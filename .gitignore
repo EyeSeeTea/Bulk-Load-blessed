@@ -1,0 +1,11 @@
+### Intellij ###
+.idea/
+.idea_modules/
+*.iml
+
+### Node.js ###
+node_modules/
+build/
+
+### Environment ###
+.env.development
