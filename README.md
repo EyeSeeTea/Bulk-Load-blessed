@@ -1,6 +1,6 @@
-# DHIS2 Advanced Metadata Export App
+# DHIS2 Bulk Load
 
-This advanced export app allows the user to create packages of metadata with all the required  dependencies for a successful import.
+This bulk load app allows the user import data and produce templates for the same purpose.
 
 ## Prepare the environment
 
