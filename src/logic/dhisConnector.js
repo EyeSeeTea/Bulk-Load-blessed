@@ -21,19 +21,19 @@ export function getUserInformation(builder) {
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
         const API_USER_INFO = API_BASE_URL + "/me.json?paging=FALSE&fields=userCredentials,displayName";
         // Parse API to get user information (username and roles)
-        getJSON(API_USER_INFO).then((json) => {
-            result.username = json.userCredentials.username;
+        getJSON(API_USER_INFO).then((userInfo) => {
+            result.username = userInfo.userCredentials.username;
             // For each userRole parse the available programs and dataSets
-            _.forEach(json.userCredentials.userRoles, function (role) {
+            _.forEach(userInfo.userCredentials.userRoles, function (role) {
                 const API_USER_ROLES = API_BASE_URL + "/userRoles/" + role.id + ".json?paging=FALSE&fields=programs,dataSets";
-                getJSON(API_USER_ROLES).then((json) => {
+                getJSON(API_USER_ROLES).then((userRoles) => {
                     const API_USER_PROGRAMS_DATASETS = API_BASE_URL + "/metadata.json?fields=id,displayName," +
                         "categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[" +
-                        _.union(json.programs.map(e => e.id), json.dataSets.map(e => e.id)).toString() + ']';
+                        _.union(userRoles.programs.map(e => e.id), userRoles.dataSets.map(e => e.id)).toString() + ']';
                     // Parse API for programs and dataSets information
-                    getJSON(API_USER_PROGRAMS_DATASETS).then((json) => {
+                    getJSON(API_USER_PROGRAMS_DATASETS).then((userProgramsAndDatasets) => {
                         _.forEach(["programs", "dataSets"], type => {
-                            _.forEach(json[type], element => {
+                            _.forEach(userProgramsAndDatasets[type], element => {
                                 element.value = element.id;
                                 element.label = element.displayName;
                                 element.type = builder.d2.models[type].name;
