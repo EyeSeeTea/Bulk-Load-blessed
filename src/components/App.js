@@ -1,10 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+import Select from 'react-select';
+import Dropzone from "react-dropzone";
 import {MuiThemeProvider} from 'material-ui';
 import {withStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import Select from 'react-select';
+import Button from "@material-ui/core/Button/Button";
 import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload';
 import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done';
 
@@ -18,9 +20,8 @@ import theme from './Theme';
 import {getElementMetadata, getUserInformation} from '../logic/dhisConnector';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
-import Button from "@material-ui/core/Button/Button";
 import {buildSheet} from "../logic/sheetBuilder";
-import Dropzone from "react-dropzone";
+import {importSheet} from "../logic/sheetImport";
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -122,7 +123,7 @@ class App extends React.Component {
         let orgUnits = this.state.orgUnitTreeSelected.map(element =>
             element.substr(element.lastIndexOf('/') + 1));
 
-        // TODO: Add validation errors
+        // TODO: Add validation error message
         if (orgUnits.length === 0) return;
         if (this.state.selectedProgramOrDataSet1 === undefined) return;
 
@@ -144,7 +145,18 @@ class App extends React.Component {
     }
 
     handleDataImportClick() {
-        // TODO
+        // TODO: Missing options error checking
+        // TODO: Add validation error message
+        if (this.state.selectedProgramOrDataSet2 === undefined) return;
+        if (this.state.importDataSheet === undefined) return;
+
+        this.props.setLoading(true);
+        importSheet({
+            d2: this.props.d2,
+            element: this.state.selectedProgramOrDataSet2,
+            file: this.state.importDataSheet
+        }).then(() => this.props.setLoading(false)
+        ).catch((reason => {})); // TODO Output errors on snackbar
     }
 
     render() {
