@@ -5,6 +5,8 @@ import {MuiThemeProvider} from 'material-ui';
 import {withStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Select from 'react-select';
+import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload';
+import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done';
 
 import HeaderBarComponent from 'd2-ui/lib/app-header/HeaderBar';
 import headerBarStore$ from 'd2-ui/lib/app-header/headerBar.store';
@@ -13,9 +15,12 @@ import LoadingMask from 'd2-ui/lib/loading-mask/LoadingMask.component';
 
 import './App.css';
 import theme from './Theme';
-import {getUserInformation} from '../logic/dhisConnector';
+import {getElementMetadata, getUserInformation} from '../logic/dhisConnector';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
+import Button from "@material-ui/core/Button/Button";
+import {buildSheet} from "../logic/sheetBuilder";
+import Dropzone from "react-dropzone";
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -35,40 +40,27 @@ class App extends React.Component {
             username: undefined,
             dataSets: [],
             programs: [],
-            organisationUnits: [],
             orgUnitTreeSelected: [],
             orgUnitTreeRoots: [],
             orgUnitTreeBaseRoot: [],
-            elementSelectOptions: [],
-            selectedProgramOrDataSet: undefined
+            elementSelectOptions1: [],
+            elementSelectOptions2: [],
+            selectedProgramOrDataSet1: undefined,
+            selectedProgramOrDataSet2: undefined,
+            importElementOptions: [],
+            importElementYear: [],
+            importElementMonth: [],
+            importElementWeek: [],
+            importElementDay: [],
+            importDataSheet: undefined
         };
 
         this.loadUserInformation();
         this.searchForOrgUnits();
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
-
-        //this.props.setLoading(true);
-        /**getElementMetadata({
-            d2: this.props.d2,
-            element: {
-                id: 'vFcxda6dJyT',
-                type: 'program',
-                endpoint: 'programs',
-                displayName: 'Chagas disease - Diagnosis (individual data) (HMO16)',
-                categoryCombo: {
-                    id: 'JzvGfLYkX17'
-                },
-                programStages: [
-                    {
-                        id: 'bZyGv5YPlFt'
-                    }
-                ]
-            }
-        }).then(result => {
-            buildSheet(result).then(() =>
-                this.props.setLoading(false));
-        });**/
+        this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
+        this.handleDataImportClick = this.handleDataImportClick.bind(this);
     }
 
     getChildContext() {
@@ -124,17 +116,52 @@ class App extends React.Component {
                 });
             });
         }
+    }
 
+    handleTemplateDownloadClick() {
+        let orgUnits = this.state.orgUnitTreeSelected.map(element =>
+            element.substr(element.lastIndexOf('/') + 1));
 
+        // TODO: Add validation errors
+        if (orgUnits.length === 0) return;
+        if (this.state.selectedProgramOrDataSet1 === undefined) return;
+
+        this.props.setLoading(true);
+         getElementMetadata({
+            d2: this.props.d2,
+            element: this.state.selectedProgramOrDataSet1,
+            organisationUnits: orgUnits
+        }).then(result => {
+            buildSheet(result).then(() =>
+                this.props.setLoading(false));
+        });
+    }
+
+    onDrop(file) {
+        this.setState({
+            importDataSheet: file[0]
+        });
+    }
+
+    handleDataImportClick() {
+        // TODO
     }
 
     render() {
-        let handleModelChange = (selectedOption) => {
-            this.setState({elementSelectOptions: this.state[selectedOption.value]});
+        let handleModelChange1 = (selectedOption) => {
+            this.setState({elementSelectOptions1: this.state[selectedOption.value]});
         };
 
-        let handleElementChange = (selectedOption) => {
-            this.setState({selectedProgramOrDataSet: selectedOption.value})
+        let handleElementChange1 = (selectedOption) => {
+            this.setState({selectedProgramOrDataSet1: selectedOption})
+        };
+
+        let handleModelChange2 = (selectedOption) => {
+            this.setState({elementSelectOptions2: this.state[selectedOption.value]});
+        };
+
+        let handleElementChange2 = (selectedOption) => {
+            this.setState({selectedProgramOrDataSet2: selectedOption})
         };
 
         return (
@@ -148,22 +175,22 @@ class App extends React.Component {
                         <div className='main-container' style={{margin: '1em', marginTop: '3em'}}>
                             <Paper style={{margin: '2em', marginTop: '2em', padding: '2em', width: '50%'}}>
                                 <h1>Template Generation</h1>
-                                <div className='row' style={{marginTop: '2em', marginLeft: '2em', marginRight: '2em'}}>
-                                    <div style={{flexBasis: '30%', marginRight: '1em'}}>
+                                <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
+                                    <div style={{flexBasis: '30%', margin: '1em'}}>
                                         <Select
                                             placeholder={'Model'}
-                                            onChange={handleModelChange}
+                                            onChange={handleModelChange1}
                                             options={[{value: 'dataSets', label: 'Data Set'}, {
                                                 value: 'programs',
                                                 label: 'Program'
                                             }]}
                                         />
                                     </div>
-                                    <div style={{flexBasis: '70%', marginLeft: '1em'}}>
+                                    <div style={{flexBasis: '70%', margin: '1em'}}>
                                         <Select
                                             placeholder={'Select element to export...'}
-                                            onChange={handleElementChange}
-                                            options={this.state.elementSelectOptions}
+                                            onChange={handleElementChange1}
+                                            options={this.state.elementSelectOptions1}
                                         />
                                     </div>
                                 </div>
@@ -175,9 +202,90 @@ class App extends React.Component {
                                     onSelectClick={this.handleOrgUnitTreeClick}
                                     noHitsLabel={'No Organisation Units found'}
                                 />
+                                <div className='row' style={{marginTop: '2em', marginLeft: '2em', marginRight: '2em'}}>
+                                    <Button variant="contained" color="primary" onClick={this.handleTemplateDownloadClick}>
+                                        Download template
+                                    </Button>
+                                </div>
                             </Paper>
                             <Paper style={{margin: '2em', marginTop: '2em', padding: '2em', width: '50%'}}>
                                 <h1>Bulk Import</h1>
+                                <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
+                                    <div style={{flexBasis: '30%', margin: '1em'}}>
+                                        <Select
+                                            placeholder={'Model'}
+                                            onChange={handleModelChange2}
+                                            options={[{value: 'dataSets', label: 'Data Set'}, {
+                                                value: 'programs',
+                                                label: 'Program'
+                                            }]}
+                                        />
+                                    </div>
+                                    <div style={{flexBasis: '70%', margin: '1em'}}>
+                                        <Select
+                                            placeholder={'Select element to import...'}
+                                            onChange={handleElementChange2}
+                                            options={this.state.elementSelectOptions2}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementOptions.length === 0}>
+                                        <Select
+                                            placeholder={'Options'}
+                                            options={this.state.importElementOptions}
+                                        />
+                                    </div>
+                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementYear.length === 0}>
+                                        <Select
+                                            placeholder={'Year'}
+                                            options={this.state.importElementYear}
+                                        />
+                                    </div>
+                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementMonth.length === 0}>
+                                        <Select
+                                            placeholder={'Month'}
+                                            options={this.state.importElementMonth}
+                                        />
+                                    </div>
+                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementWeek.length === 0}>
+                                        <Select
+                                            placeholder={'Week'}
+                                            options={this.state.importElementWeek}
+                                        />
+                                    </div>
+                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementDay.length === 0}>
+                                        <Select
+                                            placeholder={'Day'}
+                                            options={this.state.importElementDay}
+                                        />
+                                    </div>
+                                </div>
+                                <Dropzone
+                                    accept={'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
+                                    className={'dropZone'}
+                                    acceptClassName={'stripes'}
+                                    rejectClassName={'rejectStripes'}
+                                    onDrop={this.onDrop.bind(this)}
+                                    multiple={false}
+                                >
+                                    <div className={'dropzoneTextStyle'} hidden={this.state.importDataSheet !== undefined}>
+                                        <p className={'dropzoneParagraph'}>{'Drag and drop file to import'}</p>
+                                        <br/>
+                                        <CloudUploadIcon className={'uploadIconSize'}/>
+                                    </div>
+                                    <div className={'dropzoneTextStyle'} hidden={this.state.importDataSheet === undefined}>
+                                        {this.state.importDataSheet !== undefined &&
+                                        <p className={'dropzoneParagraph'}>{this.state.importDataSheet.name}</p>}
+                                        <br/>
+                                        <CloudDoneIcon className={'uploadIconSize'}/>
+                                    </div>
+                                </Dropzone>
+                                <div className='row' style={{marginTop: '2em', marginLeft: '2em', marginRight: '2em'}}>
+                                    <Button variant="contained" color="primary" onClick={this.handleDataImportClick}>
+                                        Import data
+                                    </Button>
+                                </div>
                             </Paper>
                         </div>
                     </div>
