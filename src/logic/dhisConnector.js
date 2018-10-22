@@ -38,7 +38,7 @@ export function getUserInformation(builder) {
                                 element.label = element.displayName;
                                 element.type = builder.d2.models[type].name;
                                 element.endpoint = type;
-                                result[type].push(element.id, element);
+                                result[type].push(element);
                             });
                         });
                     });
@@ -53,6 +53,7 @@ export function getUserInformation(builder) {
  * @param builder:
  *      - d2: DHIS2 Library
  *      - element: Element to be parsed
+ *      - organisationUnits: Org Units to be parsed
  * @returns {Promise<Object>}:
  *      - element: The given element
  *      - elementMetadata: The requested metadata
@@ -60,9 +61,11 @@ export function getUserInformation(builder) {
 export function getElementMetadata(builder) {
     return new Promise(function (resolve, reject) {
         let elementMetadata = new Map();
+        let organisationUnits = [];
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
         const API_ELEMENT = API_BASE_URL + "/" + builder.element.endpoint + "/" + builder.element.id + "/metadata.json";
+        const API_ORG_UNITS = API_BASE_URL + '/metadata.json?fields=id,displayName&filter=id:in:[' + builder.organisationUnits.toString() + ']';
         getJSON(API_ELEMENT).then((json) => {
             _.forOwn(json, (value, key) => {
                 if (Array.isArray(value)) {
@@ -74,9 +77,14 @@ export function getElementMetadata(builder) {
                     });
                 }
             });
+            return getJSON(API_ORG_UNITS);
+        }).then((json) => {
+            organisationUnits = json.organisationUnits;
+        }).then(() => {
             resolve({
                 element: builder.element,
-                elementMetadata: elementMetadata
+                elementMetadata: elementMetadata,
+                organisationUnits: organisationUnits
             });
         }).catch(reason => reject(reason));
     });
