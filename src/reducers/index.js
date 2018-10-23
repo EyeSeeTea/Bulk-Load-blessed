@@ -1,6 +1,6 @@
 import d2 from './d2Reducer';
 import database from './databaseReducer';
-import loading from "./loadingReducer";
+import loading from './loadingReducer';
 
 const index = (state = {}, action: Action) => {
     return {

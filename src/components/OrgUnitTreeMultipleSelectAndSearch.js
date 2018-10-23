@@ -3,7 +3,7 @@ import OrganisationUnitTree from 'd2-ui/lib/org-unit-tree/OrgUnitTree.component'
 import addD2Context from 'd2-ui/lib/component-helpers/addD2Context';
 import noop from 'd2-utilizr/lib/noop';
 import PropTypes from 'prop-types';
-import TextField from "@material-ui/core/TextField/TextField";
+import TextField from '@material-ui/core/TextField/TextField';
 
 function OrgUnitTreeMultipleSelectAndSearch(props, context) {
     const styles = {
@@ -30,10 +30,10 @@ function OrgUnitTreeMultipleSelectAndSearch(props, context) {
     return (
         <div style={{position: 'relative'}}>
             <TextField
-                id="search"
-                label="Search"
+                id='search'
+                label='Search'
                 onChange={handleChange}
-                margin="normal"
+                margin='normal'
                 style={{width: '100%'}}
             />
             <div style={{height: '12em', overflow: 'auto', width: '100%'}}>

@@ -1,4 +1,4 @@
-import * as Excel from "excel4node/source";
+import * as Excel from 'excel4node/source';
 import {saveAs} from 'file-saver';
 import _ from 'lodash';
 
@@ -165,8 +165,8 @@ function addDataEntrySheet(workbook, element, metadata) {
  */
 function downloadExcel(workbook, title) {
     return new Promise(function (resolve, reject) {
-        workbook.writeToBuffer().then(function(data) {
-            const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+        workbook.writeToBuffer().then(function (data) {
+            const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
             saveAs(blob, title + '.xlsx');
             resolve();
         }).catch(reason => reject(reason));

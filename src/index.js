@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Provider} from "react-redux";
+import {Provider} from 'react-redux';
 
-import * as D2Library from "d2/lib/d2";
+import * as D2Library from 'd2/lib/d2';
 import LoadingMask from 'd2-ui/lib/loading-mask/LoadingMask.component';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import App from './components/App.js';
 import theme from './components/Theme';
-import {store} from "./store";
+import {store} from './store';
 import './index.css';
 
 const DEBUG = process.env.REACT_APP_DEBUG;
@@ -26,7 +26,7 @@ D2Library.getManifest('manifest.webapp').then((manifest) => {
     if (process.env.REACT_APP_DEBUG === 'true') {
         console.log('Starting React App in DEBUG mode with user: ' + process.env.REACT_APP_DHIS2_USERNAME);
         config.headers = {
-            Authorization: "Basic " + btoa(process.env.REACT_APP_DHIS2_USERNAME + ':' + process.env.REACT_APP_DHIS2_PASSWORD)
+            Authorization: 'Basic ' + btoa(process.env.REACT_APP_DHIS2_USERNAME + ':' + process.env.REACT_APP_DHIS2_PASSWORD)
         }
     }
 

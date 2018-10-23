@@ -1,4 +1,4 @@
-import {createAjaxQueue} from "./ajaxMultiQueue";
+import {createAjaxQueue} from './ajaxMultiQueue';
 
 let ajaxQueue = createAjaxQueue(25);
 
@@ -9,7 +9,7 @@ let ajaxQueue = createAjaxQueue(25);
 export function getJSON(requestUrl) {
     return new Promise(function (resolve, reject) {
         ajaxQueue.queue({
-            dataType: "json",
+            dataType: 'json',
             url: requestUrl,
             success: (json) => resolve(json),
             fail: (reason) => reject(reason)

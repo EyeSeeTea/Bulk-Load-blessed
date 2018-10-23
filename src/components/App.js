@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import Select from 'react-select';
-import Dropzone from "react-dropzone";
+import Dropzone from 'react-dropzone';
 import {MuiThemeProvider} from 'material-ui';
 import {withStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import Button from "@material-ui/core/Button/Button";
+import Button from '@material-ui/core/Button/Button';
 import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload';
 import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done';
 
@@ -20,8 +20,8 @@ import theme from './Theme';
 import {getElementMetadata, getUserInformation} from '../logic/dhisConnector';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
-import {buildSheet} from "../logic/sheetBuilder";
-import {importSheet} from "../logic/sheetImport";
+import {buildSheet} from '../logic/sheetBuilder';
+import {importSheet} from '../logic/sheetImport';
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -84,12 +84,12 @@ class App extends React.Component {
         if (this.state.orgUnitTreeSelected.includes(orgUnit.path)) {
             this.setState(state => {
                 state.orgUnitTreeSelected.splice(state.orgUnitTreeSelected.indexOf(orgUnit.path), 1);
-                return { orgUnitTreeSelected: state.orgUnitTreeSelected };
+                return {orgUnitTreeSelected: state.orgUnitTreeSelected};
             });
         } else {
             this.setState(state => {
                 state.orgUnitTreeSelected.push(orgUnit.path);
-                return { orgUnitTreeSelected: state.orgUnitTreeSelected };
+                return {orgUnitTreeSelected: state.orgUnitTreeSelected};
             });
         }
     }
@@ -128,7 +128,7 @@ class App extends React.Component {
         if (this.state.selectedProgramOrDataSet1 === undefined) return;
 
         this.props.setLoading(true);
-         getElementMetadata({
+        getElementMetadata({
             d2: this.props.d2,
             element: this.state.selectedProgramOrDataSet1,
             organisationUnits: orgUnits
@@ -156,7 +156,8 @@ class App extends React.Component {
             element: this.state.selectedProgramOrDataSet2,
             file: this.state.importDataSheet
         }).then(() => this.props.setLoading(false)
-        ).catch((reason => {})); // TODO Output errors on snackbar
+        ).catch((reason => {
+        })); // TODO Output errors on snackbar
     }
 
     render() {
@@ -215,7 +216,8 @@ class App extends React.Component {
                                     noHitsLabel={'No Organisation Units found'}
                                 />
                                 <div className='row' style={{marginTop: '2em', marginLeft: '2em', marginRight: '2em'}}>
-                                    <Button variant="contained" color="primary" onClick={this.handleTemplateDownloadClick}>
+                                    <Button variant='contained' color='primary'
+                                            onClick={this.handleTemplateDownloadClick}>
                                         Download template
                                     </Button>
                                 </div>
@@ -242,31 +244,36 @@ class App extends React.Component {
                                     </div>
                                 </div>
                                 <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
-                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementOptions.length === 0}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}}
+                                         hidden={this.state.importElementOptions.length === 0}>
                                         <Select
                                             placeholder={'Options'}
                                             options={this.state.importElementOptions}
                                         />
                                     </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementYear.length === 0}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}}
+                                         hidden={this.state.importElementYear.length === 0}>
                                         <Select
                                             placeholder={'Year'}
                                             options={this.state.importElementYear}
                                         />
                                     </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementMonth.length === 0}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}}
+                                         hidden={this.state.importElementMonth.length === 0}>
                                         <Select
                                             placeholder={'Month'}
                                             options={this.state.importElementMonth}
                                         />
                                     </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementWeek.length === 0}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}}
+                                         hidden={this.state.importElementWeek.length === 0}>
                                         <Select
                                             placeholder={'Week'}
                                             options={this.state.importElementWeek}
                                         />
                                     </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}} hidden={this.state.importElementDay.length === 0}>
+                                    <div style={{flexBasis: '35%', margin: '1em'}}
+                                         hidden={this.state.importElementDay.length === 0}>
                                         <Select
                                             placeholder={'Day'}
                                             options={this.state.importElementDay}
@@ -281,12 +288,14 @@ class App extends React.Component {
                                     onDrop={this.onDrop.bind(this)}
                                     multiple={false}
                                 >
-                                    <div className={'dropzoneTextStyle'} hidden={this.state.importDataSheet !== undefined}>
+                                    <div className={'dropzoneTextStyle'}
+                                         hidden={this.state.importDataSheet !== undefined}>
                                         <p className={'dropzoneParagraph'}>{'Drag and drop file to import'}</p>
                                         <br/>
                                         <CloudUploadIcon className={'uploadIconSize'}/>
                                     </div>
-                                    <div className={'dropzoneTextStyle'} hidden={this.state.importDataSheet === undefined}>
+                                    <div className={'dropzoneTextStyle'}
+                                         hidden={this.state.importDataSheet === undefined}>
                                         {this.state.importDataSheet !== undefined &&
                                         <p className={'dropzoneParagraph'}>{this.state.importDataSheet.name}</p>}
                                         <br/>
@@ -294,7 +303,7 @@ class App extends React.Component {
                                     </div>
                                 </Dropzone>
                                 <div className='row' style={{marginTop: '2em', marginLeft: '2em', marginRight: '2em'}}>
-                                    <Button variant="contained" color="primary" onClick={this.handleDataImportClick}>
+                                    <Button variant='contained' color='primary' onClick={this.handleDataImportClick}>
                                         Import data
                                     </Button>
                                 </div>

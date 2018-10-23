@@ -52,7 +52,7 @@ function MultiQueue(number) {
             }
 
             // and then reject the deferred
-            dfd.rejectWith(ajaxOpts.context || ajaxOpts, [promise, statusText, ""]);
+            dfd.rejectWith(ajaxOpts.context || ajaxOpts, [promise, statusText, '']);
             return promise;
         };
 

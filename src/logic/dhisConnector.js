@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {getJSON} from "./utils";
+import {getJSON} from './utils';
 
 /**
  * Get User Information
@@ -19,20 +19,20 @@ export function getUserInformation(builder) {
         };
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
-        const API_USER_INFO = API_BASE_URL + "/me.json?paging=FALSE&fields=userCredentials,displayName";
+        const API_USER_INFO = API_BASE_URL + '/me.json?paging=FALSE&fields=userCredentials,displayName';
         // Parse API to get user information (username and roles)
         getJSON(API_USER_INFO).then((userInfo) => {
             result.username = userInfo.userCredentials.username;
             // For each userRole parse the available programs and dataSets
             _.forEach(userInfo.userCredentials.userRoles, function (role) {
-                const API_USER_ROLES = API_BASE_URL + "/userRoles/" + role.id + ".json?paging=FALSE&fields=programs,dataSets";
+                const API_USER_ROLES = API_BASE_URL + '/userRoles/' + role.id + '.json?paging=FALSE&fields=programs,dataSets';
                 getJSON(API_USER_ROLES).then((userRoles) => {
-                    const API_USER_PROGRAMS_DATASETS = API_BASE_URL + "/metadata.json?fields=id,displayName," +
-                        "categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[" +
+                    const API_USER_PROGRAMS_DATASETS = API_BASE_URL + '/metadata.json?fields=id,displayName,' +
+                        'categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[' +
                         _.union(userRoles.programs.map(e => e.id), userRoles.dataSets.map(e => e.id)).toString() + ']';
                     // Parse API for programs and dataSets information
                     getJSON(API_USER_PROGRAMS_DATASETS).then((userProgramsAndDatasets) => {
-                        _.forEach(["programs", "dataSets"], type => {
+                        _.forEach(['programs', 'dataSets'], type => {
                             _.forEach(userProgramsAndDatasets[type], element => {
                                 element.value = element.id;
                                 element.label = element.displayName;
@@ -64,7 +64,7 @@ export function getElementMetadata(builder) {
         let organisationUnits = [];
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
-        const API_ELEMENT = API_BASE_URL + "/" + builder.element.endpoint + "/" + builder.element.id + "/metadata.json";
+        const API_ELEMENT = API_BASE_URL + '/' + builder.element.endpoint + '/' + builder.element.id + '/metadata.json';
         const API_ORG_UNITS = API_BASE_URL + '/metadata.json?fields=id,displayName&filter=id:in:[' + builder.organisationUnits.toString() + ']';
         getJSON(API_ELEMENT).then((json) => {
             _.forOwn(json, (value, key) => {
