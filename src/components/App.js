@@ -22,6 +22,7 @@ import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
 import {buildSheet} from '../logic/sheetBuilder';
 import {readSheet} from '../logic/sheetImport';
+import ImportOptionsRow from "./ImportOptionsRow";
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -160,6 +161,10 @@ class App extends React.Component {
         })); // TODO Output errors on snackbar
     }
 
+    onChangeImportOptions(selector, option) {
+        // TODO
+    }
+
     render() {
         let handleModelChange1 = (selectedOption) => {
             this.setState({elementSelectOptions1: this.state[selectedOption.value]});
@@ -243,43 +248,14 @@ class App extends React.Component {
                                         />
                                     </div>
                                 </div>
-                                <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
-                                    <div style={{flexBasis: '35%', margin: '1em'}}
-                                         hidden={this.state.importElementOptions.length === 0}>
-                                        <Select
-                                            placeholder={'Options'}
-                                            options={this.state.importElementOptions}
-                                        />
-                                    </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}}
-                                         hidden={this.state.importElementYear.length === 0}>
-                                        <Select
-                                            placeholder={'Year'}
-                                            options={this.state.importElementYear}
-                                        />
-                                    </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}}
-                                         hidden={this.state.importElementMonth.length === 0}>
-                                        <Select
-                                            placeholder={'Month'}
-                                            options={this.state.importElementMonth}
-                                        />
-                                    </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}}
-                                         hidden={this.state.importElementWeek.length === 0}>
-                                        <Select
-                                            placeholder={'Week'}
-                                            options={this.state.importElementWeek}
-                                        />
-                                    </div>
-                                    <div style={{flexBasis: '35%', margin: '1em'}}
-                                         hidden={this.state.importElementDay.length === 0}>
-                                        <Select
-                                            placeholder={'Day'}
-                                            options={this.state.importElementDay}
-                                        />
-                                    </div>
-                                </div>
+                                <ImportOptionsRow
+                                    importElementOptions={this.state.importElementOptions}
+                                    importElementYear={this.state.importElementYear}
+                                    importElementMonth={this.state.importElementMonth}
+                                    importElementWeek={this.state.importElementWeek}
+                                    importElementDay={this.state.importElementDay}
+                                    onChange={this.onChangeImportOptions.bind(this)}
+                                />
                                 <Dropzone
                                     accept={'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
                                     className={'dropZone'}
