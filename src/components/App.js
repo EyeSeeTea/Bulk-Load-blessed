@@ -21,7 +21,7 @@ import {getElementMetadata, getUserInformation} from '../logic/dhisConnector';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
 import {buildSheet} from '../logic/sheetBuilder';
-import {importSheet} from '../logic/sheetImport';
+import {readSheet} from '../logic/sheetImport';
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -151,7 +151,7 @@ class App extends React.Component {
         if (this.state.importDataSheet === undefined) return;
 
         this.props.setLoading(true);
-        importSheet({
+        readSheet({
             d2: this.props.d2,
             element: this.state.selectedProgramOrDataSet2,
             file: this.state.importDataSheet
