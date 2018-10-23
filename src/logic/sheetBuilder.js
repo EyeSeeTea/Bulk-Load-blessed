@@ -27,7 +27,7 @@ export function buildSheet(builder) {
 }
 
 function addOverviewSheet(workbook, title, organisationUnits) {
-    let overviewSheet = workbook.addWorksheet('Overview', lockedSheetOptions);
+    let overviewSheet = workbook.addWorksheet('Overview');
 
     // Freeze and format column titles
     overviewSheet.row(2).freeze();
@@ -53,7 +53,7 @@ function addOverviewSheet(workbook, title, organisationUnits) {
  * @param organisationUnits
  */
 function addMetadataSheet(workbook, metadata, organisationUnits) {
-    let metadataSheet = workbook.addWorksheet('Metadata', lockedSheetOptions);
+    let metadataSheet = workbook.addWorksheet('Metadata');
 
     // Freeze and format column titles
     metadataSheet.row(2).freeze();
