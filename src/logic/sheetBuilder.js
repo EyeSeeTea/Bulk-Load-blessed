@@ -16,6 +16,8 @@ export function buildSheet(builder) {
     return new Promise(function (resolve, reject) {
         let workbook = new Excel.Workbook();
 
+        console.log(builder)
+
         addOverviewSheet(workbook, builder.element.displayName, builder.organisationUnits);
         addDataEntrySheet(workbook, builder.element, builder.elementMetadata);
         addMetadataSheet(workbook, builder.elementMetadata, builder.organisationUnits);
@@ -25,7 +27,7 @@ export function buildSheet(builder) {
 }
 
 function addOverviewSheet(workbook, title, organisationUnits) {
-    let overviewSheet = workbook.addWorksheet('Overview');
+    let overviewSheet = workbook.addWorksheet('Overview', lockedSheetOptions);
 
     // Freeze and format column titles
     overviewSheet.row(2).freeze();
@@ -51,7 +53,7 @@ function addOverviewSheet(workbook, title, organisationUnits) {
  * @param organisationUnits
  */
 function addMetadataSheet(workbook, metadata, organisationUnits) {
-    let metadataSheet = workbook.addWorksheet('Metadata');
+    let metadataSheet = workbook.addWorksheet('Metadata', lockedSheetOptions);
 
     // Freeze and format column titles
     metadataSheet.row(2).freeze();
@@ -226,3 +228,7 @@ function groupStyle(groupId) {
         }
     };
 }
+
+let lockedSheetOptions = {sheetProtection: {
+        autoFilter: true, deleteColumns: true, deleteRows: true, password: 'wiscentd', pivotTables: true,
+        selectLockedCells: true, selectUnlockedCells: true, sheet: true, sort: true}};

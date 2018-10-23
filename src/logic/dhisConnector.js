@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {getJSON} from './utils';
+import axios from 'axios';
 
 /**
  * Get User Information
@@ -57,6 +58,7 @@ export function getUserInformation(builder) {
  * @returns {Promise<Object>}:
  *      - element: The given element
  *      - elementMetadata: The requested metadata
+ *      - organisationUnits: The orgUnits
  */
 export function getElementMetadata(builder) {
     return new Promise(function (resolve, reject) {
@@ -87,5 +89,28 @@ export function getElementMetadata(builder) {
                 organisationUnits: organisationUnits
             });
         }).catch(reason => reject(reason));
+    });
+}
+
+/**
+ * Import data to DHIS2 with a dryRun strategy
+ * @param builder
+ *      - d2: DHIS2 Library
+ *      - element: Element where import
+ *      - data: Data to import
+ * @param dryRun: Boolean
+ */
+export function importData(builder, dryRun = false) {
+    return new Promise(function (resolve, reject) {
+        let baseUrl = builder.d2.Api.getApi().baseUrl;
+        axios.post(baseUrl + '/events?dryRun=' + dryRun.toString(), builder.data
+        ).then(response => {
+            //if (dryRun) return axios.post(baseUrl + '/events', builder.data);
+            resolve(response);
+        }).then(response => {
+            if (response !== undefined) resolve(response);
+        }).catch(reason => {
+            reject(reason);
+        });
     });
 }

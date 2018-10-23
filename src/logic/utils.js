@@ -17,6 +17,20 @@ export function getJSON(requestUrl) {
     });
 }
 
+/**
+ * Compares a given baseString with compareString and returns true if they are the same
+ * @param baseString
+ * @param compareString
+ * @returns {boolean}
+ */
+export function stringEquals(baseString, compareString) {
+    return baseString.toString().trim().toLowerCase() === compareString.toString().trim().toLowerCase();
+}
+
+/**
+ * Palette of colors used in the sheet building
+ * @type {string[]}
+ */
 export const colors = [
     'ffee58', 'ffca28', 'ffa726', 'ff7043',
     'e57373', 'f06292', 'ba68c8', '9575cd',

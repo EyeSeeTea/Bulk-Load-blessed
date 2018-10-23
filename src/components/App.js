@@ -15,14 +15,16 @@ import headerBarStore$ from 'd2-ui/lib/app-header/headerBar.store';
 import withStateFrom from 'd2-ui/lib/component-helpers/withStateFrom';
 import LoadingMask from 'd2-ui/lib/loading-mask/LoadingMask.component';
 
+import * as sheetImport from "../logic/sheetImport";
+import * as sheetBuilder from "../logic/sheetBuilder";
+import * as dhisConnector from "../logic/dhisConnector";
+
 import './App.css';
 import theme from './Theme';
-import {getElementMetadata, getUserInformation} from '../logic/dhisConnector';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
-import {buildSheet} from '../logic/sheetBuilder';
-import {readSheet} from '../logic/sheetImport';
 import ImportOptionsRow from "./ImportOptionsRow";
+import AlertSnackbar from "./AlertSnackbar";
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
@@ -72,7 +74,7 @@ class App extends React.Component {
     }
 
     loadUserInformation() {
-        getUserInformation({
+        dhisConnector.getUserInformation({
             d2: this.props.d2
         }).then(result => {
             this.setState({
@@ -129,12 +131,12 @@ class App extends React.Component {
         if (this.state.selectedProgramOrDataSet1 === undefined) return;
 
         this.props.setLoading(true);
-        getElementMetadata({
+        dhisConnector.getElementMetadata({
             d2: this.props.d2,
             element: this.state.selectedProgramOrDataSet1,
             organisationUnits: orgUnits
         }).then(result => {
-            buildSheet(result).then(() =>
+            sheetBuilder.buildSheet(result).then(() =>
                 this.props.setLoading(false));
         });
     }
@@ -152,13 +154,33 @@ class App extends React.Component {
         if (this.state.importDataSheet === undefined) return;
 
         this.props.setLoading(true);
-        readSheet({
+        dhisConnector.getElementMetadata({
             d2: this.props.d2,
             element: this.state.selectedProgramOrDataSet2,
-            file: this.state.importDataSheet
-        }).then(() => this.props.setLoading(false)
-        ).catch((reason => {
-        })); // TODO Output errors on snackbar
+            organisationUnits: []
+        }).then(result => {
+            return sheetImport.readSheet({
+                ...result,
+                d2: this.props.d2,
+                file: this.state.importDataSheet
+            });
+        }).then((data) => {
+            console.log(data);
+            return dhisConnector.importData({
+                d2: this.props.d2,
+                element: this.state.selectedProgramOrDataSet2,
+                data: data
+            });
+        }).then(response => {
+            this.props.setLoading(false);
+            console.log(response);
+            this.props.showSnackbar(response.data.message + ' Imported: ' + response.data.response.imported + ' elements');
+        }).catch((reason => {
+            // TODO Output errors on snackbar
+            this.props.setLoading(false);
+            console.error(reason);
+            this.props.showSnackbar(reason.message);
+        }));
     }
 
     onChangeImportOptions(selector, option) {
@@ -166,6 +188,10 @@ class App extends React.Component {
     }
 
     render() {
+        const {
+            snackbarOpen, snackbarMessage
+        } = this.props.dialog;
+
         let handleModelChange1 = (selectedOption) => {
             this.setState({elementSelectOptions1: this.state[selectedOption.value]});
         };
@@ -286,6 +312,7 @@ class App extends React.Component {
                             </Paper>
                         </div>
                     </div>
+                    <AlertSnackbar open={snackbarOpen} message={snackbarMessage} onClose={this.props.hideSnackbar}/>
                 </div>
             </MuiThemeProvider>
         );
@@ -299,11 +326,19 @@ App.childContextTypes = {
 const mapStateToProps = state => ({
     d2: state.d2,
     database: state.database,
-    loading: state.loading
+    loading: state.loading,
+    dialog: state.dialog
 });
 
 const mapDispatchToProps = dispatch => ({
-    setLoading: (loading) => dispatch({type: actionTypes.LOADING, loading: loading})
+    setLoading: (loading) => dispatch({type: actionTypes.LOADING, loading: loading}),
+    hideSnackbar: () => {
+        dispatch({type: actionTypes.SNACKBAR_SHOW, show: false});
+    },
+    showSnackbar: (message) => {
+        dispatch({type: actionTypes.SNACKBAR_UPDATE, message});
+        dispatch({type: actionTypes.SNACKBAR_SHOW, show: true});
+    }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(App));
