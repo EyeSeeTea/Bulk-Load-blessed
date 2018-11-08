@@ -176,7 +176,6 @@ class App extends React.Component {
             console.log(response);
             this.props.showSnackbar(response.data.message + ' Imported: ' + response.data.response.imported + ' elements');
         }).catch((reason => {
-            // TODO Output errors on snackbar
             this.props.setLoading(false);
             console.error(reason);
             this.props.showSnackbar(reason.message);

@@ -66,6 +66,7 @@ export function getElementMetadata(builder) {
         let organisationUnits = [];
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
+        // TODO: Optimize query with less fields
         const API_ELEMENT = API_BASE_URL + '/' + builder.element.endpoint + '/' + builder.element.id + '/metadata.json';
         const API_ORG_UNITS = API_BASE_URL + '/metadata.json?fields=id,displayName&filter=id:in:[' + builder.organisationUnits.toString() + ']';
         getJSON(API_ELEMENT).then((json) => {
@@ -79,9 +80,10 @@ export function getElementMetadata(builder) {
                     });
                 }
             });
-            return getJSON(API_ORG_UNITS);
+            if (builder.organisationUnits.length !== 0)
+                return getJSON(API_ORG_UNITS);
         }).then((json) => {
-            organisationUnits = json.organisationUnits;
+            if (json && json.organisationUnits) organisationUnits = json.organisationUnits;
         }).then(() => {
             resolve({
                 element: builder.element,
@@ -98,16 +100,12 @@ export function getElementMetadata(builder) {
  *      - d2: DHIS2 Library
  *      - element: Element where import
  *      - data: Data to import
- * @param dryRun: Boolean
  */
-export function importData(builder, dryRun = false) {
+export function importData(builder) {
     return new Promise(function (resolve, reject) {
         let baseUrl = builder.d2.Api.getApi().baseUrl;
-        axios.post(baseUrl + '/events?dryRun=' + dryRun.toString(), builder.data
+        axios.post(baseUrl + '/events', builder.data
         ).then(response => {
-            //if (dryRun) return axios.post(baseUrl + '/events', builder.data);
-            resolve(response);
-        }).then(response => {
             if (response !== undefined) resolve(response);
         }).catch(reason => {
             reject(reason);
