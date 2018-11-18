@@ -1,9 +1,9 @@
 import React from 'react';
-import OrganisationUnitTree from 'd2-ui/lib/org-unit-tree/OrgUnitTree.component';
-import addD2Context from 'd2-ui/lib/component-helpers/addD2Context';
+import {OrgUnitTree} from '@dhis2/d2-ui-org-unit-tree';
+import addD2Context from '@dhis2/d2-ui-core/component-helpers/addD2Context';
+import TextField from '@material-ui/core/TextField/TextField';
 import noop from 'd2-utilizr/lib/noop';
 import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField/TextField';
 
 function OrgUnitTreeMultipleSelectAndSearch(props, context) {
     const styles = {
@@ -39,7 +39,7 @@ function OrgUnitTreeMultipleSelectAndSearch(props, context) {
             <div style={{height: '12em', overflow: 'auto', width: '100%'}}>
                 {Array.isArray(props.roots) && props.roots.length > 0 ? props.roots.map(root => {
                     return (
-                        <OrganisationUnitTree
+                        <OrgUnitTree
                             key={root.id}
                             root={root}
                             selected={props.selected}

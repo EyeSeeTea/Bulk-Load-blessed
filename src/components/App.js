@@ -3,17 +3,16 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import Select from 'react-select';
 import Dropzone from 'react-dropzone';
-import {MuiThemeProvider} from 'material-ui';
+
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {withStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button/Button';
-import CloudUploadIcon from 'material-ui/svg-icons/file/cloud-upload';
-import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import CloudDoneIcon from '@material-ui/icons/CloudDone';
 
-import HeaderBarComponent from 'd2-ui/lib/app-header/HeaderBar';
-import headerBarStore$ from 'd2-ui/lib/app-header/headerBar.store';
-import withStateFrom from 'd2-ui/lib/component-helpers/withStateFrom';
-import LoadingMask from 'd2-ui/lib/loading-mask/LoadingMask.component';
+import HeaderBar from '@dhis2/d2-ui-header-bar';
+import LoadingMask from '@dhis2/d2-ui-core/loading-mask/LoadingMask.component';
 
 import * as sheetImport from "../logic/sheetImport";
 import * as sheetBuilder from "../logic/sheetBuilder";
@@ -25,8 +24,6 @@ import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
 import ImportOptionsRow from "./ImportOptionsRow";
 import AlertSnackbar from "./AlertSnackbar";
-
-const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
 const styles = theme => ({
     root: {

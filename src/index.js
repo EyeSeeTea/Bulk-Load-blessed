@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 
-import * as D2Library from 'd2/lib/d2';
-import LoadingMask from 'd2-ui/lib/loading-mask/LoadingMask.component';
+import {getManifest, init} from 'd2';
+import LoadingMask from '@dhis2/d2-ui-core/loading-mask/LoadingMask.component';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import App from './components/App.js';
@@ -13,7 +13,7 @@ import './index.css';
 
 const DEBUG = process.env.REACT_APP_DEBUG;
 
-D2Library.getManifest('manifest.webapp').then((manifest) => {
+getManifest('manifest.webapp').then((manifest) => {
     let config = {};
 
     // Set baseUrl
@@ -31,7 +31,7 @@ D2Library.getManifest('manifest.webapp').then((manifest) => {
     }
 
     // Init library
-    D2Library.init(config).then(d2 => {
+    init(config).then(d2 => {
         if (DEBUG) console.log({url: config.baseUrl, d2: d2});
         store.dispatch({type: 'SET_D2', d2});
         store.dispatch({type: 'LOADING', loading: false});
@@ -46,5 +46,9 @@ D2Library.getManifest('manifest.webapp').then((manifest) => {
     ReactDOM.render((<div>Failed to connect with D2</div>), document.getElementById('root'));
 });
 
-ReactDOM.render(<MuiThemeProvider muiTheme={theme} theme={theme}><LoadingMask
-    large={true}/></MuiThemeProvider>, document.getElementById('root'));
+ReactDOM.render(
+    <MuiThemeProvider muiTheme={theme} theme={theme}>
+        <LoadingMask
+            large={true}
+        />
+    </MuiThemeProvider>, document.getElementById('root'));
