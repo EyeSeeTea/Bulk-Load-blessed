@@ -190,6 +190,7 @@ function createColumn(sheet, columnId, label, validation = undefined) {
     });
 }
 
+/**
 function namedValidationToFormula(validation) {
     let result = '=';
     _.forEach(validation, item => {
@@ -199,6 +200,7 @@ function namedValidationToFormula(validation) {
     console.log(result);
     return result;
 }
+**/
 
 /**
  * Common cell style definition
@@ -229,6 +231,8 @@ function groupStyle(groupId) {
     };
 }
 
+/**
 let lockedSheetOptions = {sheetProtection: {
         autoFilter: true, deleteColumns: true, deleteRows: true, password: 'wiscentd', pivotTables: true,
         selectLockedCells: true, selectUnlockedCells: true, sheet: true, sort: true}};
+ **/
