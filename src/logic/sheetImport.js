@@ -3,7 +3,6 @@ import fileReaderStream from 'filereader-stream';
 import dateFormat from 'dateformat';
 
 import {stringEquals} from './utils';
-import _ from "lodash";
 
 /**
  * Import sheet information
@@ -27,17 +26,16 @@ export function readSheet(builder) {
 
             // TODO: Check malformed template (undefined?)
 
-            // Remove first row (contains section stages)
-            dataEntrySheet.spliceRows(1, 1);
-
             let columns;
+            let stageColumns;
             let dataToImport = [];
 
             let isProgram = builder.element.type === 'program';
 
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
-                if (rowNumber === 1) columns = row.values;
+                if (rowNumber === 1) stageColumns = row.values;
+                else if (rowNumber === 2) columns = row.values;
                 else {
                     let result = {
                         dataValues: []
@@ -67,7 +65,7 @@ export function readSheet(builder) {
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
-                    if (row.values[2] !== undefined && row.values[3] !== undefined)
+                    if (isProgram && row.values[2] !== undefined && row.values[3] !== undefined)
                         result.coordinate = {
                             latitude: row.values[2],
                             longitude: row.values[3]
@@ -89,15 +87,17 @@ export function readSheet(builder) {
                             } else if (dataValue.valueType === 'DATE') {
                                 cellValue = dateFormat(new Date(cellValue), 'yyyy-mm-dd');
                             }
-
                             result.dataValues.push({dataElement: id, value: cellValue});
-                        } else if (!isProgram && colNumber > 3) { // TODO: Do not hardcode previous entries
-                            let id = columns[colNumber].formula.substr(1);
+                        } else if (!isProgram && colNumber > 1) { // TODO: Do not hardcode previous entries
+                            let column = columns[colNumber];
+                            let id = column.formula ? column.formula.substr(1) :
+                                dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
+                            let stageColumn = stageColumns[colNumber];
+                            let dataElementId = stageColumn.formula ? stageColumn.formula.substr(1) :
+                                dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
                             let cellValue = cell.value.toString();
 
                             let dataValue = builder.elementMetadata.get(id);
-                            let dataElementLookup = _.find(builder.element.dataSetElements, {categoryCombo: { id: dataValue.categoryCombo.id }});
-                            let dataElementId = dataElementLookup.dataElement.id;
                             if (dataValue.type === 'categoryOptionCombo') {
                                 // TODO: OptionSets in categoryOptionCombos
                                 result.dataValues.push({dataElement: dataElementId, categoryOptionCombo: id,

@@ -1,5 +1,5 @@
 {
-  "name": "bulk-over-load",
+  "name": "bulk-load",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -83,9 +83,9 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "prebuild": "rm -rf bulk-over-load.zip && rm -rf build/",
+    "prebuild": "rm -rf bulk-load.zip && rm -rf build/",
     "build": "node scripts/build.js",
-    "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-over-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
+    "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
     "test": "node scripts/test.js --env=jsdom"
   },
   "manifest.webapp": {

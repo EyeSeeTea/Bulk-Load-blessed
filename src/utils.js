@@ -27,15 +27,14 @@ export function prepareDataSetOptions(builder) {
         weeks: [],
         days: []
     };
+
     if (builder.element.type === 'dataSet') {
-        let options = [];
-        let categoryCombo = builder.elementMetadata.get(builder.element.categoryCombo.id);
-        _.forEach(categoryCombo.categories.map(e => builder.elementMetadata.get(e.id)), category => {
-            _.forEach(category.categoryOptions.map(e => builder.elementMetadata.get(e.id)), categoryOption => {
-                options.push({value: categoryOption.id, label: categoryOption.name});
-            });
+        let dataSetOptionComboId = builder.element.categoryCombo.id;
+        builder.elementMetadata.forEach(e => {
+            if (e.type === 'categoryOptionCombo' && e.categoryCombo.id === dataSetOptionComboId) {
+                result['options'].push({value: e.id, label: e.name});
+            }
         });
-        result['options'] = options;
 
         switch (builder.element.periodType) {
             case "Daily":

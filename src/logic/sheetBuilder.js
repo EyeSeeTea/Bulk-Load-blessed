@@ -117,8 +117,10 @@ function addDataEntrySheet(workbook, element, metadata) {
 
     // TODO: Do not hard-code OrgUnit fetching
     createColumn(dataEntrySheet, columnId++, 'Org Unit', '=Overview!$A$3:$A$1048576');
-    createColumn(dataEntrySheet, columnId++, 'Latitude');
-    createColumn(dataEntrySheet, columnId++, 'Longitude');
+    if (element.type === 'program') {
+        createColumn(dataEntrySheet, columnId++, 'Latitude');
+        createColumn(dataEntrySheet, columnId++, 'Longitude');
+    }
 
     if (element.type === 'dataSet') {
         let categoryOptionCombos = [];
@@ -132,32 +134,34 @@ function addDataEntrySheet(workbook, element, metadata) {
         _.forOwn(sections, (ownSection, categoryComboId) => {
             let categoryCombo = metadata.get(categoryComboId);
             if (categoryCombo.code !== 'default') {
-                let firstColumnId = columnId;
+                let dataElementLookup = _.filter(element.dataSetElements, {categoryCombo: { id: categoryComboId}});
+                _.forEach(dataElementLookup, lookupResult => {
+                    let firstColumnId = columnId;
 
-                let dataElementLookup = _.find(element.dataSetElements, {categoryCombo: { id: categoryComboId}});
-                let dataElementId = dataElementLookup.dataElement.id;
-                let sectionCategoryOptionCombos = sections[categoryComboId];
-                _.forEach(sectionCategoryOptionCombos, dataValue => {
-                    dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
-                    dataEntrySheet.cell(2, columnId)
-                    .formula('_' + dataValue.id)
+                    let dataElementId = lookupResult.dataElement.id;
+                    let sectionCategoryOptionCombos = sections[categoryComboId];
+                    _.forEach(sectionCategoryOptionCombos, dataValue => {
+                        dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
+                        dataEntrySheet.cell(2, columnId)
+                        .formula('_' + dataValue.id)
+                        .style(groupStyle(groupId));
+
+                        if (dataValue.description !== undefined) {
+                            dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
+                                height: '100pt',
+                                width: '160pt'
+                            });
+                        }
+
+                        columnId++;
+                    });
+
+                    dataEntrySheet.cell(1, firstColumnId, 1, columnId - 1, true)
+                    .formula('_' + dataElementId)
                     .style(groupStyle(groupId));
 
-                    if (dataValue.description !== undefined) {
-                        dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
-                            height: '100pt',
-                            width: '160pt'
-                        });
-                    }
-
-                    columnId++;
+                    groupId++;
                 });
-
-                dataEntrySheet.cell(1, firstColumnId, 1, columnId - 1, true)
-                .formula('_' + dataElementId)
-                .style(groupStyle(groupId));
-
-                groupId++;
             }
         });
     } else {
