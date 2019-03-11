@@ -1,6 +1,6 @@
 {
   "name": "bulk-load",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
     "d2": "latest",
@@ -91,7 +91,7 @@
   "manifest.webapp": {
     "name": "Bulk Load",
     "description": "Bulk importing made easy",
-    "version": "0.0.1",
+    "version": "2.0.0",
     "developer": {
       "name": "Alexis Rico",
       "url": "https://github.com/SferaDev"
