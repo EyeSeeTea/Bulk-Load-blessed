@@ -100,8 +100,11 @@ export function getElementMetadata(builder) {
  */
 export function importData(builder) {
     return new Promise(function (resolve, reject) {
+        let isProgram = builder.element.type === 'program';
+        let endpoint = isProgram ? '/events' : '/dataValueSets';
+
         let baseUrl = builder.d2.Api.getApi().baseUrl;
-        axios.post(baseUrl + '/events', builder.data
+        axios.post(baseUrl + endpoint, builder.data
         ).then(response => {
             if (response !== undefined) resolve(response);
         }).catch(reason => {

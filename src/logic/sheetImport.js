@@ -49,6 +49,8 @@ export function readSheet(builder) {
                     } else {
                         result['dataSet'] = builder.element.id;
                         result['completeDate'] = dateFormat(new Date(), 'yyyy-mm-dd');
+                        result['period'] = builder.period;
+                        if (builder.attributeOptionCombo !== undefined) result['attributeOptionCombo'] = builder.attributeOptionCombo.value;
                     }
 
                     if (row.values[1] !== undefined) {
@@ -106,11 +108,12 @@ export function readSheet(builder) {
                         }
                     });
 
-                    dataToImport.push(result);
+                    if (isProgram) dataToImport.push(result);
+                    else dataToImport = result;
                 }
             });
 
-            resolve({ events: dataToImport });
+            resolve(isProgram ? { events: dataToImport } : dataToImport);
         });
         frs.pipe(is);
     });
