@@ -3,6 +3,7 @@ import fileReaderStream from 'filereader-stream';
 import dateFormat from 'dateformat';
 
 import {stringEquals} from './utils';
+import _ from "lodash";
 
 /**
  * Import sheet information
@@ -32,15 +33,23 @@ export function readSheet(builder) {
             let columns;
             let dataToImport = [];
 
+            let isProgram = builder.element.type === 'program';
+
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) columns = row.values;
                 else {
                     let result = {
-                        program: builder.element.id,
-                        status: 'COMPLETED',
                         dataValues: []
                     };
+
+                    if (isProgram) {
+                        result['program'] = builder.element.id;
+                        result['status'] = 'COMPLETED';
+                    } else {
+                        result['dataSet'] = builder.element.id;
+                        result['completeDate'] = dateFormat(new Date(), 'yyyy-mm-dd');
+                    }
 
                     if (row.values[1] !== undefined) {
                         result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
@@ -49,9 +58,9 @@ export function readSheet(builder) {
                         result.orgUnit = overviewSheet.getCell('A3').formula.substr(1);
                     }
 
-                    if (row.values[4] !== undefined) {
+                    if (isProgram && row.values[4] !== undefined) {
                         result.eventDate = dateFormat(new Date(row.values[4]), 'yyyy-mm-dd');
-                    } else {
+                    } else if (isProgram) {
                         return reject(new Error('Event date is empty'))
                     }
 
@@ -63,7 +72,7 @@ export function readSheet(builder) {
                     };
 
                     row.eachCell((cell, colNumber) => {
-                        if (colNumber > 4) { // TODO: Do not hardcode previous entries
+                        if (isProgram && colNumber > 4) { // TODO: Do not hardcode previous entries
                             let id = columns[colNumber].formula.substr(1);
                             let cellValue = cell.value.toString();
 
@@ -79,7 +88,21 @@ export function readSheet(builder) {
                                 cellValue = dateFormat(new Date(cellValue), 'yyyy-mm-dd');
                             }
 
-                            result.dataValues.push({dataElement: id, value: cellValue})
+                            result.dataValues.push({dataElement: id, value: cellValue});
+                        } else if (!isProgram && colNumber > 3) { // TODO: Do not hardcode previous entries
+                            let id = columns[colNumber].formula.substr(1);
+                            let cellValue = cell.value.toString();
+
+                            let dataValue = builder.elementMetadata.get(id);
+                            let dataElementLookup = _.find(builder.element.dataSetElements, {categoryCombo: { id: dataValue.categoryCombo.id }});
+                            let dataElementId = dataElementLookup.dataElement.id;
+                            if (dataValue.type === 'categoryOptionCombo') {
+                                // TODO: OptionSets in categoryOptionCombos
+                                result.dataValues.push({dataElement: dataElementId, categoryOptionCombo: id,
+                                    value: cellValue});
+                            } else {
+                                result.dataValues.push({dataElement: id, value: cellValue});
+                            }
                         }
                     });
 

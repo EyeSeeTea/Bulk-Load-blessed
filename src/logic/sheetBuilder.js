@@ -120,43 +120,85 @@ function addDataEntrySheet(workbook, element, metadata) {
     createColumn(dataEntrySheet, columnId++, 'Latitude');
     createColumn(dataEntrySheet, columnId++, 'Longitude');
 
-    _.forEach(element.programStages, (programStageT) => {
-        let programStage = metadata.get(programStageT.id);
+    if (element.type === 'dataSet') {
+        let categoryOptionCombos = [];
+        for (let [, value] of metadata) {
+            if (value.type === 'categoryOptionCombo') {
+                categoryOptionCombos.push(value);
+            }
+        }
 
-        createColumn(dataEntrySheet, columnId++, programStage.executionDateLabel);
+        let sections = _.groupBy(categoryOptionCombos, 'categoryCombo.id');
+        _.forOwn(sections, (ownSection, categoryComboId) => {
+            let categoryCombo = metadata.get(categoryComboId);
+            if (categoryCombo.code !== 'default') {
+                let firstColumnId = columnId;
 
-        dataEntrySheet.cell(1, columnId - 1)
+                let dataElementLookup = _.find(element.dataSetElements, {categoryCombo: { id: categoryComboId}});
+                let dataElementId = dataElementLookup.dataElement.id;
+                let sectionCategoryOptionCombos = sections[categoryComboId];
+                _.forEach(sectionCategoryOptionCombos, dataValue => {
+                    dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
+                    dataEntrySheet.cell(2, columnId)
+                    .formula('_' + dataValue.id)
+                    .style(groupStyle(groupId));
+
+                    if (dataValue.description !== undefined) {
+                        dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
+                            height: '100pt',
+                            width: '160pt'
+                        });
+                    }
+
+                    columnId++;
+                });
+
+                dataEntrySheet.cell(1, firstColumnId, 1, columnId - 1, true)
+                .formula('_' + dataElementId)
+                .style(groupStyle(groupId));
+
+                groupId++;
+            }
+        });
+    } else {
+        _.forEach(element.programStages, (programStageT) => {
+            let programStage = metadata.get(programStageT.id);
+
+            createColumn(dataEntrySheet, columnId++, programStage.executionDateLabel);
+
+            dataEntrySheet.cell(1, columnId - 1)
             .string(programStage.name)
             .style(style);
 
-        _.forEach(programStage.programStageSections, (programStageSectionT) => {
-            let programStageSection = metadata.get(programStageSectionT.id);
-            let firstColumnId = columnId;
+            _.forEach(programStage.programStageSections, (programStageSectionT) => {
+                let programStageSection = metadata.get(programStageSectionT.id);
+                let firstColumnId = columnId;
 
-            _.forEach(programStageSection.dataElements, (dataElementT) => {
-                let dataElement = metadata.get(dataElementT.id);
-                dataEntrySheet.column(columnId).setWidth(dataElement.formName.length / 2.5 + 10);
-                dataEntrySheet.cell(2, columnId)
+                _.forEach(programStageSection.dataElements, (dataElementT) => {
+                    let dataElement = metadata.get(dataElementT.id);
+                    dataEntrySheet.column(columnId).setWidth(dataElement.formName.length / 2.5 + 10);
+                    dataEntrySheet.cell(2, columnId)
                     .formula('_' + dataElement.id)
                     .style(groupStyle(groupId));
 
-                if (dataElement.description !== undefined) {
-                    dataEntrySheet.cell(2, columnId).comment(dataElement.description, {
-                        height: '100pt',
-                        width: '160pt'
-                    });
-                }
+                    if (dataElement.description !== undefined) {
+                        dataEntrySheet.cell(2, columnId).comment(dataElement.description, {
+                            height: '100pt',
+                            width: '160pt'
+                        });
+                    }
 
-                columnId++;
-            });
+                    columnId++;
+                });
 
-            dataEntrySheet.cell(1, firstColumnId, 1, columnId - 1, true)
+                dataEntrySheet.cell(1, firstColumnId, 1, columnId - 1, true)
                 .formula('_' + programStageSection.id)
                 .style(groupStyle(groupId));
 
-            groupId++;
+                groupId++;
+            });
         });
-    });
+    }
 }
 
 /**
