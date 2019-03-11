@@ -178,7 +178,9 @@ class App extends React.Component {
             this.props.setLoading(false);
             console.log(response);
             let imported = response.data.response !== undefined ? response.data.response.imported : response.data.importCount.imported;
-            this.props.showSnackbar(response.data.message + ' Imported: ' + imported + ' elements');
+            let updated = response.data.response !== undefined ? response.data.response.updated : response.data.importCount.updated;
+            let ignored = response.data.response !== undefined ? response.data.response.ignored : response.data.importCount.ignored;
+            this.props.showSnackbar(response.data.message + ' Imported: ' + imported + ', Updated: ' + updated + ', Ignored: ' + ignored);
         }).catch((reason => {
             this.props.setLoading(false);
             console.error(reason);
