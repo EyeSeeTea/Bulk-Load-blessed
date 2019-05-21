@@ -1,6 +1,6 @@
 {
   "name": "bulk-load",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "dependencies": {
     "@devexpress/dx-react-core": "^1.4.0",
