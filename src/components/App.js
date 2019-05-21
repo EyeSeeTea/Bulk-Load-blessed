@@ -22,9 +22,7 @@ import './App.css';
 import theme from './Theme';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
-import ImportOptionsRow from "./ImportOptionsRow";
 import AlertSnackbar from "./AlertSnackbar";
-import {getPeriod, prepareDataSetOptions} from "../utils";
 
 const styles = theme => ({
     root: {
@@ -49,14 +47,6 @@ class App extends React.Component {
             elementSelectOptions2: [],
             selectedProgramOrDataSet1: undefined,
             selectedProgramOrDataSet2: undefined,
-            importOptionsRowValues: {
-                options: [],
-                years: [],
-                months: [],
-                weeks: [],
-                days: []
-            },
-            importOptionsRowSelected: {},
             importDataSheet: undefined
         };
 
@@ -163,9 +153,7 @@ class App extends React.Component {
             return sheetImport.readSheet({
                 ...result,
                 d2: this.props.d2,
-                file: this.state.importDataSheet,
-                period: getPeriod(result.element.periodType, this.state.importOptionsRowSelected),
-                attributeOptionCombo: this.state.importOptionsRowSelected['option']
+                file: this.state.importDataSheet
             });
         }).then((data) => {
             console.log(data);
@@ -188,12 +176,6 @@ class App extends React.Component {
         }));
     }
 
-    onChangeImportOptions(selector, option) {
-        let importOptionsRowSelected = {...this.state.importOptionsRowSelected};
-        importOptionsRowSelected[selector] = option;
-        this.setState({importOptionsRowSelected});
-    }
-
     render() {
         const {
             snackbarOpen, snackbarMessage
@@ -213,13 +195,6 @@ class App extends React.Component {
 
         let handleElementChange2 = (selectedOption) => {
             this.setState({selectedProgramOrDataSet2: selectedOption});
-            dhisConnector.getElementMetadata({
-                d2: this.props.d2,
-                element: selectedOption,
-                organisationUnits: []
-            }).then(result => {
-                this.setState({importOptionsRowValues: prepareDataSetOptions(result)});
-            });
         };
 
         return (
@@ -293,14 +268,6 @@ class App extends React.Component {
                                         />
                                     </div>
                                 </div>
-                                <ImportOptionsRow
-                                    importElementOptionsValues={this.state.importOptionsRowValues.options}
-                                    importElementYearValues={this.state.importOptionsRowValues.years}
-                                    importElementMonthValues={this.state.importOptionsRowValues.months}
-                                    importElementWeekValues={this.state.importOptionsRowValues.weeks}
-                                    importElementDayValues={this.state.importOptionsRowValues.days}
-                                    onChange={this.onChangeImportOptions.bind(this)}
-                                />
                                 <Dropzone
                                     accept={'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
                                     className={'dropZone'}

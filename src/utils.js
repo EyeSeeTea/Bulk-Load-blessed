@@ -1,4 +1,5 @@
 import _ from "lodash";
+import moment from "moment";
 
 /**
  * Creates the string describing the period for the selected period type.
@@ -17,6 +18,37 @@ export function getPeriod(periodType, selected) {
         default:
             throw new Error("Invalid period type: " + periodType);
     }
+}
+
+export function buildAllPossiblePeriods(periodType) {
+    let unit, format;
+    switch (periodType) {
+        case "Daily":
+            unit = "days";
+            format = "YYYYMMDD";
+            break;
+        case "Monthly":
+            unit = "months";
+            format = "YYYYMM";
+            break;
+        case "Yearly":
+            unit = "years";
+            format = "YYYY";
+            break;
+        case "Weekly":
+            unit = "weeks";
+            format = "YYYY[W]W";
+            break;
+        default:
+            throw new Error("Unsupported periodType");
+    }
+
+    const dates = [];
+    for (const current = moment("1970-01-01"); current.isSameOrBefore(moment()); current.add(1, unit)) {
+        dates.push(current.format(format));
+    }
+
+    return dates;
 }
 
 export function prepareDataSetOptions(builder) {

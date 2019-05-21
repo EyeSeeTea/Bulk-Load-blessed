@@ -61,12 +61,14 @@ export function getElementMetadata(builder) {
     return new Promise(function (resolve, reject) {
         let elementMetadata = new Map();
         let organisationUnits = [];
+        let rawMetadata = {};
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
         // TODO: Optimize query with less fields
         const API_ELEMENT = API_BASE_URL + '/' + builder.element.endpoint + '/' + builder.element.id + '/metadata.json';
         const API_ORG_UNITS = API_BASE_URL + '/metadata.json?fields=id,displayName&filter=id:in:[' + builder.organisationUnits.toString() + ']';
         getJSON(API_ELEMENT).then((json) => {
+            rawMetadata = json;
             _.forOwn(json, (value, key) => {
                 if (Array.isArray(value)) {
                     _.forEach(value, (object) => {
@@ -84,8 +86,9 @@ export function getElementMetadata(builder) {
         }).then(() => {
             resolve({
                 element: builder.element,
-                elementMetadata: elementMetadata,
-                organisationUnits: organisationUnits
+                elementMetadata,
+                organisationUnits,
+                rawMetadata,
             });
         }).catch(reason => reject(reason));
     });

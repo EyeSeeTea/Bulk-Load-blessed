@@ -47,8 +47,6 @@ export function readSheet(builder) {
                     } else {
                         result['dataSet'] = builder.element.id;
                         result['completeDate'] = dateFormat(new Date(), 'yyyy-mm-dd');
-                        result['period'] = builder.period;
-                        if (builder.attributeOptionCombo !== undefined) result['attributeOptionCombo'] = builder.attributeOptionCombo.value;
                     }
 
                     if (row.values[1] !== undefined) {
@@ -58,18 +56,26 @@ export function readSheet(builder) {
                         result.orgUnit = overviewSheet.getCell('A3').formula.substr(1);
                     }
 
-                    if (isProgram && row.values[4] !== undefined) {
-                        result.eventDate = dateFormat(new Date(row.values[4]), 'yyyy-mm-dd');
-                    } else if (isProgram) {
-                        return reject(new Error('Event date is empty'))
-                    }
-
                     // TODO: If latitude and longitude are empty or invalid remove prop
                     if (isProgram && row.values[2] !== undefined && row.values[3] !== undefined)
                         result.coordinate = {
                             latitude: row.values[2],
                             longitude: row.values[3]
                     };
+
+                    if (isProgram && row.values[4] !== undefined) {
+                        result.eventDate = dateFormat(new Date(row.values[4]), 'yyyy-mm-dd');
+                    } else if (isProgram) {
+                        return reject(new Error('Event date is empty'))
+                    }
+
+                    if (!isProgram && row.values[2] !== undefined) {
+                        result.period = row.values[2];
+                    }
+
+                    if (!isProgram && row.values[3] !== undefined) {
+                        result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
+                    }
 
                     row.eachCell((cell, colNumber) => {
                         if (isProgram && colNumber > 4) { // TODO: Do not hardcode previous entries
@@ -88,7 +94,7 @@ export function readSheet(builder) {
                                 cellValue = dateFormat(new Date(cellValue), 'yyyy-mm-dd');
                             }
                             result.dataValues.push({dataElement: id, value: cellValue});
-                        } else if (!isProgram && colNumber > 1) { // TODO: Do not hardcode previous entries
+                        } else if (!isProgram && colNumber > 3) { // TODO: Do not hardcode previous entries
                             let column = columns[colNumber];
                             let id = column.formula ? column.formula.substr(1) :
                                 dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
@@ -122,8 +128,7 @@ export function readSheet(builder) {
 function parseMetadataId(metadataSheet, metadataName) {
     let result = metadataName;
     metadataSheet.eachRow((row, rowNumber) => {
-        if (row.values[2] === 'organisationUnit' && stringEquals(metadataName, row.values[3]))
-            result = row.values[1];
+        if (stringEquals(metadataName, row.values[3])) result = row.values[1];
     });
     return result;
 }
