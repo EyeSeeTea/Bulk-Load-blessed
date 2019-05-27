@@ -51,16 +51,18 @@ function addOverviewSheet(workbook, builder) {
         overviewSheet.cell(rowId++, columnId).formula('_' + orgUnit.id);
     });
 
-    rowId = 2;
-    columnId++;
-    overviewSheet.cell(rowId++, columnId).string('Periods');
-    buildAllPossiblePeriods(element.periodType).forEach(period => {
-        if (isNaN(parseInt(period))) {
-            overviewSheet.cell(rowId++, columnId).string(period);
-        } else {
-            overviewSheet.cell(rowId++, columnId).number(parseInt(period));
-        }
-    });
+    if (element.type === 'dataSet') {
+        rowId = 2;
+        columnId++;
+        overviewSheet.cell(rowId++, columnId).string('Periods');
+        buildAllPossiblePeriods(element.periodType).forEach(period => {
+            if (isNaN(parseInt(period))) {
+                overviewSheet.cell(rowId++, columnId).string(period);
+            } else {
+                overviewSheet.cell(rowId++, columnId).number(parseInt(period));
+            }
+        });
+    }
 
     rowId = 2;
     columnId++;
@@ -103,14 +105,22 @@ function addMetadataSheet(workbook, metadata, organisationUnits) {
     metadataSheet.cell(1, 1, 2, 1, true).string('Identifier').style(style);
     metadataSheet.cell(1, 2, 2, 2, true).string('Type').style(style);
     metadataSheet.cell(1, 3, 2, 3, true).string('Name').style(style);
+    metadataSheet.cell(1, 4, 2, 4, true).string('Value Type').style(style);
+    metadataSheet.cell(1, 5, 2, 5, true).string('Option Set').style(style);
+    metadataSheet.cell(1, 6, 2, 6, true).string('Possible Values').style(style);
 
     let rowId = 3;
     metadata.forEach((value, key) => {
         let name = value.formName !== undefined ? value.formName : value.name;
+        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        let options = optionSet ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
 
-        metadataSheet.cell(rowId, 1).string(value.id !== undefined ? value.id : '');
-        metadataSheet.cell(rowId, 2).string(value.type !== undefined ? value.type : '');
-        metadataSheet.cell(rowId, 3).string(name !== undefined ? name : '');
+        metadataSheet.cell(rowId, 1).string(value.id ? value.id : '');
+        metadataSheet.cell(rowId, 2).string(value.type ? value.type : '');
+        metadataSheet.cell(rowId, 3).string(name ? name : '');
+        metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : '');
+        metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : '');
+        metadataSheet.cell(rowId, 6).string(options ? options : '');
 
         if (name !== undefined) workbook.definedNameCollection.addDefinedName({
             refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + '$' + rowId,
@@ -220,7 +230,7 @@ function addDataEntrySheet(workbook, element, metadata) {
 
                 _.forEach(programStageSection.dataElements, (dataElementT) => {
                     let dataElement = metadata.get(dataElementT.id);
-                    dataEntrySheet.column(columnId).setWidth(dataElement.formName.length / 2.5 + 10);
+                    dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
                     dataEntrySheet.cell(2, columnId)
                     .formula('_' + dataElement.id)
                     .style(groupStyle(groupId));
