@@ -23,6 +23,8 @@ import theme from './Theme';
 import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
 import AlertSnackbar from "./AlertSnackbar";
+import moment from "moment";
+import {buildPossibleYears} from "../utils";
 
 const styles = theme => ({
     root: {
@@ -47,7 +49,10 @@ class App extends React.Component {
             elementSelectOptions2: [],
             selectedProgramOrDataSet1: undefined,
             selectedProgramOrDataSet2: undefined,
-            importDataSheet: undefined
+            importDataSheet: undefined,
+            model1: undefined,
+            startYear: 2010,
+            endYear: moment().year(),
         };
 
         this.loadUserInformation();
@@ -127,7 +132,11 @@ class App extends React.Component {
             element: this.state.selectedProgramOrDataSet1,
             organisationUnits: orgUnits
         }).then(result => {
-            sheetBuilder.buildSheet(result).then(() =>
+            sheetBuilder.buildSheet({
+                ...result,
+                startYear: this.state.startYear,
+                endYear: this.state.endYear
+            }).then(() =>
                 this.props.setLoading(false));
         });
     }
@@ -182,7 +191,10 @@ class App extends React.Component {
         } = this.props.dialog;
 
         let handleModelChange1 = (selectedOption) => {
-            this.setState({elementSelectOptions1: this.state[selectedOption.value]});
+            this.setState({
+                model1: selectedOption.value,
+                elementSelectOptions1: this.state[selectedOption.value]
+            });
         };
 
         let handleElementChange1 = (selectedOption) => {
@@ -195,6 +207,14 @@ class App extends React.Component {
 
         let handleElementChange2 = (selectedOption) => {
             this.setState({selectedProgramOrDataSet2: selectedOption});
+        };
+
+        let handleStartYear = (selectedOption) => {
+            this.setState({startYear: selectedOption.value});
+        };
+
+        let handleEndYear = (selectedOption) => {
+            this.setState({endYear: selectedOption.value});
         };
 
         return (
@@ -227,6 +247,32 @@ class App extends React.Component {
                                         />
                                     </div>
                                 </div>
+                                {this.state.model1 === "dataSets" && (
+                                    <div className='row' style={{marginTop: '1em', marginLeft: '1em', marginRight: '1em'}}>
+                                        <div style={{flexBasis: '30%', margin: '1em'}}>
+                                            <Select
+                                                placeholder={'Start Year'}
+                                                options={buildPossibleYears(1970, this.state.endYear)}
+                                                defaultValue={{
+                                                    value: moment('2010-01-01').year(),
+                                                    label: moment('2010-01-01').year().toString()
+                                                }}
+                                                onChange={handleStartYear}
+                                            />
+                                        </div>
+                                        <div style={{flexBasis: '30%', margin: '1em'}}>
+                                            <Select
+                                                placeholder={'End Year'}
+                                                options={buildPossibleYears(this.state.startYear, moment().year())}
+                                                defaultValue={{
+                                                    value: moment().year(),
+                                                    label: moment().year().toString()
+                                                }}
+                                                onChange={handleEndYear}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                                 <OrgUnitTreeMultipleSelectAndSearch
                                     roots={this.state.orgUnitTreeRoots}
                                     onUpdateInput={this.searchForOrgUnits.bind(this)}

@@ -28,7 +28,7 @@ export function buildSheet(builder) {
 }
 
 function addOverviewSheet(workbook, builder) {
-    const { organisationUnits, element, rawMetadata } = builder;
+    const { organisationUnits, element, rawMetadata, startYear, endYear } = builder;
     const title = element.displayName;
 
     let overviewSheet = workbook.addWorksheet('Overview');
@@ -55,11 +55,11 @@ function addOverviewSheet(workbook, builder) {
         rowId = 2;
         columnId++;
         overviewSheet.cell(rowId++, columnId).string('Periods');
-        buildAllPossiblePeriods(element.periodType).forEach(period => {
-            if (isNaN(parseInt(period))) {
+        buildAllPossiblePeriods(element.periodType, startYear, endYear).forEach(period => {
+            if (isNaN(period)) {
                 overviewSheet.cell(rowId++, columnId).string(period);
             } else {
-                overviewSheet.cell(rowId++, columnId).number(parseInt(period));
+                overviewSheet.cell(rowId++, columnId).number(Number(period));
             }
         });
     }

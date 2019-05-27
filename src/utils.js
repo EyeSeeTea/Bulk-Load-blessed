@@ -20,7 +20,7 @@ export function getPeriod(periodType, selected) {
     }
 }
 
-export function buildAllPossiblePeriods(periodType) {
+export function buildAllPossiblePeriods(periodType, startYear, endYear) {
     let unit, format;
     switch (periodType) {
         case "Daily":
@@ -44,8 +44,20 @@ export function buildAllPossiblePeriods(periodType) {
     }
 
     const dates = [];
-    for (const current = moment("1970-01-01"); current.isSameOrBefore(moment()); current.add(1, unit)) {
+    for (const current = moment(startYear + "-01-01"); current.isSameOrBefore(moment(endYear + "-12-31")); current.add(1, unit)) {
         dates.push(current.format(format));
+    }
+
+    return dates;
+}
+
+export function buildPossibleYears(startYear, endYear) {
+    const dates = [];
+    for (const current = moment(startYear + "-01-01"); current.isSameOrBefore(moment(endYear + "-12-31")); current.add(1, "year")) {
+        dates.push({
+            value: current.year(),
+            label: current.year().toString()
+        });
     }
 
     return dates;
