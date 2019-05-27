@@ -22,9 +22,9 @@ export function getUserInformation(builder) {
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
         let elements = [];
 
-        builder.d2.models.dataSets.list({ fields: ['id'] }).then(dataSetCollection => {
+        builder.d2.models.dataSets.list({ fields: ['id'], paging: "false" }).then(dataSetCollection => {
             dataSetCollection.forEach(dataSet => elements.push(dataSet.id));
-            return builder.d2.models.programs.list({ fields: ['id'] });
+            return builder.d2.models.programs.list({ fields: ['id'], paging: "false" });
         }).then(programCollection => {
             programCollection.forEach(program => elements.push(program.id));
             const API_USER_PROGRAMS_DATASETS = API_BASE_URL + '/metadata.json?fields=id,displayName,' +
