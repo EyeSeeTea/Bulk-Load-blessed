@@ -5,5 +5,14 @@
  * @returns {boolean}
  */
 export function stringEquals(baseString, compareString) {
-    return baseString.toString().trim().toLowerCase() === compareString.toString().trim().toLowerCase();
+    return (
+        baseString
+            .toString()
+            .trim()
+            .toLowerCase() ===
+        compareString
+            .toString()
+            .trim()
+            .toLowerCase()
+    );
 }

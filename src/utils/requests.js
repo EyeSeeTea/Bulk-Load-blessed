@@ -1,4 +1,4 @@
-import {createAjaxQueue} from '../logic/ajaxMultiQueue';
+import { createAjaxQueue } from "../logic/ajaxMultiQueue";
 
 let ajaxQueue = createAjaxQueue(25);
 
@@ -7,13 +7,12 @@ let ajaxQueue = createAjaxQueue(25);
  * @param requestUrl
  */
 export function getJSON(requestUrl) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         ajaxQueue.queue({
-            dataType: 'json',
+            dataType: "json",
             url: requestUrl,
-            success: (json) => resolve(json),
-            fail: (reason) => reject(reason)
+            success: json => resolve(json),
+            fail: reason => reject(reason),
         });
     });
 }
-

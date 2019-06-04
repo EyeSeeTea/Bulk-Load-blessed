@@ -1,10 +1,13 @@
 import * as actionTypes from "../actions/actionTypes";
 
-const dialog = (state = {
-    snackbarOpen: false,
-    snackbarMessage: ''
-}, action) => {
-    let newState = {...state};
+const dialog = (
+    state = {
+        snackbarOpen: false,
+        snackbarMessage: "",
+    },
+    action
+) => {
+    let newState = { ...state };
     switch (action.type) {
         case actionTypes.SNACKBAR_UPDATE:
             newState.snackbarMessage = action.message;

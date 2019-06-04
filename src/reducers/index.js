@@ -1,6 +1,6 @@
-import d2 from './d2Reducer';
-import database from './databaseReducer';
-import loading from './loadingReducer';
+import d2 from "./d2Reducer";
+import database from "./databaseReducer";
+import loading from "./loadingReducer";
 import dialog from "./dialogReducer";
 
 const index = (state = {}, action: Action) => {
@@ -8,7 +8,7 @@ const index = (state = {}, action: Action) => {
         d2: d2(state.d2, action),
         database: database(state.database, action),
         dialog: dialog(state.dialog, action),
-        loading: loading(state.loading, action)
+        loading: loading(state.loading, action),
     };
 };
 

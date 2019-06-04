@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese');
+@import url("https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese");
 
 * {
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     font-size: 16px;
 }
 
@@ -17,7 +17,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #F1F1F1;
+    background-color: #f1f1f1;
     opacity: 0.8;
     z-index: 1001;
 }
@@ -35,16 +35,16 @@
 }
 
 .dropzoneParagraph {
-    font-size: 20px
+    font-size: 20px;
 }
 
 .dropZone {
     position: relative;
     width: 100%;
     height: 200px;
-    background-color: #F0F0F0;
+    background-color: #f0f0f0;
     border: dashed;
-    border-color: #C8C8C8;
+    border-color: #c8c8c8;
     cursor: pointer;
 }
 
@@ -53,8 +53,14 @@
     height: 200px;
     cursor: pointer;
     border: solid;
-    border-color: #C8C8C8;
-    background-image: repeating-linear-gradient(-45deg, #F0F0F0, #F0F0F0 25px, #C8C8C8 25px, #C8C8C8 50px);
+    border-color: #c8c8c8;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        #f0f0f0,
+        #f0f0f0 25px,
+        #c8c8c8 25px,
+        #c8c8c8 50px
+    );
     -webkit-animation: progress 2s linear infinite !important;
     -moz-animation: progress 2s linear infinite !important;
     animation: progress 2s linear infinite !important;
@@ -66,8 +72,14 @@
     height: 200px;
     cursor: pointer;
     border: solid;
-    border-color: #C8C8C8;
-    background-image: repeating-linear-gradient(-45deg, #fc8785, #fc8785 25px, #f4231f 25px, #f4231f 50px);
+    border-color: #c8c8c8;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        #fc8785,
+        #fc8785 25px,
+        #f4231f 25px,
+        #f4231f 50px
+    );
     -webkit-animation: progress 2s linear infinite !important;
     -moz-animation: progress 2s linear infinite !important;
     animation: progress 2s linear infinite !important;

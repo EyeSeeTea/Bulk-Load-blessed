@@ -57,6 +57,7 @@
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",
     "pouchdb": "^7.0.0",
+    "prettier": "^1.17.1",
     "promise": "8.0.1",
     "prop-types": "latest",
     "raf": "3.4.0",
@@ -87,6 +88,7 @@
     "prebuild": "rm -rf bulk-load.zip && rm -rf build/",
     "build": "node scripts/build.js",
     "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
+    "prettify": "prettier \"{src,public}/**/*.{js,jsx,ts,tsx,json,css}\" --write",
     "test": "node scripts/test.js --env=jsdom"
   },
   "manifest.webapp": {

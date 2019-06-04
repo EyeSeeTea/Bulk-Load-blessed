@@ -1,13 +1,22 @@
-import Spacing from 'material-ui/styles/spacing';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import {blue100, blue700, darkBlack, grey100, grey400, grey500, orange500, white,} from 'material-ui/styles/colors';
-import {fade} from 'material-ui/utils/colorManipulator';
+import Spacing from "material-ui/styles/spacing";
+import getMuiTheme from "material-ui/styles/getMuiTheme";
+import {
+    blue100,
+    blue700,
+    darkBlack,
+    grey100,
+    grey400,
+    grey500,
+    orange500,
+    white,
+} from "material-ui/styles/colors";
+import { fade } from "material-ui/utils/colorManipulator";
 
 const theme = {
     spacing: Spacing,
-    fontFamily: 'Roboto, sans-serif',
+    fontFamily: "Roboto, sans-serif",
     palette: {
-        primary1Color: '#276696',
+        primary1Color: "#276696",
         primary2Color: blue700,
         primary3Color: blue100,
         accent1Color: orange500,
@@ -24,12 +33,12 @@ const theme = {
 function createAppTheme(style) {
     return {
         sideBar: {
-            backgroundColor: '#F3F3F3',
-            backgroundColorItem: 'transparent',
+            backgroundColor: "#F3F3F3",
+            backgroundColorItem: "transparent",
             backgroundColorItemActive: style.palette.accent2Color,
             textColor: style.palette.textColor,
             textColorActive: style.palette.primary1Color,
-            borderStyle: '1px solid #e1e1e1',
+            borderStyle: "1px solid #e1e1e1",
         },
         forms: {
             minWidth: 350,

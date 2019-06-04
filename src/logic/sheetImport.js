@@ -1,8 +1,8 @@
-import ExcelJS from 'exceljs/dist/es5/exceljs.browser';
-import fileReaderStream from 'filereader-stream';
-import dateFormat from 'dateformat';
+import ExcelJS from "exceljs/dist/es5/exceljs.browser";
+import fileReaderStream from "filereader-stream";
+import dateFormat from "dateformat";
 
-import {stringEquals} from "../utils/strings";
+import { stringEquals } from "../utils/strings";
 
 /**
  * Import sheet information
@@ -13,16 +13,16 @@ import {stringEquals} from "../utils/strings";
  * @returns {Promise<>}
  */
 export function readSheet(builder) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         let workbook = new ExcelJS.Workbook();
         let is = workbook.xlsx.createInputStream();
         let frs = fileReaderStream(builder.file);
         // Read workbook when stream is loaded
-        is.on('error', reject);
-        is.on('done', () => {
-            let dataEntrySheet = workbook.getWorksheet('Data Entry');
-            let metadataSheet = workbook.getWorksheet('Metadata');
-            let validationSheet = workbook.getWorksheet('Validation');
+        is.on("error", reject);
+        is.on("done", () => {
+            let dataEntrySheet = workbook.getWorksheet("Data Entry");
+            let metadataSheet = workbook.getWorksheet("Metadata");
+            let validationSheet = workbook.getWorksheet("Validation");
 
             // TODO: Check malformed template (undefined?)
 
@@ -30,7 +30,7 @@ export function readSheet(builder) {
             let stageColumns;
             let dataToImport = [];
 
-            let isProgram = builder.element.type === 'program';
+            let isProgram = builder.element.type === "program";
 
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
@@ -38,35 +38,35 @@ export function readSheet(builder) {
                 else if (rowNumber === 2) columns = row.values;
                 else {
                     let result = {
-                        dataValues: []
+                        dataValues: [],
                     };
 
                     if (isProgram) {
-                        result['program'] = builder.element.id;
-                        result['status'] = 'COMPLETED';
+                        result["program"] = builder.element.id;
+                        result["status"] = "COMPLETED";
                     } else {
-                        result['dataSet'] = builder.element.id;
-                        result['completeDate'] = dateFormat(new Date(), 'yyyy-mm-dd');
+                        result["dataSet"] = builder.element.id;
+                        result["completeDate"] = dateFormat(new Date(), "yyyy-mm-dd");
                     }
 
                     if (row.values[1] !== undefined) {
                         result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
                     } else {
                         // TODO: Do not hardcode this
-                        result.orgUnit = validationSheet.getCell('A3').formula.substr(1);
+                        result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
                     if (isProgram && row.values[2] !== undefined && row.values[3] !== undefined)
                         result.coordinate = {
                             latitude: row.values[2],
-                            longitude: row.values[3]
-                    };
+                            longitude: row.values[3],
+                        };
 
                     if (isProgram && row.values[4] !== undefined) {
-                        result.eventDate = dateFormat(new Date(row.values[4]), 'yyyy-mm-dd');
+                        result.eventDate = dateFormat(new Date(row.values[4]), "yyyy-mm-dd");
                     } else if (isProgram) {
-                        return reject(new Error('Event date is empty'))
+                        return reject(new Error("Event date is empty"));
                     }
 
                     if (!isProgram && row.values[2] !== undefined) {
@@ -78,7 +78,8 @@ export function readSheet(builder) {
                     }
 
                     row.eachCell((cell, colNumber) => {
-                        if (isProgram && colNumber > 4) { // TODO: Do not hardcode previous entries
+                        if (isProgram && colNumber > 4) {
+                            // TODO: Do not hardcode previous entries
                             let id = columns[colNumber].formula.substr(1);
                             let cellValue = cell.value.toString();
 
@@ -88,28 +89,39 @@ export function readSheet(builder) {
                                 let optionSet = builder.elementMetadata.get(dataValue.optionSet.id);
                                 optionSet.options.forEach(optionId => {
                                     let option = builder.elementMetadata.get(optionId.id);
-                                    if (stringEquals(cellValue, option.name)) cellValue = option.code;
+                                    if (stringEquals(cellValue, option.name))
+                                        cellValue = option.code;
                                 });
-                            } else if (dataValue.valueType === 'DATE') {
-                                cellValue = dateFormat(new Date(cellValue), 'yyyy-mm-dd');
+                            } else if (dataValue.valueType === "DATE") {
+                                cellValue = dateFormat(new Date(cellValue), "yyyy-mm-dd");
                             }
-                            result.dataValues.push({dataElement: id, value: cellValue});
-                        } else if (!isProgram && colNumber > 3) { // TODO: Do not hardcode previous entries
+                            result.dataValues.push({ dataElement: id, value: cellValue });
+                        } else if (!isProgram && colNumber > 3) {
+                            // TODO: Do not hardcode previous entries
                             let column = columns[colNumber];
-                            let id = column.formula ? column.formula.substr(1) :
-                                dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
+                            let id = column.formula
+                                ? column.formula.substr(1)
+                                : dataEntrySheet
+                                      .getCell(column.sharedFormula)
+                                      .value.formula.substr(1);
                             let stageColumn = stageColumns[colNumber];
-                            let dataElementId = stageColumn.formula ? stageColumn.formula.substr(1) :
-                                dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
+                            let dataElementId = stageColumn.formula
+                                ? stageColumn.formula.substr(1)
+                                : dataEntrySheet
+                                      .getCell(stageColumn.sharedFormula)
+                                      .value.formula.substr(1);
                             let cellValue = cell.value.toString();
 
                             let dataValue = builder.elementMetadata.get(id);
-                            if (dataValue.type === 'categoryOptionCombo') {
+                            if (dataValue.type === "categoryOptionCombo") {
                                 // TODO: OptionSets in categoryOptionCombos
-                                result.dataValues.push({dataElement: dataElementId, categoryOptionCombo: id,
-                                    value: cellValue});
+                                result.dataValues.push({
+                                    dataElement: dataElementId,
+                                    categoryOptionCombo: id,
+                                    value: cellValue,
+                                });
                             } else {
-                                result.dataValues.push({dataElement: id, value: cellValue});
+                                result.dataValues.push({ dataElement: id, value: cellValue });
                             }
                         }
                     });

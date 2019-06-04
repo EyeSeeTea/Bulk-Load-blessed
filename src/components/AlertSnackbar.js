@@ -7,11 +7,11 @@ export default class AlertSnackbar extends React.Component {
     };
 
     render() {
-        const {open, message} = this.props;
+        const { open, message } = this.props;
 
         return (
             <Snackbar
-                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 open={open}
                 onClose={this.handleClose}
                 autoHideDuration={3000}

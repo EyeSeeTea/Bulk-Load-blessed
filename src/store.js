@@ -1,7 +1,7 @@
-import {applyMiddleware, createStore} from 'redux';
-import reducers from './reducers/index';
-import thunk from 'redux-thunk';
-import logger from 'redux-logger';
+import { applyMiddleware, createStore } from "redux";
+import reducers from "./reducers/index";
+import thunk from "redux-thunk";
+import logger from "redux-logger";
 
 const DEBUG = process.env.REACT_APP_DEBUG;
 

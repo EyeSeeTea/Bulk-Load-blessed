@@ -1,19 +1,20 @@
 /*
-* AJAXMultiQueue - A queue for multiple concurrent ajax requests
-* Dual licensed under the MIT and GPL licenses.
-*
-* (c) 2013 Amir Grozki
-* (c) 2011 Corey Frang
-*/
+ * AJAXMultiQueue - A queue for multiple concurrent ajax requests
+ * Dual licensed under the MIT and GPL licenses.
+ *
+ * (c) 2013 Amir Grozki
+ * (c) 2011 Corey Frang
+ */
 
-import $ from 'jquery';
+import $ from "jquery";
 
 export function createAjaxQueue(n) {
     return new MultiQueue(~~n);
 }
 
 function MultiQueue(number) {
-    let queues, current = 0;
+    let queues,
+        current = 0;
 
     if (!queues) {
         queues = new Array(number);
@@ -35,7 +36,7 @@ function MultiQueue(number) {
         current = (current + 1) % number;
 
         // add the abort method
-        promise.abort = function (statusText) {
+        promise.abort = function(statusText) {
             // proxy abort to the jqXHR if it is active
             if (jqXHR) return jqXHR.abort(statusText);
 
@@ -52,7 +53,7 @@ function MultiQueue(number) {
             }
 
             // and then reject the deferred
-            dfd.rejectWith(ajaxOpts.context || ajaxOpts, [promise, statusText, '']);
+            dfd.rejectWith(ajaxOpts.context || ajaxOpts, [promise, statusText, ""]);
             return promise;
         };
 
@@ -68,6 +69,6 @@ function MultiQueue(number) {
     }
 
     return {
-        queue: queue
+        queue: queue,
     };
 }

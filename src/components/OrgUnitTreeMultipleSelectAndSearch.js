@@ -1,19 +1,19 @@
-import React from 'react';
-import {OrgUnitTree} from '@dhis2/d2-ui-org-unit-tree';
-import addD2Context from '@dhis2/d2-ui-core/component-helpers/addD2Context';
-import TextField from '@material-ui/core/TextField/TextField';
-import noop from 'd2-utilizr/lib/noop';
-import PropTypes from 'prop-types';
+import React from "react";
+import { OrgUnitTree } from "@dhis2/d2-ui-org-unit-tree";
+import addD2Context from "@dhis2/d2-ui-core/component-helpers/addD2Context";
+import TextField from "@material-ui/core/TextField/TextField";
+import noop from "d2-utilizr/lib/noop";
+import PropTypes from "prop-types";
 
 function OrgUnitTreeMultipleSelectAndSearch(props, context) {
     const styles = {
         labelStyle: {
-            whiteSpace: 'nowrap',
+            whiteSpace: "nowrap",
         },
         noHitsLabel: {
-            fontStyle: 'italic',
-            color: 'rgba(0, 0, 0, 0.4)',
-        }
+            fontStyle: "italic",
+            color: "rgba(0, 0, 0, 0.4)",
+        },
     };
 
     let currentTimeout = undefined;
@@ -28,30 +28,34 @@ function OrgUnitTreeMultipleSelectAndSearch(props, context) {
     };
 
     return (
-        <div style={{position: 'relative'}}>
+        <div style={{ position: "relative" }}>
             <TextField
-                id='search'
-                label='Search'
+                id="search"
+                label="Search"
                 onChange={handleChange}
-                margin='normal'
-                style={{width: '100%'}}
+                margin="normal"
+                style={{ width: "100%" }}
             />
-            <div style={{height: '12em', overflow: 'auto', width: '100%'}}>
-                {Array.isArray(props.roots) && props.roots.length > 0 ? props.roots.map(root => {
-                    return (
-                        <OrgUnitTree
-                            key={root.id}
-                            root={root}
-                            selected={props.selected}
-                            initiallyExpanded={props.initiallyExpanded}
-                            labelStyle={styles.labelStyle}
-                            onSelectClick={props.onSelectClick}
-                            idsThatShouldBeReloaded={props.idsThatShouldBeReloaded}
-                            hideCheckboxes={props.hideCheckboxes}
-                            hideMemberCount={props.hideMemberCount}
-                        />
-                    )
-                }) : <div style={styles.noHitsLabel}>{props.noHitsLabel}</div>}
+            <div style={{ height: "12em", overflow: "auto", width: "100%" }}>
+                {Array.isArray(props.roots) && props.roots.length > 0 ? (
+                    props.roots.map(root => {
+                        return (
+                            <OrgUnitTree
+                                key={root.id}
+                                root={root}
+                                selected={props.selected}
+                                initiallyExpanded={props.initiallyExpanded}
+                                labelStyle={styles.labelStyle}
+                                onSelectClick={props.onSelectClick}
+                                idsThatShouldBeReloaded={props.idsThatShouldBeReloaded}
+                                hideCheckboxes={props.hideCheckboxes}
+                                hideMemberCount={props.hideMemberCount}
+                            />
+                        );
+                    })
+                ) : (
+                    <div style={styles.noHitsLabel}>{props.noHitsLabel}</div>
+                )}
             </div>
         </div>
     );
