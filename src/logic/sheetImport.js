@@ -20,7 +20,6 @@ export function readSheet(builder) {
         // Read workbook when stream is loaded
         is.on('error', reject);
         is.on('done', () => {
-            let overviewSheet = workbook.getWorksheet('Overview');
             let dataEntrySheet = workbook.getWorksheet('Data Entry');
             let metadataSheet = workbook.getWorksheet('Metadata');
             let validationSheet = workbook.getWorksheet('Validation');

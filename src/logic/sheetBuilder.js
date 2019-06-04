@@ -5,30 +5,28 @@ import _ from 'lodash';
 import * as utils from './utils';
 import {buildAllPossiblePeriods} from "../utils";
 
-/**
- * Get User Information
- * @param builder:
- *      - element: Element to be parsed
- *      - elementMetadata: The requested metadata
- *      - organisationUnits: Organisation Units to be imported
- * @returns {Promise<>}:
- */
-export function buildSheet(builder) {
-    return new Promise(function (resolve, reject) {
-        let workbook = new Excel.Workbook();
+export const SheetBuilder = function (builder) {
+    this.workbook = new Excel.Workbook();
+    this.builder = builder;
 
-        addOverviewSheet(workbook, builder);
-        addDataEntrySheet(workbook, builder.element, builder.elementMetadata);
-        addMetadataSheet(workbook, builder.elementMetadata, builder.organisationUnits);
-        addValidationSheet(workbook, builder);
+    this.overviewSheet = this.workbook.addWorksheet('Overview');
+    this.dataEntrySheet = this.workbook.addWorksheet('Data Entry');
+    this.metadataSheet = this.workbook.addWorksheet('Metadata');
+    this.validationSheet = this.workbook.addWorksheet('Validation');
 
-        downloadExcel(workbook, builder.element.displayName).then(() => resolve());
-    });
-}
+    this.addOverviewSheet();
+    this.addDataEntrySheet();
+    this.addMetadataSheet();
+    this.addValidationSheet();
+};
 
-function addOverviewSheet(workbook, builder) {
-    const { elementMetadata: metadata, rawMetadata } = builder;
-    let overviewSheet = workbook.addWorksheet('Overview');
+SheetBuilder.prototype.downloadSheet = async function () {
+    await downloadExcel(this.workbook, this.builder.element.displayName);
+};
+
+SheetBuilder.prototype.addOverviewSheet = function () {
+    const { elementMetadata: metadata, rawMetadata } = this.builder;
+    let overviewSheet = this.overviewSheet;
 
     // Freeze and format column titles
     overviewSheet.row(2).freeze();
@@ -59,133 +57,11 @@ function addOverviewSheet(workbook, builder) {
 
         rowId++;
     });
-}
+};
 
-function addValidationSheet(workbook, builder) {
-    const { organisationUnits, element, rawMetadata, startYear, endYear } = builder;
-    const title = element.displayName;
-
-    let validationSheet = workbook.addWorksheet('Validation');
-
-    // Freeze and format column titles
-    validationSheet.row(2).freeze();
-    //validationSheet.column(1).setWidth(70);
-    //validationSheet.column(2).setWidth(30);
-    //validationSheet.column(3).setWidth(30);
-
-    // Add column titles
-    let rowId = 1;
-    let columnId = 1;
-    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(style);
-
-    rowId = 2;
-    columnId = 1;
-    validationSheet.cell(rowId++, columnId).string('Organisation Units');
-    _.forEach(organisationUnits, orgUnit => {
-        validationSheet.cell(rowId++, columnId).formula('_' + orgUnit.id);
-    });
-
-    if (element.type === 'dataSet') {
-        rowId = 2;
-        columnId++;
-        validationSheet.cell(rowId++, columnId).string('Periods');
-        buildAllPossiblePeriods(element.periodType, startYear, endYear).forEach(period => {
-            if (isNaN(period)) {
-                validationSheet.cell(rowId++, columnId).string(period);
-            } else {
-                validationSheet.cell(rowId++, columnId).number(Number(period));
-            }
-        });
-    }
-
-    rowId = 2;
-    columnId++;
-    validationSheet.cell(rowId++, columnId).string('Options');
-    let dataSetOptionComboId = builder.element.categoryCombo.id;
-    builder.elementMetadata.forEach(e => {
-        if (e.type === 'categoryOptionCombo' && e.categoryCombo.id === dataSetOptionComboId) {
-            validationSheet.cell(rowId++, columnId).formula('_' + e.id);
-        }
-    });
-
-    _.forEach(rawMetadata.optionSets, optionSet => {
-        rowId = 2;
-        columnId++;
-
-        validationSheet.cell(rowId++, columnId).formula('_' + optionSet.id);
-        _.forEach(optionSet.options, option => {
-            validationSheet.cell(rowId++, columnId).formula('_' + option.id);
-        });
-    });
-}
-
-/**
- * Add a new metadata sheet on the given workbook with the current metadata
- * @param workbook
- * @param metadata
- * @param organisationUnits
- */
-function addMetadataSheet(workbook, metadata, organisationUnits) {
-    let metadataSheet = workbook.addWorksheet('Metadata');
-
-    // Freeze and format column titles
-    metadataSheet.row(2).freeze();
-    metadataSheet.column(1).setWidth(30);
-    metadataSheet.column(2).setWidth(30);
-    metadataSheet.column(3).setWidth(70);
-
-    // Add column titles
-    // TODO: Freeze 2 fix
-    metadataSheet.cell(1, 1, 2, 1, true).string('Identifier').style(style);
-    metadataSheet.cell(1, 2, 2, 2, true).string('Type').style(style);
-    metadataSheet.cell(1, 3, 2, 3, true).string('Name').style(style);
-    metadataSheet.cell(1, 4, 2, 4, true).string('Value Type').style(style);
-    metadataSheet.cell(1, 5, 2, 5, true).string('Option Set').style(style);
-    metadataSheet.cell(1, 6, 2, 6, true).string('Possible Values').style(style);
-
-    let rowId = 3;
-    metadata.forEach((value, key) => {
-        let name = value.formName !== undefined ? value.formName : value.name;
-        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options = optionSet && optionSet.options ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
-
-        metadataSheet.cell(rowId, 1).string(value.id ? value.id : '');
-        metadataSheet.cell(rowId, 2).string(value.type ? value.type : '');
-        metadataSheet.cell(rowId, 3).string(name ? name : '');
-        metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : '');
-        metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : '');
-        metadataSheet.cell(rowId, 6).string(options ? options : '');
-
-        if (name !== undefined) workbook.definedNameCollection.addDefinedName({
-            refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + '$' + rowId,
-            name: '_' + value.id
-        });
-
-        rowId++;
-    });
-
-    organisationUnits.forEach(orgUnit => {
-        metadataSheet.cell(rowId, 1).string(orgUnit.id !== undefined ? orgUnit.id : '');
-        metadataSheet.cell(rowId, 2).string('organisationUnit');
-        metadataSheet.cell(rowId, 3).string(orgUnit.displayName !== undefined ? orgUnit.displayName : '');
-
-        if (orgUnit.displayName !== undefined) workbook.definedNameCollection.addDefinedName({
-            refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + '$' + rowId,
-            name: '_' + orgUnit.id
-        });
-
-        rowId++;
-    });
-}
-
-/**
- * Add a new data entry sheet on the given workbook with the current metadata
- * @param workbook
- * @param element
- * @param metadata
- */
-function addDataEntrySheet(workbook, element, metadata) {
-    let dataEntrySheet = workbook.addWorksheet('Data Entry');
+SheetBuilder.prototype.addDataEntrySheet = function () {
+    const { element, elementMetadata: metadata} = this.builder;
+    let dataEntrySheet = this.dataEntrySheet;
 
     // Freeze and format column titles
     dataEntrySheet.row(2).freeze();
@@ -287,7 +163,119 @@ function addDataEntrySheet(workbook, element, metadata) {
             });
         });
     }
-}
+};
+
+SheetBuilder.prototype.addMetadataSheet = function () {
+    const { elementMetadata: metadata, organisationUnits } = this.builder;
+    let metadataSheet = this.metadataSheet;
+
+    // Freeze and format column titles
+    metadataSheet.row(2).freeze();
+    metadataSheet.column(1).setWidth(30);
+    metadataSheet.column(2).setWidth(30);
+    metadataSheet.column(3).setWidth(70);
+
+    // Add column titles
+    // TODO: Freeze 2 fix
+    metadataSheet.cell(1, 1, 2, 1, true).string('Identifier').style(style);
+    metadataSheet.cell(1, 2, 2, 2, true).string('Type').style(style);
+    metadataSheet.cell(1, 3, 2, 3, true).string('Name').style(style);
+    metadataSheet.cell(1, 4, 2, 4, true).string('Value Type').style(style);
+    metadataSheet.cell(1, 5, 2, 5, true).string('Option Set').style(style);
+    metadataSheet.cell(1, 6, 2, 6, true).string('Possible Values').style(style);
+
+    let rowId = 3;
+    metadata.forEach((value, key) => {
+        let name = value.formName !== undefined ? value.formName : value.name;
+        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        let options = optionSet && optionSet.options ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
+
+        metadataSheet.cell(rowId, 1).string(value.id ? value.id : '');
+        metadataSheet.cell(rowId, 2).string(value.type ? value.type : '');
+        metadataSheet.cell(rowId, 3).string(name ? name : '');
+        metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : '');
+        metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : '');
+        metadataSheet.cell(rowId, 6).string(options ? options : '');
+
+        if (name !== undefined) this.workbook.definedNameCollection.addDefinedName({
+            refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + '$' + rowId,
+            name: '_' + value.id
+        });
+
+        rowId++;
+    });
+
+    organisationUnits.forEach(orgUnit => {
+        metadataSheet.cell(rowId, 1).string(orgUnit.id !== undefined ? orgUnit.id : '');
+        metadataSheet.cell(rowId, 2).string('organisationUnit');
+        metadataSheet.cell(rowId, 3).string(orgUnit.displayName !== undefined ? orgUnit.displayName : '');
+
+        if (orgUnit.displayName !== undefined) this.workbook.definedNameCollection.addDefinedName({
+            refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + '$' + rowId,
+            name: '_' + orgUnit.id
+        });
+
+        rowId++;
+    });
+};
+
+SheetBuilder.prototype.addValidationSheet = function () {
+    const { organisationUnits, element, rawMetadata, elementMetadata, startYear, endYear } = this.builder;
+    const title = element.displayName;
+
+    let validationSheet = this.validationSheet;
+
+    // Freeze and format column titles
+    validationSheet.row(2).freeze();
+    //validationSheet.column(1).setWidth(70);
+    //validationSheet.column(2).setWidth(30);
+    //validationSheet.column(3).setWidth(30);
+
+    // Add column titles
+    let rowId = 1;
+    let columnId = 1;
+    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(style);
+
+    rowId = 2;
+    columnId = 1;
+    validationSheet.cell(rowId++, columnId).string('Organisation Units');
+    _.forEach(organisationUnits, orgUnit => {
+        validationSheet.cell(rowId++, columnId).formula('_' + orgUnit.id);
+    });
+
+    if (element.type === 'dataSet') {
+        rowId = 2;
+        columnId++;
+        validationSheet.cell(rowId++, columnId).string('Periods');
+        buildAllPossiblePeriods(element.periodType, startYear, endYear).forEach(period => {
+            if (isNaN(period)) {
+                validationSheet.cell(rowId++, columnId).string(period);
+            } else {
+                validationSheet.cell(rowId++, columnId).number(Number(period));
+            }
+        });
+    }
+
+    rowId = 2;
+    columnId++;
+    validationSheet.cell(rowId++, columnId).string('Options');
+    let dataSetOptionComboId = element.categoryCombo.id;
+    elementMetadata.forEach(e => {
+        if (e.type === 'categoryOptionCombo' && e.categoryCombo.id === dataSetOptionComboId) {
+            validationSheet.cell(rowId++, columnId).formula('_' + e.id);
+        }
+    });
+
+    _.forEach(rawMetadata.optionSets, optionSet => {
+        rowId = 2;
+        columnId++;
+
+        validationSheet.cell(rowId++, columnId).formula('_' + optionSet.id);
+        _.forEach(optionSet.options, option => {
+            validationSheet.cell(rowId++, columnId).formula('_' + option.id);
+        });
+    });
+};
 
 /**
  * Query a file download of the current workbook with a title
@@ -322,18 +310,6 @@ function createColumn(sheet, columnId, label, validation = undefined) {
 }
 
 /**
-function namedValidationToFormula(validation) {
-    let result = '=';
-    _.forEach(validation, item => {
-        result += '_' + item + ';';
-    });
-    result = result.substr(0, result.length - 1);
-    console.log(result);
-    return result;
-}
-**/
-
-/**
  * Common cell style definition
  * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
  */
@@ -361,9 +337,3 @@ function groupStyle(groupId) {
         }
     };
 }
-
-/**
-let lockedSheetOptions = {sheetProtection: {
-        autoFilter: true, deleteColumns: true, deleteRows: true, password: 'wiscentd', pivotTables: true,
-        selectLockedCells: true, selectUnlockedCells: true, sheet: true, sort: true}};
- **/

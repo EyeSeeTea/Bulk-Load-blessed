@@ -15,7 +15,7 @@ import HeaderBar from '@dhis2/d2-ui-header-bar';
 import LoadingMask from '@dhis2/d2-ui-core/loading-mask/LoadingMask.component';
 
 import * as sheetImport from "../logic/sheetImport";
-import * as sheetBuilder from "../logic/sheetBuilder";
+import { SheetBuilder } from "../logic/sheetBuilder";
 import * as dhisConnector from "../logic/dhisConnector";
 
 import './App.css';
@@ -132,12 +132,13 @@ class App extends React.Component {
             element: this.state.selectedProgramOrDataSet1,
             organisationUnits: orgUnits
         }).then(result => {
-            sheetBuilder.buildSheet({
+            const template = new SheetBuilder({
                 ...result,
                 startYear: this.state.startYear,
                 endYear: this.state.endYear
-            }).then(() =>
-                this.props.setLoading(false));
+            });
+
+            template.downloadSheet().then(() => this.props.setLoading(false));
         });
     }
 
