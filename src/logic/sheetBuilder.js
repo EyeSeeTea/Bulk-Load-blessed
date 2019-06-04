@@ -238,11 +238,12 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
         metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : "");
         metadataSheet.cell(rowId, 6).string(options ? options : "");
 
-        if (name !== undefined)
+        if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
                 refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
                 name: "_" + value.id,
             });
+        }
 
         rowId++;
     });
