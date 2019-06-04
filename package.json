@@ -1,7 +1,6 @@
 {
   "name": "bulk-load",
   "version": "2.0.3",
-  "private": true,
   "dependencies": {
     "@dhis2/d2-ui-core": "latest",
     "@dhis2/d2-ui-header-bar": "latest",
@@ -81,12 +80,13 @@
     "whatwg-fetch": "2.0.3"
   },
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "react-scripts start",
     "prebuild": "rm -rf bulk-load.zip && rm -rf build/",
-    "build": "node scripts/build.js",
+    "build": "react-scripts build",
     "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
     "prettify": "prettier \"{src,public}/**/*.{js,jsx,ts,tsx,json,css}\" --write",
-    "test": "node scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom",
+    "eject": "react-scripts eject"
   },
   "manifest.webapp": {
     "name": "Bulk Load",
@@ -105,49 +105,5 @@
       }
     }
   },
-  "homepage": ".",
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,mjs}"
-    ],
-    "setupFiles": [
-      "<rootDir>/config/polyfills.js"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{js,jsx,mjs}",
-      "<rootDir>/src/**/?(*.)(spec|test).{js,jsx,mjs}"
-    ],
-    "testEnvironment": "node",
-    "testURL": "http://localhost",
-    "transform": {
-      "^.+\\.(js|jsx|mjs)$": "<rootDir>/node_modules/babel-jest",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs)$"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web"
-    },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node",
-      "mjs"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "react-app",
-      "es2015",
-      "stage-2"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  }
+  "homepage": "."
 }
