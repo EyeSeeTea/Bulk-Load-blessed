@@ -23,7 +23,7 @@ export function createColumn(sheet, columnId, label, validation = undefined) {
  * Common cell style definition
  * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
  */
-export let style = {
+export const style = {
     alignment: {
         horizontal: "center",
         vertical: "center",
@@ -35,6 +35,19 @@ export let style = {
         patternType: "solid",
         fgColor: "ffffff",
     },
+};
+
+export const protectedSheet = {
+    sheetProtection: {
+        sheet: true,
+        formatCells: false,
+        formatColumns: false,
+        formatRows: false,
+    },
+};
+
+export const hiddenSheet = {
+    hidden: true,
 };
 
 export function groupStyle(groupId) {

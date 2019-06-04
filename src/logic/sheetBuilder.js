@@ -2,21 +2,27 @@ import * as Excel from "excel4node";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
-import { createColumn, groupStyle, style } from "../utils/excel";
+import { createColumn, groupStyle, hiddenSheet, protectedSheet, style } from "../utils/excel";
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
 
-    this.overviewSheet = this.workbook.addWorksheet("Overview");
+    this.overviewSheet = this.workbook.addWorksheet("Overview", _.merge(protectedSheet));
+    this.validationSheet = this.workbook.addWorksheet(
+        "Validation",
+        _.merge(protectedSheet, hiddenSheet)
+    );
+    this.metadataSheet = this.workbook.addWorksheet(
+        "Metadata",
+        _.merge(protectedSheet, hiddenSheet)
+    );
     this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
-    this.metadataSheet = this.workbook.addWorksheet("Metadata");
-    this.validationSheet = this.workbook.addWorksheet("Validation");
 
     this.fillOverviewSheet();
-    this.fillDataEntrySheet();
-    this.fillMetadataSheet();
     this.fillValidationSheet();
+    this.fillMetadataSheet();
+    this.fillDataEntrySheet();
 };
 
 SheetBuilder.prototype.fillOverviewSheet = function() {

@@ -52,7 +52,10 @@ getManifest("manifest.webapp")
             store.dispatch({ type: "LOADING", loading: false });
             ReactDOM.render(
                 <Provider store={store}>
-                    <DataProvider baseUrl={config.baseUrl.split("/api")[0]} apiVersion={d2.system.version.minor}>
+                    <DataProvider
+                        baseUrl={config.baseUrl.split("/api")[0]}
+                        apiVersion={d2.system.version.minor}
+                    >
                         <App d2={d2} />
                     </DataProvider>
                 </Provider>,
