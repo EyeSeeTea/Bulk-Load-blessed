@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 
 import { getManifest, init } from "d2";
+import { DataProvider } from "@dhis2/app-runtime";
 import LoadingMask from "@dhis2/d2-ui-core/loading-mask/LoadingMask.component";
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 
@@ -51,7 +52,9 @@ getManifest("manifest.webapp")
             store.dispatch({ type: "LOADING", loading: false });
             ReactDOM.render(
                 <Provider store={store}>
-                    <App />
+                    <DataProvider baseUrl={config.baseUrl.split("/api")[0]} apiVersion={d2.system.version.minor}>
+                        <App d2={d2} />
+                    </DataProvider>
                 </Provider>,
                 document.getElementById("root")
             );

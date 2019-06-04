@@ -2,9 +2,10 @@
   "name": "bulk-load",
   "version": "2.0.3",
   "dependencies": {
+    "@dhis2/app-runtime": "^1.2.0",
     "@dhis2/d2-ui-core": "^6.1.0",
-    "@dhis2/d2-ui-header-bar": "^6.1.0",
     "@dhis2/d2-ui-org-unit-tree": "^6.1.0",
+    "@dhis2/ui-widgets": "^1.0.3",
     "@material-ui/core": "^4.0.2",
     "@material-ui/icons": "^4.0.1",
     "axios": "^0.19.0",
@@ -26,7 +27,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-dropzone": "^10.1.5",
+    "react-dropzone": "^6.2.4",
     "react-redux": "^7.0.3",
     "react-scripts": "^3.0.1",
     "react-select": "^3.0.4",
@@ -35,7 +36,7 @@
     "redux-thunk": "^2.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "BROWSER=false react-scripts start",
     "prebuild": "rm -rf bulk-load.zip && rm -rf build/",
     "build": "react-scripts build",
     "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
@@ -60,5 +61,16 @@
       }
     }
   },
-  "homepage": "."
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

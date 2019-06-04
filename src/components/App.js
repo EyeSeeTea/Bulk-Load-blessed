@@ -11,7 +11,7 @@ import Button from "@material-ui/core/Button/Button";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 
-import HeaderBar from "@dhis2/d2-ui-header-bar";
+import { HeaderBar } from "@dhis2/ui-widgets";
 import LoadingMask from "@dhis2/d2-ui-core/loading-mask/LoadingMask.component";
 
 import * as sheetImport from "../logic/sheetImport";
@@ -257,7 +257,7 @@ class App extends React.Component {
                         <LoadingMask large={true} />
                     </div>
                     <div>
-                        <HeaderBar d2={this.props.d2} />
+                        <HeaderBar appName={"Bulk Load"} />
                         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
                             <Paper
                                 style={{
