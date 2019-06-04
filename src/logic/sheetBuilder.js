@@ -1,4 +1,4 @@
-import * as Excel from 'excel4node/source';
+import * as Excel from 'excel4node';
 import {saveAs} from 'file-saver';
 import _ from 'lodash';
 
@@ -17,60 +17,94 @@ export function buildSheet(builder) {
     return new Promise(function (resolve, reject) {
         let workbook = new Excel.Workbook();
 
-        console.log(builder)
-
         addOverviewSheet(workbook, builder);
         addDataEntrySheet(workbook, builder.element, builder.elementMetadata);
         addMetadataSheet(workbook, builder.elementMetadata, builder.organisationUnits);
+        addValidationSheet(workbook, builder);
 
         downloadExcel(workbook, builder.element.displayName).then(() => resolve());
     });
 }
 
 function addOverviewSheet(workbook, builder) {
-    const { organisationUnits, element, rawMetadata, startYear, endYear } = builder;
-    const title = element.displayName;
-
+    const { elementMetadata: metadata, rawMetadata } = builder;
     let overviewSheet = workbook.addWorksheet('Overview');
 
     // Freeze and format column titles
     overviewSheet.row(2).freeze();
-    //overviewSheet.column(1).setWidth(70);
-    //overviewSheet.column(2).setWidth(30);
-    //overviewSheet.column(3).setWidth(30);
+    overviewSheet.column(1).setWidth(50);
+    overviewSheet.column(2).setWidth(50);
+    overviewSheet.column(3).setWidth(20);
+    overviewSheet.column(4).setWidth(20);
+    overviewSheet.column(5).setWidth(40);
+
+    // Add column titles
+    overviewSheet.cell(1, 1, 2, 1, true).string('Name').style(style);
+    overviewSheet.cell(1, 2, 2, 2, true).string('Description').style(style);
+    overviewSheet.cell(1, 3, 2, 3, true).string('Value Type').style(style);
+    overviewSheet.cell(1, 4, 2, 4, true).string('Option Set').style(style);
+    overviewSheet.cell(1, 5, 2, 5, true).string('Possible Values').style(style);
+
+    let rowId = 3;
+    rawMetadata["dataElements"].forEach((value, key) => {
+        let name = value.formName ? value.formName : value.name;
+        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        let options = optionSet && optionSet.options ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
+
+        overviewSheet.cell(rowId, 1).string(name ? name : '');
+        overviewSheet.cell(rowId, 2).string(value.description ? value.description : '');
+        overviewSheet.cell(rowId, 3).string(value.valueType ? value.valueType : '');
+        overviewSheet.cell(rowId, 4).string(optionSet ? optionSet.name : '');
+        overviewSheet.cell(rowId, 5).string(options ? options : '');
+
+        rowId++;
+    });
+}
+
+function addValidationSheet(workbook, builder) {
+    const { organisationUnits, element, rawMetadata, startYear, endYear } = builder;
+    const title = element.displayName;
+
+    let validationSheet = workbook.addWorksheet('Validation');
+
+    // Freeze and format column titles
+    validationSheet.row(2).freeze();
+    //validationSheet.column(1).setWidth(70);
+    //validationSheet.column(2).setWidth(30);
+    //validationSheet.column(3).setWidth(30);
 
     // Add column titles
     let rowId = 1;
     let columnId = 1;
-    overviewSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(style);
+    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(style);
 
     rowId = 2;
     columnId = 1;
-    overviewSheet.cell(rowId++, columnId).string('Organisation Units');
+    validationSheet.cell(rowId++, columnId).string('Organisation Units');
     _.forEach(organisationUnits, orgUnit => {
-        overviewSheet.cell(rowId++, columnId).formula('_' + orgUnit.id);
+        validationSheet.cell(rowId++, columnId).formula('_' + orgUnit.id);
     });
 
     if (element.type === 'dataSet') {
         rowId = 2;
         columnId++;
-        overviewSheet.cell(rowId++, columnId).string('Periods');
+        validationSheet.cell(rowId++, columnId).string('Periods');
         buildAllPossiblePeriods(element.periodType, startYear, endYear).forEach(period => {
             if (isNaN(period)) {
-                overviewSheet.cell(rowId++, columnId).string(period);
+                validationSheet.cell(rowId++, columnId).string(period);
             } else {
-                overviewSheet.cell(rowId++, columnId).number(Number(period));
+                validationSheet.cell(rowId++, columnId).number(Number(period));
             }
         });
     }
 
     rowId = 2;
     columnId++;
-    overviewSheet.cell(rowId++, columnId).string('Options');
+    validationSheet.cell(rowId++, columnId).string('Options');
     let dataSetOptionComboId = builder.element.categoryCombo.id;
     builder.elementMetadata.forEach(e => {
         if (e.type === 'categoryOptionCombo' && e.categoryCombo.id === dataSetOptionComboId) {
-            overviewSheet.cell(rowId++, columnId).formula('_' + e.id);
+            validationSheet.cell(rowId++, columnId).formula('_' + e.id);
         }
     });
 
@@ -78,9 +112,9 @@ function addOverviewSheet(workbook, builder) {
         rowId = 2;
         columnId++;
 
-        overviewSheet.cell(rowId++, columnId).formula('_' + optionSet.id);
+        validationSheet.cell(rowId++, columnId).formula('_' + optionSet.id);
         _.forEach(optionSet.options, option => {
-            overviewSheet.cell(rowId++, columnId).formula('_' + option.id);
+            validationSheet.cell(rowId++, columnId).formula('_' + option.id);
         });
     });
 }
@@ -113,7 +147,7 @@ function addMetadataSheet(workbook, metadata, organisationUnits) {
     metadata.forEach((value, key) => {
         let name = value.formName !== undefined ? value.formName : value.name;
         let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options = optionSet ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
+        let options = optionSet && optionSet.options ? optionSet.options.map(option => metadata.get(option.id).name).join(', ') : null;
 
         metadataSheet.cell(rowId, 1).string(value.id ? value.id : '');
         metadataSheet.cell(rowId, 2).string(value.type ? value.type : '');
@@ -163,13 +197,13 @@ function addDataEntrySheet(workbook, element, metadata) {
     let groupId = 0;
 
     // TODO: Do not hard-code OrgUnit fetching
-    createColumn(dataEntrySheet, columnId++, 'Org Unit', '=Overview!$A$3:$A$1048576');
+    createColumn(dataEntrySheet, columnId++, 'Org Unit', '=Validation!$A$3:$A$1048576');
     if (element.type === 'program') {
         createColumn(dataEntrySheet, columnId++, 'Latitude');
         createColumn(dataEntrySheet, columnId++, 'Longitude');
     } else if (element.type === 'dataSet') {
-        createColumn(dataEntrySheet, columnId++, 'Period', '=Overview!$B$3:$B$1048576');
-        createColumn(dataEntrySheet, columnId++, 'Options', '=Overview!$C$3:$C$1048576');
+        createColumn(dataEntrySheet, columnId++, 'Period', '=Validation!$B$3:$B$1048576');
+        createColumn(dataEntrySheet, columnId++, 'Options', '=Validation!$C$3:$C$1048576');
     }
 
     if (element.type === 'dataSet') {

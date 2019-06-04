@@ -23,6 +23,7 @@ export function readSheet(builder) {
             let overviewSheet = workbook.getWorksheet('Overview');
             let dataEntrySheet = workbook.getWorksheet('Data Entry');
             let metadataSheet = workbook.getWorksheet('Metadata');
+            let validationSheet = workbook.getWorksheet('Validation');
 
             // TODO: Check malformed template (undefined?)
 
@@ -53,7 +54,7 @@ export function readSheet(builder) {
                         result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
                     } else {
                         // TODO: Do not hardcode this
-                        result.orgUnit = overviewSheet.getCell('A3').formula.substr(1);
+                        result.orgUnit = validationSheet.getCell('A3').formula.substr(1);
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
