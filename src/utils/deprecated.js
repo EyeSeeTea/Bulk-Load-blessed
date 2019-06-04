@@ -1,11 +1,25 @@
-import _ from "lodash";
-import moment from "moment";
+/**
+ let lockedSheetOptions = {sheetProtection: {
+        autoFilter: true, deleteColumns: true, deleteRows: true, password: 'wiscentd', pivotTables: true,
+        selectLockedCells: true, selectUnlockedCells: true, sheet: true, sort: true}};
+ **/
+
+/**
+ function namedValidationToFormula(validation) {
+    let result = '=';
+    _.forEach(validation, item => {
+        result += '_' + item + ';';
+    });
+    result = result.substr(0, result.length - 1);
+    console.log(result);
+    return result;
+}
+ **/
 
 /**
  * Creates the string describing the period for the selected period type.
  * @returns string describing the period.
- */
-export function getPeriod(periodType, selected) {
+ export function getPeriod(periodType, selected) {
     switch (periodType) {
         case "Daily":
             return (selected['year'].value * 10000 + selected['month'].value * 100 + selected['day'].value).toString();
@@ -19,51 +33,10 @@ export function getPeriod(periodType, selected) {
             throw new Error("Invalid period type: " + periodType);
     }
 }
+ */
 
-export function buildAllPossiblePeriods(periodType, startYear, endYear) {
-    let unit, format;
-    switch (periodType) {
-        case "Daily":
-            unit = "days";
-            format = "YYYYMMDD";
-            break;
-        case "Monthly":
-            unit = "months";
-            format = "YYYYMM";
-            break;
-        case "Yearly":
-            unit = "years";
-            format = "YYYY";
-            break;
-        case "Weekly":
-            unit = "weeks";
-            format = "YYYY[W]W";
-            break;
-        default:
-            throw new Error("Unsupported periodType");
-    }
-
-    const dates = [];
-    for (const current = moment(startYear + "-01-01"); current.isSameOrBefore(moment(endYear + "-12-31")); current.add(1, unit)) {
-        dates.push(current.format(format));
-    }
-
-    return dates;
-}
-
-export function buildPossibleYears(startYear, endYear) {
-    const dates = [];
-    for (const current = moment(startYear + "-01-01"); current.isSameOrBefore(moment(endYear + "-12-31")); current.add(1, "year")) {
-        dates.push({
-            value: current.year(),
-            label: current.year().toString()
-        });
-    }
-
-    return dates;
-}
-
-export function prepareDataSetOptions(builder) {
+/**
+ export function prepareDataSetOptions(builder) {
     let result = {
         options: [],
         years: [],
@@ -104,6 +77,7 @@ export function prepareDataSetOptions(builder) {
     return result;
 }
 
-function buildOption(n) {
+ function buildOption(n) {
     return {value: n, label: n};
 }
+ */

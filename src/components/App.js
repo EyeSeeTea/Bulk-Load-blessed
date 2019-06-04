@@ -24,7 +24,7 @@ import * as actionTypes from '../actions/actionTypes';
 import OrgUnitTreeMultipleSelectAndSearch from './OrgUnitTreeMultipleSelectAndSearch';
 import AlertSnackbar from "./AlertSnackbar";
 import moment from "moment";
-import {buildPossibleYears} from "../utils";
+import {buildPossibleYears} from "../utils/periods";
 
 const styles = theme => ({
     root: {

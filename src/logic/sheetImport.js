@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs/dist/es5/exceljs.browser';
 import fileReaderStream from 'filereader-stream';
 import dateFormat from 'dateformat';
 
-import {stringEquals} from './utils';
+import {stringEquals} from "../utils/strings";
 
 /**
  * Import sheet information

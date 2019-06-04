@@ -1,9 +1,8 @@
 import * as Excel from 'excel4node';
 import {saveAs} from 'file-saver';
 import _ from 'lodash';
-
-import * as utils from './utils';
-import {buildAllPossiblePeriods} from "../utils";
+import {buildAllPossiblePeriods} from "../utils/periods";
+import {createColumn, groupStyle, style} from "../utils/excel";
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
@@ -14,17 +13,13 @@ export const SheetBuilder = function (builder) {
     this.metadataSheet = this.workbook.addWorksheet('Metadata');
     this.validationSheet = this.workbook.addWorksheet('Validation');
 
-    this.addOverviewSheet();
-    this.addDataEntrySheet();
-    this.addMetadataSheet();
-    this.addValidationSheet();
+    this.fillOverviewSheet();
+    this.fillDataEntrySheet();
+    this.fillMetadataSheet();
+    this.fillValidationSheet();
 };
 
-SheetBuilder.prototype.downloadSheet = async function () {
-    await downloadExcel(this.workbook, this.builder.element.displayName);
-};
-
-SheetBuilder.prototype.addOverviewSheet = function () {
+SheetBuilder.prototype.fillOverviewSheet = function () {
     const { elementMetadata: metadata, rawMetadata } = this.builder;
     let overviewSheet = this.overviewSheet;
 
@@ -59,7 +54,7 @@ SheetBuilder.prototype.addOverviewSheet = function () {
     });
 };
 
-SheetBuilder.prototype.addDataEntrySheet = function () {
+SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata} = this.builder;
     let dataEntrySheet = this.dataEntrySheet;
 
@@ -165,7 +160,7 @@ SheetBuilder.prototype.addDataEntrySheet = function () {
     }
 };
 
-SheetBuilder.prototype.addMetadataSheet = function () {
+SheetBuilder.prototype.fillMetadataSheet = function () {
     const { elementMetadata: metadata, organisationUnits } = this.builder;
     let metadataSheet = this.metadataSheet;
 
@@ -219,7 +214,7 @@ SheetBuilder.prototype.addMetadataSheet = function () {
     });
 };
 
-SheetBuilder.prototype.addValidationSheet = function () {
+SheetBuilder.prototype.fillValidationSheet = function () {
     const { organisationUnits, element, rawMetadata, elementMetadata, startYear, endYear } = this.builder;
     const title = element.displayName;
 
@@ -277,63 +272,13 @@ SheetBuilder.prototype.addValidationSheet = function () {
     });
 };
 
-/**
- * Query a file download of the current workbook with a title
- * @param workbook
- * @param title
- * @returns {Promise<>}
- */
-function downloadExcel(workbook, title) {
-    return new Promise(function (resolve, reject) {
-        workbook.writeToBuffer().then(function (data) {
-            const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-            saveAs(blob, title + '.xlsx');
-            resolve();
-        }).catch(reason => reject(reason));
-    });
-}
-
-function createColumn(sheet, columnId, label, validation = undefined) {
-    sheet.column(columnId).setWidth(20);
-    sheet.cell(2, columnId)
-        .string(label)
-        .style(style);
-    if (validation !== undefined) sheet.addDataValidation({
-        type: 'list',
-        allowBlank: true,
-        error: 'Invalid choice was chosen',
-        errorStyle: 'warning',
-        showDropDown: true,
-        sqref: Excel.getExcelAlpha(columnId) + '3:' + Excel.getExcelAlpha(columnId) + '1048576',
-        formulas: [validation.toString()],
-    });
-}
-
-/**
- * Common cell style definition
- * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
- */
-let style = {
-    alignment: {
-        horizontal: 'center',
-        vertical: 'center',
-        wrapText: true,
-        shrinkToFit: true
-    },
-    fill: {
-        type: 'pattern',
-        patternType: 'solid',
-        fgColor: 'ffffff'
+SheetBuilder.prototype.downloadSheet = async function () {
+    try {
+        const data = await this.workbook.writeToBuffer();
+        const blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        saveAs(blob, `${this.builder.element.displayName}.xlsx`);
+    } catch (error) {
+        console.log("Failed building/downloading template");
+        throw error;
     }
 };
-
-function groupStyle(groupId) {
-    return {
-        ...style,
-        fill: {
-            type: 'pattern',
-            patternType: 'solid',
-            fgColor: utils.colors[groupId % utils.colors.length]
-        }
-    };
-}

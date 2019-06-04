@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {getJSON} from './utils';
+import {getJSON} from '../utils/requests';
 import axios from 'axios';
 
 /**
