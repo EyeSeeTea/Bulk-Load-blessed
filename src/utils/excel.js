@@ -46,6 +46,7 @@ export const protectedSheet = {
         formatCells: false,
         formatColumns: false,
         formatRows: false,
+        password: "Wiscentd2019!"
     },
 };
 
