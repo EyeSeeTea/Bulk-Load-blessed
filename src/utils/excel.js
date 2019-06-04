@@ -1,13 +1,15 @@
 import * as Excel from "excel4node";
 import { colors } from "./colors";
 
-export function createColumn(sheet, columnId, label, validation = undefined) {
+export function createColumn(sheet, columnId, label, groupId = undefined, validation = undefined) {
     sheet.column(columnId).setWidth(20);
-    sheet
-        .cell(2, columnId)
-        .string(label)
-        .style(style);
-    if (validation !== undefined)
+    const cell = sheet.cell(2, columnId);
+    cell.style(groupId ? groupStyle(groupId) : baseStyle);
+
+    if (label.startsWith("_")) cell.formula(label);
+    else cell.string(label);
+
+    if (validation !== undefined) {
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
@@ -17,13 +19,14 @@ export function createColumn(sheet, columnId, label, validation = undefined) {
             sqref: Excel.getExcelAlpha(columnId) + "3:" + Excel.getExcelAlpha(columnId) + "1048576",
             formulas: [validation.toString()],
         });
+    }
 }
 
 /**
  * Common cell style definition
  * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
  */
-export const style = {
+export const baseStyle = {
     alignment: {
         horizontal: "center",
         vertical: "center",
@@ -52,7 +55,7 @@ export const hiddenSheet = {
 
 export function groupStyle(groupId) {
     return {
-        ...style,
+        ...baseStyle,
         fill: {
             type: "pattern",
             patternType: "solid",
