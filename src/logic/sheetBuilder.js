@@ -20,9 +20,9 @@ export const SheetBuilder = function(builder) {
         _.merge(protectedSheet, hiddenSheet)
     );
 
-    this.fillLegendSheet();
     this.fillValidationSheet();
     this.fillMetadataSheet();
+    this.fillLegendSheet();
     this.fillDataEntrySheet();
 };
 
@@ -61,7 +61,7 @@ SheetBuilder.prototype.fillLegendSheet = function() {
         .style(baseStyle);
 
     let rowId = 3;
-    rawMetadata["dataElements"].forEach((value, key) => {
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach((value, key) => {
         let name = value.formName ? value.formName : value.name;
         let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         let options =
