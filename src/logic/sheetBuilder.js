@@ -256,13 +256,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
     let columnId = 1;
     let groupId = 0;
 
-    createColumn(dataEntrySheet, columnId++, "Org Unit", null, this.validations.get("organisationUnits"));
+    createColumn(this.workbook, dataEntrySheet, columnId++, "Org Unit", null, this.validations.get("organisationUnits"));
     if (element.type === "program") {
-        createColumn(dataEntrySheet, columnId++, "Latitude");
-        createColumn(dataEntrySheet, columnId++, "Longitude");
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude");
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude");
     } else if (element.type === "dataSet") {
-        createColumn(dataEntrySheet, columnId++, "Period", null, this.validations.get("periods"));
-        createColumn(dataEntrySheet, columnId++, "Options", null, this.validations.get("options"));
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Period", null, this.validations.get("periods"));
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Options", null, this.validations.get("options"));
     }
 
     if (element.type === "dataSet") {
@@ -320,7 +320,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         _.forEach(element.programStages, programStageT => {
             let programStage = metadata.get(programStageT.id);
 
-            createColumn(dataEntrySheet, columnId++, programStage.executionDateLabel);
+            createColumn(this.workbook, dataEntrySheet, columnId++, programStage.executionDateLabel);
 
             dataEntrySheet
                 .cell(1, columnId - 1)
@@ -342,6 +342,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                     let dataElement = metadata.get(dataElementT.id);
                     let validation = dataElement.optionSet ? dataElement.optionSet.id : null;
                     createColumn(
+                        this.workbook,
                         dataEntrySheet,
                         columnId,
                         "_" + dataElement.id,

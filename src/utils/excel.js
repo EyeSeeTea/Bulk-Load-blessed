@@ -1,7 +1,7 @@
 import * as Excel from "excel4node";
 import { colors } from "./colors";
 
-export function createColumn(sheet, columnId, label, groupId = undefined, validation = undefined) {
+export function createColumn(workbook, sheet, columnId, label, groupId = undefined, validation = undefined) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(2, columnId);
     cell.style(groupId ? groupStyle(groupId) : baseStyle);
@@ -10,14 +10,27 @@ export function createColumn(sheet, columnId, label, groupId = undefined, valida
     else cell.string(label);
 
     if (validation !== undefined) {
+        const ref = Excel.getExcelAlpha(columnId) + "3:" + Excel.getExcelAlpha(columnId) + "1048576";
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
             error: "Invalid choice was chosen",
             errorStyle: "warning",
             showDropDown: true,
-            sqref: Excel.getExcelAlpha(columnId) + "3:" + Excel.getExcelAlpha(columnId) + "1048576",
+            sqref: ref,
             formulas: [validation.toString()],
+        });
+
+        sheet.addConditionalFormattingRule(ref, {
+            type: 'expression', // the conditional formatting type
+            priority: 1, // rule priority order (required)
+            formula: 'ISERROR(MATCH(' + Excel.getExcelAlpha(columnId) + "3," + validation.toString().substr(1) + ",0))", // formula that returns nonzero or 0
+            style: workbook.createStyle({
+                font: {
+                    bold: true,
+                    color: "FF0000",
+                },
+            }), // a style object containing styles to apply
         });
     }
 }
