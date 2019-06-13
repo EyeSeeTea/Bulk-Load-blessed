@@ -10,15 +10,9 @@ export const SheetBuilder = function(builder) {
     this.validations = new Map();
 
     this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
-    this.legendSheet = this.workbook.addWorksheet("Legend", _.merge(protectedSheet));
-    this.validationSheet = this.workbook.addWorksheet(
-        "Validation",
-        _.merge(protectedSheet, hiddenSheet)
-    );
-    this.metadataSheet = this.workbook.addWorksheet(
-        "Metadata",
-        _.merge(protectedSheet, hiddenSheet)
-    );
+    this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
+    this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
+    this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
 
     this.fillValidationSheet();
     this.fillMetadataSheet();
