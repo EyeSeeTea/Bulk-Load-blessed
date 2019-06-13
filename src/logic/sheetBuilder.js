@@ -327,8 +327,15 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                 .string(programStage.name)
                 .style(baseStyle);
 
+            if (programStage.programStageSections.length === 0) {
+                programStage.programStageSections.push({
+                    dataElements: programStage.programStageDataElements.map(e => e.dataElement),
+                    id: programStageT.id
+                });
+            }
+
             _.forEach(programStage.programStageSections, programStageSectionT => {
-                let programStageSection = metadata.get(programStageSectionT.id);
+                let programStageSection = programStageSectionT.dataElements ? programStageSectionT : metadata.get(programStageSectionT.id);
                 let firstColumnId = columnId;
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
