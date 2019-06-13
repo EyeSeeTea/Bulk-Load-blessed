@@ -9,7 +9,8 @@ export const SheetBuilder = function(builder) {
     this.builder = builder;
     this.validations = new Map();
 
-    this.overviewSheet = this.workbook.addWorksheet("Overview", _.merge(protectedSheet));
+    this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+    this.legendSheet = this.workbook.addWorksheet("Legend", _.merge(protectedSheet));
     this.validationSheet = this.workbook.addWorksheet(
         "Validation",
         _.merge(protectedSheet, hiddenSheet)
@@ -18,44 +19,43 @@ export const SheetBuilder = function(builder) {
         "Metadata",
         _.merge(protectedSheet, hiddenSheet)
     );
-    this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
 
-    this.fillOverviewSheet();
+    this.fillLegendSheet();
     this.fillValidationSheet();
     this.fillMetadataSheet();
     this.fillDataEntrySheet();
 };
 
-SheetBuilder.prototype.fillOverviewSheet = function() {
+SheetBuilder.prototype.fillLegendSheet = function() {
     const { elementMetadata: metadata, rawMetadata } = this.builder;
-    let overviewSheet = this.overviewSheet;
+    let legendSheet = this.legendSheet;
 
     // Freeze and format column titles
-    overviewSheet.row(2).freeze();
-    overviewSheet.column(1).setWidth(50);
-    overviewSheet.column(2).setWidth(50);
-    overviewSheet.column(3).setWidth(20);
-    overviewSheet.column(4).setWidth(20);
-    overviewSheet.column(5).setWidth(40);
+    legendSheet.row(2).freeze();
+    legendSheet.column(1).setWidth(50);
+    legendSheet.column(2).setWidth(50);
+    legendSheet.column(3).setWidth(20);
+    legendSheet.column(4).setWidth(20);
+    legendSheet.column(5).setWidth(40);
 
     // Add column titles
-    overviewSheet
+    legendSheet
         .cell(1, 1, 2, 1, true)
         .string("Name")
         .style(baseStyle);
-    overviewSheet
+    legendSheet
         .cell(1, 2, 2, 2, true)
         .string("Description")
         .style(baseStyle);
-    overviewSheet
+    legendSheet
         .cell(1, 3, 2, 3, true)
         .string("Value Type")
         .style(baseStyle);
-    overviewSheet
+    legendSheet
         .cell(1, 4, 2, 4, true)
         .string("Option Set")
         .style(baseStyle);
-    overviewSheet
+    legendSheet
         .cell(1, 5, 2, 5, true)
         .string("Possible Values")
         .style(baseStyle);
@@ -69,11 +69,11 @@ SheetBuilder.prototype.fillOverviewSheet = function() {
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
 
-        overviewSheet.cell(rowId, 1).string(name ? name : "");
-        overviewSheet.cell(rowId, 2).string(value.description ? value.description : "");
-        overviewSheet.cell(rowId, 3).string(value.valueType ? value.valueType : "");
-        overviewSheet.cell(rowId, 4).string(optionSet ? optionSet.name : "");
-        overviewSheet.cell(rowId, 5).string(options ? options : "");
+        legendSheet.cell(rowId, 1).string(name ? name : "");
+        legendSheet.cell(rowId, 2).string(value.description ? value.description : "");
+        legendSheet.cell(rowId, 3).string(value.valueType ? value.valueType : "");
+        legendSheet.cell(rowId, 4).string(optionSet ? optionSet.name : "");
+        legendSheet.cell(rowId, 5).string(options ? options : "");
 
         rowId++;
     });
