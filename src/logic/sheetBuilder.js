@@ -302,6 +302,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                         columnId++;
                     });
 
+                    if (columnId - 1 === firstColumnId) {
+                        let dataElement = metadata.get(lookupResult.dataElement.id);
+                        dataEntrySheet.column(firstColumnId).setWidth(dataElement.name.length / 2.5 + 15);
+                    }
+
                     dataEntrySheet
                         .cell(1, firstColumnId, 1, columnId - 1, true)
                         .formula("_" + dataElementId)
