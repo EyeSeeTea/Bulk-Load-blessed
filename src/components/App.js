@@ -5,9 +5,7 @@ import Select from "react-select";
 import Dropzone from "react-dropzone";
 
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import { withStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button/Button";
+import { Button, Paper, withStyles } from "@material-ui/core";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 

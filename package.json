@@ -1,6 +1,6 @@
 {
   "name": "bulk-load",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "dependencies": {
     "@dhis2/app-runtime": "^1.2.0",
     "@dhis2/d2-ui-core": "^6.1.0",
@@ -47,7 +47,7 @@
   "manifest.webapp": {
     "name": "Bulk Load",
     "description": "Bulk importing made easy",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "developer": {
       "name": "Alexis Rico",
       "url": "https://github.com/SferaDev"
@@ -61,6 +61,7 @@
       }
     }
   },
+  "homepage": ".",
   "browserslist": {
     "production": [
       ">0.2%",
