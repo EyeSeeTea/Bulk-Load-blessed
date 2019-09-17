@@ -8,7 +8,7 @@ node_modules/
 build/
 
 ### Environment ###
-.env*
+.env.local
 
 ### Build ###
 bulk-load.zip

@@ -2,7 +2,7 @@ import * as Excel from "excel4node";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
-import { baseStyle, createColumn, groupStyle, hiddenSheet, protectedSheet } from "../utils/excel";
+import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
@@ -250,13 +250,34 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
     let columnId = 1;
     let groupId = 0;
 
-    createColumn(this.workbook, dataEntrySheet, columnId++, "Org Unit", null, this.validations.get("organisationUnits"));
+    createColumn(
+        this.workbook,
+        dataEntrySheet,
+        columnId++,
+        "Org Unit",
+        null,
+        this.validations.get("organisationUnits")
+    );
     if (element.type === "program") {
         createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude");
         createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude");
     } else if (element.type === "dataSet") {
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Period", null, this.validations.get("periods"));
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Options", null, this.validations.get("options"));
+        createColumn(
+            this.workbook,
+            dataEntrySheet,
+            columnId++,
+            "Period",
+            null,
+            this.validations.get("periods")
+        );
+        createColumn(
+            this.workbook,
+            dataEntrySheet,
+            columnId++,
+            "Options",
+            null,
+            this.validations.get("options")
+        );
     }
 
     if (element.type === "dataSet") {
@@ -298,7 +319,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
 
                     if (columnId - 1 === firstColumnId) {
                         let dataElement = metadata.get(lookupResult.dataElement.id);
-                        dataEntrySheet.column(firstColumnId).setWidth(dataElement.name.length / 2.5 + 15);
+                        dataEntrySheet
+                            .column(firstColumnId)
+                            .setWidth(dataElement.name.length / 2.5 + 15);
                     }
 
                     dataEntrySheet
@@ -314,7 +337,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         _.forEach(element.programStages, programStageT => {
             let programStage = metadata.get(programStageT.id);
 
-            createColumn(this.workbook, dataEntrySheet, columnId++, programStage.executionDateLabel);
+            createColumn(
+                this.workbook,
+                dataEntrySheet,
+                columnId++,
+                programStage.executionDateLabel
+            );
 
             dataEntrySheet
                 .cell(1, columnId - 1)
@@ -324,12 +352,14 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
             if (programStage.programStageSections.length === 0) {
                 programStage.programStageSections.push({
                     dataElements: programStage.programStageDataElements.map(e => e.dataElement),
-                    id: programStageT.id
+                    id: programStageT.id,
                 });
             }
 
             _.forEach(programStage.programStageSections, programStageSectionT => {
-                let programStageSection = programStageSectionT.dataElements ? programStageSectionT : metadata.get(programStageSectionT.id);
+                let programStageSection = programStageSectionT.dataElements
+                    ? programStageSectionT
+                    : metadata.get(programStageSectionT.id);
                 let firstColumnId = columnId;
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
