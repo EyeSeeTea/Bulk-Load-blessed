@@ -83,7 +83,7 @@ export function getElementMetadata(builder) {
             "/metadata.json";
         const API_ORG_UNITS =
             API_BASE_URL +
-            "/metadata.json?fields=id,displayName&filter=id:in:[" +
+            "/metadata.json?fields=id,displayName,dataSets&filter=id:in:[" +
             builder.organisationUnits.toString() +
             "]";
         getJSON(API_ELEMENT)
@@ -124,6 +124,7 @@ export function getElementMetadata(builder) {
  *      - data: Data to import
  */
 export function importData(builder) {
+    console.log(builder.data);
     return new Promise(function(resolve, reject) {
         let isProgram = builder.element.type === "program";
         let endpoint = isProgram ? "/events" : "/dataValueSets";

@@ -41,6 +41,7 @@ class App extends React.Component {
             dataSets: [],
             programs: [],
             orgUnitTreeSelected: [],
+            orgUnitTreeSelected2: [],
             orgUnitTreeRoots: [],
             orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
@@ -57,6 +58,7 @@ class App extends React.Component {
         this.searchForOrgUnits();
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
+        this.handleOrgUnitTreeClick2 = this.handleOrgUnitTreeClick2.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
     }
@@ -94,6 +96,14 @@ class App extends React.Component {
                 return { orgUnitTreeSelected: state.orgUnitTreeSelected };
             });
         }
+    }
+
+    handleOrgUnitTreeClick2(event, orgUnit) {
+        this.setState(state => {
+            state.orgUnitTreeSelected2=[];
+            state.orgUnitTreeSelected2.push(orgUnit.path);
+            return { orgUnitTreeSelected2: state.orgUnitTreeSelected2 };
+        });
     }
 
     searchForOrgUnits(searchValue = "") {
@@ -163,15 +173,33 @@ class App extends React.Component {
         // TODO: Add validation error message
         if (this.state.selectedProgramOrDataSet2 === undefined) return;
         if (this.state.importDataSheet === undefined) return;
+        if (this.state.orgUnitTreeSelected2===undefined) return;
+        //console.log(this.state.orgUnitTreeSelected2);
+        let orgUnits = this.state.orgUnitTreeSelected2.map(element =>
+            element.substr(element.lastIndexOf("/") + 1)
+        );
+        
 
         this.props.setLoading(true);
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
                 element: this.state.selectedProgramOrDataSet2,
-                organisationUnits: [],
+                organisationUnits: orgUnits,
             })
             .then(result => {
+               /*
+                console.log("DATASET");
+                console.log(result.element.id);
+                console.log("ORG UNITS");
+                console.log(result.organisationUnits);
+                console.log("datasets");
+                console.log(result.organisationUnits[0].dataSets);
+                */
+                if (result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id).length ===0) {
+                    console.log("dataset no encontrado en la orgUnit seleccionada");
+                    return 
+                }
                 return sheetImport.readSheet({
                     ...result,
                     d2: this.props.d2,
@@ -179,8 +207,7 @@ class App extends React.Component {
                 });
             })
             .then(data => {
-                console.log(data);
-                return dhisConnector.importData({
+                    return dhisConnector.importData({
                     d2: this.props.d2,
                     element: this.state.selectedProgramOrDataSet2,
                     data: data,
@@ -201,8 +228,10 @@ class App extends React.Component {
                     response.data.response !== undefined
                         ? response.data.response.ignored
                         : response.data.importCount.ignored;
+                       // console.log("response");
+                       // console.log(response);
                 this.props.showSnackbar(
-                    response.data.message +
+                    response.data.description +
                         " Imported: " +
                         imported +
                         ", Updated: " +
@@ -257,6 +286,7 @@ class App extends React.Component {
                     <div>
                         <HeaderBar appName={"Bulk Load"} />
                         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
+                            
                             <Paper
                                 style={{
                                     margin: "2em",
@@ -344,7 +374,7 @@ class App extends React.Component {
                                     initiallyExpanded={this.state.orgUnitTreeBaseRoot}
                                     selected={this.state.orgUnitTreeSelected}
                                     onSelectClick={this.handleOrgUnitTreeClick}
-                                    noHitsLabel={"No Organisation Units found"}
+                                   noHitsLabel={"No Organisation Units found"}
                                 />
                                 <div
                                     className="row"
@@ -406,8 +436,9 @@ class App extends React.Component {
                                 </div>
                                 <Dropzone
                                     accept={
-                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabled.12"
                                     }
+                                    
                                     className={"dropZone"}
                                     acceptClassName={"stripes"}
                                     rejectClassName={"rejectStripes"}
@@ -437,6 +468,15 @@ class App extends React.Component {
                                         <CloudDoneIcon className={"uploadIconSize"} />
                                     </div>
                                 </Dropzone>
+                                <OrgUnitTreeMultipleSelectAndSearch
+                                    roots={this.state.orgUnitTreeRoots}
+                                    onUpdateInput={this.searchForOrgUnits.bind(this)}
+                                    initiallyExpanded={this.state.orgUnitTreeBaseRoot}
+                                    selected={this.state.orgUnitTreeSelected2}
+                                    onSelectClick={this.handleOrgUnitTreeClick2}
+                                    hideCheckboxes={true}
+                                    noHitsLabel={"No Organisation Units found"}
+                                />
                                 <div
                                     className="row"
                                     style={{
