@@ -7,34 +7,23 @@ This bulk load app allows the user import data and produce templates for the sam
 All the required dependencies to develop the app can be achieved through npm.
 
 ```
-npm install
+$ yarn install
 ```
 
 ## Start a development server
 
-- Create .env file with the following content
+-   Edit .env file to set `REACT_APP_DHIS2_BASE_URL`.
+
+-   Execute development server
 
 ```
-REACT_APP_DEBUG=true
-REACT_APP_DHIS2_BASE_URL=http://who-dev.essi.upc.edu:8081
-REACT_APP_DHIS2_USERNAME=username
-REACT_APP_DHIS2_PASSWORD=password
-```
-
-- Launch Chrome with CORS disabled
-
-https://stackoverflow.com/questions/3102819/disable-same-origin-policy-in-chrome
-
-- Execute development server
-
-```
-npm run start
+$ yarn start
 ```
 
 ## Build a release package
 
-- Create a packaged zip
+-   Create a packaged zip
 
 ```
-npm run build
+$ yarn build-webapp
 ```

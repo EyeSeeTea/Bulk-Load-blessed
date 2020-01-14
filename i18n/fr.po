@@ -1,0 +1,51 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: i18next-conv\n"
+"POT-Creation-Date: 2020-01-14T10:33:14.472Z\n"
+"PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "Imported"
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Template Generation"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Select element to export..."
+msgstr ""
+
+msgid "Start Year"
+msgstr ""
+
+msgid "End Year"
+msgstr ""
+
+msgid "No Organisation Units found"
+msgstr ""
+
+msgid "Download template"
+msgstr ""
+
+msgid "Bulk Import"
+msgstr ""
+
+msgid "Select element to import..."
+msgstr ""
+
+msgid "Drag and drop file to import"
+msgstr ""
+
+msgid "Import data"
+msgstr ""
