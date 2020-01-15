@@ -27,10 +27,12 @@ yarn-error.log*
 
 src/locales/
 src/react-app.d.ts
+scripts/
 
 # cypress
 cypress/screenshots/
 cypress/videos/
+cypress/fixtures/
 
 # IntelliJ
 .idea/*
