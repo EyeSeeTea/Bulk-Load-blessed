@@ -1,0 +1,31 @@
+dist: bionic
+language: node_js
+node_js:
+    - 8.15.0
+services:
+    - xvfb
+addons:
+    chrome: stable
+    apt:
+        packages:
+            - libgconf-2-4
+cache:
+    directories:
+        - "$HOME/.cache"
+install:
+    - yarn install --frozen-lockfile
+    - yarn cy:verify
+    - yarn build
+env:
+    global:
+        - PORT=8081
+        - REACT_APP_DHIS2_BASE_URL=http://dev2.eyeseetea.com:8081
+        - REACT_APP_CYPRESS=true
+        - CYPRESS_EXTERNAL_API=http://dev2.eyeseetea.com:8081
+        - CYPRESS_ROOT_URL=http://localhost:8081
+        - NODE_OPTIONS=--max-old-space-size=8192
+script:
+    - yarn start &
+    - yarn run wait-on http-get://localhost:8081
+    - yarn cy:e2e:run --browser chrome
+    - kill $(jobs -p) || true
