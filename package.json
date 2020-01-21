@@ -105,7 +105,7 @@
     },
     "manifest.webapp": {
         "name": "bulk-load",
-        "description": "DHIS2 Bulk Load",
+        "description": "DHIS2 Bulk Load App",
         "icons": {
             "48": "icon.png"
         },
