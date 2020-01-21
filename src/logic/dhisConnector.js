@@ -13,14 +13,14 @@ import axios from "axios";
  */
 export function getUserInformation(builder) {
     return new Promise(function(resolve, reject) {
-        let result = {
+        const result = {
             username: builder.d2.currentUser.username,
             dataSets: [],
             programs: [],
         };
 
         const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
-        let elements = [];
+        const elements = [];
 
         builder.d2.models.dataSets
             .list({ fields: ["id"], paging: "false" })
@@ -37,11 +37,11 @@ export function getUserInformation(builder) {
                     elements.toString() +
                     "]";
                 // Parse API for programs and dataSets information
-                return getJSON(API_USER_PROGRAMS_DATASETS);
+                return getJSON(builder.d2, API_USER_PROGRAMS_DATASETS);
             })
             .then(userProgramsAndDatasets => {
                 _.forEach(["programs", "dataSets"], type => {
-                    _.forEach(userProgramsAndDatasets[type], element => {
+                    _.forEach(userProgramsAndDatasets[type] || [], element => {
                         element.value = element.id;
                         element.label = element.displayName;
                         element.type = builder.d2.models[type].name;
@@ -68,7 +68,7 @@ export function getUserInformation(builder) {
  */
 export function getElementMetadata(builder) {
     return new Promise(function(resolve, reject) {
-        let elementMetadata = new Map();
+        const elementMetadata = new Map();
         let organisationUnits = [];
         let rawMetadata = {};
 
@@ -86,7 +86,7 @@ export function getElementMetadata(builder) {
             "/metadata.json?fields=id,displayName&filter=id:in:[" +
             builder.organisationUnits.toString() +
             "]";
-        getJSON(API_ELEMENT)
+        getJSON(builder.d2, API_ELEMENT)
             .then(json => {
                 rawMetadata = json;
                 _.forOwn(json, (value, key) => {
@@ -99,7 +99,8 @@ export function getElementMetadata(builder) {
                         });
                     }
                 });
-                if (builder.organisationUnits.length !== 0) return getJSON(API_ORG_UNITS);
+                if (builder.organisationUnits.length !== 0)
+                    return getJSON(builder.d2, API_ORG_UNITS);
             })
             .then(json => {
                 if (json && json.organisationUnits) organisationUnits = json.organisationUnits;
@@ -125,12 +126,12 @@ export function getElementMetadata(builder) {
  */
 export function importData(builder) {
     return new Promise(function(resolve, reject) {
-        let isProgram = builder.element.type === "program";
-        let endpoint = isProgram ? "/events" : "/dataValueSets";
+        const isProgram = builder.element.type === "program";
+        const endpoint = isProgram ? "/events" : "/dataValueSets";
 
-        let baseUrl = builder.d2.Api.getApi().baseUrl;
+        const baseUrl = builder.d2.Api.getApi().baseUrl;
         axios
-            .post(baseUrl + endpoint, builder.data)
+            .post(baseUrl + endpoint, builder.data, { withCredentials: true })
             .then(response => {
                 if (response !== undefined) resolve(response);
             })
