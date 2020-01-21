@@ -254,11 +254,10 @@ class App extends React.Component {
                         className="row"
                         style={{
                             marginTop: "1em",
-                            marginLeft: "1em",
                             marginRight: "1em",
                         }}
                     >
-                        <div style={{ flexBasis: "30%", margin: "1em" }}>
+                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
                             <Select
                                 placeholder={i18n.t("Model")}
                                 onChange={handleModelChange1}
@@ -288,7 +287,7 @@ class App extends React.Component {
                                 marginRight: "1em",
                             }}
                         >
-                            <div style={{ flexBasis: "30%", margin: "1em" }}>
+                            <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
                                 <Select
                                     placeholder={i18n.t("Start Year")}
                                     options={buildPossibleYears(1970, this.state.endYear)}
@@ -363,11 +362,10 @@ class App extends React.Component {
                         className="row"
                         style={{
                             marginTop: "1em",
-                            marginLeft: "1em",
                             marginRight: "1em",
                         }}
                     >
-                        <div style={{ flexBasis: "30%", margin: "1em" }}>
+                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
                             <Select
                                 placeholder={i18n.t("Model")}
                                 onChange={handleModelChange2}
