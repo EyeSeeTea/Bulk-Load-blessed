@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-01-14T10:33:14.472Z\n"
-"PO-Revision-Date: 2020-01-14T10:33:14.472Z\n"
+"POT-Creation-Date: 2020-02-05T13:45:25.077Z\n"
+"PO-Revision-Date: 2020-02-05T13:45:25.077Z\n"
 
 msgid "Imported"
 msgstr ""
@@ -48,4 +48,28 @@ msgid "Drag and drop file to import"
 msgstr ""
 
 msgid "Import data"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Models"
+msgstr ""
+
+msgid "User groups for Template Generation"
+msgstr ""
+
+msgid "Data set"
+msgstr ""
+
+msgid "Program"
 msgstr ""

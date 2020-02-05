@@ -101,7 +101,7 @@ const App = () => {
             configI18n(data.userSettings);
             const appContext: AppContextI = { d2, api };
             setAppContext(appContext);
-            Object.assign(window, { pm: appContext });
+            Object.assign(window, { bulkLoad: appContext });
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
 

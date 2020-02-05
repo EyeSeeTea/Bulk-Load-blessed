@@ -17,6 +17,7 @@ import { buildPossibleYears } from "../utils/periods";
 import i18n from "@dhis2/d2-i18n";
 import Select from "./Select";
 import { OrgUnitsSelector, withSnackbar, withLoading } from "d2-ui-components";
+import Settings from "./settings/Settings";
 
 const styles = theme => ({
     root: {
@@ -267,6 +268,8 @@ class App extends React.Component {
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
+                <Settings />
+
                 <Paper
                     style={{
                         margin: "2em",
