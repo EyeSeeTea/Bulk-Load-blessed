@@ -21,7 +21,7 @@
         "axios": "^0.19.0",
         "d2": "^31.1.1",
         "d2-api": "0.0.2-beta.15",
-        "d2-ui-components": "1.0.3-beta.3",
+        "d2-ui-components": "1.1.0",
         "dateformat": "^3.0.3",
         "excel4node": "^1.7.2",
         "exceljs": "^1.12.0",
