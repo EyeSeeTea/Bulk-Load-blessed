@@ -164,7 +164,7 @@ class App extends React.Component {
         if (this.state.selectedProgramOrDataSet2 === undefined) return;
         if (this.state.importDataSheet === undefined) return;
         if (this.state.orgUnitTreeSelected2 === undefined) return;
-        let orgUnits = this.state.orgUnitTreeSelected2.map(path =>
+        const orgUnits = this.state.orgUnitTreeSelected2.map(path =>
             path.substr(path.lastIndexOf("/") + 1)
         );
 
@@ -188,7 +188,6 @@ class App extends React.Component {
                     result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
                         .length === 0
                 ) {
-                    debugger;
                     console.log("dataset no encontrado en la orgUnit seleccionada");
                     return;
                 }
