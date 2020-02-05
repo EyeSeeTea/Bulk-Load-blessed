@@ -1,29 +1,22 @@
 import React from "react";
 import _ from "lodash";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import Select from "react-select";
 import Dropzone from "react-dropzone";
 
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import { Button, Paper, withStyles } from "@material-ui/core";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
-
-import { HeaderBar } from "@dhis2/ui-widgets";
-import LoadingMask from "@dhis2/d2-ui-core/loading-mask/LoadingMask.component";
 
 import * as sheetImport from "../logic/sheetImport";
 import { SheetBuilder } from "../logic/sheetBuilder";
 import * as dhisConnector from "../logic/dhisConnector";
 
 import "./App.css";
-import theme from "./Theme";
-import * as actionTypes from "../actions/actionTypes";
-import OrgUnitTreeMultipleSelectAndSearch from "./OrgUnitTreeMultipleSelectAndSearch";
-import AlertSnackbar from "./AlertSnackbar";
 import moment from "moment";
 import { buildPossibleYears } from "../utils/periods";
+import i18n from "@dhis2/d2-i18n";
+import Select from "./Select";
+import { OrgUnitsSelector, withSnackbar, withLoading } from "d2-ui-components";
 
 const styles = theme => ({
     root: {
@@ -32,6 +25,12 @@ const styles = theme => ({
         paddingBottom: theme.spacing(2),
     },
 });
+
+const controls = {
+    filterByLevel: false,
+    filterByGroup: false,
+    selectAll: false,
+};
 
 class App extends React.Component {
     constructor(props) {
@@ -55,13 +54,16 @@ class App extends React.Component {
             endYear: moment().year(),
         };
 
-        this.loadUserInformation();
-        this.searchForOrgUnits();
-
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
         this.handleOrgUnitTreeClick2 = this.handleOrgUnitTreeClick2.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
+    }
+
+    async componentDidMount() {
+        this.props.loading.show();
+        await Promise.all([this.loadUserInformation(), this.searchForOrgUnits()]);
+        this.props.loading.hide();
     }
 
     getChildContext() {
@@ -71,7 +73,7 @@ class App extends React.Component {
     }
 
     loadUserInformation() {
-        dhisConnector
+        return dhisConnector
             .getUserInformation({
                 d2: this.props.d2,
             })
@@ -82,36 +84,23 @@ class App extends React.Component {
             });
     }
 
-    handleOrgUnitTreeClick(event, orgUnit) {
-        if (this.state.orgUnitTreeSelected.includes(orgUnit.path)) {
-            this.setState(state => {
-                state.orgUnitTreeSelected.splice(
-                    state.orgUnitTreeSelected.indexOf(orgUnit.path),
-                    1
-                );
-                return { orgUnitTreeSelected: state.orgUnitTreeSelected };
-            });
-        } else {
-            this.setState(state => {
-                state.orgUnitTreeSelected.push(orgUnit.path);
-                return { orgUnitTreeSelected: state.orgUnitTreeSelected };
-            });
-        }
+    handleOrgUnitTreeClick(orgUnitPaths) {
+        this.setState({
+            orgUnitTreeSelected: orgUnitPaths,
+        });
     }
 
-    handleOrgUnitTreeClick2(event, orgUnit) {
-        this.setState(state => {
-            state.orgUnitTreeSelected2 = [];
-            state.orgUnitTreeSelected2.push(orgUnit.path);
-            return { orgUnitTreeSelected2: state.orgUnitTreeSelected2 };
+    handleOrgUnitTreeClick2(orgUnitPaths) {
+        this.setState({
+            orgUnitTreeSelected2: _.takeRight(orgUnitPaths, 1),
         });
     }
 
     searchForOrgUnits(searchValue = "") {
-        let fields = "id,displayName,path,children::isNotEmpty,access";
+        const fields = "id,displayName,path,children::isNotEmpty,access";
 
         if (searchValue.trim().length === 0) {
-            this.props.d2.models.organisationUnits
+            return this.props.d2.models.organisationUnits
                 .list({
                     fields,
                     level: 1,
@@ -123,7 +112,7 @@ class App extends React.Component {
                     });
                 });
         } else {
-            this.props.d2.models.organisationUnits
+            return this.props.d2.models.organisationUnits
                 .list({
                     fields,
                     query: searchValue,
@@ -137,7 +126,7 @@ class App extends React.Component {
     }
 
     handleTemplateDownloadClick() {
-        let orgUnits = this.state.orgUnitTreeSelected.map(element =>
+        const orgUnits = this.state.orgUnitTreeSelected.map(element =>
             element.substr(element.lastIndexOf("/") + 1)
         );
 
@@ -145,7 +134,7 @@ class App extends React.Component {
         if (orgUnits.length === 0) return;
         if (this.state.selectedProgramOrDataSet1 === undefined) return;
 
-        this.props.setLoading(true);
+        this.props.loading.show(true);
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
@@ -159,7 +148,7 @@ class App extends React.Component {
                     endYear: this.state.endYear,
                 });
 
-                template.downloadSheet().then(() => this.props.setLoading(false));
+                template.downloadSheet().then(() => this.props.loading.show(false));
             });
     }
 
@@ -175,12 +164,11 @@ class App extends React.Component {
         if (this.state.selectedProgramOrDataSet2 === undefined) return;
         if (this.state.importDataSheet === undefined) return;
         if (this.state.orgUnitTreeSelected2 === undefined) return;
-        //console.log(this.state.orgUnitTreeSelected2);
-        let orgUnits = this.state.orgUnitTreeSelected2.map(element =>
-            element.substr(element.lastIndexOf("/") + 1)
+        let orgUnits = this.state.orgUnitTreeSelected2.map(path =>
+            path.substr(path.lastIndexOf("/") + 1)
         );
 
-        this.props.setLoading(true);
+        this.props.loading.show(true);
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
@@ -200,6 +188,7 @@ class App extends React.Component {
                     result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
                         .length === 0
                 ) {
+                    debugger;
                     console.log("dataset no encontrado en la orgUnit seleccionada");
                     return;
                 }
@@ -217,293 +206,282 @@ class App extends React.Component {
                 });
             })
             .then(response => {
-                this.props.setLoading(false);
+                this.props.loading.show(false);
                 console.log(response);
-                let imported =
+                const imported =
                     response.data.response !== undefined
                         ? response.data.response.imported
                         : response.data.importCount.imported;
-                let updated =
+                const updated =
                     response.data.response !== undefined
                         ? response.data.response.updated
                         : response.data.importCount.updated;
-                let ignored =
+                const ignored =
                     response.data.response !== undefined
                         ? response.data.response.ignored
                         : response.data.importCount.ignored;
-                // console.log("response");
-                // console.log(response);
-                this.props.showSnackbar(
-                    response.data.description +
-                        " Imported: " +
-                        imported +
-                        ", Updated: " +
-                        updated +
-                        ", Ignored: " +
-                        ignored
+                this.props.snackbar.info(
+                    _.compact([
+                        response.data.description,
+                        [
+                            `${i18n.t("Imported")}: ${imported}`,
+                            `${i18n.t("Updated")}: ${updated}`,
+                            `${i18n.t("Ignored")}: ${ignored}`,
+                        ].join(", "),
+                    ]).join(" - ")
                 );
             })
             .catch(reason => {
-                this.props.setLoading(false);
+                this.props.loading.show(false);
                 console.error(reason);
-                this.props.showSnackbar(reason.message);
+                this.props.snackbar.error(reason.message);
             });
     }
 
     render() {
-        const { snackbarOpen, snackbarMessage } = this.props.dialog;
-
-        let handleModelChange1 = selectedOption => {
+        const handleModelChange1 = selectedOption => {
             this.setState({
                 model1: selectedOption.value,
                 elementSelectOptions1: this.state[selectedOption.value],
             });
         };
 
-        let handleElementChange1 = selectedOption => {
+        const handleElementChange1 = selectedOption => {
             this.setState({ selectedProgramOrDataSet1: selectedOption });
         };
 
-        let handleModelChange2 = selectedOption => {
+        const handleModelChange2 = selectedOption => {
             this.setState({ elementSelectOptions2: this.state[selectedOption.value] });
         };
 
-        let handleElementChange2 = selectedOption => {
+        const handleElementChange2 = selectedOption => {
             this.setState({ selectedProgramOrDataSet2: selectedOption });
         };
 
-        let handleStartYear = selectedOption => {
+        const handleStartYear = selectedOption => {
             this.setState({ startYear: selectedOption.value });
         };
 
-        let handleEndYear = selectedOption => {
+        const handleEndYear = selectedOption => {
             this.setState({ endYear: selectedOption.value });
         };
 
         return (
-            <MuiThemeProvider muiTheme={theme} theme={theme}>
-                <div>
-                    <div id="loading" hidden={!this.props.loading}>
-                        <LoadingMask large={true} />
-                    </div>
-                    <div>
-                        <HeaderBar appName={"Bulk Load"} />
-                        <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-                            <Paper
-                                style={{
-                                    margin: "2em",
-                                    marginTop: "2em",
-                                    padding: "2em",
-                                    width: "50%",
-                                }}
-                            >
-                                <h1>Template Generation</h1>
-                                <div
-                                    className="row"
-                                    style={{
-                                        marginTop: "1em",
-                                        marginLeft: "1em",
-                                        marginRight: "1em",
-                                    }}
-                                >
-                                    <div style={{ flexBasis: "30%", margin: "1em" }}>
-                                        <Select
-                                            placeholder={"Model"}
-                                            onChange={handleModelChange1}
-                                            options={[
-                                                { value: "dataSets", label: "Data Set" },
-                                                {
-                                                    value: "programs",
-                                                    label: "Program",
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                    <div style={{ flexBasis: "70%", margin: "1em" }}>
-                                        <Select
-                                            placeholder={"Select element to export..."}
-                                            onChange={handleElementChange1}
-                                            options={this.state.elementSelectOptions1}
-                                        />
-                                    </div>
-                                </div>
-                                {this.state.model1 === "dataSets" && (
-                                    <div
-                                        className="row"
-                                        style={{
-                                            marginTop: "1em",
-                                            marginLeft: "1em",
-                                            marginRight: "1em",
-                                        }}
-                                    >
-                                        <div style={{ flexBasis: "30%", margin: "1em" }}>
-                                            <Select
-                                                placeholder={"Start Year"}
-                                                options={buildPossibleYears(
-                                                    1970,
-                                                    this.state.endYear
-                                                )}
-                                                defaultValue={{
-                                                    value: moment("2010-01-01").year(),
-                                                    label: moment("2010-01-01")
-                                                        .year()
-                                                        .toString(),
-                                                }}
-                                                onChange={handleStartYear}
-                                            />
-                                        </div>
-                                        <div style={{ flexBasis: "30%", margin: "1em" }}>
-                                            <Select
-                                                placeholder={"End Year"}
-                                                options={buildPossibleYears(
-                                                    this.state.startYear,
-                                                    moment().year()
-                                                )}
-                                                defaultValue={{
-                                                    value: moment().year(),
-                                                    label: moment()
-                                                        .year()
-                                                        .toString(),
-                                                }}
-                                                onChange={handleEndYear}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                <OrgUnitTreeMultipleSelectAndSearch
-                                    roots={this.state.orgUnitTreeRoots}
-                                    onUpdateInput={this.searchForOrgUnits.bind(this)}
-                                    initiallyExpanded={this.state.orgUnitTreeBaseRoot}
-                                    selected={this.state.orgUnitTreeSelected}
-                                    onSelectClick={this.handleOrgUnitTreeClick}
-                                    noHitsLabel={"No Organisation Units found"}
-                                />
-                                <div
-                                    className="row"
-                                    style={{
-                                        marginTop: "2em",
-                                        marginLeft: "2em",
-                                        marginRight: "2em",
-                                    }}
-                                >
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={this.handleTemplateDownloadClick}
-                                    >
-                                        Download template
-                                    </Button>
-                                </div>
-                            </Paper>
-                            <Paper
-                                style={{
-                                    margin: "2em",
-                                    marginTop: "2em",
-                                    padding: "2em",
-                                    width: "50%",
-                                }}
-                            >
-                                <h1>Bulk Import</h1>
-                                <div
-                                    className="row"
-                                    style={{
-                                        marginTop: "1em",
-                                        marginLeft: "1em",
-                                        marginRight: "1em",
-                                    }}
-                                >
-                                    <div style={{ flexBasis: "30%", margin: "1em" }}>
-                                        <Select
-                                            placeholder={"Model"}
-                                            onChange={handleModelChange2}
-                                            options={[
-                                                {
-                                                    value: "dataSets",
-                                                    label: "Data Set",
-                                                },
-                                                {
-                                                    value: "programs",
-                                                    label: "Program",
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                    <div style={{ flexBasis: "70%", margin: "1em" }}>
-                                        <Select
-                                            placeholder={"Select element to import..."}
-                                            onChange={handleElementChange2}
-                                            options={this.state.elementSelectOptions2}
-                                        />
-                                    </div>
-                                </div>
-                                <Dropzone
-                                    accept={
-                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabled.12"
-                                    }
-                                    className={"dropZone"}
-                                    acceptClassName={"stripes"}
-                                    rejectClassName={"rejectStripes"}
-                                    onDrop={this.onDrop.bind(this)}
-                                    multiple={false}
-                                >
-                                    <div
-                                        className={"dropzoneTextStyle"}
-                                        hidden={this.state.importDataSheet !== undefined}
-                                    >
-                                        <p className={"dropzoneParagraph"}>
-                                            {"Drag and drop file to import"}
-                                        </p>
-                                        <br />
-                                        <CloudUploadIcon className={"uploadIconSize"} />
-                                    </div>
-                                    <div
-                                        className={"dropzoneTextStyle"}
-                                        hidden={this.state.importDataSheet === undefined}
-                                    >
-                                        {this.state.importDataSheet !== undefined && (
-                                            <p className={"dropzoneParagraph"}>
-                                                {this.state.importDataSheet.name}
-                                            </p>
-                                        )}
-                                        <br />
-                                        <CloudDoneIcon className={"uploadIconSize"} />
-                                    </div>
-                                </Dropzone>
-                                <OrgUnitTreeMultipleSelectAndSearch
-                                    roots={this.state.orgUnitTreeRoots}
-                                    onUpdateInput={this.searchForOrgUnits.bind(this)}
-                                    initiallyExpanded={this.state.orgUnitTreeBaseRoot}
-                                    selected={this.state.orgUnitTreeSelected2}
-                                    onSelectClick={this.handleOrgUnitTreeClick2}
-                                    hideCheckboxes={true}
-                                    noHitsLabel={"No Organisation Units found"}
-                                />
-                                <div
-                                    className="row"
-                                    style={{
-                                        marginTop: "2em",
-                                        marginLeft: "2em",
-                                        marginRight: "2em",
-                                    }}
-                                >
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={this.handleDataImportClick}
-                                    >
-                                        Import data
-                                    </Button>
-                                </div>
-                            </Paper>
+            <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
+                <Paper
+                    style={{
+                        margin: "2em",
+                        marginTop: "2em",
+                        padding: "2em",
+                        width: "50%",
+                    }}
+                >
+                    <h1>{i18n.t("Template Generation")}</h1>
+                    <div
+                        className="row"
+                        style={{
+                            marginTop: "1em",
+                            marginRight: "1em",
+                        }}
+                    >
+                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
+                            <Select
+                                placeholder={i18n.t("Model")}
+                                onChange={handleModelChange1}
+                                options={[
+                                    { value: "dataSets", label: "Data Set" },
+                                    {
+                                        value: "programs",
+                                        label: "Program",
+                                    },
+                                ]}
+                            />
+                        </div>
+                        <div style={{ flexBasis: "70%", margin: "1em" }}>
+                            <Select
+                                placeholder={i18n.t("Select element to export...")}
+                                onChange={handleElementChange1}
+                                options={this.state.elementSelectOptions1}
+                            />
                         </div>
                     </div>
-                    <AlertSnackbar
-                        open={snackbarOpen}
-                        message={snackbarMessage}
-                        onClose={this.props.hideSnackbar}
-                    />
-                </div>
-            </MuiThemeProvider>
+                    {this.state.model1 === "dataSets" && (
+                        <div
+                            className="row"
+                            style={{
+                                marginTop: "1em",
+                                marginLeft: "1em",
+                                marginRight: "1em",
+                            }}
+                        >
+                            <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
+                                <Select
+                                    placeholder={i18n.t("Start Year")}
+                                    options={buildPossibleYears(1970, this.state.endYear)}
+                                    defaultValue={{
+                                        value: moment("2010-01-01").year(),
+                                        label: moment("2010-01-01")
+                                            .year()
+                                            .toString(),
+                                    }}
+                                    onChange={handleStartYear}
+                                />
+                            </div>
+                            <div style={{ flexBasis: "30%", margin: "1em" }}>
+                                <Select
+                                    placeholder={i18n.t("End Year")}
+                                    options={buildPossibleYears(
+                                        this.state.startYear,
+                                        moment().year()
+                                    )}
+                                    defaultValue={{
+                                        value: moment().year(),
+                                        label: moment()
+                                            .year()
+                                            .toString(),
+                                    }}
+                                    onChange={handleEndYear}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
+                        <OrgUnitsSelector
+                            d2={this.props.d2}
+                            onChange={this.handleOrgUnitTreeClick}
+                            selected={this.state.orgUnitTreeSelected}
+                            controls={controls}
+                            rootIds={this.state.orgUnitTreeRoots.map(ou => ou.id)}
+                            fullWidth={false}
+                            height={192}
+                        />
+                    ) : (
+                        i18n.t("No Organisation Units found")
+                    )}
+
+                    <div
+                        className="row"
+                        style={{
+                            marginTop: "2em",
+                            marginLeft: "2em",
+                            marginRight: "2em",
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={this.handleTemplateDownloadClick}
+                        >
+                            {i18n.t("Download template")}
+                        </Button>
+                    </div>
+                </Paper>
+                <Paper
+                    style={{
+                        margin: "2em",
+                        marginTop: "2em",
+                        padding: "2em",
+                        width: "50%",
+                    }}
+                >
+                    <h1>{i18n.t("Bulk Import")}</h1>
+                    <div
+                        className="row"
+                        style={{
+                            marginTop: "1em",
+                            marginRight: "1em",
+                        }}
+                    >
+                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
+                            <Select
+                                placeholder={i18n.t("Model")}
+                                onChange={handleModelChange2}
+                                options={[
+                                    {
+                                        value: "dataSets",
+                                        label: "Data Set",
+                                    },
+                                    {
+                                        value: "programs",
+                                        label: "Program",
+                                    },
+                                ]}
+                            />
+                        </div>
+                        <div style={{ flexBasis: "70%", margin: "1em" }}>
+                            <Select
+                                placeholder={i18n.t("Select element to import...")}
+                                onChange={handleElementChange2}
+                                options={this.state.elementSelectOptions2}
+                            />
+                        </div>
+                    </div>
+                    <Dropzone
+                        accept={
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
+                        }
+                        className={"dropZone"}
+                        acceptClassName={"stripes"}
+                        rejectClassName={"rejectStripes"}
+                        onDrop={this.onDrop.bind(this)}
+                        multiple={false}
+                    >
+                        <div
+                            className={"dropzoneTextStyle"}
+                            hidden={this.state.importDataSheet !== undefined}
+                        >
+                            <p className={"dropzoneParagraph"}>
+                                {i18n.t("Drag and drop file to import")}
+                            </p>
+                            <br />
+                            <CloudUploadIcon className={"uploadIconSize"} />
+                        </div>
+                        <div
+                            className={"dropzoneTextStyle"}
+                            hidden={this.state.importDataSheet === undefined}
+                        >
+                            {this.state.importDataSheet !== undefined && (
+                                <p className={"dropzoneParagraph"}>
+                                    {this.state.importDataSheet.name}
+                                </p>
+                            )}
+                            <br />
+                            <CloudDoneIcon className={"uploadIconSize"} />
+                        </div>
+                    </Dropzone>
+
+                    {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
+                        <OrgUnitsSelector
+                            d2={this.props.d2}
+                            onChange={this.handleOrgUnitTreeClick2}
+                            selected={this.state.orgUnitTreeSelected2}
+                            controls={controls}
+                            rootIds={this.state.orgUnitTreeRoots.map(ou => ou.id)}
+                            fullWidth={false}
+                            height={192}
+                        />
+                    ) : (
+                        i18n.t("No Organisation Units found")
+                    )}
+
+                    <div
+                        className="row"
+                        style={{
+                            marginTop: "2em",
+                            marginLeft: "2em",
+                            marginRight: "2em",
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={this.handleDataImportClick}
+                        >
+                            {i18n.t("Import data")}
+                        </Button>
+                    </div>
+                </Paper>
+            </div>
         );
     }
 }
@@ -512,22 +490,4 @@ App.childContextTypes = {
     d2: PropTypes.object,
 };
 
-const mapStateToProps = state => ({
-    d2: state.d2,
-    database: state.database,
-    loading: state.loading,
-    dialog: state.dialog,
-});
-
-const mapDispatchToProps = dispatch => ({
-    setLoading: loading => dispatch({ type: actionTypes.LOADING, loading: loading }),
-    hideSnackbar: () => {
-        dispatch({ type: actionTypes.SNACKBAR_SHOW, show: false });
-    },
-    showSnackbar: message => {
-        dispatch({ type: actionTypes.SNACKBAR_UPDATE, message });
-        dispatch({ type: actionTypes.SNACKBAR_SHOW, show: true });
-    },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(App));
+export default withStyles(styles)(withLoading(withSnackbar(App)));

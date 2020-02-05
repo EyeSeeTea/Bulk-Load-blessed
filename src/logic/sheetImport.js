@@ -14,34 +14,35 @@ import { stringEquals } from "../utils/strings";
  */
 export function readSheet(builder) {
     return new Promise(function(resolve, reject) {
-        let workbook = new ExcelJS.Workbook();
-        let is = workbook.xlsx.createInputStream();
-        let frs = fileReaderStream(builder.file);
+        const workbook = new ExcelJS.Workbook();
+        const is = workbook.xlsx.createInputStream();
+        const frs = fileReaderStream(builder.file);
         // Read workbook when stream is loaded
         is.on("error", reject);
         is.on("done", () => {
-            let dataEntrySheet = workbook.getWorksheet("Data Entry");
-            let metadataSheet = workbook.getWorksheet("Metadata");
-           // let validationSheet = workbook.getWorksheet("Validation");
+            const dataEntrySheet = workbook.getWorksheet("Data Entry");
+            const metadataSheet = workbook.getWorksheet("Metadata");
+            // const validationSheet = workbook.getWorksheet("Validation");
 
             // TODO: Check malformed template (undefined?)
 
             let columns;
             let stageColumns;
             let dataToImport = {
-            "dataSet": "",
-            "completeDate": "",
-            "orgUnit":"", 
-            "dataValues": []};
+                dataSet: "",
+                completeDate: "",
+                orgUnit: "",
+                dataValues: [],
+            };
 
-            let isProgram = builder.element.type === "program";
+            const isProgram = builder.element.type === "program";
 
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
                 if (rowNumber === 1) stageColumns = row.values;
                 else if (rowNumber === 2) columns = row.values;
                 else {
-                    let result = {
+                    const result = {
                         dataValues: [],
                     };
 
@@ -54,10 +55,10 @@ export function readSheet(builder) {
                     }
 
                     if (row.values[1] !== undefined) {
-                       result.orgUnit = builder.organisationUnits[0].id; //parseMetadataId(metadataSheet, row.values[1]);
+                        result.orgUnit = builder.organisationUnits[0].id; //parseMetadataId(metadataSheet, row.values[1]);
                     } else {
                         // TODO: Do not hardcode this
-                        result.orgUnit =builder.organisationUnits[0].id ;// validationSheet.getCell("A3").formula.substr(1);
+                        result.orgUnit = builder.organisationUnits[0].id; // validationSheet.getCell("A3").formula.substr(1);
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
@@ -80,19 +81,21 @@ export function readSheet(builder) {
                     if (!isProgram && row.values[3] !== undefined) {
                         result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
                     }
-                   // row.eachCell({ includeEmpty: true },(cell, colNumber) => {
+                    // row.eachCell({ includeEmpty: true },(cell, colNumber) => {
                     row.eachCell((cell, colNumber) => {
                         if (isProgram && colNumber > 4) {
                             // TODO: Do not hardcode previous entries
-                            let id = columns[colNumber].formula.substr(1);
+                            const id = columns[colNumber].formula.substr(1);
                             let cellValue = cell.value.toString();
 
                             // TODO: Check different data types
-                            let dataValue = builder.elementMetadata.get(id);
+                            const dataValue = builder.elementMetadata.get(id);
                             if (dataValue.optionSet !== undefined) {
-                                let optionSet = builder.elementMetadata.get(dataValue.optionSet.id);
+                                const optionSet = builder.elementMetadata.get(
+                                    dataValue.optionSet.id
+                                );
                                 optionSet.options.forEach(optionId => {
-                                    let option = builder.elementMetadata.get(optionId.id);
+                                    const option = builder.elementMetadata.get(optionId.id);
                                     if (stringEquals(cellValue, option.name))
                                         cellValue = option.code;
                                 });
@@ -102,22 +105,23 @@ export function readSheet(builder) {
                             result.dataValues.push({ dataElement: id, value: cellValue });
                         } else if (!isProgram && colNumber > 3) {
                             // TODO: Do not hardcode previous entries
-                            let column = columns[colNumber];
-                            let id = column.formula
+                            const column = columns[colNumber];
+                            const id = column.formula
                                 ? column.formula.substr(1)
                                 : dataEntrySheet
                                       .getCell(column.sharedFormula)
                                       .value.formula.substr(1);
-                            let stageColumn = stageColumns[colNumber];
-                            let dataElementId = stageColumn.formula
+                            const stageColumn = stageColumns[colNumber];
+                            const dataElementId = stageColumn.formula
                                 ? stageColumn.formula.substr(1)
                                 : dataEntrySheet
                                       .getCell(stageColumn.sharedFormula)
                                       .value.formula.substr(1);
-                              //        let cellValue=""
-                            //if (cell.value!=null) { let cellValue = cell.value.toString();} 
-                            let cellValue = cell.value.toString();
-                            let dataValue = builder.elementMetadata.get(id);
+                            //        let cellValue=""
+                            //if (cell.value!=null) { let cellValue = cell.value.toString();}
+                            const cellValue = cell.value.toString();
+                            const dataValue = builder.elementMetadata.get(id);
+
                             if (dataValue.type === "categoryOptionCombo") {
                                 // TODO: OptionSets in categoryOptionCombos
                                 result.dataValues.push({
@@ -125,24 +129,27 @@ export function readSheet(builder) {
                                     categoryOptionCombo: id,
                                     value: cellValue,
                                     period: result.period,
-                                    orgUnit:result.orgUnit, 
-                                   });
+                                    orgUnit: result.orgUnit,
+                                });
                             } else {
-                                result.dataValues.push({ dataElement: id, value: cellValue, period: result.period, orgUnit:result.orgUnit });
+                                result.dataValues.push({
+                                    dataElement: id,
+                                    value: cellValue,
+                                    period: result.period,
+                                    orgUnit: result.orgUnit,
+                                });
                             }
                         }
                     });
 
                     if (isProgram) dataToImport.push(result);
                     else {
-                        dataToImport=
-                        {
-                            "dataSet": result.dataSet,
-                           // "completeDate": result.completeDate,
-                            "orgUnit":result.orgUnit, 
-                            "dataValues": dataToImport.dataValues.concat(result.dataValues)
+                        dataToImport = {
+                            dataSet: result.dataSet,
+                            // "completeDate": result.completeDate,
+                            orgUnit: result.orgUnit,
+                            dataValues: dataToImport.dataValues.concat(result.dataValues),
                         };
-                        
                     }
                 }
             });

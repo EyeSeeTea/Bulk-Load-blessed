@@ -26,9 +26,9 @@ function MultiQueue(number) {
     }
 
     function queue(ajaxOpts) {
-        let jqXHR,
-            dfd = $.Deferred(),
-            promise = dfd.promise();
+        let jqXHR;
+        const dfd = $.Deferred();
+        const promise = dfd.promise();
 
         // queue our ajax request
         queues[current].queue(doRequest);
