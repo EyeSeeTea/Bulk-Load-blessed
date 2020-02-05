@@ -133,7 +133,7 @@ const App = () => {
                 <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                     <LoadingProvider>
                         <SnackbarProvider>
-                            <HeaderBar appName={"Project Monitoring"} />
+                            <HeaderBar appName={"Bulk Load"} />
 
                             <div id="app" className="content">
                                 <AppContext.Provider value={appContext}>
