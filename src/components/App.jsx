@@ -1,4 +1,5 @@
 import React from "react";
+import _ from "lodash";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Select from "react-select";
@@ -100,7 +101,7 @@ class App extends React.Component {
 
     handleOrgUnitTreeClick2(event, orgUnit) {
         this.setState(state => {
-            state.orgUnitTreeSelected2=[];
+            state.orgUnitTreeSelected2 = [];
             state.orgUnitTreeSelected2.push(orgUnit.path);
             return { orgUnitTreeSelected2: state.orgUnitTreeSelected2 };
         });
@@ -173,12 +174,11 @@ class App extends React.Component {
         // TODO: Add validation error message
         if (this.state.selectedProgramOrDataSet2 === undefined) return;
         if (this.state.importDataSheet === undefined) return;
-        if (this.state.orgUnitTreeSelected2===undefined) return;
+        if (this.state.orgUnitTreeSelected2 === undefined) return;
         //console.log(this.state.orgUnitTreeSelected2);
         let orgUnits = this.state.orgUnitTreeSelected2.map(element =>
             element.substr(element.lastIndexOf("/") + 1)
         );
-        
 
         this.props.setLoading(true);
         dhisConnector
@@ -188,7 +188,7 @@ class App extends React.Component {
                 organisationUnits: orgUnits,
             })
             .then(result => {
-               /*
+                /*
                 console.log("DATASET");
                 console.log(result.element.id);
                 console.log("ORG UNITS");
@@ -196,9 +196,12 @@ class App extends React.Component {
                 console.log("datasets");
                 console.log(result.organisationUnits[0].dataSets);
                 */
-                if (result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id).length ===0) {
+                if (
+                    result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
+                        .length === 0
+                ) {
                     console.log("dataset no encontrado en la orgUnit seleccionada");
-                    return 
+                    return;
                 }
                 return sheetImport.readSheet({
                     ...result,
@@ -207,7 +210,7 @@ class App extends React.Component {
                 });
             })
             .then(data => {
-                    return dhisConnector.importData({
+                return dhisConnector.importData({
                     d2: this.props.d2,
                     element: this.state.selectedProgramOrDataSet2,
                     data: data,
@@ -228,8 +231,8 @@ class App extends React.Component {
                     response.data.response !== undefined
                         ? response.data.response.ignored
                         : response.data.importCount.ignored;
-                       // console.log("response");
-                       // console.log(response);
+                // console.log("response");
+                // console.log(response);
                 this.props.showSnackbar(
                     response.data.description +
                         " Imported: " +
@@ -286,7 +289,6 @@ class App extends React.Component {
                     <div>
                         <HeaderBar appName={"Bulk Load"} />
                         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-                            
                             <Paper
                                 style={{
                                     margin: "2em",
@@ -374,7 +376,7 @@ class App extends React.Component {
                                     initiallyExpanded={this.state.orgUnitTreeBaseRoot}
                                     selected={this.state.orgUnitTreeSelected}
                                     onSelectClick={this.handleOrgUnitTreeClick}
-                                   noHitsLabel={"No Organisation Units found"}
+                                    noHitsLabel={"No Organisation Units found"}
                                 />
                                 <div
                                     className="row"
@@ -436,9 +438,8 @@ class App extends React.Component {
                                 </div>
                                 <Dropzone
                                     accept={
-                                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabled.12"
+                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabled.12"
                                     }
-                                    
                                     className={"dropZone"}
                                     acceptClassName={"stripes"}
                                     rejectClassName={"rejectStripes"}
@@ -529,7 +530,4 @@ const mapDispatchToProps = dispatch => ({
     },
 });
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(withStyles(styles)(App));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(App));
