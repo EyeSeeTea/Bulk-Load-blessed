@@ -5,8 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-06T13:15:45.147Z\n"
-"PO-Revision-Date: 2020-02-06T13:15:45.147Z\n"
+"POT-Creation-Date: 2020-02-06T14:06:30.254Z\n"
+"PO-Revision-Date: 2020-02-06T14:06:30.254Z\n"
+
+msgid "Cannot read file"
+msgstr ""
 
 msgid "Imported"
 msgstr ""
@@ -51,9 +54,6 @@ msgid "Download template"
 msgstr ""
 
 msgid "Bulk Import"
-msgstr ""
-
-msgid "import"
 msgstr ""
 
 msgid "Drag and drop file to import"

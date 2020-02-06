@@ -49,7 +49,6 @@ class App extends React.Component {
             orgUnitTreeRootIds: [],
             orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
-            elementSelectOptions2: [],
             selectedProgramOrDataSet1: undefined,
             selectedProgramOrDataSet2: undefined,
             importDataSheet: undefined,
@@ -66,6 +65,7 @@ class App extends React.Component {
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
         this.onSettingsChange = this.onSettingsChange.bind(this);
+        this.onDrop = this.onDrop.bind(this).bind(this);
     }
 
     async componentDidMount() {
@@ -168,10 +168,22 @@ class App extends React.Component {
             });
     }
 
-    onDrop(file) {
-        this.setState({
-            importDataSheet: file[0],
-        });
+    async onDrop(files) {
+        const { snackbar } = this.props;
+        const { dataSets, programs } = this.state;
+
+        if (_.isEmpty(files)) {
+            snackbar.error(i18n.t("Cannot read file"));
+            return;
+        }
+        const file = files[0];
+        try {
+            const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
+            this.setState({ importDataSheet: file, selectedProgramOrDataSet2: object });
+        } catch (err) {
+            snackbar.error(err.message || err.toString());
+            return;
+        }
     }
 
     handleDataImportClick() {
@@ -275,7 +287,6 @@ class App extends React.Component {
 
         if (this.state.model1 !== model1 && modelOptions.length === 1) {
             this.handleModelChange1(modelOptions[0]);
-            this.handleModelChange2(modelOptions[0]);
         }
 
         this.setState({ settings, isTemplateGenerationVisible, modelOptions, model1 });
@@ -332,14 +343,6 @@ class App extends React.Component {
         this.setState({ selectedProgramOrDataSet1: selectedOption });
     };
 
-    handleModelChange2 = selectedOption => {
-        this.setState({ elementSelectOptions2: this.state[selectedOption.value] });
-    };
-
-    handleElementChange2 = selectedOption => {
-        this.setState({ selectedProgramOrDataSet2: selectedOption });
-    };
-
     handleStartYear = selectedOption => {
         this.setState({ startYear: selectedOption.value });
     };
@@ -350,7 +353,7 @@ class App extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible } = this.state;
+        const { settings, isTemplateGenerationVisible, selectedProgramOrDataSet2 } = this.state;
 
         if (!settings) return null;
 
@@ -459,12 +462,6 @@ class App extends React.Component {
                 >
                     <h1>{i18n.t("Bulk Import")}</h1>
 
-                    <ModelSelector
-                        action={i18n.t("import")}
-                        onModelChange={this.handleModelChange2}
-                        onObjectChange={this.handleElementChange2}
-                        objectOptions={this.state.elementSelectOptions2}
-                    />
                     <Dropzone
                         accept={
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
@@ -472,7 +469,7 @@ class App extends React.Component {
                         className={"dropZone"}
                         acceptClassName={"stripes"}
                         rejectClassName={"rejectStripes"}
-                        onDrop={this.onDrop.bind(this)}
+                        onDrop={this.onDrop}
                         multiple={false}
                     >
                         <div
@@ -498,6 +495,13 @@ class App extends React.Component {
                             <CloudDoneIcon className={"uploadIconSize"} />
                         </div>
                     </Dropzone>
+
+                    {selectedProgramOrDataSet2 && (
+                        <div style={{ margin: 20 }}>
+                            {selectedProgramOrDataSet2.type} -
+                            {selectedProgramOrDataSet2.displayName}
+                        </div>
+                    )}
 
                     {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
                         <OrgUnitsSelector
