@@ -70,11 +70,9 @@ class App extends React.Component {
 
     async componentDidMount() {
         this.props.loading.show();
-        await Promise.all([
-            this.loadUserInformation(),
-            this.searchForOrgUnits(),
-            this.loadSettings(),
-        ]);
+        await Promise.all([this.loadUserInformation(), this.searchForOrgUnits()]);
+        // Load settings once data is already loaded so we can render the objects in single model
+        await this.loadSettings();
         this.props.loading.hide();
     }
 
@@ -271,40 +269,92 @@ class App extends React.Component {
             },
         ]);
 
-        this.setState({ settings, isTemplateGenerationVisible, modelOptions });
+        const model1 = _.isEqual(this.state.modelOptions, modelOptions)
+            ? this.state.model1
+            : modelOptions.length === 1
+            ? modelOptions[0].value
+            : undefined;
+
+        if (this.state.model1 !== model1 && modelOptions.length === 1) {
+            this.handleModelChange1(modelOptions[0]);
+            this.handleModelChange2(modelOptions[0]);
+        }
+
+        this.setState({ settings, isTemplateGenerationVisible, modelOptions, model1 });
     }
 
+    renderModelSelector = props => {
+        const { action, onModelChange, onObjectChange, objectOptions } = props;
+        const { modelOptions } = this.state;
+        const showModelSelector = modelOptions.length > 1;
+
+        const rowStyle = showModelSelector
+            ? { marginTop: "1em", marginRight: "1em" }
+            : { justifyContent: "left" };
+
+        const elementLabel = showModelSelector ? i18n.t("elements") : modelOptions[0].label;
+        const key = modelOptions.map(option => option.value).join("-");
+
+        return (
+            <div className="row" style={rowStyle}>
+                {showModelSelector && (
+                    <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
+                        <Select
+                            key={key}
+                            placeholder={i18n.t("Model")}
+                            onChange={onModelChange}
+                            options={modelOptions}
+                        />
+                    </div>
+                )}
+
+                <div style={{ flexBasis: "70%", margin: "1em" }}>
+                    <Select
+                        key={key}
+                        placeholder={i18n.t("Select {{element}} to {{action}}...", {
+                            element: elementLabel,
+                            action,
+                        })}
+                        onChange={onObjectChange}
+                        options={objectOptions}
+                    />
+                </div>
+            </div>
+        );
+    };
+
+    handleModelChange1 = selectedOption => {
+        this.setState({
+            model1: selectedOption.value,
+            elementSelectOptions1: this.state[selectedOption.value],
+        });
+    };
+
+    handleElementChange1 = selectedOption => {
+        this.setState({ selectedProgramOrDataSet1: selectedOption });
+    };
+
+    handleModelChange2 = selectedOption => {
+        this.setState({ elementSelectOptions2: this.state[selectedOption.value] });
+    };
+
+    handleElementChange2 = selectedOption => {
+        this.setState({ selectedProgramOrDataSet2: selectedOption });
+    };
+
+    handleStartYear = selectedOption => {
+        this.setState({ startYear: selectedOption.value });
+    };
+
+    handleEndYear = selectedOption => {
+        this.setState({ endYear: selectedOption.value });
+    };
+
     render() {
-        const { settings, isTemplateGenerationVisible, modelOptions } = this.state;
+        const ModelSelector = this.renderModelSelector;
+        const { settings, isTemplateGenerationVisible } = this.state;
 
         if (!settings) return null;
-
-        const handleModelChange1 = selectedOption => {
-            this.setState({
-                model1: selectedOption.value,
-                elementSelectOptions1: this.state[selectedOption.value],
-            });
-        };
-
-        const handleElementChange1 = selectedOption => {
-            this.setState({ selectedProgramOrDataSet1: selectedOption });
-        };
-
-        const handleModelChange2 = selectedOption => {
-            this.setState({ elementSelectOptions2: this.state[selectedOption.value] });
-        };
-
-        const handleElementChange2 = selectedOption => {
-            this.setState({ selectedProgramOrDataSet2: selectedOption });
-        };
-
-        const handleStartYear = selectedOption => {
-            this.setState({ startYear: selectedOption.value });
-        };
-
-        const handleEndYear = selectedOption => {
-            this.setState({ endYear: selectedOption.value });
-        };
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
@@ -320,28 +370,14 @@ class App extends React.Component {
                     }}
                 >
                     <h1>{i18n.t("Template Generation")}</h1>
-                    <div
-                        className="row"
-                        style={{
-                            marginTop: "1em",
-                            marginRight: "1em",
-                        }}
-                    >
-                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
-                            <Select
-                                placeholder={i18n.t("Model")}
-                                onChange={handleModelChange1}
-                                options={modelOptions}
-                            />
-                        </div>
-                        <div style={{ flexBasis: "70%", margin: "1em" }}>
-                            <Select
-                                placeholder={i18n.t("Select element to export...")}
-                                onChange={handleElementChange1}
-                                options={this.state.elementSelectOptions1}
-                            />
-                        </div>
-                    </div>
+
+                    <ModelSelector
+                        action={i18n.t("export")}
+                        onModelChange={this.handleModelChange1}
+                        onObjectChange={this.handleElementChange1}
+                        objectOptions={this.state.elementSelectOptions1}
+                    />
+
                     {this.state.model1 === "dataSets" && (
                         <div
                             className="row"
@@ -361,7 +397,7 @@ class App extends React.Component {
                                             .year()
                                             .toString(),
                                     }}
-                                    onChange={handleStartYear}
+                                    onChange={this.handleStartYear}
                                 />
                             </div>
                             <div style={{ flexBasis: "30%", margin: "1em" }}>
@@ -377,7 +413,7 @@ class App extends React.Component {
                                             .year()
                                             .toString(),
                                     }}
-                                    onChange={handleEndYear}
+                                    onChange={this.handleEndYear}
                                 />
                             </div>
                         </div>
@@ -422,28 +458,13 @@ class App extends React.Component {
                     }}
                 >
                     <h1>{i18n.t("Bulk Import")}</h1>
-                    <div
-                        className="row"
-                        style={{
-                            marginTop: "1em",
-                            marginRight: "1em",
-                        }}
-                    >
-                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
-                            <Select
-                                placeholder={i18n.t("Model")}
-                                onChange={handleModelChange2}
-                                options={modelOptions}
-                            />
-                        </div>
-                        <div style={{ flexBasis: "70%", margin: "1em" }}>
-                            <Select
-                                placeholder={i18n.t("Select element to import...")}
-                                onChange={handleElementChange2}
-                                options={this.state.elementSelectOptions2}
-                            />
-                        </div>
-                    </div>
+
+                    <ModelSelector
+                        action={i18n.t("import")}
+                        onModelChange={this.handleModelChange2}
+                        onObjectChange={this.handleElementChange2}
+                        objectOptions={this.state.elementSelectOptions2}
+                    />
                     <Dropzone
                         accept={
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
