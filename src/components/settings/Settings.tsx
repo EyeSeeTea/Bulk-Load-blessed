@@ -13,60 +13,37 @@ import {
 import i18n from "../../locales";
 import SettingsFields from "./SettingsFields";
 import Settings from "../../logic/settings";
-import { useAppContext } from "../../contexts/api-context";
 import { useSnackbar } from "d2-ui-components";
 import { makeStyles } from "@material-ui/styles";
 
-export interface SettingsProps {}
-
-type LoaderState<Data> =
-    | { type: "loading" }
-    | { type: "error"; message: string }
-    | { type: "loaded"; data: Data };
-
-function useLoader<Data>() {
-    const [state, setState] = React.useState<LoaderState<Data>>({ type: "loading" } as const);
-
-    return React.useMemo(() => {
-        return {
-            state: state,
-            setData(data: Data) {
-                setState({ type: "loaded", data });
-            },
-            setError(error: any) {
-                setState({
-                    type: "error",
-                    message: error ? error.message || error.toString() : "",
-                });
-            },
-        };
-    }, [state, setState]);
+export interface SettingsProps {
+    settings: Settings;
+    onChange: (settings: Settings) => void;
 }
 
-export default function SettingsComponent(_props: SettingsProps) {
-    const { api } = useAppContext();
+export default function SettingsComponent(props: SettingsProps) {
+    const { settings, onChange } = props;
     const classes = useStyles();
     const snackbar = useSnackbar();
     const [isOpen, setOpenState] = React.useState(false);
-    const settingsLoader = useLoader<Settings>();
+    const [unsavedSettings, setUnsavedSettings] = React.useState(settings);
 
-    async function save() {
-        if (settingsLoader.state.type === "loaded") {
-            const response = await settingsLoader.state.data.save();
-            if (response.status === "OK") {
-                snackbar.success("Settings saved");
-                setOpenState(false);
-            } else {
-                snackbar.error(JSON.stringify(response.typeReports));
-            }
+    const save = React.useCallback(async () => {
+        const response = await unsavedSettings.save();
+
+        if (response.status === "OK") {
+            setOpenState(false);
+            onChange(unsavedSettings);
+            snackbar.success(i18n.t("Settings saved"));
+        } else {
+            snackbar.error(JSON.stringify(response.typeReports));
         }
-    }
+    }, [unsavedSettings]);
 
-    React.useEffect(() => {
-        Settings.build(api)
-            .then(settingsLoader.setData)
-            .catch(settingsLoader.setError);
-    }, []);
+    const close = React.useCallback(() => {
+        setOpenState(false);
+        setUnsavedSettings(settings);
+    }, [settings]);
 
     return (
         <React.Fragment>
@@ -76,39 +53,21 @@ export default function SettingsComponent(_props: SettingsProps) {
                 </IconButton>
             </div>
 
-            <Dialog
-                open={isOpen}
-                fullWidth={true}
-                maxWidth="md"
-                onClose={() => setOpenState(false)}
-            >
+            <Dialog open={isOpen} fullWidth={true} maxWidth="md" onClose={close}>
                 <DialogTitle>{i18n.t("Settings")}</DialogTitle>
 
                 <DialogContent>
                     <Card className={classes.content}>
-                        {settingsLoader.state.type === "loading" && i18n.t("Loading...")}
-
-                        {settingsLoader.state.type === "error" && (
-                            <div>
-                                {i18n.t("Error")}: {settingsLoader.state.message}
-                            </div>
-                        )}
-
-                        {settingsLoader.state.type === "loaded" && (
-                            <SettingsFields
-                                settings={settingsLoader.state.data}
-                                onChange={settingsLoader.setData}
-                            />
-                        )}
+                        <SettingsFields settings={unsavedSettings} onChange={setUnsavedSettings} />
                     </Card>
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => setOpenState(false)} variant="contained">
+                    <Button onClick={close} variant="contained">
                         {i18n.t("Cancel")}
                     </Button>
 
-                    <Button onClick={() => save()} color="primary" variant="contained">
+                    <Button onClick={save} color="primary" variant="contained">
                         {i18n.t("Save")}
                     </Button>
                 </DialogActions>

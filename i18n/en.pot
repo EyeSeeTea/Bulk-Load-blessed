@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-05T14:06:52.389Z\n"
-"PO-Revision-Date: 2020-02-05T14:06:52.389Z\n"
+"POT-Creation-Date: 2020-02-06T11:00:23.603Z\n"
+"PO-Revision-Date: 2020-02-06T11:00:23.603Z\n"
 
 msgid "Imported"
 msgstr ""
@@ -50,13 +50,10 @@ msgstr ""
 msgid "Import data"
 msgstr ""
 
+msgid "Settings saved"
+msgstr ""
+
 msgid "Settings"
-msgstr ""
-
-msgid "Loading..."
-msgstr ""
-
-msgid "Error"
 msgstr ""
 
 msgid "Cancel"

@@ -3,7 +3,7 @@ import _ from "lodash";
 import PropTypes from "prop-types";
 import Dropzone from "react-dropzone";
 
-import { Button, Paper, withStyles } from "@material-ui/core";
+import { Button, Paper } from "@material-ui/core";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 
@@ -16,8 +16,11 @@ import moment from "moment";
 import { buildPossibleYears } from "../utils/periods";
 import i18n from "@dhis2/d2-i18n";
 import Select from "./Select";
-import { OrgUnitsSelector, withSnackbar, withLoading } from "d2-ui-components";
-import Settings from "./settings/Settings";
+import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import Settings from "../logic/settings";
+import SettingsComponent from "./settings/Settings";
+import { makeStyles } from "@material-ui/styles";
+import { useAppContext } from "../contexts/api-context";
 
 const styles = theme => ({
     root: {
@@ -43,7 +46,7 @@ class App extends React.Component {
             programs: [],
             orgUnitTreeSelected: [],
             orgUnitTreeSelected2: [],
-            orgUnitTreeRoots: [],
+            orgUnitTreeRootIds: [],
             orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
             elementSelectOptions2: [],
@@ -53,17 +56,24 @@ class App extends React.Component {
             model1: undefined,
             startYear: 2010,
             endYear: moment().year(),
+            settings: undefined,
+            isTemplateGenerationVisible: true,
         };
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
         this.handleOrgUnitTreeClick2 = this.handleOrgUnitTreeClick2.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
+        this.onSettingsChange = this.onSettingsChange.bind(this);
     }
 
     async componentDidMount() {
         this.props.loading.show();
-        await Promise.all([this.loadUserInformation(), this.searchForOrgUnits()]);
+        await Promise.all([
+            this.loadUserInformation(),
+            this.searchForOrgUnits(),
+            this.loadSettings(),
+        ]);
         this.props.loading.hide();
     }
 
@@ -71,6 +81,14 @@ class App extends React.Component {
         return {
             d2: this.props.d2,
         };
+    }
+
+    loadSettings() {
+        const { api, snackbar } = this.props;
+
+        return Settings.build(api)
+            .then(this.onSettingsChange)
+            .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
     }
 
     loadUserInformation() {
@@ -109,7 +127,7 @@ class App extends React.Component {
                 .then(result => {
                     this.setState({
                         orgUnitTreeBaseRoot: result.toArray().map(model => model.path),
-                        orgUnitTreeRoots: result.toArray(),
+                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
                     });
                 });
         } else {
@@ -120,7 +138,7 @@ class App extends React.Component {
                 })
                 .then(result => {
                     this.setState({
-                        orgUnitTreeRoots: result.toArray(),
+                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
                     });
                 });
         }
@@ -238,7 +256,18 @@ class App extends React.Component {
             });
     }
 
+    onSettingsChange(settings) {
+        this.setState({
+            settings,
+            isTemplateGenerationVisible: settings.isTemplateGenerationVisible(),
+        });
+    }
+
     render() {
+        const { settings, isTemplateGenerationVisible } = this.state;
+
+        if (!settings) return null;
+
         const handleModelChange1 = selectedOption => {
             this.setState({
                 model1: selectedOption.value,
@@ -268,7 +297,7 @@ class App extends React.Component {
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-                <Settings />
+                <SettingsComponent settings={settings} onChange={this.onSettingsChange} />
 
                 <Paper
                     style={{
@@ -276,6 +305,7 @@ class App extends React.Component {
                         marginTop: "2em",
                         padding: "2em",
                         width: "50%",
+                        display: isTemplateGenerationVisible ? "block" : "none",
                     }}
                 >
                     <h1>{i18n.t("Template Generation")}</h1>
@@ -347,13 +377,13 @@ class App extends React.Component {
                             </div>
                         </div>
                     )}
-                    {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
+                    {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
                         <OrgUnitsSelector
-                            d2={this.props.d2}
+                            api={this.props.api}
                             onChange={this.handleOrgUnitTreeClick}
                             selected={this.state.orgUnitTreeSelected}
                             controls={controls}
-                            rootIds={this.state.orgUnitTreeRoots.map(ou => ou.id)}
+                            rootIds={this.state.orgUnitTreeRootIds}
                             fullWidth={false}
                             height={192}
                         />
@@ -452,13 +482,13 @@ class App extends React.Component {
                         </div>
                     </Dropzone>
 
-                    {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
+                    {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
                         <OrgUnitsSelector
-                            d2={this.props.d2}
+                            api={this.props.api}
                             onChange={this.handleOrgUnitTreeClick2}
                             selected={this.state.orgUnitTreeSelected2}
                             controls={controls}
-                            rootIds={this.state.orgUnitTreeRoots.map(ou => ou.id)}
+                            rootIds={this.state.orgUnitTreeRootIds}
                             fullWidth={false}
                             height={192}
                         />
@@ -492,4 +522,13 @@ App.childContextTypes = {
     d2: PropTypes.object,
 };
 
-export default withStyles(styles)(withLoading(withSnackbar(App)));
+const useStyles = makeStyles(styles);
+
+export default function App2() {
+    const classes = useStyles();
+    const loading = useLoading();
+    const snackbar = useSnackbar();
+    const { d2, api } = useAppContext();
+
+    return <App classes={classes} loading={loading} snackbar={snackbar} api={api} d2={d2} />;
+}
