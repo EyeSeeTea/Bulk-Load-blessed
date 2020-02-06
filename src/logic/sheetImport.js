@@ -22,13 +22,18 @@ export function readSheet(builder) {
         is.on("done", () => {
             const dataEntrySheet = workbook.getWorksheet("Data Entry");
             const metadataSheet = workbook.getWorksheet("Metadata");
-            const validationSheet = workbook.getWorksheet("Validation");
+            // const validationSheet = workbook.getWorksheet("Validation");
 
             // TODO: Check malformed template (undefined?)
 
             let columns;
             let stageColumns;
-            let dataToImport = [];
+            let dataToImport = {
+                dataSet: "",
+                completeDate: "",
+                orgUnit: "",
+                dataValues: [],
+            };
 
             const isProgram = builder.element.type === "program";
 
@@ -50,10 +55,10 @@ export function readSheet(builder) {
                     }
 
                     if (row.values[1] !== undefined) {
-                        result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
+                        result.orgUnit = builder.organisationUnits[0].id; //parseMetadataId(metadataSheet, row.values[1]);
                     } else {
                         // TODO: Do not hardcode this
-                        result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
+                        result.orgUnit = builder.organisationUnits[0].id; // validationSheet.getCell("A3").formula.substr(1);
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
@@ -76,7 +81,7 @@ export function readSheet(builder) {
                     if (!isProgram && row.values[3] !== undefined) {
                         result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
                     }
-
+                    // row.eachCell({ includeEmpty: true },(cell, colNumber) => {
                     row.eachCell((cell, colNumber) => {
                         if (isProgram && colNumber > 4) {
                             // TODO: Do not hardcode previous entries
@@ -112,24 +117,40 @@ export function readSheet(builder) {
                                 : dataEntrySheet
                                       .getCell(stageColumn.sharedFormula)
                                       .value.formula.substr(1);
+                            //        let cellValue=""
+                            //if (cell.value!=null) { let cellValue = cell.value.toString();}
                             const cellValue = cell.value.toString();
-
                             const dataValue = builder.elementMetadata.get(id);
+
                             if (dataValue.type === "categoryOptionCombo") {
                                 // TODO: OptionSets in categoryOptionCombos
                                 result.dataValues.push({
                                     dataElement: dataElementId,
                                     categoryOptionCombo: id,
                                     value: cellValue,
+                                    period: result.period,
+                                    orgUnit: result.orgUnit,
                                 });
                             } else {
-                                result.dataValues.push({ dataElement: id, value: cellValue });
+                                result.dataValues.push({
+                                    dataElement: id,
+                                    value: cellValue,
+                                    period: result.period,
+                                    orgUnit: result.orgUnit,
+                                });
                             }
                         }
                     });
 
                     if (isProgram) dataToImport.push(result);
-                    else dataToImport = result;
+                    else {
+                        dataToImport = {
+                            dataSet: result.dataSet,
+                            // "completeDate": result.completeDate,
+                            orgUnit: result.orgUnit,
+                            dataValues: dataToImport.dataValues.concat(result.dataValues),
+                        };
+                    }
                 }
             });
 

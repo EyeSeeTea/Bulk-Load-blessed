@@ -41,6 +41,7 @@ class App extends React.Component {
             dataSets: [],
             programs: [],
             orgUnitTreeSelected: [],
+            orgUnitTreeSelected2: [],
             orgUnitTreeRoots: [],
             orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
@@ -54,6 +55,7 @@ class App extends React.Component {
         };
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
+        this.handleOrgUnitTreeClick2 = this.handleOrgUnitTreeClick2.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
     }
@@ -85,6 +87,12 @@ class App extends React.Component {
     handleOrgUnitTreeClick(orgUnitPaths) {
         this.setState({
             orgUnitTreeSelected: orgUnitPaths,
+        });
+    }
+
+    handleOrgUnitTreeClick2(orgUnitPaths) {
+        this.setState({
+            orgUnitTreeSelected2: _.takeRight(orgUnitPaths, 1),
         });
     }
 
@@ -155,15 +163,34 @@ class App extends React.Component {
         // TODO: Add validation error message
         if (this.state.selectedProgramOrDataSet2 === undefined) return;
         if (this.state.importDataSheet === undefined) return;
+        if (this.state.orgUnitTreeSelected2 === undefined) return;
+        const orgUnits = this.state.orgUnitTreeSelected2.map(path =>
+            path.substr(path.lastIndexOf("/") + 1)
+        );
 
         this.props.loading.show(true);
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
                 element: this.state.selectedProgramOrDataSet2,
-                organisationUnits: [],
+                organisationUnits: orgUnits,
             })
             .then(result => {
+                /*
+                console.log("DATASET");
+                console.log(result.element.id);
+                console.log("ORG UNITS");
+                console.log(result.organisationUnits);
+                console.log("datasets");
+                console.log(result.organisationUnits[0].dataSets);
+                */
+                if (
+                    result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
+                        .length === 0
+                ) {
+                    console.log("dataset no encontrado en la orgUnit seleccionada");
+                    return;
+                }
                 return sheetImport.readSheet({
                     ...result,
                     d2: this.props.d2,
@@ -171,7 +198,6 @@ class App extends React.Component {
                 });
             })
             .then(data => {
-                console.log(data);
                 return dhisConnector.importData({
                     d2: this.props.d2,
                     element: this.state.selectedProgramOrDataSet2,
@@ -195,7 +221,7 @@ class App extends React.Component {
                         : response.data.importCount.ignored;
                 this.props.snackbar.info(
                     _.compact([
-                        response.data.message,
+                        response.data.description,
                         [
                             `${i18n.t("Imported")}: ${imported}`,
                             `${i18n.t("Updated")}: ${updated}`,
@@ -390,7 +416,9 @@ class App extends React.Component {
                         </div>
                     </div>
                     <Dropzone
-                        accept={"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+                        accept={
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
+                        }
                         className={"dropZone"}
                         acceptClassName={"stripes"}
                         rejectClassName={"rejectStripes"}
@@ -420,6 +448,21 @@ class App extends React.Component {
                             <CloudDoneIcon className={"uploadIconSize"} />
                         </div>
                     </Dropzone>
+
+                    {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
+                        <OrgUnitsSelector
+                            d2={this.props.d2}
+                            onChange={this.handleOrgUnitTreeClick2}
+                            selected={this.state.orgUnitTreeSelected2}
+                            controls={controls}
+                            rootIds={this.state.orgUnitTreeRoots.map(ou => ou.id)}
+                            fullWidth={false}
+                            height={192}
+                        />
+                    ) : (
+                        i18n.t("No Organisation Units found")
+                    )}
+
                     <div
                         className="row"
                         style={{
