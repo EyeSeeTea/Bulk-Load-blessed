@@ -1,6 +1,15 @@
 import React from "react";
 import _ from "lodash";
-import { Dialog, Card, Button, DialogTitle, DialogContent, DialogActions } from "@material-ui/core";
+import {
+    Dialog,
+    Card,
+    Button,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
+    Icon,
+} from "@material-ui/core";
 import i18n from "../../locales";
 import SettingsFields from "./SettingsFields";
 import Settings from "../../logic/settings";
@@ -16,20 +25,29 @@ type LoaderState<Data> =
     | { type: "loaded"; data: Data };
 
 function useLoader<Data>() {
-    const [state, setState] = React.useState<LoaderState<Data>>({ type: "loading" });
-    return {
-        state: state,
-        setData(newData: Data) {
-            setState({ type: "loaded", data: newData });
-        },
-    };
+    const [state, setState] = React.useState<LoaderState<Data>>({ type: "loading" } as const);
+
+    return React.useMemo(() => {
+        return {
+            state: state,
+            setData(data: Data) {
+                setState({ type: "loaded", data });
+            },
+            setError(error: any) {
+                setState({
+                    type: "error",
+                    message: error ? error.message || error.toString() : "",
+                });
+            },
+        };
+    }, [state, setState]);
 }
 
 export default function SettingsComponent(_props: SettingsProps) {
     const { api } = useAppContext();
     const classes = useStyles();
     const snackbar = useSnackbar();
-    const [isOpen, setOpenState] = React.useState(true); // DEBUG: -> false
+    const [isOpen, setOpenState] = React.useState(false);
     const settingsLoader = useLoader<Settings>();
 
     async function save() {
@@ -37,6 +55,7 @@ export default function SettingsComponent(_props: SettingsProps) {
             const response = await settingsLoader.state.data.save();
             if (response.status === "OK") {
                 snackbar.success("Settings saved");
+                setOpenState(false);
             } else {
                 snackbar.error(JSON.stringify(response.typeReports));
             }
@@ -44,15 +63,17 @@ export default function SettingsComponent(_props: SettingsProps) {
     }
 
     React.useEffect(() => {
-        Settings.build(api).then(settingsLoader.setData);
+        Settings.build(api)
+            .then(settingsLoader.setData)
+            .catch(settingsLoader.setError);
     }, []);
 
     return (
         <React.Fragment>
-            <div>
-                <Button onClick={() => setOpenState(true)} variant="contained">
-                    {i18n.t("Settings")}
-                </Button>
+            <div className={classes.button}>
+                <IconButton onClick={() => setOpenState(true)} aria-label={i18n.t("Settings")}>
+                    <Icon>settings</Icon>
+                </IconButton>
             </div>
 
             <Dialog
@@ -66,11 +87,13 @@ export default function SettingsComponent(_props: SettingsProps) {
                 <DialogContent>
                     <Card className={classes.content}>
                         {settingsLoader.state.type === "loading" && i18n.t("Loading...")}
+
                         {settingsLoader.state.type === "error" && (
                             <div>
                                 {i18n.t("Error")}: {settingsLoader.state.message}
                             </div>
                         )}
+
                         {settingsLoader.state.type === "loaded" && (
                             <SettingsFields
                                 settings={settingsLoader.state.data}
@@ -96,4 +119,5 @@ export default function SettingsComponent(_props: SettingsProps) {
 
 const useStyles = makeStyles({
     content: { padding: 10, margin: 10 },
+    button: { position: "absolute", right: 10, top: 70 },
 });

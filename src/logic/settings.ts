@@ -3,20 +3,18 @@ import _ from "lodash";
 import i18n from "../locales";
 import { generateUid } from "d2/uid";
 
+const models = ["dataSet", "program"] as const;
+const optionFields = ["models", "userGroups", "userGroupsForGeneration"] as const;
+
+type GetArrayInnerType<T extends readonly any[]> = T[number];
+export type Model = GetArrayInnerType<typeof models>;
+type Models = Record<Model, boolean>;
+type Options = Pick<Settings, GetArrayInnerType<typeof optionFields>>;
+
 interface UserGroup {
     id: string;
     displayName: string;
 }
-
-type GetArrayInnerType<T extends readonly any[]> = T[number];
-
-const models = ["dataSet", "program"] as const;
-export type Model = GetArrayInnerType<typeof models>;
-
-type Models = Record<Model, boolean>;
-
-const optionFields = ["models", "userGroups", "userGroupsForGeneration"] as const;
-type Options = Pick<Settings, GetArrayInnerType<typeof optionFields>>;
 
 interface PersistedData {
     models: Models;
@@ -116,12 +114,10 @@ export default class Settings {
         return this.update({ userGroupsForGeneration });
     }
 
-    getModelsInfo = _.memoize(
-        (): Array<{ key: Model; name: string; value: boolean }> => {
-            return [
-                { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
-                { key: "program", name: i18n.t("Program"), value: this.models.program },
-            ];
-        }
-    );
+    getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
+        return [
+            { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
+            { key: "program", name: i18n.t("Program"), value: this.models.program },
+        ];
+    }
 }

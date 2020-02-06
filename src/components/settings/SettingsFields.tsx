@@ -5,6 +5,8 @@ import i18n from "../../locales";
 import Settings, { Model } from "../../logic/settings";
 import { useAppContext } from "../../contexts/api-context";
 import { Id } from "d2-api";
+import classes from "*.module.css";
+import { makeStyles } from "@material-ui/styles";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -14,20 +16,23 @@ export interface SettingsFieldsProps {
 export default function SettingsFields(props: SettingsFieldsProps) {
     const { d2 } = useAppContext();
     const { settings, onChange } = props;
+    const classes = useStyles();
 
-    const options = settings.userGroups.map(userGroup => ({
-        value: userGroup.id,
-        text: userGroup.displayName,
-    }));
+    const options = React.useMemo(() => {
+        return settings.userGroups.map(userGroup => ({
+            value: userGroup.id,
+            text: userGroup.displayName,
+        }));
+    }, [settings.userGroups]);
 
-    const setModel = React.useCallback(
-        (model: Model) => {
-            return function(ev: React.ChangeEvent<HTMLInputElement>) {
+    function setModel(model: Model) {
+        return React.useCallback(
+            (ev: React.ChangeEvent<HTMLInputElement>) => {
                 onChange(settings.setModel(model, ev.target.checked));
-            };
-        },
-        [settings]
-    );
+            },
+            [settings]
+        );
+    }
 
     const setUserGroups = React.useCallback(
         (userGroupIds: Id[]) => {
@@ -36,12 +41,16 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         [settings]
     );
 
+    const modelsInfo = React.useMemo(() => {
+        return settings.getModelsInfo();
+    }, [settings]);
+
     return (
         <div>
             <FieldTitle>{i18n.t("Models")}</FieldTitle>
 
             <FormGroup row={true}>
-                {settings.getModelsInfo().map(({ key, name, value }) => (
+                {modelsInfo.map(({ key, name, value }) => (
                     <FormControlLabel
                         key={key}
                         control={<Checkbox checked={value} onChange={setModel(key)} />}
@@ -53,7 +62,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
 
             <FormGroup row={true}>
-                <div style={{ width: "100%" }}>
+                <div className={classes.selectorWrapper}>
                     <MultiSelector
                         d2={d2}
                         searchFilterLabel={true}
@@ -68,6 +77,10 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         </div>
     );
 }
+
+const useStyles = makeStyles({
+    selectorWrapper: { width: "100%" },
+});
 
 function FieldTitle(props: { children: React.ReactNode }) {
     return <h3>{props.children}</h3>;
