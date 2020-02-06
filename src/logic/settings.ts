@@ -4,18 +4,25 @@ import i18n from "../locales";
 import { generateUid } from "d2/uid";
 
 const models = ["dataSet", "program"] as const;
-const optionFields = [
-    "api",
-    "currentUser",
-    "models",
-    "userGroups",
-    "userGroupsForGeneration",
-] as const;
+
+const privateFields = ["api", "currentUser", "userGroups"] as const;
+
+const publicFields = ["models", "userGroupsForGeneration", "showOrgUnitsOnGeneration"] as const;
+
+const allFields = [...privateFields, ...publicFields];
 
 type GetArrayInnerType<T extends readonly any[]> = T[number];
 export type Model = GetArrayInnerType<typeof models>;
+
 type Models = Record<Model, boolean>;
-type Options = Pick<Settings, GetArrayInnerType<typeof optionFields>>;
+type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
+
+type PublicOption = Pick<
+    Options,
+    "models" | "userGroupsForGeneration" | "showOrgUnitsOnGeneration"
+>;
+
+export type Field = keyof PublicOption;
 
 interface UserGroup {
     id: string;
@@ -25,6 +32,7 @@ interface UserGroup {
 interface PersistedData {
     models: Models;
     userGroupNamesForGeneration: string[];
+    showOrgUnitsOnGeneration: boolean;
 }
 
 interface CurrentUser {
@@ -39,13 +47,14 @@ export default class Settings {
     public models: Models;
     public userGroups: UserGroup[];
     public userGroupsForGeneration: UserGroup[];
-    //private userGroupsByName: Record<Id, UserGroup>;
+    public showOrgUnitsOnGeneration: boolean;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
     static defaultData = {
         models: { dataSet: true, program: false },
         userGroupsForGeneration: ["HMIS Officers"],
+        showOrgUnitsOnGeneration: false,
     };
 
     constructor(options: Options) {
@@ -54,6 +63,7 @@ export default class Settings {
         this.models = options.models;
         this.userGroups = options.userGroups;
         this.userGroupsForGeneration = options.userGroupsForGeneration;
+        this.showOrgUnitsOnGeneration = options.showOrgUnitsOnGeneration;
     }
 
     static async build(api: D2Api): Promise<Settings> {
@@ -89,6 +99,8 @@ export default class Settings {
             userGroups: userGroups,
             models: data.models || Settings.defaultData.models,
             userGroupsForGeneration,
+            showOrgUnitsOnGeneration:
+                data.showOrgUnitsOnGeneration || Settings.defaultData.showOrgUnitsOnGeneration,
         });
     }
 
@@ -102,7 +114,7 @@ export default class Settings {
     }
 
     async save(): Promise<OkOrError> {
-        const { api, models, userGroupsForGeneration } = this;
+        const { api, models, userGroupsForGeneration, showOrgUnitsOnGeneration } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
 
@@ -117,7 +129,11 @@ export default class Settings {
 
         const settingsConstant = _(constants).get(0, null);
         const userGroupNamesForGeneration = userGroupsForGeneration.map(ug => ug.displayName);
-        const data: PersistedData = { models, userGroupNamesForGeneration };
+        const data: PersistedData = {
+            models,
+            userGroupNamesForGeneration,
+            showOrgUnitsOnGeneration,
+        };
         const newSettingsConstant: PartialPersistedModel<D2Constant> = {
             id: settingsConstant ? settingsConstant.id : generateUid(),
             code: Settings.constantCode,
@@ -134,12 +150,17 @@ export default class Settings {
         }
     }
 
-    update(newOptions: Partial<Options>): Settings {
-        return new Settings({ ..._.pick(this, optionFields), ...newOptions });
+    private updateOptions(newOptions: Partial<Options>): Settings {
+        return new Settings({ ..._.pick(this, allFields), ...newOptions });
+    }
+
+    update(options: Partial<PublicOption>): Settings {
+        const currentOptions = _.pick(this, allFields);
+        return new Settings({ ...currentOptions, ...options });
     }
 
     setModel(model: Model, value: boolean) {
-        return this.update({ models: { ...this.models, [model]: value } });
+        return this.updateOptions({ models: { ...this.models, [model]: value } });
     }
 
     setUserGroupsForGenerationFromIds(userGroupIds: Id[]) {
@@ -148,7 +169,7 @@ export default class Settings {
             .at(userGroupIds)
             .compact()
             .value();
-        return this.update({ userGroupsForGeneration });
+        return this.updateOptions({ userGroupsForGeneration });
     }
 
     isModelEnabled(key: Model) {

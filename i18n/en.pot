@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-06T11:00:23.603Z\n"
-"PO-Revision-Date: 2020-02-06T11:00:23.603Z\n"
+"POT-Creation-Date: 2020-02-06T12:43:05.778Z\n"
+"PO-Revision-Date: 2020-02-06T12:43:05.778Z\n"
 
 msgid "Imported"
 msgstr ""
@@ -17,13 +17,25 @@ msgstr ""
 msgid "Ignored"
 msgstr ""
 
-msgid "Template Generation"
+msgid "Data Set"
+msgstr ""
+
+msgid "Program"
+msgstr ""
+
+msgid "elements"
 msgstr ""
 
 msgid "Model"
 msgstr ""
 
-msgid "Select element to export..."
+msgid "Select {{element}} to {{action}}..."
+msgstr ""
+
+msgid "Template Generation"
+msgstr ""
+
+msgid "export"
 msgstr ""
 
 msgid "Start Year"
@@ -41,7 +53,7 @@ msgstr ""
 msgid "Bulk Import"
 msgstr ""
 
-msgid "Select element to import..."
+msgid "import"
 msgstr ""
 
 msgid "Drag and drop file to import"
@@ -68,8 +80,8 @@ msgstr ""
 msgid "User groups for Template Generation"
 msgstr ""
 
-msgid "Data set"
+msgid "Select at least one model"
 msgstr ""
 
-msgid "Program"
+msgid "Data set"
 msgstr ""
