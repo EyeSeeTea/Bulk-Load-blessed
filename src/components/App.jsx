@@ -148,8 +148,6 @@ class App extends React.Component {
             element.substr(element.lastIndexOf("/") + 1)
         );
 
-        // TODO: Add validation error message
-        if (orgUnits.length === 0) return;
         if (this.state.selectedProgramOrDataSet1 === undefined) return;
 
         this.props.loading.show(true);
@@ -419,15 +417,17 @@ class App extends React.Component {
                         </div>
                     )}
                     {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
-                        <OrgUnitsSelector
-                            api={this.props.api}
-                            onChange={this.handleOrgUnitTreeClick}
-                            selected={this.state.orgUnitTreeSelected}
-                            controls={controls}
-                            rootIds={this.state.orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={192}
-                        />
+                        settings.showOrgUnitsOnGeneration ? (
+                            <OrgUnitsSelector
+                                api={this.props.api}
+                                onChange={this.handleOrgUnitTreeClick}
+                                selected={this.state.orgUnitTreeSelected}
+                                controls={controls}
+                                rootIds={this.state.orgUnitTreeRootIds}
+                                fullWidth={false}
+                                height={192}
+                            />
+                        ) : null
                     ) : (
                         i18n.t("No Organisation Units found")
                     )}
