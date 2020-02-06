@@ -31,6 +31,8 @@ interface CurrentUser {
     userGroups: Ref[];
 }
 
+type OkOrError = { status: true } | { status: false; error: string };
+
 export default class Settings {
     public api: D2Api;
     public currentUser: CurrentUser;
@@ -90,8 +92,19 @@ export default class Settings {
         });
     }
 
-    async save() {
+    validate(): OkOrError {
+        const isSomeModelEnabled = _(this.models)
+            .values()
+            .some();
+        return isSomeModelEnabled
+            ? { status: true }
+            : { status: false, error: i18n.t("Select at least one model") };
+    }
+
+    async save(): Promise<OkOrError> {
         const { api, models, userGroupsForGeneration } = this;
+        const validation = this.validate();
+        if (!validation.status) return validation;
 
         const { constants } = await api.metadata
             .get({
@@ -112,7 +125,13 @@ export default class Settings {
             description: JSON.stringify(data, null, 2),
         };
 
-        return await api.metadata.post({ constants: [newSettingsConstant] }).getData();
+        const response = await api.metadata.post({ constants: [newSettingsConstant] }).getData();
+
+        if (response.status == "OK") {
+            return { status: true };
+        } else {
+            return { status: false, error: JSON.stringify(response.typeReports, null, 2) };
+        }
     }
 
     update(newOptions: Partial<Options>): Settings {

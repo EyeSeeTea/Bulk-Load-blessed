@@ -29,14 +29,14 @@ export default function SettingsComponent(props: SettingsProps) {
     const [unsavedSettings, setUnsavedSettings] = React.useState(settings);
 
     const save = React.useCallback(async () => {
-        const response = await unsavedSettings.save();
+        const result = await unsavedSettings.save();
 
-        if (response.status === "OK") {
+        if (result.status) {
             setOpenState(false);
             onChange(unsavedSettings);
             snackbar.success(i18n.t("Settings saved"));
         } else {
-            snackbar.error(JSON.stringify(response.typeReports));
+            snackbar.error(result.error);
         }
     }, [unsavedSettings]);
 

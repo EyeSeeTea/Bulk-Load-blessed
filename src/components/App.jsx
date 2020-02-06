@@ -58,6 +58,7 @@ class App extends React.Component {
             endYear: moment().year(),
             settings: undefined,
             isTemplateGenerationVisible: true,
+            modelOptions: [],
         };
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
@@ -257,14 +258,24 @@ class App extends React.Component {
     }
 
     onSettingsChange(settings) {
-        this.setState({
-            settings,
-            isTemplateGenerationVisible: settings.isTemplateGenerationVisible(),
-        });
+        const isTemplateGenerationVisible = settings.isTemplateGenerationVisible();
+
+        const modelOptions = _.compact([
+            settings.isModelEnabled("dataSet") && {
+                value: "dataSets",
+                label: i18n.t("Data Set"),
+            },
+            settings.isModelEnabled("program") && {
+                value: "programs",
+                label: i18n.t("Program"),
+            },
+        ]);
+
+        this.setState({ settings, isTemplateGenerationVisible, modelOptions });
     }
 
     render() {
-        const { settings, isTemplateGenerationVisible } = this.state;
+        const { settings, isTemplateGenerationVisible, modelOptions } = this.state;
 
         if (!settings) return null;
 
@@ -320,13 +331,7 @@ class App extends React.Component {
                             <Select
                                 placeholder={i18n.t("Model")}
                                 onChange={handleModelChange1}
-                                options={[
-                                    { value: "dataSets", label: "Data Set" },
-                                    {
-                                        value: "programs",
-                                        label: "Program",
-                                    },
-                                ]}
+                                options={modelOptions}
                             />
                         </div>
                         <div style={{ flexBasis: "70%", margin: "1em" }}>
@@ -428,16 +433,7 @@ class App extends React.Component {
                             <Select
                                 placeholder={i18n.t("Model")}
                                 onChange={handleModelChange2}
-                                options={[
-                                    {
-                                        value: "dataSets",
-                                        label: "Data Set",
-                                    },
-                                    {
-                                        value: "programs",
-                                        label: "Program",
-                                    },
-                                ]}
+                                options={modelOptions}
                             />
                         </div>
                         <div style={{ flexBasis: "70%", margin: "1em" }}>
