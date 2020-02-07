@@ -108,5 +108,5 @@ const useStyles = makeStyles({
 });
 
 function FieldTitle(props: { children: React.ReactNode }) {
-    return <h3>{props.children}</h3>;
+    return <h3 style={{ marginTop: 20 }}>{props.children}</h3>;
 }
