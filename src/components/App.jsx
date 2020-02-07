@@ -49,8 +49,9 @@ class App extends React.Component {
             orgUnitTreeRootIds: [],
             orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
+            importOrgUnitIds: [],
             selectedProgramOrDataSet1: undefined,
-            selectedProgramOrDataSet2: undefined,
+            importObject: undefined,
             importDataSheet: undefined,
             model1: undefined,
             startYear: 2010,
@@ -116,30 +117,21 @@ class App extends React.Component {
 
     searchForOrgUnits(searchValue = "") {
         const fields = "id,displayName,path,children::isNotEmpty,access";
+        const listOptions = { fields, level: 1, userOnly: true };
 
-        if (searchValue.trim().length === 0) {
-            return this.props.d2.models.organisationUnits
-                .list({
-                    fields,
-                    level: 1,
-                })
-                .then(result => {
-                    this.setState({
-                        orgUnitTreeBaseRoot: result.toArray().map(model => model.path),
-                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                    });
+        if (!searchValue.trim()) {
+            return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
+                this.setState({
+                    orgUnitTreeBaseRoot: result.toArray().map(model => model.path),
+                    orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
                 });
+            });
         } else {
-            return this.props.d2.models.organisationUnits
-                .list({
-                    fields,
-                    query: searchValue,
-                })
-                .then(result => {
-                    this.setState({
-                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                    });
+            return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
+                this.setState({
+                    orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
                 });
+            });
         }
     }
 
@@ -170,7 +162,7 @@ class App extends React.Component {
 
     async onDrop(files) {
         const { snackbar } = this.props;
-        const { dataSets, programs } = this.state;
+        const { dataSets, programs, settings } = this.state;
 
         if (_.isEmpty(files)) {
             snackbar.error(i18n.t("Cannot read file"));
@@ -179,7 +171,17 @@ class App extends React.Component {
         const file = files[0];
         try {
             const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
-            this.setState({ importDataSheet: file, selectedProgramOrDataSet2: object });
+            console.log({ object });
+
+            const importOrgUnitIds = settings.showOrgUnitsOnGeneration
+                ? this.state.orgUnitTreeRootIds
+                : object.organisationUnits.map(ou => ou.id);
+
+            this.setState({
+                importDataSheet: file,
+                importObject: object,
+                importOrgUnitIds,
+            });
         } catch (err) {
             snackbar.error(err.message || err.toString());
             return;
@@ -189,9 +191,10 @@ class App extends React.Component {
     handleDataImportClick() {
         // TODO: Missing options error checking
         // TODO: Add validation error message
-        if (this.state.selectedProgramOrDataSet2 === undefined) return;
-        if (this.state.importDataSheet === undefined) return;
-        if (this.state.orgUnitTreeSelected2 === undefined) return;
+        if (!this.state.importObject) return;
+        if (!this.state.importDataSheet) return;
+        if (!this.state.orgUnitTreeSelected2) return;
+
         const orgUnits = this.state.orgUnitTreeSelected2.map(path =>
             path.substr(path.lastIndexOf("/") + 1)
         );
@@ -200,25 +203,20 @@ class App extends React.Component {
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
-                element: this.state.selectedProgramOrDataSet2,
+                element: this.state.importObject,
                 organisationUnits: orgUnits,
             })
             .then(result => {
-                /*
-                console.log("DATASET");
-                console.log(result.element.id);
-                console.log("ORG UNITS");
-                console.log(result.organisationUnits);
-                console.log("datasets");
-                console.log(result.organisationUnits[0].dataSets);
-                */
-                if (
-                    result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
-                        .length === 0
-                ) {
-                    console.log("dataset no encontrado en la orgUnit seleccionada");
-                    return;
-                }
+                console.log({ result });
+                const orgUnit = result.organisationUnits[0];
+                if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
+                const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
+
+                if (_.isEmpty(dataSetsForElement))
+                    throw new Error(
+                        i18n.t("Selected organisation unit is not associated with the dataset")
+                    );
+
                 return sheetImport.readSheet({
                     ...result,
                     d2: this.props.d2,
@@ -228,7 +226,7 @@ class App extends React.Component {
             .then(data => {
                 return dhisConnector.importData({
                     d2: this.props.d2,
-                    element: this.state.selectedProgramOrDataSet2,
+                    element: this.state.importObject,
                     data: data,
                 });
             })
@@ -265,31 +263,37 @@ class App extends React.Component {
             });
     }
 
+    getNameForModel(key) {
+        return {
+            dataSet: i18n.t("Data Set"),
+            program: i18n.t("Program"),
+        }[key];
+    }
+
     onSettingsChange(settings) {
         const isTemplateGenerationVisible = settings.isTemplateGenerationVisible();
 
         const modelOptions = _.compact([
             settings.isModelEnabled("dataSet") && {
                 value: "dataSets",
-                label: i18n.t("Data Set"),
+                label: this.getNameForModel("dataSet"),
             },
             settings.isModelEnabled("program") && {
                 value: "programs",
-                label: i18n.t("Program"),
+                label: this.getNameForModel("program"),
             },
         ]);
 
-        const model1 = _.isEqual(this.state.modelOptions, modelOptions)
-            ? this.state.model1
-            : modelOptions.length === 1
-            ? modelOptions[0].value
-            : undefined;
+        const model1 = modelOptions.length === 1 ? modelOptions[0].value : undefined;
+        if (modelOptions.length === 1) this.handleModelChange1(modelOptions[0]);
 
-        if (this.state.model1 !== model1 && modelOptions.length === 1) {
-            this.handleModelChange1(modelOptions[0]);
-        }
-
-        this.setState({ settings, isTemplateGenerationVisible, modelOptions, model1 });
+        this.setState({
+            settings,
+            isTemplateGenerationVisible,
+            modelOptions,
+            model1,
+            importObject: undefined,
+        });
     }
 
     renderModelSelector = props => {
@@ -353,7 +357,7 @@ class App extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible, selectedProgramOrDataSet2 } = this.state;
+        const { settings, isTemplateGenerationVisible, importObject } = this.state;
 
         if (!settings) return null;
 
@@ -428,7 +432,7 @@ class App extends React.Component {
                                 controls={controls}
                                 rootIds={this.state.orgUnitTreeRootIds}
                                 fullWidth={false}
-                                height={192}
+                                height={220}
                             />
                         ) : null
                     ) : (
@@ -496,22 +500,22 @@ class App extends React.Component {
                         </div>
                     </Dropzone>
 
-                    {selectedProgramOrDataSet2 && (
+                    {importObject && (
                         <div style={{ margin: 20 }}>
-                            {selectedProgramOrDataSet2.type} -
-                            {selectedProgramOrDataSet2.displayName}
+                            {this.getNameForModel(importObject.type)} - {importObject.displayName} (
+                            {importObject.id})
                         </div>
                     )}
 
-                    {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
+                    {this.state.importObject ? (
                         <OrgUnitsSelector
                             api={this.props.api}
                             onChange={this.handleOrgUnitTreeClick2}
                             selected={this.state.orgUnitTreeSelected2}
                             controls={controls}
-                            rootIds={this.state.orgUnitTreeRootIds}
+                            rootIds={this.state.importOrgUnitIds}
                             fullWidth={false}
-                            height={192}
+                            height={220}
                         />
                     ) : (
                         i18n.t("No Organisation Units found")
@@ -529,6 +533,10 @@ class App extends React.Component {
                             variant="contained"
                             color="primary"
                             onClick={this.handleDataImportClick}
+                            disabled={
+                                !this.state.importObject ||
+                                _.isEmpty(this.state.orgUnitTreeSelected2)
+                            }
                         >
                             {i18n.t("Import data")}
                         </Button>
