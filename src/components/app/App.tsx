@@ -101,7 +101,7 @@ const App = () => {
             configI18n(data.userSettings);
             const appContext: AppContextI = { d2, api };
             setAppContext(appContext);
-            Object.assign(window, { pm: appContext });
+            Object.assign(window, { bulkLoad: appContext });
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
 
@@ -133,7 +133,7 @@ const App = () => {
                 <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                     <LoadingProvider>
                         <SnackbarProvider>
-                            <HeaderBar appName={"Project Monitoring"} />
+                            <HeaderBar appName={"Bulk Load"} />
 
                             <div id="app" className="content">
                                 <AppContext.Provider value={appContext}>

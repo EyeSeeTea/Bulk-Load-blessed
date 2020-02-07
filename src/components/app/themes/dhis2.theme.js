@@ -7,15 +7,15 @@ export const colors = {
     accentPrimaryLight: "#63A4FF",
     accentPrimaryLightest: "#EAF4FF",
 
-    accentSecondary: "#00796B",
-    accentSecondaryDark: "#004C40",
-    accentSecondaryLight: "#48A999",
-    accentSecondaryLightest: "#B2DFDB",
+    accentSecondary: "#fb8c00",
+    accentSecondaryLight: "#f57c00",
+    accentSecondaryDark: "#ff9800",
 
     black: "#000000",
     greyBlack: "#494949",
     grey: "#9E9E9E",
     greyLight: "#E0E0E0",
+    greyDisabled: "#8E8E8E",
     blueGrey: "#ECEFF1",
     snow: "#F4F6F8",
     white: "#FFFFFF", // Not included in palette!
@@ -25,6 +25,7 @@ export const colors = {
     positive: "#3D9305",
     info: "#EAF4FF",
 };
+
 export const palette = {
     common: {
         white: colors.white,
@@ -32,12 +33,12 @@ export const palette = {
     },
     action: {
         active: colors.greyBlack,
-        disabled: colors.greyLight,
+        disabled: colors.greyDisabled,
     },
     text: {
         primary: colors.black,
         secondary: colors.greyBlack,
-        disabled: colors.grey,
+        disabled: colors.greyDisabled,
         hint: colors.grey,
     },
     primary: {
@@ -49,10 +50,9 @@ export const palette = {
     },
     secondary: {
         main: colors.accentSecondary,
-        dark: colors.accentSecondaryDark,
         light: colors.accentSecondaryLight,
-        lightest: colors.accentSecondaryLightest, // Custom extension, not used by default
-        // contrastText: 'white',
+        dark: colors.accentSecondaryDark,
+        contrastText: "#fff",
     },
     error: {
         main: colors.negative, // This is automatically expanded to main/light/dark/contrastText, what do we use here?
