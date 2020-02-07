@@ -48,7 +48,7 @@ class App extends React.Component {
             orgUnitTreeSelected2: [],
             orgUnitTreeRootIds: [],
             elementSelectOptions1: [],
-            importOrgUnitIds: [],
+            importOrgUnitIds: undefined,
             selectedProgramOrDataSet1: undefined,
             importObject: undefined,
             importDataSheet: undefined,
@@ -164,7 +164,7 @@ class App extends React.Component {
             console.log({ object });
 
             const importOrgUnitIds = settings.showOrgUnitsOnGeneration
-                ? orgUnitTreeRootIds
+                ? undefined
                 : // Get only object orgUnits selected as user capture (or their children)
                   object.organisationUnits
                       .filter(ou =>
@@ -190,6 +190,8 @@ class App extends React.Component {
         if (!this.state.importDataSheet) return;
         if (!this.state.orgUnitTreeSelected2) return;
 
+        const { showOrgUnitsOnGeneration } = this.state.settings;
+
         const orgUnits = this.state.orgUnitTreeSelected2.map(path =>
             path.substr(path.lastIndexOf("/") + 1)
         );
@@ -203,19 +205,25 @@ class App extends React.Component {
             })
             .then(result => {
                 console.log({ result });
-                const orgUnit = result.organisationUnits[0];
-                if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
-                const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
-
-                if (_.isEmpty(dataSetsForElement))
-                    throw new Error(
-                        i18n.t("Selected organisation unit is not associated with the dataset")
+                if (!showOrgUnitsOnGeneration) {
+                    const orgUnit = result.organisationUnits[0];
+                    if (!orgUnit)
+                        throw new Error(i18n.t("Select a organisation units to import data"));
+                    const dataSetsForElement = orgUnit.dataSets.filter(
+                        e => e.id === result.element.id
                     );
+
+                    if (_.isEmpty(dataSetsForElement))
+                        throw new Error(
+                            i18n.t("Selected organisation unit is not associated with the dataset")
+                        );
+                }
 
                 return sheetImport.readSheet({
                     ...result,
                     d2: this.props.d2,
                     file: this.state.importDataSheet,
+                    useBuilderOrgUnits: !showOrgUnitsOnGeneration,
                 });
             })
             .then(data => {
@@ -355,6 +363,10 @@ class App extends React.Component {
         const { settings, isTemplateGenerationVisible, importObject } = this.state;
 
         if (!settings) return null;
+
+        const isImportEnabled =
+            this.state.importObject &&
+            (settings.showOrgUnitsOnGeneration || !_.isEmpty(this.state.orgUnitTreeSelected2));
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
@@ -510,6 +522,7 @@ class App extends React.Component {
                     )}
 
                     {this.state.importObject &&
+                        this.state.importOrgUnitIds &&
                         (this.state.importOrgUnitIds.length > 0 ? (
                             <OrgUnitsSelector
                                 api={this.props.api}
@@ -536,10 +549,7 @@ class App extends React.Component {
                             variant="contained"
                             color="primary"
                             onClick={this.handleDataImportClick}
-                            disabled={
-                                !this.state.importObject ||
-                                _.isEmpty(this.state.orgUnitTreeSelected2)
-                            }
+                            disabled={!isImportEnabled}
                         >
                             {i18n.t("Import data")}
                         </Button>

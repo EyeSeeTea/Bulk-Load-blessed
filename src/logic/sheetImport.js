@@ -60,7 +60,7 @@ export function readSheet(builder) {
         is.on("done", () => {
             const dataEntrySheet = workbook.getWorksheet("Data Entry");
             const metadataSheet = workbook.getWorksheet("Metadata");
-            // const validationSheet = workbook.getWorksheet("Validation");
+            const validationSheet = workbook.getWorksheet("Validation");
 
             // TODO: Check malformed template (undefined?)
 
@@ -92,11 +92,14 @@ export function readSheet(builder) {
                         result["completeDate"] = dateFormat(new Date(), "yyyy-mm-dd");
                     }
 
-                    if (row.values[1] !== undefined) {
-                        result.orgUnit = builder.organisationUnits[0].id; //parseMetadataId(metadataSheet, row.values[1]);
+                    if (builder.useBuilderOrgUnits) {
+                        result.orgUnit = builder.organisationUnits[0].id;
                     } else {
-                        // TODO: Do not hardcode this
-                        result.orgUnit = builder.organisationUnits[0].id; // validationSheet.getCell("A3").formula.substr(1);
+                        if (row.values[1] !== undefined) {
+                            result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
+                        } else {
+                            result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
+                        }
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop
