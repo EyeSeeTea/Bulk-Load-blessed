@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-06T12:43:05.778Z\n"
-"PO-Revision-Date: 2020-02-06T12:43:05.778Z\n"
+"POT-Creation-Date: 2020-02-07T08:24:37.040Z\n"
+"PO-Revision-Date: 2020-02-07T08:24:37.040Z\n"
 
 msgid "Imported"
 msgstr ""
@@ -75,6 +75,12 @@ msgid "Save"
 msgstr ""
 
 msgid "Models"
+msgstr ""
+
+msgid "Visibility"
+msgstr ""
+
+msgid "Show Organisation Units On Template Generation"
 msgstr ""
 
 msgid "User groups for Template Generation"
