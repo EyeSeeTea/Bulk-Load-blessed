@@ -3,7 +3,7 @@ import _ from "lodash";
 import PropTypes from "prop-types";
 import Dropzone from "react-dropzone";
 
-import { Button, Paper, withStyles } from "@material-ui/core";
+import { Button, Paper } from "@material-ui/core";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 
@@ -16,8 +16,10 @@ import moment from "moment";
 import { buildPossibleYears } from "../utils/periods";
 import i18n from "@dhis2/d2-i18n";
 import Select from "./Select";
-import { OrgUnitsSelector, withSnackbar, withLoading } from "d2-ui-components";
+import { OrgUnitsSelector, useSnackbar, useLoading } from "d2-ui-components";
 import Settings from "./settings/Settings";
+import { useAppContext } from "../contexts/api-context";
+import { makeStyles } from "@material-ui/styles";
 
 const styles = theme => ({
     root: {
@@ -33,7 +35,7 @@ const controls = {
     selectAll: false,
 };
 
-class App extends React.Component {
+class AppComponent extends React.Component {
     constructor(props) {
         super(props);
 
@@ -349,7 +351,7 @@ class App extends React.Component {
                     )}
                     {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
                         <OrgUnitsSelector
-                            d2={this.props.d2}
+                            api={this.props.api}
                             onChange={this.handleOrgUnitTreeClick}
                             selected={this.state.orgUnitTreeSelected}
                             controls={controls}
@@ -454,7 +456,7 @@ class App extends React.Component {
 
                     {!_.isEmpty(this.state.orgUnitTreeRoots) ? (
                         <OrgUnitsSelector
-                            d2={this.props.d2}
+                            api={this.props.api}
                             onChange={this.handleOrgUnitTreeClick2}
                             selected={this.state.orgUnitTreeSelected2}
                             controls={controls}
@@ -488,8 +490,19 @@ class App extends React.Component {
     }
 }
 
-App.childContextTypes = {
+AppComponent.childContextTypes = {
     d2: PropTypes.object,
 };
 
-export default withStyles(styles)(withLoading(withSnackbar(App)));
+const useStyles = makeStyles(styles);
+
+export default function App() {
+    const classes = useStyles();
+    const loading = useLoading();
+    const snackbar = useSnackbar();
+    const { d2, api } = useAppContext();
+
+    return (
+        <AppComponent classes={classes} loading={loading} snackbar={snackbar} api={api} d2={d2} />
+    );
+}
