@@ -501,9 +501,16 @@ class App extends React.Component {
                     </Dropzone>
 
                     {importObject && (
-                        <div style={{ margin: 20 }}>
-                            {this.getNameForModel(importObject.type)} - {importObject.displayName} (
-                            {importObject.id})
+                        <div
+                            style={{
+                                marginTop: 35,
+                                marginBottom: 15,
+                                marginLeft: 0,
+                                fontSize: "1.2em",
+                            }}
+                        >
+                            {this.getNameForModel(importObject.type)} to import:{" "}
+                            {importObject.displayName} ({importObject.id})
                         </div>
                     )}
 

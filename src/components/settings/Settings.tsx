@@ -77,6 +77,6 @@ export default function SettingsComponent(props: SettingsProps) {
 }
 
 const useStyles = makeStyles({
-    content: { padding: 20, paddingTop: 0, marginBottom: 10 },
+    content: { padding: 30, paddingTop: 0, marginTop: 0, marginBottom: 10 },
     button: { position: "absolute", right: 10, top: 70 },
 });
