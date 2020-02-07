@@ -47,7 +47,6 @@ class App extends React.Component {
             orgUnitTreeSelected: [],
             orgUnitTreeSelected2: [],
             orgUnitTreeRootIds: [],
-            orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
             importOrgUnitIds: [],
             selectedProgramOrDataSet1: undefined,
@@ -71,7 +70,7 @@ class App extends React.Component {
 
     async componentDidMount() {
         this.props.loading.show();
-        await Promise.all([this.loadUserInformation(), this.searchForOrgUnits()]);
+        await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
         // Load settings once data is already loaded so we can render the objects in single model
         await this.loadSettings();
         this.props.loading.hide();
@@ -115,24 +114,15 @@ class App extends React.Component {
         });
     }
 
-    searchForOrgUnits(searchValue = "") {
+    getUserOrgUnits() {
         const fields = "id,displayName,path,children::isNotEmpty,access";
-        const listOptions = { fields, level: 1, userOnly: true };
+        const listOptions = { fields, userOnly: true };
 
-        if (!searchValue.trim()) {
-            return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
-                this.setState({
-                    orgUnitTreeBaseRoot: result.toArray().map(model => model.path),
-                    orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                });
+        return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
+            this.setState({
+                orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
             });
-        } else {
-            return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
-                this.setState({
-                    orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                });
-            });
-        }
+        });
     }
 
     handleTemplateDownloadClick() {
@@ -162,20 +152,25 @@ class App extends React.Component {
 
     async onDrop(files) {
         const { snackbar } = this.props;
-        const { dataSets, programs, settings } = this.state;
+        const { dataSets, programs, settings, orgUnitTreeRootIds } = this.state;
 
-        if (_.isEmpty(files)) {
+        const file = files[0];
+        if (!file) {
             snackbar.error(i18n.t("Cannot read file"));
             return;
         }
-        const file = files[0];
         try {
             const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
             console.log({ object });
 
             const importOrgUnitIds = settings.showOrgUnitsOnGeneration
-                ? this.state.orgUnitTreeRootIds
-                : object.organisationUnits.map(ou => ou.id);
+                ? orgUnitTreeRootIds
+                : // Get only object orgUnits selected as user capture (or their children)
+                  object.organisationUnits
+                      .filter(ou =>
+                          _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
+                      )
+                      .map(ou => ou.id);
 
             this.setState({
                 importDataSheet: file,
@@ -436,7 +431,7 @@ class App extends React.Component {
                             />
                         ) : null
                     ) : (
-                        i18n.t("No Organisation Units found")
+                        i18n.t("No capture organisations units")
                     )}
 
                     <div
@@ -514,19 +509,20 @@ class App extends React.Component {
                         </div>
                     )}
 
-                    {this.state.importObject ? (
-                        <OrgUnitsSelector
-                            api={this.props.api}
-                            onChange={this.handleOrgUnitTreeClick2}
-                            selected={this.state.orgUnitTreeSelected2}
-                            controls={controls}
-                            rootIds={this.state.importOrgUnitIds}
-                            fullWidth={false}
-                            height={220}
-                        />
-                    ) : (
-                        i18n.t("No Organisation Units found")
-                    )}
+                    {this.state.importObject &&
+                        (this.state.importOrgUnitIds.length > 0 ? (
+                            <OrgUnitsSelector
+                                api={this.props.api}
+                                onChange={this.handleOrgUnitTreeClick2}
+                                selected={this.state.orgUnitTreeSelected2}
+                                controls={controls}
+                                rootIds={this.state.importOrgUnitIds}
+                                fullWidth={false}
+                                height={220}
+                            />
+                        ) : (
+                            i18n.t("No capture org unit match element org units")
+                        ))}
 
                     <div
                         className="row"
