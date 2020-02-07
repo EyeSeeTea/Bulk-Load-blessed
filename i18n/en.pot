@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-05T14:06:52.389Z\n"
-"PO-Revision-Date: 2020-02-05T14:06:52.389Z\n"
+"POT-Creation-Date: 2020-02-07T08:24:37.040Z\n"
+"PO-Revision-Date: 2020-02-07T08:24:37.040Z\n"
 
 msgid "Imported"
 msgstr ""
@@ -17,13 +17,25 @@ msgstr ""
 msgid "Ignored"
 msgstr ""
 
-msgid "Template Generation"
+msgid "Data Set"
+msgstr ""
+
+msgid "Program"
+msgstr ""
+
+msgid "elements"
 msgstr ""
 
 msgid "Model"
 msgstr ""
 
-msgid "Select element to export..."
+msgid "Select {{element}} to {{action}}..."
+msgstr ""
+
+msgid "Template Generation"
+msgstr ""
+
+msgid "export"
 msgstr ""
 
 msgid "Start Year"
@@ -41,7 +53,7 @@ msgstr ""
 msgid "Bulk Import"
 msgstr ""
 
-msgid "Select element to import..."
+msgid "import"
 msgstr ""
 
 msgid "Drag and drop file to import"
@@ -50,13 +62,10 @@ msgstr ""
 msgid "Import data"
 msgstr ""
 
+msgid "Settings saved"
+msgstr ""
+
 msgid "Settings"
-msgstr ""
-
-msgid "Loading..."
-msgstr ""
-
-msgid "Error"
 msgstr ""
 
 msgid "Cancel"
@@ -68,11 +77,17 @@ msgstr ""
 msgid "Models"
 msgstr ""
 
+msgid "Visibility"
+msgstr ""
+
+msgid "Show Organisation Units On Template Generation"
+msgstr ""
+
 msgid "User groups for Template Generation"
 msgstr ""
 
-msgid "Data set"
+msgid "Select at least one model"
 msgstr ""
 
-msgid "Program"
+msgid "Data set"
 msgstr ""

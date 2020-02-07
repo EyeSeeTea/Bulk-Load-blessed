@@ -28,6 +28,7 @@ yarn-error.log*
 src/locales/
 src/react-app.d.ts
 scripts/
+bak
 
 # cypress
 cypress/screenshots/
