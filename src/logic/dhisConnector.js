@@ -32,7 +32,7 @@ export function getUserInformation(builder) {
                 programCollection.forEach(program => elements.push(program.id));
                 const API_USER_PROGRAMS_DATASETS =
                     API_BASE_URL +
-                    "/metadata.json?fields=id,displayName," +
+                    "/metadata.json?fields=id,displayName,organisationUnits[id]," +
                     "categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[" +
                     elements.toString() +
                     "]";
