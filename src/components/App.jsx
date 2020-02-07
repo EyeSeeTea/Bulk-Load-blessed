@@ -36,7 +36,7 @@ const controls = {
     selectAll: false,
 };
 
-class App extends React.Component {
+class AppComponent extends React.Component {
     constructor(props) {
         super(props);
 
@@ -560,17 +560,19 @@ class App extends React.Component {
     }
 }
 
-App.childContextTypes = {
+AppComponent.childContextTypes = {
     d2: PropTypes.object,
 };
 
 const useStyles = makeStyles(styles);
 
-export default function App2() {
+export default function App() {
     const classes = useStyles();
     const loading = useLoading();
     const snackbar = useSnackbar();
     const { d2, api } = useAppContext();
 
-    return <App classes={classes} loading={loading} snackbar={snackbar} api={api} d2={d2} />;
+    return (
+        <AppComponent classes={classes} loading={loading} snackbar={snackbar} api={api} d2={d2} />
+    );
 }
