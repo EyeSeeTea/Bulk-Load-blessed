@@ -159,9 +159,9 @@ class AppComponent extends React.Component {
             snackbar.error(i18n.t("Cannot read file"));
             return;
         }
+
         try {
             const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
-            console.log({ object });
 
             const importOrgUnitIds = settings.showOrgUnitsOnGeneration
                 ? undefined
@@ -178,8 +178,13 @@ class AppComponent extends React.Component {
                 importOrgUnitIds,
             });
         } catch (err) {
+            console.error(err);
             snackbar.error(err.message || err.toString());
-            return;
+            this.setState({
+                importDataSheet: file,
+                importObject: undefined,
+                importOrgUnitIds: undefined,
+            });
         }
     }
 

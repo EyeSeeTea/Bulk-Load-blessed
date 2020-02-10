@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { getObjectVersion } from "./utils";
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
@@ -245,6 +246,14 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
     dataEntrySheet.row(2).freeze();
     dataEntrySheet.row(1).setHeight(30);
     dataEntrySheet.row(2).setHeight(50);
+
+    const version = getObjectVersion(element);
+    if (version) {
+        dataEntrySheet
+            .cell(1, 1)
+            .string(`Version: ${version}`)
+            .style(baseStyle);
+    }
 
     // Add column titles
     let columnId = 1;
