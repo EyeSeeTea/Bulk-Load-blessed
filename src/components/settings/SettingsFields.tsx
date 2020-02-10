@@ -35,9 +35,16 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         );
     }
 
-    const setUserGroups = React.useCallback(
+    const setUserGroupsForGeneration = React.useCallback(
         (userGroupIds: Id[]) => {
             onChange(settings.setUserGroupsForGenerationFromIds(userGroupIds));
+        },
+        [settings]
+    );
+
+    const setUserGroupsForSettings = React.useCallback(
+        (userGroupIds: Id[]) => {
+            onChange(settings.setUserGroupsForSettingsFromIds(userGroupIds));
         },
         [settings]
     );
@@ -93,9 +100,25 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                         searchFilterLabel={true}
                         ordered={false}
                         height={200}
-                        onChange={setUserGroups}
+                        onChange={setUserGroupsForGeneration}
                         options={options}
                         selected={settings.userGroupsForGeneration.map(userGroup => userGroup.id)}
+                    />
+                </div>
+            </FormGroup>
+
+            <FieldTitle>{i18n.t("User groups with access to Settings")}</FieldTitle>
+
+            <FormGroup row={true}>
+                <div className={classes.selectorWrapper}>
+                    <MultiSelector
+                        d2={d2}
+                        searchFilterLabel={true}
+                        ordered={false}
+                        height={200}
+                        onChange={setUserGroupsForSettings}
+                        options={options}
+                        selected={settings.userGroupsForSettings.map(userGroup => userGroup.id)}
                     />
                 </div>
             </FormGroup>

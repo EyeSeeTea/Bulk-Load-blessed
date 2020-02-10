@@ -7,7 +7,12 @@ const models = ["dataSet", "program"] as const;
 
 const privateFields = ["api", "currentUser", "userGroups"] as const;
 
-const publicFields = ["models", "userGroupsForGeneration", "showOrgUnitsOnGeneration"] as const;
+const publicFields = [
+    "models",
+    "userGroupsForGeneration",
+    "userGroupsForSettings",
+    "showOrgUnitsOnGeneration",
+] as const;
 
 const allFields = [...privateFields, ...publicFields];
 
@@ -16,11 +21,7 @@ export type Model = GetArrayInnerType<typeof models>;
 
 type Models = Record<Model, boolean>;
 type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
-
-type PublicOption = Pick<
-    Options,
-    "models" | "userGroupsForGeneration" | "showOrgUnitsOnGeneration"
->;
+type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
 export type Field = keyof PublicOption;
 
@@ -32,11 +33,13 @@ interface UserGroup {
 interface PersistedData {
     models: Models;
     userGroupNamesForGeneration: string[];
+    userGroupNamesForSettings: string[];
     showOrgUnitsOnGeneration: boolean;
 }
 
 interface CurrentUser {
     userGroups: Ref[];
+    authorities: Set<string>;
 }
 
 type OkOrError = { status: true } | { status: false; error: string };
@@ -47,6 +50,7 @@ export default class Settings {
     public models: Models;
     public userGroups: UserGroup[];
     public userGroupsForGeneration: UserGroup[];
+    public userGroupsForSettings: UserGroup[];
     public showOrgUnitsOnGeneration: boolean;
 
     static constantCode = "BULK_LOAD_SETTINGS";
@@ -54,6 +58,7 @@ export default class Settings {
     static defaultData = {
         models: { dataSet: true, program: false },
         userGroupsForGeneration: ["HMIS Officers"],
+        userGroupsForSettings: [],
         showOrgUnitsOnGeneration: false,
     };
 
@@ -63,13 +68,19 @@ export default class Settings {
         this.models = options.models;
         this.userGroups = options.userGroups;
         this.userGroupsForGeneration = options.userGroupsForGeneration;
+        this.userGroupsForSettings = options.userGroupsForSettings;
         this.showOrgUnitsOnGeneration = options.showOrgUnitsOnGeneration;
     }
 
     static async build(api: D2Api): Promise<Settings> {
-        const currentUser = await api.currentUser
-            .get({ fields: { userGroups: { id: true } } })
+        const d2CurrentUser = await api.currentUser
+            .get({ fields: { userGroups: { id: true }, authorities: true } })
             .getData();
+        const currentUser: CurrentUser = {
+            ...d2CurrentUser,
+            authorities: new Set(d2CurrentUser.authorities),
+        };
+
         const { userGroups, constants } = await api.metadata
             .get({
                 userGroups: {
@@ -87,11 +98,14 @@ export default class Settings {
             ? JSON.parse(settingsConstant.description)
             : {};
 
-        const userGroupsForGeneration = _(userGroups)
-            .keyBy(userGroup => userGroup.displayName)
-            .at(data.userGroupNamesForGeneration || Settings.defaultData.userGroupsForGeneration)
-            .compact()
-            .value();
+        const userGroupsForGeneration = getUserGroups(
+            userGroups,
+            data.userGroupNamesForGeneration || Settings.defaultData.userGroupsForGeneration
+        );
+        const userGroupsForSettings = getUserGroups(
+            userGroups,
+            data.userGroupNamesForSettings || Settings.defaultData.userGroupsForSettings
+        );
 
         return new Settings({
             api,
@@ -99,6 +113,7 @@ export default class Settings {
             userGroups: userGroups,
             models: data.models || Settings.defaultData.models,
             userGroupsForGeneration,
+            userGroupsForSettings,
             showOrgUnitsOnGeneration:
                 data.showOrgUnitsOnGeneration || Settings.defaultData.showOrgUnitsOnGeneration,
         });
@@ -114,7 +129,13 @@ export default class Settings {
     }
 
     async save(): Promise<OkOrError> {
-        const { api, models, userGroupsForGeneration, showOrgUnitsOnGeneration } = this;
+        const {
+            api,
+            models,
+            userGroupsForGeneration,
+            userGroupsForSettings,
+            showOrgUnitsOnGeneration,
+        } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
 
@@ -129,9 +150,11 @@ export default class Settings {
 
         const settingsConstant = _(constants).get(0, null);
         const userGroupNamesForGeneration = userGroupsForGeneration.map(ug => ug.displayName);
+        const userGroupNamesForSettings = userGroupsForSettings.map(ug => ug.displayName);
         const data: PersistedData = {
             models,
             userGroupNamesForGeneration,
+            userGroupNamesForSettings,
             showOrgUnitsOnGeneration,
         };
         const newSettingsConstant: PartialPersistedModel<D2Constant> = {
@@ -164,12 +187,15 @@ export default class Settings {
     }
 
     setUserGroupsForGenerationFromIds(userGroupIds: Id[]) {
-        const userGroupsForGeneration = _(this.userGroups)
-            .keyBy(userGroup => userGroup.id)
-            .at(userGroupIds)
-            .compact()
-            .value();
-        return this.updateOptions({ userGroupsForGeneration });
+        return this.updateOptions({
+            userGroupsForGeneration: this.getUserGroupsFromIds(userGroupIds),
+        });
+    }
+
+    setUserGroupsForSettingsFromIds(userGroupIds: Id[]) {
+        return this.updateOptions({
+            userGroupsForSettings: this.getUserGroupsFromIds(userGroupIds),
+        });
     }
 
     isModelEnabled(key: Model) {
@@ -177,9 +203,12 @@ export default class Settings {
     }
 
     isTemplateGenerationVisible() {
-        return !_(this.currentUser.userGroups)
-            .intersectionBy(this.userGroupsForGeneration, userGroup => userGroup.id)
-            .isEmpty();
+        return this.hasCurrentUserAnyGroup(this.userGroupsForGeneration);
+    }
+
+    areSettingsVisibleForCurrentUser(): boolean {
+        const { authorities } = this.currentUser;
+        return authorities.has("ALL") || this.hasCurrentUserAnyGroup(this.userGroupsForSettings);
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -188,4 +217,26 @@ export default class Settings {
             { key: "program", name: i18n.t("Program"), value: this.models.program },
         ];
     }
+
+    private getUserGroupsFromIds(userGroupIds: Id[]): UserGroup[] {
+        return _(this.userGroups)
+            .keyBy(userGroup => userGroup.id)
+            .at(userGroupIds)
+            .compact()
+            .value();
+    }
+
+    private hasCurrentUserAnyGroup(userGroups: UserGroup[]): boolean {
+        return !_(this.currentUser.userGroups)
+            .intersectionBy(userGroups, userGroup => userGroup.id)
+            .isEmpty();
+    }
+}
+
+function getUserGroups(userGroups: { id: string; displayName: string }[], names: string[]) {
+    return _(userGroups)
+        .keyBy(userGroup => userGroup.displayName)
+        .at(names)
+        .compact()
+        .value();
 }

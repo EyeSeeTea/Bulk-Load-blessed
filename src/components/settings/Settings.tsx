@@ -45,6 +45,12 @@ export default function SettingsComponent(props: SettingsProps) {
         setUnsavedSettings(settings);
     }, [settings]);
 
+    const isComponentVisible = React.useMemo(() => {
+        return settings.areSettingsVisibleForCurrentUser();
+    }, [settings]);
+
+    if (!isComponentVisible) return null;
+
     return (
         <React.Fragment>
             <div className={classes.button}>
