@@ -47,11 +47,10 @@ class AppComponent extends React.Component {
             orgUnitTreeSelected: [],
             orgUnitTreeSelected2: [],
             orgUnitTreeRootIds: [],
-            orgUnitTreeBaseRoot: [],
             elementSelectOptions1: [],
-            elementSelectOptions2: [],
+            importOrgUnitIds: undefined,
             selectedProgramOrDataSet1: undefined,
-            selectedProgramOrDataSet2: undefined,
+            importObject: undefined,
             importDataSheet: undefined,
             model1: undefined,
             startYear: 2010,
@@ -66,11 +65,12 @@ class AppComponent extends React.Component {
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
         this.onSettingsChange = this.onSettingsChange.bind(this);
+        this.onDrop = this.onDrop.bind(this).bind(this);
     }
 
     async componentDidMount() {
         this.props.loading.show();
-        await Promise.all([this.loadUserInformation(), this.searchForOrgUnits()]);
+        await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
         // Load settings once data is already loaded so we can render the objects in single model
         await this.loadSettings();
         this.props.loading.hide();
@@ -114,33 +114,15 @@ class AppComponent extends React.Component {
         });
     }
 
-    searchForOrgUnits(searchValue = "") {
+    getUserOrgUnits() {
         const fields = "id,displayName,path,children::isNotEmpty,access";
+        const listOptions = { fields, userOnly: true };
 
-        if (searchValue.trim().length === 0) {
-            return this.props.d2.models.organisationUnits
-                .list({
-                    fields,
-                    level: 1,
-                })
-                .then(result => {
-                    this.setState({
-                        orgUnitTreeBaseRoot: result.toArray().map(model => model.path),
-                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                    });
-                });
-        } else {
-            return this.props.d2.models.organisationUnits
-                .list({
-                    fields,
-                    query: searchValue,
-                })
-                .then(result => {
-                    this.setState({
-                        orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                    });
-                });
-        }
+        return this.props.d2.models.organisationUnits.list(listOptions).then(result => {
+            this.setState({
+                orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
+            });
+        });
     }
 
     handleTemplateDownloadClick() {
@@ -168,18 +150,48 @@ class AppComponent extends React.Component {
             });
     }
 
-    onDrop(file) {
-        this.setState({
-            importDataSheet: file[0],
-        });
+    async onDrop(files) {
+        const { snackbar } = this.props;
+        const { dataSets, programs, settings, orgUnitTreeRootIds } = this.state;
+
+        const file = files[0];
+        if (!file) {
+            snackbar.error(i18n.t("Cannot read file"));
+            return;
+        }
+        try {
+            const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
+            console.log({ object });
+
+            const importOrgUnitIds = settings.showOrgUnitsOnGeneration
+                ? undefined
+                : // Get only object orgUnits selected as user capture (or their children)
+                  object.organisationUnits
+                      .filter(ou =>
+                          _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
+                      )
+                      .map(ou => ou.id);
+
+            this.setState({
+                importDataSheet: file,
+                importObject: object,
+                importOrgUnitIds,
+            });
+        } catch (err) {
+            snackbar.error(err.message || err.toString());
+            return;
+        }
     }
 
     handleDataImportClick() {
         // TODO: Missing options error checking
         // TODO: Add validation error message
-        if (this.state.selectedProgramOrDataSet2 === undefined) return;
-        if (this.state.importDataSheet === undefined) return;
-        if (this.state.orgUnitTreeSelected2 === undefined) return;
+        if (!this.state.importObject) return;
+        if (!this.state.importDataSheet) return;
+        if (!this.state.orgUnitTreeSelected2) return;
+
+        const { showOrgUnitsOnGeneration } = this.state.settings;
+
         const orgUnits = this.state.orgUnitTreeSelected2.map(path =>
             path.substr(path.lastIndexOf("/") + 1)
         );
@@ -188,35 +200,36 @@ class AppComponent extends React.Component {
         dhisConnector
             .getElementMetadata({
                 d2: this.props.d2,
-                element: this.state.selectedProgramOrDataSet2,
+                element: this.state.importObject,
                 organisationUnits: orgUnits,
             })
             .then(result => {
-                /*
-                console.log("DATASET");
-                console.log(result.element.id);
-                console.log("ORG UNITS");
-                console.log(result.organisationUnits);
-                console.log("datasets");
-                console.log(result.organisationUnits[0].dataSets);
-                */
-                if (
-                    result.organisationUnits[0].dataSets.filter(e => e.id === result.element.id)
-                        .length === 0
-                ) {
-                    console.log("dataset no encontrado en la orgUnit seleccionada");
-                    return;
+                console.log({ result });
+                if (!showOrgUnitsOnGeneration) {
+                    const orgUnit = result.organisationUnits[0];
+                    if (!orgUnit)
+                        throw new Error(i18n.t("Select a organisation units to import data"));
+                    const dataSetsForElement = orgUnit.dataSets.filter(
+                        e => e.id === result.element.id
+                    );
+
+                    if (_.isEmpty(dataSetsForElement))
+                        throw new Error(
+                            i18n.t("Selected organisation unit is not associated with the dataset")
+                        );
                 }
+
                 return sheetImport.readSheet({
                     ...result,
                     d2: this.props.d2,
                     file: this.state.importDataSheet,
+                    useBuilderOrgUnits: !showOrgUnitsOnGeneration,
                 });
             })
             .then(data => {
                 return dhisConnector.importData({
                     d2: this.props.d2,
-                    element: this.state.selectedProgramOrDataSet2,
+                    element: this.state.importObject,
                     data: data,
                 });
             })
@@ -253,32 +266,37 @@ class AppComponent extends React.Component {
             });
     }
 
+    getNameForModel(key) {
+        return {
+            dataSet: i18n.t("Data Set"),
+            program: i18n.t("Program"),
+        }[key];
+    }
+
     onSettingsChange(settings) {
         const isTemplateGenerationVisible = settings.isTemplateGenerationVisible();
 
         const modelOptions = _.compact([
             settings.isModelEnabled("dataSet") && {
                 value: "dataSets",
-                label: i18n.t("Data Set"),
+                label: this.getNameForModel("dataSet"),
             },
             settings.isModelEnabled("program") && {
                 value: "programs",
-                label: i18n.t("Program"),
+                label: this.getNameForModel("program"),
             },
         ]);
 
-        const model1 = _.isEqual(this.state.modelOptions, modelOptions)
-            ? this.state.model1
-            : modelOptions.length === 1
-            ? modelOptions[0].value
-            : undefined;
+        const model1 = modelOptions.length === 1 ? modelOptions[0].value : undefined;
+        if (modelOptions.length === 1) this.handleModelChange1(modelOptions[0]);
 
-        if (this.state.model1 !== model1 && modelOptions.length === 1) {
-            this.handleModelChange1(modelOptions[0]);
-            this.handleModelChange2(modelOptions[0]);
-        }
-
-        this.setState({ settings, isTemplateGenerationVisible, modelOptions, model1 });
+        this.setState({
+            settings,
+            isTemplateGenerationVisible,
+            modelOptions,
+            model1,
+            importObject: undefined,
+        });
     }
 
     renderModelSelector = props => {
@@ -332,14 +350,6 @@ class AppComponent extends React.Component {
         this.setState({ selectedProgramOrDataSet1: selectedOption });
     };
 
-    handleModelChange2 = selectedOption => {
-        this.setState({ elementSelectOptions2: this.state[selectedOption.value] });
-    };
-
-    handleElementChange2 = selectedOption => {
-        this.setState({ selectedProgramOrDataSet2: selectedOption });
-    };
-
     handleStartYear = selectedOption => {
         this.setState({ startYear: selectedOption.value });
     };
@@ -350,9 +360,13 @@ class AppComponent extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible } = this.state;
+        const { settings, isTemplateGenerationVisible, importObject } = this.state;
 
         if (!settings) return null;
+
+        const isImportEnabled =
+            this.state.importObject &&
+            (settings.showOrgUnitsOnGeneration || !_.isEmpty(this.state.orgUnitTreeSelected2));
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
@@ -425,11 +439,11 @@ class AppComponent extends React.Component {
                                 controls={controls}
                                 rootIds={this.state.orgUnitTreeRootIds}
                                 fullWidth={false}
-                                height={192}
+                                height={220}
                             />
                         ) : null
                     ) : (
-                        i18n.t("No Organisation Units found")
+                        i18n.t("No capture organisations units")
                     )}
 
                     <div
@@ -459,12 +473,6 @@ class AppComponent extends React.Component {
                 >
                     <h1>{i18n.t("Bulk Import")}</h1>
 
-                    <ModelSelector
-                        action={i18n.t("import")}
-                        onModelChange={this.handleModelChange2}
-                        onObjectChange={this.handleElementChange2}
-                        objectOptions={this.state.elementSelectOptions2}
-                    />
                     <Dropzone
                         accept={
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
@@ -472,7 +480,7 @@ class AppComponent extends React.Component {
                         className={"dropZone"}
                         acceptClassName={"stripes"}
                         rejectClassName={"rejectStripes"}
-                        onDrop={this.onDrop.bind(this)}
+                        onDrop={this.onDrop}
                         multiple={false}
                     >
                         <div
@@ -499,19 +507,35 @@ class AppComponent extends React.Component {
                         </div>
                     </Dropzone>
 
-                    {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
-                        <OrgUnitsSelector
-                            api={this.props.api}
-                            onChange={this.handleOrgUnitTreeClick2}
-                            selected={this.state.orgUnitTreeSelected2}
-                            controls={controls}
-                            rootIds={this.state.orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={192}
-                        />
-                    ) : (
-                        i18n.t("No Organisation Units found")
+                    {importObject && (
+                        <div
+                            style={{
+                                marginTop: 35,
+                                marginBottom: 15,
+                                marginLeft: 0,
+                                fontSize: "1.2em",
+                            }}
+                        >
+                            {this.getNameForModel(importObject.type)} to import:{" "}
+                            {importObject.displayName} ({importObject.id})
+                        </div>
                     )}
+
+                    {this.state.importObject &&
+                        this.state.importOrgUnitIds &&
+                        (this.state.importOrgUnitIds.length > 0 ? (
+                            <OrgUnitsSelector
+                                api={this.props.api}
+                                onChange={this.handleOrgUnitTreeClick2}
+                                selected={this.state.orgUnitTreeSelected2}
+                                controls={controls}
+                                rootIds={this.state.importOrgUnitIds}
+                                fullWidth={false}
+                                height={220}
+                            />
+                        ) : (
+                            i18n.t("No capture org unit match element org units")
+                        ))}
 
                     <div
                         className="row"
@@ -525,6 +549,7 @@ class AppComponent extends React.Component {
                             variant="contained"
                             color="primary"
                             onClick={this.handleDataImportClick}
+                            disabled={!isImportEnabled}
                         >
                             {i18n.t("Import data")}
                         </Button>

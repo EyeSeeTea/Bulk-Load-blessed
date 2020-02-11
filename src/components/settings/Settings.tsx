@@ -53,7 +53,7 @@ export default function SettingsComponent(props: SettingsProps) {
                 </IconButton>
             </div>
 
-            <Dialog open={isOpen} fullWidth={true} maxWidth="md" onClose={close}>
+            <Dialog open={isOpen} fullWidth={true} maxWidth="lg" onClose={close}>
                 <DialogTitle>{i18n.t("Settings")}</DialogTitle>
 
                 <DialogContent>
@@ -77,6 +77,6 @@ export default function SettingsComponent(props: SettingsProps) {
 }
 
 const useStyles = makeStyles({
-    content: { padding: 10, margin: 10 },
+    content: { padding: 30, paddingTop: 0, marginTop: 0, marginBottom: 10 },
     button: { position: "absolute", right: 10, top: 70 },
 });
