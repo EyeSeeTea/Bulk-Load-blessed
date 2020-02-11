@@ -403,8 +403,8 @@ class AppComponent extends React.Component {
                 isOpen={true}
                 title={i18n.t("Existing data values")}
                 description={i18n.t(
-                    "There are {{count}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { count: confirmOnExistingData.dataValues.length }
+                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { dataValuesSize: confirmOnExistingData.dataValues.length }
                 )}
                 onCancel={() => this.setState({ confirmOnExistingData: undefined })}
                 onSave={() => this.performImport(confirmOnExistingData)}

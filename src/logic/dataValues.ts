@@ -43,7 +43,7 @@ export async function deleteDataValues(
 
         if (response.status !== "SUCCESS") {
             throw new Error(
-                i18n.t("Error deleting data elements") +
+                i18n.t("Error deleting data values") +
                     ": " +
                     JSON.stringify(response.conflicts, null, 2)
             );

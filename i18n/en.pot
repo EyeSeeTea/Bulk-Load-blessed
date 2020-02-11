@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-10T11:28:24.117Z\n"
-"PO-Revision-Date: 2020-02-10T11:28:24.117Z\n"
+"POT-Creation-Date: 2020-02-11T12:11:38.013Z\n"
+"PO-Revision-Date: 2020-02-11T12:11:38.013Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -26,6 +26,9 @@ msgstr ""
 msgid "Ignored"
 msgstr ""
 
+msgid "Deleted"
+msgstr ""
+
 msgid "Data Set"
 msgstr ""
 
@@ -39,6 +42,21 @@ msgid "Model"
 msgstr ""
 
 msgid "Select {{element}} to {{action}}..."
+msgstr ""
+
+msgid "Existing data values"
+msgstr ""
+
+msgid ""
+"There are {{dataValuesSize}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will "
+"be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+
+msgid "Proceed"
+msgstr ""
+
+msgid "Cancel"
 msgstr ""
 
 msgid "Template Generation"
@@ -77,9 +95,6 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-msgid "Cancel"
-msgstr ""
-
 msgid "Save"
 msgstr ""
 
@@ -93,6 +108,9 @@ msgid "Show Organisation Units On Template Generation"
 msgstr ""
 
 msgid "User groups for Template Generation"
+msgstr ""
+
+msgid "Error deleting data values"
 msgstr ""
 
 msgid "Select at least one model"
