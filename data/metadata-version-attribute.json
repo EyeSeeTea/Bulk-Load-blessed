@@ -12,7 +12,7 @@
             "code": "VERSION",
             "indicatorAttribute": false,
             "indicatorGroupAttribute": false,
-            "publicAccess": "r-------",
+            "publicAccess": "rw------",
             "userGroupAttribute": false,
             "dataElementAttribute": false,
             "constantAttribute": false,

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-10T11:28:24.117Z\n"
-"PO-Revision-Date: 2020-02-10T11:28:24.117Z\n"
+"POT-Creation-Date: 2020-02-11T11:58:19.883Z\n"
+"PO-Revision-Date: 2020-02-11T11:58:19.883Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -93,6 +93,9 @@ msgid "Show Organisation Units On Template Generation"
 msgstr ""
 
 msgid "User groups for Template Generation"
+msgstr ""
+
+msgid "User groups with access to Settings"
 msgstr ""
 
 msgid "Select at least one model"
