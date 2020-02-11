@@ -103,3 +103,8 @@ msgstr ""
 
 msgid "Data set"
 msgstr ""
+
+msgid ""
+"Cannot import: Versions do not match (database={{dbVersion}}, "
+"file={{sheetVersion}})"
+msgstr ""

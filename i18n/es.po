@@ -66,7 +66,7 @@ msgid "Drag and drop file to import"
 msgstr "Mueva aquí los ficheros a importar"
 
 msgid "No capture org unit match element org units"
-msgstr "LAs unidades organizativas de introducción de datos y del elemento no coinciden"
+msgstr "Las unidades organizativas de introducción de datos y del elemento no coinciden"
 
 msgid "Import data"
 msgstr "Importar datos"
@@ -90,10 +90,10 @@ msgid "Visibility"
 msgstr "Visibilidad"
 
 msgid "Show Organisation Units On Template Generation"
-msgstr "Mostrar unidades organizativas en la generación de plantilla"
+msgstr "Mostrar unidades organizativas en la plantilla de generación"
 
 msgid "User groups for Template Generation"
-msgstr "Generación de plantilla"
+msgstr "Grupos de usuario con acceso a la plantilla de generación"
 
 msgid "User groups with access to Settings"
 msgstr "Grupos de usuario con acceso a la configuración"
@@ -103,3 +103,10 @@ msgstr "Seleccione al menos un modelo"
 
 msgid "Data set"
 msgstr "Data set"
+
+msgid ""
+"Cannot import: Versions do not match (database={{dbVersion}}, "
+"file={{sheetVersion}})"
+msgstr ""
+"No se puede importar: Las versiones no coinciden (base de datos={{dbVersion}}, "
+"fichero={{sheetVersion}})"

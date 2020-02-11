@@ -4,22 +4,18 @@ import fileReaderStream from "filereader-stream";
 import dateFormat from "dateformat";
 
 import { stringEquals } from "../utils/strings";
+import { getObjectVersion } from "./utils";
+import i18n from "@dhis2/d2-i18n";
 
 const models = { dataSet: "dataSets", program: "programs" };
 
 export async function getElementFromSheet(file, objectsByType) {
-    const workbook = await new Promise(function(resolve, reject) {
-        const workbook = new ExcelJS.Workbook();
-        const inputStream = workbook.xlsx.createInputStream();
-        const readerStream = fileReaderStream(file);
-        inputStream.on("error", reject);
-        inputStream.on("done", () => {
-            resolve(workbook);
-        });
-        readerStream.pipe(inputStream);
-    });
+    const workbook = await getWorkbook(file);
 
+    const dataEntrySheet = workbook.getWorksheet("Data Entry");
     const metadataSheet = workbook.getWorksheet("Metadata");
+
+    if (!dataEntrySheet) throw new Error("Cannot get data entry sheet");
     if (!metadataSheet) throw new Error("Cannot get metadata sheet");
 
     const initialRow = 3;
@@ -38,8 +34,22 @@ export async function getElementFromSheet(file, objectsByType) {
     if (!allObjects) {
         throw new Error(`No data for type: ${object.type}`);
     } else {
-        return _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
+        const dbObject =
+            _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
+        checkVersion(dataEntrySheet, dbObject);
+        return dbObject;
     }
+}
+
+function getWorkbook(file) {
+    return new Promise(function(resolve, reject) {
+        const workbook = new ExcelJS.Workbook();
+        const inputStream = workbook.xlsx.createInputStream();
+        const readerStream = fileReaderStream(file);
+        inputStream.on("error", reject);
+        inputStream.on("done", () => resolve(workbook));
+        readerStream.pipe(inputStream);
+    });
 }
 
 /**
@@ -207,4 +217,22 @@ function parseMetadataId(metadataSheet, metadataName) {
         if (stringEquals(metadataName, row.values[3])) result = row.values[1];
     });
     return result;
+}
+
+function checkVersion(dataEntrySheet, dbObject) {
+    if (!dbObject) return true;
+
+    const cellValue = dataEntrySheet.getCell("A1").value || "";
+    const sheetVersion = cellValue.replace(/^.*?:/, "").trim(); // Version: 1.2.3
+    const dbVersion = getObjectVersion(dbObject) || "";
+
+    if (sheetVersion === dbVersion) {
+        return true;
+    } else {
+        const msg = i18n.t(
+            "Cannot import: Versions do not match (database={{dbVersion}}, file={{sheetVersion}})",
+            { dbVersion, sheetVersion, nsSeparator: false }
+        );
+        throw new Error(msg);
+    }
 }
