@@ -74,12 +74,15 @@ export default class Settings {
     }
 
     static async build(api: D2Api): Promise<Settings> {
+        const authorities = await api.get<string[]>("/me/authorization").getData();
+
         const d2CurrentUser = await api.currentUser
-            .get({ fields: { userGroups: { id: true }, authorities: true } })
+            .get({ fields: { userGroups: { id: true } } })
             .getData();
+
         const currentUser: CurrentUser = {
             ...d2CurrentUser,
-            authorities: new Set(d2CurrentUser.authorities),
+            authorities: new Set(authorities),
         };
 
         const { userGroups, constants } = await api.metadata
