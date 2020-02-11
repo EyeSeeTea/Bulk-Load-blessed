@@ -67,7 +67,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         <div>
             <FieldTitle>{i18n.t("Models")}</FieldTitle>
 
-            <FormGroup row={true}>
+            <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
                     <FormControlLabel
                         key={key}
@@ -79,7 +79,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
             <FieldTitle>{i18n.t("Visibility")}</FieldTitle>
 
-            <FormGroup row={true}>
+            <FormGroup className={classes.content} row={true}>
                 <FormControlLabel
                     control={
                         <Checkbox
@@ -93,7 +93,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
             <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
 
-            <FormGroup row={true}>
+            <FormGroup className={classes.content} row={true}>
                 <div className={classes.selectorWrapper}>
                     <MultiSelector
                         d2={d2}
@@ -128,6 +128,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
 const useStyles = makeStyles({
     selectorWrapper: { width: "100%" },
+    content: { marginBottom: 35, marginLeft: 0 },
 });
 
 function FieldTitle(props: { children: React.ReactNode }) {

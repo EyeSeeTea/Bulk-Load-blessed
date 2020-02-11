@@ -1,8 +1,46 @@
 import ExcelJS from "exceljs/dist/es5/exceljs.browser";
+import _ from "lodash";
 import fileReaderStream from "filereader-stream";
 import dateFormat from "dateformat";
 
 import { stringEquals } from "../utils/strings";
+
+const models = { dataSet: "dataSets", program: "programs" };
+
+export async function getElementFromSheet(file, objectsByType) {
+    const workbook = await new Promise(function(resolve, reject) {
+        const workbook = new ExcelJS.Workbook();
+        const inputStream = workbook.xlsx.createInputStream();
+        const readerStream = fileReaderStream(file);
+        inputStream.on("error", reject);
+        inputStream.on("done", () => {
+            resolve(workbook);
+        });
+        readerStream.pipe(inputStream);
+    });
+
+    const metadataSheet = workbook.getWorksheet("Metadata");
+    if (!metadataSheet) throw new Error("Cannot get metadata sheet");
+
+    const initialRow = 3;
+
+    const object = _(initialRow)
+        .range(metadataSheet.rowCount + 1)
+        .map(nRow => metadataSheet.getRow(nRow).values)
+        .map(values => ({ id: values[1], type: values[2], name: values[3] }))
+        .find(item => models[item.type]);
+
+    if (!object) throw new Error("Element not found");
+
+    const pluralName = models[object.type];
+    const allObjects = objectsByType[pluralName];
+
+    if (!allObjects) {
+        throw new Error(`No data for type: ${object.type}`);
+    } else {
+        return _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
+    }
+}
 
 /**
  * Import sheet information
@@ -22,7 +60,7 @@ export function readSheet(builder) {
         is.on("done", () => {
             const dataEntrySheet = workbook.getWorksheet("Data Entry");
             const metadataSheet = workbook.getWorksheet("Metadata");
-            // const validationSheet = workbook.getWorksheet("Validation");
+            const validationSheet = workbook.getWorksheet("Validation");
 
             // TODO: Check malformed template (undefined?)
 
@@ -54,11 +92,14 @@ export function readSheet(builder) {
                         result["completeDate"] = dateFormat(new Date(), "yyyy-mm-dd");
                     }
 
-                    if (row.values[1] !== undefined) {
-                        result.orgUnit = builder.organisationUnits[0].id; //parseMetadataId(metadataSheet, row.values[1]);
+                    if (builder.useBuilderOrgUnits) {
+                        result.orgUnit = builder.organisationUnits[0].id;
                     } else {
-                        // TODO: Do not hardcode this
-                        result.orgUnit = builder.organisationUnits[0].id; // validationSheet.getCell("A3").formula.substr(1);
+                        if (row.values[1] !== undefined) {
+                            result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
+                        } else {
+                            result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
+                        }
                     }
 
                     // TODO: If latitude and longitude are empty or invalid remove prop

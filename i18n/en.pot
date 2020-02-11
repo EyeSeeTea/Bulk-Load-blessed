@@ -44,7 +44,7 @@ msgstr ""
 msgid "End Year"
 msgstr ""
 
-msgid "No Organisation Units found"
+msgid "No capture organisations units"
 msgstr ""
 
 msgid "Download template"
@@ -53,10 +53,10 @@ msgstr ""
 msgid "Bulk Import"
 msgstr ""
 
-msgid "import"
+msgid "Drag and drop file to import"
 msgstr ""
 
-msgid "Drag and drop file to import"
+msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"
