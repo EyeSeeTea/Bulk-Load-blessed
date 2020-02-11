@@ -27,13 +27,14 @@ export type Field = keyof PublicOption;
 
 interface UserGroup {
     id: string;
+    name: string;
     displayName: string;
 }
 
 interface PersistedData {
     models: Models;
-    userGroupNamesForGeneration: string[];
-    userGroupNamesForSettings: string[];
+    userGroupForGeneration: string[];
+    userGroupForSettings: string[];
     showOrgUnitsOnGeneration: boolean;
 }
 
@@ -84,7 +85,7 @@ export default class Settings {
         const { userGroups, constants } = await api.metadata
             .get({
                 userGroups: {
-                    fields: { id: true, displayName: true },
+                    fields: { id: true, name: true, displayName: true },
                 },
                 constants: {
                     fields: { id: true, description: true },
@@ -98,13 +99,16 @@ export default class Settings {
             ? JSON.parse(settingsConstant.description)
             : {};
 
-        const userGroupsForGeneration = getUserGroups(
+        const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
             userGroups,
-            data.userGroupNamesForGeneration || Settings.defaultData.userGroupsForGeneration
+            data.userGroupForGeneration,
+            Settings.defaultData.userGroupsForGeneration
         );
-        const userGroupsForSettings = getUserGroups(
+
+        const userGroupsForSettings = getUserGroupsWithSettingEnabled(
             userGroups,
-            data.userGroupNamesForSettings || Settings.defaultData.userGroupsForSettings
+            data.userGroupForSettings,
+            Settings.defaultData.userGroupsForSettings
         );
 
         return new Settings({
@@ -149,12 +153,10 @@ export default class Settings {
             .getData();
 
         const settingsConstant = _(constants).get(0, null);
-        const userGroupNamesForGeneration = userGroupsForGeneration.map(ug => ug.displayName);
-        const userGroupNamesForSettings = userGroupsForSettings.map(ug => ug.displayName);
         const data: PersistedData = {
             models,
-            userGroupNamesForGeneration,
-            userGroupNamesForSettings,
+            userGroupForGeneration: userGroupsForGeneration.map(ug => ug.id),
+            userGroupForSettings: userGroupsForSettings.map(ug => ug.id),
             showOrgUnitsOnGeneration,
         };
         const newSettingsConstant: PartialPersistedModel<D2Constant> = {
@@ -233,10 +235,12 @@ export default class Settings {
     }
 }
 
-function getUserGroups(userGroups: { id: string; displayName: string }[], names: string[]) {
-    return _(userGroups)
-        .keyBy(userGroup => userGroup.displayName)
-        .at(names)
-        .compact()
-        .value();
+function getUserGroupsWithSettingEnabled(
+    allUserGroups: UserGroup[],
+    ids: Id[] | undefined,
+    defaultNames: string[]
+) {
+    return allUserGroups.filter(userGroup =>
+        ids ? ids.includes(userGroup.id) : defaultNames.includes(userGroup.name)
+    );
 }
