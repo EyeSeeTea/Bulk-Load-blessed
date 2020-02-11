@@ -110,6 +110,9 @@ msgstr ""
 msgid "User groups for Template Generation"
 msgstr ""
 
+msgid "User groups with access to Settings"
+msgstr ""
+
 msgid "Error deleting data values"
 msgstr ""
 

@@ -113,7 +113,10 @@ msgid "Show Organisation Units On Template Generation"
 msgstr "Mostrar unidades organizativas en la plantilla de generación"
 
 msgid "User groups for Template Generation"
-msgstr "Grupos de usuario que ven la plantilla de generación"
+msgstr "Grupos de usuario con acceso a la plantilla de generación"
+
+msgid "User groups with access to Settings"
+msgstr "Grupos de usuario con acceso a la configuración"
 
 msgid "Error deleting data values"
 msgstr "Se ha producido un error borrando valores de datos"

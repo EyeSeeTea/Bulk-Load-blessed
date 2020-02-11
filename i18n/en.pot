@@ -113,6 +113,9 @@ msgstr ""
 msgid "Error deleting data values"
 msgstr ""
 
+msgid "User groups with access to Settings"
+msgstr ""
+
 msgid "Select at least one model"
 msgstr ""
 
