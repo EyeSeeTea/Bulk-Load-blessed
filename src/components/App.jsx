@@ -16,11 +16,12 @@ import moment from "moment";
 import { buildPossibleYears } from "../utils/periods";
 import i18n from "@dhis2/d2-i18n";
 import Select from "./Select";
-import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import { OrgUnitsSelector, useLoading, useSnackbar, ConfirmationDialog } from "d2-ui-components";
 import Settings from "../logic/settings";
 import SettingsComponent from "./settings/Settings";
 import { makeStyles } from "@material-ui/styles";
 import { useAppContext } from "../contexts/api-context";
+import { getDataValuesFromData, deleteDataValues } from "../logic/dataValues";
 
 const styles = theme => ({
     root: {
@@ -58,6 +59,7 @@ class AppComponent extends React.Component {
             settings: undefined,
             isTemplateGenerationVisible: true,
             modelOptions: [],
+            confirmOnExistingData: undefined,
         };
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
@@ -191,6 +193,8 @@ class AppComponent extends React.Component {
     handleDataImportClick() {
         // TODO: Missing options error checking
         // TODO: Add validation error message
+        const { api } = this.props;
+
         if (!this.state.importObject) return;
         if (!this.state.importDataSheet) return;
         if (!this.state.orgUnitTreeSelected2) return;
@@ -231,14 +235,39 @@ class AppComponent extends React.Component {
                     useBuilderOrgUnits: !showOrgUnitsOnGeneration,
                 });
             })
-            .then(data => {
-                return dhisConnector.importData({
+            .then(async data => {
+                const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
+                const info = { data, dataValues };
+
+                if (_.isEmpty(dataValues)) {
+                    this.performImport(info);
+                } else {
+                    this.props.loading.show(false);
+                    this.setState({ confirmOnExistingData: info });
+                }
+            })
+            .catch(reason => {
+                this.props.loading.show(false);
+                console.error(reason);
+                this.props.snackbar.error(reason.message || reason.toString());
+            });
+    }
+
+    performImport(info) {
+        const { data, dataValues } = info;
+        this.props.loading.show(true);
+        this.setState({ confirmOnExistingData: undefined });
+
+        return deleteDataValues(this.props.api, dataValues)
+            .then(async deletedCount => {
+                const response = await dhisConnector.importData({
                     d2: this.props.d2,
                     element: this.state.importObject,
                     data: data,
                 });
+                return { response, deletedCount };
             })
-            .then(response => {
+            .then(({ deletedCount, response }) => {
                 this.props.loading.show(false);
                 console.log(response);
                 const imported =
@@ -260,6 +289,7 @@ class AppComponent extends React.Component {
                             `${i18n.t("Imported")}: ${imported}`,
                             `${i18n.t("Updated")}: ${updated}`,
                             `${i18n.t("Ignored")}: ${ignored}`,
+                            `${i18n.t("Deleted")}: ${deletedCount}`,
                         ].join(", "),
                     ]).join(" - ")
                 );
@@ -267,7 +297,7 @@ class AppComponent extends React.Component {
             .catch(reason => {
                 this.props.loading.show(false);
                 console.error(reason);
-                this.props.snackbar.error(reason.message);
+                this.props.snackbar.error(reason.message || reason.toString());
             });
     }
 
@@ -363,11 +393,34 @@ class AppComponent extends React.Component {
         this.setState({ endYear: selectedOption.value });
     };
 
+    renderConfirmationOnExistingData = () => {
+        const { confirmOnExistingData } = this.state;
+
+        if (!confirmOnExistingData) return null;
+
+        return (
+            <ConfirmationDialog
+                isOpen={true}
+                title={i18n.t("Existing data values")}
+                description={i18n.t(
+                    "There are {{count}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { count: confirmOnExistingData.dataValues.length }
+                )}
+                onCancel={() => this.setState({ confirmOnExistingData: undefined })}
+                onSave={() => this.performImport(confirmOnExistingData)}
+                saveText={i18n.t("Proceed")}
+                cancelText={i18n.t("Cancel")}
+            />
+        );
+    };
+
     render() {
         const ModelSelector = this.renderModelSelector;
         const { settings, isTemplateGenerationVisible, importObject } = this.state;
 
         if (!settings) return null;
+
+        const ConfirmationOnExistingData = this.renderConfirmationOnExistingData;
 
         const isImportEnabled =
             this.state.importObject &&
@@ -376,6 +429,7 @@ class AppComponent extends React.Component {
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
                 <SettingsComponent settings={settings} onChange={this.onSettingsChange} />
+                <ConfirmationOnExistingData />
 
                 <Paper
                     style={{
