@@ -1,12 +1,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-02-10T14:31:38.869Z\n"
+"POT-Creation-Date: 2020-02-11T11:58:19.883Z\n"
 "PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid "Cannot read file"
+msgstr ""
+
+msgid "Select a organisation units to import data"
+msgstr ""
+
+msgid "Selected organisation unit is not associated with the dataset"
+msgstr ""
 
 msgid "Imported"
 msgstr ""
@@ -44,7 +53,7 @@ msgstr ""
 msgid "End Year"
 msgstr ""
 
-msgid "No Organisation Units found"
+msgid "No capture organisations units"
 msgstr ""
 
 msgid "Download template"
@@ -53,10 +62,10 @@ msgstr ""
 msgid "Bulk Import"
 msgstr ""
 
-msgid "import"
+msgid "Drag and drop file to import"
 msgstr ""
 
-msgid "Drag and drop file to import"
+msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"

@@ -5,8 +5,17 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-10T14:31:38.869Z\n"
-"PO-Revision-Date: 2020-02-10T14:31:38.869Z\n"
+"POT-Creation-Date: 2020-02-11T11:58:19.883Z\n"
+"PO-Revision-Date: 2020-02-11T11:58:19.883Z\n"
+
+msgid "Cannot read file"
+msgstr ""
+
+msgid "Select a organisation units to import data"
+msgstr ""
+
+msgid "Selected organisation unit is not associated with the dataset"
+msgstr ""
 
 msgid "Imported"
 msgstr ""
