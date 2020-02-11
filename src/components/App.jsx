@@ -584,6 +584,7 @@ class AppComponent extends React.Component {
                         this.state.importOrgUnitIds &&
                         (this.state.importOrgUnitIds.length > 0 ? (
                             <OrgUnitsSelector
+                                key={this.state.importOrgUnitIds.join(".")}
                                 api={this.props.api}
                                 onChange={this.handleOrgUnitTreeClick2}
                                 selected={this.state.orgUnitTreeSelected2}
