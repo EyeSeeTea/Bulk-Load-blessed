@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-11T12:11:38.013Z\n"
-"PO-Revision-Date: 2020-02-11T12:11:38.013Z\n"
+"POT-Creation-Date: 2020-02-11T13:27:23.980Z\n"
+"PO-Revision-Date: 2020-02-11T13:27:23.980Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -110,10 +110,10 @@ msgstr ""
 msgid "User groups for Template Generation"
 msgstr ""
 
-msgid "Error deleting data values"
+msgid "User groups with access to Settings"
 msgstr ""
 
-msgid "User groups with access to Settings"
+msgid "Error deleting data values"
 msgstr ""
 
 msgid "Select at least one model"
