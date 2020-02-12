@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-02-11T12:11:38.013Z\n"
+"POT-Creation-Date: 2020-02-12T10:49:48.631Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10,6 +10,9 @@ msgstr ""
 
 msgid "Cannot read file"
 msgstr "No se puede leer el fichero"
+
+msgid "Object not found in database"
+msgstr "No se ha encontrado el objeto en la base de datos"
 
 msgid "Select a organisation units to import data"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"

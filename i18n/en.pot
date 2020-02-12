@@ -5,10 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-11T13:27:23.980Z\n"
-"PO-Revision-Date: 2020-02-11T13:27:23.980Z\n"
+"POT-Creation-Date: 2020-02-12T10:49:48.631Z\n"
+"PO-Revision-Date: 2020-02-12T10:49:48.631Z\n"
 
 msgid "Cannot read file"
+msgstr ""
+
+msgid "Object not found in database"
 msgstr ""
 
 msgid "Select a organisation units to import data"
