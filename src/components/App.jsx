@@ -165,14 +165,16 @@ class AppComponent extends React.Component {
         try {
             const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
 
-            const importOrgUnitIds = settings.showOrgUnitsOnGeneration
-                ? undefined
-                : // Get only object orgUnits selected as user capture (or their children)
-                  object.organisationUnits
-                      .filter(ou =>
-                          _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
-                      )
-                      .map(ou => ou.id);
+            let importOrgUnitIds = undefined;
+            if (!settings.showOrgUnitsOnGeneration) {
+                if (!object) throw new Error(i18n.t("Object not found in database"));
+                // Get only object orgUnits selected as user capture (or their children)
+                importOrgUnitIds = object.organisationUnits
+                    .filter(ou =>
+                        _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
+                    )
+                    .map(ou => ou.id);
+            }
 
             this.setState({
                 importDataSheet: file,
