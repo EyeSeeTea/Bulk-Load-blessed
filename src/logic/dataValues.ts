@@ -38,7 +38,7 @@ export async function deleteDataValues(
     for (const request of requests) {
         // Force delete (it will allow removal of approved data values). It has effect only for superusers.
         const response = await api.dataValues
-            .postSet({ importStrategy: "DELETE", force: true }, request)
+            .postSet({ importStrategy: "DELETE" }, request)
             .getData();
 
         if (response.status !== "SUCCESS") {
