@@ -31,45 +31,14 @@ export async function deleteDataValues(
 ): Promise<number> {
     if (_.isEmpty(dataValues)) return 0;
 
-    const requests = getDataValuesRequests(dataValues);
+    const response = await api.dataValues
+        .postSet({ importStrategy: "DELETE" }, { dataValues })
+        .getData();
 
-    let deletedCount = 0;
-
-    for (const request of requests) {
-        // Force delete (it will allow removal of approved data values). It has effect only for superusers.
-        const response = await api.dataValues
-            .postSet({ importStrategy: "DELETE" }, request)
-            .getData();
-
-        if (response.status !== "SUCCESS") {
-            throw new Error(
-                i18n.t("Error deleting data values") +
-                    ": " +
-                    JSON.stringify(response.conflicts, null, 2)
-            );
-        }
-
-        deletedCount += response.importCount.deleted;
+    if (response.status !== "SUCCESS") {
+        const details = JSON.stringify(response.conflicts, null, 2);
+        throw new Error(i18n.t("Error deleting data values") + ": " + details);
+    } else {
+        return response.importCount.deleted;
     }
-
-    return deletedCount;
-}
-
-function getDataValuesRequests(dataValues: DataValueSetsDataValue[]): DataValueSetsPostRequest[] {
-    return _(dataValues)
-        .groupBy(dv => [dv.period, dv.orgUnit, dv.attributeOptionCombo].join("-"))
-        .map(dataValuesGroup => {
-            const dataValue = dataValuesGroup[0];
-            return {
-                period: dataValue.period,
-                orgUnit: dataValue.orgUnit,
-                attributeOptionCombo: dataValue.attributeOptionCombo,
-                dataValues: dataValuesGroup.map(dv => ({
-                    dataElement: dv.dataElement,
-                    categoryOptionCombo: dv.categoryOptionCombo,
-                    value: dv.value,
-                })),
-            };
-        })
-        .value();
 }
