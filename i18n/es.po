@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-02-11T11:58:19.883Z\n"
+"POT-Creation-Date: 2020-02-12T10:49:48.631Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10,6 +10,9 @@ msgstr ""
 
 msgid "Cannot read file"
 msgstr "No se puede leer el fichero"
+
+msgid "Object not found in database"
+msgstr "No se ha encontrado el objeto en la base de datos"
 
 msgid "Select a organisation units to import data"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"
@@ -26,6 +29,9 @@ msgstr "Actualizados"
 msgid "Ignored"
 msgstr "Ignorados"
 
+msgid "Deleted"
+msgstr "Borrados"
+
 msgid "Data Set"
 msgstr "Data Set"
 
@@ -40,6 +46,24 @@ msgstr "Modelo"
 
 msgid "Select {{element}} to {{action}}..."
 msgstr "Seleccione {{element}} a {{action}}..."
+
+msgid "Existing data values"
+msgstr "Existen valores de datos"
+
+msgid ""
+"There are {{dataValuesSize}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will be "
+"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+"Existen {{dataValuesSize}} valores en la base de datos for esta unidad "
+"organizativa y periodos. Si continua, todos los valores seránborrados, y "
+"solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
+
+msgid "Proceed"
+msgstr "Continuar"
+
+msgid "Cancel"
+msgstr "Cancelar"
 
 msgid "Template Generation"
 msgstr "Generación de plantilla"
@@ -66,7 +90,9 @@ msgid "Drag and drop file to import"
 msgstr "Mueva aquí los ficheros a importar"
 
 msgid "No capture org unit match element org units"
-msgstr "Las unidades organizativas de introducción de datos y del elemento no coinciden"
+msgstr ""
+"Las unidades organizativas de introducción de datos y del elemento no "
+"coinciden"
 
 msgid "Import data"
 msgstr "Importar datos"
@@ -76,9 +102,6 @@ msgstr "Configuración guardada"
 
 msgid "Settings"
 msgstr "Configuración"
-
-msgid "Cancel"
-msgstr "Cancelar"
 
 msgid "Save"
 msgstr "Guardar"
@@ -98,6 +121,9 @@ msgstr "Grupos de usuario con acceso a la plantilla de generación"
 msgid "User groups with access to Settings"
 msgstr "Grupos de usuario con acceso a la configuración"
 
+msgid "Error deleting data values"
+msgstr "Se ha producido un error borrando valores de datos"
+
 msgid "Select at least one model"
 msgstr "Seleccione al menos un modelo"
 
@@ -108,5 +134,5 @@ msgid ""
 "Cannot import: Versions do not match (database={{dbVersion}}, "
 "file={{sheetVersion}})"
 msgstr ""
-"No se puede importar: Las versiones no coinciden (base de datos={{dbVersion}}, "
-"fichero={{sheetVersion}})"
+"No se puede importar: Las versiones no coinciden (base de "
+"datos={{dbVersion}}, fichero={{sheetVersion}})"

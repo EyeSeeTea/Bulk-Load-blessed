@@ -3992,10 +3992,10 @@ cypress@^3.1.4:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@0.1.1-beta.1:
-  version "0.1.1-beta.1"
-  resolved "https://registry.npmjs.org/d2-api/-/d2-api-0.1.1-beta.1.tgz#cb21f91a1a07440d6a71c8a13168654b41ed0b1d"
-  integrity sha512-hNekx5XyKBtdbEML1wL0V6K2sPnCq1biN8FJWV5Mtu1Nqs0rRj+qa3qoxw2oTSui/CYDgIUFCRFbBZqpPfQebA==
+d2-api@0.1.1-beta.3:
+  version "0.1.1-beta.3"
+  resolved "https://registry.npmjs.org/d2-api/-/d2-api-0.1.1-beta.3.tgz#e147698160efc067f22a91cd923f395c7ca0299f"
+  integrity sha512-/WHZc9YFnRcX8VIkuNTqks2QtjvN9Wcr2iJJZG6a/mNdkd5qSN2w9acKTccA34pTWuIi7hNPXmnTx76ohRYVeA==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
