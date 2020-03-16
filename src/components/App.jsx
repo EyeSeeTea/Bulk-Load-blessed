@@ -53,6 +53,7 @@ class AppComponent extends React.Component {
             selectedProgramOrDataSet1: undefined,
             importObject: undefined,
             importDataSheet: undefined,
+            importMessages: [],
             model1: undefined,
             startYear: 2010,
             endYear: moment().year(),
@@ -180,14 +181,17 @@ class AppComponent extends React.Component {
                 importDataSheet: file,
                 importObject: object,
                 importOrgUnitIds,
+                importMessages: [],
             });
         } catch (err) {
             console.error(err);
-            snackbar.error(err.message || err.toString());
+            const msg = err.message || err.toString();
+            snackbar.error(msg);
             this.setState({
                 importDataSheet: file,
                 importObject: undefined,
                 importOrgUnitIds: undefined,
+                importMessages: [],
             });
         }
     }
@@ -284,17 +288,17 @@ class AppComponent extends React.Component {
                     response.data.response !== undefined
                         ? response.data.response.ignored
                         : response.data.importCount.ignored;
-                this.props.snackbar.info(
-                    _.compact([
-                        response.data.description,
-                        [
-                            `${i18n.t("Imported")}: ${imported}`,
-                            `${i18n.t("Updated")}: ${updated}`,
-                            `${i18n.t("Ignored")}: ${ignored}`,
-                            `${i18n.t("Deleted")}: ${deletedCount}`,
-                        ].join(", "),
-                    ]).join(" - ")
-                );
+                const msgs = _.compact([
+                    response.data.description,
+                    [
+                        `${i18n.t("Imported")}: ${imported}`,
+                        `${i18n.t("Updated")}: ${updated}`,
+                        `${i18n.t("Ignored")}: ${ignored}`,
+                        `${i18n.t("Deleted")}: ${deletedCount}`,
+                    ].join(", "),
+                ]);
+                this.props.snackbar.info(msgs.join(" - "));
+                this.setState({ importMessages: msgs });
             })
             .catch(reason => {
                 this.props.loading.show(false);
@@ -418,7 +422,7 @@ class AppComponent extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible, importObject } = this.state;
+        const { settings, isTemplateGenerationVisible, importObject, importMessages } = this.state;
 
         if (!settings) return null;
 
@@ -600,11 +604,24 @@ class AppComponent extends React.Component {
                         ))}
 
                     <div
-                        className="row"
                         style={{
-                            marginTop: "2em",
+                            marginTop: "1em",
                             marginLeft: "2em",
                             marginRight: "2em",
+                            fontSize: "1.2em",
+                        }}
+                    >
+                        {importMessages.map(msg => (
+                            <div key={msg}>{msg}</div>
+                        ))}
+                    </div>
+
+                    <div
+                        className="row"
+                        style={{
+                            marginTop: "1.5em",
+                            marginLeft: "1em",
+                            marginRight: "1em",
                         }}
                     >
                         <Button
