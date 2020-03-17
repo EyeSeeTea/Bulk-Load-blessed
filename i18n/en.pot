@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-02-12T10:49:48.631Z\n"
-"PO-Revision-Date: 2020-02-12T10:49:48.631Z\n"
+"POT-Creation-Date: 2020-03-17T09:12:34.505Z\n"
+"PO-Revision-Date: 2020-03-17T09:12:34.505Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -84,6 +84,9 @@ msgid "Bulk Import"
 msgstr ""
 
 msgid "Drag and drop file to import"
+msgstr ""
+
+msgid "data values"
 msgstr ""
 
 msgid "No capture org unit match element org units"
