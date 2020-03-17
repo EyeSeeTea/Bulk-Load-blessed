@@ -53,6 +53,7 @@ class AppComponent extends React.Component {
             selectedProgramOrDataSet1: undefined,
             importObject: undefined,
             importDataSheet: undefined,
+            importDataValues: [],
             model1: undefined,
             startYear: 2010,
             endYear: moment().year(),
@@ -163,7 +164,8 @@ class AppComponent extends React.Component {
         }
 
         try {
-            const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
+            const info = await sheetImport.getBasicInfoFromSheet(file, { dataSets, programs });
+            const { object, dataValues } = info;
 
             let importOrgUnitIds = undefined;
             if (!settings.showOrgUnitsOnGeneration) {
@@ -179,6 +181,7 @@ class AppComponent extends React.Component {
             this.setState({
                 importDataSheet: file,
                 importObject: object,
+                importDataValues: dataValues,
                 importOrgUnitIds,
             });
         } catch (err) {
@@ -187,6 +190,7 @@ class AppComponent extends React.Component {
             this.setState({
                 importDataSheet: file,
                 importObject: undefined,
+                importDataValues: [],
                 importOrgUnitIds: undefined,
             });
         }
@@ -418,7 +422,8 @@ class AppComponent extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible, importObject } = this.state;
+        const { settings, isTemplateGenerationVisible } = this.state;
+        const { importObject, importDataValues } = this.state;
 
         if (!settings) return null;
 
@@ -569,17 +574,24 @@ class AppComponent extends React.Component {
                     </Dropzone>
 
                     {importObject && (
-                        <div
-                            style={{
-                                marginTop: 35,
-                                marginBottom: 15,
-                                marginLeft: 0,
-                                fontSize: "1.2em",
-                            }}
-                        >
-                            {this.getNameForModel(importObject.type)} to import:{" "}
-                            {importObject.displayName} ({importObject.id})
-                        </div>
+                        <React.Fragment>
+                            <div
+                                style={{
+                                    marginTop: 35,
+                                    marginBottom: 15,
+                                    marginLeft: 0,
+                                    fontSize: "1.2em",
+                                }}
+                            >
+                                {this.getNameForModel(importObject.type)}:{" "}
+                                {importObject.displayName} ({importObject.id})
+                                {importDataValues.map((group, idx) => (
+                                    <p key={idx} style={{ lineHeight: "0.5em", marginLeft: 10 }}>
+                                        {group.period}: {group.count} {i18n.t("data values")}
+                                    </p>
+                                ))}
+                            </div>
+                        </React.Fragment>
                     )}
 
                     {this.state.importObject &&
