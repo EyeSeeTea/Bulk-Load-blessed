@@ -9,7 +9,13 @@ import i18n from "@dhis2/d2-i18n";
 
 const models = { dataSet: "dataSets", program: "programs" };
 
-export async function getElementFromSheet(file, objectsByType) {
+/**
+ * Return basic information from sheet.
+ * @param file: xlsx file to be imported.
+ * @param objectsByType: Object {dataSet, program} containing all D2 objects.
+ * @returns {Promise<{object, dataValues}>}
+ */
+export async function getBasicInfoFromSheet(file, objectsByType) {
     const workbook = await getWorkbook(file);
 
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
@@ -37,8 +43,40 @@ export async function getElementFromSheet(file, objectsByType) {
         const dbObject =
             _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
         checkVersion(dataEntrySheet, dbObject);
-        return dbObject;
+        return { object: dbObject, dataValues: getDataValues(object, dataEntrySheet) };
     }
+}
+
+function getDataValues(object, dataEntrySheet) {
+    const initialRow = 3;
+
+    return _(initialRow)
+        .range(dataEntrySheet.rowCount + 1)
+        .map(nRow => dataEntrySheet.getRow(nRow))
+        .map(row => getDataValuesFromRow(row, object))
+        .compact()
+        .sortBy("period")
+        .value();
+}
+
+function getDataValuesFromRow(row, object) {
+    const infoByType = {
+        dataSet: { periodRow: 2, initialValuesRow: 4 },
+        program: { periodRow: 4, initialValuesRow: 5 },
+    };
+    const info = infoByType[object.type];
+    if (!info) return;
+
+    const values = row.values;
+    const period = values[info.periodRow];
+    if (!period) return;
+
+    const count = _(values)
+        .drop(info.initialValuesRow)
+        .reject(_.isNil)
+        .size();
+
+    return { period, count };
 }
 
 function getWorkbook(file) {

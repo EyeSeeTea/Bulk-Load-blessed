@@ -54,6 +54,7 @@ class AppComponent extends React.Component {
             importObject: undefined,
             importDataSheet: undefined,
             importMessages: [],
+            importDataValues: [],
             model1: undefined,
             startYear: 2010,
             endYear: moment().year(),
@@ -164,7 +165,8 @@ class AppComponent extends React.Component {
         }
 
         try {
-            const object = await sheetImport.getElementFromSheet(file, { dataSets, programs });
+            const info = await sheetImport.getBasicInfoFromSheet(file, { dataSets, programs });
+            const { object, dataValues } = info;
 
             let importOrgUnitIds = undefined;
             if (!settings.showOrgUnitsOnGeneration) {
@@ -180,6 +182,7 @@ class AppComponent extends React.Component {
             this.setState({
                 importDataSheet: file,
                 importObject: object,
+                importDataValues: dataValues,
                 importOrgUnitIds,
                 importMessages: [],
             });
@@ -190,6 +193,7 @@ class AppComponent extends React.Component {
             this.setState({
                 importDataSheet: file,
                 importObject: undefined,
+                importDataValues: [],
                 importOrgUnitIds: undefined,
                 importMessages: [],
             });
@@ -422,7 +426,8 @@ class AppComponent extends React.Component {
 
     render() {
         const ModelSelector = this.renderModelSelector;
-        const { settings, isTemplateGenerationVisible, importObject, importMessages } = this.state;
+        const { settings, isTemplateGenerationVisible } = this.state;
+        const { importObject, importDataValues, importMessages } = this.state;
 
         if (!settings) return null;
 
@@ -581,8 +586,13 @@ class AppComponent extends React.Component {
                                 fontSize: "1.2em",
                             }}
                         >
-                            {this.getNameForModel(importObject.type)} to import:{" "}
-                            {importObject.displayName} ({importObject.id})
+                            {this.getNameForModel(importObject.type)}: {importObject.displayName} (
+                            {importObject.id})
+                            {importDataValues.map((group, idx) => (
+                                <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
+                                    {group.period}: {group.count} {i18n.t("data values")}
+                                </li>
+                            ))}
                         </div>
                     )}
 
