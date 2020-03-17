@@ -53,6 +53,7 @@ class AppComponent extends React.Component {
             selectedProgramOrDataSet1: undefined,
             importObject: undefined,
             importDataSheet: undefined,
+            importMessages: [],
             importDataValues: [],
             model1: undefined,
             startYear: 2010,
@@ -183,15 +184,18 @@ class AppComponent extends React.Component {
                 importObject: object,
                 importDataValues: dataValues,
                 importOrgUnitIds,
+                importMessages: [],
             });
         } catch (err) {
             console.error(err);
-            snackbar.error(err.message || err.toString());
+            const msg = err.message || err.toString();
+            snackbar.error(msg);
             this.setState({
                 importDataSheet: file,
                 importObject: undefined,
                 importDataValues: [],
                 importOrgUnitIds: undefined,
+                importMessages: [],
             });
         }
     }
@@ -288,17 +292,17 @@ class AppComponent extends React.Component {
                     response.data.response !== undefined
                         ? response.data.response.ignored
                         : response.data.importCount.ignored;
-                this.props.snackbar.info(
-                    _.compact([
-                        response.data.description,
-                        [
-                            `${i18n.t("Imported")}: ${imported}`,
-                            `${i18n.t("Updated")}: ${updated}`,
-                            `${i18n.t("Ignored")}: ${ignored}`,
-                            `${i18n.t("Deleted")}: ${deletedCount}`,
-                        ].join(", "),
-                    ]).join(" - ")
-                );
+                const msgs = _.compact([
+                    response.data.description,
+                    [
+                        `${i18n.t("Imported")}: ${imported}`,
+                        `${i18n.t("Updated")}: ${updated}`,
+                        `${i18n.t("Ignored")}: ${ignored}`,
+                        `${i18n.t("Deleted")}: ${deletedCount}`,
+                    ].join(", "),
+                ]);
+                this.props.snackbar.info(msgs.join(" - "));
+                this.setState({ importMessages: msgs });
             })
             .catch(reason => {
                 this.props.loading.show(false);
@@ -423,7 +427,7 @@ class AppComponent extends React.Component {
     render() {
         const ModelSelector = this.renderModelSelector;
         const { settings, isTemplateGenerationVisible } = this.state;
-        const { importObject, importDataValues } = this.state;
+        const { importObject, importDataValues, importMessages } = this.state;
 
         if (!settings) return null;
 
@@ -609,12 +613,28 @@ class AppComponent extends React.Component {
                             i18n.t("No capture org unit match element org units")
                         ))}
 
+                    {importMessages && importMessages.length > 0 && (
+                        <div
+                            style={{
+                                marginTop: "1em",
+                                marginRight: "2em",
+                                fontSize: "1.2em",
+                                border: "1px solid",
+                                padding: "1em",
+                            }}
+                        >
+                            {importMessages.map(msg => (
+                                <div key={msg}>{msg}</div>
+                            ))}
+                        </div>
+                    )}
+
                     <div
                         className="row"
                         style={{
-                            marginTop: "2em",
-                            marginLeft: "2em",
-                            marginRight: "2em",
+                            marginTop: "1.5em",
+                            marginLeft: "1em",
+                            marginRight: "1em",
                         }}
                     >
                         <Button
