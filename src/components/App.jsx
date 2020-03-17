@@ -589,9 +589,9 @@ class AppComponent extends React.Component {
                             {this.getNameForModel(importObject.type)}: {importObject.displayName} (
                             {importObject.id})
                             {importDataValues.map((group, idx) => (
-                                <p key={idx} style={{ lineHeight: "0.5em", marginLeft: 10 }}>
+                                <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
                                     {group.period}: {group.count} {i18n.t("data values")}
-                                </p>
+                                </li>
                             ))}
                         </div>
                     )}
