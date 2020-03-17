@@ -574,24 +574,22 @@ class AppComponent extends React.Component {
                     </Dropzone>
 
                     {importObject && (
-                        <React.Fragment>
-                            <div
-                                style={{
-                                    marginTop: 35,
-                                    marginBottom: 15,
-                                    marginLeft: 0,
-                                    fontSize: "1.2em",
-                                }}
-                            >
-                                {this.getNameForModel(importObject.type)}:{" "}
-                                {importObject.displayName} ({importObject.id})
-                                {importDataValues.map((group, idx) => (
-                                    <p key={idx} style={{ lineHeight: "0.5em", marginLeft: 10 }}>
-                                        {group.period}: {group.count} {i18n.t("data values")}
-                                    </p>
-                                ))}
-                            </div>
-                        </React.Fragment>
+                        <div
+                            style={{
+                                marginTop: 35,
+                                marginBottom: 15,
+                                marginLeft: 0,
+                                fontSize: "1.2em",
+                            }}
+                        >
+                            {this.getNameForModel(importObject.type)}: {importObject.displayName} (
+                            {importObject.id})
+                            {importDataValues.map((group, idx) => (
+                                <p key={idx} style={{ lineHeight: "0.5em", marginLeft: 10 }}>
+                                    {group.period}: {group.count} {i18n.t("data values")}
+                                </p>
+                            ))}
+                        </div>
                     )}
 
                     {this.state.importObject &&
