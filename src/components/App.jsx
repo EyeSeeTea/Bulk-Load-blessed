@@ -603,18 +603,21 @@ class AppComponent extends React.Component {
                             i18n.t("No capture org unit match element org units")
                         ))}
 
-                    <div
-                        style={{
-                            marginTop: "1em",
-                            marginLeft: "2em",
-                            marginRight: "2em",
-                            fontSize: "1.2em",
-                        }}
-                    >
-                        {importMessages.map(msg => (
-                            <div key={msg}>{msg}</div>
-                        ))}
-                    </div>
+                    {importMessages && importMessages.length > 0 && (
+                        <div
+                            style={{
+                                marginTop: "1em",
+                                marginRight: "2em",
+                                fontSize: "1.2em",
+                                border: "1px solid",
+                                padding: "1em",
+                            }}
+                        >
+                            {importMessages.map(msg => (
+                                <div key={msg}>{msg}</div>
+                            ))}
+                        </div>
+                    )}
 
                     <div
                         className="row"
