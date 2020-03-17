@@ -55,6 +55,7 @@ function getDataValues(object, dataEntrySheet) {
         .map(nRow => dataEntrySheet.getRow(nRow))
         .map(row => getDataValuesFromRow(row, object))
         .compact()
+        .sortBy("period")
         .value();
 }
 
