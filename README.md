@@ -1,10 +1,11 @@
 # DHIS2 Bulk Load
 
-The bulk load application allows generating templates (excel sheet) and importing multiple data (data values) in a 2.30 DHIS2 instance.
+The Bulk Load application generates templates (an Excel sheet) and imports multiple data values for DHIS2 v2.30 instances. Some notes:
 
-## Prepare the environment
+-   Settings are only visible for superusers (`ALL` authority) or users that belong to the settings groups.
+-   The generation box is only visible for users that belong to the configurable `Template Generation` groups (initial value: `HMIS Officers`).
 
-All the required dependencies to develop the app can be achieved through npm.
+## Set up
 
 ```
 $ yarn install
@@ -12,9 +13,7 @@ $ yarn install
 
 ## Start a development server
 
--   Edit .env file to set `PORT` and `REACT_APP_DHIS2_BASE_URL`.
-
--   Execute development server
+Edit .env file to set `PORT` and `REACT_APP_DHIS2_BASE_URL` (or use normal shell environment variables) and execute the development server:
 
 ```
 $ yarn start
@@ -30,14 +29,14 @@ $ export CYPRESS_EXTERNAL_API="http://localhost:8080"
 $ export CYPRESS_ROOT_URL=http://localhost:8081
 
 $ yarn cy:e2e:open # interactive UI
-$ [xvfb-run] yarn cy:e2e:run # non-interactive UI
+$ yarn cy:e2e:run # non-interactive UI
 ```
 
 For cypress tests to work in Travis CI, you will have to create an environment variable CYPRESS_DHIS2_AUTH (Settings -> Environment Variables) with the authentication used in your testing DHIS2 instance.
 
 ## Build a release package
 
--   Create a packaged zip
+Create a packaged zip:
 
 ```
 $ yarn build-webapp
@@ -45,18 +44,10 @@ $ yarn build-webapp
 
 ## i18n
 
-### Update an existing language
+### Update translations
 
 ```
 $ yarn update-po
 # ... add/edit translations in po files ...
-$ yarn localize
-```
-
-### Create a new language
-
-```
-$ cp i18n/en.pot i18n/es.po
-# ... add translations to i18n/es.po ...
 $ yarn localize
 ```
