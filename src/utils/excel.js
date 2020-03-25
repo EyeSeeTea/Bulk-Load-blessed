@@ -13,8 +13,7 @@ export function createColumn(
     const cell = sheet.cell(2, columnId);
     cell.style(groupId ? groupStyle(groupId) : baseStyle);
 
-    if (label === undefined) cell.string("");
-    else if (label.startsWith("_")) cell.formula(label);
+    if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
 
     if (validation !== undefined) {

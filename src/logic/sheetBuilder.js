@@ -341,7 +341,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                 this.workbook,
                 dataEntrySheet,
                 columnId++,
-                programStage.executionDateLabel
+                programStage.executionDateLabel === undefined ? "Date" : programStage.executionDateLabel
             );
 
             dataEntrySheet
