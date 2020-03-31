@@ -205,7 +205,18 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 
         metadataSheet.cell(rowId, 1).string(value.id ? value.id : "");
         metadataSheet.cell(rowId, 2).string(value.type ? value.type : "");
-        metadataSheet.cell(rowId, 3).string(name ? name : "");
+        
+        if (value.type === "dataElement") {
+
+            let elements = this.builder.rawMetadata.programStageDataElements;
+            for (let i = 0; i < elements.length; ++i)
+                if (elements[i].dataElement.id === value.id) {
+                    if (elements[i].compulsory) metadataSheet.cell(rowId, 3).string(name ? name.concat("*") : "");
+                    else metadataSheet.cell(rowId, 3).string(name ? name : "");
+                    break;
+                }    
+        } else metadataSheet.cell(rowId, 3).string(name ? name : "");
+        
         metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : "");
         metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : "");
         metadataSheet.cell(rowId, 6).string(options ? options : "");
@@ -254,13 +265,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         this.workbook,
         dataEntrySheet,
         columnId++,
-        "Org Unit",
+        element.type === "program"? "Org Unit*" : "Org Unit",
         null,
         this.validations.get("organisationUnits")
     );
     if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude");
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude");
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude*");
+        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude*");
     } else if (element.type === "dataSet") {
         createColumn(
             this.workbook,
@@ -341,7 +352,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                 this.workbook,
                 dataEntrySheet,
                 columnId++,
-                programStage.executionDateLabel === undefined ? "Date" : programStage.executionDateLabel
+                programStage.executionDateLabel === undefined ? "Date*" : programStage.executionDateLabel.concat("*")
             );
 
             dataEntrySheet
