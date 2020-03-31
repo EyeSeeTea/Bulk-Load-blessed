@@ -191,6 +191,17 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
         metadataSheet.cell(rowId, 3).string(name ?? "");
+
+        if (value.type === "dataElement") {
+            let elements = this.builder.rawMetadata.programStageDataElements;
+            for (let i = 0; i < elements.length; ++i)
+                if (elements[i].dataElement.id === value.id) {
+                    if (elements[i].compulsory) metadataSheet.cell(rowId, 3).string(name ? name.concat("*") : "");
+                    else metadataSheet.cell(rowId, 3).string(name ? name : "");
+                    break;
+                }
+        } else metadataSheet.cell(rowId, 3).string(name ?? "");
+
         metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
         metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
         metadataSheet.cell(rowId, 6).string(options ?? "");
@@ -275,7 +286,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         dataEntrySheet,
         itemRow,
         columnId++,
-        "Org Unit",
+        "Org Unit *",
         null,
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
@@ -384,7 +395,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 dataEntrySheet,
                 itemRow,
                 columnId++,
-                programStage.executionDateLabel ?? "Date"
+                `${programStage.executionDateLabel ?? "Date"} *`
             );
 
             if (programStage.programStageSections.length === 0) {
