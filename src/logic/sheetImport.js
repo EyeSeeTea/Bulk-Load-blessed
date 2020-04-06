@@ -81,7 +81,7 @@ export function readSheet(builder) {
                         if (isProgram && colNumber > 4) {
                             // TODO: Do not hardcode previous entries
                             let id = columns[colNumber].formula.substr(1);
-                            let cellValue = cell.value.toString();
+                            let cellValue = cell.value !== undefined ? cell.value.toString() : undefined;
 
                             // TODO: Check different data types
                             let dataValue = builder.elementMetadata.get(id);
@@ -110,7 +110,7 @@ export function readSheet(builder) {
                                 : dataEntrySheet
                                       .getCell(stageColumn.sharedFormula)
                                       .value.formula.substr(1);
-                            let cellValue = cell.value.toString();
+                            let cellValue = cell.value !== undefined ? cell.value.toString() : undefined;
 
                             let dataValue = builder.elementMetadata.get(id);
                             if (dataValue.type === "categoryOptionCombo") {
@@ -140,7 +140,7 @@ export function readSheet(builder) {
 function parseMetadataId(metadataSheet, metadataName) {
     let result = metadataName;
     metadataSheet.eachRow((row, rowNumber) => {
-        if (stringEquals(metadataName, row.values[3])) result = row.values[1];
+        if (row.values[3] !== undefined && stringEquals(metadataName, row.values[3])) result = row.values[1];
     });
     return result;
 }
