@@ -161,7 +161,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
 SheetBuilder.prototype.fillMetadataSheet = function() {
     const { elementMetadata: metadata, organisationUnits } = this.builder;
     let metadataSheet = this.metadataSheet;
-
+    
     // Freeze and format column titles
     metadataSheet.row(2).freeze();
     metadataSheet.column(1).setWidth(30);
@@ -196,6 +196,7 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 
     let rowId = 3;
     metadata.forEach((value, key) => {
+        
         let name = value.formName !== undefined ? value.formName : value.name;
         let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         let options =
@@ -206,7 +207,9 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
         metadataSheet.cell(rowId, 1).string(value.id ? value.id : "");
         metadataSheet.cell(rowId, 2).string(value.type ? value.type : "");
         
-        if (value.type === "dataElement") {
+        
+        if (value.type === "dataElement" && 
+                this.builder.rawMetadata.programStageDataElements !== undefined) {
 
             let elements = this.builder.rawMetadata.programStageDataElements;
             for (let i = 0; i < elements.length; ++i)
@@ -249,9 +252,10 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function() {
+
     const { element, elementMetadata: metadata } = this.builder;
     let dataEntrySheet = this.dataEntrySheet;
-
+    
     // Freeze and format column titles
     dataEntrySheet.row(2).freeze();
     dataEntrySheet.row(1).setHeight(30);
@@ -293,15 +297,17 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
 
     if (element.type === "dataSet") {
         let categoryOptionCombos = [];
-        for (let [, value] of metadata) {
+        
+        for (let [, value] of metadata) { 
             if (value.type === "categoryOptionCombo") {
                 categoryOptionCombos.push(value);
             }
         }
-
         let sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
+        
         _.forOwn(sections, (ownSection, categoryComboId) => {
             let categoryCombo = metadata.get(categoryComboId);
+
             if (categoryCombo.code !== "default") {
                 let dataElementLookup = _.filter(element.dataSetElements, {
                     categoryCombo: { id: categoryComboId },
