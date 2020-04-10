@@ -307,47 +307,52 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         
         _.forOwn(sections, (ownSection, categoryComboId) => {
             let categoryCombo = metadata.get(categoryComboId);
+            try {
+                if (categoryCombo.code !== "default") {
+                    let dataElementLookup = _.filter(element.dataSetElements, {
+                        categoryCombo: { id: categoryComboId },
+                    });
+                    _.forEach(dataElementLookup, lookupResult => {
+                        let firstColumnId = columnId;
 
-            if (categoryCombo.code !== "default") {
-                let dataElementLookup = _.filter(element.dataSetElements, {
-                    categoryCombo: { id: categoryComboId },
-                });
-                _.forEach(dataElementLookup, lookupResult => {
-                    let firstColumnId = columnId;
+                        let dataElementId = lookupResult.dataElement.id;
+                        let sectionCategoryOptionCombos = sections[categoryComboId];
+                        _.forEach(sectionCategoryOptionCombos, dataValue => {
+                            dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
+                            dataEntrySheet
+                                .cell(2, columnId)
+                                .formula("_" + dataValue.id)
+                                .style(groupStyle(groupId));
 
-                    let dataElementId = lookupResult.dataElement.id;
-                    let sectionCategoryOptionCombos = sections[categoryComboId];
-                    _.forEach(sectionCategoryOptionCombos, dataValue => {
-                        dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
-                        dataEntrySheet
-                            .cell(2, columnId)
-                            .formula("_" + dataValue.id)
-                            .style(groupStyle(groupId));
+                            if (dataValue.description !== undefined) {
+                                dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
+                                    height: "100pt",
+                                    width: "160pt",
+                                });
+                            }
 
-                        if (dataValue.description !== undefined) {
-                            dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
-                                height: "100pt",
-                                width: "160pt",
-                            });
+                            columnId++;
+                        });
+
+                        if (columnId - 1 === firstColumnId) {
+                            let dataElement = metadata.get(lookupResult.dataElement.id);
+                            dataEntrySheet
+                                .column(firstColumnId)
+                                .setWidth(dataElement.name.length / 2.5 + 15);
                         }
 
-                        columnId++;
-                    });
-
-                    if (columnId - 1 === firstColumnId) {
-                        let dataElement = metadata.get(lookupResult.dataElement.id);
                         dataEntrySheet
-                            .column(firstColumnId)
-                            .setWidth(dataElement.name.length / 2.5 + 15);
-                    }
+                            .cell(1, firstColumnId, 1, columnId - 1, true)
+                            .formula("_" + dataElementId)
+                            .style(groupStyle(groupId));
 
-                    dataEntrySheet
-                        .cell(1, firstColumnId, 1, columnId - 1, true)
-                        .formula("_" + dataElementId)
-                        .style(groupStyle(groupId));
-
-                    groupId++;
-                });
+                        groupId++;
+                    });
+                }
+            } catch(error) {
+                console.log("Failed building/downloading template");
+                console.error(error);
+                
             }
         });
     } else {
