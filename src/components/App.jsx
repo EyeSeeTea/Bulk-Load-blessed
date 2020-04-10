@@ -1,27 +1,23 @@
-import React from "react";
-import _ from "lodash";
-import PropTypes from "prop-types";
-import Dropzone from "react-dropzone";
-
-import { Button, Paper } from "@material-ui/core";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import CloudDoneIcon from "@material-ui/icons/CloudDone";
-
-import * as sheetImport from "../logic/sheetImport";
-import { SheetBuilder } from "../logic/sheetBuilder";
-import * as dhisConnector from "../logic/dhisConnector";
-
-import "./App.css";
-import moment from "moment";
-import { buildPossibleYears } from "../utils/periods";
 import i18n from "@dhis2/d2-i18n";
-import Select from "./Select";
-import { OrgUnitsSelector, useLoading, useSnackbar, ConfirmationDialog } from "d2-ui-components";
-import Settings from "../logic/settings";
-import SettingsComponent from "./settings/Settings";
-import { makeStyles } from "@material-ui/styles";
+import { Button, makeStyles, Paper } from "@material-ui/core";
+import CloudDoneIcon from "@material-ui/icons/CloudDone";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import _ from "lodash";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import Dropzone from "react-dropzone";
 import { useAppContext } from "../contexts/api-context";
-import { getDataValuesFromData, deleteDataValues } from "../logic/dataValues";
+import { deleteDataValues, getDataValuesFromData } from "../logic/dataValues";
+import * as dhisConnector from "../logic/dhisConnector";
+import Settings from "../logic/settings";
+import { SheetBuilder } from "../logic/sheetBuilder";
+import * as sheetImport from "../logic/sheetImport";
+import { buildPossibleYears } from "../utils/periods";
+import "./App.css";
+import Select from "./Select";
+import SettingsComponent from "./settings/Settings";
 
 const styles = theme => ({
     root: {
@@ -475,9 +471,7 @@ class AppComponent extends React.Component {
                                     options={buildPossibleYears(1970, this.state.endYear)}
                                     defaultValue={{
                                         value: moment("2010-01-01").year(),
-                                        label: moment("2010-01-01")
-                                            .year()
-                                            .toString(),
+                                        label: moment("2010-01-01").year().toString(),
                                     }}
                                     onChange={this.handleStartYear}
                                 />
@@ -491,9 +485,7 @@ class AppComponent extends React.Component {
                                     )}
                                     defaultValue={{
                                         value: moment().year(),
-                                        label: moment()
-                                            .year()
-                                            .toString(),
+                                        label: moment().year().toString(),
                                     }}
                                     onChange={this.handleEndYear}
                                 />

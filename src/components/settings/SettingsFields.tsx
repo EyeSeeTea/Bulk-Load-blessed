@@ -1,11 +1,10 @@
-import * as React from "react";
-import { Checkbox, FormGroup, FormControlLabel } from "@material-ui/core";
+import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
+import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
+import React from "react";
+import { useAppContext } from "../../contexts/api-context";
 import i18n from "../../locales";
 import Settings, { Model } from "../../logic/settings";
-import { useAppContext } from "../../contexts/api-context";
-import { Id } from "d2-api";
-import { makeStyles } from "@material-ui/styles";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -26,38 +25,38 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         }));
     }, [settings.userGroups]);
 
-    function setModel(model: Model) {
-        return React.useCallback(
-            (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const setModel = React.useCallback(
+        (model: Model) => {
+            return (ev: React.ChangeEvent<HTMLInputElement>) => {
                 onChange(settings.setModel(model, ev.target.checked));
-            },
-            [settings]
-        );
-    }
+            };
+        },
+        [settings, onChange]
+    );
 
     const setUserGroupsForGeneration = React.useCallback(
         (userGroupIds: Id[]) => {
             onChange(settings.setUserGroupsForGenerationFromIds(userGroupIds));
         },
-        [settings]
+        [settings, onChange]
     );
 
     const setUserGroupsForSettings = React.useCallback(
         (userGroupIds: Id[]) => {
             onChange(settings.setUserGroupsForSettingsFromIds(userGroupIds));
         },
-        [settings]
+        [settings, onChange]
     );
 
-    function updateBoolean(field: BooleanField) {
-        return React.useCallback(
-            (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const updateBoolean = React.useCallback(
+        (field: BooleanField) => {
+            return (ev: React.ChangeEvent<HTMLInputElement>) => {
                 const newSettings = settings.update({ [field]: ev.target.checked });
                 onChange(newSettings);
-            },
-            [settings]
-        );
-    }
+            };
+        },
+        [settings, onChange]
+    );
 
     const modelsInfo = React.useMemo(() => {
         return settings.getModelsInfo();

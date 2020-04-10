@@ -1,20 +1,19 @@
-import React from "react";
-import _ from "lodash";
 import {
-    Dialog,
-    Card,
     Button,
-    DialogTitle,
-    DialogContent,
+    Card,
+    Dialog,
     DialogActions,
-    IconButton,
+    DialogContent,
+    DialogTitle,
     Icon,
+    IconButton,
+    makeStyles,
 } from "@material-ui/core";
-import i18n from "../../locales";
-import SettingsFields from "./SettingsFields";
-import Settings from "../../logic/settings";
 import { useSnackbar } from "d2-ui-components";
-import { makeStyles } from "@material-ui/styles";
+import React from "react";
+import i18n from "../../locales";
+import Settings from "../../logic/settings";
+import SettingsFields from "./SettingsFields";
 
 export interface SettingsProps {
     settings: Settings;
@@ -38,7 +37,7 @@ export default function SettingsComponent(props: SettingsProps) {
         } else {
             snackbar.error(result.error);
         }
-    }, [unsavedSettings]);
+    }, [unsavedSettings, onChange, snackbar]);
 
     const close = React.useCallback(() => {
         setOpenState(false);

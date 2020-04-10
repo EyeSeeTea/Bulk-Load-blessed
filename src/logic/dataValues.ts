@@ -1,4 +1,4 @@
-import { Id, D2Api, DataValueSetsDataValue, DataValueSetsPostRequest } from "d2-api";
+import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
 import i18n from "../locales";
 
