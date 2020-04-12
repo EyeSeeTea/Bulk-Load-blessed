@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-03-17T09:12:34.505Z\n"
-"PO-Revision-Date: 2020-03-17T09:12:34.505Z\n"
+"POT-Creation-Date: 2020-04-12T16:33:22.643Z\n"
+"PO-Revision-Date: 2020-04-12T16:33:22.643Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -36,15 +36,6 @@ msgid "Data Set"
 msgstr ""
 
 msgid "Program"
-msgstr ""
-
-msgid "elements"
-msgstr ""
-
-msgid "Model"
-msgstr ""
-
-msgid "Select {{element}} to {{action}}..."
 msgstr ""
 
 msgid "Existing data values"
@@ -117,6 +108,15 @@ msgid "User groups for Template Generation"
 msgstr ""
 
 msgid "User groups with access to Settings"
+msgstr ""
+
+msgid "elements"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Select {{element}} to {{action}}..."
 msgstr ""
 
 msgid "Error deleting data values"

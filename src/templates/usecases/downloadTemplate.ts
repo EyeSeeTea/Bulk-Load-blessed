@@ -8,7 +8,6 @@ export class DownloadTemplateUseCase {
 
     constructor(private templateId: Id) {
         this.templateProvider = new DefaultTemplateProvider();
-        console.log(this.templateProvider.templates);
     }
 
     public async execute(): Promise<void> {
