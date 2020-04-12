@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { getObjectVersion } from "./utils";
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
@@ -22,7 +23,7 @@ export const SheetBuilder = function(builder) {
 
 SheetBuilder.prototype.fillLegendSheet = function() {
     const { elementMetadata: metadata, rawMetadata } = this.builder;
-    let legendSheet = this.legendSheet;
+    const legendSheet = this.legendSheet;
 
     // Freeze and format column titles
     legendSheet.row(2).freeze();
@@ -56,9 +57,9 @@ SheetBuilder.prototype.fillLegendSheet = function() {
 
     let rowId = 3;
     _.sortBy(rawMetadata["dataElements"], ["name"]).forEach((value, key) => {
-        let name = value.formName ? value.formName : value.name;
-        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options =
+        const name = value.formName ? value.formName : value.name;
+        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        const options =
             optionSet && optionSet.options
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
@@ -84,7 +85,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     } = this.builder;
     const title = element.displayName;
 
-    let validationSheet = this.validationSheet;
+    const validationSheet = this.validationSheet;
 
     // Freeze and format column titles
     validationSheet.row(2).freeze();
@@ -130,7 +131,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     rowId = 2;
     columnId++;
     validationSheet.cell(rowId++, columnId).string("Options");
-    let dataSetOptionComboId = element.categoryCombo.id;
+    const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
         if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
             validationSheet.cell(rowId++, columnId).formula("_" + e.id);
@@ -160,7 +161,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
 
 SheetBuilder.prototype.fillMetadataSheet = function() {
     const { elementMetadata: metadata, organisationUnits } = this.builder;
-    let metadataSheet = this.metadataSheet;
+    const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
     metadataSheet.row(2).freeze();
@@ -196,9 +197,9 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 
     let rowId = 3;
     metadata.forEach((value, key) => {
-        let name = value.formName !== undefined ? value.formName : value.name;
-        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options =
+        const name = value.formName !== undefined ? value.formName : value.name;
+        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        const options =
             optionSet && optionSet.options
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
@@ -239,12 +240,20 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 
 SheetBuilder.prototype.fillDataEntrySheet = function() {
     const { element, elementMetadata: metadata } = this.builder;
-    let dataEntrySheet = this.dataEntrySheet;
+    const dataEntrySheet = this.dataEntrySheet;
 
     // Freeze and format column titles
     dataEntrySheet.row(2).freeze();
     dataEntrySheet.row(1).setHeight(30);
     dataEntrySheet.row(2).setHeight(50);
+
+    const version = getObjectVersion(element);
+    if (version) {
+        dataEntrySheet
+            .cell(1, 1)
+            .string(`Version: ${version}`)
+            .style(baseStyle);
+    }
 
     // Add column titles
     let columnId = 1;
@@ -281,25 +290,25 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
     }
 
     if (element.type === "dataSet") {
-        let categoryOptionCombos = [];
-        for (let [, value] of metadata) {
+        const categoryOptionCombos = [];
+        for (const [, value] of metadata) {
             if (value.type === "categoryOptionCombo") {
                 categoryOptionCombos.push(value);
             }
         }
 
-        let sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
+        const sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
         _.forOwn(sections, (ownSection, categoryComboId) => {
-            let categoryCombo = metadata.get(categoryComboId);
+            const categoryCombo = metadata.get(categoryComboId);
             if (categoryCombo.code !== "default") {
-                let dataElementLookup = _.filter(element.dataSetElements, {
+                const dataElementLookup = _.filter(element.dataSetElements, {
                     categoryCombo: { id: categoryComboId },
                 });
                 _.forEach(dataElementLookup, lookupResult => {
-                    let firstColumnId = columnId;
+                    const firstColumnId = columnId;
 
-                    let dataElementId = lookupResult.dataElement.id;
-                    let sectionCategoryOptionCombos = sections[categoryComboId];
+                    const dataElementId = lookupResult.dataElement.id;
+                    const sectionCategoryOptionCombos = sections[categoryComboId];
                     _.forEach(sectionCategoryOptionCombos, dataValue => {
                         dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
                         dataEntrySheet
@@ -318,7 +327,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                     });
 
                     if (columnId - 1 === firstColumnId) {
-                        let dataElement = metadata.get(lookupResult.dataElement.id);
+                        const dataElement = metadata.get(lookupResult.dataElement.id);
                         dataEntrySheet
                             .column(firstColumnId)
                             .setWidth(dataElement.name.length / 2.5 + 15);
@@ -335,7 +344,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         });
     } else {
         _.forEach(element.programStages, programStageT => {
-            let programStage = metadata.get(programStageT.id);
+            const programStage = metadata.get(programStageT.id);
 
             createColumn(
                 this.workbook,
@@ -357,14 +366,14 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
             }
 
             _.forEach(programStage.programStageSections, programStageSectionT => {
-                let programStageSection = programStageSectionT.dataElements
+                const programStageSection = programStageSectionT.dataElements
                     ? programStageSectionT
                     : metadata.get(programStageSectionT.id);
-                let firstColumnId = columnId;
+                const firstColumnId = columnId;
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
-                    let dataElement = metadata.get(dataElementT.id);
-                    let validation = dataElement.optionSet ? dataElement.optionSet.id : null;
+                    const dataElement = metadata.get(dataElementT.id);
+                    const validation = dataElement.optionSet ? dataElement.optionSet.id : null;
                     createColumn(
                         this.workbook,
                         dataEntrySheet,

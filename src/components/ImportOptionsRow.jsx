@@ -3,23 +3,23 @@ import Select from "react-select";
 
 class ImportOptionsRow extends React.Component {
     render() {
-        let handleChangeOptions = selectedOption => {
+        const handleChangeOptions = selectedOption => {
             this.props.onChange("option", selectedOption);
         };
 
-        let handleChangeYear = selectedOption => {
+        const handleChangeYear = selectedOption => {
             this.props.onChange("year", selectedOption);
         };
 
-        let handleChangeMonth = selectedOption => {
+        const handleChangeMonth = selectedOption => {
             this.props.onChange("month", selectedOption);
         };
 
-        let handleChangeWeek = selectedOption => {
+        const handleChangeWeek = selectedOption => {
             this.props.onChange("week", selectedOption);
         };
 
-        let handleChangeDay = selectedOption => {
+        const handleChangeDay = selectedOption => {
             this.props.onChange("day", selectedOption);
         };
 

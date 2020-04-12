@@ -1,77 +1,39 @@
 import React from "react";
+import axios from "axios";
 import ReactDOM from "react-dom";
-import { Provider } from "react-redux";
+import { Provider } from "@dhis2/app-runtime";
 
-import { getManifest, init } from "d2";
-import { Provider as D2Provider } from "@dhis2/app-runtime";
-import LoadingMask from "@dhis2/d2-ui-core/loading-mask/LoadingMask.component";
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-
-import App from "./components/App.js";
-import theme from "./components/Theme";
-import { store } from "./store";
+import App from "./components/app/App";
+import "./locales";
 import "./index.css";
 
-const DEBUG = process.env.REACT_APP_DEBUG;
+async function getBaseUrl() {
+    if (process.env.NODE_ENV === "development") {
+        const baseUrl = process.env.REACT_APP_DHIS2_BASE_URL || "http://localhost:8080";
+        console.info(`[DEV] DHIS2 instance: ${baseUrl}`);
+        return baseUrl.replace(/\/*$/, "");
+    } else {
+        const { data: manifest } = await axios.get("manifest.webapp");
+        return manifest.activities.dhis.href;
+    }
+}
 
-getManifest("manifest.webapp")
-    .then(manifest => {
-        let config = {};
+async function main() {
+    const config = {
+        baseUrl: await getBaseUrl(),
+        apiVersion: "30",
+    };
+    try {
+        ReactDOM.render(
+            <Provider config={config}>
+                <App />
+            </Provider>,
+            document.getElementById("root")
+        );
+    } catch (err) {
+        console.error(err);
+        ReactDOM.render(<div>{err.toString()}</div>, document.getElementById("root"));
+    }
+}
 
-        // Set baseUrl
-        config.baseUrl =
-            manifest.activities !== undefined
-                ? manifest.activities.dhis.href + "/api"
-                : process.env.REACT_APP_DHIS2_BASE_URL !== undefined
-                ? process.env.REACT_APP_DHIS2_BASE_URL + "/api"
-                : (config.baseUrl = window.location.href.includes("/api")
-                      ? window.location.href.split("/api")[0] + "/api"
-                      : undefined);
-
-        // Set credentials
-        if (process.env.REACT_APP_DEBUG === "true") {
-            console.log(
-                "Starting React App in DEBUG mode with user: " +
-                    process.env.REACT_APP_DHIS2_USERNAME
-            );
-            config.headers = {
-                Authorization:
-                    "Basic " +
-                    btoa(
-                        process.env.REACT_APP_DHIS2_USERNAME +
-                            ":" +
-                            process.env.REACT_APP_DHIS2_PASSWORD
-                    ),
-            };
-        }
-
-        // Init library
-        init(config).then(d2 => {
-            const providerConfig = {
-                baseUrl: config.baseUrl.split("/api")[0],
-                apiVersion: d2.system.version.minor,
-            };
-            if (DEBUG) console.log(providerConfig, d2);
-            store.dispatch({ type: "SET_D2", d2 });
-            store.dispatch({ type: "LOADING", loading: false });
-            ReactDOM.render(
-                <Provider store={store}>
-                    <D2Provider config={providerConfig}>
-                        <App d2={d2} />
-                    </D2Provider>
-                </Provider>,
-                document.getElementById("root")
-            );
-        });
-    })
-    .catch(error => {
-        console.error("D2 initialization error:", error);
-        ReactDOM.render(<div>Failed to connect with D2</div>, document.getElementById("root"));
-    });
-
-ReactDOM.render(
-    <MuiThemeProvider muiTheme={theme} theme={theme}>
-        <LoadingMask large={true} />
-    </MuiThemeProvider>,
-    document.getElementById("root")
-);
+main();

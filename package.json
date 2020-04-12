@@ -1,76 +1,128 @@
 {
-  "name": "bulk-load",
-  "version": "2.1.3",
-  "dependencies": {
-    "@dhis2/app-runtime": "^1.5.1",
-    "@dhis2/d2-ui-core": "^6.2.1",
-    "@dhis2/d2-ui-org-unit-tree": "^6.2.1",
-    "@dhis2/ui-widgets": "^1.0.8",
-    "@material-ui/core": "^4.4.2",
-    "@material-ui/icons": "^4.4.1",
-    "axios": "^0.19.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "d2": "^31.8.1",
-    "d2-manifest": "^1.0.0",
-    "d2-utilizr": "^0.2.16",
-    "dateformat": "^3.0.3",
-    "excel4node": "^1.7.2",
-    "exceljs": "^1.12.0",
-    "file-saver": "^2.0.2",
-    "filereader-stream": "^2.0.0",
-    "jquery": "^3.4.1",
-    "lodash": "^4.17.15",
-    "material-ui": "0.20.2",
-    "moment": "^2.24.0",
-    "prettier": "^1.18.2",
-    "prop-types": "^15.7.2",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-dropzone": "^6.2.4",
-    "react-redux": "^7.1.1",
-    "react-scripts": "^3.1.1",
-    "react-select": "^3.0.4",
-    "redux": "^4.0.4",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "prebuild": "rm -rf bulk-load.zip && rm -rf build/",
-    "build": "react-scripts build",
-    "postbuild": "d2-manifest package.json build/manifest.webapp && cd build && zip -r ../bulk-load.zip . && rm asset-manifest.json && rm service-worker.js && cd ..",
-    "prettify": "prettier \"{src,public}/**/*.{js,jsx,ts,tsx,json,css}\" --write",
-    "test": "node scripts/test.js --env=jsdom",
-    "eject": "react-scripts eject"
-  },
-  "manifest.webapp": {
-    "name": "Bulk Load",
+    "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "developer": {
-      "name": "Alexis Rico",
-      "url": "https://github.com/SferaDev"
+    "version": "3.0.0",
+    "license": "GPL-3.0",
+    "author": "EyeSeeTea team",
+    "homepage": ".",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/eyeseetea/bulk-load.git"
     },
-    "icons": {
-      "48": "img/icon.png"
+    "dependencies": {
+        "@dhis2/app-runtime": "^1.5.1",
+        "@dhis2/d2-i18n": "^1.0.4",
+        "@dhis2/d2-ui-core": "^1.3.5",
+        "@dhis2/ui": "https://github.com/d2-ci/ui",
+        "@dhis2/ui-widgets": "^1.0.8",
+        "@material-ui/core": "^4.6.0",
+        "@material-ui/icons": "^4.5.1",
+        "@material-ui/styles": "^4.6.0",
+        "axios": "^0.19.0",
+        "d2": "^31.1.1",
+        "d2-api": "0.2.0",
+        "d2-ui-components": "1.3.0",
+        "dateformat": "^3.0.3",
+        "excel4node": "^1.7.2",
+        "exceljs": "^1.12.0",
+        "file-saver": "^2.0.2",
+        "filereader-stream": "^2.0.0",
+        "font-awesome": "^4.7.0",
+        "jquery": "^3.4.1",
+        "lodash": "^4.17.15",
+        "prop-types": "^15",
+        "react": "^16.6.0",
+        "react-dom": "^16.6.0",
+        "react-dropzone": "^6.2.4",
+        "react-router-dom": "^5.0.1",
+        "react-scripts": "2.0.6-next.c662dfb0"
     },
-    "activities": {
-      "dhis": {
-        "href": "*"
-      }
-    }
-  },
-  "homepage": ".",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+    "scripts": {
+        "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
+        "start": "react-scripts start",
+        "prebuild": "yarn localize && yarn test",
+        "build": "rm -rf build/ && d2-manifest package.json manifest.webapp && react-scripts build && yarn run manifest && cp -r i18n icon.png build",
+        "build-webapp": "yarn build && rm -f $npm_package_name.zip && cd build && zip -r ../$npm_package_name.zip *",
+        "test": "jest",
+        "lint": "eslint src cypress --ext .js,.jsx,.ts,.tsx",
+        "eject": "react-scripts eject",
+        "prettify": "prettier \"{src,config,cypress}/**/*.{js,jsx,json,css}\" --write",
+        "extract-pot": "yarn d2-i18n-extract -p src/ -o i18n/",
+        "localize": "yarn update-po && d2-i18n-generate -n bulk-load -p ./i18n/ -o ./src/locales/",
+        "update-po": "yarn extract-pot && for pofile in i18n/*.po; do msgmerge --backup=off -U $pofile i18n/en.pot; done",
+        "manifest": "d2-manifest package.json build/manifest.webapp",
+        "cy:verify": "cypress verify",
+        "cy:e2e:open": "CYPRESS_E2E=true cypress open",
+        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome"
+    },
+    "husky": {
+        "hooks": {
+            "pre-push": "yarn prettify && yarn lint && yarn extract-pot && yarn jest"
+        }
+    },
+    "devDependencies": {
+        "@babel/core": "^7.0.0-0",
+        "@dhis2/d2-i18n-extract": "^1.0.7",
+        "@dhis2/d2-i18n-generate": "^1.0.19",
+        "@testing-library/jest-dom": "^4.1.2",
+        "@testing-library/react": "^9.3.0",
+        "@types/enzyme-adapter-react-16": "^1.0.5",
+        "@types/jest": "^23.3.13",
+        "@types/lodash": "^4.14.144",
+        "@types/node": "^10.12.19",
+        "@types/react": "^16.7.22",
+        "@types/react-dom": "^16.0.11",
+        "@typescript-eslint/eslint-plugin": "^2.15.0",
+        "@typescript-eslint/parser": "^2.15.0",
+        "axios-mock-adapter": "^1.17.0",
+        "babel-core": "7.0.0-bridge.0",
+        "babel-eslint": "9.x",
+        "cypress": "^3.1.4",
+        "cypress-xpath": "^1.3.0",
+        "d2-manifest": "^1.0.0",
+        "enzyme": "^3.7.0",
+        "enzyme-adapter-react-16": "^1.6.0",
+        "enzyme-to-json": "^3.3.4",
+        "eslint": "^5.12.1",
+        "eslint-config-prettier": "^6.4.0",
+        "eslint-config-react": "^1.1.7",
+        "eslint-config-react-app": "^3.0.7",
+        "eslint-plugin-cypress": "^2.2.0",
+        "eslint-plugin-flowtype": "^2.x",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-jsx-a11y": "^6.2.0",
+        "eslint-plugin-prettier": "^3.1.1",
+        "eslint-plugin-react": "^7.12.4",
+        "husky": "^1.1.2",
+        "jest": "^23.6.0",
+        "moment": "^2.24.0",
+        "postcss-rtl": "^1.3.2",
+        "prettier": "^1.13.0",
+        "react-test-renderer": "^16.8.3",
+        "ts-jest": "^23.10.5",
+        "typescript": "^3.2.4",
+        "wait-on": "^3.2.0"
+    },
+    "manifest.webapp": {
+        "name": "Bulk Load",
+        "description": "DHIS2 Bulk Load App",
+        "icons": {
+            "48": "icon.png"
+        },
+        "developer": {
+            "url": "https://www.eyeseetea.com/",
+            "name": "EyeSeeTea team"
+        },
+        "activities": {
+            "dhis": {
+                "href": "*"
+            }
+        }
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
     ]
-  }
 }
