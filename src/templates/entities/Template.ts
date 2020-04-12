@@ -17,7 +17,6 @@ export interface GenericTemplate {
     url?: string;
     type: TemplateType;
     dataSources: DataSource[];
-    loadFromUrl(): Promise<void>;
     from(file: File): AggregatedPackage | EventsPackage;
     toBlob(): Promise<Blob>;
 }
