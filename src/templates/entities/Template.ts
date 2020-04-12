@@ -14,20 +14,22 @@ export type Template = DataSetTemplate | ProgramTemplate;
 export interface GenericTemplate {
     id: Id;
     name: string;
+    url?: string;
     type: TemplateType;
     dataSources: DataSource[];
-    write(): Blob;
-    read(file: File): AggregatedPackage | EventsPackage;
+    loadFromUrl(): Promise<void>;
+    from(file: File): AggregatedPackage | EventsPackage;
+    toBlob(): Promise<Blob>;
 }
 
 export interface DataSetTemplate extends GenericTemplate {
     type: "dataSet";
-    read(file: File): AggregatedPackage;
+    from(file: File): AggregatedPackage;
 }
 
 export interface ProgramTemplate extends GenericTemplate {
     type: "program";
-    read(file: File): EventsPackage;
+    from(file: File): EventsPackage;
 }
 
 export interface GenericSheetRef {
