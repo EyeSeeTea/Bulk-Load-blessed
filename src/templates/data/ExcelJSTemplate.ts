@@ -23,7 +23,7 @@ class ExcelJSTemplate {
     }
 
     async toBlob(): Promise<Blob> {
-        const data = await this.workbook.xlsx.writeBuffer({ useStyles: true })
+        const data = await this.workbook.xlsx.writeBuffer({ useStyles: true });
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });

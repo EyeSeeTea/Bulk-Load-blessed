@@ -16,7 +16,6 @@ export class DownloadTemplateUseCase {
             const template = this.templateProvider.getTemplate(this.templateId);
             await template.loadFromUrl();
             const data = await template.toBlob();
-            console.log(data)
             saveAs(data, `${template.name}.xlsx`);
         } catch (error) {
             console.log("Failed building/downloading template");
