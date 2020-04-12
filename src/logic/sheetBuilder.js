@@ -132,7 +132,9 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     validationSheet.cell(rowId++, columnId).string("Options");
     let dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
-        if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
+        if (e.type === "categoryOptionCombo" 
+            && e.categoryCombo.id === dataSetOptionComboId
+           && e.name !== "default") {
             validationSheet.cell(rowId++, columnId).formula("_" + e.id);
         }
     });
