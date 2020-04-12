@@ -17,18 +17,19 @@ export interface GenericTemplate {
     url?: string;
     type: TemplateType;
     dataSources: DataSource[];
-    from(file: File): AggregatedPackage | EventsPackage;
+    initialize(): Promise<void>;
+    parseData(file: File): AggregatedPackage | EventsPackage;
     toBlob(): Promise<Blob>;
 }
 
 export interface DataSetTemplate extends GenericTemplate {
     type: "dataSet";
-    from(file: File): AggregatedPackage;
+    parseData(file: File): AggregatedPackage;
 }
 
 export interface ProgramTemplate extends GenericTemplate {
     type: "program";
-    from(file: File): EventsPackage;
+    parseData(file: File): EventsPackage;
 }
 
 export interface GenericSheetRef {

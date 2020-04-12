@@ -13,7 +13,7 @@ export class DownloadTemplateUseCase {
 
     public async execute(): Promise<void> {
         try {
-            const template = this.templateProvider.getTemplate(this.templateId);
+            const template = await this.templateProvider.getTemplate(this.templateId);
             const data = await template.toBlob();
             saveAs(data, `${template.name}.xlsx`);
         } catch (error) {

@@ -17,9 +17,10 @@ export class DefaultTemplateProvider implements TemplateProvider {
         this.templates = getTemplates();
     }
 
-    getTemplate(templateId: Id): Template {
+    async getTemplate(templateId: Id): Promise<Template> {
         const template = this.templates.find(({ id }) => id === templateId);
         if (!template) throw new Error("Attempt to read from an invalid template");
+        await template.initialize();
 
         return template;
     }

@@ -1,4 +1,4 @@
-import { ProgramExcelJSTemplate } from "../ExcelJSTemplate";
+import { ProgramExcelJSTemplate } from "../ExcelTemplate";
 
 export default class extends ProgramExcelJSTemplate {
     readonly id = "id";
