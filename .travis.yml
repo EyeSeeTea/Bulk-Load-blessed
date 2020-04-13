@@ -11,6 +11,8 @@ addons:
             - libgconf-2-4
 cache:
     npm: false
+before_install:
+    - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 install:
     - yarn install --frozen-lockfile
     - yarn cy:verify
