@@ -10,8 +10,7 @@ addons:
         packages:
             - libgconf-2-4
 cache:
-    directories:
-        - "$HOME/.cache"
+    npm: false
 install:
     - yarn install --frozen-lockfile
     - yarn cy:verify
