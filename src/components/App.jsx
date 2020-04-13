@@ -14,13 +14,13 @@ import * as dhisConnector from "../logic/dhisConnector";
 import Settings from "../logic/settings";
 import { SheetBuilder } from "../logic/sheetBuilder";
 import * as sheetImport from "../logic/sheetImport";
-import { ListTemplatesUseCase } from "../templates/usecases/listTemplates";
+import { ListTemplatesUseCase } from "../domain/usecases/listTemplates";
 import { buildPossibleYears } from "../utils/periods";
 import "./App.css";
 import Select from "./select/Select";
 import SettingsComponent from "./settings/Settings";
 import { TemplateSelector } from "./template-selector/TemplateSelector";
-import { DownloadTemplateUseCase } from "../templates/usecases/downloadTemplate";
+import { DownloadTemplateUseCase } from "../domain/usecases/downloadTemplate";
 
 const styles = theme => ({
     root: {

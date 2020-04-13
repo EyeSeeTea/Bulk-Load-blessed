@@ -1,16 +1,16 @@
-import { AggregatedPackage } from "../entities/AggregatedPackage";
-import { EventsPackage } from "../entities/EventsPackage";
-import { DataSetTemplate, DataSource, ProgramTemplate } from "../entities/Template";
 import XlsxPopulate from "xlsx-populate";
+import { AggregatedPackage } from "../domain/entities/AggregatedPackage";
+import { EventsPackage } from "../domain/entities/EventsPackage";
+import { DataSetTemplate, DataSource, ProgramTemplate } from "../domain/entities/Template";
 
 class ExcelTemplate {
     protected workbook: XlsxPopulate.Workbook | undefined;
 
     constructor(
-        readonly id: string,
-        readonly name: string,
-        readonly url: string | undefined,
-        readonly dataSources: DataSource[]
+        public readonly id: string,
+        public readonly name: string,
+        public readonly url: string | undefined,
+        public readonly dataSources: DataSource[]
     ) {}
 
     public async initialize() {
@@ -25,7 +25,7 @@ class ExcelTemplate {
         }
     }
 
-    async toBlob(): Promise<Blob> {
+    public async toBlob(): Promise<Blob> {
         if (!this.workbook) throw new Error("Failed to read workbook");
         const data = await this.workbook.outputAsync("buffer");
         return new Blob([data], {
@@ -33,23 +33,23 @@ class ExcelTemplate {
         });
     }
 
-    parseData(file: File): void {
+    public parseData(file: File): void {
         throw new Error("Method not implemented.");
     }
 }
 
 export class DataSetExcelJSTemplate extends ExcelTemplate implements DataSetTemplate {
-    readonly type = "dataSet";
+    public readonly type = "dataSet";
 
-    parseData(file: File): AggregatedPackage {
+    public parseData(file: File): AggregatedPackage {
         throw new Error("Method not implemented.");
     }
 }
 
 export class ProgramExcelJSTemplate extends ExcelTemplate implements ProgramTemplate {
-    readonly type = "program";
+    public readonly type = "program";
 
-    parseData(file: File): EventsPackage {
+    public parseData(file: File): EventsPackage {
         throw new Error("Method not implemented.");
     }
 }

@@ -1,4 +1,4 @@
-import { DefaultTemplateProvider } from "../data/DefaultTemplateProvider";
+import { DefaultTemplateProvider } from "../../data/DefaultTemplateProvider";
 import { TemplateProvider } from "../entities/TemplateProvider";
 
 export class ListTemplatesUseCase {

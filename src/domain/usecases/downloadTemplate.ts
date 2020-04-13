@@ -1,5 +1,5 @@
 import { saveAs } from "file-saver";
-import { DefaultTemplateProvider } from "../data/DefaultTemplateProvider";
+import { DefaultTemplateProvider } from "../../data/DefaultTemplateProvider";
 import { Id } from "../entities/ReferenceObject";
 import { TemplateProvider } from "../entities/TemplateProvider";
 

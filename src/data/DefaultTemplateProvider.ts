@@ -1,6 +1,6 @@
-import { Id } from "../entities/ReferenceObject";
-import { Template } from "../entities/Template";
-import { TemplateProvider } from "../entities/TemplateProvider";
+import { Id } from "../domain/entities/ReferenceObject";
+import { Template } from "../domain/entities/Template";
+import { TemplateProvider } from "../domain/entities/TemplateProvider";
 
 export function getTemplates(): Template[] {
     const tasks = require.context("./custom-templates", false, /.*\.ts$/);
@@ -17,11 +17,11 @@ export class DefaultTemplateProvider implements TemplateProvider {
         this.templates = getTemplates();
     }
 
-    listTemplates(): Pick<Template, "id" | "name" | "type">[] {
+    public listTemplates(): Pick<Template, "id" | "name" | "type">[] {
         return this.templates.map(({ id, name, type }) => ({ id, name, type }));
     }
 
-    async getTemplate(templateId: Id): Promise<Template> {
+    public async getTemplate(templateId: Id): Promise<Template> {
         const template = this.templates.find(({ id }) => id === templateId);
         if (!template) throw new Error("Attempt to read from an invalid template");
         await template.initialize();
