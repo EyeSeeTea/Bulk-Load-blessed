@@ -84,6 +84,7 @@
         "axios-mock-adapter": "1.18.1",
         "babel-core": "6.26.3",
         "babel-eslint": "10.1.0",
+        "babel-preset-react-app": "^9.1.2",
         "cypress": "4.3.0",
         "cypress-xpath": "1.4.0",
         "d2-manifest": "1.0.0",
