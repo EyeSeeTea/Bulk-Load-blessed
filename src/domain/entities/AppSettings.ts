@@ -11,10 +11,3 @@ export interface AppSettings {
     userGroupsForSettings: string[];
     showOrgUnitsOnGeneration: boolean;
 }
-
-export const defaultAppSettings: AppSettings = {
-    models: { dataSet: true, program: false },
-    userGroupsForGeneration: ["HMIS Officers"],
-    userGroupsForSettings: [],
-    showOrgUnitsOnGeneration: false,
-};

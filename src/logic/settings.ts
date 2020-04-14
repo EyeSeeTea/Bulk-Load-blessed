@@ -89,7 +89,7 @@ export default class Settings {
         const defaultSettings = new AppSettingsUseCase().getDefaultSettings();
 
         const defaultData = {
-            models: { dataSet: true, program: false },
+            models: { dataSet: true, program: true },
             userGroupsForGeneration: [],
             userGroupsForSettings: [],
             showOrgUnitsOnGeneration: false,

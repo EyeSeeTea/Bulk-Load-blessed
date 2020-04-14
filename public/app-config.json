@@ -1,7 +1,7 @@
 {
     "appKey": "bulk-load",
     "appearance": {
-        "showShareButton": true
+        "showShareButton": false
     },
     "feedback": null,
     "storage": "dataStore"
