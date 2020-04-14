@@ -1,6 +1,6 @@
 import { Id } from "../domain/entities/ReferenceObject";
 import { Template } from "../domain/entities/Template";
-import { TemplateProvider } from "../domain/entities/TemplateProvider";
+import { TemplateProvider } from "../domain/repositories/TemplateProvider";
 
 export function getTemplates(): Template[] {
     const tasks = require.context("./custom-templates", false, /.*\.ts$/);

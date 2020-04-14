@@ -3,5 +3,6 @@
     "appearance": {
         "showShareButton": true
     },
-    "feedback": null
+    "feedback": null,
+    "storage": "dataStore"
 }

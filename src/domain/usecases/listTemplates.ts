@@ -1,5 +1,5 @@
 import { DefaultTemplateProvider } from "../../data/DefaultTemplateProvider";
-import { TemplateProvider } from "../entities/TemplateProvider";
+import { TemplateProvider } from "../repositories/TemplateProvider";
 
 export class ListTemplatesUseCase {
     private templateProvider: TemplateProvider;
