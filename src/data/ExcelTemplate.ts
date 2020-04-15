@@ -1,33 +1,31 @@
-import XlsxPopulate from "xlsx-populate";
+import Excel, { Workbook } from "exceljs";
 import { AggregatedPackage } from "../domain/entities/AggregatedPackage";
 import { EventsPackage } from "../domain/entities/EventsPackage";
 import { DataSetTemplate, DataSource, ProgramTemplate } from "../domain/entities/Template";
 
 class ExcelTemplate {
-    protected workbook: XlsxPopulate.Workbook | undefined;
+    protected workbook: Workbook;
 
     constructor(
         public readonly id: string,
         public readonly name: string,
         public readonly url: string | undefined,
         public readonly dataSources: DataSource[]
-    ) {}
+    ) {
+        this.workbook = new Excel.Workbook();
+    }
 
     public async initialize() {
-        if (this.workbook) {
-            return;
-        } else if (this.url) {
+        if (this.url) {
             const response = await fetch(this.url);
             const data = await response.arrayBuffer();
-            this.workbook = await XlsxPopulate.fromDataAsync(data);
-        } else {
-            this.workbook = await XlsxPopulate.fromBlankAsync();
+            this.workbook.xlsx.load(data);
         }
     }
 
     public async toBlob(): Promise<Blob> {
         if (!this.workbook) throw new Error("Failed to read workbook");
-        const data = await this.workbook.outputAsync("buffer");
+        const data = await this.workbook.xlsx.writeBuffer();
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
