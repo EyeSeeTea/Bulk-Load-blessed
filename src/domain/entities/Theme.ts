@@ -1,33 +1,29 @@
-import { CellRef } from "./Template";
+export type Color = string;
 
-export type CellColor = string;
+export type ThemeableSections = "header" | "title" | "subtitle" | "footer";
 
-export interface StyledCell {
-    text: string;
-    ref: CellRef;
-    color?: CellColor;
+export interface ThemeStyle {
+    text?: string;
     bold?: boolean;
-    italics?: boolean;
-    size?: number;
+    italic?: boolean;
+    fontSize?: number;
+    fontColor?: Color;
+    fillColor?: Color;
 }
 
 export interface CellImage {
-    ref: CellRef;
     src: string;
 }
 
-export interface ColorPattern {
-    header?: CellColor;
-    title?: CellColor;
-    subtitle?: CellColor;
-    footer?: CellColor;
-}
+export type ColorPattern = {
+    [key in ThemeableSections]?: Color;
+};
 
-export interface Theme {
-    header: StyledCell;
-    title: StyledCell;
-    subtitle: StyledCell;
-    footer: StyledCell;
-    logo: CellImage;
-    colorPattern: ColorPattern;
-}
+export type Theme =
+    | {
+          [key in ThemeableSections]?: ThemeStyle;
+      }
+    | {
+          logo: CellImage;
+          colorPattern: ColorPattern;
+      };

@@ -1,5 +1,7 @@
-import { DataSource, Template } from "../domain/entities/Template";
+import _ from "lodash";
 import XLSX, { Workbook } from "xlsx-populate";
+import { DataSource, SheetRef, StyleSource, Template } from "../domain/entities/Template";
+import { Theme, ThemeStyle } from "../domain/entities/Theme";
 
 export class XLSXPopulateTemplate implements Template {
     protected workbook: Workbook | undefined;
@@ -8,7 +10,8 @@ export class XLSXPopulateTemplate implements Template {
         public readonly id: string,
         public readonly name: string,
         public readonly url: string | undefined,
-        public readonly dataSources: DataSource[]
+        public readonly dataSources: DataSource[],
+        public readonly styleSources: StyleSource[]
     ) {}
 
     public async initialize() {
@@ -25,13 +28,47 @@ export class XLSXPopulateTemplate implements Template {
 
     public async toBlob(): Promise<Blob> {
         if (!this.workbook) throw new Error("Failed to read workbook");
-        const data = await this.workbook.outputAsync("buffer");
+        const data = await this.workbook.outputAsync();
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     }
 
+    public applyTheme(theme: Theme): void {
+        _.forOwn(theme, (style: ThemeStyle, section: string) => {
+            const { source } = this.styleSources.find(source => source.section === section) ?? {};
+            if (source) this.applyThemeToRange(source, style);
+        });
+    }
+
     public parseData(file: File): void {
         throw new Error("Method not implemented.");
+    }
+
+    private applyThemeToRange(source: SheetRef, style: ThemeStyle): void {
+        const { sheet } = source;
+        const { text, bold, italic, fontSize, fontColor, fillColor } = style;
+
+        try {
+            const range =
+                source.type === "range"
+                    ? this.workbook?.sheet(sheet).range(source.ref)
+                    : this.workbook?.sheet(sheet).range(`${source.ref}:${source.ref}`);
+
+            this.workbook
+                ?.sheet(sheet)
+                .range(range?.address() ?? "")
+                .merged(true)
+                .style({
+                    bold,
+                    italic,
+                    fontSize,
+                    fontColor,
+                    fill: fillColor,
+                })
+                .value(text);
+        } catch (error) {
+            console.error("Could not apply style", { source, style, error });
+        }
     }
 }

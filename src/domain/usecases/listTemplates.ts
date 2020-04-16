@@ -8,7 +8,7 @@ export class ListTemplatesUseCase {
         this.templateProvider = new DefaultTemplateProvider();
     }
 
-    public execute(): { value: string; label: string; }[] {
+    public execute(): { value: string; label: string }[] {
         return this.templateProvider
             .listTemplates()
             .map(({ id, name }) => ({ value: id, label: name }));
