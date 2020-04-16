@@ -37,7 +37,8 @@
         "react-dropzone": "6.2.4",
         "react-router-dom": "5.1.2",
         "react-scripts": "3.4.1",
-        "styled-jsx": "3.2.5"
+        "styled-jsx": "3.2.5",
+        "xlsx-populate": "^1.21.0"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
@@ -77,6 +78,7 @@
         "@types/react": "16.9.34",
         "@types/react-dom": "16.9.6",
         "@types/webpack-env": "1.15.1",
+        "@types/xlsx-populate": "git+https://github.com/JanLoebel/types-xlsx-populate.git",
         "@typescript-eslint/eslint-plugin": "2.27.0",
         "@typescript-eslint/parser": "2.27.0",
         "axios-mock-adapter": "1.18.1",

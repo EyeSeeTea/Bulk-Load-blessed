@@ -17,8 +17,8 @@ export class DefaultTemplateProvider implements TemplateProvider {
         this.templates = getTemplates();
     }
 
-    public listTemplates(): Pick<Template, "id" | "name" | "type">[] {
-        return this.templates.map(({ id, name, type }) => ({ id, name, type }));
+    public listTemplates(): Pick<Template, "id" | "name">[] {
+        return this.templates.map(({ id, name }) => ({ id, name }));
     }
 
     public async getTemplate(templateId: Id): Promise<Template> {

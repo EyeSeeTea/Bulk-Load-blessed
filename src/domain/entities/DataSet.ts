@@ -1,35 +1,33 @@
 import { D2DataSetSchema, SelectedPick } from "d2-api";
 
-const include = true as const;
-
 export const DataSetFields = {
-    id: include,
-    name: include,
-    code: include,
+    id: true,
+    name: true,
+    code: true,
     dataSetElements: {
         dataElement: {
-            id: include,
-            name: include,
-            valueType: include,
-            zeroIsSignificant: include,
+            id: true,
+            name: true,
+            valueType: true,
+            zeroIsSignificant: true,
             optionSet: {
-                id: include,
+                id: true,
                 options: {
-                    id: include,
-                    name: include,
-                    code: include,
+                    id: true,
+                    name: true,
+                    code: true,
                 },
             },
         },
         categoryCombo: {
-            id: include,
-            name: include,
+            id: true,
+            name: true,
             categoryOptionCombos: {
-                id: include,
-                name: include,
+                id: true,
+                name: true,
             },
         },
     },
-};
+} as const;
 
 export type DataSet = SelectedPick<D2DataSetSchema, typeof DataSetFields>;

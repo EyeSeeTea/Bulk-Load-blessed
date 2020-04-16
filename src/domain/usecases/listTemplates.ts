@@ -8,9 +8,9 @@ export class ListTemplatesUseCase {
         this.templateProvider = new DefaultTemplateProvider();
     }
 
-    public execute(): { value: string; label: string; type: string }[] {
+    public execute(): { value: string; label: string; }[] {
         return this.templateProvider
             .listTemplates()
-            .map(({ id, name, type }) => ({ value: id, label: name, type }));
+            .map(({ id, name }) => ({ value: id, label: name }));
     }
 }

@@ -9,27 +9,15 @@ export type SheetRef = RowRef | ColumnRef | CellRef;
 export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
 
 export type TemplateType = "dataSet" | "program";
-export type Template = DataSetTemplate | ProgramTemplate;
 
-export interface GenericTemplate {
+export interface Template {
     id: Id;
     name: string;
     url?: string;
-    type: TemplateType;
     dataSources: DataSource[];
     initialize(): Promise<void>;
-    parseData(file: File): AggregatedPackage | EventsPackage;
+    parseData(file: File): void;
     toBlob(): Promise<Blob>;
-}
-
-export interface DataSetTemplate extends GenericTemplate {
-    type: "dataSet";
-    parseData(file: File): AggregatedPackage;
-}
-
-export interface ProgramTemplate extends GenericTemplate {
-    type: "program";
-    parseData(file: File): EventsPackage;
 }
 
 export interface GenericSheetRef {
