@@ -1,5 +1,5 @@
 import { saveAs } from "file-saver";
-import { DefaultTemplateProvider } from "../../data/DefaultTemplateProvider";
+import { CompositionRoot } from "../CompositionRoot";
 import { Id } from "../entities/ReferenceObject";
 import { TemplateProvider } from "../repositories/TemplateProvider";
 
@@ -7,7 +7,7 @@ export class DownloadTemplateUseCase {
     private templateProvider: TemplateProvider;
 
     constructor(private templateId: Id) {
-        this.templateProvider = new DefaultTemplateProvider();
+        this.templateProvider = CompositionRoot.getInstance().templateProvider;
     }
 
     public async execute(): Promise<void> {

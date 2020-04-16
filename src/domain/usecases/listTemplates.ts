@@ -1,11 +1,11 @@
-import { DefaultTemplateProvider } from "../../data/DefaultTemplateProvider";
+import { CompositionRoot } from "../CompositionRoot";
 import { TemplateProvider } from "../repositories/TemplateProvider";
 
 export class ListTemplatesUseCase {
     private templateProvider: TemplateProvider;
 
     constructor() {
-        this.templateProvider = new DefaultTemplateProvider();
+        this.templateProvider = CompositionRoot.getInstance().templateProvider;
     }
 
     public execute(): { value: string; label: string }[] {

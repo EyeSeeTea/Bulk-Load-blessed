@@ -1,3 +1,5 @@
+import { Id } from "./ReferenceObject";
+
 export type Color = string;
 
 export type ThemeableSections = "header" | "title" | "subtitle" | "footer";
@@ -12,18 +14,24 @@ export interface ThemeStyle {
 }
 
 export interface CellImage {
-    src: string;
+    sheet: string;
+    name: string;
+    src: File;
+    from: string;
+    to: string;
 }
 
 export type ColorPattern = {
     [key in ThemeableSections]?: Color;
 };
 
-export type Theme =
-    | {
-          [key in ThemeableSections]?: ThemeStyle;
-      }
-    | {
-          logo: CellImage;
-          colorPattern: ColorPattern;
-      };
+export interface Theme {
+    id: Id;
+    name: string;
+    templates: Id[];
+    sections?: {
+        [key in ThemeableSections]?: ThemeStyle;
+    },
+    pictures?: CellImage[];
+    colorPattern?: ColorPattern;
+}

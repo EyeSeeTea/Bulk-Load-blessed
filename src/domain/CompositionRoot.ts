@@ -1,9 +1,13 @@
 import { ConstantSettingsStorage } from "../data/ConstantSettingsStorage";
 import { DataStoreSettingsStorage } from "../data/DataStoreSettingsStorage";
+import { DefaultTemplateProvider } from "../data/DefaultTemplateProvider";
 import { WebAppConfig } from "../data/WebAppConfig";
 import { DhisInstance } from "./entities/DhisInstance";
 import { AppConfig } from "./repositories/AppConfig";
 import { AppStorage } from "./repositories/AppStorage";
+import { TemplateProvider } from "./repositories/TemplateProvider";
+import { DefaultThemeProvider } from "../data/DefaultThemeProvider";
+import { ThemeProvider } from "./repositories/ThemeProvider";
 
 export interface CompositionRootOptions {
     appConfig: AppConfig;
@@ -12,9 +16,11 @@ export interface CompositionRootOptions {
 
 export class CompositionRoot {
     private static instance: CompositionRoot;
-    public readonly appStorage: AppStorage;
     public readonly appConfig: AppConfig;
     public readonly dhisInstance: DhisInstance;
+    public readonly appStorage: AppStorage;
+    public readonly templateProvider: TemplateProvider;
+    public readonly themeProvider: ThemeProvider;
 
     private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
         this.appConfig = new WebAppConfig(appConfig as any);
@@ -23,6 +29,8 @@ export class CompositionRoot {
             this.appConfig.getAppStorage() === "dataStore"
                 ? new DataStoreSettingsStorage(dhisInstance)
                 : new ConstantSettingsStorage(dhisInstance);
+        this.templateProvider = new DefaultTemplateProvider();
+        this.themeProvider = new DefaultThemeProvider(this.appStorage);
     }
 
     public static initialize(options: CompositionRootOptions) {
