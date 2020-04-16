@@ -35,9 +35,14 @@ export class XLSXPopulateTemplate implements Template {
     }
 
     public applyTheme(theme: Theme): void {
-        _.forOwn(theme, (style: ThemeStyle, section: string) => {
+        _.forOwn(theme.sections, (style: ThemeStyle, section: string) => {
             const { source } = this.styleSources.find(source => source.section === section) ?? {};
             if (source) this.applyThemeToRange(source, style);
+        });
+
+        _.forEach(theme.pictures, ({ name, src, sheet, from, to }) => {
+            // @ts-ignore: This part is not typed (we need to create an extension)
+            this.workbook?.sheet(sheet).drawings(name).image(src).from(from).to(to);
         });
     }
 

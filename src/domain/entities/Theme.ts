@@ -31,7 +31,7 @@ export interface Theme {
     templates: Id[];
     sections?: {
         [key in ThemeableSections]?: ThemeStyle;
-    },
+    };
     pictures?: CellImage[];
     colorPattern?: ColorPattern;
 }

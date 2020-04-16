@@ -11,6 +11,6 @@ export class DefaultThemeProvider implements ThemeProvider {
     }
 
     public async getTheme(templateId: Id): Promise<Theme> {
-        throw new Error("Method not implemented")
+        throw new Error("Method not implemented");
     }
 }
