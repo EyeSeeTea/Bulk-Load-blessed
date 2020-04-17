@@ -408,11 +408,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
 
                     columnId++;
                 });
-
-                dataEntrySheet
-                    .cell(1, firstColumnId, 1, columnId - 1, true)
-                    .formula("_" + programStageSection.id)
-                    .style(groupStyle(groupId));
+                
+                if (firstColumnId < columnId)
+                    dataEntrySheet
+                        .cell(1, firstColumnId, 1, columnId - 1, true)
+                        .formula("_" + programStageSection.id)
+                        .style(groupStyle(groupId));
 
                 groupId++;
             });
