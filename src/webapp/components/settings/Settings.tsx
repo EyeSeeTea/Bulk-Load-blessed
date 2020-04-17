@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import { useSnackbar } from "d2-ui-components";
 import React from "react";
-import i18n from "../../locales";
+import i18n from "../../../locales";
 import Settings from "../../logic/settings";
 import SettingsFields from "./SettingsFields";
 

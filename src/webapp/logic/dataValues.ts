@@ -1,6 +1,6 @@
 import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
-import i18n from "../locales";
+import i18n from "../../locales";
 
 interface DataValuesData {
     dataSet: Id;

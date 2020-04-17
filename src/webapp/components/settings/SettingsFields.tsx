@@ -3,7 +3,7 @@ import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
 import React from "react";
 import { useAppContext } from "../../contexts/api-context";
-import i18n from "../../locales";
+import i18n from "../../../locales";
 import Settings, { Model } from "../../logic/settings";
 
 export interface SettingsFieldsProps {

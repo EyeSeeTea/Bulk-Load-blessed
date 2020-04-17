@@ -15,7 +15,7 @@ import _ from "lodash";
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
 import { AppContext, AppContextI } from "../../contexts/api-context";
-import { CompositionRoot } from "../../domain/CompositionRoot";
+import { CompositionRoot } from "../../../domain/CompositionRoot";
 import Root from "../../pages/root/Root";
 import Share from "../share/Share";
 import "./App.css";

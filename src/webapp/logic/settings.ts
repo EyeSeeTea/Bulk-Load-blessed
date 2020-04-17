@@ -1,7 +1,7 @@
 import { D2Api, Id, Ref } from "d2-api";
 import _ from "lodash";
-import { AppSettingsUseCase } from "../domain/usecases/AppSettingsUseCase";
-import i18n from "../locales";
+import { AppSettingsUseCase } from "../../domain/usecases/AppSettingsUseCase";
+import i18n from "../../locales";
 
 const models = ["dataSet", "program"] as const;
 
