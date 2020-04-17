@@ -15,5 +15,13 @@ export default class extends XLSXPopulateTemplate {
                 sheet: "DiscriminatingBioassays",
             },
         },
+        {
+            section: "subtitle",
+            source: {
+                type: "range",
+                ref: "H4:N4",
+                sheet: "DiscriminatingBioassays",
+            }
+        }
     ];
 }
