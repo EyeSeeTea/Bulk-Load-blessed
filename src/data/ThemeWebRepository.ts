@@ -10,7 +10,7 @@ export class ThemeWebRepository implements ThemeRepository {
         return [];
     }
 
-    public async getTheme(templateId: Id): Promise<Theme> {
+    public async getTheme(_templateId: Id): Promise<Theme> {
         throw new Error("Method not implemented");
     }
 }

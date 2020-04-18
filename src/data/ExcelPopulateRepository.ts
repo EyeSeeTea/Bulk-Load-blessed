@@ -46,7 +46,7 @@ export class XLSXPopulateTemplate implements Template {
         });
     }
 
-    public parseData(file: File): void {
+    public parseData(_file: File): void {
         throw new Error("Method not implemented.");
     }
 
