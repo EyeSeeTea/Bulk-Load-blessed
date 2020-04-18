@@ -96,8 +96,6 @@ Cypress.Commands.add("selectInDropdown", (containerSelector, label, option) => {
 });
 
 Cypress.Commands.add("loadPage", (path = appUrl) => {
-    cy.visit(path, {
-        onBeforeLoad: stubFetch,
-    });
+    cy.visit(path);
     cy.get("#app", { log: false, timeout: 20000 }); // Waits for the page to fully load
 });
