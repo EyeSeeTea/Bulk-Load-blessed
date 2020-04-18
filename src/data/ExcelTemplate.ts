@@ -31,7 +31,7 @@ class ExcelTemplate {
         });
     }
 
-    public parseData(file: File): void {
+    public parseData(_file: File): void {
         throw new Error("Method not implemented.");
     }
 }
@@ -39,7 +39,7 @@ class ExcelTemplate {
 export class DataSetExcelJSTemplate extends ExcelTemplate implements DataSetTemplate {
     public readonly type = "dataSet";
 
-    public parseData(file: File): AggregatedPackage {
+    public parseData(_file: File): AggregatedPackage {
         throw new Error("Method not implemented.");
     }
 }
@@ -47,7 +47,7 @@ export class DataSetExcelJSTemplate extends ExcelTemplate implements DataSetTemp
 export class ProgramExcelJSTemplate extends ExcelTemplate implements ProgramTemplate {
     public readonly type = "program";
 
-    public parseData(file: File): EventsPackage {
+    public parseData(_file: File): EventsPackage {
         throw new Error("Method not implemented.");
     }
 }
