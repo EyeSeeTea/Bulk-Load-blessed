@@ -3,7 +3,7 @@ import { Theme } from "../domain/entities/Theme";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 import { ThemeRepository } from "../domain/repositories/ThemeRepository";
 
-export class DefaultThemeProvider implements ThemeRepository {
+export class ThemeWebRepository implements ThemeRepository {
     constructor(private appStorage: StorageRepository) {}
 
     public listThemes(): Theme[] {

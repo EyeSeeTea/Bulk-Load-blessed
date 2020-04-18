@@ -13,7 +13,7 @@ interface Constant {
 
 const defaultName = "Bulk Load Storage";
 
-export class ConstantSettingsStorage implements StorageRepository {
+export class StorageConstantRepository implements StorageRepository {
     private api: D2Api;
 
     constructor({ url }: DhisInstance) {

@@ -10,7 +10,7 @@ export function getTemplates(): Template[] {
     });
 }
 
-export class DefaultTemplateProvider implements TemplateRepository {
+export class TemplateWebRepository implements TemplateRepository {
     public readonly templates: Template[];
 
     constructor() {

@@ -1,8 +1,8 @@
-import { WebAppConfig } from "./data/ConfigWebRepository";
-import { ConstantSettingsStorage } from "./data/StorageConstantRepository";
-import { DataStoreSettingsStorage } from "./data/StorageDataStoreRepository";
-import { DefaultTemplateProvider } from "./data/TemplateWebRepository";
-import { DefaultThemeProvider } from "./data/ThemeWebRepository";
+import { ConfigWebRepository } from "./data/ConfigWebRepository";
+import { StorageConstantRepository } from "./data/StorageConstantRepository";
+import { StorageDataStoreRepository } from "./data/StorageDataStoreRepository";
+import { TemplateWebRepository } from "./data/TemplateWebRepository";
+import { ThemeWebRepository } from "./data/ThemeWebRepository";
 import { DhisInstance } from "./domain/entities/DhisInstance";
 import { ConfigRepository } from "./domain/repositories/ConfigRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
@@ -28,14 +28,14 @@ export class CompositionRoot {
     private readonly themeProvider: ThemeRepository;
 
     private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
-        this.appConfig = new WebAppConfig(appConfig as any);
+        this.appConfig = new ConfigWebRepository(appConfig as any);
         this.dhisInstance = dhisInstance;
         this.appStorage =
             this.appConfig.getAppStorage() === "dataStore"
-                ? new DataStoreSettingsStorage(dhisInstance)
-                : new ConstantSettingsStorage(dhisInstance);
-        this.templateProvider = new DefaultTemplateProvider();
-        this.themeProvider = new DefaultThemeProvider(this.appStorage);
+                ? new StorageDataStoreRepository(dhisInstance)
+                : new StorageConstantRepository(dhisInstance);
+        this.templateProvider = new TemplateWebRepository();
+        this.themeProvider = new ThemeWebRepository(this.appStorage);
     }
 
     public static initialize(options: CompositionRootOptions) {

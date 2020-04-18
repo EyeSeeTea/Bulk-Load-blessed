@@ -7,7 +7,7 @@ import { StorageRepository } from "../domain/repositories/StorageRepository";
 
 const dataStoreNamespace = "bulk-load";
 
-export class DataStoreSettingsStorage implements StorageRepository {
+export class StorageDataStoreRepository implements StorageRepository {
     private api: D2Api;
     private dataStore: DataStore;
 

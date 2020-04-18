@@ -6,7 +6,7 @@ interface JsonConfig {
     defaultSettings?: object;
 }
 
-export class WebAppConfig implements ConfigRepository {
+export class ConfigWebRepository implements ConfigRepository {
     constructor(private jsonConfig: JsonConfig) {}
 
     getAppKey(): string {
