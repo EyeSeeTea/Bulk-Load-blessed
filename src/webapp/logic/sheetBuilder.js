@@ -1,8 +1,8 @@
 import * as Excel from "excel4node";
 import { saveAs } from "file-saver";
 import _ from "lodash";
-import { buildAllPossiblePeriods } from "../utils/periods";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
 export const SheetBuilder = function (builder) {
@@ -41,7 +41,7 @@ SheetBuilder.prototype.fillLegendSheet = function () {
     legendSheet.cell(1, 5, 2, 5, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach((value, key) => {
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(value => {
         const name = value.formName ? value.formName : value.name;
         const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         const options =
@@ -160,7 +160,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(1, 6, 2, 6, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    metadata.forEach((value, key) => {
+    metadata.forEach(value => {
         const name = value.formName !== undefined ? value.formName : value.name;
         const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         const options =

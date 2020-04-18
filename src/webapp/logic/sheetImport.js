@@ -248,7 +248,7 @@ export function readSheet(builder) {
 
 function parseMetadataId(metadataSheet, metadataName) {
     let result = metadataName;
-    metadataSheet.eachRow((row, rowNumber) => {
+    metadataSheet.eachRow(row => {
         if (stringEquals(metadataName, row.values[3])) result = row.values[1];
     });
     return result;
