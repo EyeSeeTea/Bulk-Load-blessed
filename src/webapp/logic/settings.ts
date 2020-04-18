@@ -1,8 +1,6 @@
 import { D2Api, Id, Ref } from "d2-api";
 import _ from "lodash";
-import { GetDefaultSettingsUseCase } from "../../domain/usecases/GetDefaultSettingsUseCase";
-import { ReadSettingsUseCase } from "../../domain/usecases/ReadSettingsUseCase";
-import { WriteSettingsUseCase } from "../../domain/usecases/WriteSettingsUseCase";
+import { CompositionRoot } from "../../CompositionRoot";
 import i18n from "../../locales";
 
 const models = ["dataSet", "program"] as const;
@@ -88,7 +86,7 @@ export default class Settings {
             })
             .getData();
 
-        const defaultSettings = new GetDefaultSettingsUseCase().execute();
+        const defaultSettings = CompositionRoot.getInstance().settings.getDefault();
 
         const defaultData = {
             models: { dataSet: true, program: true },
@@ -98,7 +96,7 @@ export default class Settings {
             ...defaultSettings,
         };
 
-        const data = await new ReadSettingsUseCase().execute<Partial<PersistedData>>(
+        const data = await CompositionRoot.getInstance().settings.read<Partial<PersistedData>>(
             Settings.constantCode,
             defaultData
         );
@@ -152,7 +150,10 @@ export default class Settings {
         };
 
         try {
-            await new WriteSettingsUseCase().execute<PersistedData>(Settings.constantCode, data);
+            await CompositionRoot.getInstance().settings.write<PersistedData>(
+                Settings.constantCode,
+                data
+            );
             return { status: true };
         } catch (error) {
             return { status: false, error };

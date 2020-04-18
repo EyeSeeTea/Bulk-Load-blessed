@@ -1,13 +1,18 @@
+import { WebAppConfig } from "./data/ConfigWebRepository";
 import { ConstantSettingsStorage } from "./data/StorageConstantRepository";
 import { DataStoreSettingsStorage } from "./data/StorageDataStoreRepository";
 import { DefaultTemplateProvider } from "./data/TemplateWebRepository";
 import { DefaultThemeProvider } from "./data/ThemeWebRepository";
-import { WebAppConfig } from "./data/ConfigWebRepository";
 import { DhisInstance } from "./domain/entities/DhisInstance";
 import { ConfigRepository } from "./domain/repositories/ConfigRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { ThemeRepository } from "./domain/repositories/ThemeRepository";
+import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
+import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
+import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
+import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
+import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 
 export interface CompositionRootOptions {
     appConfig: ConfigRepository;
@@ -16,11 +21,11 @@ export interface CompositionRootOptions {
 
 export class CompositionRoot {
     private static instance: CompositionRoot;
-    public readonly appConfig: ConfigRepository;
-    public readonly dhisInstance: DhisInstance;
-    public readonly appStorage: StorageRepository;
-    public readonly templateProvider: TemplateRepository;
-    public readonly themeProvider: ThemeRepository;
+    private readonly appConfig: ConfigRepository;
+    private readonly dhisInstance: DhisInstance;
+    private readonly appStorage: StorageRepository;
+    private readonly templateProvider: TemplateRepository;
+    private readonly themeProvider: ThemeRepository;
 
     private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
         this.appConfig = new WebAppConfig(appConfig as any);
@@ -42,5 +47,20 @@ export class CompositionRoot {
     public static getInstance(): CompositionRoot {
         if (!CompositionRoot.instance) throw new Error("Composition root has not been initialized");
         return CompositionRoot.instance;
+    }
+
+    public get template() {
+        return {
+            download: new DownloadTemplateUseCase(this.templateProvider).execute,
+            list: new ListTemplatesUseCase(this.templateProvider).execute,
+        };
+    }
+
+    public get settings() {
+        return {
+            getDefault: new GetDefaultSettingsUseCase(this.appConfig).execute,
+            read: new ReadSettingsUseCase(this.appStorage).execute,
+            write: new WriteSettingsUseCase(this.appStorage).execute,
+        };
     }
 }

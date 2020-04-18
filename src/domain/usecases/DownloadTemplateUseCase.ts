@@ -1,18 +1,13 @@
 import { saveAs } from "file-saver";
-import { CompositionRoot } from "../../CompositionRoot";
 import { Id } from "../entities/ReferenceObject";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export class DownloadTemplateUseCase {
-    private templateProvider: TemplateRepository;
+    constructor(private templateProvider: TemplateRepository) {}
 
-    constructor(private templateId: Id) {
-        this.templateProvider = CompositionRoot.getInstance().templateProvider;
-    }
-
-    public async execute(): Promise<void> {
+    public async execute(templateId: Id): Promise<void> {
         try {
-            const template = await this.templateProvider.getTemplate(this.templateId);
+            const template = await this.templateProvider.getTemplate(templateId);
             const data = await template.toBlob();
             saveAs(data, `${template.name}.xlsx`);
         } catch (error) {
