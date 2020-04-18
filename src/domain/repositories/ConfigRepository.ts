@@ -1,6 +1,6 @@
 export type AppStorageType = "dataStore" | "constant";
 
-export interface AppConfig {
+export interface ConfigRepository {
     getAppStorage(): AppStorageType;
     getDefaultSettings(): object;
 }

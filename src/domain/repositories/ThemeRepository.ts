@@ -1,7 +1,7 @@
 import { Id } from "../entities/ReferenceObject";
 import { Theme } from "../entities/Theme";
 
-export interface ThemeProvider {
+export interface ThemeRepository {
     listThemes(): Theme[];
     getTheme(id: Id): Promise<Theme>;
 }

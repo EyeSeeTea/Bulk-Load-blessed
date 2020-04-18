@@ -1,10 +1,10 @@
 import { saveAs } from "file-saver";
-import { CompositionRoot } from "../CompositionRoot";
+import { CompositionRoot } from "../../CompositionRoot";
 import { Id } from "../entities/ReferenceObject";
-import { TemplateProvider } from "../repositories/TemplateProvider";
+import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export class DownloadTemplateUseCase {
-    private templateProvider: TemplateProvider;
+    private templateProvider: TemplateRepository;
 
     constructor(private templateId: Id) {
         this.templateProvider = CompositionRoot.getInstance().templateProvider;

@@ -1,6 +1,8 @@
 import { D2Api, Id, Ref } from "d2-api";
 import _ from "lodash";
-import { AppSettingsUseCase } from "../../domain/usecases/AppSettingsUseCase";
+import { GetDefaultSettingsUseCase } from "../../domain/usecases/GetDefaultSettingsUseCase";
+import { ReadSettingsUseCase } from "../../domain/usecases/ReadSettingsUseCase";
+import { WriteSettingsUseCase } from "../../domain/usecases/WriteSettingsUseCase";
 import i18n from "../../locales";
 
 const models = ["dataSet", "program"] as const;
@@ -86,7 +88,7 @@ export default class Settings {
             })
             .getData();
 
-        const defaultSettings = new AppSettingsUseCase().getDefaultSettings();
+        const defaultSettings = new GetDefaultSettingsUseCase().execute();
 
         const defaultData = {
             models: { dataSet: true, program: true },
@@ -96,7 +98,7 @@ export default class Settings {
             ...defaultSettings,
         };
 
-        const data = await new AppSettingsUseCase().read<Partial<PersistedData>>(
+        const data = await new ReadSettingsUseCase().execute<Partial<PersistedData>>(
             Settings.constantCode,
             defaultData
         );
@@ -150,7 +152,7 @@ export default class Settings {
         };
 
         try {
-            await new AppSettingsUseCase().write<PersistedData>(Settings.constantCode, data);
+            await new WriteSettingsUseCase().execute<PersistedData>(Settings.constantCode, data);
             return { status: true };
         } catch (error) {
             return { status: false, error };

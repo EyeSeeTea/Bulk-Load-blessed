@@ -3,11 +3,11 @@ import DataStore from "d2-api/api/dataStore";
 import _ from "lodash";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { ReferenceObject } from "../domain/entities/ReferenceObject";
-import { AppStorage } from "../domain/repositories/AppStorage";
+import { StorageRepository } from "../domain/repositories/StorageRepository";
 
 const dataStoreNamespace = "bulk-load";
 
-export class DataStoreSettingsStorage implements AppStorage {
+export class DataStoreSettingsStorage implements StorageRepository {
     private api: D2Api;
     private dataStore: DataStore;
 

@@ -1,4 +1,4 @@
-import { AppConfig, AppStorageType } from "../domain/repositories/AppConfig";
+import { ConfigRepository, AppStorageType } from "../domain/repositories/ConfigRepository";
 
 interface JsonConfig {
     appKey?: string;
@@ -6,7 +6,7 @@ interface JsonConfig {
     defaultSettings?: object;
 }
 
-export class WebAppConfig implements AppConfig {
+export class WebAppConfig implements ConfigRepository {
     constructor(private jsonConfig: JsonConfig) {}
 
     getAppKey(): string {

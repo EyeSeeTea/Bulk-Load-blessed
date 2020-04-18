@@ -1,6 +1,6 @@
 import { ReferenceObject } from "../entities/ReferenceObject";
 
-export interface AppStorage {
+export interface StorageRepository {
     // Basic operations
     get<T extends object>(key: string, defaultValue: T): Promise<T>;
     set<T extends object>(key: string, value: T): Promise<void>;

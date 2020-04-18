@@ -1,8 +1,8 @@
-import { CompositionRoot } from "../CompositionRoot";
-import { TemplateProvider } from "../repositories/TemplateProvider";
+import { CompositionRoot } from "../../CompositionRoot";
+import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export class ListTemplatesUseCase {
-    private templateProvider: TemplateProvider;
+    private templateProvider: TemplateRepository;
 
     constructor() {
         this.templateProvider = CompositionRoot.getInstance().templateProvider;

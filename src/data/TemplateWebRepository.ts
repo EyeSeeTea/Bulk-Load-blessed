@@ -1,6 +1,6 @@
 import { Id } from "../domain/entities/ReferenceObject";
 import { Template } from "../domain/entities/Template";
-import { TemplateProvider } from "../domain/repositories/TemplateProvider";
+import { TemplateRepository } from "../domain/repositories/TemplateRepository";
 
 export function getTemplates(): Template[] {
     const tasks = require.context("./custom-templates", false, /.*\.ts$/);
@@ -10,7 +10,7 @@ export function getTemplates(): Template[] {
     });
 }
 
-export class DefaultTemplateProvider implements TemplateProvider {
+export class DefaultTemplateProvider implements TemplateRepository {
     public readonly templates: Template[];
 
     constructor() {

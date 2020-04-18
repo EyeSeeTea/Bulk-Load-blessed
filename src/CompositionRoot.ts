@@ -1,26 +1,26 @@
-import { ConstantSettingsStorage } from "../data/ConstantSettingsStorage";
-import { DataStoreSettingsStorage } from "../data/DataStoreSettingsStorage";
-import { DefaultTemplateProvider } from "../data/DefaultTemplateProvider";
-import { WebAppConfig } from "../data/WebAppConfig";
-import { DhisInstance } from "./entities/DhisInstance";
-import { AppConfig } from "./repositories/AppConfig";
-import { AppStorage } from "./repositories/AppStorage";
-import { TemplateProvider } from "./repositories/TemplateProvider";
-import { DefaultThemeProvider } from "../data/DefaultThemeProvider";
-import { ThemeProvider } from "./repositories/ThemeProvider";
+import { ConstantSettingsStorage } from "./data/StorageConstantRepository";
+import { DataStoreSettingsStorage } from "./data/StorageDataStoreRepository";
+import { DefaultTemplateProvider } from "./data/TemplateWebRepository";
+import { DefaultThemeProvider } from "./data/ThemeWebRepository";
+import { WebAppConfig } from "./data/ConfigWebRepository";
+import { DhisInstance } from "./domain/entities/DhisInstance";
+import { ConfigRepository } from "./domain/repositories/ConfigRepository";
+import { StorageRepository } from "./domain/repositories/StorageRepository";
+import { TemplateRepository } from "./domain/repositories/TemplateRepository";
+import { ThemeRepository } from "./domain/repositories/ThemeRepository";
 
 export interface CompositionRootOptions {
-    appConfig: AppConfig;
+    appConfig: ConfigRepository;
     dhisInstance: DhisInstance;
 }
 
 export class CompositionRoot {
     private static instance: CompositionRoot;
-    public readonly appConfig: AppConfig;
+    public readonly appConfig: ConfigRepository;
     public readonly dhisInstance: DhisInstance;
-    public readonly appStorage: AppStorage;
-    public readonly templateProvider: TemplateProvider;
-    public readonly themeProvider: ThemeProvider;
+    public readonly appStorage: StorageRepository;
+    public readonly templateProvider: TemplateRepository;
+    public readonly themeProvider: ThemeRepository;
 
     private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
         this.appConfig = new WebAppConfig(appConfig as any);

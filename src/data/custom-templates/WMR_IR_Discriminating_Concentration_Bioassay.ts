@@ -1,5 +1,5 @@
 import { StyleSource } from "../../domain/entities/Template";
-import { XLSXPopulateTemplate } from "../XLSXPopulateTemplate";
+import { XLSXPopulateTemplate } from "../ExcelPopulateRepository";
 
 export default class extends XLSXPopulateTemplate {
     public readonly id = "WMR_IR_v0";
@@ -21,7 +21,7 @@ export default class extends XLSXPopulateTemplate {
                 type: "range",
                 ref: "H4:N4",
                 sheet: "DiscriminatingBioassays",
-            }
-        }
+            },
+        },
     ];
 }

@@ -1,10 +1,10 @@
 import { Id } from "../domain/entities/ReferenceObject";
 import { Theme } from "../domain/entities/Theme";
-import { AppStorage } from "../domain/repositories/AppStorage";
-import { ThemeProvider } from "../domain/repositories/ThemeProvider";
+import { StorageRepository } from "../domain/repositories/StorageRepository";
+import { ThemeRepository } from "../domain/repositories/ThemeRepository";
 
-export class DefaultThemeProvider implements ThemeProvider {
-    constructor(private appStorage: AppStorage) {}
+export class DefaultThemeProvider implements ThemeRepository {
+    constructor(private appStorage: StorageRepository) {}
 
     public listThemes(): Theme[] {
         return [];
