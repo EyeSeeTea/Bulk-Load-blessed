@@ -22,14 +22,12 @@ export interface CompositionRootOptions {
 export class CompositionRoot {
     private static instance: CompositionRoot;
     private readonly appConfig: ConfigRepository;
-    private readonly dhisInstance: DhisInstance;
     private readonly appStorage: StorageRepository;
     private readonly templateProvider: TemplateRepository;
     private readonly themeProvider: ThemeRepository;
 
     private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
         this.appConfig = new ConfigWebRepository(appConfig as any);
-        this.dhisInstance = dhisInstance;
         this.appStorage =
             this.appConfig.getAppStorage() === "dataStore"
                 ? new StorageDataStoreRepository(dhisInstance)
