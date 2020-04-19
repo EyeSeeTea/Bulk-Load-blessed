@@ -1,1 +1,1 @@
-export type EventsPackage = {};
+export type EventsPackage = unknown;
