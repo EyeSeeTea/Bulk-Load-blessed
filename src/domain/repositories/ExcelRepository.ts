@@ -1,7 +1,8 @@
-import { Id } from "../entities/ReferenceObject";
 import { Template } from "../entities/Template";
+import { Theme } from "../entities/Theme";
 
 export interface ExcelRepository {
-    listTemplates(): Pick<Template, "id" | "name">[];
-    getTemplate(id: Id): Promise<Template>;
+    toBlob(template: Template): Promise<Blob>;
+    applyTheme(template: Template, theme: Theme): Promise<void>;
+    reset(template: Template): Promise<void>;
 }

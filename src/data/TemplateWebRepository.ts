@@ -11,7 +11,7 @@ export function getTemplates(): Template[] {
 }
 
 export class TemplateWebRepository implements TemplateRepository {
-    public readonly templates: Template[];
+    private templates: Template[];
 
     constructor() {
         this.templates = getTemplates();
@@ -24,8 +24,6 @@ export class TemplateWebRepository implements TemplateRepository {
     public async getTemplate(templateId: Id): Promise<Template> {
         const template = this.templates.find(({ id }) => id === templateId);
         if (!template) throw new Error("Attempt to read from an invalid template");
-        await template.initialize();
-
-        return template;
+        else return template;
     }
 }

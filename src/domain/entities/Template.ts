@@ -1,5 +1,5 @@
 import { Id } from "./ReferenceObject";
-import { Theme, ThemeableSections } from "./Theme";
+import { ThemeableSections } from "./Theme";
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -18,10 +18,6 @@ export interface Template {
     url?: string;
     dataSources: DataSource[];
     styleSources: StyleSource[];
-    initialize(): Promise<void>;
-    toBlob(): Promise<Blob>;
-    applyTheme(theme: Theme): void;
-    parseData(file: File): void;
 }
 
 export interface GenericSheetRef {
