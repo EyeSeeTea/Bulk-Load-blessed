@@ -16,17 +16,17 @@ export class StorageDataStoreRepository implements StorageRepository {
         this.dataStore = this.api.dataStore(dataStoreNamespace);
     }
 
-    public async get<T extends object>(key: string, defaultValue: T): Promise<T> {
+    public async loadObject<T extends object>(key: string, defaultValue: T): Promise<T> {
         const value = await this.dataStore.get<T>(key).getData();
-        if (!value) await this.set(key, defaultValue);
+        if (!value) await this.saveObject(key, defaultValue);
         return value ?? defaultValue;
     }
 
-    public async set<T extends object>(key: string, value: T): Promise<void> {
+    public async saveObject<T extends object>(key: string, value: T): Promise<void> {
         await this.dataStore.save(key, value).getData();
     }
 
-    public async delete(key: string): Promise<void> {
+    public async removeObject(key: string): Promise<void> {
         try {
             await this.dataStore.delete(key).getData();
         } catch (error) {
@@ -36,23 +36,23 @@ export class StorageDataStoreRepository implements StorageRepository {
         }
     }
 
-    public async loadDataById<T extends ReferenceObject>(
+    public async loadCollection<T extends ReferenceObject>(
         key: string,
         id: string
     ): Promise<T | undefined> {
-        const rawData = await this.get<T[]>(key, []);
+        const rawData = await this.loadObject<T[]>(key, []);
         return _.find(rawData, element => element.id === id);
     }
 
-    public async removeDataById(key: string, id: string): Promise<void> {
-        const oldData = await this.get(key, [] as ReferenceObject[]);
+    public async removeCollection(key: string, id: string): Promise<void> {
+        const oldData = await this.loadObject(key, [] as ReferenceObject[]);
         const newData = _.reject(oldData, { id });
-        await this.set(key, newData);
+        await this.saveObject(key, newData);
     }
 
-    public async saveData<T extends ReferenceObject>(key: string, element: T): Promise<void> {
-        const oldData = await this.get(key, [] as ReferenceObject[]);
+    public async saveCollection<T extends ReferenceObject>(key: string, element: T): Promise<void> {
+        const oldData = await this.loadObject(key, [] as ReferenceObject[]);
         const newData = _.uniqBy([...oldData, element], "id");
-        await this.set(key, newData);
+        await this.saveObject(key, newData);
     }
 }
