@@ -8,19 +8,18 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import Dropzone from "react-dropzone";
+import { CompositionRoot } from "../../CompositionRoot";
 import { useAppContext } from "../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../logic/dataValues";
 import * as dhisConnector from "../logic/dhisConnector";
 import Settings from "../logic/settings";
 import { SheetBuilder } from "../logic/sheetBuilder";
 import * as sheetImport from "../logic/sheetImport";
-import { ListTemplatesUseCase } from "../../domain/usecases/ListTemplatesUseCase";
 import { buildPossibleYears } from "../utils/periods";
 import "./App.css";
 import Select from "./select/Select";
 import SettingsComponent from "./settings/Settings";
 import { TemplateSelector } from "./template-selector/TemplateSelector";
-import { DownloadTemplateUseCase } from "../../domain/usecases/DownloadTemplateUseCase";
 
 const styles = theme => ({
     root: {
@@ -77,7 +76,7 @@ class AppComponent extends React.Component {
         await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
         // Load settings once data is already loaded so we can render the objects in single model
         await this.loadSettings();
-        const customTemplates = new ListTemplatesUseCase().execute();
+        const customTemplates = CompositionRoot.getInstance().templates.list.execute();
         this.setState({ customTemplates });
         await this.props.loading.hide();
     }
@@ -141,8 +140,8 @@ class AppComponent extends React.Component {
         this.props.loading.show(true);
 
         if (this.state.model1 === "customTemplates") {
-            new DownloadTemplateUseCase(this.state.selectedProgramOrDataSet1.value)
-                .execute()
+            CompositionRoot.getInstance()
+                .templates.download.execute(this.state.selectedProgramOrDataSet1.value)
                 .then(() => this.props.loading.show(false));
         } else {
             dhisConnector
