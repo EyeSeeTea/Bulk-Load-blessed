@@ -6,13 +6,6 @@
  */
 export function stringEquals(baseString, compareString) {
     return (
-        baseString
-            .toString()
-            .trim()
-            .toLowerCase() ===
-        compareString
-            .toString()
-            .trim()
-            .toLowerCase()
+        baseString.toString().trim().toLowerCase() === compareString.toString().trim().toLowerCase()
     );
 }

@@ -1,7 +1,7 @@
-import React from "react";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from "@material-ui/core";
+import { createStyles, makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
-import { MenuItem, FormControl, InputLabel, Select as MuiSelect } from "@material-ui/core";
+import React from "react";
 
 type Option = { value: string; label: string };
 
@@ -44,7 +44,7 @@ const Select: React.FC<SelectProps> = props => {
     );
 };
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
     createStyles({
         formControl: {
             margin: 0,

@@ -1,11 +1,11 @@
 import * as Excel from "excel4node";
 import { saveAs } from "file-saver";
 import _ from "lodash";
-import { buildAllPossiblePeriods } from "../utils/periods";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
-export const SheetBuilder = function(builder) {
+export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
     this.validations = new Map();
@@ -21,7 +21,7 @@ export const SheetBuilder = function(builder) {
     this.fillDataEntrySheet();
 };
 
-SheetBuilder.prototype.fillLegendSheet = function() {
+SheetBuilder.prototype.fillLegendSheet = function () {
     const { elementMetadata: metadata, rawMetadata } = this.builder;
     const legendSheet = this.legendSheet;
 
@@ -34,29 +34,14 @@ SheetBuilder.prototype.fillLegendSheet = function() {
     legendSheet.column(5).setWidth(40);
 
     // Add column titles
-    legendSheet
-        .cell(1, 1, 2, 1, true)
-        .string("Name")
-        .style(baseStyle);
-    legendSheet
-        .cell(1, 2, 2, 2, true)
-        .string("Description")
-        .style(baseStyle);
-    legendSheet
-        .cell(1, 3, 2, 3, true)
-        .string("Value Type")
-        .style(baseStyle);
-    legendSheet
-        .cell(1, 4, 2, 4, true)
-        .string("Option Set")
-        .style(baseStyle);
-    legendSheet
-        .cell(1, 5, 2, 5, true)
-        .string("Possible Values")
-        .style(baseStyle);
+    legendSheet.cell(1, 1, 2, 1, true).string("Name").style(baseStyle);
+    legendSheet.cell(1, 2, 2, 2, true).string("Description").style(baseStyle);
+    legendSheet.cell(1, 3, 2, 3, true).string("Value Type").style(baseStyle);
+    legendSheet.cell(1, 4, 2, 4, true).string("Option Set").style(baseStyle);
+    legendSheet.cell(1, 5, 2, 5, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach((value, key) => {
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(value => {
         const name = value.formName ? value.formName : value.name;
         const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         const options =
@@ -74,7 +59,7 @@ SheetBuilder.prototype.fillLegendSheet = function() {
     });
 };
 
-SheetBuilder.prototype.fillValidationSheet = function() {
+SheetBuilder.prototype.fillValidationSheet = function () {
     const {
         organisationUnits,
         element,
@@ -93,10 +78,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     // Add column titles
     let rowId = 1;
     let columnId = 1;
-    validationSheet
-        .cell(rowId, columnId, rowId, 3, true)
-        .string(title)
-        .style(baseStyle);
+    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(baseStyle);
 
     rowId = 2;
     columnId = 1;
@@ -159,7 +141,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     });
 };
 
-SheetBuilder.prototype.fillMetadataSheet = function() {
+SheetBuilder.prototype.fillMetadataSheet = function () {
     const { elementMetadata: metadata, organisationUnits } = this.builder;
     const metadataSheet = this.metadataSheet;
 
@@ -170,33 +152,15 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
     metadataSheet.column(3).setWidth(70);
 
     // Add column titles
-    metadataSheet
-        .cell(1, 1, 2, 1, true)
-        .string("Identifier")
-        .style(baseStyle);
-    metadataSheet
-        .cell(1, 2, 2, 2, true)
-        .string("Type")
-        .style(baseStyle);
-    metadataSheet
-        .cell(1, 3, 2, 3, true)
-        .string("Name")
-        .style(baseStyle);
-    metadataSheet
-        .cell(1, 4, 2, 4, true)
-        .string("Value Type")
-        .style(baseStyle);
-    metadataSheet
-        .cell(1, 5, 2, 5, true)
-        .string("Option Set")
-        .style(baseStyle);
-    metadataSheet
-        .cell(1, 6, 2, 6, true)
-        .string("Possible Values")
-        .style(baseStyle);
+    metadataSheet.cell(1, 1, 2, 1, true).string("Identifier").style(baseStyle);
+    metadataSheet.cell(1, 2, 2, 2, true).string("Type").style(baseStyle);
+    metadataSheet.cell(1, 3, 2, 3, true).string("Name").style(baseStyle);
+    metadataSheet.cell(1, 4, 2, 4, true).string("Value Type").style(baseStyle);
+    metadataSheet.cell(1, 5, 2, 5, true).string("Option Set").style(baseStyle);
+    metadataSheet.cell(1, 6, 2, 6, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    metadata.forEach((value, key) => {
+    metadata.forEach(value => {
         const name = value.formName !== undefined ? value.formName : value.name;
         const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
         const options =
@@ -238,7 +202,7 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
     });
 };
 
-SheetBuilder.prototype.fillDataEntrySheet = function() {
+SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata } = this.builder;
     const dataEntrySheet = this.dataEntrySheet;
 
@@ -249,10 +213,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
 
     const version = getObjectVersion(element);
     if (version) {
-        dataEntrySheet
-            .cell(1, 1)
-            .string(`Version: ${version}`)
-            .style(baseStyle);
+        dataEntrySheet.cell(1, 1).string(`Version: ${version}`).style(baseStyle);
     }
 
     // Add column titles
@@ -405,7 +366,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
     }
 };
 
-SheetBuilder.prototype.downloadSheet = async function() {
+SheetBuilder.prototype.downloadSheet = async function () {
     try {
         const data = await this.workbook.writeToBuffer();
         const blob = new Blob([data], {

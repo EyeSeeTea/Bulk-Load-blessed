@@ -80,14 +80,14 @@ function configI18n(userSettings: { keyUiLocale: string }) {
     document.documentElement.setAttribute("dir", isLangRTL(uiLocale) ? "rtl" : "ltr");
 }
 
+const settingsQuery = { userSettings: { resource: "/userSettings" } };
+
 const App = () => {
     const { baseUrl } = useConfig();
     const [appContext, setAppContext] = useState<AppContextI | null>(null);
 
     const [showShareButton, setShowShareButton] = useState(false);
-    const { loading, error, data } = useDataQuery({
-        userSettings: { resource: "/userSettings" },
-    });
+    const { loading, error, data } = useDataQuery(settingsQuery);
 
     useEffect(() => {
         const run = async () => {
@@ -109,7 +109,7 @@ const App = () => {
         };
 
         if (data) run();
-    }, [data]);
+    }, [data, baseUrl]);
 
     if (error) {
         return (

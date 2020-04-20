@@ -36,7 +36,7 @@ function MultiQueue(number) {
         current = (current + 1) % number;
 
         // add the abort method
-        promise.abort = function(statusText) {
+        promise.abort = function (statusText) {
             // proxy abort to the jqXHR if it is active
             if (jqXHR) return jqXHR.abort(statusText);
 
@@ -59,10 +59,7 @@ function MultiQueue(number) {
 
         // run the actual query
         function doRequest(next) {
-            jqXHR = $.ajax(ajaxOpts)
-                .done(dfd.resolve)
-                .fail(dfd.reject)
-                .then(next, next);
+            jqXHR = $.ajax(ajaxOpts).done(dfd.resolve).fail(dfd.reject).then(next, next);
         }
 
         return promise;

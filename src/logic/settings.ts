@@ -127,9 +127,7 @@ export default class Settings {
     }
 
     validate(): OkOrError {
-        const isSomeModelEnabled = _(this.models)
-            .values()
-            .some();
+        const isSomeModelEnabled = _(this.models).values().some();
         return isSomeModelEnabled
             ? { status: true }
             : { status: false, error: i18n.t("Select at least one model") };
@@ -171,7 +169,7 @@ export default class Settings {
 
         const response = await api.metadata.post({ constants: [newSettingsConstant] }).getData();
 
-        if (response.status == "OK") {
+        if (response.status === "OK") {
             return { status: true };
         } else {
             return { status: false, error: JSON.stringify(response.typeReports, null, 2) };
