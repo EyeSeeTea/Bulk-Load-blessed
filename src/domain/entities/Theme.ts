@@ -19,7 +19,7 @@ export interface ThemeStyle {
 
 export interface CellImage {
     name: string;
-    src: File;
+    src: string;
 }
 
 export class Theme {
@@ -59,9 +59,14 @@ export class Theme {
         return this.update({ templates });
     }
 
-    public updateSection(section: ThemeableSections, style: ThemeStyle): Theme {
+    public updateSection(section: ThemeableSections, style?: ThemeStyle): Theme {
         const sections = { ...this.sections, [section]: style };
         return this.update({ sections });
+    }
+
+    public updatePicture(section: ImageSections, image: CellImage): Theme {
+        const pictures = { ...this.pictures, [section]: image };
+        return this.update({ pictures });
     }
 
     public validate(): Validation {

@@ -1,9 +1,11 @@
 import { makeStyles, TextField, Typography } from "@material-ui/core";
 import { ConfirmationDialog, MultiSelector } from "d2-ui-components";
-import React, { useEffect, useState, ChangeEvent } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
+import { toBase64 } from "../../../utils/files";
 import { useAppContext } from "../../contexts/api-context";
 
 interface ThemeEditDialogProps {
@@ -25,6 +27,17 @@ export default function ThemeEditDialog({
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
     const [allTemplates, setAllTemplates] = useState<{ value: string; text: string }[]>([]);
 
+    const onDrop = useCallback(async ([file]: File[]) => {
+        if (!file) return;
+        const src = await toBase64(file);
+        updateTheme(theme => theme.updatePicture("logo", { name: file.name, src }));
+    }, []);
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: "image/jpeg, image/png",
+    });
+
     const title = type === "edit" ? i18n.t("Edit theme") : i18n.t("New theme");
 
     useEffect(() => {
@@ -40,7 +53,7 @@ export default function ThemeEditDialog({
     const updateSection = (field: ThemeableSections) => {
         return (event: ChangeEvent<HTMLInputElement>) => {
             const text = event.target.value;
-            updateTheme(theme => theme.updateSection(field, { text }));
+            updateTheme(theme => theme.updateSection(field, text ? { text } : undefined));
         };
     };
 
@@ -113,6 +126,14 @@ export default function ThemeEditDialog({
                     selected={theme.templates}
                 />
             </div>
+
+            <div className={classes.group}>
+                <Typography variant="h6">{i18n.t("Logo")}</Typography>
+                <div {...getRootProps({ className: classes.dropzone })}>
+                    <input {...getInputProps()} />
+                    {theme.pictures?.logo?.name ?? <p>{i18n.t("Drag and drop logo file")}</p>}
+                </div>
+            </div>
         </ConfirmationDialog>
     );
 }
@@ -120,4 +141,18 @@ export default function ThemeEditDialog({
 const useStyles = makeStyles({
     group: { marginBottom: 35, marginLeft: 0 },
     text: { marginTop: 8 },
+    dropzone: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column" as const,
+        alignItems: "center",
+        padding: 20,
+        margin: 8,
+        borderWidth: 2,
+        borderRadius: 2,
+        borderColor: "#c8c8c8",
+        borderStyle: "dashed",
+        backgroundColor: "#f0f0f0",
+        cursor: "pointer",
+    },
 });

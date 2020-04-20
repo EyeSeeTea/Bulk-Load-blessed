@@ -59,7 +59,8 @@ export class StorageDataStoreRepository implements StorageRepository {
         element: T
     ): Promise<void> {
         const oldData = await this.getObject(key, [] as ReferenceObject[]);
-        const newData = _.uniqBy([...oldData, element], "id");
+        const cleanData = oldData.filter(item => item.id !== element.id);
+        const newData = [...cleanData, element];
         await this.saveObject(key, newData);
     }
 }
