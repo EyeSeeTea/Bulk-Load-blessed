@@ -1,4 +1,3 @@
-import i18n from "@dhis2/d2-i18n";
 import { Button, makeStyles, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
@@ -9,6 +8,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../CompositionRoot";
+import i18n from "../../locales";
 import { useAppContext } from "../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../logic/dataValues";
 import * as dhisConnector from "../logic/dhisConnector";
@@ -18,7 +18,7 @@ import * as sheetImport from "../logic/sheetImport";
 import { buildPossibleYears } from "../utils/periods";
 import "./App.css";
 import Select from "./select/Select";
-import SettingsComponent from "./settings/Settings";
+import SettingsComponent from "./settings/SettingsDialog";
 import { TemplateSelector } from "./template-selector/TemplateSelector";
 
 const styles = theme => ({

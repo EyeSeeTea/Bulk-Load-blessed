@@ -8,10 +8,13 @@ import { ConfigRepository } from "./domain/repositories/ConfigRepository";
 import { ExcelRepository } from "./domain/repositories/ExcelRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
+import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
+import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
+import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 
 export interface CompositionRootOptions {
@@ -32,7 +35,7 @@ export class CompositionRoot {
             this.config.getAppStorage() === "dataStore"
                 ? new StorageDataStoreRepository(dhisInstance)
                 : new StorageConstantRepository(dhisInstance);
-        this.templateManager = new TemplateWebRepository();
+        this.templateManager = new TemplateWebRepository(this.storage);
         this.excelReader = new ExcelPopulateRepository();
     }
 
@@ -51,6 +54,14 @@ export class CompositionRoot {
         return {
             download: new DownloadTemplateUseCase(this.templateManager, this.excelReader),
             list: new ListTemplatesUseCase(this.templateManager),
+        };
+    }
+
+    public get themes() {
+        return {
+            list: new ListThemesUseCase(this.templateManager),
+            save: new SaveThemeUseCase(this.templateManager),
+            delete: new DeleteThemeUseCase(this.templateManager),
         };
     }
 

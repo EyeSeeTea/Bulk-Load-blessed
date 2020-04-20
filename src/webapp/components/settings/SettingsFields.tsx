@@ -2,9 +2,10 @@ import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/
 import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
 import React from "react";
-import { useAppContext } from "../../contexts/api-context";
 import i18n from "../../../locales";
+import { useAppContext } from "../../contexts/api-context";
 import Settings, { Model } from "../../logic/settings";
+import ThemeList from "../theme-list/ThemeList";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -64,6 +65,14 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
     return (
         <div>
+            <FieldTitle>{i18n.t("Themes")}</FieldTitle>
+
+            <FormGroup className={classes.content} row={true}>
+                <div className={classes.fullWidth}>
+                    <ThemeList />
+                </div>
+            </FormGroup>
+
             <FieldTitle>{i18n.t("Models")}</FieldTitle>
 
             <FormGroup className={classes.content} row={true}>
@@ -93,7 +102,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
 
             <FormGroup className={classes.content} row={true}>
-                <div className={classes.selectorWrapper}>
+                <div className={classes.fullWidth}>
                     <MultiSelector
                         d2={d2}
                         searchFilterLabel={true}
@@ -109,7 +118,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FieldTitle>{i18n.t("User groups with access to Settings")}</FieldTitle>
 
             <FormGroup row={true}>
-                <div className={classes.selectorWrapper}>
+                <div className={classes.fullWidth}>
                     <MultiSelector
                         d2={d2}
                         searchFilterLabel={true}
@@ -126,7 +135,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 }
 
 const useStyles = makeStyles({
-    selectorWrapper: { width: "100%" },
+    fullWidth: { width: "100%" },
     content: { marginBottom: 35, marginLeft: 0 },
 });
 

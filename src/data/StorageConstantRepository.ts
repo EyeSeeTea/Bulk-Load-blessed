@@ -41,7 +41,7 @@ export class StorageConstantRepository implements StorageRepository {
         return constants[0] ?? {};
     }
 
-    public async loadObject<T extends object>(key: string, defaultValue: T): Promise<T> {
+    public async getObject<T extends object>(key: string, defaultValue: T): Promise<T> {
         const { description } = await this.getConstant(key);
         if (!description) {
             await this.api.models.constants.post(this.buildDefault(key, defaultValue)).getData();
@@ -67,18 +67,25 @@ export class StorageConstantRepository implements StorageRepository {
         throw new Error("Method not implemented.");
     }
 
-    public async loadCollection<T extends ReferenceObject>(
+    public async listObjectsInCollection<T extends ReferenceObject>(_key: string): Promise<T[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    public async getObjectInCollection<T extends ReferenceObject>(
         _key: string,
         _id: string
     ): Promise<T | undefined> {
         throw new Error("Method not implemented.");
     }
 
-    public async saveCollection<T extends ReferenceObject>(_key: string, _data: T): Promise<void> {
+    public async saveObjectInCollection<T extends ReferenceObject>(
+        _key: string,
+        _data: T
+    ): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    public async removeCollection(_key: string, _id: string): Promise<void> {
+    public async removeObjectInCollection(_key: string, _id: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

@@ -16,7 +16,7 @@ export class StorageDataStoreRepository implements StorageRepository {
         this.dataStore = this.api.dataStore(dataStoreNamespace);
     }
 
-    public async loadObject<T extends object>(key: string, defaultValue: T): Promise<T> {
+    public async getObject<T extends object>(key: string, defaultValue: T): Promise<T> {
         const value = await this.dataStore.get<T>(key).getData();
         if (!value) await this.saveObject(key, defaultValue);
         return value ?? defaultValue;
@@ -36,22 +36,29 @@ export class StorageDataStoreRepository implements StorageRepository {
         }
     }
 
-    public async loadCollection<T extends ReferenceObject>(
+    public async listObjectsInCollection<T extends ReferenceObject>(key: string): Promise<T[]> {
+        return await this.getObject<T[]>(key, []);
+    }
+
+    public async getObjectInCollection<T extends ReferenceObject>(
         key: string,
         id: string
     ): Promise<T | undefined> {
-        const rawData = await this.loadObject<T[]>(key, []);
+        const rawData = await this.getObject<T[]>(key, []);
         return _.find(rawData, element => element.id === id);
     }
 
-    public async removeCollection(key: string, id: string): Promise<void> {
-        const oldData = await this.loadObject(key, [] as ReferenceObject[]);
+    public async removeObjectInCollection(key: string, id: string): Promise<void> {
+        const oldData = await this.getObject(key, [] as ReferenceObject[]);
         const newData = _.reject(oldData, { id });
         await this.saveObject(key, newData);
     }
 
-    public async saveCollection<T extends ReferenceObject>(key: string, element: T): Promise<void> {
-        const oldData = await this.loadObject(key, [] as ReferenceObject[]);
+    public async saveObjectInCollection<T extends ReferenceObject>(
+        key: string,
+        element: T
+    ): Promise<void> {
+        const oldData = await this.getObject(key, [] as ReferenceObject[]);
         const newData = _.uniqBy([...oldData, element], "id");
         await this.saveObject(key, newData);
     }

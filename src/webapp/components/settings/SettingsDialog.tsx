@@ -1,15 +1,5 @@
-import {
-    Button,
-    Card,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Icon,
-    IconButton,
-    makeStyles,
-} from "@material-ui/core";
-import { useSnackbar } from "d2-ui-components";
+import { Card, Icon, IconButton, makeStyles } from "@material-ui/core";
+import { ConfirmationDialog, useSnackbar } from "d2-ui-components";
 import React from "react";
 import i18n from "../../../locales";
 import Settings from "../../logic/settings";
@@ -58,25 +48,17 @@ export default function SettingsComponent(props: SettingsProps) {
                 </IconButton>
             </div>
 
-            <Dialog open={isOpen} fullWidth={true} maxWidth="lg" onClose={close}>
-                <DialogTitle>{i18n.t("Settings")}</DialogTitle>
-
-                <DialogContent>
-                    <Card className={classes.content}>
-                        <SettingsFields settings={unsavedSettings} onChange={setUnsavedSettings} />
-                    </Card>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={close} variant="contained">
-                        {i18n.t("Cancel")}
-                    </Button>
-
-                    <Button onClick={save} color="primary" variant="contained">
-                        {i18n.t("Save")}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <ConfirmationDialog
+                isOpen={isOpen}
+                fullWidth={true}
+                maxWidth="xl"
+                onCancel={close}
+                onSave={save}
+            >
+                <Card className={classes.content}>
+                    <SettingsFields settings={unsavedSettings} onChange={setUnsavedSettings} />
+                </Card>
+            </ConfirmationDialog>
         </React.Fragment>
     );
 }

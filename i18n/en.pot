@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-04-17T08:58:51.366Z\n"
-"PO-Revision-Date: 2020-04-17T08:58:51.366Z\n"
+"POT-Creation-Date: 2020-04-20T14:12:22.131Z\n"
+"PO-Revision-Date: 2020-04-20T14:12:22.131Z\n"
 
 msgid "Cannot read file"
 msgstr ""
@@ -95,7 +95,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-msgid "Save"
+msgid "Themes"
 msgstr ""
 
 msgid "Models"
@@ -120,6 +120,74 @@ msgid "Model"
 msgstr ""
 
 msgid "Select {{element}} to {{action}}..."
+msgstr ""
+
+msgid "Edit theme"
+msgstr ""
+
+msgid "New theme"
+msgstr ""
+
+msgid "Theme name"
+msgstr ""
+
+msgid "Sections"
+msgstr ""
+
+msgid "Header text"
+msgstr ""
+
+msgid "Footer text"
+msgstr ""
+
+msgid "Title text"
+msgstr ""
+
+msgid "Subtitle text"
+msgstr ""
+
+msgid "Templates"
+msgstr ""
+
+msgid "An error ocurred while saving theme"
+msgstr ""
+
+msgid "Delete {{count}} themes"
+msgid_plural "Delete {{count}} themes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Are you sure you want to remove selected themes"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Logo"
+msgstr ""
+
+msgid "Header"
+msgstr ""
+
+msgid "Footer"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Subtitle"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Add"
 msgstr ""
 
 msgid "Error deleting data values"

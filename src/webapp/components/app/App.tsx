@@ -1,8 +1,6 @@
 //@ts-ignore
 import { useConfig, useDataQuery } from "@dhis2/app-runtime";
 //@ts-ignore
-import i18n from "@dhis2/d2-i18n";
-//@ts-ignore
 import { HeaderBar } from "@dhis2/ui-widgets";
 import { LinearProgress } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
@@ -14,8 +12,9 @@ import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
-import { AppContext, AppContextI } from "../../contexts/api-context";
 import { CompositionRoot } from "../../../CompositionRoot";
+import i18n from "../../../locales";
+import { AppContext, AppContextI } from "../../contexts/api-context";
 import Root from "../../pages/root/Root";
 import Share from "../share/Share";
 import "./App.css";

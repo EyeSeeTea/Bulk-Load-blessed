@@ -1,11 +1,10 @@
-import ExcelJS from "exceljs/dist/es5/exceljs.browser";
-import _ from "lodash";
-import fileReaderStream from "filereader-stream";
 import dateFormat from "dateformat";
-
+import ExcelJS from "exceljs/dist/es5/exceljs.browser";
+import fileReaderStream from "filereader-stream";
+import _ from "lodash";
+import i18n from "../../locales";
 import { stringEquals } from "../utils/strings";
 import { getObjectVersion } from "./utils";
-import i18n from "@dhis2/d2-i18n";
 
 const models = { dataSet: "dataSets", program: "programs" };
 
