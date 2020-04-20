@@ -24,5 +24,13 @@ export default class implements Template {
                 sheet: "DiscriminatingBioassays",
             },
         },
+        {
+            section: "logo",
+            source: {
+                type: "range",
+                ref: "D2:E8",
+                sheet: "DiscriminatingBioassays",
+            },
+        },
     ];
 }

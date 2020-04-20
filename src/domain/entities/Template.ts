@@ -1,5 +1,5 @@
 import { Id } from "./ReferenceObject";
-import { ThemeableSections } from "./Theme";
+import { ThemeableSections, ImageSections } from "./Theme";
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -8,7 +8,7 @@ export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
 
 export type StyleSource = {
-    section: ThemeableSections;
+    section: ThemeableSections | ImageSections;
     source: CellRef | RangeRef;
 };
 

@@ -1,8 +1,9 @@
 import _ from "lodash";
 import XLSX, { Workbook } from "xlsx-populate";
 import { SheetRef, Template } from "../domain/entities/Template";
-import { Theme, ThemeStyle } from "../domain/entities/Theme";
+import { CellImage, Theme, ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository } from "../domain/repositories/ExcelRepository";
+import { fromBase64 } from "../utils/files";
 
 export class ExcelPopulateRepository implements ExcelRepository {
     private workbooks: Record<string, Workbook> = {};
@@ -20,17 +21,17 @@ export class ExcelPopulateRepository implements ExcelRepository {
     }
 
     public async applyTheme(template: Template, theme: Theme): Promise<void> {
-        const workbook = await this.getWorkbook(template);
-
         _.forOwn(theme.sections, (style: ThemeStyle, section: string) => {
-            const { source } =
-                template.styleSources.find(source => source.section === section) ?? {};
+            const styleSource = template.styleSources.find(source => source.section === section);
+            const { source } = styleSource ?? {};
             if (source) this.applyThemeToRange(template, source, style);
         });
 
-        _.forEach(theme.pictures, ({ name, src, sheet, from, to }) => {
-            // @ts-ignore: This part is not typed (we need to create an extension)
-            workbook.sheet(sheet).drawings(name).image(src).from(from).to(to);
+        _.forOwn(theme.pictures, async (image: CellImage, section: string) => {
+            const src = await fromBase64(image.src);
+            const styleSource = template.styleSources.find(source => source.section === section);
+            const { source } = styleSource ?? {};
+            if (source) this.applyImageToRange(template, source, src);
         });
     }
 
@@ -57,27 +58,46 @@ export class ExcelPopulateRepository implements ExcelRepository {
         const { sheet } = source;
         const { text, bold, italic, fontSize, fontColor, fillColor } = style;
         const workbook = await this.getWorkbook(template);
+        const cellStyle = _.omitBy(
+            {
+                bold,
+                italic,
+                fontSize,
+                fontColor,
+                fill: fillColor,
+            },
+            _.isUndefined
+        );
+        const range =
+            source.type === "range"
+                ? workbook.sheet(sheet).range(source.ref)
+                : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
         try {
-            const range =
-                source.type === "range"
-                    ? workbook.sheet(sheet).range(source.ref)
-                    : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
-
             workbook
                 .sheet(sheet)
                 .range(range?.address() ?? "")
                 .merged(true)
-                .style({
-                    bold,
-                    italic,
-                    fontSize,
-                    fontColor,
-                    fill: fillColor,
-                })
+                .style(cellStyle)
                 .value(text);
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
+    }
+
+    private async applyImageToRange(
+        template: Template,
+        source: SheetRef,
+        file: File
+    ): Promise<void> {
+        const { sheet, ref } = source;
+        const workbook = await this.getWorkbook(template);
+        const [from, to] = source.type === "range" ? String(ref).split(":") : [ref, ref];
+
+        // @ts-ignore: This part is not typed (we need to create an extension)
+        const drawings = workbook.sheet(sheet).drawings();
+        const name = drawings[0]?.name();
+        // @ts-ignore: This part is not typed (we need to create an extension)
+        workbook.sheet(sheet).drawings(name).image(file).from(from).to(to);
     }
 }
