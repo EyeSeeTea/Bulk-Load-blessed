@@ -68,7 +68,7 @@ class AppComponent extends React.Component {
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
         this.onSettingsChange = this.onSettingsChange.bind(this);
-        this.onDrop = this.onDrop.bind(this).bind(this);
+        this.onDrop = this.onDrop.bind(this);
     }
 
     async componentDidMount() {
@@ -516,34 +516,46 @@ class AppComponent extends React.Component {
                         accept={
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
                         }
-                        className={"dropZone"}
-                        acceptClassName={"stripes"}
-                        rejectClassName={"rejectStripes"}
                         onDrop={this.onDrop}
                         multiple={false}
                     >
-                        <div
-                            className={"dropzoneTextStyle"}
-                            hidden={this.state.importDataSheet !== undefined}
-                        >
-                            <p className={"dropzoneParagraph"}>
-                                {i18n.t("Drag and drop file to import")}
-                            </p>
-                            <br />
-                            <CloudUploadIcon className={"uploadIconSize"} />
-                        </div>
-                        <div
-                            className={"dropzoneTextStyle"}
-                            hidden={this.state.importDataSheet === undefined}
-                        >
-                            {this.state.importDataSheet !== undefined && (
-                                <p className={"dropzoneParagraph"}>
-                                    {this.state.importDataSheet.name}
-                                </p>
-                            )}
-                            <br />
-                            <CloudDoneIcon className={"uploadIconSize"} />
-                        </div>
+                        {({ getRootProps, getInputProps, isDragActive, isDragAccept }) => (
+                            <section>
+                                <div
+                                    {...getRootProps({
+                                        className: isDragActive
+                                            ? isDragAccept
+                                                ? "stripes"
+                                                : "rejectStripes"
+                                            : "dropZone",
+                                    })}
+                                >
+                                    <input {...getInputProps()} />
+                                    <div
+                                        className={"dropzoneTextStyle"}
+                                        hidden={this.state.importDataSheet !== undefined}
+                                    >
+                                        <p className={"dropzoneParagraph"}>
+                                            {i18n.t("Drag and drop file to import")}
+                                        </p>
+                                        <br />
+                                        <CloudUploadIcon className={"uploadIconSize"} />
+                                    </div>
+                                    <div
+                                        className={"dropzoneTextStyle"}
+                                        hidden={this.state.importDataSheet === undefined}
+                                    >
+                                        {this.state.importDataSheet !== undefined && (
+                                            <p className={"dropzoneParagraph"}>
+                                                {this.state.importDataSheet.name}
+                                            </p>
+                                        )}
+                                        <br />
+                                        <CloudDoneIcon className={"uploadIconSize"} />
+                                    </div>
+                                </div>
+                            </section>
+                        )}
                     </Dropzone>
 
                     {importObject && (

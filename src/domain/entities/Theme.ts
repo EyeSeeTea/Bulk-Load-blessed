@@ -69,7 +69,7 @@ export class Theme {
             name: _.compact([
                 !this.name.trim()
                     ? {
-                          key: "cannot_be_blank",
+                          key: "isBlank",
                           namespace: { field: "name" },
                       }
                     : null,

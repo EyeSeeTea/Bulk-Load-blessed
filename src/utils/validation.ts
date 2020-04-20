@@ -3,8 +3,8 @@ import { Validation } from "../domain/entities/Validation";
 import i18n from "../locales";
 
 const translations: Record<string, (namespace: unknown) => string> = {
-    cannot_be_blank: (namespace: unknown) => i18n.t("Field {{field}} cannot be blank", namespace),
-    cannot_be_empty: (namespace: unknown) =>
+    isBlank: (namespace: unknown) => i18n.t("Field {{field}} cannot be blank", namespace),
+    isEmpty: (namespace: unknown) =>
         i18n.t("You need to select at least one {{element}}", namespace),
 };
 
