@@ -12,7 +12,7 @@ msgid "Field {{field}} cannot be blank"
 msgstr ""
 
 msgid "You need to select at least one {{element}}"
-msgstr "Seleccione al menos un {{elemento}}"
+msgstr "Seleccione al menos un {{element}}"
 
 msgid "Cannot read file"
 msgstr "No se puede leer el fichero"
