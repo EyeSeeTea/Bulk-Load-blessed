@@ -52,9 +52,13 @@ export default function ThemeList() {
 
     const saveTheme = async (theme: Theme) => {
         try {
-            await CompositionRoot.getInstance().themes.save.execute(theme);
-            cancelThemeEdit();
-            setReloadKey(Math.random());
+            const errors = await CompositionRoot.getInstance().themes.save.execute(theme);
+            if (errors.length > 0) {
+                snackbar.error(errors.join("\n"));
+            } else {
+                cancelThemeEdit();
+                setReloadKey(Math.random());
+            }
         } catch (error) {
             snackbar.error(i18n.t("An error ocurred while saving theme"));
         }
