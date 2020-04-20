@@ -41,8 +41,11 @@ export default function ThemeEditDialog({
     const title = type === "edit" ? i18n.t("Edit theme") : i18n.t("New theme");
 
     useEffect(() => {
-        const templates = CompositionRoot.getInstance().templates.list.execute();
-        setAllTemplates(templates.map(({ value, label }) => ({ value, text: label })));
+        CompositionRoot.getInstance()
+            .templates.list.execute()
+            .then(templates => {
+                setAllTemplates(templates.map(({ id, name }) => ({ value: id, text: name })));
+            });
     }, []);
 
     const updateName = (event: ChangeEvent<HTMLInputElement>) => {

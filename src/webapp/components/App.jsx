@@ -76,7 +76,17 @@ class AppComponent extends React.Component {
         await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
         // Load settings once data is already loaded so we can render the objects in single model
         await this.loadSettings();
-        const customTemplates = CompositionRoot.getInstance().templates.list.execute();
+        const templates = await CompositionRoot.getInstance().templates.list.execute();
+        const customTemplates = _.flatten(
+            templates.map(({ id, name, themes }) =>
+                themes.length > 0
+                    ? themes.map(theme => ({
+                          value: { id, theme: theme.id },
+                          label: `${name} (${theme.name})`,
+                      }))
+                    : { value: { id }, label: name }
+            )
+        );
         this.setState({ customTemplates });
         await this.props.loading.hide();
     }
@@ -140,8 +150,9 @@ class AppComponent extends React.Component {
         this.props.loading.show(true);
 
         if (this.state.model1 === "customTemplates") {
+            const { id, theme } = this.state.selectedProgramOrDataSet1.value;
             CompositionRoot.getInstance()
-                .templates.download.execute(this.state.selectedProgramOrDataSet1.value)
+                .templates.download.execute(id, theme)
                 .then(() => this.props.loading.show(false));
         } else {
             dhisConnector

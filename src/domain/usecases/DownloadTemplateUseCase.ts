@@ -9,9 +9,15 @@ export class DownloadTemplateUseCase {
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute(templateId: Id): Promise<void> {
+    public async execute(templateId: Id, themeId?: Id): Promise<void> {
         try {
             const template = await this.templateRepository.getTemplate(templateId);
+
+            if (themeId) {
+                const theme = await this.templateRepository.getTheme(themeId);
+                await this.excelRepository.applyTheme(template, theme);
+            }
+
             const data = await this.excelRepository.toBlob(template);
             saveAs(data, `${template.name}.xlsx`);
         } catch (error) {

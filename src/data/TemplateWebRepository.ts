@@ -32,7 +32,13 @@ export class TemplateWebRepository implements TemplateRepository {
     }
 
     public async listThemes(): Promise<Theme[]> {
-        return this.storage.listObjectsInCollection<Theme>(themeCollectionKey);
+        const objects = await this.storage.listObjectsInCollection(themeCollectionKey);
+        return objects.map(data => new Theme(data));
+    }
+
+    public async getTheme(themeId: string): Promise<Theme> {
+        const data = await this.storage.getObjectInCollection(themeCollectionKey, themeId);
+        return new Theme(data);
     }
 
     public async saveTheme(theme: Theme): Promise<void> {

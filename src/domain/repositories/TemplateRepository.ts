@@ -8,6 +8,7 @@ export interface TemplateRepository {
     getTemplate(id: Id): Promise<Template>;
     // Template themes
     listThemes(): Promise<Theme[]>;
+    getTheme(id: Id): Promise<Theme>;
     saveTheme(theme: Theme): Promise<void>;
     deleteTheme(id: Id): Promise<void>;
 }
