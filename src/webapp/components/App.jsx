@@ -76,18 +76,7 @@ class AppComponent extends React.Component {
         await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
         // Load settings once data is already loaded so we can render the objects in single model
         await this.loadSettings();
-        const templates = await CompositionRoot.getInstance().templates.list.execute();
-        const customTemplates = _.flatten(
-            templates.map(({ id, name, themes }) =>
-                themes.length > 0
-                    ? themes.map(theme => ({
-                          value: { id, theme: theme.id },
-                          label: `${name} (${theme.name})`,
-                      }))
-                    : { value: { id }, label: name }
-            )
-        );
-        this.setState({ customTemplates });
+        await this.loadCustomTemplates();
         await this.props.loading.hide();
     }
 
@@ -103,6 +92,21 @@ class AppComponent extends React.Component {
         return Settings.build(api)
             .then(this.onSettingsChange)
             .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
+    }
+
+    async loadCustomTemplates() {
+        const templates = await CompositionRoot.getInstance().templates.list.execute();
+        const customTemplates = _.flatten(
+            templates.map(({ id, name, themes }) =>
+                themes.length > 0
+                    ? themes.map(theme => ({
+                          value: { id, theme: theme.id },
+                          label: `${name} (${theme.name})`,
+                      }))
+                    : { value: { id }, label: name }
+            )
+        );
+        this.setState({ customTemplates });
     }
 
     loadUserInformation() {
