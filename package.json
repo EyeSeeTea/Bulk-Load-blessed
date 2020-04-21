@@ -38,7 +38,7 @@
         "react-router-dom": "5.1.2",
         "react-scripts": "3.4.1",
         "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/SferaDev/xlsx-populate.git#feature/override-images"
+        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/override-images"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
