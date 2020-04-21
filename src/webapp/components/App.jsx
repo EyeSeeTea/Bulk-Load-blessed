@@ -355,8 +355,9 @@ class AppComponent extends React.Component {
             },
         ]);
 
-        const model1 = modelOptions.length === 1 ? modelOptions[0].value : undefined;
-        if (modelOptions.length === 1) this.handleModelChange1(modelOptions[0]);
+        const shouldResetModel = this.state.modelOptions.length !== modelOptions.length;
+        const model1 = shouldResetModel ? undefined : this.state.model1;
+        if (shouldResetModel) this.handleModelChange1(modelOptions[0]);
 
         this.setState({
             settings,
