@@ -1,17 +1,37 @@
+import _ from "lodash";
 import { ReferenceObject } from "../entities/ReferenceObject";
 
-export interface StorageRepository {
+export abstract class StorageRepository {
     // Object operations
-    getObject<T extends object>(key: string, defaultValue: T): Promise<T>;
-    saveObject<T extends object>(key: string, value: T): Promise<void>;
-    removeObject(key: string): Promise<void>;
+    public abstract getObject<T extends object>(key: string, defaultValue: T): Promise<T>;
+    public abstract saveObject<T extends object>(key: string, value: T): Promise<void>;
+    public abstract removeObject(key: string): Promise<void>;
 
-    // Collection operations
-    listObjectsInCollection<T extends ReferenceObject>(key: string): Promise<T[]>;
-    getObjectInCollection<T extends ReferenceObject>(
+    public async listObjectsInCollection<T extends ReferenceObject>(key: string): Promise<T[]> {
+        return await this.getObject<T[]>(key, []);
+    }
+
+    public async getObjectInCollection<T extends ReferenceObject>(
         key: string,
         id: string
-    ): Promise<T | undefined>;
-    saveObjectInCollection<T extends ReferenceObject>(key: string, data: T): Promise<void>;
-    removeObjectInCollection(key: string, id: string): Promise<void>;
+    ): Promise<T | undefined> {
+        const rawData = await this.getObject<T[]>(key, []);
+        return _.find(rawData, element => element.id === id);
+    }
+
+    public async saveObjectInCollection<T extends ReferenceObject>(
+        key: string,
+        element: T
+    ): Promise<void> {
+        const oldData = await this.getObject(key, [] as ReferenceObject[]);
+        const cleanData = oldData.filter(item => item.id !== element.id);
+        const newData = [...cleanData, element];
+        await this.saveObject(key, newData);
+    }
+
+    public async removeObjectInCollection(key: string, id: string): Promise<void> {
+        const oldData = await this.getObject(key, [] as ReferenceObject[]);
+        const newData = _.reject(oldData, { id });
+        await this.saveObject(key, newData);
+    }
 }

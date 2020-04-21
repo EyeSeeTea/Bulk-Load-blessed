@@ -1,7 +1,6 @@
 import { D2Api, D2ApiDefault } from "d2-api";
 import { generateUid } from "d2/uid";
 import { DhisInstance } from "../domain/entities/DhisInstance";
-import { ReferenceObject } from "../domain/entities/ReferenceObject";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 
 interface Constant {
@@ -13,10 +12,11 @@ interface Constant {
 
 const defaultName = "Bulk Load Storage";
 
-export class StorageConstantRepository implements StorageRepository {
+export class StorageConstantRepository extends StorageRepository {
     private api: D2Api;
 
     constructor({ url }: DhisInstance) {
+        super();
         this.api = new D2ApiDefault({ baseUrl: url });
     }
 
@@ -29,7 +29,7 @@ export class StorageConstantRepository implements StorageRepository {
         };
     }
 
-    private async getConstant(key: string): Promise<Constant> {
+    private async getConstant(key: string): Promise<Partial<Constant>> {
         const { objects: constants } = await this.api.models.constants
             .get({
                 paging: false,
@@ -63,29 +63,8 @@ export class StorageConstantRepository implements StorageRepository {
         }
     }
 
-    public async removeObject(_key: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
-    public async listObjectsInCollection<T extends ReferenceObject>(_key: string): Promise<T[]> {
-        throw new Error("Method not implemented.");
-    }
-
-    public async getObjectInCollection<T extends ReferenceObject>(
-        _key: string,
-        _id: string
-    ): Promise<T | undefined> {
-        throw new Error("Method not implemented.");
-    }
-
-    public async saveObjectInCollection<T extends ReferenceObject>(
-        _key: string,
-        _data: T
-    ): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
-    public async removeObjectInCollection(_key: string, _id: string): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async removeObject(key: string): Promise<void> {
+        const { id } = await this.getConstant(key);
+        if (id) await this.api.models.constants.delete({ id }).getData();
     }
 }
