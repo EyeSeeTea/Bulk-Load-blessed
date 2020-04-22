@@ -18,5 +18,5 @@
         },
         "feedbackOptions": {}
     },
-    "storage": "constant"
+    "storage": "dataStore"
 }
