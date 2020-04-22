@@ -12,7 +12,7 @@ import axios from "axios";
  *      - userDataSets: User dataSets Map
  */
 export function getUserInformation(builder) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         const result = {
             username: builder.d2.currentUser.username,
             dataSets: [],
@@ -68,7 +68,7 @@ export function getUserInformation(builder) {
  *      - organisationUnits: The orgUnits
  */
 export function getElementMetadata(builder) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         const elementMetadata = new Map();
         let organisationUnits = [];
         let rawMetadata = {};
@@ -127,7 +127,7 @@ export function getElementMetadata(builder) {
  */
 export function importData(builder) {
     console.log(builder.data);
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         const isProgram = builder.element.type === "program";
         const endpoint = isProgram ? "/events" : "/dataValueSets";
 

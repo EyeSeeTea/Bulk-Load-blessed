@@ -71,13 +71,16 @@ function getDataValuesFromRow(row, object) {
     const period = values[info.periodRow];
     if (!period) return;
 
-    const count = _(values).drop(info.initialValuesRow).reject(_.isNil).size();
+    const count = _(values)
+        .drop(info.initialValuesRow)
+        .reject(_.isNil)
+        .size();
 
     return { period, count };
 }
 
 function getWorkbook(file) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         const workbook = new ExcelJS.Workbook();
         const inputStream = workbook.xlsx.createInputStream();
         const readerStream = fileReaderStream(file);
@@ -96,7 +99,7 @@ function getWorkbook(file) {
  * @returns {Promise<>}
  */
 export function readSheet(builder) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         const workbook = new ExcelJS.Workbook();
         const is = workbook.xlsx.createInputStream();
         const frs = fileReaderStream(builder.file);

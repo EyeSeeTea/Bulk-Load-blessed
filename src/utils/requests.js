@@ -7,7 +7,7 @@ const ajaxQueue = createAjaxQueue(25);
  * @param requestUrl
  */
 export function getJSON(_d2, requestUrl) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         ajaxQueue.queue({
             dataType: "json",
             url: requestUrl,

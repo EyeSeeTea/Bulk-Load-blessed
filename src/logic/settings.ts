@@ -126,7 +126,9 @@ export default class Settings {
     }
 
     validate(): OkOrError {
-        const isSomeModelEnabled = _(this.models).values().some();
+        const isSomeModelEnabled = _(this.models)
+            .values()
+            .some();
         return isSomeModelEnabled
             ? { status: true }
             : { status: false, error: i18n.t("Select at least one model") };
