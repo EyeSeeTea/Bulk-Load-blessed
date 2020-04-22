@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from "react";
 //@ts-ignore
-import { HeaderBar } from "@dhis2/ui-widgets";
-import { MuiThemeProvider } from "@material-ui/core/styles";
-//@ts-ignore
-import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-//@ts-ignore
-import { useDataQuery, useConfig } from "@dhis2/app-runtime";
-import _ from "lodash";
+import { useConfig, useDataQuery } from "@dhis2/app-runtime";
 //@ts-ignore
 import i18n from "@dhis2/d2-i18n";
 //@ts-ignore
+import { HeaderBar } from "@dhis2/ui-widgets";
+import { LinearProgress } from "@material-ui/core";
+import { MuiThemeProvider } from "@material-ui/core/styles";
+//@ts-ignore
 import { init } from "d2";
-import { SnackbarProvider, LoadingProvider } from "d2-ui-components";
 import { D2ApiDefault } from "d2-api";
-
-import "./App.css";
-import { muiTheme } from "./themes/dhis2.theme";
-import muiThemeLegacy from "./themes/dhis2-legacy.theme";
+import { LoadingProvider, SnackbarProvider } from "d2-ui-components";
+import _ from "lodash";
+//@ts-ignore
+import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import React, { useEffect, useState } from "react";
+import { AppContext, AppContextI } from "../../contexts/api-context";
+import { CompositionRoot } from "../../domain/CompositionRoot";
 import Root from "../../pages/root/Root";
 import Share from "../share/Share";
-import { AppContext, AppContextI } from "../../contexts/api-context";
-import { LinearProgress } from "@material-ui/core";
+import "./App.css";
+import muiThemeLegacy from "./themes/dhis2-legacy.theme";
+import { muiTheme } from "./themes/dhis2.theme";
 
 interface AppConfig {
     appKey: string;
@@ -91,12 +91,12 @@ const App = () => {
 
     useEffect(() => {
         const run = async () => {
-            const appConfig = await fetch("app-config.json", {
-                credentials: "same-origin",
-            }).then(res => res.json());
+            const appConfig = await fetch("app-config.json").then(res => res.json());
             const d2 = await init({ baseUrl: baseUrl + "/api" });
             const api = new D2ApiDefault({ baseUrl });
             (window as any).bulkLoad = { d2, api };
+
+            CompositionRoot.initialize({ appConfig, dhisInstance: { url: baseUrl } });
 
             configI18n(data.userSettings);
             const appContext: AppContextI = { d2, api };

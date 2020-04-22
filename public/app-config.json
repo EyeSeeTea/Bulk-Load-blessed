@@ -17,5 +17,6 @@
             "branch": "master"
         },
         "feedbackOptions": {}
-    }
+    },
+    "storage": "constant"
 }

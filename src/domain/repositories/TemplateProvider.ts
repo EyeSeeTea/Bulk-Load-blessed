@@ -1,5 +1,5 @@
-import { Id } from "./ReferenceObject";
-import { Template } from "./Template";
+import { Id } from "../entities/ReferenceObject";
+import { Template } from "../entities/Template";
 
 export interface TemplateProvider {
     templates: Template[];

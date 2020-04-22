@@ -1,7 +1,7 @@
-import { D2Api, Id, Ref, D2Constant, PartialPersistedModel } from "d2-api";
+import { D2Api, Id, Ref } from "d2-api";
 import _ from "lodash";
+import { AppSettingsUseCase } from "../domain/usecases/AppSettingsUseCase";
 import i18n from "../locales";
-import { generateUid } from "d2/uid";
 
 const models = ["dataSet", "program"] as const;
 
@@ -56,13 +56,6 @@ export default class Settings {
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
-    static defaultData = {
-        models: { dataSet: true, program: false },
-        userGroupsForGeneration: ["HMIS Officers"],
-        userGroupsForSettings: [],
-        showOrgUnitsOnGeneration: false,
-    };
-
     constructor(options: Options) {
         this.api = options.api;
         this.currentUser = options.currentUser;
@@ -85,44 +78,50 @@ export default class Settings {
             authorities: new Set(authorities),
         };
 
-        const { userGroups, constants } = await api.metadata
+        const { userGroups } = await api.metadata
             .get({
                 userGroups: {
                     fields: { id: true, name: true, displayName: true },
                 },
-                constants: {
-                    fields: { id: true, description: true },
-                    filter: { code: { eq: this.constantCode } },
-                },
             })
             .getData();
 
-        const settingsConstant = _(constants).get(0, null);
-        const data: Partial<PersistedData> = settingsConstant
-            ? JSON.parse(settingsConstant.description)
-            : {};
+        const defaultSettings = new AppSettingsUseCase().getDefaultSettings();
+
+        const defaultData = {
+            models: { dataSet: true, program: true },
+            userGroupsForGeneration: [],
+            userGroupsForSettings: [],
+            showOrgUnitsOnGeneration: false,
+            ...defaultSettings,
+        };
+
+        const data = await new AppSettingsUseCase().read<Partial<PersistedData>>(
+            Settings.constantCode,
+            defaultData
+        );
 
         const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
             userGroups,
             data.userGroupForGeneration,
-            Settings.defaultData.userGroupsForGeneration
+            defaultData.userGroupsForGeneration
         );
 
         const userGroupsForSettings = getUserGroupsWithSettingEnabled(
             userGroups,
             data.userGroupForSettings,
-            Settings.defaultData.userGroupsForSettings
+            defaultData.userGroupsForSettings
         );
 
         return new Settings({
             api,
             currentUser,
             userGroups: userGroups,
-            models: data.models || Settings.defaultData.models,
+            models: data.models || defaultData.models,
             userGroupsForGeneration,
             userGroupsForSettings,
             showOrgUnitsOnGeneration:
-                data.showOrgUnitsOnGeneration || Settings.defaultData.showOrgUnitsOnGeneration,
+                data.showOrgUnitsOnGeneration || defaultData.showOrgUnitsOnGeneration,
         });
     }
 
@@ -135,7 +134,6 @@ export default class Settings {
 
     async save(): Promise<OkOrError> {
         const {
-            api,
             models,
             userGroupsForGeneration,
             userGroupsForSettings,
@@ -144,35 +142,18 @@ export default class Settings {
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const { constants } = await api.metadata
-            .get({
-                constants: {
-                    fields: { id: true },
-                    filter: { code: { eq: Settings.constantCode } },
-                },
-            })
-            .getData();
-
-        const settingsConstant = _(constants).get(0, null);
         const data: PersistedData = {
             models,
             userGroupForGeneration: userGroupsForGeneration.map(ug => ug.id),
             userGroupForSettings: userGroupsForSettings.map(ug => ug.id),
             showOrgUnitsOnGeneration,
         };
-        const newSettingsConstant: PartialPersistedModel<D2Constant> = {
-            id: settingsConstant ? settingsConstant.id : generateUid(),
-            code: Settings.constantCode,
-            name: "Bulk Load Settings",
-            description: JSON.stringify(data, null, 2),
-        };
 
-        const response = await api.metadata.post({ constants: [newSettingsConstant] }).getData();
-
-        if (response.status === "OK") {
+        try {
+            await new AppSettingsUseCase().write<PersistedData>(Settings.constantCode, data);
             return { status: true };
-        } else {
-            return { status: false, error: JSON.stringify(response.typeReports, null, 2) };
+        } catch (error) {
+            return { status: false, error };
         }
     }
 
