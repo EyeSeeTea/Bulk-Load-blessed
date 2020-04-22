@@ -166,12 +166,12 @@ export function readSheet(builder) {
                     if (!isProgram && row.values[3] !== undefined) {
                         result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
                     }
-                    // row.eachCell({ includeEmpty: true },(cell, colNumber) => {
+
                     row.eachCell((cell, colNumber) => {
                         if (isProgram && colNumber > 4) {
                             // TODO: Do not hardcode previous entries
                             const id = columns[colNumber].formula.substr(1);
-                            let cellValue = cell.value.toString();
+                            let cellValue = cell.value?.toString();
 
                             // TODO: Check different data types
                             const dataValue = builder.elementMetadata.get(id);
@@ -202,9 +202,7 @@ export function readSheet(builder) {
                                 : dataEntrySheet
                                       .getCell(stageColumn.sharedFormula)
                                       .value.formula.substr(1);
-                            //        let cellValue=""
-                            //if (cell.value!=null) { let cellValue = cell.value.toString();}
-                            const cellValue = cell.value.toString();
+                            const cellValue = cell.value?.toString();
                             const dataValue = builder.elementMetadata.get(id);
 
                             if (dataValue.type === "categoryOptionCombo") {
@@ -248,7 +246,7 @@ export function readSheet(builder) {
 function parseMetadataId(metadataSheet, metadataName) {
     let result = metadataName;
     metadataSheet.eachRow(row => {
-        if (stringEquals(metadataName, row.values[3])) result = row.values[1];
+        if (row.values[3] && stringEquals(metadataName, row.values[3])) result = row.values[1];
     });
     return result;
 }
