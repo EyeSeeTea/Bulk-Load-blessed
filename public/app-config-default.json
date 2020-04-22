@@ -1,7 +1,7 @@
 {
     "appKey": "bulk-load",
     "appearance": {
-        "showShareButton": false
+        "showShareButton": true
     },
     "feedback": {
         "token": ["03242fc6b0c5a48582", "2e6b8d3e8337b5a0b95fe2"],
@@ -18,5 +18,5 @@
         },
         "feedbackOptions": {}
     },
-    "storage": "constant"
+    "storage": "dataStore"
 }
