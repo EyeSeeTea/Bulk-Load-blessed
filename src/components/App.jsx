@@ -448,9 +448,7 @@ class AppComponent extends React.Component {
                                     options={buildPossibleYears(1970, this.state.endYear)}
                                     defaultValue={{
                                         value: moment("2010-01-01").year(),
-                                        label: moment("2010-01-01")
-                                            .year()
-                                            .toString(),
+                                        label: moment("2010-01-01").year().toString(),
                                     }}
                                     onChange={this.handleStartYear}
                                 />
@@ -464,9 +462,7 @@ class AppComponent extends React.Component {
                                     )}
                                     defaultValue={{
                                         value: moment().year(),
-                                        label: moment()
-                                            .year()
-                                            .toString(),
+                                        label: moment().year().toString(),
                                     }}
                                     onChange={this.handleEndYear}
                                 />
