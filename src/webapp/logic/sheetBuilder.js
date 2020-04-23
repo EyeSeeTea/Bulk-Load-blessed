@@ -5,6 +5,8 @@ import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/ex
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
+const DEFAULT_GENERATED_ID = "AUTO_v0";
+
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
@@ -215,10 +217,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     dataEntrySheet.row(1).setHeight(30);
     dataEntrySheet.row(2).setHeight(50);
 
-    const version = getObjectVersion(element);
-    if (version) {
-        dataEntrySheet.cell(1, 1).string(`Version: ${version}`).style(baseStyle);
-    }
+    const version = getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
+    dataEntrySheet.cell(1, 1).string(`Version: ${version}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;
