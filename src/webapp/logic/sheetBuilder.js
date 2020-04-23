@@ -208,6 +208,11 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     });
 };
 
+SheetBuilder.prototype.getVersion = function () {
+    const { element } = this.builder;
+    return getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
+};
+
 SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata } = this.builder;
     const dataEntrySheet = this.dataEntrySheet;
@@ -226,8 +231,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     dataEntrySheet.row(sectionRow).setHeight(30);
     dataEntrySheet.row(dataElementsRow).setHeight(50);
 
-    const version = getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
-    dataEntrySheet.cell(sectionRow, 1).string(`Version: ${version}`).style(baseStyle);
+    // Add template version
+    dataEntrySheet.cell(sectionRow, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;
