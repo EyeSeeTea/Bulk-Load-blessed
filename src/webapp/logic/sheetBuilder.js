@@ -212,13 +212,22 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata } = this.builder;
     const dataEntrySheet = this.dataEntrySheet;
 
+    // Add cells for themes
+    const sectionRow = 5;
+    const dataElementsRow = 6;
+
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        dataEntrySheet.row(row).hide();
+    }
+
     // Freeze and format column titles
-    dataEntrySheet.row(2).freeze();
-    dataEntrySheet.row(1).setHeight(30);
-    dataEntrySheet.row(2).setHeight(50);
+    dataEntrySheet.row(dataElementsRow).freeze();
+    dataEntrySheet.row(sectionRow).setHeight(30);
+    dataEntrySheet.row(dataElementsRow).setHeight(50);
 
     const version = getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
-    dataEntrySheet.cell(1, 1).string(`Version: ${version}`).style(baseStyle);
+    dataEntrySheet.cell(sectionRow, 1).string(`Version: ${version}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;
@@ -227,18 +236,20 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     createColumn(
         this.workbook,
         dataEntrySheet,
+        dataElementsRow,
         columnId++,
         "Org Unit",
         null,
         this.validations.get("organisationUnits")
     );
     if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude");
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude");
+        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Latitude");
+        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Longitude");
     } else if (element.type === "dataSet") {
         createColumn(
             this.workbook,
             dataEntrySheet,
+            dataElementsRow,
             columnId++,
             "Period",
             null,
@@ -247,6 +258,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         createColumn(
             this.workbook,
             dataEntrySheet,
+            dataElementsRow,
             columnId++,
             "Options",
             null,
@@ -280,15 +292,17 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 .column(columnId)
                                 .setWidth(dataValue.name.length / 2.5 + 10);
                             dataEntrySheet
-                                .cell(2, columnId)
+                                .cell(dataElementsRow, columnId)
                                 .formula("_" + dataValue.id)
                                 .style(groupStyle(groupId));
 
                             if (dataValue.description !== undefined) {
-                                dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
-                                    height: "100pt",
-                                    width: "160pt",
-                                });
+                                dataEntrySheet
+                                    .cell(dataElementsRow, columnId)
+                                    .comment(dataValue.description, {
+                                        height: "100pt",
+                                        width: "160pt",
+                                    });
                             }
 
                             columnId++;
@@ -302,7 +316,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         }
 
                         dataEntrySheet
-                            .cell(1, firstColumnId, 1, columnId - 1, true)
+                            .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
                             .formula("_" + dataElementId)
                             .style(groupStyle(groupId));
 
@@ -321,12 +335,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             createColumn(
                 this.workbook,
                 dataEntrySheet,
+                dataElementsRow,
                 columnId++,
                 programStage.executionDateLabel ?? "Date"
             );
 
             dataEntrySheet
-                .cell(1, columnId - 1)
+                .cell(sectionRow, columnId - 1)
                 .string(programStage.name)
                 .style(baseStyle);
 
@@ -349,6 +364,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     createColumn(
                         this.workbook,
                         dataEntrySheet,
+                        dataElementsRow,
                         columnId,
                         "_" + dataElement.id,
                         groupId,
@@ -357,10 +373,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
 
                     if (dataElement.description !== undefined) {
-                        dataEntrySheet.cell(2, columnId).comment(dataElement.description, {
-                            height: "100pt",
-                            width: "160pt",
-                        });
+                        dataEntrySheet
+                            .cell(dataElementsRow, columnId)
+                            .comment(dataElement.description, {
+                                height: "100pt",
+                                width: "160pt",
+                            });
                     }
 
                     columnId++;
@@ -368,7 +386,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 if (firstColumnId < columnId)
                     dataEntrySheet
-                        .cell(1, firstColumnId, 1, columnId - 1, true)
+                        .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
                         .formula("_" + programStageSection.id)
                         .style(groupStyle(groupId));
 

@@ -14,7 +14,7 @@ const models = { dataSet: "dataSets", program: "programs" };
  * @param objectsByType: Object {dataSet, program} containing all D2 objects.
  * @returns {Promise<{object, dataValues}>}
  */
-export async function getBasicInfoFromSheet(file, objectsByType) {
+export async function getBasicInfoFromSheet(file, objectsByType, rowOffset) {
     const workbook = await getWorkbook(file);
 
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
@@ -42,14 +42,12 @@ export async function getBasicInfoFromSheet(file, objectsByType) {
         const dbObject =
             _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
         checkVersion(dataEntrySheet, dbObject);
-        return { object: dbObject, dataValues: getDataValues(object, dataEntrySheet) };
+        return { object: dbObject, dataValues: getDataValues(object, dataEntrySheet, rowOffset) };
     }
 }
 
-function getDataValues(object, dataEntrySheet) {
-    const initialRow = 3;
-
-    return _(initialRow)
+function getDataValues(object, dataEntrySheet, rowOffset = 0) {
+    return _(rowOffset + 3)
         .range(dataEntrySheet.rowCount + 1)
         .map(nRow => dataEntrySheet.getRow(nRow))
         .map(row => getDataValuesFromRow(row, object))
@@ -60,17 +58,17 @@ function getDataValues(object, dataEntrySheet) {
 
 function getDataValuesFromRow(row, object) {
     const infoByType = {
-        dataSet: { periodRow: 2, initialValuesRow: 4 },
-        program: { periodRow: 4, initialValuesRow: 5 },
+        dataSet: { periodCol: 2, initialValuesCol: 4 },
+        program: { periodCol: 4, initialValuesCol: 5 },
     };
     const info = infoByType[object.type];
     if (!info) return;
 
     const values = row.values;
-    const period = values[info.periodRow];
+    const period = values[info.periodCol];
     if (!period) return;
 
-    const count = _(values).drop(info.initialValuesRow).reject(_.isNil).size();
+    const count = _(values).drop(info.initialValuesCol).reject(_.isNil).size();
 
     return { period, count };
 }
@@ -106,23 +104,25 @@ export function readSheet(builder) {
             const metadataSheet = workbook.getWorksheet("Metadata");
             const validationSheet = workbook.getWorksheet("Validation");
 
-            // TODO: Check malformed template (undefined?)
+            const isProgram = builder.element.type === "program";
+            const rowOffset = builder.rowOffset ?? 0;
 
             let columns;
             let stageColumns;
-            let dataToImport = {
-                dataSet: "",
-                completeDate: "",
-                orgUnit: "",
-                dataValues: [],
-            };
-
-            const isProgram = builder.element.type === "program";
+            let dataToImport = isProgram
+                ? []
+                : {
+                      dataSet: "",
+                      completeDate: "",
+                      orgUnit: "",
+                      dataValues: [],
+                  };
 
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
-                if (rowNumber === 1) stageColumns = row.values;
-                else if (rowNumber === 2) columns = row.values;
+                if (rowNumber <= rowOffset) {
+                } else if (rowNumber === rowOffset + 1) stageColumns = row.values;
+                else if (rowNumber === rowOffset + 2) columns = row.values;
                 else {
                     const result = {
                         dataValues: [],
