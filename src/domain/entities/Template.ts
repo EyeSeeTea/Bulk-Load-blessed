@@ -12,7 +12,16 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
-export interface Template {
+export type Template = GeneratedTemplate;
+
+export interface GeneratedTemplate {
+    id: Id;
+    name: string;
+    rowOffset: number;
+    styleSources: StyleSource[];
+}
+
+export interface CustomTemplate {
     id: Id;
     name: string;
     url?: string;

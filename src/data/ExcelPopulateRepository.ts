@@ -2,15 +2,31 @@ import _ from "lodash";
 import XLSX, { Workbook } from "xlsx-populate";
 import { SheetRef, Template } from "../domain/entities/Template";
 import { Theme, ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository } from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
 import { fromBase64 } from "../utils/files";
 import { promiseMap } from "../webapp/utils/common";
 
 export class ExcelPopulateRepository implements ExcelRepository {
     private workbooks: Record<string, Workbook> = {};
 
-    public async reset(template: Template): Promise<void> {
-        await this.getWorkbook(template, true);
+    public async loadTemplate(template: Template, options: LoadOptions): Promise<void> {
+        const { id } = template;
+        switch (options.type) {
+            case "url": {
+                const response = await fetch(options.url);
+                const data = await response.arrayBuffer();
+                this.workbooks[id] = await XLSX.fromDataAsync(data);
+                break;
+            }
+            case "file": {
+                this.workbooks[id] = await XLSX.fromDataAsync(options.file);
+                break;
+            }
+            default: {
+                this.workbooks[id] = await XLSX.fromBlankAsync();
+                break;
+            }
+        }
     }
 
     public async toBlob(template: Template): Promise<Blob> {
@@ -38,17 +54,9 @@ export class ExcelPopulateRepository implements ExcelRepository {
         });
     }
 
-    private async getWorkbook(template: Template, reload = false) {
-        const { id, url } = template;
-        const loaded = !!this.workbooks[id] && !reload;
-
-        if (!loaded && url) {
-            const response = await fetch(url);
-            const data = await response.arrayBuffer();
-            this.workbooks[id] = await XLSX.fromDataAsync(data);
-        } else if (!loaded) {
-            this.workbooks[id] = await XLSX.fromBlankAsync();
-        }
+    private async getWorkbook(template: Template) {
+        const { id } = template;
+        if (!this.workbooks[id]) throw new Error("Template not loaded");
 
         return this.workbooks[id];
     }

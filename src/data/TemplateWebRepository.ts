@@ -7,7 +7,7 @@ import { TemplateRepository } from "../domain/repositories/TemplateRepository";
 const themeCollectionKey = "themes";
 
 export function getTemplates(): Template[] {
-    const tasks = require.context("./custom-templates", false, /.*\.ts$/);
+    const tasks = require.context("./templates", false, /.*\.ts$/);
     return tasks.keys().map(key => {
         const TemplateClass = tasks(key).default;
         return new TemplateClass();
