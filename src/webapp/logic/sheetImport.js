@@ -120,10 +120,9 @@ export function readSheet(builder) {
 
             // Iterate over all rows that have values in a worksheet
             dataEntrySheet.eachRow((row, rowNumber) => {
-                if (rowNumber <= rowOffset) {
-                } else if (rowNumber === rowOffset + 1) stageColumns = row.values;
+                if (rowNumber === rowOffset + 1) stageColumns = row.values;
                 else if (rowNumber === rowOffset + 2) columns = row.values;
-                else {
+                else if (rowNumber > rowOffset) {
                     const result = {
                         dataValues: [],
                     };
