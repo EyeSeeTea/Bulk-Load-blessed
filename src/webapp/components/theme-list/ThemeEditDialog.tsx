@@ -1,12 +1,10 @@
 import { makeStyles, TextField, Typography } from "@material-ui/core";
-import { ConfirmationDialog, MultiSelector } from "d2-ui-components";
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ConfirmationDialog } from "d2-ui-components";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { toBase64 } from "../../../utils/files";
-import { useAppContext } from "../../contexts/api-context";
 
 interface ThemeEditDialogProps {
     type: "new" | "edit";
@@ -21,11 +19,8 @@ export default function ThemeEditDialog({
     onSave,
     onCancel,
 }: ThemeEditDialogProps) {
-    const { d2 } = useAppContext(); // FIXME: Remove d2 required by MultiSelector (GroupEditor)
     const classes = useStyles();
-
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
-    const [allTemplates, setAllTemplates] = useState<{ value: string; text: string }[]>([]);
 
     const onDrop = useCallback(async ([file]: File[]) => {
         if (!file) return;
@@ -40,14 +35,6 @@ export default function ThemeEditDialog({
 
     const title = type === "edit" ? i18n.t("Edit theme") : i18n.t("New theme");
 
-    useEffect(() => {
-        CompositionRoot.getInstance()
-            .templates.list.execute()
-            .then(templates => {
-                setAllTemplates(templates.map(({ id, name }) => ({ value: id, text: name })));
-            });
-    }, []);
-
     const updateName = (event: ChangeEvent<HTMLInputElement>) => {
         const name = event.target.value;
         updateTheme(theme => theme.setName(name));
@@ -58,10 +45,6 @@ export default function ThemeEditDialog({
             const text = event.target.value;
             updateTheme(theme => theme.updateSection(field, text ? { text } : undefined));
         };
-    };
-
-    const updateTemplates = (templates: string[]) => {
-        updateTheme(theme => theme.setTemplates(templates));
     };
 
     const saveTheme = () => onSave(theme);
@@ -115,18 +98,6 @@ export default function ThemeEditDialog({
                     fullWidth={true}
                     value={theme.sections?.subtitle?.text ?? ""}
                     onChange={updateSection("subtitle")}
-                />
-            </div>
-
-            <div className={classes.group}>
-                <Typography variant="h6">{i18n.t("Templates")}</Typography>
-                <MultiSelector
-                    d2={d2}
-                    ordered={false}
-                    height={200}
-                    onChange={updateTemplates}
-                    options={allTemplates}
-                    selected={theme.templates}
                 />
             </div>
 

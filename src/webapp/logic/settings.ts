@@ -86,7 +86,7 @@ export default class Settings {
             })
             .getData();
 
-        const defaultSettings = CompositionRoot.getInstance().settings.getDefault.execute();
+        const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
 
         const defaultData = {
             models: { dataSet: true, program: true },
@@ -96,9 +96,10 @@ export default class Settings {
             ...defaultSettings,
         };
 
-        const data = await CompositionRoot.getInstance().settings.read.execute<
-            Partial<PersistedData>
-        >(Settings.constantCode, defaultData);
+        const data = await CompositionRoot.attach().settings.read.execute<Partial<PersistedData>>(
+            Settings.constantCode,
+            defaultData
+        );
 
         const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
             userGroups,
@@ -149,7 +150,7 @@ export default class Settings {
         };
 
         try {
-            await CompositionRoot.getInstance().settings.write.execute<PersistedData>(
+            await CompositionRoot.attach().settings.write.execute<PersistedData>(
                 Settings.constantCode,
                 data
             );

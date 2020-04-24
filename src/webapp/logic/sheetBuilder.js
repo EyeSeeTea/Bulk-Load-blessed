@@ -1,5 +1,4 @@
 import * as Excel from "excel4node";
-import { saveAs } from "file-saver";
 import _ from "lodash";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
 import { buildAllPossiblePeriods } from "../utils/periods";
@@ -93,7 +92,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         rowId = 2;
         columnId++;
         validationSheet.cell(rowId++, columnId).string("Periods");
@@ -247,10 +246,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         null,
         this.validations.get("organisationUnits")
     );
-    if (element.type === "program") {
+    if (element.type === "programs") {
         createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Latitude");
         createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Longitude");
-    } else if (element.type === "dataSet") {
+    } else if (element.type === "dataSets") {
         createColumn(
             this.workbook,
             dataEntrySheet,
@@ -271,7 +270,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         );
     }
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         const categoryOptionCombos = [];
         for (const [, value] of metadata) {
             if (value.type === "categoryOptionCombo") {
@@ -401,13 +400,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     }
 };
 
-SheetBuilder.prototype.downloadSheet = async function () {
+SheetBuilder.prototype.toBlob = async function () {
     try {
         const data = await this.workbook.writeToBuffer();
-        const blob = new Blob([data], {
+        return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `${this.builder.element.displayName}.xlsx`);
     } catch (error) {
         console.log("Failed building/downloading template");
         throw error;

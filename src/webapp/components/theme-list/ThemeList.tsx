@@ -39,7 +39,7 @@ export default function ThemeList() {
     const [reloadKey, setReloadKey] = useState(Math.random());
 
     useEffect(() => {
-        CompositionRoot.getInstance().themes.list.execute().then(setThemes);
+        CompositionRoot.attach().themes.list.execute().then(setThemes);
     }, [reloadKey]);
 
     const newTheme = () => {
@@ -52,7 +52,7 @@ export default function ThemeList() {
 
     const saveTheme = async (theme: Theme) => {
         try {
-            const errors = await CompositionRoot.getInstance().themes.save.execute(theme);
+            const errors = await CompositionRoot.attach().themes.save.execute(theme);
             if (errors.length > 0) {
                 snackbar.error(errors.join("\n"));
             } else {
@@ -72,7 +72,7 @@ export default function ThemeList() {
     const deleteThemes = (ids: string[]) => {
         const deleteAction = async () => {
             await promiseMap(ids, id => {
-                return CompositionRoot.getInstance().themes.delete.execute(id);
+                return CompositionRoot.attach().themes.delete.execute(id);
             });
             setReloadKey(Math.random());
         };

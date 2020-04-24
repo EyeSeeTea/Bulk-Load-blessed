@@ -4,7 +4,6 @@ import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
-import PropTypes from "prop-types";
 import React from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../CompositionRoot";
@@ -17,7 +16,7 @@ import { SheetBuilder } from "../logic/sheetBuilder";
 import * as sheetImport from "../logic/sheetImport";
 import { buildPossibleYears } from "../utils/periods";
 import "./App.css";
-import Select from "./select/Select";
+import { Select } from "./select/Select";
 import SettingsComponent from "./settings/SettingsDialog";
 import { TemplateSelector } from "./template-selector/TemplateSelector";
 
@@ -40,26 +39,21 @@ class AppComponent extends React.Component {
         super(props);
 
         this.state = {
-            username: undefined,
+            template: null,
             dataSets: [],
             programs: [],
-            customTemplates: [],
             orgUnitTreeSelected: [],
             orgUnitTreeSelected2: [],
             orgUnitTreeRootIds: [],
-            elementSelectOptions1: [],
             importOrgUnitIds: undefined,
-            selectedProgramOrDataSet1: undefined,
             importObject: undefined,
             importDataSheet: undefined,
             importMessages: [],
             importDataValues: [],
-            model1: undefined,
             startYear: 2010,
             endYear: moment().year(),
             settings: undefined,
             isTemplateGenerationVisible: true,
-            modelOptions: [],
             confirmOnExistingData: undefined,
         };
 
@@ -67,23 +61,18 @@ class AppComponent extends React.Component {
         this.handleOrgUnitTreeClick2 = this.handleOrgUnitTreeClick2.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
         this.handleDataImportClick = this.handleDataImportClick.bind(this);
+        this.onTemplateChange = this.onTemplateChange.bind(this);
         this.onSettingsChange = this.onSettingsChange.bind(this);
         this.onDrop = this.onDrop.bind(this);
     }
 
     async componentDidMount() {
         this.props.loading.show();
-        await Promise.all([this.loadUserInformation(), this.getUserOrgUnits()]);
-        // Load settings once data is already loaded so we can render the objects in single model
+        await this.loadUserInformation();
+        await this.getUserOrgUnits();
         await this.loadSettings();
-        await this.loadCustomTemplates();
-        await this.props.loading.hide();
-    }
 
-    getChildContext() {
-        return {
-            d2: this.props.d2,
-        };
+        await this.props.loading.hide();
     }
 
     loadSettings() {
@@ -92,21 +81,6 @@ class AppComponent extends React.Component {
         return Settings.build(api)
             .then(this.onSettingsChange)
             .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
-    }
-
-    async loadCustomTemplates() {
-        const templates = await CompositionRoot.getInstance().templates.list.execute();
-        const customTemplates = _.flatten(
-            templates.map(({ id, name, themes }) =>
-                themes.length > 0
-                    ? themes.map(theme => ({
-                          value: { id, theme: theme.id },
-                          label: `${name} (${theme.name})`,
-                      }))
-                    : { value: { id }, label: name }
-            )
-        );
-        this.setState({ customTemplates });
     }
 
     loadUserInformation() {
@@ -144,37 +118,38 @@ class AppComponent extends React.Component {
         });
     }
 
-    handleTemplateDownloadClick() {
-        const orgUnits = this.state.orgUnitTreeSelected.map(element =>
-            element.substr(element.lastIndexOf("/") + 1)
-        );
-
-        if (this.state.selectedProgramOrDataSet1 === undefined) return;
-
+    async handleTemplateDownloadClick() {
+        if (!this.state.template) return;
+        const { type, id, theme } = this.state.template;
         this.props.loading.show(true);
 
-        if (this.state.model1 === "customTemplates") {
-            const { id, theme } = this.state.selectedProgramOrDataSet1.value;
-            CompositionRoot.getInstance()
-                .templates.download.execute(id, theme)
-                .then(() => this.props.loading.show(false));
+        if (type === "custom") {
+            await CompositionRoot.attach().templates.downloadCustom.execute(id, theme);
         } else {
-            dhisConnector
-                .getElementMetadata({
-                    d2: this.props.d2,
-                    element: this.state.selectedProgramOrDataSet1,
-                    organisationUnits: orgUnits,
-                })
-                .then(result => {
-                    const template = new SheetBuilder({
-                        ...result,
-                        startYear: this.state.startYear,
-                        endYear: this.state.endYear,
-                    });
+            const orgUnits = this.state.orgUnitTreeSelected.map(element =>
+                element.substr(element.lastIndexOf("/") + 1)
+            );
 
-                    template.downloadSheet().then(() => this.props.loading.show(false));
-                });
+            const element = await dhisConnector.getElement(this.props.d2, type, id);
+
+            const result = await dhisConnector.getElementMetadata({
+                d2: this.props.d2,
+                element: { ...element, endpoint: type, type },
+                organisationUnits: orgUnits,
+            });
+
+            const template = new SheetBuilder({
+                ...result,
+                startYear: this.state.startYear,
+                endYear: this.state.endYear,
+            });
+
+            const name = element.displayName ?? element.name;
+            const file = await template.toBlob();
+            await CompositionRoot.attach().templates.downloadGenerated.execute(name, file, theme);
         }
+
+        this.props.loading.show(false);
     }
 
     async onDrop(files) {
@@ -188,7 +163,8 @@ class AppComponent extends React.Component {
         }
 
         try {
-            const info = await sheetImport.getBasicInfoFromSheet(file, { dataSets, programs });
+            // TODO: AUTO_GEN_OFFSET
+            const info = await sheetImport.getBasicInfoFromSheet(file, { dataSets, programs }, 4);
             const { object, dataValues } = info;
 
             let importOrgUnitIds = undefined;
@@ -246,7 +222,6 @@ class AppComponent extends React.Component {
                 organisationUnits: orgUnits,
             })
             .then(result => {
-                console.log({ result });
                 if (!showOrgUnitsOnGeneration) {
                     const orgUnit = result.organisationUnits[0];
                     if (!orgUnit)
@@ -266,6 +241,8 @@ class AppComponent extends React.Component {
                     d2: this.props.d2,
                     file: this.state.importDataSheet,
                     useBuilderOrgUnits: !showOrgUnitsOnGeneration,
+                    // TODO: AUTO_GEN_OFFSET
+                    rowOffset: 4,
                 });
             })
             .then(async data => {
@@ -342,45 +319,15 @@ class AppComponent extends React.Component {
     }
 
     onSettingsChange(settings) {
-        const isTemplateGenerationVisible = settings.isTemplateGenerationVisible();
-
-        const modelOptions = _.compact([
-            settings.isModelEnabled("dataSet") && {
-                value: "dataSets",
-                label: this.getNameForModel("dataSet"),
-            },
-            settings.isModelEnabled("program") && {
-                value: "programs",
-                label: this.getNameForModel("program"),
-            },
-            {
-                value: "customTemplates",
-                label: i18n.t("Custom"),
-            },
-        ]);
-
-        const shouldResetModel = this.state.modelOptions.length !== modelOptions.length;
-        const model1 = shouldResetModel ? undefined : this.state.model1;
-        if (shouldResetModel) this.handleModelChange1(modelOptions[0]);
-
         this.setState({
             settings,
-            isTemplateGenerationVisible,
-            modelOptions,
-            model1,
+            isTemplateGenerationVisible: settings.isTemplateGenerationVisible(),
             importObject: undefined,
         });
     }
 
-    handleModelChange1 = selectedOption => {
-        this.setState({
-            model1: selectedOption.value,
-            elementSelectOptions1: this.state[selectedOption.value],
-        });
-    };
-
-    handleElementChange1 = selectedOption => {
-        this.setState({ selectedProgramOrDataSet1: selectedOption });
+    onTemplateChange = template => {
+        this.setState({ template });
     };
 
     handleStartYear = selectedOption => {
@@ -440,15 +387,9 @@ class AppComponent extends React.Component {
                 >
                     <h1>{i18n.t("Template Generation")}</h1>
 
-                    <TemplateSelector
-                        action={i18n.t("export")}
-                        onModelChange={this.handleModelChange1}
-                        onObjectChange={this.handleElementChange1}
-                        objectOptions={this.state.elementSelectOptions1}
-                        modelOptions={this.state.modelOptions}
-                    />
+                    <TemplateSelector settings={settings} onChange={this.onTemplateChange} />
 
-                    {this.state.model1 === "dataSets" && (
+                    {this.state.template?.type === "dataSets" && (
                         <div
                             className="row"
                             style={{
@@ -486,7 +427,7 @@ class AppComponent extends React.Component {
                     )}
                     {!_.isEmpty(this.state.orgUnitTreeRootIds) ? (
                         settings.showOrgUnitsOnGeneration &&
-                        this.state.model1 !== "customTemplates" ? (
+                        this.state.template?.type !== "custom" ? (
                             <OrgUnitsSelector
                                 api={this.props.api}
                                 onChange={this.handleOrgUnitTreeClick}
@@ -648,10 +589,6 @@ class AppComponent extends React.Component {
         );
     }
 }
-
-AppComponent.childContextTypes = {
-    d2: PropTypes.object,
-};
 
 const useStyles = makeStyles(styles);
 

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-04-20T16:41:39.130Z\n"
-"PO-Revision-Date: 2020-04-20T16:41:39.130Z\n"
+"POT-Creation-Date: 2020-04-24T06:44:07.419Z\n"
+"PO-Revision-Date: 2020-04-24T06:44:07.419Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -44,9 +44,6 @@ msgstr ""
 msgid "Program"
 msgstr ""
 
-msgid "Custom"
-msgstr ""
-
 msgid "Existing data values"
 msgstr ""
 
@@ -63,9 +60,6 @@ msgid "Cancel"
 msgstr ""
 
 msgid "Template Generation"
-msgstr ""
-
-msgid "export"
 msgstr ""
 
 msgid "Start Year"
@@ -119,13 +113,19 @@ msgstr ""
 msgid "User groups with access to Settings"
 msgstr ""
 
+msgid "Custom"
+msgstr ""
+
 msgid "elements"
 msgstr ""
 
 msgid "Model"
 msgstr ""
 
-msgid "Select {{element}} to {{action}}..."
+msgid "Select {{elementLabel}} to export..."
+msgstr ""
+
+msgid "Theme"
 msgstr ""
 
 msgid "Edit theme"
@@ -150,9 +150,6 @@ msgid "Title text"
 msgstr ""
 
 msgid "Subtitle text"
-msgstr ""
-
-msgid "Templates"
 msgstr ""
 
 msgid "Logo"

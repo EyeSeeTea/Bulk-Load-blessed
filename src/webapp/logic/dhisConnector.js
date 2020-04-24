@@ -56,8 +56,24 @@ export function getUserInformation(builder) {
     });
 }
 
+export function getElement(d2, endpoint, id) {
+    return new Promise(function (resolve, reject) {
+        const baseUrl = d2.Api.getApi().baseUrl;
+        axios
+            .get(
+                `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value]categoryCombo,dataSetElements,sections,periodType,programStages`,
+                { withCredentials: true }
+            )
+            .then(({ data }) => {
+                resolve(data);
+            })
+            .catch(reason => {
+                reject(reason);
+            });
+    });
+}
+
 /**
- * Get User Information
  * @param builder:
  *      - d2: DHIS2 Library
  *      - element: Element to be parsed
@@ -119,7 +135,6 @@ export function getElementMetadata(builder) {
 }
 
 /**
- * Import data to DHIS2 with a dryRun strategy
  * @param builder
  *      - d2: DHIS2 Library
  *      - element: Element where import

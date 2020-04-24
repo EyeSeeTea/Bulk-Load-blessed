@@ -1,16 +1,17 @@
-import { Theme } from "../entities/Theme";
 import { TemplateRepository } from "../repositories/TemplateRepository";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 
 export class ListTemplatesUseCase {
-    constructor(private templateRepository: TemplateRepository) {}
+    constructor(
+        private instance: InstanceRepository,
+        private templateRepository: TemplateRepository
+    ) {}
 
-    public async execute(): Promise<{ id: string; name: string; themes: Theme[] }[]> {
-        const templates = this.templateRepository.listTemplates();
+    public async execute() {
+        const dataSets = await this.instance.getDataSets();
+        const programs = await this.instance.getPrograms();
         const themes = await this.templateRepository.listThemes();
-        return templates.map(({ id, name }) => ({
-            id,
-            name,
-            themes: themes.filter(({ templates }) => templates.includes(id)),
-        }));
+
+        return { dataSets, programs, custom: [], themes };
     }
 }
