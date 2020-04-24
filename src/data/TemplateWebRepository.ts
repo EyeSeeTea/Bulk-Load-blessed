@@ -25,7 +25,7 @@ export class TemplateWebRepository implements TemplateRepository {
         return this.templates.map(({ id, name }) => ({ id, name }));
     }
 
-    public async getTemplate(templateId: Id): Promise<Template> {
+    public getTemplate(templateId: Id): Template {
         const template = this.templates.find(({ id }) => id === templateId);
         if (!template) throw new Error("Attempt to read from an invalid template");
         else return template;

@@ -217,8 +217,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     const dataEntrySheet = this.dataEntrySheet;
 
     // Add cells for themes
-    const sectionRow = 5;
-    const dataElementsRow = 6;
+    const sectionRow = 6;
+    const dataElementsRow = 7;
 
     // Hide theme rows by default
     for (let row = 1; row < sectionRow; row++) {
@@ -231,7 +231,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     dataEntrySheet.row(dataElementsRow).setHeight(50);
 
     // Add template version
-    dataEntrySheet.cell(sectionRow, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+    dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;

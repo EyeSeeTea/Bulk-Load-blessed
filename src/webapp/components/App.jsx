@@ -163,8 +163,14 @@ class AppComponent extends React.Component {
         }
 
         try {
-            // TODO: AUTO_GEN_OFFSET
-            const info = await sheetImport.getBasicInfoFromSheet(file, { dataSets, programs }, 4);
+            const id = await sheetImport.getVersion(file);
+            const { rowOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+
+            const info = await sheetImport.getBasicInfoFromSheet(
+                file,
+                { dataSets, programs },
+                rowOffset
+            );
             const { object, dataValues } = info;
 
             let importOrgUnitIds = undefined;
@@ -199,9 +205,7 @@ class AppComponent extends React.Component {
         }
     }
 
-    handleDataImportClick() {
-        // TODO: Missing options error checking
-        // TODO: Add validation error message
+    async handleDataImportClick() {
         const { api } = this.props;
 
         if (!this.state.importObject) return;
@@ -214,53 +218,51 @@ class AppComponent extends React.Component {
             path.substr(path.lastIndexOf("/") + 1)
         );
 
-        this.props.loading.show(true);
-        dhisConnector
-            .getElementMetadata({
+        try {
+            this.props.loading.show(true);
+            const result = await dhisConnector.getElementMetadata({
                 d2: this.props.d2,
                 element: this.state.importObject,
                 organisationUnits: orgUnits,
-            })
-            .then(result => {
-                if (!showOrgUnitsOnGeneration) {
-                    const orgUnit = result.organisationUnits[0];
-                    if (!orgUnit)
-                        throw new Error(i18n.t("Select a organisation units to import data"));
-                    const dataSetsForElement = orgUnit.dataSets.filter(
-                        e => e.id === result.element.id
-                    );
-
-                    if (_.isEmpty(dataSetsForElement))
-                        throw new Error(
-                            i18n.t("Selected organisation unit is not associated with the dataset")
-                        );
-                }
-
-                return sheetImport.readSheet({
-                    ...result,
-                    d2: this.props.d2,
-                    file: this.state.importDataSheet,
-                    useBuilderOrgUnits: !showOrgUnitsOnGeneration,
-                    // TODO: AUTO_GEN_OFFSET
-                    rowOffset: 4,
-                });
-            })
-            .then(async data => {
-                const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
-                const info = { data, dataValues };
-
-                if (_.isEmpty(dataValues)) {
-                    this.performImport(info);
-                } else {
-                    this.props.loading.show(false);
-                    this.setState({ confirmOnExistingData: info });
-                }
-            })
-            .catch(reason => {
-                this.props.loading.show(false);
-                console.error(reason);
-                this.props.snackbar.error(reason.message || reason.toString());
             });
+
+            if (!showOrgUnitsOnGeneration) {
+                const orgUnit = result.organisationUnits[0];
+                if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
+                const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
+
+                if (_.isEmpty(dataSetsForElement)) {
+                    throw new Error(
+                        i18n.t("Selected organisation unit is not associated with the dataset")
+                    );
+                }
+            }
+
+            const id = await sheetImport.getVersion(this.state.importDataSheet);
+            const { rowOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+
+            const data = await sheetImport.readSheet({
+                ...result,
+                d2: this.props.d2,
+                file: this.state.importDataSheet,
+                useBuilderOrgUnits: !showOrgUnitsOnGeneration,
+                rowOffset,
+            });
+
+            const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
+            const info = { data, dataValues };
+
+            if (_.isEmpty(dataValues)) {
+                this.performImport(info);
+            } else {
+                this.setState({ confirmOnExistingData: info });
+            }
+        } catch (reason) {
+            console.error(reason);
+            this.props.snackbar.error(reason.message || reason.toString());
+        }
+
+        this.props.loading.show(false);
     }
 
     performImport(info) {

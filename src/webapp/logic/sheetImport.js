@@ -41,7 +41,7 @@ export async function getBasicInfoFromSheet(file, objectsByType, rowOffset) {
     } else {
         const dbObject =
             _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
-        checkVersion(dataEntrySheet, dbObject);
+        await checkVersion(file, dbObject);
         return { object: dbObject, dataValues: getDataValues(object, dataEntrySheet, rowOffset) };
     }
 }
@@ -250,14 +250,21 @@ function parseMetadataId(metadataSheet, metadataName) {
     return result;
 }
 
-function checkVersion(dataEntrySheet, dbObject) {
-    if (!dbObject) return true;
+export async function getVersion(file) {
+    const workbook = await getWorkbook(file);
+    const dataEntrySheet = workbook.getWorksheet("Data Entry");
 
     const cellValue = dataEntrySheet.getCell("A1").value || "";
-    const sheetVersion = cellValue.replace(/^.*?:/, "").trim(); // Version: 1.2.3
-    const dbVersion = getObjectVersion(dbObject) || "";
+    return cellValue.replace(/^.*?:/, "").trim();
+}
 
-    if (sheetVersion === dbVersion) {
+async function checkVersion(file, dbObject) {
+    if (!dbObject) return true;
+
+    const sheetVersion = await getVersion(file);
+    const dbVersion = getObjectVersion(dbObject);
+
+    if (!dbVersion || sheetVersion === dbVersion) {
         return true;
     } else {
         const msg = i18n.t(

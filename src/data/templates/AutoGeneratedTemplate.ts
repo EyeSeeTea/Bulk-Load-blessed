@@ -4,7 +4,7 @@ export default class implements GeneratedTemplate {
     public readonly id = "AUTO_v0";
     public readonly name = "Auto-generated template";
 
-    public readonly rowOffset = 4;
+    public readonly rowOffset = 5;
 
     public readonly styleSources: StyleSource[] = [
         {

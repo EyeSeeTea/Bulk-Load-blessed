@@ -14,6 +14,7 @@ import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadGeneratedTemplateUseCase } from "./domain/usecases/DownloadGeneratedTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
+import { GetTemplateInfoUseCase } from "./domain/usecases/GetTemplateInfoUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
@@ -59,6 +60,7 @@ export class CompositionRoot {
 
     public get templates() {
         return {
+            getInfo: new GetTemplateInfoUseCase(this.templateManager),
             downloadGenerated: new DownloadGeneratedTemplateUseCase(
                 this.templateManager,
                 this.excelReader
