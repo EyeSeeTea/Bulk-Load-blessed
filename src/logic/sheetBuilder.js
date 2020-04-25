@@ -2,7 +2,7 @@ import * as Excel from "excel4node";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
-import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { baseStyle, createColumn, groupStyle, protectedSheet, transparentFontStyle } from "../utils/excel";
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
@@ -309,25 +309,38 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
         
         _.forOwn(sections, (ownSection, categoryComboId) => {
             let categoryCombo = metadata.get(categoryComboId);
-            try {
-                if (categoryCombo.code !== "default") {
+                if (categoryCombo !== undefined) {
                     let dataElementLookup = _.filter(element.dataSetElements, {
                         categoryCombo: { id: categoryComboId },
                     });
+
+                    console.log({dataElementLookup});
+                    
                     _.forEach(dataElementLookup, lookupResult => {
                         let firstColumnId = columnId;
 
                         let dataElementId = lookupResult.dataElement.id;
                         let sectionCategoryOptionCombos = sections[categoryComboId];
                         _.forEach(sectionCategoryOptionCombos, dataValue => {
-                            dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
                             dataEntrySheet
-                                .cell(2, columnId)
-                                .formula("_" + dataValue.id)
-                                .style(groupStyle(groupId));
+                                .column(columnId)
+                                .setWidth(dataValue.name.length / 2.5 + 10);
+                            if (categoryCombo.code !== "default")
+                                dataEntrySheet
+                                    .cell(2, columnId)
+                                    .formula("_" + dataValue.id)
+                                    .style(groupStyle(groupId));
+                            else
+                                dataEntrySheet
+                                    .cell(2, columnId)
+                                    .formula("_" + dataValue.id)
+                                    .style(groupStyle(groupId))
+                                    .style(transparentFontStyle(groupId));
 
                             if (dataValue.description !== undefined) {
-                                dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
+                                dataEntrySheet
+                                    .cell(2, columnId)
+                                    .comment(dataValue.description, {
                                     height: "100pt",
                                     width: "160pt",
                                 });
@@ -351,10 +364,30 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                         groupId++;
                     });
                 }
-            } catch(error) {
-                console.log("Failed building/downloading template");
-                console.error(error);
+        });
+        _.forEach(element.dataSetElements, elem => {
+            if (!elem.hasOwnProperty("categoryCombo")) {
+                if (metadata.get(elem.dataElement.id).formName === undefined)
+                    dataEntrySheet
+                    .column(columnId)
+                    .setWidth(metadata.get(elem.dataElement.id).name.length / 2.5 + 10);
+                else
+                    dataEntrySheet
+                        .column(columnId)
+                        .setWidth(metadata.get(elem.dataElement.id).formName.length / 2.5 + 10);
+                dataEntrySheet
+                    .cell(1, columnId)
+                    .formula("_" + elem.dataElement.id)
+                    .style(groupStyle(groupId));
                 
+                
+                dataEntrySheet
+                    .cell(2, columnId)
+                    .formula("_" + element.categoryCombo.id)
+                    .style(groupStyle(groupId))
+                    .style(transparentFontStyle(groupId));
+                groupId++;
+                columnId++;
             }
         });
     } else {

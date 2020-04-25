@@ -90,3 +90,11 @@ export function groupStyle(groupId) {
         },
     };
 }
+
+export function transparentFontStyle(groupId) {
+    return {
+        font: {
+            color: colors[groupId % colors.length],
+        }
+    };
+}
