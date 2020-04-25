@@ -312,10 +312,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                 if (categoryCombo !== undefined) {
                     let dataElementLookup = _.filter(element.dataSetElements, {
                         categoryCombo: { id: categoryComboId },
-                    });
-
-                    console.log({dataElementLookup});
-                    
+                    });                    
                     _.forEach(dataElementLookup, lookupResult => {
                         let firstColumnId = columnId;
 
