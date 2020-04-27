@@ -139,6 +139,25 @@ SheetBuilder.prototype.fillValidationSheet = function () {
             )}$${rowId}`
         );
     });
+
+    rowId = 2;
+    columnId++;
+    validationSheet.cell(rowId++, columnId).string("Boolean");
+    validationSheet.cell(rowId++, columnId).formula("_true");
+    validationSheet.cell(rowId++, columnId).formula("_false");
+    this.validations.set(
+        "BOOLEAN",
+        `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
+    );
+
+    rowId = 2;
+    columnId++;
+    validationSheet.cell(rowId++, columnId).string("True only");
+    validationSheet.cell(rowId++, columnId).formula("_true");
+    this.validations.set(
+        "TRUE_ONLY",
+        `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
+    );
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
@@ -200,6 +219,24 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
         rowId++;
     });
+
+    metadataSheet.cell(rowId, 1).string("true");
+    metadataSheet.cell(rowId, 2).string("boolean");
+    metadataSheet.cell(rowId, 3).string("Yes");
+    this.workbook.definedNameCollection.addDefinedName({
+        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        name: "_true",
+    });
+    rowId++;
+
+    metadataSheet.cell(rowId, 1).string("false");
+    metadataSheet.cell(rowId, 2).string("boolean");
+    metadataSheet.cell(rowId, 3).string("No");
+    this.workbook.definedNameCollection.addDefinedName({
+        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        name: "_false",
+    });
+    rowId++;
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function () {
@@ -334,7 +371,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
                     const dataElement = metadata.get(dataElementT.id);
-                    const validation = dataElement.optionSet ? dataElement.optionSet.id : null;
+                    const validation = dataElement.optionSet
+                        ? dataElement.optionSet.id
+                        : dataElement.valueType;
                     createColumn(
                         this.workbook,
                         dataEntrySheet,

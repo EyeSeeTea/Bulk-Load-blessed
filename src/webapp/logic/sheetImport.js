@@ -171,7 +171,7 @@ export function readSheet(builder) {
                         if (isProgram && colNumber > 4) {
                             // TODO: Do not hardcode previous entries
                             const id = columns[colNumber].formula.substr(1);
-                            let cellValue = cell.value.toString();
+                            let cellValue = cell.value?.text ?? cell.value?.toString();
 
                             // TODO: Check different data types
                             const dataValue = builder.elementMetadata.get(id);
@@ -186,6 +186,11 @@ export function readSheet(builder) {
                                 });
                             } else if (dataValue.valueType === "DATE") {
                                 cellValue = dateFormat(new Date(cellValue), "yyyy-mm-dd");
+                            } else if (
+                                dataValue.valueType === "BOOLEAN" ||
+                                dataValue.valueType === "TRUE_ONLY"
+                            ) {
+                                cellValue = cellValue === "true" || cellValue === "Yes";
                             }
                             result.dataValues.push({ dataElement: id, value: cellValue });
                         } else if (!isProgram && colNumber > 3) {
