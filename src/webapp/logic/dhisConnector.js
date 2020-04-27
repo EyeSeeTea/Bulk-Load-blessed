@@ -14,7 +14,6 @@ import axios from "axios";
 export function getUserInformation(builder) {
     return new Promise(function (resolve, reject) {
         const result = {
-            username: builder.d2.currentUser.username,
             dataSets: [],
             programs: [],
         };
@@ -32,11 +31,9 @@ export function getUserInformation(builder) {
                 programCollection.forEach(program => elements.push(program.id));
                 const API_USER_PROGRAMS_DATASETS =
                     API_BASE_URL +
-                    "/metadata.json?fields=id,displayName,organisationUnits[id,path]," +
+                    "/metadata.json?fields=id,name,displayName," +
                     "attributeValues[attribute[code],value]" +
-                    "categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[" +
-                    elements.toString() +
-                    "]";
+                    `&filter=id:in:[${elements.toString()}]`;
                 // Parse API for programs and dataSets information
                 return getJSON(builder.d2, API_USER_PROGRAMS_DATASETS);
             })
