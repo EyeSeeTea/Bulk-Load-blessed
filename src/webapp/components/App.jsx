@@ -71,16 +71,17 @@ class AppComponent extends React.Component {
         await this.loadUserInformation();
         await this.getUserOrgUnits();
         await this.loadSettings();
-
         await this.props.loading.hide();
     }
 
-    loadSettings() {
+    async loadSettings() {
         const { api, snackbar } = this.props;
-
-        return Settings.build(api)
-            .then(this.onSettingsChange)
-            .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
+        try {
+            const settings = await Settings.build(api);
+            this.onSettingsChange(settings);
+        } catch (err) {
+            snackbar.error(`Cannot load settings: ${err.message || err.toString()}`);
+        }
     }
 
     loadUserInformation() {
