@@ -4,6 +4,8 @@ import {
     ObjectsTable,
     TableAction,
     TableColumn,
+    TableSelection,
+    TableState,
     useSnackbar,
 } from "d2-ui-components";
 import React, { ReactNode, useEffect, useState } from "react";
@@ -33,6 +35,7 @@ export default function ThemeList() {
     const snackbar = useSnackbar();
 
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [selection, setSelection] = useState<TableSelection[]>([]);
     const rows = buildThemeDetails(themes);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
@@ -75,6 +78,7 @@ export default function ThemeList() {
                 return CompositionRoot.attach().themes.delete.execute(id);
             });
             setReloadKey(Math.random());
+            setSelection([]);
         };
 
         setWarningDialog({
@@ -112,6 +116,10 @@ export default function ThemeList() {
         },
     ];
 
+    const onTableChange = (state: TableState<ThemeDetail>) => {
+        setSelection(state.selection);
+    };
+
     return (
         <React.Fragment>
             {!!warningDialog && (
@@ -141,6 +149,8 @@ export default function ThemeList() {
                 rows={rows}
                 columns={columns}
                 actions={actions}
+                selection={selection}
+                onChange={onTableChange}
                 filterComponents={
                     <Tooltip title={i18n.t("Add")}>
                         <IconButton onClick={newTheme}>
