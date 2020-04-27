@@ -80,13 +80,6 @@ export default function ThemeEditDialog({
                 />
                 <TextField
                     className={classes.text}
-                    label={i18n.t("Footer text")}
-                    fullWidth={true}
-                    value={theme.sections?.footer?.text ?? ""}
-                    onChange={updateSection("footer")}
-                />
-                <TextField
-                    className={classes.text}
                     label={i18n.t("Title text")}
                     fullWidth={true}
                     value={theme.sections?.title?.text ?? ""}
@@ -98,6 +91,13 @@ export default function ThemeEditDialog({
                     fullWidth={true}
                     value={theme.sections?.subtitle?.text ?? ""}
                     onChange={updateSection("subtitle")}
+                />
+                <TextField
+                    className={classes.text}
+                    label={i18n.t("Footer text")}
+                    fullWidth={true}
+                    value={theme.sections?.footer?.text ?? ""}
+                    onChange={updateSection("footer")}
                 />
             </div>
 
