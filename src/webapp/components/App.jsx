@@ -530,7 +530,8 @@ class AppComponent extends React.Component {
                             {importObject.id})
                             {importDataValues.map((group, idx) => (
                                 <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                                    {group.period}: {group.count} {i18n.t("data values")}
+                                    {moment(group.period).format("DD/MM/YYYY")}: {group.count}{" "}
+                                    {i18n.t("data values")}
                                 </li>
                             ))}
                         </div>
