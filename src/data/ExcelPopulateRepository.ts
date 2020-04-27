@@ -64,7 +64,7 @@ export class ExcelPopulateRepository implements ExcelRepository {
     private applyThemeToRange(workbook: Workbook, source: SheetRef, style: ThemeStyle): void {
         const { sheet } = source;
         const { text, bold, italic, fontSize, fontColor, fillColor } = style;
-        const cellStyle = _.omitBy(
+        const textStyle = _.omitBy(
             {
                 bold,
                 italic,
@@ -80,12 +80,21 @@ export class ExcelPopulateRepository implements ExcelRepository {
                 : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
         try {
-            workbook
-                .sheet(sheet)
-                .range(range?.address() ?? "")
-                .merged(true)
-                .style(cellStyle)
-                .value(text);
+            if (text && range) {
+                //@ts-ignore
+                const richText = new XLSX.RichText();
+                richText.add(text, textStyle);
+
+                workbook
+                    .sheet(sheet)
+                    .range(range.address() ?? "")
+                    .merged(true)
+                    .style({ verticalAlignment: "center" })
+                    .value(richText);
+
+                const height = text.split("\n").length * 22;
+                range.cells().map(([cell]) => cell.row().hidden(false).height(height));
+            }
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }

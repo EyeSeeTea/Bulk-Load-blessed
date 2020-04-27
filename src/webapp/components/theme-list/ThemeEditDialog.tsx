@@ -75,6 +75,7 @@ export default function ThemeEditDialog({
                     className={classes.text}
                     label={i18n.t("Header text")}
                     fullWidth={true}
+                    multiline={true}
                     value={theme.sections?.header?.text ?? ""}
                     onChange={updateSection("header")}
                 />
@@ -82,6 +83,7 @@ export default function ThemeEditDialog({
                     className={classes.text}
                     label={i18n.t("Title text")}
                     fullWidth={true}
+                    multiline={true}
                     value={theme.sections?.title?.text ?? ""}
                     onChange={updateSection("title")}
                 />
@@ -89,6 +91,7 @@ export default function ThemeEditDialog({
                     className={classes.text}
                     label={i18n.t("Subtitle text")}
                     fullWidth={true}
+                    multiline={true}
                     value={theme.sections?.subtitle?.text ?? ""}
                     onChange={updateSection("subtitle")}
                 />
@@ -96,6 +99,7 @@ export default function ThemeEditDialog({
                     className={classes.text}
                     label={i18n.t("Footer text")}
                     fullWidth={true}
+                    multiline={true}
                     value={theme.sections?.footer?.text ?? ""}
                     onChange={updateSection("footer")}
                 />
