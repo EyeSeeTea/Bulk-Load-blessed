@@ -11,7 +11,7 @@ export default class implements GeneratedTemplate {
             section: "header",
             source: {
                 type: "range",
-                ref: "D1:M1",
+                ref: "D2:I2",
                 sheet: "Data Entry",
             },
         },
@@ -19,7 +19,7 @@ export default class implements GeneratedTemplate {
             section: "title",
             source: {
                 type: "range",
-                ref: "D2:M2",
+                ref: "D3:I3",
                 sheet: "Data Entry",
             },
         },
@@ -27,7 +27,7 @@ export default class implements GeneratedTemplate {
             section: "subtitle",
             source: {
                 type: "range",
-                ref: "D3:M3",
+                ref: "D4:I4",
                 sheet: "Data Entry",
             },
         },
@@ -35,7 +35,7 @@ export default class implements GeneratedTemplate {
             section: "footer",
             source: {
                 type: "range",
-                ref: "D4:M4",
+                ref: "D5:I5",
                 sheet: "Data Entry",
             },
         },
@@ -43,7 +43,7 @@ export default class implements GeneratedTemplate {
             section: "logo",
             source: {
                 type: "range",
-                ref: "A1:C4",
+                ref: "A2:C5",
                 sheet: "Data Entry",
             },
         },
