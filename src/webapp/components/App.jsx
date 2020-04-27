@@ -138,10 +138,14 @@ class AppComponent extends React.Component {
                 organisationUnits: orgUnits,
             });
 
+            const response = await fetch("img/WHO.png");
+            const logo = await response.arrayBuffer();
+
             const template = new SheetBuilder({
                 ...result,
                 startYear: this.state.startYear,
                 endYear: this.state.endYear,
+                logo,
             });
 
             const name = element.displayName ?? element.name;

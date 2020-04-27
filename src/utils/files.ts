@@ -12,3 +12,12 @@ export const fromBase64 = async (string: string): Promise<File> => {
     const buffer = await response.arrayBuffer();
     return new File([buffer], "Logo");
 };
+
+export function toBuffer(arrayBuffer: ArrayBuffer) {
+    const buf = Buffer.alloc(arrayBuffer.byteLength);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < buf.length; ++i) {
+        buf[i] = view[i];
+    }
+    return buf;
+}

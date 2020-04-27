@@ -1,5 +1,6 @@
 import * as Excel from "excel4node";
 import _ from "lodash";
+import { toBuffer } from "../../utils/files";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
@@ -250,7 +251,7 @@ SheetBuilder.prototype.getVersion = function () {
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function () {
-    const { element, elementMetadata: metadata } = this.builder;
+    const { element, elementMetadata: metadata, logo } = this.builder;
     const dataEntrySheet = this.dataEntrySheet;
 
     // Add cells for themes
@@ -260,6 +261,28 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     // Hide theme rows by default
     for (let row = 1; row < sectionRow; row++) {
         dataEntrySheet.row(row).hide();
+    }
+
+    if (logo) {
+        dataEntrySheet.addImage({
+            image: toBuffer(logo),
+            type: "picture",
+            position: {
+                type: "twoCellAnchor",
+                from: {
+                    col: 1,
+                    colOff: 0,
+                    row: 2,
+                    rowOff: 0,
+                },
+                to: {
+                    col: 3,
+                    colOff: 0,
+                    row: 4,
+                    rowOff: 0,
+                },
+            },
+        });
     }
 
     // Freeze and format column titles
@@ -338,12 +361,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 .style(groupStyle(groupId));
 
                             if (dataValue.description !== undefined) {
-                                dataEntrySheet
-                                    .cell(dataElementsRow, columnId)
-                                    .comment(dataValue.description, {
-                                        height: "100pt",
-                                        width: "160pt",
-                                    });
+                                dataEntrySheet.cell(dataElementsRow, columnId);
                             }
 
                             columnId++;
@@ -416,12 +434,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
 
                     if (dataElement.description !== undefined) {
-                        dataEntrySheet
-                            .cell(dataElementsRow, columnId)
-                            .comment(dataElement.description, {
-                                height: "100pt",
-                                width: "160pt",
-                            });
+                        dataEntrySheet.cell(dataElementsRow, columnId);
                     }
 
                     columnId++;
