@@ -105,9 +105,6 @@ export class ExcelPopulateRepository implements ExcelRepository {
         const [from, to] = source.type === "range" ? String(ref).split(":") : [ref, ref];
 
         // @ts-ignore: This part is not typed (we need to create an extension)
-        const drawings = workbook.sheet(sheet).drawings();
-        const name = drawings[0]?.name();
-        // @ts-ignore: This part is not typed (we need to create an extension)
-        workbook.sheet(sheet).drawings(name).image(file).from(from).to(to);
+        workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
     }
 }
