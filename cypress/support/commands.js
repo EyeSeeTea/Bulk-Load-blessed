@@ -36,7 +36,7 @@ Cypress.Commands.add("login", (username, _password = null) => {
 
     const password = _password || dhis2Auth[username];
 
-    cy.log("Login", { username, password });
+    cy.log("Login", { username });
     cy.request({
         method: "GET",
         url: `${externalUrl}/api/me`,
@@ -87,6 +87,14 @@ Cypress.Commands.add("selectRowInTableByText", text => {
     cy.get("table").contains(text).click();
 });
 
+Cypress.Commands.add("checkRowCheckboxByText", text => {
+    cy.get("table").contains(text).parent().find("input").click();
+});
+
+Cypress.Commands.add("selectFilterInTable", (filterLabel, filterValue) => {
+    cy.selectInDropdown("#app", filterLabel, filterValue);
+});
+
 Cypress.Commands.add("selectInDropdown", (containerSelector, label, option) => {
     const parent = containerSelector ? cy.get(containerSelector) : cy;
 
@@ -95,7 +103,7 @@ Cypress.Commands.add("selectInDropdown", (containerSelector, label, option) => {
     cy.get('[role="listbox"]').contains(option).click();
 });
 
-Cypress.Commands.add("loadPage", (path = appUrl) => {
+Cypress.Commands.add("loadPage", path => {
     cy.visit(path);
     cy.get("#app", { log: false, timeout: 20000 }); // Waits for the page to fully load
 });

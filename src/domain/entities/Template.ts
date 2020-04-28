@@ -1,44 +1,33 @@
-import { AggregatedPackage } from "./AggregatedPackage";
-import { EventsPackage } from "./EventsPackage";
 import { Id } from "./ReferenceObject";
+import { ThemeableSections, ImageSections } from "./Theme";
 
 type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export type RefType = "row" | "column" | "cell";
-export type SheetRef = RowRef | ColumnRef | CellRef;
+export type RefType = "row" | "column" | "cell" | "range";
+export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
 
-export type TemplateType = "dataSet" | "program";
-export type Template = DataSetTemplate | ProgramTemplate;
+export type StyleSource = {
+    section: ThemeableSections | ImageSections;
+    source: CellRef | RangeRef;
+};
 
-export interface GenericTemplate {
+export interface Template {
     id: Id;
     name: string;
     url?: string;
-    type: TemplateType;
     dataSources: DataSource[];
-    initialize(): Promise<void>;
-    parseData(file: File): AggregatedPackage | EventsPackage;
-    toBlob(): Promise<Blob>;
-}
-
-export interface DataSetTemplate extends GenericTemplate {
-    type: "dataSet";
-    parseData(file: File): AggregatedPackage;
-}
-
-export interface ProgramTemplate extends GenericTemplate {
-    type: "program";
-    parseData(file: File): EventsPackage;
+    styleSources: StyleSource[];
 }
 
 export interface GenericSheetRef {
     type: RefType;
     ref: string | number;
+    sheet: string | number;
 }
 
 export interface RowRef extends GenericSheetRef {
-    type: "cell";
+    type: "row";
     ref: number;
 }
 
@@ -49,6 +38,11 @@ export interface ColumnRef extends GenericSheetRef {
 
 export interface CellRef extends GenericSheetRef {
     type: "cell";
+    ref: string;
+}
+
+export interface RangeRef extends GenericSheetRef {
+    type: "range";
     ref: string;
 }
 
