@@ -1,3 +1,4 @@
+import { DataPackage } from "../entities/DataPackage";
 import { Template } from "../entities/Template";
 import { Theme } from "../entities/Theme";
 
@@ -22,5 +23,6 @@ export interface FileLoadOptions extends BaseLoadOptions {
 export interface ExcelRepository {
     loadTemplate(template: Template, options: LoadOptions): Promise<void>;
     applyTheme(template: Template, theme: Theme): Promise<void>;
+    populateTemplate(template: Template, payload: DataPackage[]): Promise<void>;
     toBlob(template: Template): Promise<Blob>;
 }

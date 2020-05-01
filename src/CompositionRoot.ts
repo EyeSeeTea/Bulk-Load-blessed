@@ -62,6 +62,7 @@ export class CompositionRoot {
         return {
             getInfo: new GetTemplateInfoUseCase(this.templateManager),
             downloadGenerated: new DownloadGeneratedTemplateUseCase(
+                this.instance,
                 this.templateManager,
                 this.excelReader
             ),

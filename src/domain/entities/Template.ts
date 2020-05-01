@@ -18,7 +18,10 @@ export interface GeneratedTemplate {
     id: Id;
     name: string;
     rowOffset: number;
+    dataSources?: DataSource[];
     styleSources: StyleSource[];
+    readId?: (id?: string | undefined | number) => string | undefined | number;
+    writeId?: (string?: string | undefined | number) => Id | undefined | number;
 }
 
 export interface CustomTemplate {
@@ -56,6 +59,7 @@ export interface RangeRef extends GenericSheetRef {
 }
 
 export interface Range {
+    sheet: string;
     rowStart: number;
     rowEnd: number;
     columnStart: string;
@@ -63,7 +67,7 @@ export interface Range {
 }
 
 export interface GenericDataSource {
-    type: RefType;
+    type: "row" | "column" | "cell";
     range: Partial<Range>;
     orgUnit: SheetRef;
     period: SheetRef;
@@ -78,6 +82,7 @@ export interface RowDataSource extends GenericDataSource {
     period: ColumnRef | CellRef;
     dataElement: RowRef;
     categoryOption?: RowRef;
+    attribute?: ColumnRef | CellRef;
 }
 
 export interface ColumnDataSource extends GenericDataSource {

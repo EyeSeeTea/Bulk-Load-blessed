@@ -156,6 +156,7 @@ class AppComponent extends React.Component {
     async onDrop(files) {
         const { snackbar } = this.props;
         const { dataSets, programs, settings, orgUnitTreeRootIds } = this.state;
+        this.props.loading.show(true);
 
         const file = files[0];
         if (!file) {
@@ -204,6 +205,8 @@ class AppComponent extends React.Component {
                 importMessages: [],
             });
         }
+
+        this.props.loading.show(false);
     }
 
     async handleDataImportClick() {

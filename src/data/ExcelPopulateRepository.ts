@@ -1,9 +1,11 @@
 import _ from "lodash";
-import XLSX, { Workbook } from "xlsx-populate";
-import { SheetRef, Template } from "../domain/entities/Template";
+import XLSX, { Cell, Workbook } from "xlsx-populate";
+import { DataPackage } from "../domain/entities/DataPackage";
+import { GeneratedTemplate, RowDataSource, SheetRef, Template } from "../domain/entities/Template";
 import { Theme, ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
 import { fromBase64 } from "../utils/files";
+import { stringOrNumber } from "../utils/string";
 import { promiseMap } from "../webapp/utils/common";
 
 export class ExcelPopulateRepository implements ExcelRepository {
@@ -37,6 +39,117 @@ export class ExcelPopulateRepository implements ExcelRepository {
         });
     }
 
+    public async populateTemplate(
+        template: GeneratedTemplate,
+        payload: DataPackage[]
+    ): Promise<void> {
+        const { dataSources = [] } = template;
+        for (const dataSource of dataSources) {
+            switch (dataSource.type) {
+                case "row":
+                    await this.fillRows(dataSource, template, payload);
+                    break;
+                default:
+                    throw new Error(`Type ${dataSource.type} not supported`);
+            }
+        }
+    }
+
+    private async fillRows(
+        dataSource: RowDataSource,
+        template: GeneratedTemplate,
+        payload: DataPackage[]
+    ) {
+        const workbook = await this.getWorkbook(template);
+        const defaultAccessor = (string?: string | number) => string;
+        const { writeId = defaultAccessor, readId = defaultAccessor } = template;
+        const {
+            sheet: rangeSheet,
+            columnStart,
+            rowStart,
+            columnEnd,
+            rowEnd = "1024",
+        } = dataSource.range;
+
+        const rangeCells = workbook
+            .sheet(rangeSheet)
+            .range(`${columnStart}${rowStart}:${columnEnd}${rowEnd}`);
+        const dataRows = rangeCells.cells()[Symbol.iterator]();
+
+        for (const { orgUnit, period, attribute, dataValues } of payload) {
+            const dataRow: Cell[] = dataRows.next().value;
+
+            this.locateRelativeValue(workbook, dataRow[0], dataSource.orgUnit, writeId(orgUnit));
+            this.locateRelativeValue(workbook, dataRow[0], dataSource.period, period);
+            this.locateRelativeValue(
+                workbook,
+                dataRow[0],
+                dataSource.attribute,
+                attribute ? writeId(attribute) : undefined
+            );
+
+            for (const cell of dataRow) {
+                const dataElement = this.locateRelativeValue(
+                    workbook,
+                    cell,
+                    dataSource.dataElement
+                );
+                const category = this.locateRelativeValue(
+                    workbook,
+                    cell,
+                    dataSource.categoryOption
+                );
+                const { value } =
+                    dataValues.find(
+                        dv =>
+                            dv.dataElement === readId(dataElement) &&
+                            dv.category === readId(category)
+                    ) ?? {};
+
+                cell.value(stringOrNumber(value));
+            }
+        }
+    }
+
+    private locateRelativeValue(
+        workbook: Workbook,
+        cell: Cell,
+        location?: SheetRef,
+        value?: string | number
+    ): string | number | undefined {
+        if (!location) return;
+        const row = location.type === "row" ? location.ref : cell?.rowNumber();
+        const column = location.type === "column" ? location.ref : cell?.columnName();
+        const destination =
+            location.type === "cell"
+                ? workbook.sheet(location.sheet).cell(location.ref)
+                : row && column
+                ? workbook.sheet(location.sheet).cell(row, column)
+                : undefined;
+
+        //@ts-ignore
+        const ranges = Object.keys(workbook.sheet(location.sheet)._mergeCells).map(key => {
+            const range = workbook.sheet(location.sheet).range(key);
+            const value = range.startCell().value() ?? range.startCell().formula();
+            const hasCell = (cell: Cell) => range.cells()[0]?.includes(cell);
+
+            return { range, value, hasCell };
+        });
+
+        if (!destination) {
+            return undefined;
+        } else if (!value) {
+            const range = ranges.find(range => range.hasCell(destination));
+            return String(range ? range.value : destination.value() ?? destination.formula());
+        } else if (value?.toString().startsWith("=")) {
+            destination.formula(String(value));
+            return value;
+        } else {
+            destination.value(stringOrNumber(value));
+            return value;
+        }
+    }
+
     public async applyTheme(template: Template, theme: Theme): Promise<void> {
         const workbook = await this.getWorkbook(template);
 
@@ -61,9 +174,16 @@ export class ExcelPopulateRepository implements ExcelRepository {
         return this.workbooks[id];
     }
 
+    private buildRange({ type, ref, sheet }: SheetRef, workbook: Workbook) {
+        return type === "range"
+            ? workbook.sheet(sheet).range(String(ref))
+            : workbook.sheet(sheet).range(`${ref}:${ref}`);
+    }
+
     private applyThemeToRange(workbook: Workbook, source: SheetRef, style: ThemeStyle): void {
         const { sheet } = source;
         const { text, bold, italic, fontSize, fontColor, fillColor } = style;
+        const range = this.buildRange(source, workbook);
         const textStyle = _.omitBy(
             {
                 bold,
@@ -74,10 +194,6 @@ export class ExcelPopulateRepository implements ExcelRepository {
             },
             _.isUndefined
         );
-        const range =
-            source.type === "range"
-                ? workbook.sheet(sheet).range(source.ref)
-                : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
         try {
             if (text && range) {

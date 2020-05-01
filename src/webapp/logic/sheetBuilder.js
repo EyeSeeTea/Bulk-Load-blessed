@@ -116,11 +116,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     validationSheet.cell(rowId++, columnId).string("Options");
     const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
-        if (
-            e.type === "categoryOptionCombo" &&
-            e.categoryCombo.id === dataSetOptionComboId &&
-            e.name !== "default"
-        ) {
+        if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
             validationSheet.cell(rowId++, columnId).formula("_" + e.id);
         }
     });
@@ -441,7 +437,7 @@ SheetBuilder.prototype.toBlob = async function () {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     } catch (error) {
-        console.log("Failed building/downloading template");
+        console.error("Failed building/downloading template");
         throw error;
     }
 };
