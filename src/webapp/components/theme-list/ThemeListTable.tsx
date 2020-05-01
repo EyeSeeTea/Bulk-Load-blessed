@@ -31,7 +31,7 @@ export interface ThemeDetail {
     logo: ReactNode;
 }
 
-export default function ThemeList() {
+export default function ThemeListTable() {
     const snackbar = useSnackbar();
 
     const [themes, setThemes] = useState<Theme[]>([]);

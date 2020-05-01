@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-01T05:46:19.212Z\n"
+"POT-Creation-Date: 2020-05-01T06:00:59.831Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -100,9 +100,6 @@ msgstr "Configuración guardada"
 msgid "Settings"
 msgstr "Configuración"
 
-msgid "Themes"
-msgstr ""
-
 msgid "Models"
 msgstr "Modelos"
 
@@ -164,6 +161,9 @@ msgstr ""
 #, fuzzy
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
+
+msgid "Themes"
+msgstr ""
 
 msgid "An error ocurred while saving theme"
 msgstr ""
