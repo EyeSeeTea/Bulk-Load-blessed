@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-01T06:00:59.831Z\n"
-"PO-Revision-Date: 2020-05-01T06:00:59.831Z\n"
+"POT-Creation-Date: 2020-05-01T06:21:13.407Z\n"
+"PO-Revision-Date: 2020-05-01T06:21:13.407Z\n"
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -156,6 +156,9 @@ msgid "Drag and drop logo file"
 msgstr ""
 
 msgid "Themes"
+msgstr ""
+
+msgid "Close"
 msgstr ""
 
 msgid "An error ocurred while saving theme"
