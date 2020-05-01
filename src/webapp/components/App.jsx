@@ -19,6 +19,7 @@ import "./App.css";
 import { Select } from "./select/Select";
 import SettingsComponent from "./settings/SettingsDialog";
 import { TemplateSelector } from "./template-selector/TemplateSelector";
+import ThemeListDialog from "./theme-list/ThemeListDialog";
 
 const styles = theme => ({
     root: {
@@ -379,6 +380,7 @@ class AppComponent extends React.Component {
 
         return (
             <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
+                <ThemeListDialog />
                 <SettingsComponent settings={settings} onChange={this.onSettingsChange} />
                 <ConfirmationOnExistingData />
 

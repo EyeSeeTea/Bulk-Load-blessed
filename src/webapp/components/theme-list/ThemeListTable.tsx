@@ -1,4 +1,4 @@
-import { Icon, IconButton, Tooltip } from "@material-ui/core";
+import { Button, Icon } from "@material-ui/core";
 import {
     ConfirmationDialog,
     ObjectsTable,
@@ -31,7 +31,7 @@ export interface ThemeDetail {
     logo: ReactNode;
 }
 
-export default function ThemeList() {
+export default function ThemeListTable() {
     const snackbar = useSnackbar();
 
     const [themes, setThemes] = useState<Theme[]>([]);
@@ -152,11 +152,9 @@ export default function ThemeList() {
                 selection={selection}
                 onChange={onTableChange}
                 filterComponents={
-                    <Tooltip title={i18n.t("Add")}>
-                        <IconButton onClick={newTheme}>
-                            <Icon>add</Icon>
-                        </IconButton>
-                    </Tooltip>
+                    <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
+                        {i18n.t("Create theme")}
+                    </Button>
                 }
             />
         </React.Fragment>
