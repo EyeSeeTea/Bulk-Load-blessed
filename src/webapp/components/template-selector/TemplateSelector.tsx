@@ -105,14 +105,16 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
                 />
             </div>
 
-            <div className={classes.themeSelect}>
-                <Select
-                    placeholder={i18n.t("Theme")}
-                    onChange={onThemeChange}
-                    options={themes}
-                    allowEmpty={true}
-                />
-            </div>
+            {themes.length > 0 && (
+                <div className={classes.themeSelect}>
+                    <Select
+                        placeholder={i18n.t("Theme")}
+                        onChange={onThemeChange}
+                        options={themes}
+                        allowEmpty={true}
+                    />
+                </div>
+            )}
         </div>
     );
 };
