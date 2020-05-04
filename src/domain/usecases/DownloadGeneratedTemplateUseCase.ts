@@ -1,5 +1,4 @@
 import { saveAs } from "file-saver";
-import moment from "moment";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -14,7 +13,7 @@ export class DownloadGeneratedTemplateUseCase {
 
     public async execute(name: string, file: File, themeId?: Id): Promise<void> {
         try {
-            const template = this.templateRepository.getTemplate("AUTO_v0");
+            const template = this.templateRepository.getTemplate("PROGRAM_GENERATED_v0");
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
             if (themeId) {
@@ -24,11 +23,9 @@ export class DownloadGeneratedTemplateUseCase {
 
             // TODO: Read values from dropdowns
             const dataPackage = await this.instance.getDataPackage({
-                type: "dataSet",
-                id: "FnYgTt843G2",
+                type: "program",
+                id: "yx6VLBFBlrK",
                 orgUnits: ["H8RixfF8ugH"],
-                startDate: moment("2010-01-01"),
-                endDate: moment("2020-01-01"),
             });
 
             await this.excelRepository.populateTemplate(template, dataPackage);

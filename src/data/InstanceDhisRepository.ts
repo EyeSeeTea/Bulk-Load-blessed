@@ -1,13 +1,12 @@
 import { D2Api, D2ApiDefault } from "d2-api";
 import _ from "lodash";
+import moment from "moment";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { AggregatedDataValue, DataSet } from "../domain/entities/DataSet";
 import { DhisInstance } from "../domain/entities/DhisInstance";
-import { Program } from "../domain/entities/Program";
-import {
-    GetDataPackageParams,
-    InstanceRepository,
-} from "../domain/repositories/InstanceRepository";
+import { EventsPackage, Program } from "../domain/entities/Program";
+import { GetDataPackageParams, InstanceRepository } from "../domain/repositories/InstanceRepository";
+import { promiseMap } from "../webapp/utils/common";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -69,9 +68,42 @@ export class InstanceDhisRepository implements InstanceRepository {
                 })
                 .value();
         } else if (type === "program") {
-            return [];
+            const response = await promiseMap(orgUnits, orgUnit =>
+                this.api
+                    .get<EventsPackage>("/events", {
+                        program: id,
+                        orgUnit,
+                        paging: false,
+                    })
+                    .getData()
+            );
+
+            return _(response)
+                .map(({ events }) => events)
+                .flatten()
+                .map(
+                    ({
+                        event,
+                        orgUnit,
+                        eventDate,
+                        attributeOptionCombo,
+                        coordinate,
+                        dataValues,
+                    }) => ({
+                        id: event,
+                        orgUnit,
+                        period: moment(eventDate).format("YYYY-MM-DD"),
+                        attribute: attributeOptionCombo,
+                        coordinate,
+                        dataValues: dataValues.map(({ dataElement, value }) => ({
+                            dataElement,
+                            value,
+                        })),
+                    })
+                )
+                .value();
         } else {
-            return [];
+            throw new Error("Unsupported type for data package");
         }
     }
 }

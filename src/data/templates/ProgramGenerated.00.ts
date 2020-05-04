@@ -2,8 +2,8 @@ import { Id } from "../../domain/entities/ReferenceObject";
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
 
 export default class implements GeneratedTemplate {
-    public readonly id = "AUTO_v0";
-    public readonly name = "Auto-generated template";
+    public readonly id = "PROGRAM_GENERATED_v0";
+    public readonly name = "Auto-generated program template";
 
     public readonly rowOffset = 5;
 
@@ -18,25 +18,15 @@ export default class implements GeneratedTemplate {
             period: {
                 sheet: "Data Entry",
                 type: "column",
-                ref: "B",
-            },
-            attribute: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "C",
+                ref: "D",
             },
             range: {
                 sheet: "Data Entry",
                 rowStart: 8,
-                columnStart: "D",
+                columnStart: "E",
                 columnEnd: "DO",
             },
             dataElement: {
-                sheet: "Data Entry",
-                type: "row",
-                ref: 6,
-            },
-            categoryOption: {
                 sheet: "Data Entry",
                 type: "row",
                 ref: 7,

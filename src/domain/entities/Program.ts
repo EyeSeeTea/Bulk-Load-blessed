@@ -1,5 +1,5 @@
 export interface ProgramEvent {
-    id?: string;
+    event?: string;
     orgUnit: string;
     program: string;
     status: string;
@@ -14,7 +14,7 @@ export interface ProgramEvent {
 
 export interface ProgramEventDataValue {
     dataElement: string;
-    value: any;
+    value: string | number;
 }
 
 export interface EventsPackage {
