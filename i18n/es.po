@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-01T06:21:13.407Z\n"
+"POT-Creation-Date: 2020-05-04T06:46:09.001Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,86 +13,6 @@ msgstr ""
 
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
-
-msgid "Cannot read file"
-msgstr "No se puede leer el fichero"
-
-msgid "Object not found in database"
-msgstr "No se ha encontrado el objeto en la base de datos"
-
-msgid "Select a organisation units to import data"
-msgstr "Seleccione una unidad organizativa en la que importar los datos"
-
-msgid "Selected organisation unit is not associated with the dataset"
-msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
-
-msgid "Imported"
-msgstr "Importados"
-
-msgid "Updated"
-msgstr "Actualizados"
-
-msgid "Ignored"
-msgstr "Ignorados"
-
-msgid "Deleted"
-msgstr "Borrados"
-
-msgid "Data Set"
-msgstr "Data Set"
-
-msgid "Program"
-msgstr "Programa"
-
-msgid "Existing data values"
-msgstr "Existen valores de datos"
-
-msgid ""
-"There are {{dataValuesSize}} data values in the database for this "
-"organisation unit and periods. If you proceed, all those data values will be "
-"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
-msgstr ""
-"Existen {{dataValuesSize}} valores en la base de datos for esta unidad "
-"organizativa y periodos. Si continua, todos los valores seránborrados, y "
-"solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
-
-msgid "Proceed"
-msgstr "Continuar"
-
-msgid "Cancel"
-msgstr "Cancelar"
-
-msgid "Template Generation"
-msgstr "Generación de plantilla"
-
-msgid "Start Year"
-msgstr "Año inicial"
-
-msgid "End Year"
-msgstr "Año final"
-
-msgid "No capture organisations units"
-msgstr "No se han encontrado unidades organizativas"
-
-msgid "Download template"
-msgstr "Descargar plantilla"
-
-msgid "Bulk Import"
-msgstr "Importación"
-
-msgid "Drag and drop file to import"
-msgstr "Mueva aquí los ficheros a importar"
-
-msgid "data values"
-msgstr "valores de datos"
-
-msgid "No capture org unit match element org units"
-msgstr ""
-"Las unidades organizativas de introducción de datos y del elemento no "
-"coinciden"
-
-msgid "Import data"
-msgstr "Importar datos"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
@@ -114,6 +34,12 @@ msgstr "Grupos de usuario con acceso a la plantilla de generación"
 
 msgid "User groups with access to Settings"
 msgstr "Grupos de usuario con acceso a la configuración"
+
+msgid "Data Set"
+msgstr "Data Set"
+
+msgid "Program"
+msgstr "Programa"
 
 msgid "Custom"
 msgstr ""
@@ -221,6 +147,80 @@ msgid ""
 msgstr ""
 "No se puede importar: Las versiones no coinciden (base de "
 "datos={{dbVersion}}, fichero={{sheetVersion}})"
+
+msgid "Cannot read file"
+msgstr "No se puede leer el fichero"
+
+msgid "Object not found in database"
+msgstr "No se ha encontrado el objeto en la base de datos"
+
+msgid "Select a organisation units to import data"
+msgstr "Seleccione una unidad organizativa en la que importar los datos"
+
+msgid "Selected organisation unit is not associated with the dataset"
+msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
+
+msgid "Imported"
+msgstr "Importados"
+
+msgid "Updated"
+msgstr "Actualizados"
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Deleted"
+msgstr "Borrados"
+
+msgid "Existing data values"
+msgstr "Existen valores de datos"
+
+msgid ""
+"There are {{dataValuesSize}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will be "
+"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+"Existen {{dataValuesSize}} valores en la base de datos for esta unidad "
+"organizativa y periodos. Si continua, todos los valores seránborrados, y "
+"solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
+
+msgid "Proceed"
+msgstr "Continuar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Template Generation"
+msgstr "Generación de plantilla"
+
+msgid "Start Year"
+msgstr "Año inicial"
+
+msgid "End Year"
+msgstr "Año final"
+
+msgid "No capture organisations units"
+msgstr "No se han encontrado unidades organizativas"
+
+msgid "Download template"
+msgstr "Descargar plantilla"
+
+msgid "Bulk Import"
+msgstr "Importación"
+
+msgid "Drag and drop file to import"
+msgstr "Mueva aquí los ficheros a importar"
+
+msgid "data values"
+msgstr "valores de datos"
+
+msgid "No capture org unit match element org units"
+msgstr ""
+"Las unidades organizativas de introducción de datos y del elemento no "
+"coinciden"
+
+msgid "Import data"
+msgstr "Importar datos"
 
 #~ msgid "export"
 #~ msgstr "exportar"

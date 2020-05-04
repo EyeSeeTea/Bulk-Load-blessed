@@ -5,7 +5,10 @@ import { DataPackage } from "../domain/entities/DataPackage";
 import { AggregatedDataValue, DataSet } from "../domain/entities/DataSet";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { EventsPackage, Program } from "../domain/entities/Program";
-import { GetDataPackageParams, InstanceRepository } from "../domain/repositories/InstanceRepository";
+import {
+    GetDataPackageParams,
+    InstanceRepository,
+} from "../domain/repositories/InstanceRepository";
 import { promiseMap } from "../webapp/utils/common";
 
 export class InstanceDhisRepository implements InstanceRepository {
