@@ -1,9 +1,11 @@
-import { Icon, IconButton, Tooltip } from "@material-ui/core";
+import { Button, Icon } from "@material-ui/core";
 import {
     ConfirmationDialog,
     ObjectsTable,
     TableAction,
     TableColumn,
+    TableSelection,
+    TableState,
     useSnackbar,
 } from "d2-ui-components";
 import React, { ReactNode, useEffect, useState } from "react";
@@ -29,17 +31,18 @@ export interface ThemeDetail {
     logo: ReactNode;
 }
 
-export default function ThemeList() {
+export default function ThemeListTable() {
     const snackbar = useSnackbar();
 
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [selection, setSelection] = useState<TableSelection[]>([]);
     const rows = buildThemeDetails(themes);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
     const [reloadKey, setReloadKey] = useState(Math.random());
 
     useEffect(() => {
-        CompositionRoot.getInstance().themes.list.execute().then(setThemes);
+        CompositionRoot.attach().themes.list.execute().then(setThemes);
     }, [reloadKey]);
 
     const newTheme = () => {
@@ -52,7 +55,7 @@ export default function ThemeList() {
 
     const saveTheme = async (theme: Theme) => {
         try {
-            const errors = await CompositionRoot.getInstance().themes.save.execute(theme);
+            const errors = await CompositionRoot.attach().themes.save.execute(theme);
             if (errors.length > 0) {
                 snackbar.error(errors.join("\n"));
             } else {
@@ -72,9 +75,10 @@ export default function ThemeList() {
     const deleteThemes = (ids: string[]) => {
         const deleteAction = async () => {
             await promiseMap(ids, id => {
-                return CompositionRoot.getInstance().themes.delete.execute(id);
+                return CompositionRoot.attach().themes.delete.execute(id);
             });
             setReloadKey(Math.random());
+            setSelection([]);
         };
 
         setWarningDialog({
@@ -112,6 +116,10 @@ export default function ThemeList() {
         },
     ];
 
+    const onTableChange = (state: TableState<ThemeDetail>) => {
+        setSelection(state.selection);
+    };
+
     return (
         <React.Fragment>
             {!!warningDialog && (
@@ -141,12 +149,12 @@ export default function ThemeList() {
                 rows={rows}
                 columns={columns}
                 actions={actions}
+                selection={selection}
+                onChange={onTableChange}
                 filterComponents={
-                    <Tooltip title={i18n.t("Add")}>
-                        <IconButton onClick={newTheme}>
-                            <Icon>add</Icon>
-                        </IconButton>
-                    </Tooltip>
+                    <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
+                        {i18n.t("Create theme")}
+                    </Button>
                 }
             />
         </React.Fragment>

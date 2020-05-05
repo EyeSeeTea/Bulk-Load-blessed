@@ -5,7 +5,7 @@ import { Theme } from "../entities/Theme";
 export interface TemplateRepository {
     // Template access
     listTemplates(): Pick<Template, "id" | "name">[];
-    getTemplate(id: Id): Promise<Template>;
+    getTemplate(id: Id): Template;
     // Template themes
     listThemes(): Promise<Theme[]>;
     getTheme(id: Id): Promise<Theme>;

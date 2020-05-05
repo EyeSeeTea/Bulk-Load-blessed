@@ -3,15 +3,16 @@ import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
-export class DownloadTemplateUseCase {
+export class DownloadGeneratedTemplateUseCase {
     constructor(
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute(templateId: Id, themeId?: Id): Promise<void> {
+    public async execute(name: string, file: File, themeId?: Id): Promise<void> {
         try {
-            const template = await this.templateRepository.getTemplate(templateId);
+            const template = await this.templateRepository.getTemplate("AUTO_v0");
+            await this.excelRepository.loadTemplate(template, { type: "file", file });
 
             if (themeId) {
                 const theme = await this.templateRepository.getTheme(themeId);
@@ -19,7 +20,7 @@ export class DownloadTemplateUseCase {
             }
 
             const data = await this.excelRepository.toBlob(template);
-            saveAs(data, `${template.name}.xlsx`);
+            saveAs(data, `${name}.xlsx`);
         } catch (error) {
             console.log("Failed building/downloading template");
             throw error;

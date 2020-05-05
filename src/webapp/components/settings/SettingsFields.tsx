@@ -5,7 +5,6 @@ import React from "react";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import Settings, { Model } from "../../logic/settings";
-import ThemeList from "../theme-list/ThemeList";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -65,21 +64,19 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
     return (
         <div>
-            <FieldTitle>{i18n.t("Themes")}</FieldTitle>
-
-            <FormGroup className={classes.content} row={true}>
-                <div className={classes.fullWidth}>
-                    <ThemeList />
-                </div>
-            </FormGroup>
-
             <FieldTitle>{i18n.t("Models")}</FieldTitle>
 
             <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
                     <FormControlLabel
                         key={key}
-                        control={<Checkbox checked={value} onChange={setModel(key)} />}
+                        control={
+                            <Checkbox
+                                className={classes.checkbox}
+                                checked={value}
+                                onChange={setModel(key)}
+                            />
+                        }
                         label={name}
                     />
                 ))}
@@ -91,6 +88,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 <FormControlLabel
                     control={
                         <Checkbox
+                            className={classes.checkbox}
                             checked={settings.showOrgUnitsOnGeneration}
                             onChange={updateBoolean("showOrgUnitsOnGeneration")}
                         />
@@ -136,7 +134,8 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
 const useStyles = makeStyles({
     fullWidth: { width: "100%" },
-    content: { marginBottom: 35, marginLeft: 0 },
+    content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
+    checkbox: { padding: 9 },
 });
 
 function FieldTitle(props: { children: React.ReactNode }) {

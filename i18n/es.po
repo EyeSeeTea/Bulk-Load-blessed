@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-04-20T16:41:39.130Z\n"
+"POT-Creation-Date: 2020-05-01T06:21:13.407Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,9 +44,6 @@ msgstr "Data Set"
 msgid "Program"
 msgstr "Programa"
 
-msgid "Custom"
-msgstr ""
-
 msgid "Existing data values"
 msgstr "Existen valores de datos"
 
@@ -67,9 +64,6 @@ msgstr "Cancelar"
 
 msgid "Template Generation"
 msgstr "Generación de plantilla"
-
-msgid "export"
-msgstr "exportar"
 
 msgid "Start Year"
 msgstr "Año inicial"
@@ -106,9 +100,6 @@ msgstr "Configuración guardada"
 msgid "Settings"
 msgstr "Configuración"
 
-msgid "Themes"
-msgstr ""
-
 msgid "Models"
 msgstr "Modelos"
 
@@ -124,14 +115,21 @@ msgstr "Grupos de usuario con acceso a la plantilla de generación"
 msgid "User groups with access to Settings"
 msgstr "Grupos de usuario con acceso a la configuración"
 
+msgid "Custom"
+msgstr ""
+
 msgid "elements"
 msgstr "elementos"
 
 msgid "Model"
 msgstr "Modelo"
 
-msgid "Select {{element}} to {{action}}..."
+#, fuzzy
+msgid "Select {{elementLabel}} to export..."
 msgstr "Seleccione {{element}} a {{action}}..."
+
+msgid "Theme"
+msgstr ""
 
 msgid "Edit theme"
 msgstr ""
@@ -148,16 +146,13 @@ msgstr ""
 msgid "Header text"
 msgstr ""
 
-msgid "Footer text"
-msgstr ""
-
 msgid "Title text"
 msgstr ""
 
 msgid "Subtitle text"
 msgstr ""
 
-msgid "Templates"
+msgid "Footer text"
 msgstr ""
 
 msgid "Logo"
@@ -166,6 +161,12 @@ msgstr ""
 #, fuzzy
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
+
+msgid "Themes"
+msgstr ""
+
+msgid "Close"
+msgstr ""
 
 msgid "An error ocurred while saving theme"
 msgstr ""
@@ -202,7 +203,7 @@ msgstr "Borrar"
 msgid "Ok"
 msgstr ""
 
-msgid "Add"
+msgid "Create theme"
 msgstr ""
 
 msgid "Error deleting data values"
@@ -220,6 +221,9 @@ msgid ""
 msgstr ""
 "No se puede importar: Las versiones no coinciden (base de "
 "datos={{dbVersion}}, fichero={{sheetVersion}})"
+
+#~ msgid "export"
+#~ msgstr "exportar"
 
 #~ msgid "Save"
 #~ msgstr "Guardar"

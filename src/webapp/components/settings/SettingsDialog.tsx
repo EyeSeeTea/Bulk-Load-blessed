@@ -49,9 +49,10 @@ export default function SettingsComponent(props: SettingsProps) {
             </div>
 
             <ConfirmationDialog
+                title={i18n.t("Settings")}
                 isOpen={isOpen}
                 fullWidth={true}
-                maxWidth="xl"
+                maxWidth="lg"
                 onCancel={close}
                 onSave={save}
             >

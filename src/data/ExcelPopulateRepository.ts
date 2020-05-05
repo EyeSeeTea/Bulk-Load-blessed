@@ -2,15 +2,31 @@ import _ from "lodash";
 import XLSX, { Workbook } from "xlsx-populate";
 import { SheetRef, Template } from "../domain/entities/Template";
 import { Theme, ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository } from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
 import { fromBase64 } from "../utils/files";
 import { promiseMap } from "../webapp/utils/common";
 
 export class ExcelPopulateRepository implements ExcelRepository {
     private workbooks: Record<string, Workbook> = {};
 
-    public async reset(template: Template): Promise<void> {
-        await this.getWorkbook(template, true);
+    public async loadTemplate(template: Template, options: LoadOptions): Promise<void> {
+        const { id } = template;
+        switch (options.type) {
+            case "url": {
+                const response = await fetch(options.url);
+                const data = await response.arrayBuffer();
+                this.workbooks[id] = await XLSX.fromDataAsync(data);
+                break;
+            }
+            case "file": {
+                this.workbooks[id] = await XLSX.fromDataAsync(options.file);
+                break;
+            }
+            default: {
+                this.workbooks[id] = await XLSX.fromBlankAsync();
+                break;
+            }
+        }
     }
 
     public async toBlob(template: Template): Promise<Blob> {
@@ -38,17 +54,9 @@ export class ExcelPopulateRepository implements ExcelRepository {
         });
     }
 
-    private async getWorkbook(template: Template, reload = false) {
-        const { id, url } = template;
-        const loaded = !!this.workbooks[id] && !reload;
-
-        if (!loaded && url) {
-            const response = await fetch(url);
-            const data = await response.arrayBuffer();
-            this.workbooks[id] = await XLSX.fromDataAsync(data);
-        } else if (!loaded) {
-            this.workbooks[id] = await XLSX.fromBlankAsync();
-        }
+    private async getWorkbook(template: Template) {
+        const { id } = template;
+        if (!this.workbooks[id]) throw new Error("Template not loaded");
 
         return this.workbooks[id];
     }
@@ -56,7 +64,7 @@ export class ExcelPopulateRepository implements ExcelRepository {
     private applyThemeToRange(workbook: Workbook, source: SheetRef, style: ThemeStyle): void {
         const { sheet } = source;
         const { text, bold, italic, fontSize, fontColor, fillColor } = style;
-        const cellStyle = _.omitBy(
+        const textStyle = _.omitBy(
             {
                 bold,
                 italic,
@@ -72,12 +80,21 @@ export class ExcelPopulateRepository implements ExcelRepository {
                 : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
         try {
-            workbook
-                .sheet(sheet)
-                .range(range?.address() ?? "")
-                .merged(true)
-                .style(cellStyle)
-                .value(text);
+            if (text && range) {
+                //@ts-ignore
+                const richText = new XLSX.RichText();
+                richText.add(text, textStyle);
+
+                workbook
+                    .sheet(sheet)
+                    .range(range.address() ?? "")
+                    .merged(true)
+                    .style({ verticalAlignment: "center" })
+                    .value(richText);
+
+                const height = text.split("\n").length * 22;
+                range.cells().map(([cell]) => cell.row().hidden(false).height(height));
+            }
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
@@ -88,9 +105,6 @@ export class ExcelPopulateRepository implements ExcelRepository {
         const [from, to] = source.type === "range" ? String(ref).split(":") : [ref, ref];
 
         // @ts-ignore: This part is not typed (we need to create an extension)
-        const drawings = workbook.sheet(sheet).drawings();
-        const name = drawings[0]?.name();
-        // @ts-ignore: This part is not typed (we need to create an extension)
-        workbook.sheet(sheet).drawings(name).image(file).from(from).to(to);
+        workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
     }
 }

@@ -1,9 +1,10 @@
 import * as Excel from "excel4node";
-import { saveAs } from "file-saver";
 import _ from "lodash";
 import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
+
+const DEFAULT_GENERATED_ID = "AUTO_v0";
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
@@ -91,7 +92,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         rowId = 2;
         columnId++;
         validationSheet.cell(rowId++, columnId).string("Periods");
@@ -115,7 +116,11 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     validationSheet.cell(rowId++, columnId).string("Options");
     const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
-        if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
+        if (
+            e.type === "categoryOptionCombo" &&
+            e.categoryCombo.id === dataSetOptionComboId &&
+            e.name !== "default"
+        ) {
             validationSheet.cell(rowId++, columnId).formula("_" + e.id);
         }
     });
@@ -239,19 +244,31 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     rowId++;
 };
 
+SheetBuilder.prototype.getVersion = function () {
+    const { element } = this.builder;
+    return getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
+};
+
 SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata } = this.builder;
     const dataEntrySheet = this.dataEntrySheet;
 
-    // Freeze and format column titles
-    dataEntrySheet.row(2).freeze();
-    dataEntrySheet.row(1).setHeight(30);
-    dataEntrySheet.row(2).setHeight(50);
+    // Add cells for themes
+    const sectionRow = 6;
+    const dataElementsRow = 7;
 
-    const version = getObjectVersion(element);
-    if (version) {
-        dataEntrySheet.cell(1, 1).string(`Version: ${version}`).style(baseStyle);
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        dataEntrySheet.row(row).hide();
     }
+
+    // Freeze and format column titles
+    dataEntrySheet.row(dataElementsRow).freeze();
+    dataEntrySheet.row(sectionRow).setHeight(30);
+    dataEntrySheet.row(dataElementsRow).setHeight(50);
+
+    // Add template version
+    dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;
@@ -260,18 +277,20 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     createColumn(
         this.workbook,
         dataEntrySheet,
+        dataElementsRow,
         columnId++,
         "Org Unit",
         null,
         this.validations.get("organisationUnits")
     );
-    if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude");
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude");
-    } else if (element.type === "dataSet") {
+    if (element.type === "programs") {
+        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Latitude");
+        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Longitude");
+    } else if (element.type === "dataSets") {
         createColumn(
             this.workbook,
             dataEntrySheet,
+            dataElementsRow,
             columnId++,
             "Period",
             null,
@@ -280,6 +299,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         createColumn(
             this.workbook,
             dataEntrySheet,
+            dataElementsRow,
             columnId++,
             "Options",
             null,
@@ -287,7 +307,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         );
     }
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         const categoryOptionCombos = [];
         for (const [, value] of metadata) {
             if (value.type === "categoryOptionCombo") {
@@ -296,48 +316,52 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         }
 
         const sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
-        _.forOwn(sections, (ownSection, categoryComboId) => {
+        _.forOwn(sections, (_section, categoryComboId) => {
             const categoryCombo = metadata.get(categoryComboId);
-            if (categoryCombo.code !== "default") {
-                const dataElementLookup = _.filter(element.dataSetElements, {
-                    categoryCombo: { id: categoryComboId },
-                });
-                _.forEach(dataElementLookup, lookupResult => {
-                    const firstColumnId = columnId;
+            if (categoryCombo !== undefined) {
+                _(element.dataSetElements)
+                    .map(({ dataElement }) => metadata.get(dataElement.id))
+                    .filter({
+                        categoryCombo: { id: categoryComboId },
+                    })
+                    .forEach(dataElement => {
+                        const firstColumnId = columnId;
 
-                    const dataElementId = lookupResult.dataElement.id;
-                    const sectionCategoryOptionCombos = sections[categoryComboId];
-                    _.forEach(sectionCategoryOptionCombos, dataValue => {
-                        dataEntrySheet.column(columnId).setWidth(dataValue.name.length / 2.5 + 10);
-                        dataEntrySheet
-                            .cell(2, columnId)
-                            .formula("_" + dataValue.id)
-                            .style(groupStyle(groupId));
+                        const sectionCategoryOptionCombos = sections[categoryComboId];
+                        _.forEach(sectionCategoryOptionCombos, dataValue => {
+                            dataEntrySheet
+                                .column(columnId)
+                                .setWidth(dataValue.name.length / 2.5 + 10);
+                            dataEntrySheet
+                                .cell(dataElementsRow, columnId)
+                                .formula("_" + dataValue.id)
+                                .style(groupStyle(groupId));
 
-                        if (dataValue.description !== undefined) {
-                            dataEntrySheet.cell(2, columnId).comment(dataValue.description, {
-                                height: "100pt",
-                                width: "160pt",
-                            });
+                            if (dataValue.description !== undefined) {
+                                dataEntrySheet
+                                    .cell(dataElementsRow, columnId)
+                                    .comment(dataValue.description, {
+                                        height: "100pt",
+                                        width: "160pt",
+                                    });
+                            }
+
+                            columnId++;
+                        });
+
+                        if (columnId - 1 === firstColumnId) {
+                            dataEntrySheet
+                                .column(firstColumnId)
+                                .setWidth(dataElement.name.length / 2.5 + 15);
                         }
 
-                        columnId++;
-                    });
-
-                    if (columnId - 1 === firstColumnId) {
-                        const dataElement = metadata.get(lookupResult.dataElement.id);
                         dataEntrySheet
-                            .column(firstColumnId)
-                            .setWidth(dataElement.name.length / 2.5 + 15);
-                    }
+                            .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                            .formula("_" + dataElement.id)
+                            .style(groupStyle(groupId));
 
-                    dataEntrySheet
-                        .cell(1, firstColumnId, 1, columnId - 1, true)
-                        .formula("_" + dataElementId)
-                        .style(groupStyle(groupId));
-
-                    groupId++;
-                });
+                        groupId++;
+                    });
             }
         });
     } else {
@@ -347,12 +371,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             createColumn(
                 this.workbook,
                 dataEntrySheet,
+                dataElementsRow,
                 columnId++,
-                programStage.executionDateLabel
+                programStage.executionDateLabel ?? "Date"
             );
 
             dataEntrySheet
-                .cell(1, columnId - 1)
+                .cell(sectionRow, columnId - 1)
                 .string(programStage.name)
                 .style(baseStyle);
 
@@ -377,6 +402,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     createColumn(
                         this.workbook,
                         dataEntrySheet,
+                        dataElementsRow,
                         columnId,
                         "_" + dataElement.id,
                         groupId,
@@ -385,19 +411,22 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
 
                     if (dataElement.description !== undefined) {
-                        dataEntrySheet.cell(2, columnId).comment(dataElement.description, {
-                            height: "100pt",
-                            width: "160pt",
-                        });
+                        dataEntrySheet
+                            .cell(dataElementsRow, columnId)
+                            .comment(dataElement.description, {
+                                height: "100pt",
+                                width: "160pt",
+                            });
                     }
 
                     columnId++;
                 });
 
-                dataEntrySheet
-                    .cell(1, firstColumnId, 1, columnId - 1, true)
-                    .formula("_" + programStageSection.id)
-                    .style(groupStyle(groupId));
+                if (firstColumnId < columnId)
+                    dataEntrySheet
+                        .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                        .formula("_" + programStageSection.id)
+                        .style(groupStyle(groupId));
 
                 groupId++;
             });
@@ -405,13 +434,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     }
 };
 
-SheetBuilder.prototype.downloadSheet = async function () {
+SheetBuilder.prototype.toBlob = async function () {
     try {
         const data = await this.workbook.writeToBuffer();
-        const blob = new Blob([data], {
+        return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
-        saveAs(blob, `${this.builder.element.displayName}.xlsx`);
     } catch (error) {
         console.log("Failed building/downloading template");
         throw error;

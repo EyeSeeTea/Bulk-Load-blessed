@@ -14,7 +14,6 @@ import axios from "axios";
 export function getUserInformation(builder) {
     return new Promise(function (resolve, reject) {
         const result = {
-            username: builder.d2.currentUser.username,
             dataSets: [],
             programs: [],
         };
@@ -32,11 +31,9 @@ export function getUserInformation(builder) {
                 programCollection.forEach(program => elements.push(program.id));
                 const API_USER_PROGRAMS_DATASETS =
                     API_BASE_URL +
-                    "/metadata.json?fields=id,displayName,organisationUnits[id,path]," +
+                    "/metadata.json?fields=id,name,displayName," +
                     "attributeValues[attribute[code],value]" +
-                    "categoryCombo,dataSetElements,sections,periodType,programStages&filter=id:in:[" +
-                    elements.toString() +
-                    "]";
+                    `&filter=id:in:[${elements.toString()}]`;
                 // Parse API for programs and dataSets information
                 return getJSON(builder.d2, API_USER_PROGRAMS_DATASETS);
             })
@@ -56,8 +53,24 @@ export function getUserInformation(builder) {
     });
 }
 
+export function getElement(d2, endpoint, id) {
+    return new Promise(function (resolve, reject) {
+        const baseUrl = d2.Api.getApi().baseUrl;
+        axios
+            .get(
+                `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value]categoryCombo,dataSetElements,sections,periodType,programStages`,
+                { withCredentials: true }
+            )
+            .then(({ data }) => {
+                resolve(data);
+            })
+            .catch(reason => {
+                reject(reason);
+            });
+    });
+}
+
 /**
- * Get User Information
  * @param builder:
  *      - d2: DHIS2 Library
  *      - element: Element to be parsed
@@ -119,7 +132,6 @@ export function getElementMetadata(builder) {
 }
 
 /**
- * Import data to DHIS2 with a dryRun strategy
  * @param builder
  *      - d2: DHIS2 Library
  *      - element: Element where import
