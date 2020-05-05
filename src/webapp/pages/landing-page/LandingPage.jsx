@@ -77,7 +77,7 @@ export default function LandingPage() {
 
     const handleTemplateDownloadClick = async () => {
         if (!state.template) return;
-        const { type, id, theme, startYear, endYear, orgUnits } = state.template;
+        const { type, id, theme, startYear, endYear, orgUnits, populate } = state.template;
         loading.show(true);
 
         if (type === "custom") {
@@ -106,6 +106,7 @@ export default function LandingPage() {
                 file,
                 theme,
                 orgUnits,
+                populate,
                 startDate: type === "dataSets" ? moment(startYear, "YYYY") : undefined,
                 endDate: type === "dataSets" ? moment(endYear, "YYYY") : undefined,
             });

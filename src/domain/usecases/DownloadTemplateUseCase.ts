@@ -10,6 +10,7 @@ interface DownloadTemplateProps {
     id: string;
     name: string;
     orgUnits: string[];
+    populate: boolean;
     startDate?: Moment;
     endDate?: Moment;
     file: File;
@@ -30,6 +31,7 @@ export class DownloadTemplateUseCase {
         file,
         theme: themeId,
         orgUnits,
+        populate,
         startDate,
         endDate,
     }: DownloadTemplateProps): Promise<void> {
@@ -44,14 +46,16 @@ export class DownloadTemplateUseCase {
                 await this.excelRepository.applyTheme(template, theme);
             }
 
-            const dataPackage = await this.instance.getDataPackage({
-                type,
-                id,
-                orgUnits,
-                startDate,
-                endDate,
-            });
-            await this.excelRepository.populateTemplate(template, dataPackage);
+            if (populate) {
+                const dataPackage = await this.instance.getDataPackage({
+                    type,
+                    id,
+                    orgUnits,
+                    startDate,
+                    endDate,
+                });
+                await this.excelRepository.populateTemplate(template, dataPackage);
+            }
 
             const data = await this.excelRepository.toBlob(template);
             saveAs(data, `${name}.xlsx`);

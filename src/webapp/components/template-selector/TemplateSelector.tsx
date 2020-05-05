@@ -1,4 +1,4 @@
-import { makeStyles } from "@material-ui/core";
+import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import { OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
@@ -18,6 +18,7 @@ interface TemplateSelectorState {
     type: TemplateType;
     id: string;
     orgUnits: string[];
+    populate: boolean;
     theme?: string;
     startYear?: string;
     endYear?: string;
@@ -40,6 +41,7 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
     const [state, setState] = useState<Partial<TemplateSelectorState>>({
         startYear: "2010",
         endYear: moment().year().toString(),
+        populate: false,
     });
 
     useEffect(() => {
@@ -77,10 +79,10 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
     }, []);
 
     useEffect(() => {
-        const { type, id, theme, startYear, endYear } = state;
+        const { type, id, theme, startYear, endYear, populate = false } = state;
         if (type && id && selectedOrgUnits.length > 0) {
             const orgUnits = cleanOrgUnitPaths(selectedOrgUnits);
-            onChange({ type, id, theme, orgUnits, startYear, endYear });
+            onChange({ type, id, theme, orgUnits, startYear, endYear, populate });
         } else {
             onChange(null);
         }
@@ -125,6 +127,10 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(orgUnitPaths);
     };
+
+    const onPopulateChange = (_event: React.ChangeEvent, checked: boolean) => {
+        setState(state => ({ ...state, populate: checked }))
+    }
 
     return (
         <React.Fragment>
@@ -208,6 +214,11 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
             ) : (
                 i18n.t("No capture organisations units")
             )}
+
+            <FormControlLabel
+                control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
+                label="Populate template with instance data"
+            />
         </React.Fragment>
     );
 };
