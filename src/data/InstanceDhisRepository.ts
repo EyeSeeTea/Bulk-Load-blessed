@@ -47,7 +47,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
-        if (type === "dataSet") {
+        if (type === "dataSets") {
             const { dataValues } = await this.api
                 .get<{ dataValues: AggregatedDataValue[] }>("/dataValueSets", {
                     dataSet: id,
@@ -78,7 +78,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     };
                 })
                 .value();
-        } else if (type === "program") {
+        } else if (type === "programs") {
             const response = await promiseMap(orgUnits, orgUnit =>
                 this.api
                     .get<EventsPackage>("/events", {
@@ -114,7 +114,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 )
                 .value();
         } else {
-            throw new Error("Unsupported type for data package");
+            throw new Error(`Unsupported type ${type} for data package`);
         }
     }
 }

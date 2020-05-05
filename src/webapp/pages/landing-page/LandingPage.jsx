@@ -99,13 +99,15 @@ export default function LandingPage() {
 
             const name = element.displayName ?? element.name;
             const file = await template.toBlob();
-            await CompositionRoot.attach().templates.downloadGenerated.execute({
+            await CompositionRoot.attach().templates.download.execute({
                 type,
                 id,
                 name,
                 file,
                 theme,
                 orgUnits,
+                startDate: type === "dataSets" ? moment(startYear, "YYYY") : undefined,
+                endDate: type === "dataSets" ? moment(endYear, "YYYY") : undefined,
             });
         }
 

@@ -20,8 +20,8 @@ export interface GeneratedTemplate {
     rowOffset: number;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
-    readId?: (id?: string | undefined | number) => string | undefined | number;
-    writeId?: (string?: string | undefined | number) => Id | undefined | number;
+    readId?: (id: string | number) => string | number;
+    writeId?: (value: string | number) => string | number;
 }
 
 export interface CustomTemplate {

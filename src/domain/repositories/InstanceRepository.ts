@@ -6,7 +6,7 @@ import { Program } from "../entities/Program";
 import { Id } from "../entities/ReferenceObject";
 
 export interface GetDataPackageParams {
-    type: "dataSet" | "program";
+    type: "dataSets" | "programs";
     id: Id;
     orgUnits: Id[];
     startDate?: Moment;

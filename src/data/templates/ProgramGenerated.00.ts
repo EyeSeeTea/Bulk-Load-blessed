@@ -1,4 +1,3 @@
-import { Id } from "../../domain/entities/ReferenceObject";
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
 
 export default class implements GeneratedTemplate {
@@ -77,11 +76,11 @@ export default class implements GeneratedTemplate {
         },
     ];
 
-    public writeId(id: string | undefined | number): string | undefined | number {
-        return id ? `=_${id}` : undefined;
+    public writeId(id: string | number): string | number {
+        return `=_${id}`;
     }
 
-    public readId(string: string | undefined | number): Id | undefined | number {
-        return string ? String(string).replace(/[^a-zA-Z0-9]/g, "") : undefined;
+    public readId(string: string | number): string | number {
+        return String(string).replace(/[^a-zA-Z0-9]/g, "");
     }
 }
