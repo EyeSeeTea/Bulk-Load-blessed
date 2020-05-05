@@ -1,6 +1,5 @@
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
-import { PartialBy } from "../../utils/types";
 import { promiseMap } from "../../webapp/utils/common";
 import { DataPackage } from "../entities/DataPackage";
 import { CellRef, Range, RowDataSource, SheetRef, Template } from "../entities/Template";
@@ -38,10 +37,7 @@ export abstract class ExcelRepository {
         value: string | number | boolean
     ): Promise<void>;
     public abstract async readCell(template: Template, cellRef: CellRef): Promise<string>;
-    public abstract async getCellsInRange(
-        template: Template,
-        range: PartialBy<Range, "columnEnd" | "rowEnd">
-    ): Promise<CellRef[]>;
+    public abstract async getCellsInRange(template: Template, range: Range): Promise<CellRef[]>;
     public abstract async addPicture(
         template: Template,
         location: SheetRef,

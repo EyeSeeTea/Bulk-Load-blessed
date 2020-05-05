@@ -3,7 +3,6 @@ import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populat
 import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
-import { PartialBy } from "../utils/types";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
@@ -89,10 +88,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return String(destination.value() ?? destination.formula());
     }
 
-    public async getCellsInRange(
-        template: Template,
-        range: PartialBy<Range, "columnEnd" | "rowEnd">
-    ): Promise<CellRef[]> {
+    public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
         const workbook = await this.getWorkbook(template);
 
         const { sheet, columnStart, rowStart, columnEnd = "CC", rowEnd = 4096 } = range;
