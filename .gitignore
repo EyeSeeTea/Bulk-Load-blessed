@@ -29,7 +29,6 @@ src/locales/
 src/react-app.d.ts
 src/react-app-env.d.ts
 scripts/
-public/app-config.json
 bak
 
 # cypress
