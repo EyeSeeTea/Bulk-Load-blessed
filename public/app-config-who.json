@@ -18,5 +18,12 @@
         },
         "feedbackOptions": {}
     },
-    "storage": "dataStore"
+    "storage": "dataStore",
+    "defaultSettings": {
+        "models": {
+            "dataSet": true,
+            "program": true
+        },
+        "showOrgUnitsOnGeneration": true
+    }
 }
