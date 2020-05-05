@@ -40,81 +40,83 @@ export class InstanceDhisRepository implements InstanceRepository {
         return objects.map(({ id, level, displayName }) => ({ id, level, name: displayName }));
     }
 
-    public async getDataPackage({
-        type,
+    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
+        switch (params.type) {
+            case "dataSets":
+                return this.getDataSetPackage(params);
+            case "programs":
+                return this.getProgramPackage(params);
+            default:
+                throw new Error(`Unsupported type ${params.type} for data package`);
+        }
+    }
+
+    private async getDataSetPackage({
         id,
         orgUnits,
         startDate,
         endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
-        if (type === "dataSets") {
-            const { dataValues } = await this.api
-                .get<{ dataValues: AggregatedDataValue[] }>("/dataValueSets", {
-                    dataSet: id,
-                    startDate: startDate?.format("YYYY-MM-DD"),
-                    endDate: endDate?.format("YYYY-MM-DD"),
-                    orgUnit: orgUnits,
-                })
-                .getData();
+        const { dataValues } = await this.api
+            .get<{ dataValues: AggregatedDataValue[] }>("/dataValueSets", {
+                dataSet: id,
+                startDate: startDate?.format("YYYY-MM-DD"),
+                endDate: endDate?.format("YYYY-MM-DD"),
+                orgUnit: orgUnits,
+            })
+            .getData();
 
-            return _(dataValues)
-                .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
-                    [period, orgUnit, attributeOptionCombo].join("-")
-                )
-                .map((dataValues, key) => {
-                    const [period, orgUnit, attribute] = key.split("-");
-                    return {
-                        orgUnit,
-                        period,
-                        attribute,
-                        dataValues: dataValues.map(
-                            ({ dataElement, categoryOptionCombo, value, comment }) => ({
-                                dataElement,
-                                category: categoryOptionCombo,
-                                value,
-                                comment,
-                            })
-                        ),
-                    };
-                })
-                .value();
-        } else if (type === "programs") {
-            const response = await promiseMap(orgUnits, orgUnit =>
-                this.api
-                    .get<EventsPackage>("/events", {
-                        program: id,
-                        orgUnit,
-                        paging: false,
-                    })
-                    .getData()
-            );
-
-            return _(response)
-                .map(({ events }) => events)
-                .flatten()
-                .map(
-                    ({
-                        event,
-                        orgUnit,
-                        eventDate,
-                        attributeOptionCombo,
-                        coordinate,
-                        dataValues,
-                    }) => ({
-                        id: event,
-                        orgUnit,
-                        period: moment(eventDate).format("YYYY-MM-DD"),
-                        attribute: attributeOptionCombo,
-                        coordinate,
-                        dataValues: dataValues.map(({ dataElement, value }) => ({
+        return _(dataValues)
+            .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
+                [period, orgUnit, attributeOptionCombo].join("-")
+            )
+            .map((dataValues, key) => {
+                const [period, orgUnit, attribute] = key.split("-");
+                return {
+                    orgUnit,
+                    period,
+                    attribute,
+                    dataValues: dataValues.map(
+                        ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
+                            category: categoryOptionCombo,
                             value,
-                        })),
-                    })
-                )
-                .value();
-        } else {
-            throw new Error(`Unsupported type ${type} for data package`);
-        }
+                            comment,
+                        })
+                    ),
+                };
+            })
+            .value();
+    }
+
+    private async getProgramPackage({
+        id,
+        orgUnits,
+    }: GetDataPackageParams): Promise<DataPackage[]> {
+        const response = await promiseMap(orgUnits, orgUnit =>
+            this.api
+                .get<EventsPackage>("/events", {
+                    program: id,
+                    orgUnit,
+                    paging: false,
+                })
+                .getData()
+        );
+
+        return _(response)
+            .map(({ events }) => events)
+            .flatten()
+            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
+                id: event,
+                orgUnit,
+                period: moment(eventDate).format("YYYY-MM-DD"),
+                attribute: attributeOptionCombo,
+                coordinate,
+                dataValues: dataValues.map(({ dataElement, value }) => ({
+                    dataElement,
+                    value,
+                })),
+            }))
+            .value();
     }
 }
