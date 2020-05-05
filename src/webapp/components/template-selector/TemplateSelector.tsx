@@ -129,8 +129,8 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
     };
 
     const onPopulateChange = (_event: React.ChangeEvent, checked: boolean) => {
-        setState(state => ({ ...state, populate: checked }))
-    }
+        setState(state => ({ ...state, populate: checked }));
+    };
 
     return (
         <React.Fragment>
