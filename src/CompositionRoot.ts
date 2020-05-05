@@ -12,8 +12,9 @@ import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
-import { DownloadGeneratedTemplateUseCase } from "./domain/usecases/DownloadGeneratedTemplateUseCase";
+import { DownloadGeneratedTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
+import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
 import { GetTemplateInfoUseCase } from "./domain/usecases/GetTemplateInfoUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
@@ -56,6 +57,12 @@ export class CompositionRoot {
             throw new Error("Composition root has not been initialized");
         }
         return CompositionRoot.compositionRoot;
+    }
+
+    public get orgUnits() {
+        return {
+            getRoots: new GetOrgUnitRootsUseCase(this.instance),
+        };
     }
 
     public get templates() {

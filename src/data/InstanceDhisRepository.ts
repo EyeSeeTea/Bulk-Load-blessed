@@ -4,6 +4,7 @@ import moment from "moment";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { AggregatedDataValue, DataSet } from "../domain/entities/DataSet";
 import { DhisInstance } from "../domain/entities/DhisInstance";
+import { OrgUnit } from "../domain/entities/OrgUnit";
 import { EventsPackage, Program } from "../domain/entities/Program";
 import {
     GetDataPackageParams,
@@ -30,6 +31,13 @@ export class InstanceDhisRepository implements InstanceRepository {
             .get({ paging: false, fields: { id: true, displayName: true, name: true } })
             .getData();
         return objects.map(({ id, displayName, name }) => ({ id, name: displayName ?? name }));
+    }
+
+    public async getOrgUnitRoots(): Promise<OrgUnit[]> {
+        const { objects } = await this.api.models.organisationUnits
+            .get({ userOnly: true, fields: { id: true, displayName: true, level: true } })
+            .getData();
+        return objects.map(({ id, level, displayName }) => ({ id, level, name: displayName }));
     }
 
     public async getDataPackage({

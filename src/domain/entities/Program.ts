@@ -1,3 +1,5 @@
+import { Id } from "./ReferenceObject";
+
 export interface ProgramEvent {
     event?: string;
     orgUnit: string;
@@ -22,6 +24,6 @@ export interface EventsPackage {
 }
 
 export interface Program {
-    id: string;
+    id: Id;
     name: string;
 }

@@ -4,6 +4,15 @@ import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
+interface DownloadTemplateProps {
+    type: "dataSet" | "program";
+    id: string;
+    name: string;
+    orgUnits: string[];
+    file: File;
+    theme?: Id;
+}
+
 export class DownloadGeneratedTemplateUseCase {
     constructor(
         private instance: InstanceRepository,
@@ -11,9 +20,17 @@ export class DownloadGeneratedTemplateUseCase {
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute(name: string, file: File, themeId?: Id): Promise<void> {
+    public async execute({
+        type,
+        id,
+        name,
+        file,
+        theme: themeId,
+        orgUnits,
+    }: DownloadTemplateProps): Promise<void> {
         try {
-            const template = this.templateRepository.getTemplate("PROGRAM_GENERATED_v0");
+            const templateId = type === "dataSet" ? "DATASET_GENERATED_v0" : "PROGRAM_GENERATED_v0";
+            const template = this.templateRepository.getTemplate(templateId);
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
             if (themeId) {
@@ -21,13 +38,7 @@ export class DownloadGeneratedTemplateUseCase {
                 await this.excelRepository.applyTheme(template, theme);
             }
 
-            // TODO: Read values from dropdowns
-            const dataPackage = await this.instance.getDataPackage({
-                type: "program",
-                id: "yx6VLBFBlrK",
-                orgUnits: ["H8RixfF8ugH"],
-            });
-
+            const dataPackage = await this.instance.getDataPackage({ type, id, orgUnits });
             await this.excelRepository.populateTemplate(template, dataPackage);
 
             const data = await this.excelRepository.toBlob(template);

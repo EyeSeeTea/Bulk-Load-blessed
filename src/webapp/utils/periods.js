@@ -36,17 +36,14 @@ export function buildAllPossiblePeriods(periodType, startYear, endYear) {
 }
 
 export function buildPossibleYears(startYear, endYear) {
-    const dates = [];
-    for (
-        const current = moment(startYear + "-01-01");
-        current.isSameOrBefore(moment(endYear + "-12-31"));
-        current.add(1, "year")
-    ) {
-        dates.push({
-            value: current.year(),
-            label: current.year().toString(),
-        });
+    const current = moment(startYear, "YYYY");
+    const endDate = moment(endYear, "YYYY");
+    const periods = [];
+
+    while (current.isSameOrBefore(endDate)) {
+        periods.push(current.format("YYYY"));
+        current.add(1, "year");
     }
 
-    return dates;
+    return periods.map(year => ({ value: year, label: year }));
 }

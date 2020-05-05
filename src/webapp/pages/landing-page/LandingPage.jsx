@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
-import { Select } from "../../components/select/Select";
+import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import SettingsComponent from "../../components/settings/SettingsDialog";
 import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
@@ -18,14 +18,7 @@ import * as dhisConnector from "../../logic/dhisConnector";
 import Settings from "../../logic/settings";
 import { SheetBuilder } from "../../logic/sheetBuilder";
 import * as sheetImport from "../../logic/sheetImport";
-import { buildPossibleYears } from "../../utils/periods";
 import "./LandingPage.css";
-
-const controls = {
-    filterByLevel: false,
-    filterByGroup: false,
-    selectAll: false,
-};
 
 export default function LandingPage() {
     const loading = useLoading();
@@ -37,7 +30,6 @@ export default function LandingPage() {
         template: null,
         dataSets: [],
         programs: [],
-        orgUnitTreeSelected: [],
         orgUnitTreeSelected2: [],
         orgUnitTreeRootIds: [],
         importOrgUnitIds: undefined,
@@ -45,44 +37,36 @@ export default function LandingPage() {
         importDataSheet: undefined,
         importMessages: [],
         importDataValues: [],
-        startYear: 2010,
-        endYear: moment().year(),
         isTemplateGenerationVisible: true,
         confirmOnExistingData: undefined,
     });
 
     useEffect(() => {
-        Settings.build(api)
-            .then(setSettings)
-            .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
-
         dhisConnector.getUserInformation({ d2 }).then(result => {
             setState(state => ({
                 ...state,
                 ...result,
             }));
         });
+    }, [d2]);
 
-        d2.models.organisationUnits
-            .list({ fields: "id,displayName,path,children::isNotEmpty,access", userOnly: true })
-            .then(result => {
-                setState(state => ({
-                    ...state,
-                    orgUnitTreeRootIds: result.toArray().map(ou => ou.id),
-                }));
+    useEffect(() => {
+        Settings.build(api)
+            .then(setSettings)
+            .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
+    }, [api, snackbar]);
+
+    useEffect(() => {
+        CompositionRoot.attach()
+            .orgUnits.getRoots.execute()
+            .then(orgUnitTreeRootIds => {
+                setState(state => ({ ...state, orgUnitTreeRootIds }));
             });
-    }, [d2, api, snackbar]);
+    }, []);
 
     const isImportEnabled =
         state.importObject &&
         (settings.showOrgUnitsOnGeneration || !_.isEmpty(state.orgUnitTreeSelected2));
-
-    const handleOrgUnitTreeClick = orgUnitPaths => {
-        setState(state => ({
-            ...state,
-            orgUnitTreeSelected: orgUnitPaths,
-        }));
-    };
 
     const handleOrgUnitTreeClick2 = orgUnitPaths => {
         setState(state => ({
@@ -93,16 +77,12 @@ export default function LandingPage() {
 
     const handleTemplateDownloadClick = async () => {
         if (!state.template) return;
-        const { type, id, theme } = state.template;
+        const { type, id, theme, startYear, endYear, orgUnits } = state.template;
         loading.show(true);
 
         if (type === "custom") {
             await CompositionRoot.attach().templates.downloadCustom.execute(id, theme);
         } else {
-            const orgUnits = state.orgUnitTreeSelected.map(element =>
-                element.substr(element.lastIndexOf("/") + 1)
-            );
-
             const element = await dhisConnector.getElement(d2, type, id);
 
             const result = await dhisConnector.getElementMetadata({
@@ -113,13 +93,20 @@ export default function LandingPage() {
 
             const template = new SheetBuilder({
                 ...result,
-                startYear: state.startYear,
-                endYear: state.endYear,
+                startYear,
+                endYear,
             });
 
             const name = element.displayName ?? element.name;
             const file = await template.toBlob();
-            await CompositionRoot.attach().templates.downloadGenerated.execute(name, file, theme);
+            await CompositionRoot.attach().templates.downloadGenerated.execute({
+                type,
+                id,
+                name,
+                file,
+                theme,
+                orgUnits,
+            });
         }
 
         loading.show(false);
@@ -188,10 +175,7 @@ export default function LandingPage() {
         if (!state.orgUnitTreeSelected2) return;
 
         const { showOrgUnitsOnGeneration } = state.settings;
-
-        const orgUnits = state.orgUnitTreeSelected2.map(path =>
-            path.substr(path.lastIndexOf("/") + 1)
-        );
+        const orgUnits = cleanOrgUnitPaths(state.orgUnitTreeSelected2);
 
         try {
             loading.show(true);
@@ -310,20 +294,6 @@ export default function LandingPage() {
         }));
     }, []);
 
-    const handleStartYear = selectedOption => {
-        setState(state => ({
-            ...state,
-            startYear: selectedOption.value,
-        }));
-    };
-
-    const handleEndYear = selectedOption => {
-        setState(state => ({
-            ...state,
-            endYear: selectedOption.value,
-        }));
-    };
-
     const ConfirmationOnExistingData = () => {
         const { confirmOnExistingData } = state;
 
@@ -365,55 +335,6 @@ export default function LandingPage() {
                 <h1>{i18n.t("Template Generation")}</h1>
 
                 <TemplateSelector settings={settings} onChange={onTemplateChange} />
-
-                {state.template?.type === "dataSets" && (
-                    <div
-                        className="row"
-                        style={{
-                            marginTop: "1em",
-                            marginLeft: "1em",
-                            marginRight: "1em",
-                        }}
-                    >
-                        <div style={{ flexBasis: "30%", margin: "1em", marginLeft: 0 }}>
-                            <Select
-                                placeholder={i18n.t("Start Year")}
-                                options={buildPossibleYears(1970, state.endYear)}
-                                defaultValue={{
-                                    value: moment("2010-01-01").year(),
-                                    label: moment("2010-01-01").year().toString(),
-                                }}
-                                onChange={handleStartYear}
-                            />
-                        </div>
-                        <div style={{ flexBasis: "30%", margin: "1em" }}>
-                            <Select
-                                placeholder={i18n.t("End Year")}
-                                options={buildPossibleYears(state.startYear, moment().year())}
-                                defaultValue={{
-                                    value: moment().year(),
-                                    label: moment().year().toString(),
-                                }}
-                                onChange={handleEndYear}
-                            />
-                        </div>
-                    </div>
-                )}
-                {!_.isEmpty(state.orgUnitTreeRootIds) ? (
-                    settings.showOrgUnitsOnGeneration && state.template?.type !== "custom" ? (
-                        <OrgUnitsSelector
-                            api={api}
-                            onChange={handleOrgUnitTreeClick}
-                            selected={state.orgUnitTreeSelected}
-                            controls={controls}
-                            rootIds={state.orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={220}
-                        />
-                    ) : null
-                ) : (
-                    i18n.t("No capture organisations units")
-                )}
 
                 <div
                     className="row"
@@ -516,7 +437,11 @@ export default function LandingPage() {
                             api={api}
                             onChange={handleOrgUnitTreeClick2}
                             selected={state.orgUnitTreeSelected2}
-                            controls={controls}
+                            controls={{
+                                filterByLevel: false,
+                                filterByGroup: false,
+                                selectAll: false,
+                            }}
                             rootIds={state.importOrgUnitIds}
                             fullWidth={false}
                             height={220}
