@@ -124,7 +124,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private formatDataValue(value: string | number, metadata: MetadataPackage): string | number {
         // Format options from CODE to UID
-        const optionValue = metadata.options.find(({ code }) => code === value);
+        const optionValue = metadata.options?.find(({ code }) => code === value);
         if (optionValue) return optionValue.id;
 
         // Return default case
@@ -163,4 +163,7 @@ interface AggregatedPackage {
     }>;
 }
 
-type MetadataPackage = Record<string, Array<{ id: string; code: string; [key: string]: unknown }>>;
+type MetadataPackage = Record<
+    string,
+    Array<{ id: string; code: string; [key: string]: unknown }> | undefined
+>;
