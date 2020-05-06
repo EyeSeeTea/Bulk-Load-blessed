@@ -4,8 +4,6 @@ import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/ex
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
-const DEFAULT_GENERATED_ID = "AUTO_v0";
-
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
@@ -242,7 +240,9 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    return getObjectVersion(element) ?? DEFAULT_GENERATED_ID;
+    const defaultVersion =
+        element.type === "dataSets" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
+    return getObjectVersion(element) ?? defaultVersion;
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function () {
@@ -292,16 +292,17 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             null,
             this.validations.get("periods")
         );
-        createColumn(
-            this.workbook,
-            dataEntrySheet,
-            dataElementsRow,
-            columnId++,
-            "Options",
-            null,
-            this.validations.get("options")
-        );
     }
+
+    createColumn(
+        this.workbook,
+        dataEntrySheet,
+        dataElementsRow,
+        columnId++,
+        "Options",
+        null,
+        this.validations.get("options")
+    );
 
     if (element.type === "dataSets") {
         const categoryOptionCombos = [];

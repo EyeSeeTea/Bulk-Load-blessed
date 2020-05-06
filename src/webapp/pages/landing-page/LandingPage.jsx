@@ -116,7 +116,7 @@ export default function LandingPage() {
     };
 
     const onDrop = async files => {
-        const { dataSets, programs, settings, orgUnitTreeRootIds } = state;
+        const { dataSets, programs, orgUnitTreeRootIds } = state;
         loading.show(true);
 
         const file = files[0];
@@ -127,12 +127,13 @@ export default function LandingPage() {
 
         try {
             const id = await sheetImport.getVersion(file);
-            const { rowOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+            const { rowOffset, colOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
 
             const info = await sheetImport.getBasicInfoFromSheet(
                 file,
                 { dataSets, programs },
-                rowOffset
+                rowOffset,
+                colOffset
             );
             const { object, dataValues } = info;
 
@@ -177,7 +178,6 @@ export default function LandingPage() {
         if (!state.importDataSheet) return;
         if (!state.orgUnitTreeSelected2) return;
 
-        const { showOrgUnitsOnGeneration } = state.settings;
         const orgUnits = cleanOrgUnitPaths(state.orgUnitTreeSelected2);
 
         try {
@@ -188,7 +188,7 @@ export default function LandingPage() {
                 organisationUnits: orgUnits,
             });
 
-            if (!showOrgUnitsOnGeneration) {
+            if (!settings.showOrgUnitsOnGeneration) {
                 const orgUnit = result.organisationUnits[0];
                 if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
                 const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
@@ -201,14 +201,15 @@ export default function LandingPage() {
             }
 
             const id = await sheetImport.getVersion(state.importDataSheet);
-            const { rowOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+            const { rowOffset, colOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
 
             const data = await sheetImport.readSheet({
                 ...result,
                 d2,
                 file: state.importDataSheet,
-                useBuilderOrgUnits: !showOrgUnitsOnGeneration,
+                useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
                 rowOffset,
+                colOffset,
             });
 
             const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];

@@ -18,6 +18,7 @@ export interface GeneratedTemplate {
     id: Id;
     name: string;
     rowOffset: number;
+    colOffset: number;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
     readId?: (id: string | number) => string | number;

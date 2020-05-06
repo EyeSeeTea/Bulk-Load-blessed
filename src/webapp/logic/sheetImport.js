@@ -14,7 +14,7 @@ const models = { dataSet: "dataSets", program: "programs" };
  * @param objectsByType: Object {dataSet, program} containing all D2 objects.
  * @returns {Promise<{object, dataValues}>}
  */
-export async function getBasicInfoFromSheet(file, objectsByType, rowOffset) {
+export async function getBasicInfoFromSheet(file, objectsByType, rowOffset = 0, colOffset = 0) {
     const workbook = await getWorkbook(file);
 
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
@@ -41,22 +41,25 @@ export async function getBasicInfoFromSheet(file, objectsByType, rowOffset) {
     } else {
         const dbObject =
             _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
-        await checkVersion(file, dbObject);
-        return { object: dbObject, dataValues: getDataValues(object, dataEntrySheet, rowOffset) };
+        await checkVersion(file, dbObject, object.type);
+        return {
+            object: dbObject,
+            dataValues: getDataValues(object, dataEntrySheet, rowOffset, colOffset),
+        };
     }
 }
 
-function getDataValues(object, dataEntrySheet, rowOffset = 0) {
+function getDataValues(object, dataEntrySheet, rowOffset, colOffset) {
     return _(rowOffset + 3)
         .range(dataEntrySheet.rowCount + 1)
         .map(nRow => dataEntrySheet.getRow(nRow))
-        .map(row => getDataValuesFromRow(row, object))
+        .map(row => getDataValuesFromRow(row, object, colOffset))
         .compact()
         .sortBy("period")
         .value();
 }
 
-function getDataValuesFromRow(row, object) {
+function getDataValuesFromRow(row, object, colOffset) {
     const infoByType = {
         dataSet: { periodCol: 2, initialValuesCol: 4 },
         program: { periodCol: 4, initialValuesCol: 5 },
@@ -65,10 +68,13 @@ function getDataValuesFromRow(row, object) {
     if (!info) return;
 
     const values = row.values;
-    const period = values[info.periodCol];
+    const period = values[info.periodCol + colOffset];
     if (!period) return;
 
-    const count = _(values).drop(info.initialValuesCol).reject(_.isNil).size();
+    const count = _(values)
+        .drop(info.initialValuesCol + colOffset)
+        .reject(_.isNil)
+        .size();
 
     return { period, count };
 }
@@ -106,6 +112,7 @@ export function readSheet(builder) {
 
             const isProgram = builder.element.type === "program";
             const rowOffset = builder.rowOffset ?? 0;
+            const colOffset = builder.colOffset ?? 0;
 
             let columns;
             let stageColumns;
@@ -152,8 +159,11 @@ export function readSheet(builder) {
                             longitude: row.values[3],
                         };
 
-                    if (isProgram && row.values[4] !== undefined) {
-                        result.eventDate = dateFormat(new Date(row.values[4]), "yyyy-mm-dd");
+                    if (isProgram && row.values[4 + colOffset] !== undefined) {
+                        result.eventDate = dateFormat(
+                            new Date(row.values[4 + colOffset]),
+                            "yyyy-mm-dd"
+                        );
                     } else if (isProgram) {
                         return reject(new Error("Event date is empty"));
                     }
@@ -162,12 +172,17 @@ export function readSheet(builder) {
                         result.period = row.values[2];
                     }
 
-                    if (!isProgram && row.values[3] !== undefined) {
+                    if (isProgram && colOffset === 1 && row.values[4] !== undefined) {
+                        result.attributeCategoryOptions = parseMetadataId(
+                            metadataSheet,
+                            row.values[4]
+                        );
+                    } else if (!isProgram && row.values[3] !== undefined) {
                         result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
                     }
 
                     row.eachCell((cell, colNumber) => {
-                        if (isProgram && colNumber > 4) {
+                        if (isProgram && colNumber > 4 + colOffset) {
                             // TODO: Do not hardcode previous entries
                             const id = columns[colNumber].formula.substr(1);
                             let cellValue = cell.value?.text ?? cell.value?.toString();
@@ -255,18 +270,19 @@ function parseMetadataId(metadataSheet, metadataName) {
     return result;
 }
 
-export async function getVersion(file) {
+export async function getVersion(file, type) {
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
 
-    const cellValue = dataEntrySheet.getCell("A1").value || "";
+    const defaultVersion = type === "dataSet" ? "DATASET_GENERATED_v0" : "PROGRAM_GENERATED_v0";
+    const cellValue = dataEntrySheet.getCell("A1").value || defaultVersion;
     return cellValue.replace(/^.*?:/, "").trim();
 }
 
-async function checkVersion(file, dbObject) {
+async function checkVersion(file, dbObject, type) {
     if (!dbObject) return true;
 
-    const sheetVersion = await getVersion(file);
+    const sheetVersion = await getVersion(file, type);
     const dbVersion = getObjectVersion(dbObject);
 
     if (!dbVersion || sheetVersion === dbVersion) {

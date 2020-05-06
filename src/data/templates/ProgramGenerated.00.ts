@@ -4,7 +4,8 @@ export default class implements GeneratedTemplate {
     public readonly id = "PROGRAM_GENERATED_v0";
     public readonly name = "Auto-generated program template";
 
-    public readonly rowOffset = 5;
+    public readonly rowOffset = 0;
+    public readonly colOffset = 0;
 
     public readonly dataSources: DataSource[] = [
         {
@@ -17,13 +18,12 @@ export default class implements GeneratedTemplate {
             period: {
                 sheet: "Data Entry",
                 type: "column",
-                ref: "D",
+                ref: "E",
             },
             range: {
                 sheet: "Data Entry",
                 rowStart: 8,
-                columnStart: "E",
-                columnEnd: "DO",
+                columnStart: "F",
             },
             dataElement: {
                 sheet: "Data Entry",
@@ -33,48 +33,7 @@ export default class implements GeneratedTemplate {
         },
     ];
 
-    public readonly styleSources: StyleSource[] = [
-        {
-            section: "header",
-            source: {
-                type: "range",
-                ref: "D2:I2",
-                sheet: "Data Entry",
-            },
-        },
-        {
-            section: "title",
-            source: {
-                type: "range",
-                ref: "D3:I3",
-                sheet: "Data Entry",
-            },
-        },
-        {
-            section: "subtitle",
-            source: {
-                type: "range",
-                ref: "D4:I4",
-                sheet: "Data Entry",
-            },
-        },
-        {
-            section: "footer",
-            source: {
-                type: "range",
-                ref: "D5:I5",
-                sheet: "Data Entry",
-            },
-        },
-        {
-            section: "logo",
-            source: {
-                type: "range",
-                ref: "A2:C5",
-                sheet: "Data Entry",
-            },
-        },
-    ];
+    public readonly styleSources: StyleSource[] = [];
 
     public writeId(id: string | number): string | number {
         return `=_${id}`;

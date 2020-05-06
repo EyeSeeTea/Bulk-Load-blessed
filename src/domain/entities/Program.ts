@@ -10,7 +10,7 @@ export interface ProgramEvent {
         latitude: string;
         longitude: string;
     };
-    attributeCategoryOptions?: string;
+    attributeOptionCombo?: string;
     dataValues: ProgramEventDataValue[];
 }
 
