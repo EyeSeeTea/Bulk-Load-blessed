@@ -2,10 +2,10 @@ import { D2Api, D2ApiDefault } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
 import { DataPackage } from "../domain/entities/DataPackage";
-import { AggregatedDataValue, DataSet } from "../domain/entities/DataSet";
+import { DataSet } from "../domain/entities/DataSet";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { OrgUnit } from "../domain/entities/OrgUnit";
-import { EventsPackage, Program } from "../domain/entities/Program";
+import { Program } from "../domain/entities/Program";
 import {
     GetDataPackageParams,
     InstanceRepository,
@@ -58,7 +58,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const { dataValues } = await this.api
-            .get<{ dataValues: AggregatedDataValue[] }>("/dataValueSets", {
+            .get<AggregatedPackage>("/dataValueSets", {
                 dataSet: id,
                 startDate: startDate?.format("YYYY-MM-DD"),
                 endDate: endDate?.format("YYYY-MM-DD"),
@@ -119,4 +119,35 @@ export class InstanceDhisRepository implements InstanceRepository {
             }))
             .value();
     }
+}
+
+interface EventsPackage {
+    events: Array<{
+        event?: string;
+        orgUnit: string;
+        program: string;
+        status: string;
+        eventDate: string;
+        coordinate?: {
+            latitude: string;
+            longitude: string;
+        };
+        attributeOptionCombo?: string;
+        dataValues: Array<{
+            dataElement: string;
+            value: string | number;
+        }>;
+    }>;
+}
+
+interface AggregatedPackage {
+    dataValues: Array<{
+        dataElement: string;
+        period: string;
+        orgUnit: string;
+        value: string;
+        comment?: string;
+        categoryOptionCombo?: string;
+        attributeOptionCombo?: string;
+    }>;
 }

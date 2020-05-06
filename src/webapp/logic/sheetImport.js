@@ -172,10 +172,7 @@ export function readSheet(builder) {
                     }
 
                     if (isProgram && colOffset === 1 && row.values[4] !== undefined) {
-                        result.attributeOptionCombo = parseMetadataId(
-                            metadataSheet,
-                            row.values[4]
-                        );
+                        result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
                     } else if (!isProgram && row.values[3] !== undefined) {
                         result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
                     }
@@ -184,7 +181,8 @@ export function readSheet(builder) {
                         if (isProgram && colNumber > 4 + colOffset) {
                             // TODO: Do not hardcode previous entries
                             const id = columns[colNumber].formula.substr(1);
-                            let cellValue = cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+                            let cellValue =
+                                cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
 
                             // TODO: Check different data types
                             const dataValue = builder.elementMetadata.get(id);

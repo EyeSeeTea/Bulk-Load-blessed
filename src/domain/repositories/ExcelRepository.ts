@@ -87,7 +87,7 @@ export abstract class ExcelRepository {
                 cells[0]
             );
             if (attributeCell && attribute) {
-                await this.writeCell(template, attributeCell, (attribute));
+                await this.writeCell(template, attributeCell, attribute);
             }
 
             for (const cell of cells) {
