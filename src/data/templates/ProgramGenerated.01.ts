@@ -1,4 +1,5 @@
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
+import { removeCharacters } from "../../utils/string";
 
 export default class implements GeneratedTemplate {
     public readonly id = "PROGRAM_GENERATED_v1";
@@ -86,6 +87,6 @@ export default class implements GeneratedTemplate {
     }
 
     public readId(string: string | number): string | number {
-        return String(string).replace(/[^a-zA-Z0-9]/g, "");
+        return removeCharacters(string);
     }
 }

@@ -41,7 +41,7 @@ export async function getBasicInfoFromSheet(file, objectsByType, rowOffset = 0, 
     } else {
         const dbObject =
             _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
-        await checkVersion(file, dbObject, object.type);
+        await checkVersion(file, dbObject);
         return {
             object: dbObject,
             dataValues: getDataValues(object, dataEntrySheet, rowOffset, colOffset),
@@ -79,15 +79,11 @@ function getDataValuesFromRow(row, object, colOffset) {
     return { period, count };
 }
 
-function getWorkbook(file) {
-    return new Promise(function (resolve, reject) {
-        const workbook = new ExcelJS.Workbook();
-        const inputStream = workbook.xlsx.createInputStream();
-        const readerStream = fileReaderStream(file);
-        inputStream.on("error", reject);
-        inputStream.on("done", () => resolve(workbook));
-        readerStream.pipe(inputStream);
-    });
+async function getWorkbook(file) {
+    const workbook = new ExcelJS.Workbook();
+    const buffer = await file.arrayBuffer();
+    await workbook.xlsx.load(buffer);
+    return workbook;
 }
 
 /**
@@ -281,12 +277,11 @@ function parseMetadataId(metadataSheet, metadataName) {
     return result;
 }
 
-export async function getVersion(file, type) {
+export async function getVersion(file) {
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
 
-    const defaultVersion = type === "dataSet" ? "DATASET_GENERATED_v0" : "PROGRAM_GENERATED_v0";
-    const cellValue = dataEntrySheet.getCell("A1").value || defaultVersion;
+    const cellValue = dataEntrySheet.getCell("A1").value || "OLD_GENERATED_v1";
     return cellValue.replace(/^.*?:/, "").trim();
 }
 

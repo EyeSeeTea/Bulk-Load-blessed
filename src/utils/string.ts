@@ -1,4 +1,3 @@
-export function stringOrNumber(value: string | number | undefined): string | number | undefined {
-    const validNumber = !isNaN(Number(value));
-    return validNumber ? Number(value) : value;
+export function removeCharacters(value: unknown): string {
+    return String(value).replace(/[^a-zA-Z0-9]/g, "")
 }
