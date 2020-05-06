@@ -237,51 +237,48 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const performImport = ({ data, dataValues }) => {
+    const performImport = async ({ data, dataValues }) => {
         loading.show(true);
         setState(state => ({ ...state, confirmOnExistingData: undefined }));
 
-        return deleteDataValues(api, dataValues)
-            .then(async deletedCount => {
-                const response = await dhisConnector.importData({
-                    d2,
-                    element: state.importObject,
-                    data: data,
-                });
-                return { response, deletedCount };
-            })
-            .then(({ deletedCount, response }) => {
-                loading.show(false);
-                console.log(response);
-                const imported =
-                    response.data.response !== undefined
-                        ? response.data.response.imported
-                        : response.data.importCount.imported;
-                const updated =
-                    response.data.response !== undefined
-                        ? response.data.response.updated
-                        : response.data.importCount.updated;
-                const ignored =
-                    response.data.response !== undefined
-                        ? response.data.response.ignored
-                        : response.data.importCount.ignored;
-                const msgs = _.compact([
-                    response.data.description,
-                    [
-                        `${i18n.t("Imported")}: ${imported}`,
-                        `${i18n.t("Updated")}: ${updated}`,
-                        `${i18n.t("Ignored")}: ${ignored}`,
-                        `${i18n.t("Deleted")}: ${deletedCount}`,
-                    ].join(", "),
-                ]);
-                snackbar.info(msgs.join(" - "));
-                setState(state => ({ ...state, importMessages: msgs }));
-            })
-            .catch(reason => {
-                loading.show(false);
-                console.error(reason);
-                snackbar.error(reason.message || reason.toString());
+        try {
+            const deletedCount = await deleteDataValues(api, dataValues);
+            const response = await dhisConnector.importData({
+                d2,
+                element: state.importObject,
+                data: data,
             });
+
+            console.log(response);
+            const imported =
+                response.data.response !== undefined
+                    ? response.data.response.imported
+                    : response.data.importCount.imported;
+            const updated =
+                response.data.response !== undefined
+                    ? response.data.response.updated
+                    : response.data.importCount.updated;
+            const ignored =
+                response.data.response !== undefined
+                    ? response.data.response.ignored
+                    : response.data.importCount.ignored;
+            const msgs = _.compact([
+                response.data.description,
+                [
+                    `${i18n.t("Imported")}: ${imported}`,
+                    `${i18n.t("Updated")}: ${updated}`,
+                    `${i18n.t("Ignored")}: ${ignored}`,
+                    `${i18n.t("Deleted")}: ${deletedCount}`,
+                ].join(", "),
+            ]);
+            snackbar.info(msgs.join(" - "));
+            setState(state => ({ ...state, importMessages: msgs }));
+        } catch (reason) {
+            console.error(reason);
+            snackbar.error(reason.message || reason.toString());
+        }
+
+        loading.show(false);
     };
 
     const getNameForModel = key => {
