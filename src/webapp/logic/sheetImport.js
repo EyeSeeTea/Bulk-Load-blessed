@@ -146,7 +146,7 @@ export function readSheet(builder) {
                         result.orgUnit = builder.organisationUnits[0].id;
                     } else {
                         if (row.values[1] !== undefined) {
-                            result.orgUnit = parseMetadataId(metadataSheet, row.values[1]);
+                            result.orgUnit = parseMetadataId(metadataSheet, row.values[1].result ?? row.values[1]);
                         } else {
                             result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
                         }
@@ -204,7 +204,7 @@ export function readSheet(builder) {
                                 dataValue.valueType === "BOOLEAN" ||
                                 dataValue.valueType === "TRUE_ONLY"
                             ) {
-                                cellValue = cellValue === "true" || cellValue === "Yes";
+                                cellValue = String(cellValue) === "true" || cellValue === "Yes";
                             }
                             result.dataValues.push({ dataElement: id, value: cellValue });
                         } else if (!isProgram && colNumber > 3) {
@@ -221,8 +221,16 @@ export function readSheet(builder) {
                                 : dataEntrySheet
                                       .getCell(stageColumn.sharedFormula)
                                       .value.formula.substr(1);
-                            const cellValue = cell.value?.toString();
+                            let cellValue = cell.value?.toString();
                             const dataValue = builder.elementMetadata.get(id);
+                            const dataElement = builder.elementMetadata.get(dataElementId);
+
+                            if (
+                                dataElement.valueType === "BOOLEAN" ||
+                                dataElement.valueType === "TRUE_ONLY"
+                            ) {
+                                cellValue = String(cellValue) === "true" || cellValue === "Yes";
+                            }
 
                             if (dataValue.type === "categoryOptionCombo") {
                                 // TODO: OptionSets in categoryOptionCombos
