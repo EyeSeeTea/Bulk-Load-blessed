@@ -11,6 +11,7 @@ export interface SelectProps {
     onChange: (option: SelectOption) => void;
     defaultValue?: SelectOption;
     allowEmpty?: boolean;
+    emptyLabel?: string;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -19,6 +20,7 @@ export const Select: React.FC<SelectProps> = ({
     onChange,
     defaultValue,
     allowEmpty = false,
+    emptyLabel = "",
 }) => {
     const classes = useStyles();
     const [value, setValue] = React.useState(defaultValue ? defaultValue.value : "");
@@ -38,7 +40,7 @@ export const Select: React.FC<SelectProps> = ({
                 <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
                 <MuiSelect onChange={handleChange} value={value} autoWidth={true}>
                     <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
-                        {allowEmpty ? "" : placeholder}
+                        {allowEmpty ? emptyLabel : placeholder}
                     </MenuItem>
                     {options.map(option => (
                         <MenuItem
