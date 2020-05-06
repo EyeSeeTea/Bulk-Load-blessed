@@ -112,6 +112,15 @@ export default function LandingPage() {
             });
         }
 
+        setState(state => ({
+            ...state,
+            importDataSheet: undefined,
+            importObject: undefined,
+            importDataValues: [],
+            importOrgUnitIds: undefined,
+            importMessages: [],
+        }));
+
         loading.show(false);
     };
 
