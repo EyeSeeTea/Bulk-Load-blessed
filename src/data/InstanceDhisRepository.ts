@@ -57,6 +57,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
+        const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
         const { dataValues } = await this.api
             .get<AggregatedPackage>("/dataValueSets", {
                 dataSet: id,
@@ -80,7 +81,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
                             category: categoryOptionCombo,
-                            value,
+                            value: this.formatDataValue(value, metadata),
                             comment,
                         })
                     ),
@@ -93,6 +94,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         id,
         orgUnits,
     }: GetDataPackageParams): Promise<DataPackage[]> {
+        const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const response = await promiseMap(orgUnits, orgUnit =>
             this.api
                 .get<EventsPackage>("/events", {
@@ -114,10 +116,19 @@ export class InstanceDhisRepository implements InstanceRepository {
                 coordinate,
                 dataValues: dataValues.map(({ dataElement, value }) => ({
                     dataElement,
-                    value,
+                    value: this.formatDataValue(value, metadata),
                 })),
             }))
             .value();
+    }
+
+    private formatDataValue(value: string | number, metadata: MetadataPackage): string | number {
+        // Format options from CODE to UID
+        const optionValue = metadata.options.find(({ code }) => code === value);
+        if (optionValue) return optionValue.id;
+
+        // Return default case
+        return value;
     }
 }
 
@@ -151,3 +162,5 @@ interface AggregatedPackage {
         attributeOptionCombo?: string;
     }>;
 }
+
+type MetadataPackage = Record<string, Array<{ id: string; code: string; [key: string]: unknown }>>;
