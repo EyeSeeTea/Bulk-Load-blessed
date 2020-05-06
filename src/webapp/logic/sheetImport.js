@@ -146,7 +146,10 @@ export function readSheet(builder) {
                         result.orgUnit = builder.organisationUnits[0].id;
                     } else {
                         if (row.values[1] !== undefined) {
-                            result.orgUnit = parseMetadataId(metadataSheet, row.values[1].result ?? row.values[1]);
+                            result.orgUnit = parseMetadataId(
+                                metadataSheet,
+                                row.values[1].result ?? row.values[1]
+                            );
                         } else {
                             result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
                         }

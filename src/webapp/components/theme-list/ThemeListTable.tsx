@@ -31,7 +31,11 @@ export interface ThemeDetail {
     logo: ReactNode;
 }
 
-export default function ThemeListTable() {
+interface ThemeListTableProps {
+    onChange?: (themes: Theme[]) => void;
+}
+
+export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     const snackbar = useSnackbar();
 
     const [themes, setThemes] = useState<Theme[]>([]);
@@ -39,11 +43,16 @@ export default function ThemeListTable() {
     const rows = buildThemeDetails(themes);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
-    const [reloadKey, setReloadKey] = useState(Math.random());
+    const [reloadKey, setReloadKey] = useState<number>();
 
     useEffect(() => {
-        CompositionRoot.attach().themes.list.execute().then(setThemes);
-    }, [reloadKey]);
+        CompositionRoot.attach()
+            .themes.list.execute()
+            .then(themes => {
+                setThemes(themes);
+                if (reloadKey && onChange) onChange(themes);
+            });
+    }, [reloadKey, onChange]);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });

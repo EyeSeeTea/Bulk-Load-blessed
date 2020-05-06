@@ -77,7 +77,7 @@ export class CompositionRoot {
                 this.templateManager,
                 this.excelReader
             ),
-            list: new ListTemplatesUseCase(this.instance, this.templateManager),
+            list: new ListTemplatesUseCase(this.instance),
         };
     }
 

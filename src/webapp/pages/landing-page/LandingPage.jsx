@@ -26,6 +26,7 @@ export default function LandingPage() {
     const { d2, api } = useAppContext();
 
     const [settings, setSettings] = useState();
+    const [themes, setThemes] = useState();
     const [state, setState] = useState({
         template: null,
         dataSets: [],
@@ -55,6 +56,10 @@ export default function LandingPage() {
             .then(setSettings)
             .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
     }, [api, snackbar]);
+
+    useEffect(() => {
+        CompositionRoot.attach().themes.list.execute().then(setThemes);
+    }, []);
 
     useEffect(() => {
         CompositionRoot.attach()
@@ -288,14 +293,18 @@ export default function LandingPage() {
         }[key];
     };
 
-    const onSettingsChange = settings => {
+    const onSettingsChange = useCallback(settings => {
         setState(state => ({
             ...state,
             settings,
             isTemplateGenerationVisible: settings.isTemplateGenerationVisible(),
             importObject: undefined,
         }));
-    };
+    }, []);
+
+    const onThemesChange = useCallback(themes => {
+        setThemes(themes);
+    }, []);
 
     const onTemplateChange = useCallback(template => {
         setState(state => ({
@@ -329,7 +338,7 @@ export default function LandingPage() {
 
     return (
         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-            <ThemeListDialog />
+            <ThemeListDialog onChange={onThemesChange} />
             <SettingsComponent settings={settings} onChange={onSettingsChange} />
             <ConfirmationOnExistingData />
 
@@ -344,7 +353,7 @@ export default function LandingPage() {
             >
                 <h1>{i18n.t("Template Generation")}</h1>
 
-                <TemplateSelector settings={settings} onChange={onTemplateChange} />
+                <TemplateSelector settings={settings} themes={themes} onChange={onTemplateChange} />
 
                 <div
                     className="row"

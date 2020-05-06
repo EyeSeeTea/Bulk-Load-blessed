@@ -4,6 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -12,7 +13,7 @@ import { buildPossibleYears } from "../../utils/periods";
 import { Select, SelectOption } from "../select/Select";
 
 type TemplateType = "dataSets" | "programs" | "custom";
-type DataSource = Record<TemplateType | "themes", { id: string; name: string }[]>;
+type DataSource = Record<TemplateType, { id: string; name: string }[]>;
 
 interface TemplateSelectorState {
     type: TemplateType;
@@ -26,10 +27,11 @@ interface TemplateSelectorState {
 
 export interface TemplateSelectorProps {
     settings: Settings;
+    themes: Theme[];
     onChange(state: TemplateSelectorState | null): void;
 }
 
-export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) => {
+export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
     const classes = useStyles();
     const { api } = useAppContext();
 
@@ -90,7 +92,7 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
 
     const showModelSelector = models.length > 1;
     const elementLabel = showModelSelector ? i18n.t("elements") : models[0]?.label;
-    const themes = dataSource ? modelToSelectOption(dataSource.themes) : [];
+    const themeOptions = dataSource ? modelToSelectOption(themes) : [];
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
@@ -155,12 +157,12 @@ export const TemplateSelector = ({ settings, onChange }: TemplateSelectorProps) 
                     />
                 </div>
 
-                {themes.length > 0 && (
+                {themeOptions.length > 0 && (
                     <div className={classes.themeSelect}>
                         <Select
                             placeholder={i18n.t("Theme")}
                             onChange={onThemeChange}
-                            options={themes}
+                            options={themeOptions}
                             allowEmpty={true}
                             emptyLabel={i18n.t("No theme")}
                         />
