@@ -426,7 +426,7 @@ export default function LandingPage() {
                         ({state.importObject.id})
                         {state.importDataValues.map((group, idx) => (
                             <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                                {moment(group.period).format("DD/MM/YYYY")}: {group.count}{" "}
+                                {moment(String(group.period)).format("DD/MM/YYYY")}: {group.count}{" "}
                                 {i18n.t("data values")}
                             </li>
                         ))}
