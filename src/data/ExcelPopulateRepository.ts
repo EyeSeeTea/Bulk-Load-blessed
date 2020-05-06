@@ -3,6 +3,7 @@ import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populat
 import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
+import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
@@ -61,6 +62,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
     ): Promise<void> {
         const workbook = await this.getWorkbook(template);
         const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
+        const definedNames = await this.listDefinedNames(template);
+        const definedName = definedNames.find(
+            name => removeCharacters(name) === removeCharacters(value)
+        );
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
@@ -73,6 +78,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
             destination.value("Yes");
         } else if (String(value) === "false") {
             destination.value("No");
+        } else if (definedName) {
+            destination.formula(`=${definedName}`);
         } else {
             destination.value(value);
         }
@@ -175,5 +182,15 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return type === "range"
             ? workbook.sheet(sheet).range(String(ref))
             : workbook.sheet(sheet).range(`${ref}:${ref}`);
+    }
+
+    private async listDefinedNames(template: Template): Promise<string[]> {
+        const workbook = await this.getWorkbook(template);
+        try {
+            //@ts-ignore Not typed, need extension
+            return workbook.definedName();
+        } catch (error) {
+            return [];
+        }
     }
 }

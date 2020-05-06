@@ -1,5 +1,4 @@
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
-import { removeCharacters } from "../../utils/string";
 
 export default class implements GeneratedTemplate {
     public readonly id = "DATASET_GENERATED_v1";
@@ -86,12 +85,4 @@ export default class implements GeneratedTemplate {
             },
         },
     ];
-
-    public writeId(id: string | number): string | number {
-        return `=_${id}`;
-    }
-
-    public readId(string: string | number): string | number {
-        return removeCharacters(string);
-    }
 }

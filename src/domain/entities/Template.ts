@@ -21,8 +21,6 @@ export interface GeneratedTemplate {
     colOffset: number;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
-    readId?: (id: string | number) => string | number;
-    writeId?: (value: string | number) => string | number;
 }
 
 export interface CustomTemplate {

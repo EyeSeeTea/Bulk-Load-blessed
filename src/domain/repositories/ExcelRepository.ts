@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
+import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../webapp/utils/common";
 import { DataPackage } from "../entities/DataPackage";
 import { CellRef, Range, RowDataSource, SheetRef, Template } from "../entities/Template";
@@ -63,8 +64,6 @@ export abstract class ExcelRepository {
     }
 
     private async fillRows(template: Template, dataSource: RowDataSource, payload: DataPackage[]) {
-        const defaultAccessor = (string: string | number) => string;
-        const { writeId = defaultAccessor, readId = defaultAccessor } = template;
         let { rowStart } = dataSource.range;
 
         for (const { orgUnit, period, attribute, dataValues } of payload) {
@@ -76,7 +75,7 @@ export abstract class ExcelRepository {
 
             const orgUnitCell = await this.findRelativeCell(template, dataSource.orgUnit, cells[0]);
             if (orgUnitCell && orgUnit) {
-                await this.writeCell(template, orgUnitCell, writeId(orgUnit));
+                await this.writeCell(template, orgUnitCell, orgUnit);
             }
 
             const periodCell = await this.findRelativeCell(template, dataSource.period, cells[0]);
@@ -88,7 +87,7 @@ export abstract class ExcelRepository {
                 cells[0]
             );
             if (attributeCell && attribute) {
-                await this.writeCell(template, attributeCell, writeId(attribute));
+                await this.writeCell(template, attributeCell, (attribute));
             }
 
             for (const cell of cells) {
@@ -104,10 +103,10 @@ export abstract class ExcelRepository {
                 );
 
                 const dataElement = dataElementCell
-                    ? readId(await this.readCell(template, dataElementCell))
+                    ? removeCharacters(await this.readCell(template, dataElementCell))
                     : undefined;
                 const category = categoryCell
-                    ? readId(await this.readCell(template, categoryCell))
+                    ? removeCharacters(await this.readCell(template, categoryCell))
                     : undefined;
 
                 const { value } =
