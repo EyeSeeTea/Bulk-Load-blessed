@@ -200,25 +200,28 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             )}
             {!_.isEmpty(orgUnitTreeRootIds) ? (
                 settings.showOrgUnitsOnGeneration && state.type !== "custom" ? (
-                    <OrgUnitsSelector
-                        api={api}
-                        onChange={onOrgUnitChange}
-                        selected={selectedOrgUnits}
-                        controls={{
-                            filterByLevel: false,
-                            filterByGroup: false,
-                            selectAll: false,
-                        }}
-                        rootIds={orgUnitTreeRootIds}
-                        fullWidth={false}
-                        height={220}
-                    />
+                    <div className={classes.orgUnitSelector}>
+                        <OrgUnitsSelector
+                            api={api}
+                            onChange={onOrgUnitChange}
+                            selected={selectedOrgUnits}
+                            controls={{
+                                filterByLevel: false,
+                                filterByGroup: false,
+                                selectAll: false,
+                            }}
+                            rootIds={orgUnitTreeRootIds}
+                            fullWidth={false}
+                            height={220}
+                        />
+                    </div>
                 ) : null
             ) : (
                 i18n.t("No capture organisations units")
             )}
 
             <FormControlLabel
+                className={classes.populateCheckbox}
                 control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
                 label="Populate template with instance data"
             />
@@ -239,6 +242,8 @@ const useStyles = makeStyles({
     themeSelect: { flexBasis: "30%", margin: "1em" },
     startYearSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
     endYearSelect: { flexBasis: "30%", margin: "1em" },
+    populateCheckbox: { marginTop: "1em" },
+    orgUnitSelector: { marginTop: "1em" },
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {
