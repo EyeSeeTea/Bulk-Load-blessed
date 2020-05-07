@@ -6,15 +6,14 @@ import i18n from "../../locales";
 import { stringEquals } from "../utils/strings";
 import { getObjectVersion } from "./utils";
 
-const models = { dataSet: "dataSets", program: "programs" };
-
 /**
  * Return basic information from sheet.
  * @param file: xlsx file to be imported.
  * @param objectsByType: Object {dataSet, program} containing all D2 objects.
- * @returns {Promise<{object, dataValues}>}
+ * @returns {Promise<{id, type, name}>}
  */
-export async function getBasicInfoFromSheet(file, objectsByType, rowOffset = 0, colOffset = 0) {
+export async function getBasicInfoFromSheet(file) {
+    const initialRow = 3;
     const workbook = await getWorkbook(file);
 
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
@@ -23,33 +22,20 @@ export async function getBasicInfoFromSheet(file, objectsByType, rowOffset = 0, 
     if (!dataEntrySheet) throw new Error("Cannot get data entry sheet");
     if (!metadataSheet) throw new Error("Cannot get metadata sheet");
 
-    const initialRow = 3;
-
-    const object = _(initialRow)
-        .range(metadataSheet.rowCount + 1)
-        .map(nRow => metadataSheet.getRow(nRow).values)
-        .map(values => ({ id: values[1], type: values[2], name: values[3] }))
-        .find(item => models[item.type]);
-
-    if (!object) throw new Error("Element not found");
-
-    const pluralName = models[object.type];
-    const allObjects = objectsByType[pluralName];
-
-    if (!allObjects) {
-        throw new Error(`No data for type: ${object.type}`);
-    } else {
-        const dbObject =
-            _.keyBy(allObjects, "id")[object.id] || _.keyBy(allObjects, "name")[object.name];
-        await checkVersion(file, dbObject);
-        return {
-            object: dbObject,
-            dataValues: getDataValues(object, dataEntrySheet, rowOffset, colOffset),
-        };
-    }
+    return (
+        _(initialRow)
+            .range(metadataSheet.rowCount + 1)
+            .map(nRow => metadataSheet.getRow(nRow).values)
+            .map(values => ({ id: values[1], type: values[2], name: values[3] }))
+            .find(item => item.type === "program" || item.type === "dataSet") ?? {}
+    );
 }
 
-function getDataValues(object, dataEntrySheet, rowOffset, colOffset) {
+export async function getDataValues(file, object, rowOffset, colOffset) {
+    const workbook = await getWorkbook(file);
+    const dataEntrySheet = workbook.getWorksheet("Data Entry");
+    if (!dataEntrySheet) throw new Error("Cannot get data entry sheet");
+
     return _(rowOffset + 3)
         .range(dataEntrySheet.rowCount + 1)
         .map(nRow => dataEntrySheet.getRow(nRow))
@@ -284,7 +270,7 @@ export async function getVersion(file) {
     return cellValue.replace(/^.*?:/, "").trim();
 }
 
-async function checkVersion(file, dbObject, type) {
+export async function checkVersion(file, dbObject, type) {
     if (!dbObject) return true;
 
     const sheetVersion = await getVersion(file, type);

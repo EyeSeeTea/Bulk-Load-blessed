@@ -29,8 +29,6 @@ export default function LandingPage() {
     const [themes, setThemes] = useState();
     const [state, setState] = useState({
         template: null,
-        dataSets: [],
-        programs: [],
         orgUnitTreeSelected2: [],
         orgUnitTreeRootIds: [],
         importOrgUnitIds: undefined,
@@ -38,18 +36,8 @@ export default function LandingPage() {
         importDataSheet: undefined,
         importMessages: [],
         importDataValues: [],
-        isTemplateGenerationVisible: true,
         confirmOnExistingData: undefined,
     });
-
-    useEffect(() => {
-        dhisConnector.getUserInformation({ d2 }).then(result => {
-            setState(state => ({
-                ...state,
-                ...result,
-            }));
-        });
-    }, [d2]);
 
     useEffect(() => {
         Settings.build(api)
@@ -110,10 +98,10 @@ export default function LandingPage() {
                 name,
                 file,
                 theme,
-                orgUnits,
-                populate,
-                startDate: type === "dataSets" ? moment(startYear, "YYYY") : undefined,
-                endDate: type === "dataSets" ? moment(endYear, "YYYY") : undefined,
+                orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
+                populate: settings.showOrgUnitsOnGeneration && populate,
+                startDate: type === "dataSet" ? moment(startYear, "YYYY") : undefined,
+                endDate: type === "dataSet" ? moment(endYear, "YYYY") : undefined,
             });
         }
 
@@ -130,37 +118,30 @@ export default function LandingPage() {
     };
 
     const onDrop = async files => {
-        const { dataSets, programs, orgUnitTreeRootIds } = state;
+        const { orgUnitTreeRootIds } = state;
         loading.show(true);
 
         const file = files[0];
         if (!file) {
             snackbar.error(i18n.t("Cannot read file"));
+            loading.show(false);
             return;
         }
 
         try {
-            const id = await sheetImport.getVersion(file);
-            const { rowOffset, colOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+            const {
+                object,
+                dataValues,
+                orgUnits,
+            } = await CompositionRoot.attach().templates.analyze.execute(file);
 
-            const info = await sheetImport.getBasicInfoFromSheet(
-                file,
-                { dataSets, programs },
-                rowOffset,
-                colOffset
-            );
-            const { object, dataValues } = info;
-
-            let importOrgUnitIds = undefined;
-            if (!settings.showOrgUnitsOnGeneration) {
-                if (!object) throw new Error(i18n.t("Object not found in database"));
-                // Get only object orgUnits selected as user capture (or their children)
-                importOrgUnitIds = object.organisationUnits
-                    .filter(ou =>
-                        _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
-                    )
-                    .map(ou => ou.id);
-            }
+            const importOrgUnitIds = !settings.showOrgUnitsOnGeneration
+                ? orgUnits
+                      ?.filter(ou =>
+                          _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
+                      )
+                      .map(ou => ou.id)
+                : undefined;
 
             setState(state => ({
                 ...state,
@@ -214,8 +195,10 @@ export default function LandingPage() {
                 }
             }
 
-            const id = await sheetImport.getVersion(state.importDataSheet);
-            const { rowOffset, colOffset } = CompositionRoot.attach().templates.getInfo.execute(id);
+            const {
+                rowOffset,
+                colOffset,
+            } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
 
             const data = await sheetImport.readSheet({
                 ...result,
@@ -294,12 +277,8 @@ export default function LandingPage() {
     };
 
     const onSettingsChange = useCallback(settings => {
-        setState(state => ({
-            ...state,
-            settings,
-            isTemplateGenerationVisible: settings.isTemplateGenerationVisible(),
-            importObject: undefined,
-        }));
+        setSettings(settings);
+        setState(state => ({ ...state, importObject: undefined }));
     }, []);
 
     const onThemesChange = useCallback(themes => {
@@ -348,7 +327,7 @@ export default function LandingPage() {
                     marginTop: "2em",
                     padding: "2em",
                     width: "50%",
-                    display: state.isTemplateGenerationVisible ? "block" : "none",
+                    display: settings.isTemplateGenerationVisible() ? "block" : "none",
                 }}
             >
                 <h1>{i18n.t("Template Generation")}</h1>

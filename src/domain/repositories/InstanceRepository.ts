@@ -1,12 +1,11 @@
 import { Moment } from "moment";
+import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
-import { DataSet } from "../entities/DataSet";
 import { OrgUnit } from "../entities/OrgUnit";
-import { Program } from "../entities/Program";
 import { Id } from "../entities/ReferenceObject";
 
 export interface GetDataPackageParams {
-    type: "dataSets" | "programs";
+    type: DataFormType;
     id: Id;
     orgUnits: Id[];
     startDate?: Moment;
@@ -14,8 +13,8 @@ export interface GetDataPackageParams {
 }
 
 export interface InstanceRepository {
-    getDataSets(): Promise<DataSet[]>;
-    getPrograms(): Promise<Program[]>;
-    getOrgUnitRoots(): Promise<OrgUnit[]>;
+    getUserOrgUnits(): Promise<OrgUnit[]>;
+    getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]>;
+    getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
 }

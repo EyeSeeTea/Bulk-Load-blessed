@@ -4,6 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
@@ -12,14 +13,14 @@ import Settings from "../../logic/settings";
 import { buildPossibleYears } from "../../utils/periods";
 import { Select, SelectOption } from "../select/Select";
 
-type TemplateType = "dataSets" | "programs" | "custom";
+type TemplateType = DataFormType | "custom";
 type DataSource = Record<TemplateType, { id: string; name: string }[]>;
 
 interface TemplateSelectorState {
     type: TemplateType;
     id: string;
-    orgUnits: string[];
     populate: boolean;
+    orgUnits?: string[];
     theme?: string;
     startYear?: string;
     endYear?: string;
@@ -52,11 +53,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             .then(dataSource => {
                 const modelOptions = _.compact([
                     settings.isModelEnabled("dataSet") && {
-                        value: "dataSets",
+                        value: "dataSet",
                         label: i18n.t("Data Set"),
                     },
                     settings.isModelEnabled("program") && {
-                        value: "programs",
+                        value: "program",
                         label: i18n.t("Program"),
                     },
                     dataSource.custom.length > 0 && {
@@ -82,7 +83,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     useEffect(() => {
         const { type, id, theme, startYear, endYear, populate = false } = state;
-        if (type && id && selectedOrgUnits.length > 0) {
+        if (type && id) {
             const orgUnits = cleanOrgUnitPaths(selectedOrgUnits);
             onChange({ type, id, theme, orgUnits, startYear, endYear, populate });
         } else {
@@ -134,6 +135,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, populate: checked }));
     };
 
+    const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
+
     return (
         <React.Fragment>
             <div className={classes.row}>
@@ -169,7 +172,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 )}
             </div>
-            {state.type === "dataSets" && (
+            {state.type === "dataSet" && (
                 <div className={classes.row}>
                     <div className={classes.startYearSelect}>
                         <Select
@@ -220,11 +223,14 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 i18n.t("No capture organisations units")
             )}
 
-            <FormControlLabel
-                className={classes.populateCheckbox}
-                control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                label="Populate template with instance data"
-            />
+            {settings.showOrgUnitsOnGeneration && (
+                <FormControlLabel
+                    disabled={!enablePopulate}
+                    className={classes.populateCheckbox}
+                    control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
+                    label="Populate template with instance data"
+                />
+            )}
         </React.Fragment>
     );
 };

@@ -10,12 +10,12 @@ import { ExcelRepository } from "./domain/repositories/ExcelRepository";
 import { InstanceRepository } from "./domain/repositories/InstanceRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
+import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
-import { GetTemplateInfoUseCase } from "./domain/usecases/GetTemplateInfoUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
@@ -67,7 +67,7 @@ export class CompositionRoot {
 
     public get templates() {
         return {
-            getInfo: new GetTemplateInfoUseCase(this.templateManager),
+            analyze: new AnalyzeTemplateUseCase(this.instance, this.templateManager),
             download: new DownloadTemplateUseCase(
                 this.instance,
                 this.templateManager,

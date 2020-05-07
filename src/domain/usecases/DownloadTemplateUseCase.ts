@@ -1,12 +1,13 @@
 import { saveAs } from "file-saver";
 import { Moment } from "moment";
+import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
 interface DownloadTemplateProps {
-    type: "dataSets" | "programs";
+    type: DataFormType;
     id: string;
     name: string;
     orgUnits: string[];
@@ -36,8 +37,7 @@ export class DownloadTemplateUseCase {
         endDate,
     }: DownloadTemplateProps): Promise<void> {
         try {
-            const templateId =
-                type === "dataSets" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
+            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
             const template = this.templateRepository.getTemplate(templateId);
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 

@@ -1,11 +1,10 @@
 import { D2Api, D2ApiDefault } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
+import { DataForm, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage } from "../domain/entities/DataPackage";
-import { DataSet } from "../domain/entities/DataSet";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { OrgUnit } from "../domain/entities/OrgUnit";
-import { Program } from "../domain/entities/Program";
 import {
     GetDataPackageParams,
     InstanceRepository,
@@ -19,32 +18,70 @@ export class InstanceDhisRepository implements InstanceRepository {
         this.api = new D2ApiDefault({ baseUrl: url });
     }
 
-    public async getDataSets(): Promise<DataSet[]> {
-        const { objects } = await this.api.models.dataSets
-            .get({ paging: false, fields: { id: true, displayName: true, name: true } })
-            .getData();
-        return objects.map(({ id, displayName, name }) => ({ id, name: displayName ?? name }));
+    public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
+        if (type === "tracker") throw new Error("Tracker programs are not supported");
+
+        const params = {
+            paging: false,
+            fields: {
+                id: true,
+                displayName: true,
+                name: true,
+                attributeValues: { value: true, attribute: { code: true } },
+            },
+            filter: {
+                id: ids ? { in: ids } : undefined,
+                programType: type === "program" ? { eq: "WITHOUT_REGISTRATION" } : undefined,
+            },
+        } as const;
+
+        const { objects } = await (type === "dataSet"
+            ? this.api.models.dataSets.get(params).getData()
+            : this.api.models.programs.get(params).getData());
+
+        return objects.map(({ displayName, name, ...rest }) => ({
+            ...rest,
+            type,
+            name: displayName ?? name,
+        }));
     }
 
-    public async getPrograms(): Promise<Program[]> {
-        const { objects } = await this.api.models.programs
-            .get({ paging: false, fields: { id: true, displayName: true, name: true } })
-            .getData();
-        return objects.map(({ id, displayName, name }) => ({ id, name: displayName ?? name }));
+    public async getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]> {
+        const params = {
+            paging: false,
+            fields: {
+                organisationUnits: { id: true, name: true, level: true, path: true },
+            },
+            filter: {
+                id: { eq: id },
+            },
+        } as const;
+
+        const { objects } = await (type === "dataSet"
+            ? this.api.models.dataSets.get(params).getData()
+            : this.api.models.programs.get(params).getData());
+
+        return _(objects)
+            .map(({ organisationUnits }) => organisationUnits)
+            .flatten()
+            .value();
     }
 
-    public async getOrgUnitRoots(): Promise<OrgUnit[]> {
+    public async getUserOrgUnits(): Promise<OrgUnit[]> {
         const { objects } = await this.api.models.organisationUnits
-            .get({ userOnly: true, fields: { id: true, displayName: true, level: true } })
+            .get({
+                userOnly: true,
+                fields: { id: true, displayName: true, level: true, path: true },
+            })
             .getData();
-        return objects.map(({ id, level, displayName }) => ({ id, level, name: displayName }));
+        return objects.map(({ displayName, ...rest }) => ({ ...rest, name: displayName }));
     }
 
     public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
         switch (params.type) {
-            case "dataSets":
+            case "dataSet":
                 return this.getDataSetPackage(params);
-            case "programs":
+            case "program":
                 return this.getProgramPackage(params);
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);

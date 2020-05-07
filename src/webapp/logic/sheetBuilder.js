@@ -90,7 +90,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    if (element.type === "dataSets") {
+    if (element.type === "dataSet") {
         rowId = 2;
         columnId++;
         validationSheet.cell(rowId++, columnId).string("Periods");
@@ -241,7 +241,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
     const defaultVersion =
-        element.type === "dataSets" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
+        element.type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -279,10 +279,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         null,
         this.validations.get("organisationUnits")
     );
-    if (element.type === "programs") {
+    if (element.type === "program") {
         createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Latitude");
         createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Longitude");
-    } else if (element.type === "dataSets") {
+    } else if (element.type === "dataSet") {
         createColumn(
             this.workbook,
             dataEntrySheet,
@@ -304,7 +304,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("options")
     );
 
-    if (element.type === "dataSets") {
+    if (element.type === "dataSet") {
         const categoryOptionCombos = [];
         for (const [, value] of metadata) {
             if (value.type === "categoryOptionCombo") {
