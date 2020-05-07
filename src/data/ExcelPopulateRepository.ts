@@ -4,6 +4,7 @@ import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template"
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
 import { removeCharacters } from "../utils/string";
+import i18n from "../locales";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
@@ -173,7 +174,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     private async getWorkbook(template: Template) {
         const { id } = template;
-        if (!this.workbooks[id]) throw new Error("Template not loaded");
+        if (!this.workbooks[id]) throw new Error(i18n.t("Template not loaded"));
 
         return this.workbooks[id];
     }

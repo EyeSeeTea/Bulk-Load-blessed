@@ -20,7 +20,7 @@ export function buildAllPossiblePeriods(periodType, startYear, endYear) {
             format = "YYYY[W]W";
             break;
         default:
-            throw new Error("Unsupported periodType");
+            throw new Error("Unsupported period type");
     }
 
     const dates = [];

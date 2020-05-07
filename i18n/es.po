@@ -1,12 +1,25 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-07T11:20:33.478Z\n"
+"POT-Creation-Date: 2020-05-07T11:51:10.667Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, fuzzy
+msgid "Template not loaded"
+msgstr "Generación de plantilla"
+
+msgid "Tracker programs are not supported"
+msgstr ""
+
+msgid "Element not found"
+msgstr ""
+
+msgid "Program or DataSet not found in instance"
+msgstr ""
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
@@ -152,6 +165,15 @@ msgstr "Seleccione al menos un modelo"
 
 msgid "Data set"
 msgstr "Data set"
+
+msgid "Cannot get data entry sheet"
+msgstr ""
+
+msgid "Cannot get metadata sheet"
+msgstr ""
+
+msgid "Event date is empty"
+msgstr ""
 
 msgid ""
 "Cannot import: Versions do not match (database={{dbVersion}}, "

@@ -9,6 +9,7 @@ import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
+import i18n from "../locales";
 import { promiseMap } from "../webapp/utils/common";
 
 export class InstanceDhisRepository implements InstanceRepository {
@@ -19,7 +20,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        if (type === "tracker") throw new Error("Tracker programs are not supported");
+        if (type === "tracker") throw new Error(i18n.t("Tracker programs are not supported"));
 
         const params = {
             paging: false,

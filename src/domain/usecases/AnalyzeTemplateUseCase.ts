@@ -1,3 +1,4 @@
+import i18n from "../../locales";
 import {
     checkVersion,
     getBasicInfoFromSheet,
@@ -15,7 +16,7 @@ export class AnalyzeTemplateUseCase {
 
     public async execute(file: File) {
         const { id, type } = await getBasicInfoFromSheet(file);
-        if (!id) throw new Error("Element not found");
+        if (!id) throw new Error(i18n.t("Element not found"));
 
         const templateVersion = await getVersion(file);
         const { rowOffset = 0, colOffset = 0 } = this.templateRepository.getTemplate(
@@ -23,7 +24,7 @@ export class AnalyzeTemplateUseCase {
         );
 
         const [object] = await this.instanceRepository.getDataForms(type, [id]);
-        if (!object) throw new Error("Program or DataSet not found in instance");
+        if (!object) throw new Error(i18n.t("Program or DataSet not found in instance"));
 
         await checkVersion(file, object);
         const dataValues = await getDataValues(file, object, rowOffset, colOffset);

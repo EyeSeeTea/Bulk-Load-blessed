@@ -19,8 +19,8 @@ export async function getBasicInfoFromSheet(file) {
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
     const metadataSheet = workbook.getWorksheet("Metadata");
 
-    if (!dataEntrySheet) throw new Error("Cannot get data entry sheet");
-    if (!metadataSheet) throw new Error("Cannot get metadata sheet");
+    if (!dataEntrySheet) throw new Error(i18n.t("Cannot get data entry sheet"));
+    if (!metadataSheet) throw new Error(i18n.t("Cannot get metadata sheet"));
 
     return (
         _(initialRow)
@@ -34,7 +34,7 @@ export async function getBasicInfoFromSheet(file) {
 export async function getDataValues(file, object, rowOffset, colOffset) {
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
-    if (!dataEntrySheet) throw new Error("Cannot get data entry sheet");
+    if (!dataEntrySheet) throw new Error(i18n.t("Cannot get data entry sheet"));
 
     return _(rowOffset + 3)
         .range(dataEntrySheet.rowCount + 1)
@@ -150,7 +150,7 @@ export function readSheet(builder) {
                             "yyyy-mm-dd"
                         );
                     } else if (isProgram) {
-                        return reject(new Error("Event date is empty"));
+                        return reject(new Error(i18n.t("Event date is empty")));
                     }
 
                     if (!isProgram && row.values[2] !== undefined) {
