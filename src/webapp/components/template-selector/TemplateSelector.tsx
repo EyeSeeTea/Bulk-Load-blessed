@@ -146,6 +146,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             placeholder={i18n.t("Model")}
                             onChange={onModelChange}
                             options={models}
+                            value={state.type ?? ""}
                         />
                     </div>
                 )}
@@ -157,6 +158,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         })}
                         onChange={onTemplateChange}
                         options={templates}
+                        value={state.id ?? ""}
                     />
                 </div>
 
@@ -168,6 +170,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             options={themeOptions}
                             allowEmpty={true}
                             emptyLabel={i18n.t("No theme")}
+                            value={state.theme ?? ""}
                         />
                     </div>
                 )}
