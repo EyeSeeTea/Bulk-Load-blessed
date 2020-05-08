@@ -8,6 +8,7 @@ import { DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import { PartialBy } from "../../../utils/types";
 import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
 import { buildPossibleYears } from "../../utils/periods";
@@ -20,6 +21,7 @@ interface TemplateSelectorState {
     type: TemplateType;
     id: string;
     populate: boolean;
+    language: string;
     orgUnits?: string[];
     theme?: string;
     startYear?: string;
@@ -40,11 +42,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
+    const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
-    const [state, setState] = useState<Partial<TemplateSelectorState>>({
+    const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startYear: "2010",
         endYear: moment().year().toString(),
         populate: false,
+        language: "en",
     });
 
     useEffect(() => {
@@ -82,10 +86,14 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     }, []);
 
     useEffect(() => {
-        const { type, id, theme, startYear, endYear, populate = false } = state;
+        CompositionRoot.attach().languages.list.execute().then(setAvailableLanguages);
+    }, []);
+
+    useEffect(() => {
+        const { type, id, ...rest } = state;
         if (type && id) {
             const orgUnits = cleanOrgUnitPaths(selectedOrgUnits);
-            onChange({ type, id, theme, orgUnits, startYear, endYear, populate });
+            onChange({ type, id, orgUnits, ...rest });
         } else {
             onChange(null);
         }
@@ -135,6 +143,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, populate: checked }));
     };
 
+    const onLanguageChange = ({ value }: SelectOption) => {
+        setState(state => ({
+            ...state,
+            language: value,
+        }));
+    };
+
     const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
 
     return (
@@ -161,7 +176,17 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         value={state.id ?? ""}
                     />
                 </div>
+            </div>
 
+            <div className={classes.row}>
+                <div className={classes.languageSelect}>
+                    <Select
+                        placeholder={i18n.t("Language")}
+                        onChange={onLanguageChange}
+                        options={availableLanguages}
+                        value={state.language ?? ""}
+                    />
+                </div>
                 {themeOptions.length > 0 && (
                     <div className={classes.themeSelect}>
                         <Select
@@ -175,6 +200,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 )}
             </div>
+
             {state.type === "dataSet" && (
                 <div className={classes.row}>
                     <div className={classes.startYearSelect}>
@@ -248,6 +274,7 @@ const useStyles = makeStyles({
     },
     modelSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
     templateSelect: { flexBasis: "70%", margin: "1em" },
+    languageSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
     themeSelect: { flexBasis: "30%", margin: "1em" },
     startYearSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
     endYearSelect: { flexBasis: "30%", margin: "1em" },

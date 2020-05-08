@@ -4,6 +4,7 @@ import moment from "moment";
 import { DataForm, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
+import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
     GetDataPackageParams,
@@ -87,6 +88,11 @@ export class InstanceDhisRepository implements InstanceRepository {
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
+    }
+
+    public async getLocales(): Promise<Locale[]> {
+        const locales = await this.api.get<Locale[]>("/locales/ui").getData();
+        return locales;
     }
 
     private async getDataSetPackage({
