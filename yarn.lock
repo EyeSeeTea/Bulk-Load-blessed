@@ -4960,10 +4960,10 @@ cypress@4.4.0:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@0.2.2-beta.1:
-  version "0.2.2-beta.1"
-  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-0.2.2-beta.1.tgz#cd6a5cffc9012ab1350dacc5d7a7c04bb511e612"
-  integrity sha512-m99Ut6iFcqGnrSgCZP7s7NWdt/MYFdbWwd9+NvXctn6wjlfb1R4tbnmQekMhRZ4mkkelSN6RleVpGgd2FFNAZw==
+d2-api@0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-0.2.2.tgz#fbc8fd483ba45abb1d6085c5e2f70aa3adebe3a3"
+  integrity sha512-khtQoU2DbJEKhkPpLWgkoZ84dNoHRft93o6SdOYjX9C7+KbZ6hHJ6rL8vCm8RvKe45tiKRNWK4waw/RLD222AQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
@@ -4999,10 +4999,10 @@ d2-manifest@1.0.0:
     minimist "^1.1.0"
     readline-sync "^1.4.1"
 
-d2-ui-components@1.3.1-beta.1:
-  version "1.3.1-beta.1"
-  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.3.1-beta.1.tgz#84dbab602b44ad25778d8980884afe2859b37934"
-  integrity sha512-ZrTCN3ahc7zVRuFaEsorN49E4nQLTsq9w8pamww0JqoX6igUFI5MezdVCqf4i+uPoWKJIKHqmCmO1Hby85yCTg==
+d2-ui-components@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.3.2.tgz#3e4f7d2e85ae394350c2882c46f4ba3f62a64dfe"
+  integrity sha512-Xd5CH9SFvnYEaaSA7wlNTR4YMFAf4aj239Umhy1HVT7sy8QCmUspYD+qy+M5/V/Jf636l1iPbNiba2avAekiww==
   dependencies:
     "@date-io/core" "^1.3.6"
     "@date-io/moment" "^1.0.2"
@@ -15295,9 +15295,9 @@ ws@^7.0.0:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.5.tgz#abb1370d4626a5a9cd79d8de404aa18b3465d10d"
   integrity sha512-C34cIU4+DB2vMyAbmEKossWq2ZQDr6QEyuuCzWrM9zfw1sGc0mYiJ0UnG9zzNykt49C2Fi34hvr2vssFQRS6EA==
 
-"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/defined-names":
+"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#development":
   version "1.21.0"
-  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#3601793e49df16e74ff3489568703a6d1754dc0b"
+  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#4e3f8413fbee9d6f6c9520f992b660eea9c7214b"
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"

@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -21,8 +21,8 @@
         "axios": "0.19.2",
         "core-js": "^3.6.5",
         "d2": "31.8.1",
-        "d2-api": "0.2.2-beta.1",
-        "d2-ui-components": "1.3.1-beta.1",
+        "d2-api": "0.2.2",
+        "d2-ui-components": "1.3.2",
         "dateformat": "3.0.3",
         "excel4node": "1.7.2",
         "exceljs": "3.8.2",
@@ -38,7 +38,7 @@
         "react-router-dom": "5.1.2",
         "react-scripts": "3.4.1",
         "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/defined-names"
+        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#development"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
