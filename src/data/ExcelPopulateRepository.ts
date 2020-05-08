@@ -99,7 +99,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
     public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
         const workbook = await this.getWorkbook(template);
 
-        const { sheet, columnStart, rowStart, columnEnd = "CC", rowEnd = 4096 } = range;
+        const { sheet, columnStart, rowStart, columnEnd = "XFD", rowEnd = 1048576 } = range;
 
         const rangeCells = workbook
             .sheet(sheet)
