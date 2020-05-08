@@ -1,6 +1,5 @@
 import dateFormat from "dateformat";
 import ExcelJS from "exceljs/dist/es5/exceljs.browser";
-import fileReaderStream from "filereader-stream";
 import _ from "lodash";
 import i18n from "../../locales";
 import { stringEquals } from "../utils/strings";
@@ -80,177 +79,166 @@ async function getWorkbook(file) {
  *      - file: File to be imported
  * @returns {Promise<>}
  */
-export function readSheet(builder) {
-    return new Promise(function (resolve, reject) {
-        const workbook = new ExcelJS.Workbook();
-        const is = workbook.xlsx.createInputStream();
-        const frs = fileReaderStream(builder.file);
-        // Read workbook when stream is loaded
-        is.on("error", reject);
-        is.on("done", () => {
-            const dataEntrySheet = workbook.getWorksheet("Data Entry");
-            const metadataSheet = workbook.getWorksheet("Metadata");
-            const validationSheet = workbook.getWorksheet("Validation");
+export async function readSheet({
+    file,
+    element,
+    elementMetadata,
+    useBuilderOrgUnits,
+    organisationUnits,
+    rowOffset = 0,
+    colOffset = 0,
+}) {
+    const workbook = await getWorkbook(file);
+    const dataEntrySheet = workbook.getWorksheet("Data Entry");
+    const metadataSheet = workbook.getWorksheet("Metadata");
+    const validationSheet = workbook.getWorksheet("Validation");
 
-            const isProgram = builder.element.type === "program";
-            const rowOffset = builder.rowOffset ?? 0;
-            const colOffset = builder.colOffset ?? 0;
+    const isProgram = element.type === "program";
 
-            let columns;
-            let stageColumns;
-            let dataToImport = isProgram
-                ? []
-                : {
-                      dataSet: "",
-                      completeDate: "",
-                      orgUnit: "",
-                      dataValues: [],
-                  };
+    let columns;
+    let stageColumns;
+    let dataToImport = isProgram
+        ? []
+        : {
+              dataSet: "",
+              completeDate: "",
+              orgUnit: "",
+              dataValues: [],
+          };
 
-            // Iterate over all rows that have values in a worksheet
-            dataEntrySheet.eachRow((row, rowNumber) => {
-                if (rowNumber === rowOffset + 1) stageColumns = row.values;
-                else if (rowNumber === rowOffset + 2) columns = row.values;
-                else if (rowNumber > rowOffset) {
-                    const result = {
-                        dataValues: [],
-                    };
+    // Iterate over all rows that have values in a worksheet
+    dataEntrySheet.eachRow((row, rowNumber) => {
+        if (rowNumber === rowOffset + 1) {
+            stageColumns = row.values;
+        } else if (rowNumber === rowOffset + 2) {
+            columns = row.values;
+        } else if (rowNumber > rowOffset) {
+            const result = {
+                dataValues: [],
+            };
 
-                    if (isProgram) {
-                        result["program"] = builder.element.id;
-                        result["status"] = "COMPLETED";
-                    } else {
-                        result["dataSet"] = builder.element.id;
-                        result["completeDate"] = dateFormat(new Date(), "yyyy-mm-dd");
+            if (isProgram) {
+                result["program"] = element.id;
+                result["status"] = "COMPLETED";
+            } else {
+                result["dataSet"] = element.id;
+                result["completeDate"] = dateFormat(new Date(), "yyyy-mm-dd");
+            }
+
+            if (useBuilderOrgUnits) {
+                result.orgUnit = organisationUnits[0].id;
+            } else {
+                if (row.values[1] !== undefined) {
+                    result.orgUnit = parseMetadataId(
+                        metadataSheet,
+                        row.values[1].result ?? row.values[1]
+                    );
+                } else {
+                    result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
+                }
+            }
+
+            // TODO: If latitude and longitude are empty or invalid remove prop
+            if (isProgram && row.values[2] !== undefined && row.values[3] !== undefined)
+                result.coordinate = {
+                    latitude: row.values[2],
+                    longitude: row.values[3],
+                };
+
+            if (isProgram && row.values[4 + colOffset] !== undefined) {
+                result.eventDate = dateFormat(new Date(row.values[4 + colOffset]), "yyyy-mm-dd");
+            } else if (isProgram) {
+                throw new Error(i18n.t("Event date is empty"));
+            }
+
+            if (!isProgram && row.values[2] !== undefined) {
+                result.period = row.values[2];
+            }
+
+            if (isProgram && colOffset === 1 && row.values[4] !== undefined) {
+                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
+            } else if (!isProgram && row.values[3] !== undefined) {
+                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
+            }
+
+            row.eachCell((cell, colNumber) => {
+                if (isProgram && colNumber > 4 + colOffset) {
+                    // TODO: Do not hardcode previous entries
+                    const id = columns[colNumber].formula.substr(1);
+                    let cellValue =
+                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+
+                    // TODO: Check different data types
+                    const dataValue = elementMetadata.get(id);
+                    if (dataValue.optionSet !== undefined) {
+                        const optionSet = elementMetadata.get(dataValue.optionSet.id);
+                        optionSet.options.forEach(optionId => {
+                            const option = elementMetadata.get(optionId.id);
+                            if (stringEquals(cellValue, option.name)) cellValue = option.code;
+                        });
+                    } else if (dataValue.valueType === "DATE") {
+                        cellValue = dateFormat(new Date(cellValue), "yyyy-mm-dd");
+                    } else if (
+                        dataValue.valueType === "BOOLEAN" ||
+                        dataValue.valueType === "TRUE_ONLY"
+                    ) {
+                        cellValue = String(cellValue) === "true" || cellValue === "Yes";
+                    }
+                    result.dataValues.push({ dataElement: id, value: cellValue });
+                } else if (!isProgram && colNumber > 3) {
+                    // TODO: Do not hardcode previous entries
+                    const column = columns[colNumber];
+                    const id = column.formula
+                        ? column.formula.substr(1)
+                        : dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
+                    const stageColumn = stageColumns[colNumber];
+                    const dataElementId = stageColumn.formula
+                        ? stageColumn.formula.substr(1)
+                        : dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
+                    let cellValue = cell.value?.toString();
+                    const dataValue = elementMetadata.get(id);
+                    const dataElement = elementMetadata.get(dataElementId);
+
+                    if (
+                        dataElement.valueType === "BOOLEAN" ||
+                        dataElement.valueType === "TRUE_ONLY"
+                    ) {
+                        cellValue = String(cellValue) === "true" || cellValue === "Yes";
                     }
 
-                    if (builder.useBuilderOrgUnits) {
-                        result.orgUnit = builder.organisationUnits[0].id;
-                    } else {
-                        if (row.values[1] !== undefined) {
-                            result.orgUnit = parseMetadataId(
-                                metadataSheet,
-                                row.values[1].result ?? row.values[1]
-                            );
-                        } else {
-                            result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
-                        }
-                    }
-
-                    // TODO: If latitude and longitude are empty or invalid remove prop
-                    if (isProgram && row.values[2] !== undefined && row.values[3] !== undefined)
-                        result.coordinate = {
-                            latitude: row.values[2],
-                            longitude: row.values[3],
-                        };
-
-                    if (isProgram && row.values[4 + colOffset] !== undefined) {
-                        result.eventDate = dateFormat(
-                            new Date(row.values[4 + colOffset]),
-                            "yyyy-mm-dd"
-                        );
-                    } else if (isProgram) {
-                        return reject(new Error(i18n.t("Event date is empty")));
-                    }
-
-                    if (!isProgram && row.values[2] !== undefined) {
-                        result.period = row.values[2];
-                    }
-
-                    if (isProgram && colOffset === 1 && row.values[4] !== undefined) {
-                        result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
-                    } else if (!isProgram && row.values[3] !== undefined) {
-                        result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
-                    }
-
-                    row.eachCell((cell, colNumber) => {
-                        if (isProgram && colNumber > 4 + colOffset) {
-                            // TODO: Do not hardcode previous entries
-                            const id = columns[colNumber].formula.substr(1);
-                            let cellValue =
-                                cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
-
-                            // TODO: Check different data types
-                            const dataValue = builder.elementMetadata.get(id);
-                            if (dataValue.optionSet !== undefined) {
-                                const optionSet = builder.elementMetadata.get(
-                                    dataValue.optionSet.id
-                                );
-                                optionSet.options.forEach(optionId => {
-                                    const option = builder.elementMetadata.get(optionId.id);
-                                    if (stringEquals(cellValue, option.name))
-                                        cellValue = option.code;
-                                });
-                            } else if (dataValue.valueType === "DATE") {
-                                cellValue = dateFormat(new Date(cellValue), "yyyy-mm-dd");
-                            } else if (
-                                dataValue.valueType === "BOOLEAN" ||
-                                dataValue.valueType === "TRUE_ONLY"
-                            ) {
-                                cellValue = String(cellValue) === "true" || cellValue === "Yes";
-                            }
-                            result.dataValues.push({ dataElement: id, value: cellValue });
-                        } else if (!isProgram && colNumber > 3) {
-                            // TODO: Do not hardcode previous entries
-                            const column = columns[colNumber];
-                            const id = column.formula
-                                ? column.formula.substr(1)
-                                : dataEntrySheet
-                                      .getCell(column.sharedFormula)
-                                      .value.formula.substr(1);
-                            const stageColumn = stageColumns[colNumber];
-                            const dataElementId = stageColumn.formula
-                                ? stageColumn.formula.substr(1)
-                                : dataEntrySheet
-                                      .getCell(stageColumn.sharedFormula)
-                                      .value.formula.substr(1);
-                            let cellValue = cell.value?.toString();
-                            const dataValue = builder.elementMetadata.get(id);
-                            const dataElement = builder.elementMetadata.get(dataElementId);
-
-                            if (
-                                dataElement.valueType === "BOOLEAN" ||
-                                dataElement.valueType === "TRUE_ONLY"
-                            ) {
-                                cellValue = String(cellValue) === "true" || cellValue === "Yes";
-                            }
-
-                            if (dataValue.type === "categoryOptionCombo") {
-                                // TODO: OptionSets in categoryOptionCombos
-                                result.dataValues.push({
-                                    dataElement: dataElementId,
-                                    categoryOptionCombo: id,
-                                    value: cellValue,
-                                    period: result.period,
-                                    orgUnit: result.orgUnit,
-                                });
-                            } else {
-                                result.dataValues.push({
-                                    dataElement: id,
-                                    value: cellValue,
-                                    period: result.period,
-                                    orgUnit: result.orgUnit,
-                                });
-                            }
-                        }
-                    });
-
-                    if (isProgram) dataToImport.push(result);
-                    else {
-                        dataToImport = {
-                            dataSet: result.dataSet,
-                            // "completeDate": result.completeDate,
+                    if (dataValue.type === "categoryOptionCombo") {
+                        // TODO: OptionSets in categoryOptionCombos
+                        result.dataValues.push({
+                            dataElement: dataElementId,
+                            categoryOptionCombo: id,
+                            value: cellValue,
+                            period: result.period,
                             orgUnit: result.orgUnit,
-                            dataValues: dataToImport.dataValues.concat(result.dataValues),
-                        };
+                        });
+                    } else {
+                        result.dataValues.push({
+                            dataElement: id,
+                            value: cellValue,
+                            period: result.period,
+                            orgUnit: result.orgUnit,
+                        });
                     }
                 }
             });
 
-            resolve(isProgram ? { events: dataToImport } : dataToImport);
-        });
-        frs.pipe(is);
+            if (isProgram) dataToImport.push(result);
+            else {
+                dataToImport = {
+                    dataSet: result.dataSet,
+                    // "completeDate": result.completeDate,
+                    orgUnit: result.orgUnit,
+                    dataValues: dataToImport.dataValues.concat(result.dataValues),
+                };
+            }
+        }
     });
+
+    return isProgram ? { events: dataToImport } : dataToImport;
 }
 
 function parseMetadataId(metadataSheet, metadataName) {
