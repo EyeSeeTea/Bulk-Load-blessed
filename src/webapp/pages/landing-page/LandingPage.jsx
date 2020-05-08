@@ -203,6 +203,7 @@ export default function LandingPage() {
             const data = await sheetImport.readSheet({
                 ...result,
                 d2,
+                api,
                 file: state.importDataSheet,
                 useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
                 rowOffset,
