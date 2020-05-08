@@ -251,7 +251,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
     // Add cells for themes
     const sectionRow = 6;
-    const dataElementsRow = 7;
+    const itemRow = 7;
 
     // Hide theme rows by default
     for (let row = 1; row < sectionRow; row++) {
@@ -259,9 +259,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     }
 
     // Freeze and format column titles
-    dataEntrySheet.row(dataElementsRow).freeze();
+    dataEntrySheet.row(itemRow).freeze();
     dataEntrySheet.row(sectionRow).setHeight(30);
-    dataEntrySheet.row(dataElementsRow).setHeight(50);
+    dataEntrySheet.row(itemRow).setHeight(50);
 
     // Add template version
     dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
@@ -273,20 +273,20 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     createColumn(
         this.workbook,
         dataEntrySheet,
-        dataElementsRow,
+        itemRow,
         columnId++,
         "Org Unit",
         null,
         this.validations.get("organisationUnits")
     );
     if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Latitude");
-        createColumn(this.workbook, dataEntrySheet, dataElementsRow, columnId++, "Longitude");
+        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Latitude");
+        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Longitude");
     } else if (element.type === "dataSet") {
         createColumn(
             this.workbook,
             dataEntrySheet,
-            dataElementsRow,
+            itemRow,
             columnId++,
             "Period",
             null,
@@ -297,7 +297,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     createColumn(
         this.workbook,
         dataEntrySheet,
-        dataElementsRow,
+        itemRow,
         columnId++,
         "Options",
         null,
@@ -325,19 +325,24 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         const firstColumnId = columnId;
 
                         const sectionCategoryOptionCombos = sections[categoryComboId];
-                        _.forEach(sectionCategoryOptionCombos, dataValue => {
-                            dataEntrySheet
-                                .column(columnId)
-                                .setWidth(dataValue.name.length / 2.5 + 10);
-                            dataEntrySheet
-                                .cell(dataElementsRow, columnId)
-                                .formula("_" + dataValue.id)
-                                .style(groupStyle(groupId));
+                        _.forEach(sectionCategoryOptionCombos, categoryOptionCombo => {
+                            const validation = dataElement.optionSet
+                                ? dataElement.optionSet.id
+                                : dataElement.valueType;
+                            createColumn(
+                                this.workbook,
+                                dataEntrySheet,
+                                itemRow,
+                                columnId,
+                                "_" + categoryOptionCombo.id,
+                                groupId,
+                                this.validations.get(validation)
+                            );
 
-                            if (dataValue.description !== undefined) {
+                            if (categoryOptionCombo.description !== undefined) {
                                 dataEntrySheet
-                                    .cell(dataElementsRow, columnId)
-                                    .comment(dataValue.description, {
+                                    .cell(itemRow, columnId)
+                                    .comment(categoryOptionCombo.description, {
                                         height: "100pt",
                                         width: "160pt",
                                     });
@@ -357,6 +362,15 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                             .formula("_" + dataElement.id)
                             .style(groupStyle(groupId));
 
+                        if (dataElement.description !== undefined) {
+                            dataEntrySheet
+                                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                                .comment(dataElement.description, {
+                                    height: "100pt",
+                                    width: "160pt",
+                                });
+                        }
+
                         groupId++;
                     });
             }
@@ -368,7 +382,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             createColumn(
                 this.workbook,
                 dataEntrySheet,
-                dataElementsRow,
+                itemRow,
                 columnId++,
                 programStage.executionDateLabel ?? "Date"
             );
@@ -399,7 +413,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     createColumn(
                         this.workbook,
                         dataEntrySheet,
-                        dataElementsRow,
+                        itemRow,
                         columnId,
                         "_" + dataElement.id,
                         groupId,
@@ -408,12 +422,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
 
                     if (dataElement.description !== undefined) {
-                        dataEntrySheet
-                            .cell(dataElementsRow, columnId)
-                            .comment(dataElement.description, {
-                                height: "100pt",
-                                width: "160pt",
-                            });
+                        dataEntrySheet.cell(itemRow, columnId).comment(dataElement.description, {
+                            height: "100pt",
+                            width: "160pt",
+                        });
                     }
 
                     columnId++;
