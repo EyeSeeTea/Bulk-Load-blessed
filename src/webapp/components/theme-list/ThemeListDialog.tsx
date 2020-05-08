@@ -1,10 +1,15 @@
 import { Card, FormGroup, Icon, IconButton, makeStyles } from "@material-ui/core";
 import { ConfirmationDialog } from "d2-ui-components";
 import React from "react";
+import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import ThemeListTable from "./ThemeListTable";
 
-export default function ThemeListDialog() {
+interface ThemeListDialogProps {
+    onChange?: (themes: Theme[]) => void;
+}
+
+export default function ThemeListDialog({ onChange }: ThemeListDialogProps) {
     const classes = useStyles();
     const [isOpen, setOpenState] = React.useState(false);
 
@@ -32,7 +37,7 @@ export default function ThemeListDialog() {
 
                     <FormGroup className={classes.content} row={true}>
                         <div className={classes.fullWidth}>
-                            <ThemeListTable />
+                            <ThemeListTable onChange={onChange} />
                         </div>
                     </FormGroup>
                 </Card>

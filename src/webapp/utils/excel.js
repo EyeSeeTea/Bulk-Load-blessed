@@ -7,17 +7,17 @@ export function createColumn(
     rowId,
     columnId,
     label,
-    groupId = undefined,
-    validation = undefined
+    groupId = null,
+    validation = null
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
-    cell.style(groupId ? groupStyle(groupId) : baseStyle);
+    cell.style(groupId !== null ? groupStyle(groupId) : baseStyle);
 
     if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
 
-    if (validation !== undefined) {
+    if (validation !== null) {
         const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
             columnId
         )}1048576`;

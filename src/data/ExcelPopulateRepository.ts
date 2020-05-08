@@ -1,13 +1,13 @@
 import _ from "lodash";
-import XLSX, { Workbook } from "xlsx-populate";
-import { SheetRef, Template } from "../domain/entities/Template";
-import { Theme, ThemeStyle } from "../domain/entities/Theme";
+import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populate";
+import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
+import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
-import { fromBase64 } from "../utils/files";
-import { promiseMap } from "../webapp/utils/common";
+import { removeCharacters } from "../utils/string";
+import i18n from "../locales";
 
-export class ExcelPopulateRepository implements ExcelRepository {
-    private workbooks: Record<string, Workbook> = {};
+export class ExcelPopulateRepository extends ExcelRepository {
+    private workbooks: Record<string, ExcelWorkbook> = {};
 
     public async loadTemplate(template: Template, options: LoadOptions): Promise<void> {
         const { id } = template;
@@ -37,33 +37,100 @@ export class ExcelPopulateRepository implements ExcelRepository {
         });
     }
 
-    public async applyTheme(template: Template, theme: Theme): Promise<void> {
+    public async findRelativeCell(
+        template: Template,
+        location?: SheetRef,
+        cellRef?: CellRef
+    ): Promise<CellRef | undefined> {
         const workbook = await this.getWorkbook(template);
 
-        _.forOwn(theme.sections, (style: ThemeStyle, section: string) => {
-            const styleSource = template.styleSources.find(source => source.section === section);
-            const { source } = styleSource ?? {};
-            if (source) this.applyThemeToRange(workbook, source, style);
-        });
-
-        await promiseMap(_.toPairs(theme.pictures), async ([section, image]) => {
-            const file = image ? await fromBase64(image.src) : undefined;
-            const styleSource = template.styleSources.find(source => source.section === section);
-            const { source } = styleSource ?? {};
-            if (source && file) this.applyImageToRange(workbook, source, file);
-        });
+        if (location?.type === "cell") {
+            const destination = workbook.sheet(location.sheet).cell(location.ref);
+            return { type: "cell", sheet: destination.sheet().name(), ref: destination.address() };
+        } else if (location && cellRef) {
+            const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+            const row = location.type === "row" ? location.ref : cell.rowNumber();
+            const column = location.type === "column" ? location.ref : cell.columnName();
+            const destination = workbook.sheet(location.sheet).cell(row, column);
+            return { type: "cell", sheet: destination.sheet().name(), ref: destination.address() };
+        }
     }
 
-    private async getWorkbook(template: Template) {
-        const { id } = template;
-        if (!this.workbooks[id]) throw new Error("Template not loaded");
+    public async writeCell(
+        template: Template,
+        cellRef: CellRef,
+        value: string | number | boolean
+    ): Promise<void> {
+        const workbook = await this.getWorkbook(template);
+        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
+        const definedNames = await this.listDefinedNames(template);
+        const definedName = definedNames.find(
+            name => removeCharacters(name) === removeCharacters(value)
+        );
+        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+        const { startCell: destination = cell } =
+            mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        return this.workbooks[id];
+        if (!isNaN(Number(value))) {
+            destination.value(Number(value));
+        } else if (String(value).startsWith("=")) {
+            destination.formula(String(value));
+        } else if (String(value) === "true") {
+            destination.value("Yes");
+        } else if (String(value) === "false") {
+            destination.value("No");
+        } else if (definedName) {
+            destination.formula(`=${definedName}`);
+        } else {
+            destination.value(value);
+        }
     }
 
-    private applyThemeToRange(workbook: Workbook, source: SheetRef, style: ThemeStyle): void {
+    public async readCell(template: Template, cellRef: CellRef): Promise<string> {
+        const workbook = await this.getWorkbook(template);
+        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
+        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+        const { startCell: destination = cell } =
+            mergedCells.find(range => range.hasCell(cell)) ?? {};
+
+        return String(destination.value() ?? destination.formula());
+    }
+
+    public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
+        const workbook = await this.getWorkbook(template);
+
+        const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
+        const endCell = workbook.sheet(range.sheet).usedRange()?.endCell();
+        const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
+        const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+
+        const rangeCells = workbook
+            .sheet(sheet)
+            .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
+
+        return rangeCells.cells()[0].map(cell => ({
+            type: "cell",
+            sheet,
+            ref: cell.address(),
+        }));
+    }
+
+    public async addPicture(template: Template, location: SheetRef, file: File): Promise<void> {
+        const workbook = await this.getWorkbook(template);
+
+        const { sheet, ref } = location;
+        const [from, to] = location.type === "range" ? String(ref).split(":") : [ref, ref];
+
+        // @ts-ignore: This part is not typed (we need to create an extension)
+        workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
+    }
+
+    public async styleCell(template: Template, source: SheetRef, style: ThemeStyle): Promise<void> {
+        const workbook = await this.getWorkbook(template);
+
         const { sheet } = source;
         const { text, bold, italic, fontSize, fontColor, fillColor } = style;
+        const range = this.buildRange(source, workbook);
         const textStyle = _.omitBy(
             {
                 bold,
@@ -74,14 +141,10 @@ export class ExcelPopulateRepository implements ExcelRepository {
             },
             _.isUndefined
         );
-        const range =
-            source.type === "range"
-                ? workbook.sheet(sheet).range(source.ref)
-                : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
         try {
             if (text && range) {
-                //@ts-ignore
+                //@ts-ignore Not properly typed
                 const richText = new XLSX.RichText();
                 richText.add(text, textStyle);
 
@@ -100,11 +163,38 @@ export class ExcelPopulateRepository implements ExcelRepository {
         }
     }
 
-    private applyImageToRange(workbook: Workbook, source: SheetRef, file: File): void {
-        const { sheet, ref } = source;
-        const [from, to] = source.type === "range" ? String(ref).split(":") : [ref, ref];
+    private async buildMergedCells(template: Template, sheet: string | number) {
+        const workbook = await this.getWorkbook(template);
+        //@ts-ignore
+        return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
+            const range = workbook.sheet(sheet).range(key);
+            const startCell = range.startCell();
+            const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 
-        // @ts-ignore: This part is not typed (we need to create an extension)
-        workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
+            return { range, startCell, hasCell };
+        });
+    }
+
+    private async getWorkbook(template: Template) {
+        const { id } = template;
+        if (!this.workbooks[id]) throw new Error(i18n.t("Template not loaded"));
+
+        return this.workbooks[id];
+    }
+
+    private buildRange({ type, ref, sheet }: SheetRef, workbook: ExcelWorkbook) {
+        return type === "range"
+            ? workbook.sheet(sheet).range(String(ref))
+            : workbook.sheet(sheet).range(`${ref}:${ref}`);
+    }
+
+    private async listDefinedNames(template: Template): Promise<string[]> {
+        const workbook = await this.getWorkbook(template);
+        try {
+            //@ts-ignore Not typed, need extension
+            return workbook.definedName();
+        } catch (error) {
+            return [];
+        }
     }
 }

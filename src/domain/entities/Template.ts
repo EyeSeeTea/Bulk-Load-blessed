@@ -18,6 +18,8 @@ export interface GeneratedTemplate {
     id: Id;
     name: string;
     rowOffset: number;
+    colOffset: number;
+    dataSources?: DataSource[];
     styleSources: StyleSource[];
 }
 
@@ -56,14 +58,15 @@ export interface RangeRef extends GenericSheetRef {
 }
 
 export interface Range {
+    sheet: string;
     rowStart: number;
-    rowEnd: number;
+    rowEnd?: number;
     columnStart: string;
-    columnEnd: string;
+    columnEnd?: string;
 }
 
 export interface GenericDataSource {
-    type: RefType;
+    type: "row" | "column" | "cell";
     range: Partial<Range>;
     orgUnit: SheetRef;
     period: SheetRef;
@@ -73,16 +76,17 @@ export interface GenericDataSource {
 
 export interface RowDataSource extends GenericDataSource {
     type: "row";
-    range: PartialBy<Range, "rowEnd">;
+    range: Range;
     orgUnit: ColumnRef | CellRef;
     period: ColumnRef | CellRef;
     dataElement: RowRef;
     categoryOption?: RowRef;
+    attribute?: ColumnRef | CellRef;
 }
 
 export interface ColumnDataSource extends GenericDataSource {
     type: "column";
-    range: PartialBy<Range, "columnEnd">;
+    range: Range;
     orgUnit: RowRef | CellRef;
     period: RowRef | CellRef;
     dataElement: ColumnRef;

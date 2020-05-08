@@ -5,88 +5,25 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-01T06:21:13.407Z\n"
-"PO-Revision-Date: 2020-05-01T06:21:13.407Z\n"
+"POT-Creation-Date: 2020-05-07T11:51:10.667Z\n"
+"PO-Revision-Date: 2020-05-07T11:51:10.667Z\n"
+
+msgid "Template not loaded"
+msgstr ""
+
+msgid "Tracker programs are not supported"
+msgstr ""
+
+msgid "Element not found"
+msgstr ""
+
+msgid "Program or DataSet not found in instance"
+msgstr ""
 
 msgid "Field {{field}} cannot be blank"
 msgstr ""
 
 msgid "You need to select at least one {{element}}"
-msgstr ""
-
-msgid "Cannot read file"
-msgstr ""
-
-msgid "Object not found in database"
-msgstr ""
-
-msgid "Select a organisation units to import data"
-msgstr ""
-
-msgid "Selected organisation unit is not associated with the dataset"
-msgstr ""
-
-msgid "Imported"
-msgstr ""
-
-msgid "Updated"
-msgstr ""
-
-msgid "Ignored"
-msgstr ""
-
-msgid "Deleted"
-msgstr ""
-
-msgid "Data Set"
-msgstr ""
-
-msgid "Program"
-msgstr ""
-
-msgid "Existing data values"
-msgstr ""
-
-msgid ""
-"There are {{dataValuesSize}} data values in the database for this "
-"organisation unit and periods. If you proceed, all those data values will "
-"be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
-msgstr ""
-
-msgid "Proceed"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
-
-msgid "Template Generation"
-msgstr ""
-
-msgid "Start Year"
-msgstr ""
-
-msgid "End Year"
-msgstr ""
-
-msgid "No capture organisations units"
-msgstr ""
-
-msgid "Download template"
-msgstr ""
-
-msgid "Bulk Import"
-msgstr ""
-
-msgid "Drag and drop file to import"
-msgstr ""
-
-msgid "data values"
-msgstr ""
-
-msgid "No capture org unit match element org units"
-msgstr ""
-
-msgid "Import data"
 msgstr ""
 
 msgid "Settings saved"
@@ -110,6 +47,12 @@ msgstr ""
 msgid "User groups with access to Settings"
 msgstr ""
 
+msgid "Data Set"
+msgstr ""
+
+msgid "Program"
+msgstr ""
+
 msgid "Custom"
 msgstr ""
 
@@ -123,6 +66,18 @@ msgid "Select {{elementLabel}} to export..."
 msgstr ""
 
 msgid "Theme"
+msgstr ""
+
+msgid "No theme"
+msgstr ""
+
+msgid "Start Year"
+msgstr ""
+
+msgid "End Year"
+msgstr ""
+
+msgid "No capture organisations units"
 msgstr ""
 
 msgid "Edit theme"
@@ -208,7 +163,73 @@ msgstr ""
 msgid "Data set"
 msgstr ""
 
+msgid "Cannot get data entry sheet"
+msgstr ""
+
+msgid "Cannot get metadata sheet"
+msgstr ""
+
+msgid "Event date is empty"
+msgstr ""
+
 msgid ""
 "Cannot import: Versions do not match (database={{dbVersion}}, "
 "file={{sheetVersion}})"
+msgstr ""
+
+msgid "Cannot read file"
+msgstr ""
+
+msgid "Select a organisation units to import data"
+msgstr ""
+
+msgid "Selected organisation unit is not associated with the dataset"
+msgstr ""
+
+msgid "Imported"
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Existing data values"
+msgstr ""
+
+msgid ""
+"There are {{dataValuesSize}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will "
+"be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+
+msgid "Proceed"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Template Generation"
+msgstr ""
+
+msgid "Download template"
+msgstr ""
+
+msgid "Bulk Import"
+msgstr ""
+
+msgid "Drag and drop file to import"
+msgstr ""
+
+msgid "data values"
+msgstr ""
+
+msgid "No capture org unit match element org units"
+msgstr ""
+
+msgid "Import data"
 msgstr ""
