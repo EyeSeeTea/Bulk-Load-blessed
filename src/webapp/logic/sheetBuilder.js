@@ -160,7 +160,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
-    const { elementMetadata: metadata, organisationUnits } = this.builder;
+    const { elementMetadata: metadata, organisationUnits, language } = this.builder;
     const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
@@ -178,25 +178,31 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(1, 6, 2, 6, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    metadata.forEach(value => {
-        const name = value.formName !== undefined ? value.formName : value.name;
-        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+    metadata.forEach(item => {
+        const translations = item.translations.filter(({ locale }) => locale === language);
+        const { value: formName = item.formName } =
+            translations.find(({ property }) => property === "FORM_NAME") ?? {};
+        const { value: shortName = item.shortName } =
+            translations.find(({ property }) => property === "SHORT_NAME") ?? {};
+        const name = formName ?? shortName ?? item.name;
+
+        const optionSet = item.optionSet ? metadata.get(item.optionSet.id) : null;
         const options =
             optionSet && optionSet.options
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
 
-        metadataSheet.cell(rowId, 1).string(value.id ? value.id : "");
-        metadataSheet.cell(rowId, 2).string(value.type ? value.type : "");
+        metadataSheet.cell(rowId, 1).string(item.id ? item.id : "");
+        metadataSheet.cell(rowId, 2).string(item.type ? item.type : "");
         metadataSheet.cell(rowId, 3).string(name ? name : "");
-        metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : "");
+        metadataSheet.cell(rowId, 4).string(item.valueType ? item.valueType : "");
         metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : "");
         metadataSheet.cell(rowId, 6).string(options ? options : "");
 
         if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
                 refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + value.id,
+                name: "_" + item.id,
             });
         }
 

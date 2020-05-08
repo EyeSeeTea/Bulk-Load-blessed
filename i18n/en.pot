@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-07T11:51:10.667Z\n"
-"PO-Revision-Date: 2020-05-07T11:51:10.667Z\n"
+"POT-Creation-Date: 2020-05-08T14:50:03.408Z\n"
+"PO-Revision-Date: 2020-05-08T14:50:03.408Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -63,6 +63,9 @@ msgid "Model"
 msgstr ""
 
 msgid "Select {{elementLabel}} to export..."
+msgstr ""
+
+msgid "Language"
 msgstr ""
 
 msgid "Theme"
