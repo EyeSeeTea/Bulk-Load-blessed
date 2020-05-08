@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-07T11:51:10.667Z\n"
+"POT-Creation-Date: 2020-05-08T10:38:37.993Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,6 +26,53 @@ msgstr ""
 
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
+
+msgid "Close"
+msgstr ""
+
+msgid "Import data"
+msgstr "Importar datos"
+
+msgid "Name"
+msgstr ""
+
+#, fuzzy
+msgid "Data Element"
+msgstr "Data Set"
+
+msgid "Category Option"
+msgstr ""
+
+#, fuzzy
+msgid "Import Value"
+msgstr "Importados"
+
+msgid "Current Value"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Created"
+msgstr ""
+
+msgid "Updated"
+msgstr "Actualizados"
+
+#, fuzzy
+msgid "Toggle ignore data value"
+msgstr "Se ha producido un error borrando valores de datos"
+
+#, fuzzy
+msgid "Include data value"
+msgstr "valores de datos"
+
+#, fuzzy
+msgid "Ignore data value"
+msgstr "valores de datos"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
@@ -116,9 +163,6 @@ msgstr "Mueva aquí los ficheros a importar"
 msgid "Themes"
 msgstr ""
 
-msgid "Close"
-msgstr ""
-
 msgid "An error ocurred while saving theme"
 msgstr ""
 
@@ -128,9 +172,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Are you sure you want to remove selected themes"
-msgstr ""
-
-msgid "Name"
 msgstr ""
 
 msgid "Header"
@@ -194,12 +235,6 @@ msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
 msgid "Imported"
 msgstr "Importados"
 
-msgid "Updated"
-msgstr "Actualizados"
-
-msgid "Ignored"
-msgstr "Ignorados"
-
 msgid "Deleted"
 msgstr "Borrados"
 
@@ -240,9 +275,6 @@ msgid "No capture org unit match element org units"
 msgstr ""
 "Las unidades organizativas de introducción de datos y del elemento no "
 "coinciden"
-
-msgid "Import data"
-msgstr "Importar datos"
 
 #~ msgid "Object not found in database"
 #~ msgstr "No se ha encontrado el objeto en la base de datos"

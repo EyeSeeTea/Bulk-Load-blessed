@@ -9,6 +9,7 @@ import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import ImportPreviewDialog from "../../components/import-preview/ImportPreviewDialog";
 import SettingsComponent from "../../components/settings/SettingsDialog";
 import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
@@ -203,6 +204,7 @@ export default function LandingPage() {
             const data = await sheetImport.readSheet({
                 ...result,
                 d2,
+                api,
                 file: state.importDataSheet,
                 useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
                 rowOffset,
@@ -320,6 +322,8 @@ export default function LandingPage() {
             <ThemeListDialog onChange={onThemesChange} />
             <SettingsComponent settings={settings} onChange={onSettingsChange} />
             <ConfirmationOnExistingData />
+
+            {true && <ImportPreviewDialog />}
 
             <Paper
                 style={{
