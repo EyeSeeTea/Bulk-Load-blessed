@@ -380,7 +380,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                 
                 dataEntrySheet
                     .cell(2, columnId)
-                    .formula("_" + element.categoryCombo.id)
+                    .formula("_" + window.$default_category_combo.categoryCombos[0].id)
                     .style(groupStyle(groupId))
                     .style(transparentFontStyle(groupId));
                 groupId++;

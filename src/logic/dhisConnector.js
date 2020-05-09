@@ -139,3 +139,26 @@ export function importData(builder) {
             });
     });
 }
+
+/**
+ * Get Default Category Combo
+ * @param builder:
+ *      - d2: DHIS2 Library
+ * @returns {Promise<Object>}:
+ *      - The default category combo
+ */
+export function getDefaultCategoryCombo(builder) {
+    return new Promise(function(resolve, reject) {
+        const API_BASE_URL = builder.d2.Api.getApi().baseUrl;
+        const API_DEFAULT_ELEMENT_URL = API_BASE_URL 
+                                    + "/categoryCombos?filter=name:eq:default";
+        
+        getJSON(API_DEFAULT_ELEMENT_URL)
+            .then(response => {
+                resolve(response);
+            })
+            .catch(reason => {
+                reject(reason);
+            });
+    });        
+}

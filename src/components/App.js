@@ -32,6 +32,8 @@ const styles = theme => ({
     },
 });
 
+window.$default_category_combo = {};
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -55,6 +57,7 @@ class App extends React.Component {
 
         this.loadUserInformation();
         this.searchForOrgUnits();
+        this.loadDefaultCategoryCombo();
 
         this.handleOrgUnitTreeClick = this.handleOrgUnitTreeClick.bind(this);
         this.handleTemplateDownloadClick = this.handleTemplateDownloadClick.bind(this);
@@ -77,6 +80,14 @@ class App extends React.Component {
                     ...result,
                 });
             });
+    }
+
+    loadDefaultCategoryCombo() {
+        dhisConnector
+            .getDefaultCategoryCombo({
+                d2: this.props.d2,
+            })
+            .then(result => window.$default_category_combo = result);
     }
 
     handleOrgUnitTreeClick(event, orgUnit) {
