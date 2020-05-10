@@ -5,13 +5,179 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-03-17T09:12:34.505Z\n"
-"PO-Revision-Date: 2020-03-17T09:12:34.505Z\n"
+"POT-Creation-Date: 2020-05-07T11:51:10.667Z\n"
+"PO-Revision-Date: 2020-05-07T11:51:10.667Z\n"
 
-msgid "Cannot read file"
+msgid "Template not loaded"
 msgstr ""
 
-msgid "Object not found in database"
+msgid "Tracker programs are not supported"
+msgstr ""
+
+msgid "Element not found"
+msgstr ""
+
+msgid "Program or DataSet not found in instance"
+msgstr ""
+
+msgid "Field {{field}} cannot be blank"
+msgstr ""
+
+msgid "You need to select at least one {{element}}"
+msgstr ""
+
+msgid "Settings saved"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Models"
+msgstr ""
+
+msgid "Visibility"
+msgstr ""
+
+msgid "Show Organisation Units On Template Generation"
+msgstr ""
+
+msgid "User groups for Template Generation"
+msgstr ""
+
+msgid "User groups with access to Settings"
+msgstr ""
+
+msgid "Data Set"
+msgstr ""
+
+msgid "Program"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
+msgid "elements"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Select {{elementLabel}} to export..."
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "No theme"
+msgstr ""
+
+msgid "Start Year"
+msgstr ""
+
+msgid "End Year"
+msgstr ""
+
+msgid "No capture organisations units"
+msgstr ""
+
+msgid "Edit theme"
+msgstr ""
+
+msgid "New theme"
+msgstr ""
+
+msgid "Theme name"
+msgstr ""
+
+msgid "Sections"
+msgstr ""
+
+msgid "Header text"
+msgstr ""
+
+msgid "Title text"
+msgstr ""
+
+msgid "Subtitle text"
+msgstr ""
+
+msgid "Footer text"
+msgstr ""
+
+msgid "Logo"
+msgstr ""
+
+msgid "Drag and drop logo file"
+msgstr ""
+
+msgid "Themes"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "An error ocurred while saving theme"
+msgstr ""
+
+msgid "Delete {{count}} themes"
+msgid_plural "Delete {{count}} themes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Are you sure you want to remove selected themes"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Header"
+msgstr ""
+
+msgid "Footer"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Subtitle"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Create theme"
+msgstr ""
+
+msgid "Error deleting data values"
+msgstr ""
+
+msgid "Select at least one model"
+msgstr ""
+
+msgid "Data set"
+msgstr ""
+
+msgid "Cannot get data entry sheet"
+msgstr ""
+
+msgid "Cannot get metadata sheet"
+msgstr ""
+
+msgid "Event date is empty"
+msgstr ""
+
+msgid ""
+"Cannot import: Versions do not match (database={{dbVersion}}, "
+"file={{sheetVersion}})"
+msgstr ""
+
+msgid "Cannot read file"
 msgstr ""
 
 msgid "Select a organisation units to import data"
@@ -32,21 +198,6 @@ msgstr ""
 msgid "Deleted"
 msgstr ""
 
-msgid "Data Set"
-msgstr ""
-
-msgid "Program"
-msgstr ""
-
-msgid "elements"
-msgstr ""
-
-msgid "Model"
-msgstr ""
-
-msgid "Select {{element}} to {{action}}..."
-msgstr ""
-
 msgid "Existing data values"
 msgstr ""
 
@@ -65,18 +216,6 @@ msgstr ""
 msgid "Template Generation"
 msgstr ""
 
-msgid "export"
-msgstr ""
-
-msgid "Start Year"
-msgstr ""
-
-msgid "End Year"
-msgstr ""
-
-msgid "No capture organisations units"
-msgstr ""
-
 msgid "Download template"
 msgstr ""
 
@@ -93,42 +232,4 @@ msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"
-msgstr ""
-
-msgid "Settings saved"
-msgstr ""
-
-msgid "Settings"
-msgstr ""
-
-msgid "Save"
-msgstr ""
-
-msgid "Models"
-msgstr ""
-
-msgid "Visibility"
-msgstr ""
-
-msgid "Show Organisation Units On Template Generation"
-msgstr ""
-
-msgid "User groups for Template Generation"
-msgstr ""
-
-msgid "User groups with access to Settings"
-msgstr ""
-
-msgid "Error deleting data values"
-msgstr ""
-
-msgid "Select at least one model"
-msgstr ""
-
-msgid "Data set"
-msgstr ""
-
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
 msgstr ""
