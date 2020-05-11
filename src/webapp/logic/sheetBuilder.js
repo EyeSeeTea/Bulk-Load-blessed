@@ -322,6 +322,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         categoryCombo: { id: categoryComboId },
                     })
                     .forEach(dataElement => {
+                        const { description } = this.translate(dataElement);
                         const firstColumnId = columnId;
 
                         const sectionCategoryOptionCombos = sections[categoryComboId];
@@ -339,15 +340,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 this.validations.get(validation)
                             );
 
-                            if (categoryOptionCombo.description !== undefined) {
-                                dataEntrySheet
-                                    .cell(itemRow, columnId)
-                                    .comment(categoryOptionCombo.description, {
-                                        height: "100pt",
-                                        width: "160pt",
-                                    });
-                            }
-
                             columnId++;
                         });
 
@@ -362,10 +354,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                             .formula("_" + dataElement.id)
                             .style(groupStyle(groupId));
 
-                        if (dataElement.description !== undefined) {
+                        if (description !== undefined) {
                             dataEntrySheet
                                 .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                                .comment(dataElement.description, {
+                                .comment(description, {
                                     height: "100pt",
                                     width: "160pt",
                                 });
@@ -407,6 +399,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
                     const dataElement = metadata.get(dataElementT.id);
+                    const { description } = this.translate(dataElement);
+
                     const validation = dataElement.optionSet
                         ? dataElement.optionSet.id
                         : dataElement.valueType;
@@ -421,8 +415,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     );
                     dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
 
-                    if (dataElement.description !== undefined) {
-                        dataEntrySheet.cell(itemRow, columnId).comment(dataElement.description, {
+                    if (description !== undefined) {
+                        dataEntrySheet.cell(itemRow, columnId).comment(description, {
                             height: "100pt",
                             width: "160pt",
                         });
