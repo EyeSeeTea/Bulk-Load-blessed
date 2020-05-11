@@ -323,7 +323,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         categoryCombo: { id: categoryComboId },
                     })
                     .forEach(dataElement => {
-                        const { description } = this.translate(dataElement);
+                        const { name, description } = this.translate(dataElement);
                         const firstColumnId = columnId;
 
                         const sectionCategoryOptionCombos = sections[categoryComboId];
@@ -347,7 +347,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         if (columnId - 1 === firstColumnId) {
                             dataEntrySheet
                                 .column(firstColumnId)
-                                .setWidth(dataElement.name.length / 2.5 + 15);
+                                .setWidth(name.length / 2.5 + 15);
                         }
 
                         dataEntrySheet
@@ -400,7 +400,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
                     const dataElement = metadata.get(dataElementT.id);
-                    const { description } = this.translate(dataElement);
+                    const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet
                         ? dataElement.optionSet.id
@@ -414,7 +414,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         groupId,
                         this.validations.get(validation)
                     );
-                    dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
+                    dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
                     if (description !== undefined) {
                         dataEntrySheet.cell(itemRow, columnId).comment(description, {
