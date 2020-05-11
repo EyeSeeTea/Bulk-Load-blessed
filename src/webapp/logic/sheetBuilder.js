@@ -181,18 +181,19 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     let rowId = 3;
     metadata.forEach(item => {
         const { name } = this.translate(item);
-        const optionSet = item.optionSet ? metadata.get(item.optionSet.id) : null;
-        const options =
-            optionSet && optionSet.options
-                ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
-                : null;
+        const optionSet = metadata.get(item.optionSet?.id);
+        const { name: optionSetName } = this.translate(optionSet);
+        const options = optionSet?.options
+            ?.map(({ id }) => metadata.get(id))
+            .map(option => this.translate(option).name)
+            .join(", ");
 
-        metadataSheet.cell(rowId, 1).string(item.id ? item.id : "");
-        metadataSheet.cell(rowId, 2).string(item.type ? item.type : "");
-        metadataSheet.cell(rowId, 3).string(name ? name : "");
-        metadataSheet.cell(rowId, 4).string(item.valueType ? item.valueType : "");
-        metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : "");
-        metadataSheet.cell(rowId, 6).string(options ? options : "");
+        metadataSheet.cell(rowId, 1).string(item.id ?? "");
+        metadataSheet.cell(rowId, 2).string(item.type ?? "");
+        metadataSheet.cell(rowId, 3).string(name ?? "");
+        metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
+        metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
+        metadataSheet.cell(rowId, 6).string(options ?? "");
 
         if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
