@@ -91,7 +91,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async getLocales(): Promise<Locale[]> {
-        const locales = await this.api.get<Locale[]>("/locales/ui").getData();
+        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
         return locales;
     }
 

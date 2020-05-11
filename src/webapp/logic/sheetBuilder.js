@@ -40,19 +40,20 @@ SheetBuilder.prototype.fillLegendSheet = function () {
     legendSheet.cell(1, 5, 2, 5, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(value => {
-        const name = value.formName ? value.formName : value.name;
-        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        const options =
-            optionSet && optionSet.options
-                ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
-                : null;
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
+        const { name, description } = this.translate(item);
+        const optionSet = metadata.get(item.optionSet?.id);
+        const { name: optionSetName } = this.translate(optionSet);
+        const options = optionSet?.options
+            ?.map(({ id }) => metadata.get(id))
+            .map(option => this.translate(option).name)
+            .join(", ");
 
-        legendSheet.cell(rowId, 1).string(name ? name : "");
-        legendSheet.cell(rowId, 2).string(value.description ? value.description : "");
-        legendSheet.cell(rowId, 3).string(value.valueType ? value.valueType : "");
-        legendSheet.cell(rowId, 4).string(optionSet ? optionSet.name : "");
-        legendSheet.cell(rowId, 5).string(options ? options : "");
+        legendSheet.cell(rowId, 1).string(name ?? "");
+        legendSheet.cell(rowId, 2).string(description ?? "");
+        legendSheet.cell(rowId, 3).string(item?.valueType ?? "");
+        legendSheet.cell(rowId, 4).string(optionSetName ?? "");
+        legendSheet.cell(rowId, 5).string(options ?? "");
 
         rowId++;
     });
@@ -160,7 +161,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
-    const { elementMetadata: metadata, organisationUnits, language } = this.builder;
+    const { elementMetadata: metadata, organisationUnits } = this.builder;
     const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
@@ -179,13 +180,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
     let rowId = 3;
     metadata.forEach(item => {
-        const translations = item.translations.filter(({ locale }) => locale === language);
-        const { value: formName = item.formName } =
-            translations.find(({ property }) => property === "FORM_NAME") ?? {};
-        const { value: shortName = item.shortName } =
-            translations.find(({ property }) => property === "SHORT_NAME") ?? {};
-        const name = formName ?? shortName ?? item.name;
-
+        const { name } = this.translate(item);
         const optionSet = item.optionSet ? metadata.get(item.optionSet.id) : null;
         const options =
             optionSet && optionSet.options
@@ -210,13 +205,12 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     });
 
     organisationUnits.forEach(orgUnit => {
+        const { name } = this.translate(orgUnit);
         metadataSheet.cell(rowId, 1).string(orgUnit.id !== undefined ? orgUnit.id : "");
         metadataSheet.cell(rowId, 2).string("organisationUnit");
-        metadataSheet
-            .cell(rowId, 3)
-            .string(orgUnit.displayName !== undefined ? orgUnit.displayName : "");
+        metadataSheet.cell(rowId, 3).string(name ?? "");
 
-        if (orgUnit.displayName !== undefined)
+        if (name !== undefined)
             this.workbook.definedNameCollection.addDefinedName({
                 refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
                 name: "_" + orgUnit.id,
@@ -459,4 +453,22 @@ SheetBuilder.prototype.toBlob = async function () {
         console.error("Failed building/downloading template");
         throw error;
     }
+};
+
+SheetBuilder.prototype.translate = function (item) {
+    const { language } = this.builder;
+    const translations = item?.translations?.filter(({ locale }) => locale === language) ?? [];
+
+    const { value: formName } = translations.find(({ property }) => property === "FORM_NAME") ?? {};
+    const { value: regularName } = translations.find(({ property }) => property === "NAME") ?? {};
+    const { value: shortName } =
+        translations.find(({ property }) => property === "SHORT_NAME") ?? {};
+
+    const defaultName = item?.displayName ?? item?.formName ?? item?.name;
+    const name = formName ?? regularName ?? shortName ?? defaultName;
+
+    const { value: description = item?.description } =
+        translations.find(({ property }) => property === "DESCRIPTION") ?? {};
+
+    return { name, description };
 };
