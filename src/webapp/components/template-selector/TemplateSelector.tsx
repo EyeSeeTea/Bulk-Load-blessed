@@ -275,7 +275,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     disabled={!enablePopulate}
                     className={classes.populateCheckbox}
                     control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                    label="Populate template with instance data"
+                    label={i18n.t("Populate template with instance data")}
                 />
             )}
         </React.Fragment>
