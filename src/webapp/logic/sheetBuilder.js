@@ -68,8 +68,6 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         startYear,
         endYear,
     } = this.builder;
-    const { name: title } = this.translate(elementMetadata.get(element.id));
-
     const validationSheet = this.validationSheet;
 
     // Freeze and format column titles
@@ -156,7 +154,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     );
 
     // Add program title
-    validationSheet.cell(1, 1, 1, columnId, true).string(title).style(baseStyle);
+    validationSheet.cell(1, 1, 1, columnId, true).formula(`_${element.id}`).style(baseStyle);
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
@@ -306,6 +304,12 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         null,
         this.validations.get("options")
     );
+
+    // Add element title
+    dataEntrySheet
+        .cell(sectionRow, 1, sectionRow, columnId - 1, true)
+        .formula(`_${element.id}`)
+        .style(baseStyle);
 
     if (element.type === "dataSet") {
         const categoryOptionCombos = [];
