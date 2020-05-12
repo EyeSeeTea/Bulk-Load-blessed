@@ -145,13 +145,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onStartDateChange = (date: Date) => {
         const { unit = "date" } = datePickerFormat ?? {};
-        const startDate = moment(date).startOf(unit);
+        const startDate = date ? moment(date).startOf(unit) : undefined;
         setState(state => ({ ...state, startDate }));
     };
 
     const onEndDateChange = (date: Date) => {
         const { unit = "date" } = datePickerFormat ?? {};
-        const endDate = moment(date).endOf(unit);
+        const endDate = date ? moment(date).endOf(unit) : undefined;
         setState(state => ({ ...state, endDate }));
     };
 
@@ -225,7 +225,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 <div className={classes.startDateSelect}>
                     <DatePicker
                         className={classes.fullWidth}
-                        value={state.startDate}
+                        emptyLabel={i18n.t("Start date")}
+                        value={state.startDate ?? null}
                         onChange={onStartDateChange}
                         maxDate={state.endDate}
                         views={datePickerFormat?.views}
@@ -235,7 +236,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 <div className={classes.endDateSelect}>
                     <DatePicker
                         className={classes.fullWidth}
-                        value={state.endDate}
+                        emptyLabel={i18n.t("End date")}
+                        value={state.endDate ?? null}
                         onChange={onEndDateChange}
                         minDate={state.startDate}
                         views={datePickerFormat?.views}

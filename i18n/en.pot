@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-12T07:13:41.283Z\n"
-"PO-Revision-Date: 2020-05-12T07:13:41.283Z\n"
+"POT-Creation-Date: 2020-05-12T07:16:26.576Z\n"
+"PO-Revision-Date: 2020-05-12T07:16:26.576Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -72,6 +72,12 @@ msgid "Theme"
 msgstr ""
 
 msgid "No theme"
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
 msgstr ""
 
 msgid "No capture organisations units"
