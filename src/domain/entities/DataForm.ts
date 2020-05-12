@@ -6,6 +6,7 @@ export interface DataForm {
     type: DataFormType;
     id: Id;
     name: string;
+    periodType?: "Daily" | "Monthly" | "Yearly" | "Weekly";
     attributeValues: {
         attribute: { code: string };
         value: string;

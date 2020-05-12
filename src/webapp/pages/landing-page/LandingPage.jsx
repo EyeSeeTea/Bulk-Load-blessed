@@ -74,8 +74,8 @@ export default function LandingPage() {
             type,
             id,
             theme,
-            startYear,
-            endYear,
+            startDate,
+            endDate,
             orgUnits,
             language,
             populate,
@@ -95,8 +95,8 @@ export default function LandingPage() {
 
             const template = new SheetBuilder({
                 ...result,
-                startYear,
-                endYear,
+                startDate,
+                endDate,
                 language,
             });
 
@@ -110,8 +110,8 @@ export default function LandingPage() {
                 theme,
                 orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
                 populate: settings.showOrgUnitsOnGeneration && populate,
-                startDate: type === "dataSet" ? moment(startYear, "YYYY") : undefined,
-                endDate: type === "dataSet" ? moment(endYear, "YYYY") : undefined,
+                startDate,
+                endDate,
             });
         }
 

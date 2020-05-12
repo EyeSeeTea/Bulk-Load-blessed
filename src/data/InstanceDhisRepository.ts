@@ -30,6 +30,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 displayName: true,
                 name: true,
                 attributeValues: { value: true, attribute: { code: true } },
+                periodType: true,
             },
             filter: {
                 id: ids ? { in: ids } : undefined,
