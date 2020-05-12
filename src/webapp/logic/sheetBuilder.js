@@ -76,12 +76,8 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     validationSheet.row(2).freeze();
 
     // Add column titles
-    let rowId = 1;
+    let rowId = 2;
     let columnId = 1;
-    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(baseStyle);
-
-    rowId = 2;
-    columnId = 1;
     validationSheet.cell(rowId++, columnId).string("Organisation Units");
     _.forEach(organisationUnits, orgUnit => {
         validationSheet.cell(rowId++, columnId).formula("_" + orgUnit.id);
@@ -158,6 +154,9 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         "TRUE_ONLY",
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
+
+    // Add program title
+    validationSheet.cell(1, 1, 1, columnId, true).string(title).style(baseStyle);
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
