@@ -3,6 +3,9 @@ import { saveAs } from "file-saver";
 import _ from "lodash";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { baseStyle, createColumn, groupStyle, protectedSheet, transparentFontStyle } from "../utils/excel";
+import { getObjectVersion } from "./utils";
+
+
 
 export const SheetBuilder = function(builder) {
     this.workbook = new Excel.Workbook();
@@ -22,7 +25,7 @@ export const SheetBuilder = function(builder) {
 
 SheetBuilder.prototype.fillLegendSheet = function() {
     const { elementMetadata: metadata, rawMetadata } = this.builder;
-    let legendSheet = this.legendSheet;
+    const legendSheet = this.legendSheet;
 
     // Freeze and format column titles
     legendSheet.row(2).freeze();
@@ -55,10 +58,10 @@ SheetBuilder.prototype.fillLegendSheet = function() {
         .style(baseStyle);
 
     let rowId = 3;
-    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach((value, key) => {
-        let name = value.formName ? value.formName : value.name;
-        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options =
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(value => {
+        const name = value.formName ? value.formName : value.name;
+        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        const options =
             optionSet && optionSet.options
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
@@ -84,7 +87,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     } = this.builder;
     const title = element.displayName;
 
-    let validationSheet = this.validationSheet;
+    const validationSheet = this.validationSheet;
 
     // Freeze and format column titles
     validationSheet.row(2).freeze();
@@ -130,7 +133,7 @@ SheetBuilder.prototype.fillValidationSheet = function() {
     rowId = 2;
     columnId++;
     validationSheet.cell(rowId++, columnId).string("Options");
-    let dataSetOptionComboId = element.categoryCombo.id;
+    const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
         if (e.type === "categoryOptionCombo" 
             && e.categoryCombo.id === dataSetOptionComboId
@@ -158,11 +161,28 @@ SheetBuilder.prototype.fillValidationSheet = function() {
             )}$${rowId}`
         );
     });
+    rowId = 2;
+    columnId++;
+    validationSheet.cell(rowId++, columnId).string("Boolean");
+    validationSheet.cell(rowId++, columnId).formula("_true");
+    validationSheet.cell(rowId++, columnId).formula("_false");
+    this.validations.set(
+        "BOOLEAN",
+        `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
+    );
+    rowId = 2;
+    columnId++;
+    validationSheet.cell(rowId++, columnId).string("True only");
+    validationSheet.cell(rowId++, columnId).formula("_true");
+    this.validations.set(
+        "TRUE_ONLY",
+        `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
+    );
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function() {
     const { elementMetadata: metadata, organisationUnits } = this.builder;
-    let metadataSheet = this.metadataSheet;
+    const metadataSheet = this.metadataSheet;
     
     // Freeze and format column titles
     metadataSheet.row(2).freeze();
@@ -197,11 +217,11 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
         .style(baseStyle);
 
     let rowId = 3;
-    metadata.forEach((value, key) => {
+    metadata.forEach(value => {
         
-        let name = value.formName !== undefined ? value.formName : value.name;
-        let optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        let options =
+        const name = value.formName !== undefined ? value.formName : value.name;
+        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
+        const options =
             optionSet && optionSet.options
                 ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
                 : null;
@@ -209,7 +229,7 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
         metadataSheet.cell(rowId, 1).string(value.id ? value.id : "");
         metadataSheet.cell(rowId, 2).string(value.type ? value.type : "");
         
-        
+        //Checks if an element is compulsory, if it is adds a * at the end
         if (value.type === "dataElement" && 
                 this.builder.rawMetadata.programStageDataElements !== undefined) {
 
@@ -251,116 +271,166 @@ SheetBuilder.prototype.fillMetadataSheet = function() {
 
         rowId++;
     });
+    metadataSheet.cell(rowId, 1).string("true");
+    metadataSheet.cell(rowId, 2).string("boolean");
+    metadataSheet.cell(rowId, 3).string("Yes");
+    this.workbook.definedNameCollection.addDefinedName({
+        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        name: "_true",
+    });
+    rowId++;
+    metadataSheet.cell(rowId, 1).string("false");
+    metadataSheet.cell(rowId, 2).string("boolean");
+    metadataSheet.cell(rowId, 3).string("No");
+    this.workbook.definedNameCollection.addDefinedName({
+        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        name: "_false",
+    });
+    rowId++;
+};
+
+SheetBuilder.prototype.getVersion = function () {
+    const { element } = this.builder;
+    const defaultVersion =
+        element.type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
+    return getObjectVersion(element) ?? defaultVersion;
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function() {
 
     const { element, elementMetadata: metadata } = this.builder;
-    let dataEntrySheet = this.dataEntrySheet;
-    
+    const dataEntrySheet = this.dataEntrySheet;
+
+    // Add cells for themes
+    const sectionRow = 6;
+    const itemRow = 7;
+
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        dataEntrySheet.row(row).hide();
+    }
+
     // Freeze and format column titles
-    dataEntrySheet.row(2).freeze();
-    dataEntrySheet.row(1).setHeight(30);
-    dataEntrySheet.row(2).setHeight(50);
+    dataEntrySheet.row(itemRow).freeze();
+    dataEntrySheet.row(sectionRow).setHeight(30);
+    dataEntrySheet.row(itemRow).setHeight(50);
+
+
+    // Add template version
+    dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
     // Add column titles
     let columnId = 1;
     let groupId = 0;
 
+
     createColumn(
         this.workbook,
         dataEntrySheet,
+        itemRow,
         columnId++,
         element.type === "program"? "Org Unit*" : "Org Unit",
         null,
         this.validations.get("organisationUnits")
     );
     if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Latitude*");
-        createColumn(this.workbook, dataEntrySheet, columnId++, "Longitude*");
+        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Latitude*");
+        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Longitude*");
+ 
     } else if (element.type === "dataSet") {
         createColumn(
             this.workbook,
             dataEntrySheet,
+            itemRow,           
             columnId++,
             "Period",
             null,
             this.validations.get("periods")
         );
-        createColumn(
-            this.workbook,
-            dataEntrySheet,
-            columnId++,
-            "Options",
-            null,
-            this.validations.get("options")
-        );
     }
-
+    
+    createColumn(
+        this.workbook,
+        dataEntrySheet,
+        itemRow,
+        columnId++,
+        "Options",
+        null,
+        this.validations.get("options")
+    );
     if (element.type === "dataSet") {
-        let categoryOptionCombos = [];
+        const categoryOptionCombos = [];
         
-        for (let [, value] of metadata) { 
+        for (const [, value] of metadata) { 
             if (value.type === "categoryOptionCombo") {
                 categoryOptionCombos.push(value);
             }
         }
         let sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
         
-        _.forOwn(sections, (ownSection, categoryComboId) => {
-            let categoryCombo = metadata.get(categoryComboId);
-                if (categoryCombo !== undefined) {
-                    let dataElementLookup = _.filter(element.dataSetElements, {
+        _.forOwn(sections, (_section, categoryComboId) => {
+            const categoryCombo = metadata.get(categoryComboId);
+            if (categoryCombo !== undefined) {
+                _(element.dataSetElements)
+                    .map(({ dataElement }) => metadata.get(dataElement.id))
+                    .filter({
                         categoryCombo: { id: categoryComboId },
-                    });                    
-                    _.forEach(dataElementLookup, lookupResult => {
-                        let firstColumnId = columnId;
+                    })
+                    .forEach(dataElement => {
+                        const firstColumnId = columnId;
 
-                        let dataElementId = lookupResult.dataElement.id;
-                        let sectionCategoryOptionCombos = sections[categoryComboId];
-                        _.forEach(sectionCategoryOptionCombos, dataValue => {
-                            dataEntrySheet
-                                .column(columnId)
-                                .setWidth(dataValue.name.length / 2.5 + 10);
-                            if (categoryCombo.code !== "default")
-                                dataEntrySheet
-                                    .cell(2, columnId)
-                                    .formula("_" + dataValue.id)
-                                    .style(groupStyle(groupId));
-                            else
-                                dataEntrySheet
-                                    .cell(2, columnId)
-                                    .formula("_" + dataValue.id)
-                                    .style(groupStyle(groupId))
-                                    .style(transparentFontStyle(groupId));
+                        const sectionCategoryOptionCombos = sections[categoryComboId];
+                        _.forEach(sectionCategoryOptionCombos, categoryOptionCombo => {
+                            const validation = dataElement.optionSet
+                                ? dataElement.optionSet.id
+                                : dataElement.valueType;
 
-                            if (dataValue.description !== undefined) {
+                            createColumn(
+                                this.workbook,
+                                dataEntrySheet,
+                                itemRow,
+                                columnId,
+                                "_" + categoryOptionCombo.id,
+                                groupId,
+                                this.validations.get(validation),
+                                categoryOptionCombo.code === "default"
+                            );
+
+                            if (categoryOptionCombo.description !== undefined) {
                                 dataEntrySheet
-                                    .cell(2, columnId)
-                                    .comment(dataValue.description, {
-                                    height: "100pt",
-                                    width: "160pt",
-                                });
+                                    .cell(itemRow, columnId)
+                                    .comment(categoryOptionCombo.description, {
+                                        height: "100pt",
+                                        width: "160pt",
+                                    });
                             }
 
                             columnId++;
                         });
 
                         if (columnId - 1 === firstColumnId) {
-                            let dataElement = metadata.get(lookupResult.dataElement.id);
                             dataEntrySheet
                                 .column(firstColumnId)
                                 .setWidth(dataElement.name.length / 2.5 + 15);
                         }
 
                         dataEntrySheet
-                            .cell(1, firstColumnId, 1, columnId - 1, true)
-                            .formula("_" + dataElementId)
+                            .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                            .formula("_" + dataElement.id)
                             .style(groupStyle(groupId));
+
+                        if (dataElement.description !== undefined) {
+                            dataEntrySheet
+                                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                                .comment(dataElement.description, {
+                                    height: "100pt",
+                                    width: "160pt",
+                                });
+                        }
 
                         groupId++;
                     });
-                }
+            }
         });
         _.forEach(element.dataSetElements, elem => {
             if (!elem.hasOwnProperty("categoryCombo")) {
@@ -376,7 +446,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                     .cell(1, columnId)
                     .formula("_" + elem.dataElement.id)
                     .style(groupStyle(groupId));
-                
                 
                 dataEntrySheet
                     .cell(2, columnId)
@@ -394,6 +463,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
             createColumn(
                 this.workbook,
                 dataEntrySheet,
+                itemRow,
                 columnId++,
                 programStage.executionDateLabel === undefined ? "Date*" : programStage.executionDateLabel.concat("*")
             );
@@ -422,6 +492,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function() {
                     createColumn(
                         this.workbook,
                         dataEntrySheet,
+                        itemRow,
                         columnId,
                         "_" + dataElement.id,
                         groupId,

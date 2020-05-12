@@ -3,7 +3,7 @@ import database from "./databaseReducer";
 import loading from "./loadingReducer";
 import dialog from "./dialogReducer";
 
-const index = (state = {}, action: Action) => {
+const index = (state = {}, action) => {
     return {
         d2: d2(state.d2, action),
         database: database(state.database, action),
