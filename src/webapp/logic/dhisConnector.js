@@ -8,7 +8,7 @@ export async function getElement(d2, type, id) {
     const {
         data,
     } = await axios.get(
-        `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value]categoryCombo,dataSetElements,sections,periodType,programStages`,
+        `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value],categoryCombo,dataSetElements,sections,periodType,programStages`,
         { withCredentials: true }
     );
 

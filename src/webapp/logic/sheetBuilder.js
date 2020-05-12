@@ -68,7 +68,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         startYear,
         endYear,
     } = this.builder;
-    const title = element.displayName;
+    const { name: title } = this.translate(elementMetadata.get(element.id));
 
     const validationSheet = this.validationSheet;
 
@@ -295,12 +295,15 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         );
     }
 
+    const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
+    const optionsTitle = attributeCode !== "default" ? `_${element.categoryCombo.id}` : "Options";
+
     createColumn(
         this.workbook,
         dataEntrySheet,
         itemRow,
         columnId++,
-        "Options",
+        optionsTitle,
         null,
         this.validations.get("options")
     );
@@ -345,9 +348,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         });
 
                         if (columnId - 1 === firstColumnId) {
-                            dataEntrySheet
-                                .column(firstColumnId)
-                                .setWidth(name.length / 2.5 + 15);
+                            dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
                         }
 
                         dataEntrySheet
@@ -382,7 +383,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
             dataEntrySheet
                 .cell(sectionRow, columnId - 1)
-                .string(programStage.name)
+                .string(this.translate(programStage).name)
                 .style(baseStyle);
 
             if (programStage.programStageSections.length === 0) {
