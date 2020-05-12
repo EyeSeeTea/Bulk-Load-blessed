@@ -452,7 +452,7 @@ SheetBuilder.prototype.toBlob = async function () {
 };
 
 SheetBuilder.prototype.translate = function (item) {
-    const { language } = this.builder;
+    const { elementMetadata, language } = this.builder;
     const translations = item?.translations?.filter(({ locale }) => locale === language) ?? [];
 
     const { value: formName } = translations.find(({ property }) => property === "FORM_NAME") ?? {};
@@ -466,5 +466,15 @@ SheetBuilder.prototype.translate = function (item) {
     const { value: description = item?.description } =
         translations.find(({ property }) => property === "DESCRIPTION") ?? {};
 
-    return { name, description };
+    if (item?.type === "categoryOptionCombo" && name === defaultName) {
+        const options = item?.categoryOptions?.map(({ id }) => {
+            const element = elementMetadata.get(id);
+            const { name } = this.translate(element);
+            return name;
+        });
+
+        return { name: options.join(", "), description };
+    } else {
+        return { name, description };
+    }
 };
