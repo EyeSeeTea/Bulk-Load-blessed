@@ -69,7 +69,11 @@ export default function LandingPage() {
     };
 
     const handleTemplateDownloadClick = async () => {
-        if (!state.template) return;
+        if (!state.template) {
+            snackbar.info(i18n.t("You need to select at least one element to export"));
+            return;
+        }
+
         const {
             type,
             id,
