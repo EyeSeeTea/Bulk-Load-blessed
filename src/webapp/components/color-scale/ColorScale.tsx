@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import colorbrewer from "../../utils/colorbrewer";
+import { palettes } from "../../utils/palettes";
 
 export interface ColorScaleProps {
     bins: number;
@@ -12,7 +12,7 @@ export interface ColorScaleProps {
 // Returns one color scale based on a code and number of classes
 export const ColorScale = ({ scale, bins, width, onClick = () => {} }: ColorScaleProps) => {
     const classes = useStyles();
-    const colors = colorbrewer[scale][bins];
+    const colors = palettes[scale][bins];
     const itemWidth = width ? width / bins : 36;
 
     return (

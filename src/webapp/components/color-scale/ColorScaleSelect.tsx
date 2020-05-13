@@ -1,7 +1,8 @@
 import { Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useState } from "react";
-import { colorScales, getColorPalette, getColorScale } from "../../utils/colors";
+import { getColorPalette, getColorScale } from "../../utils/colors";
+import { colorScales } from "../../utils/palettes";
 import { ColorScale } from "./ColorScale";
 
 export interface ColorScaleSelectProps {

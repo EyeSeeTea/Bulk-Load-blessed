@@ -1,5 +1,5 @@
 import * as Excel from "excel4node";
-import { defaultColors } from "./colors";
+import { defaultColorScale } from "./colors";
 
 export function createColumn(
     workbook,
@@ -83,13 +83,13 @@ export const hiddenSheet = {
     hidden: true,
 };
 
-export function groupStyle(groupId) {
+export function groupStyle(groupId, palette = defaultColorScale) {
     return {
         ...baseStyle,
         fill: {
             type: "pattern",
             patternType: "solid",
-            fgColor: defaultColors[groupId % defaultColors.length],
+            fgColor: palette[groupId % palette.length],
         },
     };
 }
