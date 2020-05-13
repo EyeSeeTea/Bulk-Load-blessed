@@ -16,19 +16,21 @@ export const ColorScale = ({ scale, bins, width, onClick = () => {} }: ColorScal
     const itemWidth = width ? width / bins : 36;
 
     return (
-        <ul
-            className={classes.scale}
-            onClick={event => onClick(event, scale)}
-            style={{ ...(width && { width }) }}
-        >
-            {colors.map((color, index) => (
-                <li
-                    key={index}
-                    className={classes.item}
-                    style={{ backgroundColor: color, width: itemWidth }}
-                />
-            ))}
-        </ul>
+        !!colors && (
+            <ul
+                className={classes.scale}
+                onClick={event => onClick(event, scale)}
+                style={{ ...(width && { width }) }}
+            >
+                {colors.map((color, index) => (
+                    <li
+                        key={index}
+                        className={classes.item}
+                        style={{ backgroundColor: color, width: itemWidth }}
+                    />
+                ))}
+            </ul>
+        )
     );
 };
 
