@@ -225,23 +225,25 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 <div className={classes.startDateSelect}>
                     <DatePicker
                         className={classes.fullWidth}
-                        emptyLabel={i18n.t("Start date")}
+                        label={i18n.t("Start date")}
                         value={state.startDate ?? null}
                         onChange={onStartDateChange}
                         maxDate={state.endDate}
                         views={datePickerFormat?.views}
                         format={datePickerFormat?.format}
+                        InputLabelProps={{ style: { color: "#494949" } }}
                     />
                 </div>
                 <div className={classes.endDateSelect}>
                     <DatePicker
                         className={classes.fullWidth}
-                        emptyLabel={i18n.t("End date")}
+                        label={i18n.t("End date")}
                         value={state.endDate ?? null}
                         onChange={onEndDateChange}
                         minDate={state.startDate}
                         views={datePickerFormat?.views}
                         format={datePickerFormat?.format}
+                        InputLabelProps={{ style: { color: "#494949" } }}
                     />
                 </div>
             </div>
@@ -273,7 +275,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     disabled={!enablePopulate}
                     className={classes.populateCheckbox}
                     control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                    label="Populate template with instance data"
+                    label={i18n.t("Populate template with instance data")}
                 />
             )}
         </React.Fragment>

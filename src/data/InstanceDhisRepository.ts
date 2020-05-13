@@ -138,6 +138,8 @@ export class InstanceDhisRepository implements InstanceRepository {
     private async getProgramPackage({
         id,
         orgUnits,
+        startDate,
+        endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const response = await promiseMap(orgUnits, orgUnit =>
@@ -146,6 +148,8 @@ export class InstanceDhisRepository implements InstanceRepository {
                     program: id,
                     orgUnit,
                     paging: false,
+                    startDate: startDate?.format("YYYY-MM-DD"),
+                    endDate: endDate?.format("YYYY-MM-DD"),
                 })
                 .getData()
         );
