@@ -379,11 +379,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 programStage.executionDateLabel ?? "Date"
             );
 
-            dataEntrySheet
-                .cell(sectionRow, columnId - 1)
-                .string(this.translate(programStage).name)
-                .style(baseStyle);
-
             if (programStage.programStageSections.length === 0) {
                 programStage.programStageSections.push({
                     dataElements: programStage.programStageDataElements.map(e => e.dataElement),

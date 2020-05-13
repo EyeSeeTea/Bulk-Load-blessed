@@ -73,7 +73,13 @@ export default function LandingPage() {
             return;
         }
 
-        const { type, id, theme, orgUnits, populate, ...rest } = state.template;
+        const { type, id, theme, orgUnits, populate, startDate, endDate, ...rest } = state.template;
+
+        if (type === "dataSet" && (!startDate || !endDate)) {
+            snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
+            return;
+        }
+
         loading.show(true);
 
         if (type === "custom") {
@@ -86,6 +92,8 @@ export default function LandingPage() {
                 theme,
                 orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
                 populate: settings.showOrgUnitsOnGeneration && populate,
+                startDate,
+                endDate,
                 ...rest,
             });
         }

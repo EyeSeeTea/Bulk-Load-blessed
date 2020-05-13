@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-13T05:42:55.844Z\n"
+"POT-Creation-Date: 2020-05-13T07:20:10.111Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -86,6 +86,9 @@ msgstr "Año final"
 
 msgid "No capture organisations units"
 msgstr "No se han encontrado unidades organizativas"
+
+msgid "Populate template with instance data"
+msgstr ""
 
 msgid "Edit theme"
 msgstr ""
@@ -192,6 +195,10 @@ msgstr ""
 
 #, fuzzy
 msgid "You need to select at least one element to export"
+msgstr "Seleccione al menos un {{element}}"
+
+#, fuzzy
+msgid "You need to select start and end dates for dataSet templates"
 msgstr "Seleccione al menos un {{element}}"
 
 msgid "Cannot read file"
