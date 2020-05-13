@@ -1,37 +1,25 @@
 import { makeStyles } from "@material-ui/core/styles";
-import _ from "lodash";
 import React from "react";
 import colorbrewer from "../../utils/colorbrewer";
 
 export interface ColorScaleProps {
     bins: number;
-    scale?: string;
+    scale: string;
     width?: number;
-    onClick?: Function;
-    style?: object;
+    onClick?: (event: React.MouseEvent, scale: string) => void;
 }
 
 // Returns one color scale based on a code and number of classes
-export const ColorScale = ({
-    scale = "",
-    bins,
-    width,
-    style = {},
-    onClick = _.noop,
-}: ColorScaleProps) => {
+export const ColorScale = ({ scale, bins, width, onClick = () => {} }: ColorScaleProps) => {
     const classes = useStyles();
-
     const colors = colorbrewer[scale][bins];
     const itemWidth = width ? width / bins : 36;
 
     return (
         <ul
             className={classes.scale}
-            style={{
-                ...(width && { width }),
-                ...style,
-            }}
             onClick={event => onClick(event, scale)}
+            style={{ ...(width && { width }) }}
         >
             {colors.map((color, index) => (
                 <li

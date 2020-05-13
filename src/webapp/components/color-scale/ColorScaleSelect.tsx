@@ -5,38 +5,43 @@ import { colorScales, getColorPalette, getColorScale } from "../../utils/colors"
 import { ColorScale } from "./ColorScale";
 
 export interface ColorScaleSelectProps {
-    palette: string;
-    onChange: Function;
+    palette: string[];
+    onChange: (palette: string[]) => void;
     width?: number;
     style?: object;
 }
 
 // Returns one color scale based on a code and number of classes
-export const ColorScaleSelect = ({ palette, width, style, onChange }: ColorScaleSelectProps) => {
+export const ColorScaleSelect = ({
+    palette,
+    width = 260,
+    style,
+    onChange,
+}: ColorScaleSelectProps) => {
     const classes = useStyles();
     const [anchor, setAnchor] = useState<Element | null>(null);
 
+    const scale = getColorScale(palette);
+    if (!scale) throw new Error(`Invalid palette ${palette}, scale not found`);
+
     // Show/hide popover with allowed color scales
-    const showColorScales = (event: any) => setAnchor(event.currentTarget);
+    const showColorScales = (event: React.MouseEvent) => setAnchor(event.currentTarget);
     const hideColorScales = () => setAnchor(null);
 
     // Called when a new color scale is selected in the popover
-    const onColorScaleSelect = (_event: any, scale: string) => {
-        onChange(getColorPalette(scale, palette.split(",").length));
+    const onColorScaleSelect = (_event: React.MouseEvent, scale: string) => {
+        onChange(getColorPalette(scale, palette.length));
         hideColorScales();
     };
-
-    const bins = palette.split(",").length;
-    const scale = getColorScale(palette);
 
     return (
         <div style={style}>
             <div className={classes.scale}>
                 <ColorScale
-                    bins={bins}
+                    bins={palette.length}
                     scale={scale}
                     onClick={showColorScales}
-                    width={width || 260}
+                    width={width}
                 />
             </div>
 
@@ -52,9 +57,9 @@ export const ColorScaleSelect = ({ palette, width, style, onChange }: ColorScale
                         <div key={index} className={classes.scaleItem}>
                             <ColorScale
                                 scale={scale}
-                                bins={bins}
+                                bins={palette.length}
                                 onClick={onColorScaleSelect}
-                                width={width || 260}
+                                width={width}
                             />
                         </div>
                     ))}

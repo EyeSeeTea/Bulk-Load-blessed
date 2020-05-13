@@ -37,18 +37,17 @@ export const colorScales = [
 ];
 
 // Returns a color brewer scale for a number of classes
-export const getColorPalette = (scale: string, classes: number) => {
-    return colorbrewer[scale][classes].join(",");
+export const getColorPalette = (scale: string, classes: number): string[] => {
+    return colorbrewer[scale][classes];
 };
 
 // Returns color scale name for a palette
-export const getColorScale = (palette: string) => {
-    const classes = palette.split(",").length;
-    return colorScales.find(name => colorbrewer[name][classes].join(",") === palette);
+export const getColorScale = (palette: string[]) => {
+    return colorScales.find(name => colorbrewer[name][palette.length] === palette);
 };
 
 export const defaultColorScaleName = "YlOrBr";
-export const defaultClasses = 5;
+export const defaultClasses = 9;
 export const defaultColorScale = getColorPalette(defaultColorScaleName, defaultClasses);
 
 // Correct colors not adhering to the css standard (add missing #)
