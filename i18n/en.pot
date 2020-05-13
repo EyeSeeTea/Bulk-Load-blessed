@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-13T07:20:10.111Z\n"
-"PO-Revision-Date: 2020-05-13T07:20:10.111Z\n"
+"POT-Creation-Date: 2020-05-13T10:34:02.695Z\n"
+"PO-Revision-Date: 2020-05-13T10:34:02.695Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -51,9 +51,6 @@ msgid "Data Set"
 msgstr ""
 
 msgid "Program"
-msgstr ""
-
-msgid "Custom"
 msgstr ""
 
 msgid "elements"
