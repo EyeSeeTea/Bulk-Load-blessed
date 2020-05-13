@@ -78,7 +78,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     let columnId = 1;
     validationSheet.cell(rowId++, columnId).string("Organisation Units");
     _.forEach(organisationUnits, orgUnit => {
-        validationSheet.cell(rowId++, columnId).formula("_" + orgUnit.id);
+        validationSheet.cell(rowId++, columnId).formula(`_${orgUnit.id}`);
     });
     this.validations.set(
         "organisationUnits",
@@ -110,7 +110,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
         if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
-            validationSheet.cell(rowId++, columnId).formula("_" + e.id);
+            validationSheet.cell(rowId++, columnId).formula(`_${e.id}`);
         }
     });
     this.validations.set(
@@ -122,9 +122,9 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         rowId = 2;
         columnId++;
 
-        validationSheet.cell(rowId++, columnId).formula("_" + optionSet.id);
+        validationSheet.cell(rowId++, columnId).formula(`_${optionSet.id}`);
         _.forEach(optionSet.options, option => {
-            validationSheet.cell(rowId++, columnId).formula("_" + option.id);
+            validationSheet.cell(rowId++, columnId).formula(`_${option.id}`);
         });
         this.validations.set(
             optionSet.id,
@@ -194,8 +194,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
         if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
-                refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + item.id,
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${item.id}`,
             });
         }
 
@@ -210,8 +210,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
         if (name !== undefined)
             this.workbook.definedNameCollection.addDefinedName({
-                refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + orgUnit.id,
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${orgUnit.id}`,
             });
 
         rowId++;
@@ -221,7 +221,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("Yes");
     this.workbook.definedNameCollection.addDefinedName({
-        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_true",
     });
     rowId++;
@@ -230,7 +230,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("No");
     this.workbook.definedNameCollection.addDefinedName({
-        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_false",
     });
     rowId++;
@@ -338,7 +338,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 dataEntrySheet,
                                 itemRow,
                                 columnId,
-                                "_" + categoryOptionCombo.id,
+                                `_${categoryOptionCombo.id}`,
                                 groupId,
                                 this.validations.get(validation)
                             );
@@ -352,7 +352,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                         dataEntrySheet
                             .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                            .formula("_" + dataElement.id)
+                            .formula(`_${dataElement.id}`)
                             .style(this.groupStyle(groupId));
 
                         if (description !== undefined) {
@@ -508,13 +508,9 @@ SheetBuilder.prototype.createColumn = function (
         sheet.addConditionalFormattingRule(ref, {
             type: "expression", // the conditional formatting type
             priority: 1, // rule priority order (required)
-            formula:
-                "ISERROR(MATCH(" +
-                Excel.getExcelAlpha(columnId) +
-                +(rowId + 1) +
-                "," +
-                validation.toString().substr(1) +
-                ",0))", // formula that returns nonzero or 0
+            formula: `ISERROR(MATCH(${Excel.getExcelAlpha(columnId)}${
+                rowId + 1
+            },${validation.toString().substr(1)},0))`, // formula that returns nonzero or 0
             style: this.workbook.createStyle({
                 font: {
                     bold: true,
