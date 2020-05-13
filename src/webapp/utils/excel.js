@@ -1,5 +1,5 @@
 import * as Excel from "excel4node";
-import { colors } from "./colors";
+import { defaultColors } from "./colors";
 
 export function createColumn(
     workbook,
@@ -89,7 +89,7 @@ export function groupStyle(groupId) {
         fill: {
             type: "pattern",
             patternType: "solid",
-            fgColor: colors[groupId % colors.length],
+            fgColor: defaultColors[groupId % defaultColors.length],
         },
     };
 }
