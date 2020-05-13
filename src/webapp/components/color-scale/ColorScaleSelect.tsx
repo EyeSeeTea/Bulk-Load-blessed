@@ -30,7 +30,7 @@ export const ColorScaleSelect = ({
 
     const availablePalettes = disableDefaultPalettes
         ? additionalPalettes
-        : { ...palettes, ...additionalPalettes };
+        : { ...additionalPalettes, ...palettes };
 
     const scale = getColorScale(availablePalettes, selected);
     if (!scale) throw new Error(`Invalid palette ${selected}, scale not found`);
