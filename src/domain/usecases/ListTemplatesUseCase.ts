@@ -7,6 +7,6 @@ export class ListTemplatesUseCase {
         const dataSet = await this.instance.getDataForms("dataSet");
         const program = await this.instance.getDataForms("program");
 
-        return { dataSet, program, tracker: [], custom: [] };
+        return { dataSet, program, tracker: [] };
     }
 }

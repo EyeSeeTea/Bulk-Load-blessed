@@ -15,6 +15,7 @@ import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
+import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
@@ -63,6 +64,7 @@ export class CompositionRoot {
     public get orgUnits() {
         return {
             getRoots: new GetOrgUnitRootsUseCase(this.instance),
+            getRootsByForm: new GetFormOrgUnitRootsUseCase(this.instance),
         };
     }
 
