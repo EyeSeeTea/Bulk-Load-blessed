@@ -23,6 +23,7 @@ export const ColorScaleSelect = ({
     const [anchor, setAnchor] = useState<Element | null>(null);
 
     const scale = getColorScale(palette);
+    console.log({ palette, scale });
     if (!scale) throw new Error(`Invalid palette ${palette}, scale not found`);
 
     // Show/hide popover with allowed color scales

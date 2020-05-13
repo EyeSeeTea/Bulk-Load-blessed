@@ -16,7 +16,6 @@ import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import Settings from "../../logic/settings";
-import { SheetBuilder } from "../../logic/sheetBuilder";
 import * as sheetImport from "../../logic/sheetImport";
 import "./LandingPage.css";
 
@@ -74,48 +73,20 @@ export default function LandingPage() {
             return;
         }
 
-        const {
-            type,
-            id,
-            theme,
-            startDate,
-            endDate,
-            orgUnits,
-            language,
-            populate,
-        } = state.template;
+        const { type, id, theme, orgUnits, populate, ...rest } = state.template;
         loading.show(true);
 
         if (type === "custom") {
             await CompositionRoot.attach().templates.downloadCustom.execute(id, theme);
         } else {
-            const element = await dhisConnector.getElement(d2, type, id);
-
-            const result = await dhisConnector.getElementMetadata({
-                d2,
-                element: { ...element, endpoint: type, type },
-                organisationUnits: orgUnits,
-            });
-
-            const template = new SheetBuilder({
-                ...result,
-                startDate,
-                endDate,
-                language,
-            });
-
-            const name = element.displayName ?? element.name;
-            const file = await template.toBlob();
             await CompositionRoot.attach().templates.download.execute({
+                d2,
                 type,
                 id,
-                name,
-                file,
                 theme,
                 orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
                 populate: settings.showOrgUnitsOnGeneration && populate,
-                startDate,
-                endDate,
+                ...rest,
             });
         }
 
