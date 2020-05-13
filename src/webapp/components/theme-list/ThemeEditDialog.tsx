@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { toBase64 } from "../../../utils/files";
+import { generatorOriginalPalette } from "../../utils/colors";
 import { ColorScaleSelect } from "../color-scale/ColorScaleSelect";
 
 interface ThemeEditDialogProps {
@@ -76,7 +77,11 @@ export default function ThemeEditDialog({
 
             <div className={classes.group}>
                 <Typography variant="h6">{i18n.t("Color palette")}</Typography>
-                <ColorScaleSelect palette={theme.palette} onChange={updatePalette} />
+                <ColorScaleSelect
+                    selected={theme.palette}
+                    onChange={updatePalette}
+                    additionalPalettes={generatorOriginalPalette}
+                />
             </div>
 
             <div className={classes.group}>

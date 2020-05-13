@@ -1,30 +1,39 @@
 import { Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import _ from "lodash";
 import React, { useState } from "react";
+import { PaletteCollection } from "../../../domain/entities/Palette";
 import { getColorPalette, getColorScale } from "../../utils/colors";
-import { colorScales } from "../../utils/palettes";
+import { palettes } from "../../utils/palettes";
 import { ColorScale } from "./ColorScale";
 
 export interface ColorScaleSelectProps {
-    palette: string[];
+    selected: string[];
     onChange: (palette: string[]) => void;
     width?: number;
     style?: object;
+    additionalPalettes?: PaletteCollection;
+    disableDefaultPalettes?: boolean;
 }
 
 // Returns one color scale based on a code and number of classes
 export const ColorScaleSelect = ({
-    palette,
+    selected,
     width = 260,
     style,
     onChange,
+    additionalPalettes = {},
+    disableDefaultPalettes = false,
 }: ColorScaleSelectProps) => {
     const classes = useStyles();
     const [anchor, setAnchor] = useState<Element | null>(null);
 
-    const scale = getColorScale(palette);
-    console.log({ palette, scale });
-    if (!scale) throw new Error(`Invalid palette ${palette}, scale not found`);
+    const availablePalettes = disableDefaultPalettes
+        ? additionalPalettes
+        : { ...palettes, ...additionalPalettes };
+
+    const scale = getColorScale(availablePalettes, selected);
+    if (!scale) throw new Error(`Invalid palette ${selected}, scale not found`);
 
     // Show/hide popover with allowed color scales
     const showColorScales = (event: React.MouseEvent) => setAnchor(event.currentTarget);
@@ -32,7 +41,7 @@ export const ColorScaleSelect = ({
 
     // Called when a new color scale is selected in the popover
     const onColorScaleSelect = (_event: React.MouseEvent, scale: string) => {
-        onChange(getColorPalette(scale, palette.length));
+        onChange(getColorPalette(availablePalettes, scale, selected.length));
         hideColorScales();
     };
 
@@ -40,7 +49,8 @@ export const ColorScaleSelect = ({
         <div style={style}>
             <div className={classes.scale}>
                 <ColorScale
-                    bins={palette.length}
+                    palettes={availablePalettes}
+                    bins={selected.length}
                     scale={scale}
                     onClick={showColorScales}
                     width={width}
@@ -55,11 +65,12 @@ export const ColorScaleSelect = ({
                     anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
                     onClose={hideColorScales}
                 >
-                    {colorScales.map((scale, index) => (
+                    {_.keys(availablePalettes).map((scale, index) => (
                         <div key={index} className={classes.scaleItem}>
                             <ColorScale
+                                palettes={availablePalettes}
                                 scale={scale}
-                                bins={palette.length}
+                                bins={selected.length}
                                 onClick={onColorScaleSelect}
                                 width={width}
                             />

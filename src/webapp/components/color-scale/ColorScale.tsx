@@ -1,8 +1,9 @@
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import { palettes } from "../../utils/palettes";
+import { PaletteCollection } from "../../../domain/entities/Palette";
 
 export interface ColorScaleProps {
+    palettes: PaletteCollection;
     bins: number;
     scale: string;
     width?: number;
@@ -10,7 +11,13 @@ export interface ColorScaleProps {
 }
 
 // Returns one color scale based on a code and number of classes
-export const ColorScale = ({ scale, bins, width, onClick = () => {} }: ColorScaleProps) => {
+export const ColorScale = ({
+    palettes,
+    scale,
+    bins,
+    width,
+    onClick = () => {},
+}: ColorScaleProps) => {
     const classes = useStyles();
     const colors = palettes[scale][bins];
     const itemWidth = width ? width / bins : 36;
