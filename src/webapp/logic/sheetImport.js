@@ -61,7 +61,9 @@ function getDataValuesFromRow(row, object, colOffset) {
         .reject(_.isNil)
         .size();
 
-    return { period, count };
+    const id = object.type === "program" && colOffset > 1 ? values[5] : undefined;
+
+    return { period, count, id };
 }
 
 async function getWorkbook(file) {
