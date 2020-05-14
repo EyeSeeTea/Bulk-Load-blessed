@@ -1,6 +1,6 @@
 import moment from "moment";
 
-export function buildAllPossiblePeriods(periodType, startYear, endYear) {
+export function buildAllPossiblePeriods(periodType, startDate, endDate) {
     let unit, format;
     switch (periodType) {
         case "Daily":
@@ -25,25 +25,12 @@ export function buildAllPossiblePeriods(periodType, startYear, endYear) {
 
     const dates = [];
     for (
-        const current = moment(startYear + "-01-01");
-        current.isSameOrBefore(moment(endYear + "-12-31"));
+        const current = moment(startDate);
+        current.isSameOrBefore(moment(endDate));
         current.add(1, unit)
     ) {
         dates.push(current.format(format));
     }
 
     return dates;
-}
-
-export function buildPossibleYears(startYear, endYear) {
-    const current = moment(startYear, "YYYY");
-    const endDate = moment(endYear, "YYYY");
-    const periods = [];
-
-    while (current.isSameOrBefore(endDate)) {
-        periods.push(current.format("YYYY"));
-        current.add(1, "year");
-    }
-
-    return periods.map(year => ({ value: year, label: year }));
 }

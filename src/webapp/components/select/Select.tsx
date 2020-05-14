@@ -10,6 +10,7 @@ export interface SelectProps {
     options: Array<SelectOption>;
     onChange: (option: SelectOption) => void;
     defaultValue?: SelectOption;
+    value?: string;
     allowEmpty?: boolean;
     emptyLabel?: string;
 }
@@ -19,11 +20,12 @@ export const Select: React.FC<SelectProps> = ({
     options,
     onChange,
     defaultValue,
+    value,
     allowEmpty = false,
     emptyLabel = "",
 }) => {
     const classes = useStyles();
-    const [value, setValue] = React.useState(defaultValue ? defaultValue.value : "");
+    const [stateValue, setValue] = React.useState(defaultValue ? defaultValue.value : "");
     const optionsByValue = React.useMemo(() => _.keyBy(options, option => option.value), [options]);
     const defaultOption = allowEmpty ? { label: "", value: "" } : undefined;
 
@@ -38,7 +40,7 @@ export const Select: React.FC<SelectProps> = ({
         <div>
             <FormControl className={classes.formControl}>
                 <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
-                <MuiSelect onChange={handleChange} value={value} autoWidth={true}>
+                <MuiSelect onChange={handleChange} value={value ?? stateValue} autoWidth={true}>
                     <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
                         {allowEmpty ? emptyLabel : placeholder}
                     </MenuItem>

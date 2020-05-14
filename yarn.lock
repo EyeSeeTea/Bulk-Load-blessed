@@ -1140,7 +1140,7 @@
     moment "^2.22.1"
     rimraf "^2.6.2"
 
-"@dhis2/d2-i18n@1.0.6", "@dhis2/d2-i18n@^1.0.3", "@dhis2/d2-i18n@^1.0.5":
+"@dhis2/d2-i18n@1.0.6", "@dhis2/d2-i18n@^1.0.5":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@dhis2/d2-i18n/-/d2-i18n-1.0.6.tgz#2914be8acf296f3a6bf7b51c76c46da6a120b0ff"
   integrity sha512-7YdA4ppFosjuyf7ZMm47BrdsA5TWLM9lmS0lUPgjcCVeeWfUgagqzf4W5JGB9XQ3w1vzK+yy5zH2Ij8IgRAGhA==
@@ -1608,33 +1608,14 @@
     react-is "^16.8.0"
     react-transition-group "^4.3.0"
 
-"@material-ui/core@^4.9.4":
-  version "4.9.12"
-  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.9.12.tgz#0156d87c8b5db5a8aad992d6883a081a32684e2e"
-  integrity sha512-JtRm1iNw3PRg+bzULS1uRKhdIJ2jhKO3/5ptO6kTADARsv5KmhzMbM+PYmVS09qm9Yu3ilwka4dYrtjqea53Lw==
-  dependencies:
-    "@babel/runtime" "^7.4.4"
-    "@material-ui/react-transition-group" "^4.3.0"
-    "@material-ui/styles" "^4.9.10"
-    "@material-ui/system" "^4.9.10"
-    "@material-ui/types" "^5.0.1"
-    "@material-ui/utils" "^4.9.12"
-    "@types/react-transition-group" "^4.2.0"
-    clsx "^1.0.4"
-    hoist-non-react-statics "^3.3.2"
-    popper.js "^1.16.1-lts"
-    prop-types "^15.7.2"
-    react-is "^16.8.0"
-    react-transition-group "^4.3.0"
-
-"@material-ui/icons@4.9.1", "@material-ui/icons@^4.5.1":
+"@material-ui/icons@4.9.1":
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-4.9.1.tgz#fdeadf8cb3d89208945b33dbc50c7c616d0bd665"
   integrity sha512-GBitL3oBWO0hzBhvA9KxqcowRUsA0qzwKkURyC8nppnC3fw54KPKZ+d4V1Eeg/UnDRSzDaI9nGCdel/eh9AQMg==
   dependencies:
     "@babel/runtime" "^7.4.4"
 
-"@material-ui/pickers@^3.2.7":
+"@material-ui/pickers@3.2.10":
   version "3.2.10"
   resolved "https://registry.yarnpkg.com/@material-ui/pickers/-/pickers-3.2.10.tgz#19df024895876eb0ec7cd239bbaea595f703f0ae"
   integrity sha512-B8G6Obn5S3RCl7hwahkQj9sKUapwXWFjiaz/Bsw1fhYFdNMnDUolRiWQSoKPb1/oKe37Dtfszoywi1Ynbo3y8w==
@@ -1645,16 +1626,6 @@
     clsx "^1.0.2"
     react-transition-group "^4.0.0"
     rifm "^0.7.0"
-
-"@material-ui/react-transition-group@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@material-ui/react-transition-group/-/react-transition-group-4.3.0.tgz#92529142addb5cc179dbf42d246c7e3fe4d6104b"
-  integrity sha512-CwQ0aXrlUynUTY6sh3UvKuvye1o92en20VGAs6TORnSxUYeRmkX8YeTUN3lAkGiBX1z222FxLFO36WWh6q73rQ==
-  dependencies:
-    "@babel/runtime" "^7.5.5"
-    dom-helpers "^5.0.1"
-    loose-envify "^1.4.0"
-    prop-types "^15.6.2"
 
 "@material-ui/styles@4.9.10", "@material-ui/styles@^4.9.10":
   version "4.9.10"
@@ -1692,7 +1663,7 @@
   resolved "https://registry.yarnpkg.com/@material-ui/types/-/types-5.0.1.tgz#c4954063cdc196eb327ee62c041368b1aebb6d61"
   integrity sha512-wURPSY7/3+MAtng3i26g+WKwwNE3HEeqa/trDBR5+zWKmcjO+u9t7Npu/J1r+3dmIa/OeziN9D/18IrBKvKffw==
 
-"@material-ui/utils@^4.9.12", "@material-ui/utils@^4.9.6":
+"@material-ui/utils@^4.9.6":
   version "4.9.12"
   resolved "https://registry.yarnpkg.com/@material-ui/utils/-/utils-4.9.12.tgz#0d639f1c1ed83fffb2ae10c21d15a938795d9e65"
   integrity sha512-/0rgZPEOcZq5CFA4+4n6Q6zk7fi8skHhH2Bcra8R3epoJEYy5PL55LuMazPtPH1oKeRausDV/Omz4BbgFsn1HQ==
@@ -4960,10 +4931,10 @@ cypress@4.4.0:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-0.2.1.tgz#7fb54f99893b052aa67f2bc1cd333ebd6685dbbb"
-  integrity sha512-1QH3pjt5OpBdeBBZzibX7U3bjImRjNBU04TEZZLc3hrFPmVwZk7C8k22MSOc4C3+/CoorDwfYKGTLfSFZXiawQ==
+d2-api@0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-0.2.2.tgz#fbc8fd483ba45abb1d6085c5e2f70aa3adebe3a3"
+  integrity sha512-khtQoU2DbJEKhkPpLWgkoZ84dNoHRft93o6SdOYjX9C7+KbZ6hHJ6rL8vCm8RvKe45tiKRNWK4waw/RLD222AQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
@@ -4999,22 +4970,21 @@ d2-manifest@1.0.0:
     minimist "^1.1.0"
     readline-sync "^1.4.1"
 
-d2-ui-components@1.3.1-beta.1:
-  version "1.3.1-beta.1"
-  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.3.1-beta.1.tgz#84dbab602b44ad25778d8980884afe2859b37934"
-  integrity sha512-ZrTCN3ahc7zVRuFaEsorN49E4nQLTsq9w8pamww0JqoX6igUFI5MezdVCqf4i+uPoWKJIKHqmCmO1Hby85yCTg==
+d2-ui-components@1.3.2-beta.1:
+  version "1.3.2-beta.1"
+  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.3.2-beta.1.tgz#b3a722bda445f0d69e6734fc88dbde25c5206ac3"
+  integrity sha512-GGIdzR2QrLe2yhhHAwAYjX/Nz0HaXyQGVKNzSCt/cC2dmH9gIRXRNDiuZsXZ+0/sUtQ5OksNnEXyAtD4P7mT2Q==
   dependencies:
     "@date-io/core" "^1.3.6"
     "@date-io/moment" "^1.0.2"
-    "@dhis2/d2-i18n" "^1.0.3"
+    "@dhis2/d2-i18n" "1.0.6"
     "@dhis2/d2-ui-core" "6.3.0"
-    "@material-ui/core" "^4.9.4"
-    "@material-ui/icons" "^4.5.1"
-    "@material-ui/pickers" "^3.2.7"
+    "@material-ui/icons" "4.9.1"
+    "@material-ui/pickers" "3.2.10"
     classnames "^2.2.6"
-    lodash "^4.17.11"
+    lodash "4.17.15"
     moment "^2.22.2"
-    nano-memoize "^1.1.5"
+    nano-memoize "1.1.10"
     node-sass "^4.12.0"
     react-linkify "^1.0.0-alpha"
     throttle-debounce "^2.1.0"
@@ -10225,7 +10195,7 @@ nan@^2.12.1, nan@^2.13.2:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.1.tgz#d7be34dfa3105b91494c3147089315eff8874b01"
   integrity sha512-isWHgVjnFjh2x2yuJ/tj3JbwoHu3UC2dX5G/88Cm24yB6YopVgxvBObDY7n5xW6ExmFhJpSEQqFPvq9zaXc8Jw==
 
-nano-memoize@^1.1.5:
+nano-memoize@1.1.10:
   version "1.1.10"
   resolved "https://registry.yarnpkg.com/nano-memoize/-/nano-memoize-1.1.10.tgz#ff38d9454812f7c5a5248b7115c838ab4da936c5"
   integrity sha512-eMG3EMNCZ64XP7EMrCr0dBVuQPj1htR7nx81/vGYWy1GP/Waw+CqwScswwooKUQD16KnuJI2zUZCwdwC1Lki3w==
@@ -15295,9 +15265,9 @@ ws@^7.0.0:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.5.tgz#abb1370d4626a5a9cd79d8de404aa18b3465d10d"
   integrity sha512-C34cIU4+DB2vMyAbmEKossWq2ZQDr6QEyuuCzWrM9zfw1sGc0mYiJ0UnG9zzNykt49C2Fi34hvr2vssFQRS6EA==
 
-"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/defined-names":
+"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#development":
   version "1.21.0"
-  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#3601793e49df16e74ff3489568703a6d1754dc0b"
+  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#4e3f8413fbee9d6f6c9520f992b660eea9c7214b"
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"

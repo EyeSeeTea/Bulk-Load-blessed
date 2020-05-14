@@ -1,6 +1,7 @@
 import { Moment } from "moment";
 import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
+import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
 import { Id } from "../entities/ReferenceObject";
 
@@ -17,4 +18,5 @@ export interface InstanceRepository {
     getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]>;
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
+    getLocales(): Promise<Locale[]>;
 }

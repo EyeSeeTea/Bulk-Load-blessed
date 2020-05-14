@@ -17,7 +17,6 @@ import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import Settings from "../../logic/settings";
-import { SheetBuilder } from "../../logic/sheetBuilder";
 import * as sheetImport from "../../logic/sheetImport";
 import "./LandingPage.css";
 
@@ -70,39 +69,33 @@ export default function LandingPage() {
     };
 
     const handleTemplateDownloadClick = async () => {
-        if (!state.template) return;
-        const { type, id, theme, startYear, endYear, orgUnits, populate } = state.template;
+        if (!state.template) {
+            snackbar.info(i18n.t("You need to select at least one element to export"));
+            return;
+        }
+
+        const { type, id, theme, orgUnits, populate, startDate, endDate, ...rest } = state.template;
+
+        if (type === "dataSet" && (!startDate || !endDate)) {
+            snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
+            return;
+        }
+
         loading.show(true);
 
         if (type === "custom") {
             await CompositionRoot.attach().templates.downloadCustom.execute(id, theme);
         } else {
-            const element = await dhisConnector.getElement(d2, type, id);
-
-            const result = await dhisConnector.getElementMetadata({
-                d2,
-                element: { ...element, endpoint: type, type },
-                organisationUnits: orgUnits,
-            });
-
-            const template = new SheetBuilder({
-                ...result,
-                startYear,
-                endYear,
-            });
-
-            const name = element.displayName ?? element.name;
-            const file = await template.toBlob();
             await CompositionRoot.attach().templates.download.execute({
+                d2,
                 type,
                 id,
-                name,
-                file,
                 theme,
                 orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
                 populate: settings.showOrgUnitsOnGeneration && populate,
-                startDate: type === "dataSet" ? moment(startYear, "YYYY") : undefined,
-                endDate: type === "dataSet" ? moment(endYear, "YYYY") : undefined,
+                startDate,
+                endDate,
+                ...rest,
             });
         }
 
@@ -319,8 +312,13 @@ export default function LandingPage() {
 
     return (
         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-            <ThemeListDialog onChange={onThemesChange} />
-            <SettingsComponent settings={settings} onChange={onSettingsChange} />
+            {settings.areSettingsVisibleForCurrentUser() && (
+                <React.Fragment>
+                    <ThemeListDialog onChange={onThemesChange} />
+                    <SettingsComponent settings={settings} onChange={onSettingsChange} />
+                </React.Fragment>
+            )}
+
             <ConfirmationOnExistingData />
 
             {true && <ImportPreviewDialog />}
@@ -424,8 +422,9 @@ export default function LandingPage() {
                         ({state.importObject.id})
                         {state.importDataValues.map((group, idx) => (
                             <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                                {moment(String(group.period)).format("DD/MM/YYYY")}: {group.count}{" "}
-                                {i18n.t("data values")}
+                                {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                                {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                                {i18n.t("data values")} {group.id && `(${group.id})`}
                             </li>
                         ))}
                     </div>
