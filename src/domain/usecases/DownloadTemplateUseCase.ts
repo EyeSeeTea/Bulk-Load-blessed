@@ -62,7 +62,7 @@ export class DownloadTemplateUseCase {
             const name = element.displayName ?? element.name;
             const file = await builderOutput.toBlob();
 
-            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v1";
+            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v2";
             const template = this.templateRepository.getTemplate(templateId);
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
