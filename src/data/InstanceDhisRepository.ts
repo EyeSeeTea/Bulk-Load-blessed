@@ -119,7 +119,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
                             category: categoryOptionCombo,
-                            value: this.formatDataValue(value, metadata),
+                            value: this.formatDataValue(dataElement, value, metadata),
                             comment,
                         })
                     ),
@@ -175,7 +175,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         coordinate,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
-                            value: this.formatDataValue(value, metadata),
+                            value: this.formatDataValue(dataElement, value, metadata),
                         })),
                     })
                 )
@@ -186,9 +186,11 @@ export class InstanceDhisRepository implements InstanceRepository {
         }
     }
 
-    private formatDataValue(value: string | number, metadata: MetadataPackage): string | number {
+    private formatDataValue(dataElement: string, value: string | number, metadata: MetadataPackage): string | number {
         // Format options from CODE to UID
-        const optionValue = metadata.options?.find(({ code }) => code === value);
+        const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
+        const options = _.filter(metadata.options, { optionSet: { id: optionSet } });
+        const optionValue = options.find(({ code }) => code === value);
         if (optionValue) return optionValue.id;
 
         // Return default case
