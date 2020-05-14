@@ -191,14 +191,13 @@ export class InstanceDhisRepository implements InstanceRepository {
         value: string | number,
         metadata: MetadataPackage
     ): string | number {
-        // Format options from CODE to UID
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
+        if (!optionSet) return value;
+
+        // Format options from CODE to UID
         const options = _.filter(metadata.options, { optionSet: { id: optionSet } });
         const optionValue = options.find(({ code }) => code === value);
-        if (optionValue) return optionValue.id;
-
-        // Return default case
-        return value;
+        return optionValue?.id ?? value;
     }
 
     private buildProgramAttributeOptions(
