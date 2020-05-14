@@ -214,7 +214,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             controls={{
                                 filterByLevel: true,
                                 filterByGroup: true,
-                                selectAll: false,
+                                selectAll: true,
                             }}
                             rootIds={orgUnitTreeRootIds}
                             fullWidth={false}

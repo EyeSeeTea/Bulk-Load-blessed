@@ -61,7 +61,9 @@ function getDataValuesFromRow(row, object, colOffset) {
         .reject(_.isNil)
         .size();
 
-    return { period, count };
+    const id = object.type === "program" && colOffset > 1 ? values[5] : undefined;
+
+    return { period, count, id };
 }
 
 async function getWorkbook(file) {
@@ -80,7 +82,6 @@ async function getWorkbook(file) {
  * @returns {Promise<>}
  */
 export async function readSheet({
-    api,
     file,
     element,
     elementMetadata,
@@ -89,7 +90,6 @@ export async function readSheet({
     rowOffset = 0,
     colOffset = 0,
 }) {
-    const { version } = await api.system.info.getData();
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
     const metadataSheet = workbook.getWorksheet("Metadata");
@@ -157,16 +157,17 @@ export async function readSheet({
                 result.period = row.values[2];
             }
 
-            if (isProgram && colOffset === 1 && row.values[4] !== undefined) {
-                // There's a bug in some builds of 2.30 with property for attributeOptionCombo
-                if (version === "2.30") {
-                    result.attributeCategoryOptions = parseMetadataId(metadataSheet, row.values[4]);
-                    result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
-                } else {
-                    result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
-                }
+            // Read attribute option combo
+            if (isProgram && colOffset > 0 && row.values[4] !== undefined) {
+                // NOTICE: Some old versions of 2.30 appeared to have a bug and required attributeCategoryOptions
+                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
             } else if (!isProgram && row.values[3] !== undefined) {
                 result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
+            }
+
+            // Read event id
+            if (isProgram && colOffset > 1 && row.values[5] !== undefined) {
+                result.event = row.values[5];
             }
 
             row.eachCell((cell, colNumber) => {
