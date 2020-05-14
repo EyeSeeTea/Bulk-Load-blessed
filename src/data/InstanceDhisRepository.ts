@@ -186,7 +186,11 @@ export class InstanceDhisRepository implements InstanceRepository {
         }
     }
 
-    private formatDataValue(dataElement: string, value: string | number, metadata: MetadataPackage): string | number {
+    private formatDataValue(
+        dataElement: string,
+        value: string | number,
+        metadata: MetadataPackage
+    ): string | number {
         // Format options from CODE to UID
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
         const options = _.filter(metadata.options, { optionSet: { id: optionSet } });
