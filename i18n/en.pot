@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-13T07:20:10.111Z\n"
-"PO-Revision-Date: 2020-05-13T07:20:10.111Z\n"
+"POT-Creation-Date: 2020-05-14T06:02:13.298Z\n"
+"PO-Revision-Date: 2020-05-14T06:02:13.298Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -238,6 +238,12 @@ msgid "Bulk Import"
 msgstr ""
 
 msgid "Drag and drop file to import"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Create"
 msgstr ""
 
 msgid "data values"
