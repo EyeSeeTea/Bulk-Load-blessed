@@ -101,7 +101,7 @@ export default function ThemeEditDialog({
                             onChange={changeColorOption}
                         />
                     </div>
-                    
+
                     {theme.palette.length > 1 ? (
                         <ColorScaleSelect
                             selected={theme.palette}

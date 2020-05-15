@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-14T06:02:13.298Z\n"
-"PO-Revision-Date: 2020-05-14T06:02:13.298Z\n"
+"POT-Creation-Date: 2020-05-15T10:34:31.511Z\n"
+"PO-Revision-Date: 2020-05-15T10:34:31.511Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -95,7 +95,10 @@ msgstr ""
 msgid "Theme name"
 msgstr ""
 
-msgid "Color palette"
+msgid "Colors"
+msgstr ""
+
+msgid "Color options"
 msgstr ""
 
 msgid "Sections"
@@ -117,6 +120,12 @@ msgid "Logo"
 msgstr ""
 
 msgid "Drag and drop logo file"
+msgstr ""
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Fixed"
 msgstr ""
 
 msgid "Themes"
