@@ -55,7 +55,8 @@ export default function ThemeEditDialog({
     const updateSection = (field: ThemeableSections) => {
         return (event: ChangeEvent<HTMLInputElement>) => {
             const text = event.target.value;
-            updateTheme(theme => theme.updateSection(field, text ? { text } : undefined));
+            const fontSize = field === "title" ? 22 : 12;
+            updateTheme(theme => theme.updateSection(field, text ? { text, fontSize } : undefined));
         };
     };
 
