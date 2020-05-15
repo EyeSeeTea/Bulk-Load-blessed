@@ -6,6 +6,7 @@ import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { toBase64 } from "../../../utils/files";
 import { generatorOriginalPalette } from "../../utils/colors";
+import { ColorPicker } from "../color-picker/ColorPicker";
 import { ColorScaleSelect } from "../color-scale/ColorScaleSelect";
 
 interface ThemeEditDialogProps {
@@ -23,6 +24,7 @@ export default function ThemeEditDialog({
 }: ThemeEditDialogProps) {
     const classes = useStyles();
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
+    const [color, setColor] = useState<string>("");
 
     const onDrop = useCallback(async ([file]: File[]) => {
         if (!file) return;
@@ -81,6 +83,13 @@ export default function ThemeEditDialog({
                     selected={theme.palette}
                     onChange={updatePalette}
                     additionalPalettes={generatorOriginalPalette}
+                />
+                <ColorPicker
+                    color={color}
+                    onChange={setColor}
+                    width={36}
+                    height={36}
+                    disableArrow={true}
                 />
             </div>
 

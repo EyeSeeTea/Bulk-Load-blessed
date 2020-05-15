@@ -302,8 +302,10 @@ const useStyles = makeStyles({
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {
-    return array.map(({ id, name }) => ({
-        value: id,
-        label: name,
-    }));
+    return (
+        array?.map(({ id, name }) => ({
+            value: id,
+            label: name,
+        })) ?? []
+    );
 }
