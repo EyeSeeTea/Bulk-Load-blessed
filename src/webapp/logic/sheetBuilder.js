@@ -4,6 +4,9 @@ import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
+export const dataSetId = "DATASET_GENERATED_v2";
+export const programId = "PROGRAM_GENERATED_v3";
+
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
@@ -238,18 +241,18 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion =
-        element.type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v2";
+    const defaultVersion = element.type === "dataSet" ? dataSetId : programId;
     return getObjectVersion(element) ?? defaultVersion;
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { element, elementMetadata: metadata } = this.builder;
+    const { rowOffset = 0 } = this.builder.template;
     const dataEntrySheet = this.dataEntrySheet;
 
     // Add cells for themes
-    const sectionRow = 6;
-    const itemRow = 7;
+    const sectionRow = rowOffset + 1;
+    const itemRow = rowOffset + 2;
 
     // Hide theme rows by default
     for (let row = 1; row < sectionRow; row++) {
@@ -519,7 +522,7 @@ SheetBuilder.prototype.createColumn = function (
 };
 
 SheetBuilder.prototype.groupStyle = function (groupId) {
-    const { palette = defaultColorScale } = this.builder;
+    const { palette = defaultColorScale } = this.builder.theme ?? {};
     return {
         ...baseStyle,
         fill: {

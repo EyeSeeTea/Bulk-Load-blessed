@@ -6,7 +6,7 @@ import { Validation } from "./Validation";
 
 export type Color = string;
 
-export type ThemeableSections = "header" | "title" | "subtitle" | "footer";
+export type ThemeableSections = "title" | "subtitle";
 export type ImageSections = "logo";
 
 export interface ThemeStyle {
