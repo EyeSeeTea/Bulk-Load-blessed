@@ -43,5 +43,30 @@ export default class implements GeneratedTemplate {
         },
     ];
 
-    public readonly styleSources: StyleSource[] = [];
+    public readonly styleSources: StyleSource[] = [
+        {
+            section: "title",
+            source: {
+                type: "range",
+                ref: "D3:I3",
+                sheet: "Data Entry",
+            },
+        },
+        {
+            section: "subtitle",
+            source: {
+                type: "range",
+                ref: "D4:I4",
+                sheet: "Data Entry",
+            },
+        },
+        {
+            section: "logo",
+            source: {
+                type: "range",
+                ref: "A2:C5",
+                sheet: "Data Entry",
+            },
+        },
+    ];
 }

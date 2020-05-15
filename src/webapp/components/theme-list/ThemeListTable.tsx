@@ -24,8 +24,6 @@ interface WarningDialog {
 export interface ThemeDetail {
     id: string;
     name: string;
-    header: string;
-    footer: string;
     title: string;
     subtitle: string;
     logo: ReactNode;
@@ -102,8 +100,6 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     const columns: TableColumn<ThemeDetail>[] = [
         { name: "name", text: i18n.t("Name") },
         { name: "logo", text: i18n.t("Logo") },
-        { name: "header", text: i18n.t("Header") },
-        { name: "footer", text: i18n.t("Footer") },
         { name: "title", text: i18n.t("Title") },
         { name: "subtitle", text: i18n.t("Subtitle") },
     ];
@@ -174,8 +170,6 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
     return themes.map(({ id, name, sections, pictures }) => ({
         id,
         name,
-        header: sections?.header?.text ?? "-",
-        footer: sections?.footer?.text ?? "-",
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
         logo: pictures?.logo?.src ? (
