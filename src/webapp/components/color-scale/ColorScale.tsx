@@ -1,43 +1,28 @@
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import { PaletteCollection } from "../../../domain/entities/Palette";
 
 export interface ColorScaleProps {
-    palettes: PaletteCollection;
-    bins: number;
-    scale: string;
+    colors: string[];
     width?: number;
-    onClick?: (event: React.MouseEvent, scale: string) => void;
+    onClick?: (event: React.MouseEvent) => void;
 }
 
 // Returns one color scale based on a code and number of classes
-export const ColorScale = ({
-    palettes,
-    scale,
-    bins,
-    width,
-    onClick = () => {},
-}: ColorScaleProps) => {
+export const ColorScale = ({ width, colors, onClick = () => {} }: ColorScaleProps) => {
     const classes = useStyles();
-    const colors = palettes[scale][bins];
+    const bins = colors.length;
     const itemWidth = width ? width / bins : 36;
 
     return (
-        !!colors && (
-            <ul
-                className={classes.scale}
-                onClick={event => onClick(event, scale)}
-                style={{ ...(width && { width }) }}
-            >
-                {colors.map((color, index) => (
-                    <li
-                        key={index}
-                        className={classes.item}
-                        style={{ backgroundColor: color, width: itemWidth }}
-                    />
-                ))}
-            </ul>
-        )
+        <ul className={classes.scale} onClick={onClick} style={{ ...(width && { width }) }}>
+            {colors.map((color, index) => (
+                <li
+                    key={index}
+                    className={classes.item}
+                    style={{ backgroundColor: color, width: itemWidth }}
+                />
+            ))}
+        </ul>
     );
 };
 

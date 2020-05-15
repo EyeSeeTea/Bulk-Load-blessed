@@ -11,7 +11,6 @@ export interface ColorScaleSelectProps {
     selected: string[];
     onChange: (palette: string[]) => void;
     width?: number;
-    style?: object;
     additionalPalettes?: PaletteCollection;
     disableDefaultPalettes?: boolean;
 }
@@ -20,7 +19,6 @@ export interface ColorScaleSelectProps {
 export const ColorScaleSelect = ({
     selected,
     width = 260,
-    style,
     onChange,
     additionalPalettes = {},
     disableDefaultPalettes = false,
@@ -33,28 +31,22 @@ export const ColorScaleSelect = ({
         : { ...additionalPalettes, ...palettes };
 
     const scale = getColorScale(availablePalettes, selected);
-    if (!scale) throw new Error(`Invalid palette ${selected}, scale not found`);
+    const selectedColors = scale ? availablePalettes[scale][selected.length] : selected;
 
     // Show/hide popover with allowed color scales
     const showColorScales = (event: React.MouseEvent) => setAnchor(event.currentTarget);
     const hideColorScales = () => setAnchor(null);
 
     // Called when a new color scale is selected in the popover
-    const onColorScaleSelect = (_event: React.MouseEvent, scale: string) => {
+    const onColorScaleSelect = (scale: string) => {
         onChange(getColorPalette(availablePalettes, scale, selected.length));
         hideColorScales();
     };
 
     return (
-        <div style={style}>
+        <React.Fragment>
             <div className={classes.scale}>
-                <ColorScale
-                    palettes={availablePalettes}
-                    bins={selected.length}
-                    scale={scale}
-                    onClick={showColorScales}
-                    width={width}
-                />
+                <ColorScale colors={selectedColors} onClick={showColorScales} width={width} />
             </div>
 
             {!!anchor && (
@@ -68,23 +60,20 @@ export const ColorScaleSelect = ({
                     {_.keys(availablePalettes).map((scale, index) => (
                         <div key={index} className={classes.scaleItem}>
                             <ColorScale
-                                palettes={availablePalettes}
-                                scale={scale}
-                                bins={selected.length}
-                                onClick={onColorScaleSelect}
+                                colors={availablePalettes[scale][selectedColors.length] ?? []}
+                                onClick={() => onColorScaleSelect(scale)}
                                 width={width}
                             />
                         </div>
                     ))}
                 </Popover>
             )}
-        </div>
+        </React.Fragment>
     );
 };
 
 const useStyles = makeStyles({
     scale: {
-        marginTop: 19,
         overflow: "visible",
         whiteSpace: "nowrap",
     },

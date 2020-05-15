@@ -201,14 +201,16 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             </div>
 
             <div className={classes.row}>
-                <div className={classes.languageSelect}>
-                    <Select
-                        placeholder={i18n.t("Language")}
-                        onChange={onLanguageChange}
-                        options={availableLanguages}
-                        value={state.language ?? ""}
-                    />
-                </div>
+                {availableLanguages.length > 0 && (
+                    <div className={classes.languageSelect}>
+                        <Select
+                            placeholder={i18n.t("Language")}
+                            onChange={onLanguageChange}
+                            options={availableLanguages}
+                            value={state.language ?? ""}
+                        />
+                    </div>
+                )}
                 {themeOptions.length > 0 && (
                     <div className={classes.themeSelect}>
                         <Select
@@ -260,7 +262,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             controls={{
                                 filterByLevel: true,
                                 filterByGroup: true,
-                                selectAll: false,
+                                selectAll: true,
                             }}
                             rootIds={orgUnitTreeRootIds}
                             fullWidth={false}
@@ -304,8 +306,10 @@ const useStyles = makeStyles({
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {
-    return array.map(({ id, name }) => ({
-        value: id,
-        label: name,
-    }));
+    return (
+        array?.map(({ id, name }) => ({
+            value: id,
+            label: name,
+        })) ?? []
+    );
 }
