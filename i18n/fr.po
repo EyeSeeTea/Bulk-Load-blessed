@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-14T06:07:04.446Z\n"
+"POT-Creation-Date: 2020-05-15T10:37:55.061Z\n"
 "PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -137,7 +137,10 @@ msgstr ""
 msgid "Theme name"
 msgstr ""
 
-msgid "Color palette"
+msgid "Colors"
+msgstr ""
+
+msgid "Color options"
 msgstr ""
 
 msgid "Sections"
@@ -159,6 +162,12 @@ msgid "Logo"
 msgstr ""
 
 msgid "Drag and drop logo file"
+msgstr ""
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Fixed"
 msgstr ""
 
 msgid "Themes"
