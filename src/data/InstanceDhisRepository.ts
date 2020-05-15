@@ -119,7 +119,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
                             category: categoryOptionCombo,
-                            value: this.formatDataValue(value, metadata),
+                            value: this.formatDataValue(dataElement, value, metadata),
                             comment,
                         })
                     ),
@@ -133,40 +133,97 @@ export class InstanceDhisRepository implements InstanceRepository {
         orgUnits,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
-        const response = await promiseMap(orgUnits, orgUnit =>
-            this.api
-                .get<EventsPackage>("/events", {
-                    program: id,
-                    orgUnit,
-                    paging: false,
-                })
-                .getData()
-        );
+        const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
+        const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
+        if (categoryOptions.length === 0) {
+            throw new Error(`Could not find category options for the program ${id}`);
+        }
 
-        return _(response)
-            .map(({ events }) => events)
-            .flatten()
-            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
-                id: event,
-                orgUnit,
-                period: moment(eventDate).format("YYYY-MM-DD"),
-                attribute: attributeOptionCombo,
-                coordinate,
-                dataValues: dataValues.map(({ dataElement, value }) => ({
-                    dataElement,
-                    value: this.formatDataValue(value, metadata),
-                })),
-            }))
-            .value();
+        try {
+            const response = await promiseMap(orgUnits, async orgUnit => {
+                // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
+                return promiseMap(categoryOptions, categoryOptionId =>
+                    this.api
+                        .get<EventsPackage>("/events", {
+                            program: id,
+                            orgUnit,
+                            paging: false,
+                            attributeCc: categoryComboId,
+                            attributeCos: categoryOptionId,
+                        })
+                        .getData()
+                );
+            });
+
+            return _(response)
+                .flatten()
+                .map(({ events }) => events)
+                .flatten()
+                .map(
+                    ({
+                        event,
+                        orgUnit,
+                        eventDate,
+                        attributeOptionCombo,
+                        coordinate,
+                        dataValues,
+                    }) => ({
+                        id: event,
+                        orgUnit,
+                        period: moment(eventDate).format("YYYY-MM-DD"),
+                        attribute: attributeOptionCombo,
+                        coordinate,
+                        dataValues: dataValues.map(({ dataElement, value }) => ({
+                            dataElement,
+                            value: this.formatDataValue(dataElement, value, metadata),
+                        })),
+                    })
+                )
+                .value();
+        } catch (error) {
+            console.error("Error fetching events", error);
+            return [];
+        }
     }
 
-    private formatDataValue(value: string | number, metadata: MetadataPackage): string | number {
-        // Format options from CODE to UID
-        const optionValue = metadata.options?.find(({ code }) => code === value);
-        if (optionValue) return optionValue.id;
+    private formatDataValue(
+        dataElement: string,
+        value: string | number,
+        metadata: MetadataPackage
+    ): string | number {
+        const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
+        if (!optionSet) return value;
 
-        // Return default case
-        return value;
+        // Format options from CODE to UID
+        const options = _.filter(metadata.options, { optionSet: { id: optionSet } });
+        const optionValue = options.find(({ code }) => code === value);
+        return optionValue?.id ?? value;
+    }
+
+    private buildProgramAttributeOptions(
+        metadata: MetadataPackage,
+        categoryComboId?: string
+    ): string[] {
+        if (!categoryComboId) return [];
+
+        // Get all the categories assigned to the categoryCombo of the program
+        const categoryCombo = _.find(metadata?.categoryCombos, { id: categoryComboId });
+        const categoryIds: string[] = _.compact(
+            categoryCombo?.categories?.map(({ id }: MetadataItem) => id)
+        );
+
+        // Get all the category options for each category on the categoryCombo
+        const categories = _.compact(categoryIds.map(id => _.find(metadata?.categories, { id })));
+        const categoryOptions: MetadataItem[] = _(categories)
+            .map(({ categoryOptions }: MetadataItem) =>
+                categoryOptions.map(({ id }: MetadataItem) =>
+                    _.find(metadata?.categoryOptions, { id })
+                )
+            )
+            .flatten()
+            .value();
+
+        return categoryOptions.map(({ id }) => id);
     }
 }
 
@@ -201,7 +258,10 @@ interface AggregatedPackage {
     }>;
 }
 
-type MetadataPackage = Record<
-    string,
-    Array<{ id: string; code: string; [key: string]: unknown }> | undefined
->;
+interface MetadataItem {
+    id: string;
+    code: string;
+    [key: string]: any;
+}
+
+type MetadataPackage = Record<string, MetadataItem[] | undefined>;
