@@ -1,10 +1,10 @@
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
 
 export default class implements GeneratedTemplate {
-    public readonly id = "DATASET_GENERATED_v1";
+    public readonly id = "DATASET_GENERATED_v2";
     public readonly name = "Auto-generated dataSet template";
 
-    public readonly rowOffset = 5;
+    public readonly rowOffset = 3;
     public readonly colOffset = 0;
 
     public readonly dataSources: DataSource[] = [
@@ -27,18 +27,18 @@ export default class implements GeneratedTemplate {
             },
             range: {
                 sheet: "Data Entry",
-                rowStart: 8,
+                rowStart: 6,
                 columnStart: "D",
             },
             dataElement: {
                 sheet: "Data Entry",
                 type: "row",
-                ref: 6,
+                ref: 4,
             },
             categoryOption: {
                 sheet: "Data Entry",
                 type: "row",
-                ref: 7,
+                ref: 5,
             },
         },
     ];
@@ -48,7 +48,7 @@ export default class implements GeneratedTemplate {
             section: "title",
             source: {
                 type: "range",
-                ref: "D3:I3",
+                ref: "D2:I2",
                 sheet: "Data Entry",
             },
         },
@@ -56,7 +56,7 @@ export default class implements GeneratedTemplate {
             section: "subtitle",
             source: {
                 type: "range",
-                ref: "D4:I4",
+                ref: "D3:I3",
                 sheet: "Data Entry",
             },
         },
@@ -64,7 +64,7 @@ export default class implements GeneratedTemplate {
             section: "logo",
             source: {
                 type: "range",
-                ref: "A2:C5",
+                ref: "A2:C3",
                 sheet: "Data Entry",
             },
         },
