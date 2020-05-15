@@ -11,7 +11,6 @@ export interface ColorScaleSelectProps {
     selected: string[];
     onChange: (palette: string[]) => void;
     width?: number;
-    style?: object;
     additionalPalettes?: PaletteCollection;
     disableDefaultPalettes?: boolean;
 }
@@ -20,7 +19,6 @@ export interface ColorScaleSelectProps {
 export const ColorScaleSelect = ({
     selected,
     width = 260,
-    style,
     onChange,
     additionalPalettes = {},
     disableDefaultPalettes = false,
@@ -46,7 +44,7 @@ export const ColorScaleSelect = ({
     };
 
     return (
-        <div style={style}>
+        <React.Fragment>
             <div className={classes.scale}>
                 <ColorScale colors={selectedColors} onClick={showColorScales} width={width} />
             </div>
@@ -70,13 +68,12 @@ export const ColorScaleSelect = ({
                     ))}
                 </Popover>
             )}
-        </div>
+        </React.Fragment>
     );
 };
 
 const useStyles = makeStyles({
     scale: {
-        marginTop: 19,
         overflow: "visible",
         whiteSpace: "nowrap",
     },

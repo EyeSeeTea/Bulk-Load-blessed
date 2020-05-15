@@ -8,6 +8,7 @@ import { toBase64 } from "../../../utils/files";
 import { generatorOriginalPalette } from "../../utils/colors";
 import { ColorPicker } from "../color-picker/ColorPicker";
 import { ColorScaleSelect } from "../color-scale/ColorScaleSelect";
+import { Select, SelectOption } from "../select/Select";
 
 interface ThemeEditDialogProps {
     type: "new" | "edit";
@@ -24,7 +25,9 @@ export default function ThemeEditDialog({
 }: ThemeEditDialogProps) {
     const classes = useStyles();
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
-    const [color, setColor] = useState<string>("");
+
+    const defaultColorOption = theme.palette.length > 1 ? "pattern" : "fixed";
+    const [colorOption, setColorOption] = useState<string>(defaultColorOption);
 
     const onDrop = useCallback(async ([file]: File[]) => {
         if (!file) return;
@@ -44,7 +47,8 @@ export default function ThemeEditDialog({
         updateTheme(theme => theme.setName(name));
     };
 
-    const updatePalette = (palette: string[]) => {
+    const updatePalette = (newColors: string | string[]) => {
+        const palette = [newColors].flat();
         updateTheme(theme => theme.updateColorPalette(palette));
     };
 
@@ -56,6 +60,15 @@ export default function ThemeEditDialog({
     };
 
     const saveTheme = () => onSave(theme);
+
+    const changeColorOption = ({ value }: SelectOption) => {
+        const fixedColor = theme.palette[0];
+        const defaultPalette = generatorOriginalPalette["default"][9];
+        const palette = theme.palette.length > 1 ? theme.palette : defaultPalette;
+
+        updatePalette(value === "fixed" ? [fixedColor] : palette);
+        setColorOption(value);
+    };
 
     return (
         <ConfirmationDialog
@@ -77,20 +90,34 @@ export default function ThemeEditDialog({
                 />
             </div>
 
-            <div className={classes.group}>
-                <Typography variant="h6">{i18n.t("Color palette")}</Typography>
-                <ColorScaleSelect
-                    selected={theme.palette}
-                    onChange={updatePalette}
-                    additionalPalettes={generatorOriginalPalette}
-                />
-                <ColorPicker
-                    color={color}
-                    onChange={setColor}
-                    width={36}
-                    height={36}
-                    disableArrow={true}
-                />
+            <div className={classes.group} style={{ marginBottom: 5 }}>
+                <Typography variant="h6">{i18n.t("Colors")}</Typography>
+                <div className={classes.colorOptions}>
+                    <div className={classes.colorOptionsPicker}>
+                        <Select
+                            placeholder={i18n.t("Color options")}
+                            options={colorPickerOptions}
+                            value={colorOption}
+                            onChange={changeColorOption}
+                        />
+                    </div>
+                    
+                    {theme.palette.length > 1 ? (
+                        <ColorScaleSelect
+                            selected={theme.palette}
+                            onChange={updatePalette}
+                            additionalPalettes={generatorOriginalPalette}
+                        />
+                    ) : (
+                        <ColorPicker
+                            color={theme.palette[0]}
+                            onChange={updatePalette}
+                            width={34}
+                            height={36}
+                            disableArrow={true}
+                        />
+                    )}
+                </div>
             </div>
 
             <div className={classes.group}>
@@ -141,8 +168,10 @@ export default function ThemeEditDialog({
 }
 
 const useStyles = makeStyles({
-    group: { marginBottom: 35, marginLeft: 0 },
+    group: { marginBottom: 25, marginLeft: 0 },
     text: { marginTop: 8 },
+    colorOptions: { marginTop: 12, marginBottom: 0, display: "flex" },
+    colorOptionsPicker: { width: "20%", marginRight: 30 },
     dropzone: {
         flex: 1,
         display: "flex",
@@ -158,3 +187,14 @@ const useStyles = makeStyles({
         cursor: "pointer",
     },
 });
+
+const colorPickerOptions = [
+    {
+        label: i18n.t("Pattern"),
+        value: "pattern",
+    },
+    {
+        label: i18n.t("Fixed"),
+        value: "fixed",
+    },
+];

@@ -63,12 +63,15 @@ export const ColorPicker = ({
 
 const useStyles = makeStyles({
     root: {
-        margin: "12px 0",
+        margin: 0,
+        marginTop: 16,
+        marginBottom: 16,
     },
     button: {
         padding: 0,
         textAlign: "right",
         borderRadius: 0,
+        boxShadow: "0 1px 6px rgba(0,0,0,0.12),0 1px 4px rgba(0,0,0,0.12)",
     },
     icon: {
         position: "absolute",
