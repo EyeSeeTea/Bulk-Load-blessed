@@ -1,6 +1,6 @@
 import { InstanceRepository } from "../repositories/InstanceRepository";
 
-export class ListTemplatesUseCase {
+export class ListDataFormsUseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute() {
