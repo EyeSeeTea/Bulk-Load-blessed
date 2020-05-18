@@ -188,7 +188,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const showOrgUnitsSelector = settings.showOrgUnitsOnGeneration && filterOrgUnits;
-    const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
 
     return (
         <React.Fragment>
@@ -305,7 +304,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             {userHasReadAccess && (
                 <div>
                     <FormControlLabel
-                        disabled={!showOrgUnitsSelector || !enablePopulate}
                         className={classes.checkbox}
                         control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
                         label={i18n.t("Populate template with instance data")}
