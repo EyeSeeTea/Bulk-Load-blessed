@@ -145,7 +145,8 @@ export class InstanceDhisRepository implements InstanceRepository {
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
         const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
         if (categoryOptions.length === 0) {
-            throw new Error(`Could not find category options for the program ${id}`);
+            console.error(`Could not find category options for the program ${id}`);
+            return [];
         }
 
         try {
