@@ -121,7 +121,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         const model = value as DataFormType;
         const options = modelToSelectOption(dataSource[model]);
 
-        setState(state => ({ ...state, type: model, id: undefined }));
+        setState(state => ({ ...state, type: model, id: undefined, populate: false }));
         setTemplates(options);
         setSelectedOrgUnits([]);
     };
@@ -142,7 +142,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             }
         }
 
-        setState(state => ({ ...state, id: value }));
+        setState(state => ({ ...state, id: value, populate: false }));
         setSelectedOrgUnits([]);
     };
 
@@ -171,10 +171,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const onLanguageChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            language: value,
-        }));
+        setState(state => ({ ...state, language: value }));
     };
 
     const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
