@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-18T10:02:17.134Z\n"
+"POT-Creation-Date: 2020-05-18T11:26:43.394Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -80,6 +80,10 @@ msgstr "Año inicial"
 #, fuzzy
 msgid "End date"
 msgstr "Año final"
+
+#, fuzzy
+msgid "Filter available Organisation Units"
+msgstr "No se han encontrado unidades organizativas"
 
 #, fuzzy
 msgid "User does not have any capture organisations units"
@@ -271,10 +275,6 @@ msgstr "Importar datos"
 
 #, fuzzy
 #~ msgid "For organisation units within"
-#~ msgstr "No se han encontrado unidades organizativas"
-
-#, fuzzy
-#~ msgid "For all organisation units"
 #~ msgstr "No se han encontrado unidades organizativas"
 
 #~ msgid "Object not found in database"
