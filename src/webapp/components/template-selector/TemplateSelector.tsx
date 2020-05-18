@@ -47,6 +47,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
+    const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
     const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
@@ -88,11 +89,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         if (type && id) {
             CompositionRoot.attach()
                 .orgUnits.getRootsByForm.execute(type, id)
-                .then(setOrgUnitTreeRootIds);
-        } else {
-            CompositionRoot.attach().orgUnits.getRoots.execute().then(setOrgUnitTreeRootIds);
+                .then(setOrgUnitTreeFilter);
         }
     }, [state]);
+
+    useEffect(() => {
+        CompositionRoot.attach().orgUnits.getRoots.execute().then(setOrgUnitTreeRootIds);
+    }, []);
 
     useEffect(() => {
         CompositionRoot.attach().languages.list.execute().then(setAvailableLanguages);
@@ -120,6 +123,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
         setState(state => ({ ...state, type: model, id: undefined }));
         setTemplates(options);
+        setSelectedOrgUnits([]);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
@@ -139,6 +143,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         }
 
         setState(state => ({ ...state, id: value }));
+        setSelectedOrgUnits([]);
     };
 
     const onThemeChange = ({ value }: SelectOption) => {
@@ -257,21 +262,24 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     <div className={classes.orgUnitSelector}>
                         <OrgUnitsSelector
                             api={api}
-                            onChange={onOrgUnitChange}
+                            rootIds={orgUnitTreeRootIds}
+                            selectableIds={orgUnitTreeFilter}
                             selected={selectedOrgUnits}
+                            onChange={onOrgUnitChange}
+                            fullWidth={false}
+                            height={250}
                             controls={{
                                 filterByLevel: true,
                                 filterByGroup: true,
                                 selectAll: true,
                             }}
-                            rootIds={orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={250}
                         />
                     </div>
                 ) : null
             ) : (
-                i18n.t("No capture organisations units")
+                <div className={classes.orgUnitError}>
+                    {i18n.t("User does not have any capture organisations units")}
+                </div>
             )}
 
             {settings.showOrgUnitsOnGeneration && (
@@ -303,6 +311,12 @@ const useStyles = makeStyles({
     populateCheckbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em" },
     fullWidth: { width: "100%" },
+    orgUnitError: {
+        height: 250,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {

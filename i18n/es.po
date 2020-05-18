@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-15T14:35:19.102Z\n"
+"POT-Creation-Date: 2020-05-18T10:02:17.134Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -81,7 +81,8 @@ msgstr "Año inicial"
 msgid "End date"
 msgstr "Año final"
 
-msgid "No capture organisations units"
+#, fuzzy
+msgid "User does not have any capture organisations units"
 msgstr "No se han encontrado unidades organizativas"
 
 msgid "Populate template with instance data"
@@ -263,6 +264,18 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
+
+#, fuzzy
+#~ msgid "Organisation unit group"
+#~ msgstr "No se han encontrado unidades organizativas"
+
+#, fuzzy
+#~ msgid "For organisation units within"
+#~ msgstr "No se han encontrado unidades organizativas"
+
+#, fuzzy
+#~ msgid "For all organisation units"
+#~ msgstr "No se han encontrado unidades organizativas"
 
 #~ msgid "Object not found in database"
 #~ msgstr "No se ha encontrado el objeto en la base de datos"
