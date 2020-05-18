@@ -51,6 +51,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
+    const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
@@ -128,7 +129,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onTemplateChange = ({ value }: SelectOption) => {
         if (dataSource && state.type) {
-            const { periodType } = dataSource[state.type].find(({ id }) => id === value) ?? {};
+            const { periodType, readAccess = false } =
+                dataSource[state.type].find(({ id }) => id === value) ?? {};
+            setUserHasReadAccess(readAccess);
+
             if (periodType === "Yearly") {
                 setDatePickerFormat({ unit: "year", views: ["year"], format: "YYYY" });
             } else if (periodType === "Monthly") {
@@ -254,38 +258,42 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             </div>
 
-            {!_.isEmpty(orgUnitTreeRootIds) ? (
-                settings.showOrgUnitsOnGeneration ? (
-                    <div className={classes.orgUnitSelector}>
-                        <OrgUnitsSelector
-                            api={api}
-                            rootIds={orgUnitTreeRootIds}
-                            selectableIds={orgUnitTreeFilter}
-                            selected={selectedOrgUnits}
-                            onChange={onOrgUnitChange}
-                            fullWidth={false}
-                            height={250}
-                            controls={{
-                                filterByLevel: true,
-                                filterByGroup: true,
-                                selectAll: true,
-                            }}
-                        />
-                    </div>
-                ) : null
-            ) : (
-                <div className={classes.orgUnitError}>
-                    {i18n.t("User does not have any capture organisations units")}
-                </div>
-            )}
-
             {settings.showOrgUnitsOnGeneration && (
-                <FormControlLabel
-                    disabled={!enablePopulate}
-                    className={classes.populateCheckbox}
-                    control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                    label={i18n.t("Populate template with instance data")}
-                />
+                <React.Fragment>
+                    {!_.isEmpty(orgUnitTreeRootIds) ? (
+                        <div className={classes.orgUnitSelector}>
+                            <OrgUnitsSelector
+                                api={api}
+                                rootIds={orgUnitTreeRootIds}
+                                selectableIds={orgUnitTreeFilter}
+                                selected={selectedOrgUnits}
+                                onChange={onOrgUnitChange}
+                                fullWidth={false}
+                                height={250}
+                                controls={{
+                                    filterByLevel: true,
+                                    filterByGroup: true,
+                                    selectAll: true,
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <div className={classes.orgUnitError}>
+                            {i18n.t("User does not have any capture organisations units")}
+                        </div>
+                    )}
+
+                    {userHasReadAccess && (
+                        <FormControlLabel
+                            disabled={!enablePopulate}
+                            className={classes.populateCheckbox}
+                            control={
+                                <Checkbox checked={state.populate} onChange={onPopulateChange} />
+                            }
+                            label={i18n.t("Populate template with instance data")}
+                        />
+                    )}
+                </React.Fragment>
             )}
         </React.Fragment>
     );
