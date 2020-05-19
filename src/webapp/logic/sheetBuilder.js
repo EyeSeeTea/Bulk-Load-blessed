@@ -305,11 +305,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("options")
     );
 
-    // Add element title
+    // Add dataSet or program title
     dataEntrySheet
         .cell(sectionRow, 1, sectionRow, columnId - 1, true)
         .formula(`_${element.id}`)
-        .style(baseStyle);
+        .style({ ...baseStyle, font: { size: 16, bold: true } });
 
     if (element.type === "dataSet") {
         const categoryOptionCombos = [];
