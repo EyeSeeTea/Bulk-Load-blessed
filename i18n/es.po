@@ -1,0 +1,261 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: i18next-conv\n"
+"POT-Creation-Date: 2020-05-14T05:52:47.004Z\n"
+"PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, fuzzy
+msgid "Template not loaded"
+msgstr "Generación de plantilla"
+
+msgid "Tracker programs are not supported"
+msgstr ""
+
+msgid "Element not found"
+msgstr ""
+
+msgid "Program or DataSet not found in instance"
+msgstr ""
+
+msgid "Field {{field}} cannot be blank"
+msgstr ""
+
+msgid "You need to select at least one {{element}}"
+msgstr "Seleccione al menos un {{element}}"
+
+msgid "Settings saved"
+msgstr "Configuración guardada"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Models"
+msgstr "Modelos"
+
+msgid "Visibility"
+msgstr "Visibilidad"
+
+msgid "Show Organisation Units On Template Generation"
+msgstr "Mostrar unidades organizativas en la plantilla de generación"
+
+msgid "User groups for Template Generation"
+msgstr "Grupos de usuario con acceso a la plantilla de generación"
+
+msgid "User groups with access to Settings"
+msgstr "Grupos de usuario con acceso a la configuración"
+
+msgid "Data Set"
+msgstr "Data Set"
+
+msgid "Program"
+msgstr "Programa"
+
+msgid "Custom"
+msgstr ""
+
+msgid "elements"
+msgstr "elementos"
+
+msgid "Model"
+msgstr "Modelo"
+
+#, fuzzy
+msgid "Select {{elementLabel}} to export..."
+msgstr "Seleccione {{element}} a {{action}}..."
+
+msgid "Theme"
+msgstr ""
+
+msgid "No theme"
+msgstr ""
+
+msgid "Start Year"
+msgstr "Año inicial"
+
+msgid "End Year"
+msgstr "Año final"
+
+msgid "No capture organisations units"
+msgstr "No se han encontrado unidades organizativas"
+
+msgid "Edit theme"
+msgstr ""
+
+msgid "New theme"
+msgstr ""
+
+msgid "Theme name"
+msgstr ""
+
+msgid "Sections"
+msgstr ""
+
+msgid "Header text"
+msgstr ""
+
+msgid "Title text"
+msgstr ""
+
+msgid "Subtitle text"
+msgstr ""
+
+msgid "Footer text"
+msgstr ""
+
+msgid "Logo"
+msgstr ""
+
+#, fuzzy
+msgid "Drag and drop logo file"
+msgstr "Mueva aquí los ficheros a importar"
+
+msgid "Themes"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "An error ocurred while saving theme"
+msgstr ""
+
+msgid "Delete {{count}} themes"
+msgid_plural "Delete {{count}} themes"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Are you sure you want to remove selected themes"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Header"
+msgstr ""
+
+msgid "Footer"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Subtitle"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "Ok"
+msgstr ""
+
+msgid "Create theme"
+msgstr ""
+
+msgid "Error deleting data values"
+msgstr "Se ha producido un error borrando valores de datos"
+
+msgid "Select at least one model"
+msgstr "Seleccione al menos un modelo"
+
+msgid "Data set"
+msgstr "Data set"
+
+msgid "Cannot get data entry sheet"
+msgstr ""
+
+msgid "Cannot get metadata sheet"
+msgstr ""
+
+msgid "Event date is empty"
+msgstr ""
+
+msgid ""
+"Cannot import: Versions do not match (database={{dbVersion}}, "
+"file={{sheetVersion}})"
+msgstr ""
+"No se puede importar: Las versiones no coinciden (base de "
+"datos={{dbVersion}}, fichero={{sheetVersion}})"
+
+msgid "Cannot read file"
+msgstr "No se puede leer el fichero"
+
+msgid "Select a organisation units to import data"
+msgstr "Seleccione una unidad organizativa en la que importar los datos"
+
+msgid "Selected organisation unit is not associated with the dataset"
+msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
+
+msgid "Imported"
+msgstr "Importados"
+
+msgid "Updated"
+msgstr "Actualizados"
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Deleted"
+msgstr "Borrados"
+
+msgid "Existing data values"
+msgstr "Existen valores de datos"
+
+msgid ""
+"There are {{dataValuesSize}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will be "
+"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+"Existen {{dataValuesSize}} valores en la base de datos for esta unidad "
+"organizativa y periodos. Si continua, todos los valores seránborrados, y "
+"solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
+
+msgid "Proceed"
+msgstr "Continuar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Template Generation"
+msgstr "Generación de plantilla"
+
+msgid "Download template"
+msgstr "Descargar plantilla"
+
+msgid "Bulk Import"
+msgstr "Importación"
+
+msgid "Drag and drop file to import"
+msgstr "Mueva aquí los ficheros a importar"
+
+#, fuzzy
+msgid "Update"
+msgstr "Actualizados"
+
+msgid "Create"
+msgstr ""
+
+msgid "data values"
+msgstr "valores de datos"
+
+msgid "No capture org unit match element org units"
+msgstr ""
+"Las unidades organizativas de introducción de datos y del elemento no "
+"coinciden"
+
+msgid "Import data"
+msgstr "Importar datos"
+
+#~ msgid "Object not found in database"
+#~ msgstr "No se ha encontrado el objeto en la base de datos"
+
+#~ msgid "export"
+#~ msgstr "exportar"
+
+#~ msgid "Save"
+#~ msgstr "Guardar"

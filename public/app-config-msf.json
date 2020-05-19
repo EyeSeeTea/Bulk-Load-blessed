@@ -1,0 +1,17 @@
+{
+    "appKey": "bulk-load",
+    "appearance": {
+        "showShareButton": false
+    },
+    "feedback": null,
+    "storage": "constant",
+    "defaultSettings": {
+        "models": {
+            "dataSet": true,
+            "program": false
+        },
+        "userGroupsForGeneration": [
+            "HMIS Officers"
+        ]
+    }
+}
