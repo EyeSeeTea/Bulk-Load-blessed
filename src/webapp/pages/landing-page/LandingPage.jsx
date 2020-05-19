@@ -128,6 +128,12 @@ export default function LandingPage() {
                 orgUnits,
             } = await CompositionRoot.attach().templates.analyze.execute(file);
 
+            if (!object.writeAccess) {
+                throw new Error(
+                    i18n.t("You don't have write permissions for {{type}} {{name}}", object)
+                );
+            }
+
             setState(state => ({
                 ...state,
                 importDataSheet: file,

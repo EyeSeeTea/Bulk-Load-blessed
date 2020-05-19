@@ -55,8 +55,14 @@ export default function ThemeEditDialog({
     const updateSection = (field: ThemeableSections) => {
         return (event: ChangeEvent<HTMLInputElement>) => {
             const text = event.target.value;
+
+            // TODO: This should be configurable from the UI
             const fontSize = field === "title" ? 22 : 12;
-            updateTheme(theme => theme.updateSection(field, text ? { text, fontSize } : undefined));
+            const italic = field === "subtitle";
+
+            updateTheme(theme =>
+                theme.updateSection(field, text ? { text, fontSize, italic } : undefined)
+            );
         };
     };
 
