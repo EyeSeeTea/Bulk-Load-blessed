@@ -130,7 +130,7 @@ export default function LandingPage() {
 
             if (!object.writeAccess) {
                 throw new Error(
-                    i18n.t(`You don't have write permissions for ${object.type} ${object.name}`)
+                    i18n.t("You don't have write permissions for {{type}} {{name}}", object)
                 );
             }
 
