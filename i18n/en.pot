@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-18T15:45:38.392Z\n"
-"PO-Revision-Date: 2020-05-18T15:45:38.392Z\n"
+"POT-Creation-Date: 2020-05-19T08:10:37.748Z\n"
+"PO-Revision-Date: 2020-05-19T08:10:37.748Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -39,6 +39,18 @@ msgid "Visibility"
 msgstr ""
 
 msgid "Show Organisation Units On Template Generation"
+msgstr ""
+
+msgid "Organisation Units visibility"
+msgstr ""
+
+msgid "Filter Organisation Units during template generation"
+msgstr ""
+
+msgid "Overwrite Organisation Units during template import"
+msgstr ""
+
+msgid "Show filter and overwrite menus during template generation and import"
 msgstr ""
 
 msgid "User groups for Template Generation"

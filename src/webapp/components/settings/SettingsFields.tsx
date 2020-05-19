@@ -1,10 +1,12 @@
 import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
 import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
+import _ from "lodash";
 import React from "react";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import Settings, { Model } from "../../logic/settings";
+import { Select } from "../select/Select";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -85,16 +87,39 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FieldTitle>{i18n.t("Visibility")}</FieldTitle>
 
             <FormGroup className={classes.content} row={true}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            className={classes.checkbox}
-                            checked={settings.showOrgUnitsOnGeneration}
-                            onChange={updateBoolean("showOrgUnitsOnGeneration")}
-                        />
-                    }
-                    label={i18n.t("Show Organisation Units On Template Generation")}
-                />
+                {false && (
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                className={classes.checkbox}
+                                checked={settings.showOrgUnitsOnGeneration}
+                                onChange={updateBoolean("showOrgUnitsOnGeneration")}
+                            />
+                        }
+                        label={i18n.t("Show Organisation Units On Template Generation")}
+                    />
+                )}
+                <div className={classes.fullWidth}>
+                <Select
+                    placeholder={i18n.t("Organisation Units visibility")}
+                    onChange={_.noop}
+                    options={[
+                        {
+                            value: "1",
+                            label: i18n.t("Filter Organisation Units during template generation"),
+                        },
+                        {
+                            value: "2",
+                            label: i18n.t("Overwrite Organisation Units during template import"),
+                        },
+                        {
+                            value: "3",
+                            label: i18n.t(
+                                "Show filter and overwrite menus during template generation and import"
+                            ),
+                        },
+                    ]}
+                    /></div>
             </FormGroup>
 
             <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
