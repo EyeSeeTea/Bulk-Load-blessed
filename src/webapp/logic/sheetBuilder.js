@@ -277,7 +277,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         columnId++,
         "Org Unit",
         null,
-        this.validations.get("organisationUnits")
+        this.validations.get("organisationUnits"),
+        "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
     if (element.type === "program") {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
@@ -482,7 +483,8 @@ SheetBuilder.prototype.createColumn = function (
     columnId,
     label,
     groupId = null,
-    validation = null
+    validation = null,
+    validationMessage = "Invalid choice was chosen"
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
@@ -498,7 +500,7 @@ SheetBuilder.prototype.createColumn = function (
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
-            error: "Invalid choice was chosen",
+            error: validationMessage,
             errorStyle: "warning",
             showDropDown: true,
             sqref: ref,
