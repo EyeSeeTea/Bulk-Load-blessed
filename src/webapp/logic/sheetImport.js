@@ -160,9 +160,17 @@ export async function readSheet({
             // Read attribute option combo
             if (isProgram && colOffset > 0 && row.values[4] !== undefined) {
                 // NOTICE: Some old versions of 2.30 appeared to have a bug and required attributeCategoryOptions
-                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
+                result.attributeOptionCombo = parseMetadataId(
+                    metadataSheet,
+                    row.values[4],
+                    "categoryOptionCombo"
+                );
             } else if (!isProgram && row.values[3] !== undefined) {
-                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
+                result.attributeOptionCombo = parseMetadataId(
+                    metadataSheet,
+                    row.values[3],
+                    "categoryOptionCombo"
+                );
             }
 
             // Read event id
@@ -250,11 +258,13 @@ export async function readSheet({
     return isProgram ? { events: dataToImport } : dataToImport;
 }
 
-function parseMetadataId(metadataSheet, metadataName) {
+function parseMetadataId(metadataSheet, metadataName, metadataType) {
     let result = metadataName;
     metadataSheet.eachRow(row => {
         const name = metadataName.result ?? metadataName.formula ?? metadataName;
-        if (row.values[3] && stringEquals(row.values[3], name)) result = row.values[1];
+        const hasSameName = row.values[3] && stringEquals(row.values[3], name);
+        const hasSameType = !metadataType || stringEquals(row.values[2], metadataType);
+        if (hasSameName && hasSameType) result = row.values[1];
     });
     return result;
 }
