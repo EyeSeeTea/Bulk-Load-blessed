@@ -277,7 +277,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         columnId++,
         "Org Unit",
         null,
-        this.validations.get("organisationUnits")
+        this.validations.get("organisationUnits"),
+        "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
     if (element.type === "program") {
         createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Latitude");
