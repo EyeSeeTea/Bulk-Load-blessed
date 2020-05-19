@@ -8,7 +8,8 @@ export function createColumn(
     columnId,
     label,
     groupId = null,
-    validation = null
+    validation = null,
+    validationMessage = "Invalid choice was chosen"
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
@@ -24,7 +25,7 @@ export function createColumn(
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
-            error: "Invalid choice was chosen",
+            error: validationMessage,
             errorStyle: "warning",
             showDropDown: true,
             sqref: ref,
