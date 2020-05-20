@@ -1,6 +1,7 @@
-import _ from "lodash";
-import { getJSON } from "../utils/requests";
 import axios from "axios";
+import _ from "lodash";
+import { promiseMap } from "../utils/common";
+import { getJSON } from "../utils/requests";
 
 export async function getElement(d2, type, id) {
     const baseUrl = d2.Api.getApi().baseUrl;
@@ -37,11 +38,6 @@ export function getElementMetadata(builder) {
         // TODO: Optimize query with less fields
         const API_ELEMENT =
             API_BASE_URL + "/" + endpoint + "/" + builder.element.id + "/metadata.json";
-        const API_ORG_UNITS =
-            API_BASE_URL +
-            "/metadata.json?fields=id,displayName,translations&filter=id:in:[" +
-            builder.organisationUnits.toString() +
-            "]";
         getJSON(builder.d2, API_ELEMENT)
             .then(json => {
                 rawMetadata = json;
@@ -55,11 +51,20 @@ export function getElementMetadata(builder) {
                         });
                     }
                 });
-                if (builder.organisationUnits.length !== 0)
-                    return getJSON(builder.d2, API_ORG_UNITS);
+                if (builder.organisationUnits.length !== 0) {
+                    return promiseMap(_.chunk(builder.organisationUnits, 400), orgUnits =>
+                        getJSON(
+                            builder.d2,
+                            `${API_BASE_URL}/metadata.json?fields=id,displayName,translations&filter=id:in:[${orgUnits}]`
+                        )
+                    );
+                }
             })
-            .then(json => {
-                if (json && json.organisationUnits) organisationUnits = json.organisationUnits;
+            .then(responses => {
+                organisationUnits = _.flatMap(
+                    responses,
+                    ({ organisationUnits }) => organisationUnits
+                );
             })
             .then(() => {
                 resolve({

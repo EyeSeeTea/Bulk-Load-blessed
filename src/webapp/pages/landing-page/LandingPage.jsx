@@ -1,4 +1,4 @@
-import { Button, Paper } from "@material-ui/core";
+import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
@@ -31,7 +31,8 @@ export default function LandingPage() {
         template: null,
         orgUnitTreeSelected2: [],
         orgUnitTreeRootIds: [],
-        importOrgUnitIds: undefined,
+        overwriteOrgUnits: false,
+        importOrgUnitIds: [],
         importObject: undefined,
         importDataSheet: undefined,
         importMessages: [],
@@ -51,15 +52,13 @@ export default function LandingPage() {
 
     useEffect(() => {
         CompositionRoot.attach()
-            .orgUnits.getRoots.execute()
+            .orgUnits.getUserRoots.execute()
             .then(orgUnitTreeRootIds => {
                 setState(state => ({ ...state, orgUnitTreeRootIds }));
             });
     }, []);
 
-    const isImportEnabled =
-        state.importObject &&
-        (settings.showOrgUnitsOnGeneration || !_.isEmpty(state.orgUnitTreeSelected2));
+    const showOrgUnitsOnGeneration = settings?.orgUnitSelection !== "import";
 
     const handleOrgUnitTreeClick2 = orgUnitPaths => {
         setState(state => ({
@@ -91,8 +90,8 @@ export default function LandingPage() {
                 type,
                 id,
                 theme,
-                orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
-                populate: settings.showOrgUnitsOnGeneration && populate,
+                orgUnits: showOrgUnitsOnGeneration ? orgUnits : [],
+                populate: showOrgUnitsOnGeneration && populate,
                 startDate,
                 endDate,
                 ...rest,
@@ -104,7 +103,7 @@ export default function LandingPage() {
             importDataSheet: undefined,
             importObject: undefined,
             importDataValues: [],
-            importOrgUnitIds: undefined,
+            importOrgUnitIds: [],
             importMessages: [],
         }));
 
@@ -112,7 +111,6 @@ export default function LandingPage() {
     };
 
     const onDrop = async files => {
-        const { orgUnitTreeRootIds } = state;
         loading.show(true);
 
         const file = files[0];
@@ -129,20 +127,18 @@ export default function LandingPage() {
                 orgUnits,
             } = await CompositionRoot.attach().templates.analyze.execute(file);
 
-            const importOrgUnitIds = !settings.showOrgUnitsOnGeneration
-                ? orgUnits
-                      ?.filter(ou =>
-                          _(orgUnitTreeRootIds).some(userOuId => ou.path.includes(userOuId))
-                      )
-                      .map(ou => ou.id)
-                : undefined;
+            if (!object.writeAccess) {
+                throw new Error(
+                    i18n.t("You don't have write permissions for {{type}} {{name}}", object)
+                );
+            }
 
             setState(state => ({
                 ...state,
                 importDataSheet: file,
                 importObject: object,
                 importDataValues: dataValues,
-                importOrgUnitIds,
+                importOrgUnitIds: orgUnits.map(({ id }) => id),
                 importMessages: [],
             }));
         } catch (err) {
@@ -154,7 +150,7 @@ export default function LandingPage() {
                 importDataSheet: file,
                 importObject: undefined,
                 importDataValues: [],
-                importOrgUnitIds: undefined,
+                importOrgUnitIds: [],
                 importMessages: [],
             }));
         }
@@ -177,16 +173,11 @@ export default function LandingPage() {
                 organisationUnits: orgUnits,
             });
 
-            if (!settings.showOrgUnitsOnGeneration) {
-                const orgUnit = result.organisationUnits[0];
-                if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
-                const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
+            const useBuilderOrgUnits =
+                settings.orgUnitSelection !== "generation" && state.overwriteOrgUnits;
 
-                if (_.isEmpty(dataSetsForElement)) {
-                    throw new Error(
-                        i18n.t("Selected organisation unit is not associated with the dataset")
-                    );
-                }
+            if (useBuilderOrgUnits && result.organisationUnits.length === 0) {
+                throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
             const {
@@ -199,7 +190,7 @@ export default function LandingPage() {
                 d2,
                 api,
                 file: state.importDataSheet,
-                useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
+                useBuilderOrgUnits,
                 rowOffset,
                 colOffset,
             });
@@ -208,7 +199,7 @@ export default function LandingPage() {
             const info = { data, dataValues };
 
             if (_.isEmpty(dataValues)) {
-                performImport(info);
+                await performImport(info);
             } else {
                 setState(state => ({ ...state, confirmOnExistingData: info }));
             }
@@ -273,7 +264,12 @@ export default function LandingPage() {
 
     const onSettingsChange = useCallback(settings => {
         setSettings(settings);
-        setState(state => ({ ...state, importObject: undefined }));
+        setState(state => ({
+            ...state,
+            importObject: undefined,
+            orgUnitTreeSelected2: [],
+            overwriteOrgUnits: false,
+        }));
     }, []);
 
     const onThemesChange = useCallback(themes => {
@@ -281,10 +277,11 @@ export default function LandingPage() {
     }, []);
 
     const onTemplateChange = useCallback(template => {
-        setState(state => ({
-            ...state,
-            template,
-        }));
+        setState(state => ({ ...state, template }));
+    }, []);
+
+    const onOverwriteOrgUnitsChange = useCallback((_event, overwriteOrgUnits) => {
+        setState(state => ({ ...state, overwriteOrgUnits }));
     }, []);
 
     const ConfirmationOnExistingData = () => {
@@ -418,8 +415,8 @@ export default function LandingPage() {
                             fontSize: "1.2em",
                         }}
                     >
-                        {getNameForModel(state.importObject.type)}: {state.importObject.displayName}{" "}
-                        ({state.importObject.id})
+                        {getNameForModel(state.importObject.type)}: {state.importObject.name} (
+                        {state.importObject.id})
                         {state.importDataValues.map((group, idx) => (
                             <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
                                 {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
@@ -430,22 +427,36 @@ export default function LandingPage() {
                     </div>
                 )}
 
-                {state.importObject &&
-                    state.importOrgUnitIds &&
-                    (state.importOrgUnitIds.length > 0 ? (
+                {settings.orgUnitSelection !== "generation" && (
+                    <div>
+                        <FormControlLabel
+                            style={{ marginTop: "1em" }}
+                            control={
+                                <Checkbox
+                                    checked={state.overwriteOrgUnits}
+                                    onChange={onOverwriteOrgUnitsChange}
+                                />
+                            }
+                            label={i18n.t("Select import Organisation Unit")}
+                        />
+                    </div>
+                )}
+
+                {state.overwriteOrgUnits &&
+                    (state.orgUnitTreeRootIds.length > 0 ? (
                         <OrgUnitsSelector
-                            key={state.importOrgUnitIds.join(".")}
                             api={api}
                             onChange={handleOrgUnitTreeClick2}
                             selected={state.orgUnitTreeSelected2}
+                            rootIds={state.orgUnitTreeRootIds}
+                            selectableIds={state.importOrgUnitIds}
+                            fullWidth={false}
+                            height={220}
                             controls={{
                                 filterByLevel: false,
                                 filterByGroup: false,
                                 selectAll: false,
                             }}
-                            rootIds={state.importOrgUnitIds}
-                            fullWidth={false}
-                            height={220}
                         />
                     ) : (
                         i18n.t("No capture org unit match element org units")
@@ -479,7 +490,7 @@ export default function LandingPage() {
                         variant="contained"
                         color="primary"
                         onClick={handleDataImportClick}
-                        disabled={!isImportEnabled}
+                        disabled={!state.importObject}
                     >
                         {i18n.t("Import data")}
                     </Button>

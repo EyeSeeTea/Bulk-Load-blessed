@@ -160,9 +160,17 @@ export async function readSheet({
             // Read attribute option combo
             if (isProgram && colOffset > 0 && row.values[4] !== undefined) {
                 // NOTICE: Some old versions of 2.30 appeared to have a bug and required attributeCategoryOptions
-                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4]);
+                result.attributeOptionCombo = parseMetadataId(
+                    metadataSheet,
+                    row.values[4],
+                    "categoryOptionCombo"
+                );
             } else if (!isProgram && row.values[3] !== undefined) {
-                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3]);
+                result.attributeOptionCombo = parseMetadataId(
+                    metadataSheet,
+                    row.values[3],
+                    "categoryOptionCombo"
+                );
             }
 
             // Read event id
@@ -172,66 +180,49 @@ export async function readSheet({
 
             row.eachCell((cell, colNumber) => {
                 if (isProgram && colNumber > 4 + colOffset) {
-                    // TODO: Do not hardcode previous entries
                     const id = columns[colNumber].formula.substr(1);
                     let cellValue =
                         cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
 
-                    // TODO: Check different data types
-                    const dataValue = elementMetadata.get(id);
-                    if (dataValue.optionSet !== undefined) {
-                        const optionSet = elementMetadata.get(dataValue.optionSet.id);
-                        optionSet.options.forEach(optionId => {
-                            const option = elementMetadata.get(optionId.id);
-                            if (stringEquals(cellValue, option.name)) cellValue = option.code;
-                        });
-                    } else if (dataValue.valueType === "DATE") {
-                        cellValue = dateFormat(new Date(cellValue), "yyyy-mm-dd");
-                    } else if (
-                        dataValue.valueType === "BOOLEAN" ||
-                        dataValue.valueType === "TRUE_ONLY"
-                    ) {
-                        cellValue = String(cellValue) === "true" || cellValue === "Yes";
-                    }
-                    result.dataValues.push({ dataElement: id, value: cellValue });
+                    const dataElement = elementMetadata.get(id);
+                    const value = formatValue({
+                        dataElement,
+                        cellValue,
+                        elementMetadata,
+                        metadataSheet,
+                    });
+
+                    result.dataValues.push({ dataElement: id, value });
                 } else if (!isProgram && colNumber > 3) {
-                    // TODO: Do not hardcode previous entries
                     const column = columns[colNumber];
-                    const id = column.formula
-                        ? column.formula.substr(1)
-                        : dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
+                    const id =
+                        column.formula?.substr(1) ??
+                        dataEntrySheet.getCell(column.sharedFormula).value.formula.substr(1);
+
                     const stageColumn = stageColumns[colNumber];
-                    const dataElementId = stageColumn.formula
-                        ? stageColumn.formula.substr(1)
-                        : dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
-                    let cellValue = cell.value?.toString();
-                    const dataValue = elementMetadata.get(id);
+                    const dataElementId =
+                        stageColumn.formula?.substr(1) ??
+                        dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
+
+                    const { type } = elementMetadata.get(id);
+                    const isDisaggregated = type === "categoryOptionCombo";
+
                     const dataElement = elementMetadata.get(dataElementId);
+                    const cellValue = cell.value?.toString();
+                    const value = formatValue({
+                        dataElement,
+                        cellValue,
+                        elementMetadata,
+                        metadataSheet,
+                    });
 
-                    if (
-                        dataElement.valueType === "BOOLEAN" ||
-                        dataElement.valueType === "TRUE_ONLY"
-                    ) {
-                        cellValue = String(cellValue) === "true" || cellValue === "Yes";
-                    }
-
-                    if (dataValue.type === "categoryOptionCombo") {
-                        // TODO: OptionSets in categoryOptionCombos
-                        result.dataValues.push({
-                            dataElement: dataElementId,
-                            categoryOptionCombo: id,
-                            value: cellValue,
-                            period: result.period,
-                            orgUnit: result.orgUnit,
-                        });
-                    } else {
-                        result.dataValues.push({
-                            dataElement: id,
-                            value: cellValue,
-                            period: result.period,
-                            orgUnit: result.orgUnit,
-                        });
-                    }
+                    result.dataValues.push({
+                        dataElement: isDisaggregated ? dataElementId : id,
+                        categoryOptionCombo: isDisaggregated ? id : undefined,
+                        value,
+                        period: result.period,
+                        orgUnit: result.orgUnit,
+                    });
                 }
             });
 
@@ -250,11 +241,27 @@ export async function readSheet({
     return isProgram ? { events: dataToImport } : dataToImport;
 }
 
-function parseMetadataId(metadataSheet, metadataName) {
+function formatValue({ dataElement, cellValue, elementMetadata, metadataSheet }) {
+    if (dataElement.optionSet !== undefined) {
+        const optionId = parseMetadataId(metadataSheet, cellValue, "option");
+        const option = elementMetadata.get(optionId);
+        return option?.code ?? cellValue;
+    } else if (dataElement.valueType === "DATE") {
+        return dateFormat(new Date(cellValue), "yyyy-mm-dd");
+    } else if (dataElement.valueType === "BOOLEAN" || dataElement.valueType === "TRUE_ONLY") {
+        return String(cellValue) === "true" || cellValue === "Yes";
+    } else {
+        return cellValue;
+    }
+}
+
+function parseMetadataId(metadataSheet, metadataName, metadataType) {
     let result = metadataName;
     metadataSheet.eachRow(row => {
         const name = metadataName.result ?? metadataName.formula ?? metadataName;
-        if (row.values[3] && stringEquals(row.values[3], name)) result = row.values[1];
+        const hasSameName = row.values[3] && stringEquals(row.values[3], name);
+        const hasSameType = !metadataType || stringEquals(row.values[2], metadataType);
+        if (hasSameName && hasSameType) result = row.values[1];
     });
     return result;
 }

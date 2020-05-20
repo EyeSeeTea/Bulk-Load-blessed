@@ -1,7 +1,7 @@
 import { saveAs } from "file-saver";
 import { Moment } from "moment";
 import * as dhisConnector from "../../webapp/logic/dhisConnector";
-import { SheetBuilder } from "../../webapp/logic/sheetBuilder";
+import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -40,6 +40,10 @@ export class DownloadTemplateUseCase {
         language,
     }: DownloadTemplateProps): Promise<void> {
         try {
+            const templateId = type === "dataSet" ? dataSetId : programId;
+            const template = this.templateRepository.getTemplate(templateId);
+            const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
+
             // FIXME: Legacy code, connector with d2
             const element = await dhisConnector.getElement(d2, type, id);
             const result = await dhisConnector.getElementMetadata({
@@ -48,22 +52,19 @@ export class DownloadTemplateUseCase {
                 organisationUnits: orgUnits,
             });
 
-            const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
-
             // FIXME: Legacy code, sheet generator
             const builderOutput = new SheetBuilder({
                 ...result,
                 startDate,
                 endDate,
                 language,
-                palette: theme?.palette,
+                theme,
+                template,
             });
 
             const name = element.displayName ?? element.name;
             const file = await builderOutput.toBlob();
 
-            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v2";
-            const template = this.templateRepository.getTemplate(templateId);
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
             if (theme) await this.excelRepository.applyTheme(template, theme);

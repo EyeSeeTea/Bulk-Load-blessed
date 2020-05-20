@@ -1,6 +1,7 @@
 import { D2Api, Id, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
+import { AppSettings, OrgUnitSelectionSetting } from "../../domain/entities/AppSettings";
 import i18n from "../../locales";
 
 const models = ["dataSet", "program"] as const;
@@ -11,7 +12,7 @@ const publicFields = [
     "models",
     "userGroupsForGeneration",
     "userGroupsForSettings",
-    "showOrgUnitsOnGeneration",
+    "orgUnitSelection",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -31,13 +32,6 @@ interface UserGroup {
     displayName: string;
 }
 
-interface PersistedData {
-    models: Models;
-    userGroupForGeneration: string[];
-    userGroupForSettings: string[];
-    showOrgUnitsOnGeneration: boolean;
-}
-
 interface CurrentUser {
     userGroups: Ref[];
     authorities: Set<string>;
@@ -52,7 +46,7 @@ export default class Settings {
     public userGroups: UserGroup[];
     public userGroupsForGeneration: UserGroup[];
     public userGroupsForSettings: UserGroup[];
-    public showOrgUnitsOnGeneration: boolean;
+    public orgUnitSelection: OrgUnitSelectionSetting;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -63,7 +57,7 @@ export default class Settings {
         this.userGroups = options.userGroups;
         this.userGroupsForGeneration = options.userGroupsForGeneration;
         this.userGroupsForSettings = options.userGroupsForSettings;
-        this.showOrgUnitsOnGeneration = options.showOrgUnitsOnGeneration;
+        this.orgUnitSelection = options.orgUnitSelection;
     }
 
     static async build(api: D2Api): Promise<Settings> {
@@ -92,24 +86,24 @@ export default class Settings {
             models: { dataSet: true, program: true },
             userGroupsForGeneration: [],
             userGroupsForSettings: [],
-            showOrgUnitsOnGeneration: false,
+            orgUnitSelection: "both",
             ...defaultSettings,
         };
 
-        const data = await CompositionRoot.attach().settings.read.execute<Partial<PersistedData>>(
+        const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
             Settings.constantCode,
             defaultData
         );
 
         const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
             userGroups,
-            data.userGroupForGeneration,
+            data.userGroupsForGeneration,
             defaultData.userGroupsForGeneration
         );
 
         const userGroupsForSettings = getUserGroupsWithSettingEnabled(
             userGroups,
-            data.userGroupForSettings,
+            data.userGroupsForSettings,
             defaultData.userGroupsForSettings
         );
 
@@ -117,11 +111,10 @@ export default class Settings {
             api,
             currentUser,
             userGroups: userGroups,
-            models: data.models || defaultData.models,
+            models: data.models ?? defaultData.models,
             userGroupsForGeneration,
             userGroupsForSettings,
-            showOrgUnitsOnGeneration:
-                data.showOrgUnitsOnGeneration || defaultData.showOrgUnitsOnGeneration,
+            orgUnitSelection: data.orgUnitSelection ?? defaultData.orgUnitSelection,
         });
     }
 
@@ -133,24 +126,19 @@ export default class Settings {
     }
 
     async save(): Promise<OkOrError> {
-        const {
-            models,
-            userGroupsForGeneration,
-            userGroupsForSettings,
-            showOrgUnitsOnGeneration,
-        } = this;
+        const { models, userGroupsForGeneration, userGroupsForSettings, orgUnitSelection } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const data: PersistedData = {
+        const data: AppSettings = {
             models,
-            userGroupForGeneration: userGroupsForGeneration.map(ug => ug.id),
-            userGroupForSettings: userGroupsForSettings.map(ug => ug.id),
-            showOrgUnitsOnGeneration,
+            userGroupsForGeneration: userGroupsForGeneration.map(ug => ug.id),
+            userGroupsForSettings: userGroupsForSettings.map(ug => ug.id),
+            orgUnitSelection,
         };
 
         try {
-            await CompositionRoot.attach().settings.write.execute<PersistedData>(
+            await CompositionRoot.attach().settings.write.execute<AppSettings>(
                 Settings.constantCode,
                 data
             );

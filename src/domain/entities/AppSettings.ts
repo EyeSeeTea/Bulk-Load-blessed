@@ -2,12 +2,11 @@ const models = ["dataSet", "program"] as const;
 
 type GetArrayInnerType<T extends readonly any[]> = T[number];
 export type Model = GetArrayInnerType<typeof models>;
-
-type Models = Record<Model, boolean>;
+export type OrgUnitSelectionSetting = "generation" | "import" | "both";
 
 export interface AppSettings {
-    models: Models;
+    models: Record<Model, boolean>;
     userGroupsForGeneration: string[];
     userGroupsForSettings: string[];
-    showOrgUnitsOnGeneration: boolean;
+    orgUnitSelection: OrgUnitSelectionSetting;
 }

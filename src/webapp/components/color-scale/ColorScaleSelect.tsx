@@ -57,15 +57,18 @@ export const ColorScaleSelect = ({
                     anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
                     onClose={hideColorScales}
                 >
-                    {_.keys(availablePalettes).map((scale, index) => (
-                        <div key={index} className={classes.scaleItem}>
-                            <ColorScale
-                                colors={availablePalettes[scale][selectedColors.length] ?? []}
-                                onClick={() => onColorScaleSelect(scale)}
-                                width={width}
-                            />
-                        </div>
-                    ))}
+                    {_.keys(availablePalettes).map((scale, index) => {
+                        const colors = availablePalettes[scale][selectedColors.length];
+                        return colors ? (
+                            <div key={index} className={classes.scaleItem}>
+                                <ColorScale
+                                    colors={colors}
+                                    onClick={() => onColorScaleSelect(scale)}
+                                    width={width}
+                                />
+                            </div>
+                        ) : null;
+                    })}
                 </Popover>
             )}
         </React.Fragment>

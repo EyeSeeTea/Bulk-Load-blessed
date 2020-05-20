@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-15T10:37:55.061Z\n"
+"POT-Creation-Date: 2020-05-20T16:40:23.687Z\n"
 "PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -80,7 +80,7 @@ msgstr ""
 msgid "Visibility"
 msgstr ""
 
-msgid "Show Organisation Units On Template Generation"
+msgid "Organisation Units visibility"
 msgstr ""
 
 msgid "User groups for Template Generation"
@@ -89,13 +89,19 @@ msgstr ""
 msgid "User groups with access to Settings"
 msgstr ""
 
+msgid "Select Organisation Units on template generation"
+msgstr ""
+
+msgid "Select Organisation Units on template import"
+msgstr ""
+
+msgid "Select Organisation Units on template generation and import"
+msgstr ""
+
 msgid "Data Set"
 msgstr ""
 
 msgid "Program"
-msgstr ""
-
-msgid "Custom"
 msgstr ""
 
 msgid "elements"
@@ -122,7 +128,10 @@ msgstr ""
 msgid "End date"
 msgstr ""
 
-msgid "No capture organisations units"
+msgid "Select available Organisation Units"
+msgstr ""
+
+msgid "User does not have any capture organisations units"
 msgstr ""
 
 msgid "Populate template with instance data"
@@ -146,16 +155,10 @@ msgstr ""
 msgid "Sections"
 msgstr ""
 
-msgid "Header text"
-msgstr ""
-
 msgid "Title text"
 msgstr ""
 
 msgid "Subtitle text"
-msgstr ""
-
-msgid "Footer text"
 msgstr ""
 
 msgid "Logo"
@@ -182,12 +185,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Are you sure you want to remove selected themes"
-msgstr ""
-
-msgid "Header"
-msgstr ""
-
-msgid "Footer"
 msgstr ""
 
 msgid "Title"
@@ -240,10 +237,10 @@ msgstr ""
 msgid "Cannot read file"
 msgstr ""
 
-msgid "Select a organisation units to import data"
+msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr ""
 
-msgid "Selected organisation unit is not associated with the dataset"
+msgid "Select at least one organisation unit to import data"
 msgstr ""
 
 msgid "Imported"
@@ -286,6 +283,9 @@ msgid "Create"
 msgstr ""
 
 msgid "data values"
+msgstr ""
+
+msgid "Select import Organisation Unit"
 msgstr ""
 
 msgid "No capture org unit match element org units"
