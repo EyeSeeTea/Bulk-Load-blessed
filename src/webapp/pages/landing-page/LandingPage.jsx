@@ -31,7 +31,7 @@ export default function LandingPage() {
         orgUnitTreeSelected2: [],
         orgUnitTreeRootIds: [],
         overwriteOrgUnits: false,
-        importOrgUnitIds: undefined,
+        importOrgUnitIds: [],
         importObject: undefined,
         importDataSheet: undefined,
         importMessages: [],
@@ -102,7 +102,7 @@ export default function LandingPage() {
             importDataSheet: undefined,
             importObject: undefined,
             importDataValues: [],
-            importOrgUnitIds: undefined,
+            importOrgUnitIds: [],
             importMessages: [],
         }));
 
@@ -149,7 +149,7 @@ export default function LandingPage() {
                 importDataSheet: file,
                 importObject: undefined,
                 importDataValues: [],
-                importOrgUnitIds: undefined,
+                importOrgUnitIds: [],
                 importMessages: [],
             }));
         }
@@ -434,24 +434,21 @@ export default function LandingPage() {
                     </div>
                 )}
 
-                {state.importObject &&
-                    state.overwriteOrgUnits &&
-                    (state.importOrgUnitIds && state.importOrgUnitIds.length > 0 ? (
+                {state.overwriteOrgUnits &&
+                    (state.orgUnitTreeRootIds.length > 0 ? (
                         <OrgUnitsSelector
-                            key={state.importOrgUnitIds.join(".")}
                             api={api}
                             onChange={handleOrgUnitTreeClick2}
                             selected={state.orgUnitTreeSelected2}
+                            rootIds={state.orgUnitTreeRootIds}
+                            selectableIds={state.importOrgUnitIds}
+                            fullWidth={false}
+                            height={220}
                             controls={{
                                 filterByLevel: false,
                                 filterByGroup: false,
                                 selectAll: false,
                             }}
-                            rootIds={state.orgUnitTreeRootIds}
-                            selectableIds={state.importOrgUnitIds}
-                            fullWidth={false}
-                            height={220}
-                            hideMemberCount={true}
                         />
                     ) : (
                         i18n.t("No capture org unit match element org units")
