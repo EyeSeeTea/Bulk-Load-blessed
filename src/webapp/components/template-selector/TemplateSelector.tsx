@@ -94,7 +94,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     }, [state]);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getRoots.execute().then(setOrgUnitTreeRootIds);
+        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
     }, []);
 
     useEffect(() => {

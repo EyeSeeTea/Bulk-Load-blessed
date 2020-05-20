@@ -63,7 +63,7 @@ export class CompositionRoot {
 
     public get orgUnits() {
         return {
-            getRoots: new GetOrgUnitRootsUseCase(this.instance),
+            getUserRoots: new GetOrgUnitRootsUseCase(this.instance),
             getRootsByForm: new GetFormOrgUnitRootsUseCase(this.instance),
         };
     }
