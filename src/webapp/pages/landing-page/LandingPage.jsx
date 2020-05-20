@@ -176,19 +176,9 @@ export default function LandingPage() {
 
             const useBuilderOrgUnits =
                 settings.orgUnitSelection !== "generation" && state.overwriteOrgUnits;
-            if (useBuilderOrgUnits) {
-                const orgUnit = result.organisationUnits[0];
-                if (!orgUnit) {
-                    throw new Error(i18n.t("Select at least one organisation unit to import data"));
-                }
 
-                /**const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
-
-                if (_.isEmpty(dataSetsForElement)) {
-                    throw new Error(
-                        i18n.t("Selected organisation unit is not associated with the dataset")
-                    );
-                }**/
+            if (useBuilderOrgUnits && result.organisationUnits.length === 0) {
+                throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
             const {

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-20T08:43:26.028Z\n"
+"POT-Creation-Date: 2020-05-20T11:09:11.652Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -223,9 +223,6 @@ msgstr ""
 msgid "Select at least one organisation unit to import data"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"
 
-msgid "Selected organisation unit is not associated with the dataset"
-msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
-
 msgid "Imported"
 msgstr "Importados"
 
@@ -289,6 +286,9 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
+
+#~ msgid "Selected organisation unit is not associated with the dataset"
+#~ msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
 
 #~ msgid "Show Organisation Units On Template Generation"
 #~ msgstr "Mostrar unidades organizativas en la plantilla de generación"
