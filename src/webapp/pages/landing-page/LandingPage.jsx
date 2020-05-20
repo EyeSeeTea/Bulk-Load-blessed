@@ -9,7 +9,6 @@ import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import ImportPreviewDialog from "../../components/import-preview/ImportPreviewDialog";
 import SettingsComponent from "../../components/settings/SettingsDialog";
 import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
