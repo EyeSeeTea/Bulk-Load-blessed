@@ -40,19 +40,20 @@ SheetBuilder.prototype.fillLegendSheet = function () {
     legendSheet.cell(1, 5, 2, 5, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(value => {
-        const name = value.formName ? value.formName : value.name;
-        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        const options =
-            optionSet && optionSet.options
-                ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
-                : null;
+    _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
+        const { name, description } = this.translate(item);
+        const optionSet = metadata.get(item.optionSet?.id);
+        const { name: optionSetName } = this.translate(optionSet);
+        const options = optionSet?.options
+            ?.map(({ id }) => metadata.get(id))
+            .map(option => this.translate(option).name)
+            .join(", ");
 
-        legendSheet.cell(rowId, 1).string(name ? name : "");
-        legendSheet.cell(rowId, 2).string(value.description ? value.description : "");
-        legendSheet.cell(rowId, 3).string(value.valueType ? value.valueType : "");
-        legendSheet.cell(rowId, 4).string(optionSet ? optionSet.name : "");
-        legendSheet.cell(rowId, 5).string(options ? options : "");
+        legendSheet.cell(rowId, 1).string(name ?? "");
+        legendSheet.cell(rowId, 2).string(description ?? "");
+        legendSheet.cell(rowId, 3).string(item?.valueType ?? "");
+        legendSheet.cell(rowId, 4).string(optionSetName ?? "");
+        legendSheet.cell(rowId, 5).string(options ?? "");
 
         rowId++;
     });
@@ -67,20 +68,14 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         startYear,
         endYear,
     } = this.builder;
-    const title = element.displayName;
-
     const validationSheet = this.validationSheet;
 
     // Freeze and format column titles
     validationSheet.row(2).freeze();
 
     // Add column titles
-    let rowId = 1;
+    let rowId = 2;
     let columnId = 1;
-    validationSheet.cell(rowId, columnId, rowId, 3, true).string(title).style(baseStyle);
-
-    rowId = 2;
-    columnId = 1;
     validationSheet.cell(rowId++, columnId).string("Organisation Units");
     _.forEach(organisationUnits, orgUnit => {
         validationSheet.cell(rowId++, columnId).formula("_" + orgUnit.id);
@@ -157,6 +152,9 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         "TRUE_ONLY",
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
+
+    // Add program title
+    validationSheet.cell(1, 1, 1, columnId, true).formula(`_${element.id}`).style(baseStyle);
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
@@ -178,25 +176,26 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(1, 6, 2, 6, true).string("Possible Values").style(baseStyle);
 
     let rowId = 3;
-    metadata.forEach(value => {
-        const name = value.formName !== undefined ? value.formName : value.name;
-        const optionSet = value.optionSet ? metadata.get(value.optionSet.id) : null;
-        const options =
-            optionSet && optionSet.options
-                ? optionSet.options.map(option => metadata.get(option.id).name).join(", ")
-                : null;
+    metadata.forEach(item => {
+        const { name } = this.translate(item);
+        const optionSet = metadata.get(item.optionSet?.id);
+        const { name: optionSetName } = this.translate(optionSet);
+        const options = optionSet?.options
+            ?.map(({ id }) => metadata.get(id))
+            .map(option => this.translate(option).name)
+            .join(", ");
 
-        metadataSheet.cell(rowId, 1).string(value.id ? value.id : "");
-        metadataSheet.cell(rowId, 2).string(value.type ? value.type : "");
-        metadataSheet.cell(rowId, 3).string(name ? name : "");
-        metadataSheet.cell(rowId, 4).string(value.valueType ? value.valueType : "");
-        metadataSheet.cell(rowId, 5).string(optionSet ? optionSet.name : "");
-        metadataSheet.cell(rowId, 6).string(options ? options : "");
+        metadataSheet.cell(rowId, 1).string(item.id ?? "");
+        metadataSheet.cell(rowId, 2).string(item.type ?? "");
+        metadataSheet.cell(rowId, 3).string(name ?? "");
+        metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
+        metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
+        metadataSheet.cell(rowId, 6).string(options ?? "");
 
         if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
                 refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + value.id,
+                name: "_" + item.id,
             });
         }
 
@@ -204,13 +203,12 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     });
 
     organisationUnits.forEach(orgUnit => {
+        const { name } = this.translate(orgUnit);
         metadataSheet.cell(rowId, 1).string(orgUnit.id !== undefined ? orgUnit.id : "");
         metadataSheet.cell(rowId, 2).string("organisationUnit");
-        metadataSheet
-            .cell(rowId, 3)
-            .string(orgUnit.displayName !== undefined ? orgUnit.displayName : "");
+        metadataSheet.cell(rowId, 3).string(name ?? "");
 
-        if (orgUnit.displayName !== undefined)
+        if (name !== undefined)
             this.workbook.definedNameCollection.addDefinedName({
                 refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
                 name: "_" + orgUnit.id,
@@ -295,15 +293,24 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         );
     }
 
+    const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
+    const optionsTitle = attributeCode !== "default" ? `_${element.categoryCombo.id}` : "Options";
+
     createColumn(
         this.workbook,
         dataEntrySheet,
         itemRow,
         columnId++,
-        "Options",
+        optionsTitle,
         null,
         this.validations.get("options")
     );
+
+    // Add element title
+    dataEntrySheet
+        .cell(sectionRow, 1, sectionRow, columnId - 1, true)
+        .formula(`_${element.id}`)
+        .style(baseStyle);
 
     if (element.type === "dataSet") {
         const categoryOptionCombos = [];
@@ -323,6 +330,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         categoryCombo: { id: categoryComboId },
                     })
                     .forEach(dataElement => {
+                        const { name, description } = this.translate(dataElement);
                         const firstColumnId = columnId;
 
                         const sectionCategoryOptionCombos = sections[categoryComboId];
@@ -340,22 +348,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 this.validations.get(validation)
                             );
 
-                            if (categoryOptionCombo.description !== undefined) {
-                                dataEntrySheet
-                                    .cell(itemRow, columnId)
-                                    .comment(categoryOptionCombo.description, {
-                                        height: "100pt",
-                                        width: "160pt",
-                                    });
-                            }
-
                             columnId++;
                         });
 
                         if (columnId - 1 === firstColumnId) {
-                            dataEntrySheet
-                                .column(firstColumnId)
-                                .setWidth(dataElement.name.length / 2.5 + 15);
+                            dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
                         }
 
                         dataEntrySheet
@@ -363,10 +360,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                             .formula("_" + dataElement.id)
                             .style(groupStyle(groupId));
 
-                        if (dataElement.description !== undefined) {
+                        if (description !== undefined) {
                             dataEntrySheet
                                 .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                                .comment(dataElement.description, {
+                                .comment(description, {
                                     height: "100pt",
                                     width: "160pt",
                                 });
@@ -390,11 +387,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 programStage.executionDateLabel ?? "Date"
             );
 
-            dataEntrySheet
-                .cell(sectionRow, columnId - 1)
-                .string(programStage.name)
-                .style(baseStyle);
-
             if (programStage.programStageSections.length === 0) {
                 programStage.programStageSections.push({
                     dataElements: programStage.programStageDataElements.map(e => e.dataElement),
@@ -410,6 +402,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
                     const dataElement = metadata.get(dataElementT.id);
+                    const { name, description } = this.translate(dataElement);
+
                     const validation = dataElement.optionSet
                         ? dataElement.optionSet.id
                         : dataElement.valueType;
@@ -422,10 +416,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         groupId,
                         this.validations.get(validation)
                     );
-                    dataEntrySheet.column(columnId).setWidth(dataElement.name.length / 2.5 + 10);
+                    dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
-                    if (dataElement.description !== undefined) {
-                        dataEntrySheet.cell(itemRow, columnId).comment(dataElement.description, {
+                    if (description !== undefined) {
+                        dataEntrySheet.cell(itemRow, columnId).comment(description, {
                             height: "100pt",
                             width: "160pt",
                         });
@@ -455,5 +449,33 @@ SheetBuilder.prototype.toBlob = async function () {
     } catch (error) {
         console.error("Failed building/downloading template");
         throw error;
+    }
+};
+
+SheetBuilder.prototype.translate = function (item) {
+    const { elementMetadata, language } = this.builder;
+    const translations = item?.translations?.filter(({ locale }) => locale === language) ?? [];
+
+    const { value: formName } = translations.find(({ property }) => property === "FORM_NAME") ?? {};
+    const { value: regularName } = translations.find(({ property }) => property === "NAME") ?? {};
+    const { value: shortName } =
+        translations.find(({ property }) => property === "SHORT_NAME") ?? {};
+
+    const defaultName = item?.displayName ?? item?.formName ?? item?.name;
+    const name = formName ?? regularName ?? shortName ?? defaultName;
+
+    const { value: description = item?.description } =
+        translations.find(({ property }) => property === "DESCRIPTION") ?? {};
+
+    if (item?.type === "categoryOptionCombo" && name === defaultName) {
+        const options = item?.categoryOptions?.map(({ id }) => {
+            const element = elementMetadata.get(id);
+            const { name } = this.translate(element);
+            return name;
+        });
+
+        return { name: options.join(", "), description };
+    } else {
+        return { name, description };
     }
 };

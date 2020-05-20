@@ -16,6 +16,7 @@ import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomT
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
+import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListTemplatesUseCase } from "./domain/usecases/ListTemplatesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
@@ -94,6 +95,12 @@ export class CompositionRoot {
             getDefault: new GetDefaultSettingsUseCase(this.config),
             read: new ReadSettingsUseCase(this.storage),
             write: new WriteSettingsUseCase(this.storage),
+        };
+    }
+
+    public get languages() {
+        return {
+            list: new ListLanguagesUseCase(this.instance),
         };
     }
 }

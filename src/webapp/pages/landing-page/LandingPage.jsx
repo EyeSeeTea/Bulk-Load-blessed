@@ -70,7 +70,16 @@ export default function LandingPage() {
 
     const handleTemplateDownloadClick = async () => {
         if (!state.template) return;
-        const { type, id, theme, startYear, endYear, orgUnits, populate } = state.template;
+        const {
+            type,
+            id,
+            theme,
+            startYear,
+            endYear,
+            orgUnits,
+            language,
+            populate,
+        } = state.template;
         loading.show(true);
 
         if (type === "custom") {
@@ -88,6 +97,7 @@ export default function LandingPage() {
                 ...result,
                 startYear,
                 endYear,
+                language,
             });
 
             const name = element.displayName ?? element.name;

@@ -8,7 +8,7 @@ export async function getElement(d2, type, id) {
     const {
         data,
     } = await axios.get(
-        `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value]categoryCombo,dataSetElements,sections,periodType,programStages`,
+        `${baseUrl}/${endpoint}/${id}?fields=id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value],categoryCombo,dataSetElements,sections,periodType,programStages`,
         { withCredentials: true }
     );
 
@@ -39,7 +39,7 @@ export function getElementMetadata(builder) {
             API_BASE_URL + "/" + endpoint + "/" + builder.element.id + "/metadata.json";
         const API_ORG_UNITS =
             API_BASE_URL +
-            "/metadata.json?fields=id,displayName,dataSets&filter=id:in:[" +
+            "/metadata.json?fields=id,displayName,translations&filter=id:in:[" +
             builder.organisationUnits.toString() +
             "]";
         getJSON(builder.d2, API_ELEMENT)
