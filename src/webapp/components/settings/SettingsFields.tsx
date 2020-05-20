@@ -100,26 +100,27 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                     />
                 )}
                 <div className={classes.fullWidth}>
-                <Select
-                    placeholder={i18n.t("Organisation Units visibility")}
-                    onChange={_.noop}
-                    options={[
-                        {
-                            value: "1",
-                            label: i18n.t("Filter Organisation Units during template generation"),
-                        },
-                        {
-                            value: "2",
-                            label: i18n.t("Overwrite Organisation Units during template import"),
-                        },
-                        {
-                            value: "3",
-                            label: i18n.t(
-                                "Show filter and overwrite menus during template generation and import"
-                            ),
-                        },
-                    ]}
-                    /></div>
+                    <Select
+                        placeholder={i18n.t("Organisation Units visibility")}
+                        onChange={_.noop}
+                        options={[
+                            {
+                                value: "1",
+                                label: i18n.t("Select Organisation Units on template generation"),
+                            },
+                            {
+                                value: "2",
+                                label: i18n.t("Select Organisation Units on template import"),
+                            },
+                            {
+                                value: "3",
+                                label: i18n.t(
+                                    "Select Organisation Units on template generation and import"
+                                ),
+                            },
+                        ]}
+                    />
+                </div>
             </FormGroup>
 
             <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>

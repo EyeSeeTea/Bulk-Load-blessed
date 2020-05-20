@@ -273,7 +273,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     control={
                         <Checkbox checked={filterOrgUnits} onChange={onFilterOrgUnitsChange} />
                     }
-                    label={i18n.t("Filter available Organisation Units")}
+                    label={i18n.t("Select available Organisation Units")}
                 />
             </div>
 

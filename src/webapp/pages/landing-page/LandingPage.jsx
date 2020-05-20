@@ -436,7 +436,7 @@ export default function LandingPage() {
                                     onChange={onOverwriteOrgUnitsChange}
                                 />
                             }
-                            label={i18n.t("Overwrite import Organisation Units")}
+                            label={i18n.t("Select import Organisation Unit")}
                         />
                     </div>
                 )}
