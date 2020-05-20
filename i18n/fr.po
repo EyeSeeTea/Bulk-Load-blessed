@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-20T16:40:23.687Z\n"
+"POT-Creation-Date: 2020-05-20T17:24:31.933Z\n"
 "PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,48 +24,6 @@ msgid "Field {{field}} cannot be blank"
 msgstr ""
 
 msgid "You need to select at least one {{element}}"
-msgstr ""
-
-msgid "Close"
-msgstr ""
-
-msgid "Import data"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "Data Element"
-msgstr ""
-
-msgid "Category Option"
-msgstr ""
-
-msgid "Import Value"
-msgstr ""
-
-msgid "Current Value"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Ignored"
-msgstr ""
-
-msgid "Created"
-msgstr ""
-
-msgid "Updated"
-msgstr ""
-
-msgid "Toggle ignore data value"
-msgstr ""
-
-msgid "Include data value"
-msgstr ""
-
-msgid "Ignore data value"
 msgstr ""
 
 msgid "Settings saved"
@@ -176,6 +134,9 @@ msgstr ""
 msgid "Themes"
 msgstr ""
 
+msgid "Close"
+msgstr ""
+
 msgid "An error ocurred while saving theme"
 msgstr ""
 
@@ -185,6 +146,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Are you sure you want to remove selected themes"
+msgstr ""
+
+msgid "Name"
 msgstr ""
 
 msgid "Title"
@@ -246,6 +210,12 @@ msgstr ""
 msgid "Imported"
 msgstr ""
 
+msgid "Updated"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
 msgid "Deleted"
 msgstr ""
 
@@ -289,4 +259,7 @@ msgid "Select import Organisation Unit"
 msgstr ""
 
 msgid "No capture org unit match element org units"
+msgstr ""
+
+msgid "Import data"
 msgstr ""
