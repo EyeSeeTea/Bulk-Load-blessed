@@ -51,7 +51,7 @@ export default function LandingPage() {
 
     useEffect(() => {
         CompositionRoot.attach()
-            .orgUnits.getRoots.execute()
+            .orgUnits.getUserRoots.execute()
             .then(orgUnitTreeRootIds => {
                 setState(state => ({ ...state, orgUnitTreeRootIds }));
             });

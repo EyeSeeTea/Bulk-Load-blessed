@@ -1,11 +1,15 @@
-import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "../entities/DataForm";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 
 export class GetFormOrgUnitRootsUseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute(type: DataFormType, id: string): Promise<string[]> {
-        const roots = await this.instance.getDataFormOrgUnits(type, id);
-        return roots.map(({ id }) => id);
+        const formOrgUnits = await this.instance.getDataFormOrgUnits(type, id);
+        const userOrgUnits = await this.instance.getUserOrgUnits();
+
+        return formOrgUnits
+            .filter(({ path }) => userOrgUnits.some(({ id }) => path.includes(id)))
+            .map(({ id }) => id);
     }
 }
