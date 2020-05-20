@@ -57,9 +57,9 @@ export default function LandingPage() {
             });
     }, []);
 
+    const showOrgUnitsOnGeneration = settings?.orgUnitSelection !== "import";
     const isImportEnabled =
-        state.importObject &&
-        (settings.showOrgUnitsOnGeneration || !_.isEmpty(state.orgUnitTreeSelected2));
+        state.importObject && (showOrgUnitsOnGeneration || !_.isEmpty(state.orgUnitTreeSelected2));
 
     const handleOrgUnitTreeClick2 = orgUnitPaths => {
         setState(state => ({
@@ -91,8 +91,8 @@ export default function LandingPage() {
                 type,
                 id,
                 theme,
-                orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
-                populate: settings.showOrgUnitsOnGeneration && populate,
+                orgUnits: showOrgUnitsOnGeneration ? orgUnits : [],
+                populate: showOrgUnitsOnGeneration && populate,
                 startDate,
                 endDate,
                 ...rest,
@@ -174,16 +174,21 @@ export default function LandingPage() {
                 organisationUnits: orgUnits,
             });
 
-            if (!settings.showOrgUnitsOnGeneration) {
+            const useBuilderOrgUnits =
+                settings.orgUnitSelection !== "generation" && state.overwriteOrgUnits;
+            if (useBuilderOrgUnits) {
                 const orgUnit = result.organisationUnits[0];
-                if (!orgUnit) throw new Error(i18n.t("Select a organisation units to import data"));
-                const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
+                if (!orgUnit) {
+                    throw new Error(i18n.t("Select at least one organisation unit to import data"));
+                }
+
+                /**const dataSetsForElement = orgUnit.dataSets.filter(e => e.id === result.element.id);
 
                 if (_.isEmpty(dataSetsForElement)) {
                     throw new Error(
                         i18n.t("Selected organisation unit is not associated with the dataset")
                     );
-                }
+                }**/
             }
 
             const {
@@ -196,7 +201,7 @@ export default function LandingPage() {
                 d2,
                 api,
                 file: state.importDataSheet,
-                useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
+                useBuilderOrgUnits,
                 rowOffset,
                 colOffset,
             });
@@ -426,7 +431,7 @@ export default function LandingPage() {
                     </div>
                 )}
 
-                {state.importObject && (
+                {settings.orgUnitSelection !== "generation" && (
                     <div>
                         <FormControlLabel
                             style={{ marginTop: "1em" }}

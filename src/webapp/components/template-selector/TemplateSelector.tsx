@@ -52,7 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
-    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(true);
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
@@ -187,8 +187,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, language: value }));
     };
 
-    const showOrgUnitsSelector = settings.orgUnitSelection !== "import" && filterOrgUnits;
-
     return (
         <React.Fragment>
             <div className={classes.row}>
@@ -267,39 +265,46 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             </div>
 
-            <div>
-                <FormControlLabel
-                    className={classes.checkbox}
-                    control={
-                        <Checkbox checked={filterOrgUnits} onChange={onFilterOrgUnitsChange} />
-                    }
-                    label={i18n.t("Select available Organisation Units")}
-                />
-            </div>
-
-            {showOrgUnitsSelector &&
-                (!_.isEmpty(orgUnitTreeRootIds) ? (
-                    <div className={classes.orgUnitSelector}>
-                        <OrgUnitsSelector
-                            api={api}
-                            rootIds={orgUnitTreeRootIds}
-                            selectableIds={orgUnitTreeFilter}
-                            selected={selectedOrgUnits}
-                            onChange={onOrgUnitChange}
-                            fullWidth={false}
-                            height={250}
-                            controls={{
-                                filterByLevel: true,
-                                filterByGroup: true,
-                                selectAll: true,
-                            }}
+            {settings.orgUnitSelection !== "import" && (
+                <React.Fragment>
+                    <div>
+                        <FormControlLabel
+                            className={classes.checkbox}
+                            control={
+                                <Checkbox
+                                    checked={filterOrgUnits}
+                                    onChange={onFilterOrgUnitsChange}
+                                />
+                            }
+                            label={i18n.t("Select available Organisation Units")}
                         />
                     </div>
-                ) : (
-                    <div className={classes.orgUnitError}>
-                        {i18n.t("User does not have any capture organisations units")}
-                    </div>
-                ))}
+
+                    {filterOrgUnits &&
+                        (!_.isEmpty(orgUnitTreeRootIds) ? (
+                            <div className={classes.orgUnitSelector}>
+                                <OrgUnitsSelector
+                                    api={api}
+                                    rootIds={orgUnitTreeRootIds}
+                                    selectableIds={orgUnitTreeFilter}
+                                    selected={selectedOrgUnits}
+                                    onChange={onOrgUnitChange}
+                                    fullWidth={false}
+                                    height={250}
+                                    controls={{
+                                        filterByLevel: true,
+                                        filterByGroup: true,
+                                        selectAll: true,
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <div className={classes.orgUnitError}>
+                                {i18n.t("User does not have any capture organisations units")}
+                            </div>
+                        ))}
+                </React.Fragment>
+            )}
 
             {userHasReadAccess && (
                 <div>
