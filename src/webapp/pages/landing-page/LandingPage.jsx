@@ -58,8 +58,6 @@ export default function LandingPage() {
     }, []);
 
     const showOrgUnitsOnGeneration = settings?.orgUnitSelection !== "import";
-    const isImportEnabled =
-        state.importObject && (showOrgUnitsOnGeneration || !_.isEmpty(state.orgUnitTreeSelected2));
 
     const handleOrgUnitTreeClick2 = orgUnitPaths => {
         setState(state => ({
@@ -487,7 +485,7 @@ export default function LandingPage() {
                         variant="contained"
                         color="primary"
                         onClick={handleDataImportClick}
-                        disabled={!isImportEnabled}
+                        disabled={!state.importObject}
                     >
                         {i18n.t("Import data")}
                     </Button>
