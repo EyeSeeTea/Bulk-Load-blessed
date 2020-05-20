@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-20T06:34:22.903Z\n"
+"POT-Creation-Date: 2020-05-20T07:22:37.618Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,12 +39,15 @@ msgstr "Modelos"
 msgid "Visibility"
 msgstr "Visibilidad"
 
-msgid "Show Organisation Units On Template Generation"
-msgstr "Mostrar unidades organizativas en la plantilla de generación"
-
 #, fuzzy
 msgid "Organisation Units visibility"
 msgstr "No se han encontrado unidades organizativas"
+
+msgid "User groups for Template Generation"
+msgstr "Grupos de usuario con acceso a la plantilla de generación"
+
+msgid "User groups with access to Settings"
+msgstr "Grupos de usuario con acceso a la configuración"
 
 #, fuzzy
 msgid "Select Organisation Units on template generation"
@@ -57,12 +60,6 @@ msgstr "Mostrar unidades organizativas en la plantilla de generación"
 #, fuzzy
 msgid "Select Organisation Units on template generation and import"
 msgstr "Mostrar unidades organizativas en la plantilla de generación"
-
-msgid "User groups for Template Generation"
-msgstr "Grupos de usuario con acceso a la plantilla de generación"
-
-msgid "User groups with access to Settings"
-msgstr "Grupos de usuario con acceso a la configuración"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -291,6 +288,9 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
+
+#~ msgid "Show Organisation Units On Template Generation"
+#~ msgstr "Mostrar unidades organizativas en la plantilla de generación"
 
 #, fuzzy
 #~ msgid "Organisation unit group"

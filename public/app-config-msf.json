@@ -12,6 +12,7 @@
         },
         "userGroupsForGeneration": [
             "HMIS Officers"
-        ]
+        ],
+        "orgUnitSelection": "generation"
     }
 }

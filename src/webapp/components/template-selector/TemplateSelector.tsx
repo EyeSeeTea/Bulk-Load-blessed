@@ -187,7 +187,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, language: value }));
     };
 
-    const showOrgUnitsSelector = settings.showOrgUnitsOnGeneration && filterOrgUnits;
+    const showOrgUnitsSelector = settings.orgUnitSelection !== "import" && filterOrgUnits;
 
     return (
         <React.Fragment>

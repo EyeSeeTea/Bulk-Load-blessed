@@ -1,19 +1,17 @@
 import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
 import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
-import _ from "lodash";
 import React from "react";
+import { OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import Settings, { Model } from "../../logic/settings";
-import { Select } from "../select/Select";
+import { Select, SelectOption } from "../select/Select";
 
 export interface SettingsFieldsProps {
     settings: Settings;
     onChange: (settings: Settings) => void;
 }
-
-type BooleanField = "showOrgUnitsOnGeneration";
 
 export default function SettingsFields(props: SettingsFieldsProps) {
     const { d2 } = useAppContext();
@@ -50,12 +48,9 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         [settings, onChange]
     );
 
-    const updateBoolean = React.useCallback(
-        (field: BooleanField) => {
-            return (ev: React.ChangeEvent<HTMLInputElement>) => {
-                const newSettings = settings.update({ [field]: ev.target.checked });
-                onChange(newSettings);
-            };
+    const setOrgUnitSelection = React.useCallback(
+        ({ value }: SelectOption) => {
+            onChange(settings.update({ orgUnitSelection: value as OrgUnitSelectionSetting }));
         },
         [settings, onChange]
     );
@@ -87,38 +82,12 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FieldTitle>{i18n.t("Visibility")}</FieldTitle>
 
             <FormGroup className={classes.content} row={true}>
-                {false && (
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                className={classes.checkbox}
-                                checked={settings.showOrgUnitsOnGeneration}
-                                onChange={updateBoolean("showOrgUnitsOnGeneration")}
-                            />
-                        }
-                        label={i18n.t("Show Organisation Units On Template Generation")}
-                    />
-                )}
                 <div className={classes.fullWidth}>
                     <Select
                         placeholder={i18n.t("Organisation Units visibility")}
-                        onChange={_.noop}
-                        options={[
-                            {
-                                value: "1",
-                                label: i18n.t("Select Organisation Units on template generation"),
-                            },
-                            {
-                                value: "2",
-                                label: i18n.t("Select Organisation Units on template import"),
-                            },
-                            {
-                                value: "3",
-                                label: i18n.t(
-                                    "Select Organisation Units on template generation and import"
-                                ),
-                            },
-                        ]}
+                        onChange={setOrgUnitSelection}
+                        options={orgUnitSelectionOptions}
+                        value={settings.orgUnitSelection}
                     />
                 </div>
             </FormGroup>
@@ -167,3 +136,18 @@ const useStyles = makeStyles({
 function FieldTitle(props: { children: React.ReactNode }) {
     return <h3>{props.children}</h3>;
 }
+
+const orgUnitSelectionOptions: { value: OrgUnitSelectionSetting; label: string }[] = [
+    {
+        value: "generation",
+        label: i18n.t("Select Organisation Units on template generation"),
+    },
+    {
+        value: "import",
+        label: i18n.t("Select Organisation Units on template import"),
+    },
+    {
+        value: "both",
+        label: i18n.t("Select Organisation Units on template generation and import"),
+    },
+];
