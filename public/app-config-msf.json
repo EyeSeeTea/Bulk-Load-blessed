@@ -13,6 +13,6 @@
         "userGroupsForGeneration": [
             "HMIS Officers"
         ],
-        "orgUnitSelection": "generation"
+        "orgUnitSelection": "import"
     }
 }
