@@ -263,7 +263,12 @@ export default function LandingPage() {
 
     const onSettingsChange = useCallback(settings => {
         setSettings(settings);
-        setState(state => ({ ...state, importObject: undefined }));
+        setState(state => ({
+            ...state,
+            importObject: undefined,
+            orgUnitTreeSelected2: [],
+            overwriteOrgUnits: false,
+        }));
     }, []);
 
     const onThemesChange = useCallback(themes => {
