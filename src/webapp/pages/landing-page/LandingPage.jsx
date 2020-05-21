@@ -86,7 +86,7 @@ export default function LandingPage() {
         } = state.template;
 
         if (type === "dataSet" && (!startDate || !endDate)) {
-            snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
+            snackbar.info(i18n.t("You need to select start and end dates"));
             return;
         }
 
