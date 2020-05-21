@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-21T06:22:37.476Z\n"
-"PO-Revision-Date: 2020-05-21T06:22:37.476Z\n"
+"POT-Creation-Date: 2020-05-21T07:15:28.660Z\n"
+"PO-Revision-Date: 2020-05-21T07:15:28.660Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -207,6 +207,22 @@ msgstr ""
 msgid "Select at least one organisation unit to import data"
 msgstr ""
 
+msgid "Invalid organisation units found"
+msgstr ""
+
+msgid ""
+"There are {{number}} data values with an invalid organisation unit that "
+"will be ignored during import.\n"
+"You can still download them and import them back once the organisation unit "
+"is created or assigned to this template."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Download data values with invalid organisation units"
+msgstr ""
+
 msgid "Existing data values"
 msgstr ""
 
@@ -217,9 +233,6 @@ msgid ""
 msgstr ""
 
 msgid "Proceed"
-msgstr ""
-
-msgid "Cancel"
 msgstr ""
 
 msgid "Import only new data values"

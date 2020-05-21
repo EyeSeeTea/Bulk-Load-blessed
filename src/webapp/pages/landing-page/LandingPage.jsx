@@ -2,6 +2,7 @@ import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -24,7 +25,7 @@ export default function LandingPage() {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const { d2, api } = useAppContext();
-    const [ModalComponent, updateModal] = useModal();
+    const [ModalComponent, updateModal, closeModal] = useModal();
 
     const [settings, setSettings] = useState();
     const [themes, setThemes] = useState();
@@ -181,6 +182,7 @@ export default function LandingPage() {
             const {
                 rowOffset,
                 colOffset,
+                orgUnits,
             } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
 
             const data = await sheetImport.readSheet({
@@ -193,7 +195,36 @@ export default function LandingPage() {
                 colOffset,
             });
 
-            await checkExistingData(data);
+            const removedDataValues = _.remove(
+                data.dataValues,
+                ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
+            );
+
+            if (removedDataValues.length === 0) {
+                await checkExistingData(data);
+            } else {
+                updateModal({
+                    title: i18n.t("Invalid organisation units found"),
+                    description: i18n.t(
+                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and import them back once the organisation unit is created or assigned to this template.",
+                        { number: removedDataValues.length }
+                    ),
+                    onCancel: () => {
+                        closeModal();
+                    },
+                    onSave: () => {
+                        checkExistingData(data);
+                        closeModal();
+                    },
+                    onInfoAction: () => {
+                        downloadInvalidOrganisations(removedDataValues);
+                    },
+                    cancelText: i18n.t("Cancel"),
+                    saveText: i18n.t("Ok"),
+                    infoActionText: i18n.t("Download data values with invalid organisation units"),
+                    autoClose: false,
+                });
+            }
         } catch (reason) {
             console.error(reason);
             snackbar.error(reason.message || reason.toString());
@@ -202,10 +233,17 @@ export default function LandingPage() {
         loading.show(false);
     };
 
+    const downloadInvalidOrganisations = dataValues => {
+        const json = JSON.stringify({ dataValues }, null, 4);
+        const blob = new Blob([json], { type: "application/json" });
+        const date = moment().format("YYYYMMDDHHmm");
+        saveAs(blob, `invalid-organisations-${date}.json`);
+    };
+
     const checkExistingData = async data => {
         const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
 
-        if (_.isEmpty(dataValues)) {
+        if (dataValues.length === 0) {
             await performImport({ data, dataValues });
         } else {
             updateModal({
@@ -314,7 +352,7 @@ export default function LandingPage() {
                 </React.Fragment>
             )}
 
-            <ModalComponent />
+            <ModalComponent maxWidth={"xl"} />
 
             <Paper
                 style={{
