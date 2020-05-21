@@ -1,6 +1,6 @@
 import * as Excel from "excel4node";
 import _ from "lodash";
-import { baseStyle, createColumn, groupStyle, protectedSheet } from "../utils/excel";
+import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
@@ -78,7 +78,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     let columnId = 1;
     validationSheet.cell(rowId++, columnId).string("Organisation Units");
     _.forEach(organisationUnits, orgUnit => {
-        validationSheet.cell(rowId++, columnId).formula("_" + orgUnit.id);
+        validationSheet.cell(rowId++, columnId).formula(`_${orgUnit.id}`);
     });
     this.validations.set(
         "organisationUnits",
@@ -110,7 +110,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
         if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
-            validationSheet.cell(rowId++, columnId).formula("_" + e.id);
+            validationSheet.cell(rowId++, columnId).formula(`_${e.id}`);
         }
     });
     this.validations.set(
@@ -122,9 +122,9 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         rowId = 2;
         columnId++;
 
-        validationSheet.cell(rowId++, columnId).formula("_" + optionSet.id);
+        validationSheet.cell(rowId++, columnId).formula(`_${optionSet.id}`);
         _.forEach(optionSet.options, option => {
-            validationSheet.cell(rowId++, columnId).formula("_" + option.id);
+            validationSheet.cell(rowId++, columnId).formula(`_${option.id}`);
         });
         this.validations.set(
             optionSet.id,
@@ -194,8 +194,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
         if (name !== undefined) {
             this.workbook.definedNameCollection.addDefinedName({
-                refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + item.id,
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${item.id}`,
             });
         }
 
@@ -210,8 +210,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
         if (name !== undefined)
             this.workbook.definedNameCollection.addDefinedName({
-                refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
-                name: "_" + orgUnit.id,
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${orgUnit.id}`,
             });
 
         rowId++;
@@ -221,7 +221,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("Yes");
     this.workbook.definedNameCollection.addDefinedName({
-        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_true",
     });
     rowId++;
@@ -230,7 +230,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("No");
     this.workbook.definedNameCollection.addDefinedName({
-        refFormula: "'Metadata'!$" + Excel.getExcelAlpha(3) + "$" + rowId,
+        refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_false",
     });
     rowId++;
@@ -268,8 +268,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     let columnId = 1;
     let groupId = 0;
 
-    createColumn(
-        this.workbook,
+    this.createColumn(
         dataEntrySheet,
         itemRow,
         columnId++,
@@ -279,11 +278,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
     if (element.type === "program") {
-        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Latitude");
-        createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Longitude");
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
     } else if (element.type === "dataSet") {
-        createColumn(
-            this.workbook,
+        this.createColumn(
             dataEntrySheet,
             itemRow,
             columnId++,
@@ -296,8 +294,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
     const optionsTitle = attributeCode !== "default" ? `_${element.categoryCombo.id}` : "Options";
 
-    createColumn(
-        this.workbook,
+    this.createColumn(
         dataEntrySheet,
         itemRow,
         columnId++,
@@ -338,12 +335,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                             const validation = dataElement.optionSet
                                 ? dataElement.optionSet.id
                                 : dataElement.valueType;
-                            createColumn(
-                                this.workbook,
+                            this.createColumn(
                                 dataEntrySheet,
                                 itemRow,
                                 columnId,
-                                "_" + categoryOptionCombo.id,
+                                `_${categoryOptionCombo.id}`,
                                 groupId,
                                 this.validations.get(validation)
                             );
@@ -357,8 +353,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                         dataEntrySheet
                             .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                            .formula("_" + dataElement.id)
-                            .style(groupStyle(groupId));
+                            .formula(`_${dataElement.id}`)
+                            .style(this.groupStyle(groupId));
 
                         if (description !== undefined) {
                             dataEntrySheet
@@ -377,10 +373,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         _.forEach(element.programStages, programStageT => {
             const programStage = metadata.get(programStageT.id);
 
-            createColumn(this.workbook, dataEntrySheet, itemRow, columnId++, "Event id");
+            this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
 
-            createColumn(
-                this.workbook,
+            this.createColumn(
                 dataEntrySheet,
                 itemRow,
                 columnId++,
@@ -407,12 +402,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     const validation = dataElement.optionSet
                         ? dataElement.optionSet.id
                         : dataElement.valueType;
-                    createColumn(
-                        this.workbook,
+                    this.createColumn(
                         dataEntrySheet,
                         itemRow,
                         columnId,
-                        "_" + dataElement.id,
+                        `_${dataElement.id}`,
                         groupId,
                         this.validations.get(validation)
                     );
@@ -431,8 +425,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 if (firstColumnId < columnId)
                     dataEntrySheet
                         .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                        .formula("_" + programStageSection.id)
-                        .style(groupStyle(groupId));
+                        .formula(`_${programStageSection.id}`)
+                        .style(this.groupStyle(groupId));
 
                 groupId++;
             });
@@ -478,4 +472,90 @@ SheetBuilder.prototype.translate = function (item) {
     } else {
         return { name, description };
     }
+};
+
+SheetBuilder.prototype.createColumn = function (
+    sheet,
+    rowId,
+    columnId,
+    label,
+    groupId = null,
+    validation = null,
+    validationMessage = "Invalid choice was chosen"
+) {
+    sheet.column(columnId).setWidth(20);
+    const cell = sheet.cell(rowId, columnId);
+    cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+
+    if (label.startsWith("_")) cell.formula(label);
+    else cell.string(label);
+
+    if (validation !== null) {
+        const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
+            columnId
+        )}1048576`;
+        sheet.addDataValidation({
+            type: "list",
+            allowBlank: true,
+            error: validationMessage,
+            errorStyle: "warning",
+            showDropDown: true,
+            sqref: ref,
+            formulas: [validation.toString()],
+        });
+
+        sheet.addConditionalFormattingRule(ref, {
+            type: "expression", // the conditional formatting type
+            priority: 1, // rule priority order (required)
+            formula: `ISERROR(MATCH(${Excel.getExcelAlpha(columnId)}${
+                rowId + 1
+            },${validation.toString().substr(1)},0))`, // formula that returns nonzero or 0
+            style: this.workbook.createStyle({
+                font: {
+                    bold: true,
+                    color: "FF0000",
+                },
+            }), // a style object containing styles to apply
+        });
+    }
+};
+
+SheetBuilder.prototype.groupStyle = function (groupId) {
+    const { palette = defaultColorScale } = this.builder;
+    return {
+        ...baseStyle,
+        fill: {
+            type: "pattern",
+            patternType: "solid",
+            fgColor: palette[groupId % palette.length],
+        },
+    };
+};
+
+/**
+ * Common cell style definition
+ * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
+ */
+const baseStyle = {
+    alignment: {
+        horizontal: "center",
+        vertical: "center",
+        wrapText: true,
+        shrinkToFit: true,
+    },
+    fill: {
+        type: "pattern",
+        patternType: "solid",
+        fgColor: "ffffff",
+    },
+};
+
+const protectedSheet = {
+    sheetProtection: {
+        sheet: true,
+        formatCells: false,
+        formatColumns: false,
+        formatRows: false,
+        password: "Wiscentd2019!",
+    },
 };

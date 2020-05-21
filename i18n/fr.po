@@ -95,6 +95,12 @@ msgstr ""
 msgid "Theme name"
 msgstr ""
 
+msgid "Colors"
+msgstr ""
+
+msgid "Color options"
+msgstr ""
+
 msgid "Sections"
 msgstr ""
 
@@ -114,6 +120,12 @@ msgid "Logo"
 msgstr ""
 
 msgid "Drag and drop logo file"
+msgstr ""
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Fixed"
 msgstr ""
 
 msgid "Themes"

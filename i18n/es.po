@@ -96,6 +96,12 @@ msgstr ""
 msgid "Theme name"
 msgstr ""
 
+msgid "Colors"
+msgstr ""
+
+msgid "Color options"
+msgstr ""
+
 msgid "Sections"
 msgstr ""
 
@@ -116,6 +122,12 @@ msgstr ""
 
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Fixed"
+msgstr ""
 
 msgid "Themes"
 msgstr ""
