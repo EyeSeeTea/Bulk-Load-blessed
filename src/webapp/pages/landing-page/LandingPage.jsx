@@ -210,19 +210,27 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const performImport = async ({ data, dataValues }) => {
+    const performImport = async ({ data, dataValues: existingDataValues }, overwrite = true) => {
         loading.show(true);
         setState(state => ({ ...state, confirmOnExistingData: undefined }));
 
         try {
-            const deletedCount = await deleteDataValues(api, dataValues);
+            const dataValues = overwrite
+                ? data.dataValues
+                : _.differenceBy(
+                      data.dataValues,
+                      existingDataValues,
+                      ({ dataElement, categoryOptionCombo, period, orgUnit }) =>
+                          [dataElement, categoryOptionCombo, period, orgUnit].join("-")
+                  );
+
+            const deletedCount = overwrite ? await deleteDataValues(api, existingDataValues) : 0;
             const response = await dhisConnector.importData({
                 d2,
                 element: state.importObject,
-                data: data,
+                data: { ...data, dataValues },
             });
 
-            console.log(response);
             const imported =
                 response.data.response !== undefined
                     ? response.data.response.imported
@@ -298,8 +306,10 @@ export default function LandingPage() {
                 )}
                 onCancel={() => setState(state => ({ ...state, confirmOnExistingData: undefined }))}
                 onSave={() => performImport(confirmOnExistingData)}
+                onInfoAction={() => performImport(confirmOnExistingData, false)}
                 saveText={i18n.t("Proceed")}
                 cancelText={i18n.t("Cancel")}
+                infoActionText={i18n.t("Import only new data values")}
             />
         );
     };
