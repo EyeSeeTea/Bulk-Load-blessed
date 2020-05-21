@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-21T05:31:12.177Z\n"
-"PO-Revision-Date: 2020-05-21T05:31:12.178Z\n"
+"POT-Creation-Date: 2020-05-21T06:22:37.476Z\n"
+"PO-Revision-Date: 2020-05-21T06:22:37.476Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -207,18 +207,6 @@ msgstr ""
 msgid "Select at least one organisation unit to import data"
 msgstr ""
 
-msgid "Imported"
-msgstr ""
-
-msgid "Updated"
-msgstr ""
-
-msgid "Ignored"
-msgstr ""
-
-msgid "Deleted"
-msgstr ""
-
 msgid "Existing data values"
 msgstr ""
 
@@ -235,6 +223,18 @@ msgid "Cancel"
 msgstr ""
 
 msgid "Import only new data values"
+msgstr ""
+
+msgid "Imported"
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Deleted"
 msgstr ""
 
 msgid "Template Generation"

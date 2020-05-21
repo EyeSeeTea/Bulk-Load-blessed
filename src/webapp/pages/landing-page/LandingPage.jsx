@@ -1,7 +1,7 @@
 import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import useModal from "../../components/modal/useModal";
 import SettingsComponent from "../../components/settings/SettingsDialog";
 import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
@@ -23,6 +24,7 @@ export default function LandingPage() {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const { d2, api } = useAppContext();
+    const [ModalComponent, updateModal] = useModal();
 
     const [settings, setSettings] = useState();
     const [themes, setThemes] = useState();
@@ -36,7 +38,6 @@ export default function LandingPage() {
         importDataSheet: undefined,
         importMessages: [],
         importDataValues: [],
-        confirmOnExistingData: undefined,
     });
 
     useEffect(() => {
@@ -200,7 +201,18 @@ export default function LandingPage() {
             if (_.isEmpty(dataValues)) {
                 await performImport(info);
             } else {
-                setState(state => ({ ...state, confirmOnExistingData: info }));
+                updateModal({
+                    title: i18n.t("Existing data values"),
+                    description: i18n.t(
+                        "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                        { dataValuesSize: info.dataValues.length }
+                    ),
+                    onSave: () => performImport(info),
+                    onInfoAction: () => performImport(info, false),
+                    saveText: i18n.t("Proceed"),
+                    cancelText: i18n.t("Cancel"),
+                    infoActionText: i18n.t("Import only new data values"),
+                });
             }
         } catch (reason) {
             console.error(reason);
@@ -212,7 +224,6 @@ export default function LandingPage() {
 
     const performImport = async ({ data, dataValues: existingDataValues }, overwrite = true) => {
         loading.show(true);
-        setState(state => ({ ...state, confirmOnExistingData: undefined }));
 
         try {
             const dataValues = overwrite
@@ -291,29 +302,6 @@ export default function LandingPage() {
         setState(state => ({ ...state, overwriteOrgUnits }));
     }, []);
 
-    const ConfirmationOnExistingData = () => {
-        const { confirmOnExistingData } = state;
-
-        if (!confirmOnExistingData) return null;
-
-        return (
-            <ConfirmationDialog
-                isOpen={true}
-                title={i18n.t("Existing data values")}
-                description={i18n.t(
-                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { dataValuesSize: confirmOnExistingData.dataValues.length }
-                )}
-                onCancel={() => setState(state => ({ ...state, confirmOnExistingData: undefined }))}
-                onSave={() => performImport(confirmOnExistingData)}
-                onInfoAction={() => performImport(confirmOnExistingData, false)}
-                saveText={i18n.t("Proceed")}
-                cancelText={i18n.t("Cancel")}
-                infoActionText={i18n.t("Import only new data values")}
-            />
-        );
-    };
-
     if (!settings) return null;
 
     return (
@@ -325,7 +313,7 @@ export default function LandingPage() {
                 </React.Fragment>
             )}
 
-            <ConfirmationOnExistingData />
+            <ModalComponent />
 
             <Paper
                 style={{
