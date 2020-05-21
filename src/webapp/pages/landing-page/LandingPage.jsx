@@ -163,14 +163,12 @@ export default function LandingPage() {
         if (!state.importDataSheet) return;
         if (!state.orgUnitTreeSelected2) return;
 
-        const orgUnits = cleanOrgUnitPaths(state.orgUnitTreeSelected2);
-
         try {
             loading.show(true);
             const result = await dhisConnector.getElementMetadata({
                 d2,
                 element: state.importObject,
-                organisationUnits: orgUnits,
+                organisationUnits: cleanOrgUnitPaths(state.orgUnitTreeSelected2),
             });
 
             const useBuilderOrgUnits =
@@ -195,25 +193,7 @@ export default function LandingPage() {
                 colOffset,
             });
 
-            const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
-            const info = { data, dataValues };
-
-            if (_.isEmpty(dataValues)) {
-                await performImport(info);
-            } else {
-                updateModal({
-                    title: i18n.t("Existing data values"),
-                    description: i18n.t(
-                        "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                        { dataValuesSize: info.dataValues.length }
-                    ),
-                    onSave: () => performImport(info),
-                    onInfoAction: () => performImport(info, false),
-                    saveText: i18n.t("Proceed"),
-                    cancelText: i18n.t("Cancel"),
-                    infoActionText: i18n.t("Import only new data values"),
-                });
-            }
+            await checkExistingData(data);
         } catch (reason) {
             console.error(reason);
             snackbar.error(reason.message || reason.toString());
@@ -222,7 +202,28 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const performImport = async ({ data, dataValues: existingDataValues }, overwrite = true) => {
+    const checkExistingData = async data => {
+        const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
+
+        if (_.isEmpty(dataValues)) {
+            await performImport({ data, dataValues });
+        } else {
+            updateModal({
+                title: i18n.t("Existing data values"),
+                description: i18n.t(
+                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { dataValuesSize: dataValues.length }
+                ),
+                onSave: () => performImport({ data, dataValues }),
+                onInfoAction: () => performImport({ data, dataValues, overwrite: false }),
+                saveText: i18n.t("Proceed"),
+                cancelText: i18n.t("Cancel"),
+                infoActionText: i18n.t("Import only new data values"),
+            });
+        }
+    };
+
+    const performImport = async ({ data, dataValues: existingDataValues, overwrite = true }) => {
         loading.show(true);
 
         try {
