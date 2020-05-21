@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-21T11:57:01.211Z\n"
-"PO-Revision-Date: 2020-05-21T11:57:01.211Z\n"
+"POT-Creation-Date: 2020-05-21T13:56:00.087Z\n"
+"PO-Revision-Date: 2020-05-21T13:56:00.087Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -146,12 +146,6 @@ msgid "Are you sure you want to remove selected themes"
 msgstr ""
 
 msgid "Name"
-msgstr ""
-
-msgid "Header"
-msgstr ""
-
-msgid "Footer"
 msgstr ""
 
 msgid "Title"
