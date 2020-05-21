@@ -338,8 +338,13 @@ export default function LandingPage() {
 
     return (
         <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-            <ThemeListDialog onChange={onThemesChange} />
-            <SettingsComponent settings={settings} onChange={onSettingsChange} />
+            {settings.areSettingsVisibleForCurrentUser() && (
+                <React.Fragment>
+                    <ThemeListDialog onChange={onThemesChange} />
+                    <SettingsComponent settings={settings} onChange={onSettingsChange} />
+                </React.Fragment>
+            )}
+
             <ConfirmationOnExistingData />
 
             <Paper
