@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-14T05:55:50.252Z\n"
-"PO-Revision-Date: 2020-05-14T05:55:50.252Z\n"
+"POT-Creation-Date: 2020-05-21T11:57:01.211Z\n"
+"PO-Revision-Date: 2020-05-21T11:57:01.211Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -74,13 +74,16 @@ msgstr ""
 msgid "No theme"
 msgstr ""
 
-msgid "Start Year"
+msgid "Start date"
 msgstr ""
 
-msgid "End Year"
+msgid "End date"
 msgstr ""
 
 msgid "No capture organisations units"
+msgstr ""
+
+msgid "Populate template with instance data"
 msgstr ""
 
 msgid "Edit theme"
@@ -178,6 +181,12 @@ msgstr ""
 msgid ""
 "Cannot import: Versions do not match (database={{dbVersion}}, "
 "file={{sheetVersion}})"
+msgstr ""
+
+msgid "You need to select at least one element to export"
+msgstr ""
+
+msgid "You need to select start and end dates"
 msgstr ""
 
 msgid "Cannot read file"

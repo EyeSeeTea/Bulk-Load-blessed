@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-14T05:55:50.252Z\n"
+"POT-Creation-Date: 2020-05-14T05:57:46.304Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,9 +63,8 @@ msgstr "elementos"
 msgid "Model"
 msgstr "Modelo"
 
-#, fuzzy
 msgid "Select {{elementLabel}} to export..."
-msgstr "Seleccione {{element}} a {{action}}..."
+msgstr "Seleccione {{element}} a exportar..."
 
 msgid "Language"
 msgstr ""
@@ -76,14 +75,17 @@ msgstr ""
 msgid "No theme"
 msgstr ""
 
-msgid "Start Year"
-msgstr "Año inicial"
+msgid "Start date"
+msgstr "Fecha de inicio"
 
-msgid "End Year"
-msgstr "Año final"
+msgid "End date"
+msgstr "Fecha de fin"
 
 msgid "No capture organisations units"
 msgstr "No se han encontrado unidades organizativas"
+
+msgid "Populate template with instance data"
+msgstr ""
 
 msgid "Edit theme"
 msgstr ""
@@ -112,7 +114,6 @@ msgstr ""
 msgid "Logo"
 msgstr ""
 
-#, fuzzy
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
 
@@ -185,6 +186,12 @@ msgstr ""
 "No se puede importar: Las versiones no coinciden (base de "
 "datos={{dbVersion}}, fichero={{sheetVersion}})"
 
+msgid "You need to select at least one element to export"
+msgstr "Seleccione al menos un elemento a exportar"
+
+msgid "You need to select start and end dates for dataSet templates"
+msgstr "Seleccione fecha de inicio y de fin"
+
 msgid "Cannot read file"
 msgstr "No se puede leer el fichero"
 
@@ -236,12 +243,11 @@ msgstr "Importación"
 msgid "Drag and drop file to import"
 msgstr "Mueva aquí los ficheros a importar"
 
-#, fuzzy
 msgid "Update"
-msgstr "Actualizados"
+msgstr "Actualizar"
 
 msgid "Create"
-msgstr ""
+msgstr "Crear"
 
 msgid "data values"
 msgstr "valores de datos"
@@ -253,12 +259,3 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
-
-#~ msgid "Object not found in database"
-#~ msgstr "No se ha encontrado el objeto en la base de datos"
-
-#~ msgid "export"
-#~ msgstr "exportar"
-
-#~ msgid "Save"
-#~ msgstr "Guardar"

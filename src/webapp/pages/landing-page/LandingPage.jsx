@@ -69,17 +69,27 @@ export default function LandingPage() {
     };
 
     const handleTemplateDownloadClick = async () => {
-        if (!state.template) return;
+        if (!state.template) {
+            snackbar.info(i18n.t("You need to select at least one element to export"));
+            return;
+        }
+
         const {
             type,
             id,
             theme,
-            startYear,
-            endYear,
+            startDate,
+            endDate,
             orgUnits,
             language,
             populate,
         } = state.template;
+
+        if (type === "dataSet" && (!startDate || !endDate)) {
+            snackbar.info(i18n.t("You need to select start and end dates"));
+            return;
+        }
+
         loading.show(true);
 
         if (type === "custom") {
@@ -95,8 +105,8 @@ export default function LandingPage() {
 
             const template = new SheetBuilder({
                 ...result,
-                startYear,
-                endYear,
+                startDate,
+                endDate,
                 language,
             });
 
@@ -110,8 +120,8 @@ export default function LandingPage() {
                 theme,
                 orgUnits: settings.showOrgUnitsOnGeneration ? orgUnits : [],
                 populate: settings.showOrgUnitsOnGeneration && populate,
-                startDate: type === "dataSet" ? moment(startYear, "YYYY") : undefined,
-                endDate: type === "dataSet" ? moment(endYear, "YYYY") : undefined,
+                startDate,
+                endDate,
             });
         }
 

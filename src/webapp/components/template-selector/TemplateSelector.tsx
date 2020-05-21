@@ -1,21 +1,20 @@
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import { OrgUnitsSelector } from "d2-ui-components";
+import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import React, { useEffect, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
-import { DataFormType } from "../../../domain/entities/DataForm";
+import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { PartialBy } from "../../../utils/types";
 import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
-import { buildPossibleYears } from "../../utils/periods";
 import { Select, SelectOption } from "../select/Select";
 
 type TemplateType = DataFormType | "custom";
-type DataSource = Record<TemplateType, { id: string; name: string }[]>;
+type DataSource = Record<TemplateType, DataForm[]>;
 
 interface TemplateSelectorState {
     type: TemplateType;
@@ -24,8 +23,15 @@ interface TemplateSelectorState {
     language: string;
     orgUnits?: string[];
     theme?: string;
-    startYear?: string;
-    endYear?: string;
+    startDate?: Moment;
+    endDate?: Moment;
+}
+
+type PickerUnit = "year" | "month" | "date";
+interface PickerFormat {
+    unit: PickerUnit;
+    views: PickerUnit[];
+    format: string;
 }
 
 export interface TemplateSelectorProps {
@@ -44,9 +50,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
+    const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
-        startYear: "2010",
-        endYear: moment().year().toString(),
+        startDate: moment().add("-1", "year").startOf("year"),
+        endDate: moment(),
         populate: false,
         language: "en",
     });
@@ -114,6 +121,21 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
+        if (dataSource && state.type) {
+            const { periodType } = dataSource[state.type].find(({ id }) => id === value) ?? {};
+            if (periodType === "Yearly") {
+                setDatePickerFormat({ unit: "year", views: ["year"], format: "YYYY" });
+            } else if (periodType === "Monthly") {
+                setDatePickerFormat({
+                    unit: "month",
+                    views: ["year", "month"],
+                    format: "MMMM YYYY",
+                });
+            } else {
+                setDatePickerFormat(undefined);
+            }
+        }
+
         setState(state => ({ ...state, id: value }));
     };
 
@@ -121,18 +143,16 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, theme: value }));
     };
 
-    const onStartYearChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            startYear: value,
-        }));
+    const onStartDateChange = (date: Date) => {
+        const { unit = "date" } = datePickerFormat ?? {};
+        const startDate = date ? moment(date).startOf(unit) : undefined;
+        setState(state => ({ ...state, startDate }));
     };
 
-    const onEndYearChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            endYear: value,
-        }));
+    const onEndDateChange = (date: Date) => {
+        const { unit = "date" } = datePickerFormat ?? {};
+        const endDate = date ? moment(date).endOf(unit) : undefined;
+        setState(state => ({ ...state, endDate }));
     };
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
@@ -201,35 +221,33 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 )}
             </div>
 
-            {state.type === "dataSet" && (
-                <div className={classes.row}>
-                    <div className={classes.startYearSelect}>
-                        <Select
-                            placeholder={i18n.t("Start Year")}
-                            options={buildPossibleYears("1970", state.endYear)}
-                            defaultValue={{
-                                value: moment("2010-01-01").year().toString(),
-                                label: moment("2010-01-01").year().toString(),
-                            }}
-                            onChange={onStartYearChange}
-                        />
-                    </div>
-                    <div className={classes.endYearSelect}>
-                        <Select
-                            placeholder={i18n.t("End Year")}
-                            options={buildPossibleYears(
-                                state.startYear,
-                                moment().year().toString()
-                            )}
-                            defaultValue={{
-                                value: moment().year().toString(),
-                                label: moment().year().toString(),
-                            }}
-                            onChange={onEndYearChange}
-                        />
-                    </div>
+            <div className={classes.row}>
+                <div className={classes.startDateSelect}>
+                    <DatePicker
+                        className={classes.fullWidth}
+                        label={i18n.t("Start date")}
+                        value={state.startDate ?? null}
+                        onChange={onStartDateChange}
+                        maxDate={state.endDate}
+                        views={datePickerFormat?.views}
+                        format={datePickerFormat?.format}
+                        InputLabelProps={{ style: { color: "#494949" } }}
+                    />
                 </div>
-            )}
+                <div className={classes.endDateSelect}>
+                    <DatePicker
+                        className={classes.fullWidth}
+                        label={i18n.t("End date")}
+                        value={state.endDate ?? null}
+                        onChange={onEndDateChange}
+                        minDate={state.startDate}
+                        views={datePickerFormat?.views}
+                        format={datePickerFormat?.format}
+                        InputLabelProps={{ style: { color: "#494949" } }}
+                    />
+                </div>
+            </div>
+
             {!_.isEmpty(orgUnitTreeRootIds) ? (
                 settings.showOrgUnitsOnGeneration && state.type !== "custom" ? (
                     <div className={classes.orgUnitSelector}>
@@ -257,7 +275,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     disabled={!enablePopulate}
                     className={classes.populateCheckbox}
                     control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                    label="Populate template with instance data"
+                    label={i18n.t("Populate template with instance data")}
                 />
             )}
         </React.Fragment>
@@ -269,17 +287,18 @@ const useStyles = makeStyles({
         display: "flex",
         flexFlow: "row nowrap",
         justifyContent: "space-around",
-        marginTop: "1em",
+        marginTop: "0.5em",
         marginRight: "1em",
     },
-    modelSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
-    templateSelect: { flexBasis: "70%", margin: "1em" },
-    languageSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
-    themeSelect: { flexBasis: "30%", margin: "1em" },
-    startYearSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
-    endYearSelect: { flexBasis: "30%", margin: "1em" },
+    modelSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
+    templateSelect: { flexBasis: "70%", margin: "0.5em" },
+    languageSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
+    themeSelect: { flexBasis: "30%", margin: "0.5em" },
+    startDateSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
+    endDateSelect: { flexBasis: "30%", margin: "0.5em" },
     populateCheckbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em" },
+    fullWidth: { width: "100%" },
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {

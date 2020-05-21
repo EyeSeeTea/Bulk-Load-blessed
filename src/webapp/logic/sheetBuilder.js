@@ -65,8 +65,8 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         element,
         rawMetadata,
         elementMetadata,
-        startYear,
-        endYear,
+        startDate,
+        endDate,
     } = this.builder;
     const validationSheet = this.validationSheet;
 
@@ -89,7 +89,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         rowId = 2;
         columnId++;
         validationSheet.cell(rowId++, columnId).string("Periods");
-        buildAllPossiblePeriods(element.periodType, startYear, endYear).forEach(period => {
+        buildAllPossiblePeriods(element.periodType, startDate, endDate).forEach(period => {
             if (isNaN(period)) {
                 validationSheet.cell(rowId++, columnId).string(period);
             } else {

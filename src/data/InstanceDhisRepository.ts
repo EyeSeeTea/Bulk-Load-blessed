@@ -30,6 +30,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 displayName: true,
                 name: true,
                 attributeValues: { value: true, attribute: { code: true } },
+                periodType: true,
             },
             filter: {
                 id: ids ? { in: ids } : undefined,
@@ -137,6 +138,8 @@ export class InstanceDhisRepository implements InstanceRepository {
     private async getProgramPackage({
         id,
         orgUnits,
+        startDate,
+        endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
@@ -156,6 +159,8 @@ export class InstanceDhisRepository implements InstanceRepository {
                             paging: false,
                             attributeCc: categoryComboId,
                             attributeCos: categoryOptionId,
+                            startDate: startDate?.format("YYYY-MM-DD"),
+                            endDate: endDate?.format("YYYY-MM-DD"),
                         })
                         .getData()
                 );
