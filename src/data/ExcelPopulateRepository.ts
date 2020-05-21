@@ -129,7 +129,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(template);
 
         const { sheet } = source;
-        const { text, bold, italic, fontSize, fontColor, fillColor } = style;
+        const { text, bold, italic, fontSize = 12, fontColor, fillColor } = style;
         const range = this.buildRange(source, workbook);
         const textStyle = _.omitBy(
             {
@@ -155,7 +155,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
                     .style({ verticalAlignment: "center" })
                     .value(richText);
 
-                const height = text.split("\n").length * 22;
+                const height = text.split("\n").length * fontSize * 2;
                 range.cells().map(([cell]) => cell.row().hidden(false).height(height));
             }
         } catch (error) {

@@ -207,7 +207,7 @@ export default function LandingPage() {
             const info = { data, dataValues };
 
             if (_.isEmpty(dataValues)) {
-                performImport(info);
+                await performImport(info);
             } else {
                 setState(state => ({ ...state, confirmOnExistingData: info }));
             }
