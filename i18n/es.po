@@ -105,16 +105,10 @@ msgstr ""
 msgid "Sections"
 msgstr ""
 
-msgid "Header text"
-msgstr ""
-
 msgid "Title text"
 msgstr ""
 
 msgid "Subtitle text"
-msgstr ""
-
-msgid "Footer text"
 msgstr ""
 
 msgid "Logo"
@@ -147,12 +141,6 @@ msgid "Are you sure you want to remove selected themes"
 msgstr ""
 
 msgid "Name"
-msgstr ""
-
-msgid "Header"
-msgstr ""
-
-msgid "Footer"
 msgstr ""
 
 msgid "Title"

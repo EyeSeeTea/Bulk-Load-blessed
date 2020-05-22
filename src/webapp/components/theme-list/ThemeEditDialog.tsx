@@ -55,7 +55,14 @@ export default function ThemeEditDialog({
     const updateSection = (field: ThemeableSections) => {
         return (event: ChangeEvent<HTMLInputElement>) => {
             const text = event.target.value;
-            updateTheme(theme => theme.updateSection(field, text ? { text } : undefined));
+
+            // TODO: This should be configurable from the UI
+            const fontSize = field === "title" ? 22 : 12;
+            const italic = field === "subtitle";
+
+            updateTheme(theme =>
+                theme.updateSection(field, text ? { text, fontSize, italic } : undefined)
+            );
         };
     };
 
@@ -124,14 +131,6 @@ export default function ThemeEditDialog({
                 <Typography variant="h6">{i18n.t("Sections")}</Typography>
                 <TextField
                     className={classes.text}
-                    label={i18n.t("Header text")}
-                    fullWidth={true}
-                    multiline={true}
-                    value={theme.sections?.header?.text ?? ""}
-                    onChange={updateSection("header")}
-                />
-                <TextField
-                    className={classes.text}
                     label={i18n.t("Title text")}
                     fullWidth={true}
                     multiline={true}
@@ -145,14 +144,6 @@ export default function ThemeEditDialog({
                     multiline={true}
                     value={theme.sections?.subtitle?.text ?? ""}
                     onChange={updateSection("subtitle")}
-                />
-                <TextField
-                    className={classes.text}
-                    label={i18n.t("Footer text")}
-                    fullWidth={true}
-                    multiline={true}
-                    value={theme.sections?.footer?.text ?? ""}
-                    onChange={updateSection("footer")}
                 />
             </div>
 
