@@ -88,7 +88,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         rowId = 2;
         columnId++;
         validationSheet.cell(rowId++, columnId).string("Periods");
@@ -112,7 +112,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     validationSheet.cell(rowId++, columnId).string("Options");
     const dataSetOptionComboId = element.categoryCombo.id;
     elementMetadata.forEach(e => {
-        if (e.type === "categoryOptionCombo" && e.categoryCombo.id === dataSetOptionComboId) {
+        if (e.type === "categoryOptionCombos" && e.categoryCombo.id === dataSetOptionComboId) {
             validationSheet.cell(rowId++, columnId).formula(`_${e.id}`);
         }
     });
@@ -241,7 +241,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion = element.type === "dataSet" ? dataSetId : programId;
+    const defaultVersion = element.type === "dataSets" ? dataSetId : programId;
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -280,10 +280,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
-    if (element.type === "program") {
+    if (element.type === "programs") {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
-    } else if (element.type === "dataSet") {
+    } else if (element.type === "dataSets") {
         this.createColumn(
             dataEntrySheet,
             itemRow,
@@ -312,10 +312,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         .formula(`_${element.id}`)
         .style({ ...baseStyle, font: { size: 16, bold: true } });
 
-    if (element.type === "dataSet") {
+    if (element.type === "dataSets") {
         const categoryOptionCombos = [];
         for (const [, value] of metadata) {
-            if (value.type === "categoryOptionCombo") {
+            if (value.type === "categoryOptionCombos") {
                 categoryOptionCombos.push(value);
             }
         }
@@ -464,7 +464,7 @@ SheetBuilder.prototype.translate = function (item) {
     const { value: description = item?.description } =
         translations.find(({ property }) => property === "DESCRIPTION") ?? {};
 
-    if (item?.type === "categoryOptionCombo" && name === defaultName) {
+    if (item?.type === "categoryOptionCombos" && name === defaultName) {
         const options = item?.categoryOptions?.map(({ id }) => {
             const element = elementMetadata.get(id);
             const { name } = this.translate(element);

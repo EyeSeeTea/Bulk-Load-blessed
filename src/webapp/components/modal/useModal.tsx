@@ -2,10 +2,16 @@ import { ConfirmationDialog, ConfirmationDialogProps } from "d2-ui-components";
 import React, { useCallback, useState } from "react";
 
 export interface ModalState extends Omit<ConfirmationDialogProps, "isOpen"> {
-    autoClose: boolean;
+    autoClose?: boolean;
 }
 
-export default function useModal(initialState: ModalState | null = null) {
+export type ModalResult = [
+    (props: ConfirmationDialogProps) => JSX.Element | null,
+    (state: ModalState) => void,
+    () => void
+];
+
+export default function useModal(initialState: ModalState | null = null): ModalResult {
     const [modalState, updateModal] = useState<ModalState | null>(initialState);
     const closeModal = useCallback(() => updateModal(null), []);
 

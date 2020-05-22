@@ -9,10 +9,9 @@ import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
 interface DownloadTemplateProps {
-    d2: unknown;
+    api: unknown;
     type: DataFormType;
     id: string;
-    name: string;
     orgUnits: string[];
     populate: boolean;
     startDate?: Moment;
@@ -29,7 +28,7 @@ export class DownloadTemplateUseCase {
     ) {}
 
     public async execute({
-        d2,
+        api,
         type,
         id,
         theme: themeId,
@@ -40,16 +39,15 @@ export class DownloadTemplateUseCase {
         language,
     }: DownloadTemplateProps): Promise<void> {
         try {
-            const templateId = type === "dataSet" ? dataSetId : programId;
+            const templateId = type === "dataSets" ? dataSetId : programId;
             const template = this.templateRepository.getTemplate(templateId);
             const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
-            // FIXME: Legacy code, connector with d2
-            const element = await dhisConnector.getElement(d2, type, id);
+            const element = await dhisConnector.getElement(api, type, id);
             const result = await dhisConnector.getElementMetadata({
-                d2,
-                element: { ...element, endpoint: type, type },
-                organisationUnits: orgUnits,
+                api,
+                element,
+                orgUnitIds: orgUnits,
             });
 
             // FIXME: Legacy code, sheet generator

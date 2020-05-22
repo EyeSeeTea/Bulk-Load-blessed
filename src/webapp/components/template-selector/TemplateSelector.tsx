@@ -15,7 +15,7 @@ import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<DataFormType, DataForm[]>;
 
-interface TemplateSelectorState {
+export interface TemplateSelectorState {
     type: DataFormType;
     id: string;
     populate: boolean;
@@ -66,11 +66,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             .then(dataSource => {
                 const modelOptions = _.compact([
                     settings.isModelEnabled("dataSet") && {
-                        value: "dataSet",
+                        value: "dataSets",
                         label: i18n.t("Data Set"),
                     },
                     settings.isModelEnabled("program") && {
-                        value: "program",
+                        value: "programs",
                         label: i18n.t("Program"),
                     },
                 ]);

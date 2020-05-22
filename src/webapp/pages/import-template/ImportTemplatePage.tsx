@@ -8,110 +8,52 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import useModal from "../../components/modal/useModal";
-import SettingsComponent from "../../components/settings/SettingsDialog";
-import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
-import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import Settings from "../../logic/settings";
 import * as sheetImport from "../../logic/sheetImport";
-import "./LandingPage.css";
 
-export default function LandingPage() {
+interface ImportTemplatePageProps {
+    settings: Settings;
+}
+
+interface ImportState {
+    dataForm: DataForm;
+    file: File;
+    summary: {
+        period: string;
+        count: number;
+        id: string;
+    }[];
+}
+
+export default function ImportTemplatePage({ settings }: ImportTemplatePageProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
-    const { d2, api } = useAppContext();
+    const { api } = useAppContext();
     const [ModalComponent, updateModal, closeModal] = useModal();
 
-    const [settings, setSettings] = useState();
-    const [themes, setThemes] = useState();
-    const [state, setState] = useState({
-        template: null,
-        orgUnitTreeSelected2: [],
-        orgUnitTreeRootIds: [],
-        overwriteOrgUnits: false,
-        importOrgUnitIds: [],
-        importObject: undefined,
-        importDataSheet: undefined,
-        importMessages: [],
-        importDataValues: [],
-    });
+    const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
+    const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
+    const [overwriteOrgUnits, setOverwriteOrgUnits] = useState<boolean>(false);
+    const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
+    const [importState, setImportState] = useState<ImportState>();
+    const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
-        Settings.build(api)
-            .then(setSettings)
-            .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
-    }, [api, snackbar]);
-
-    useEffect(() => {
-        CompositionRoot.attach().themes.list.execute().then(setThemes);
+        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
     }, []);
 
-    useEffect(() => {
-        CompositionRoot.attach()
-            .orgUnits.getUserRoots.execute()
-            .then(orgUnitTreeRootIds => {
-                setState(state => ({ ...state, orgUnitTreeRootIds }));
-            });
-    }, []);
-
-    const showOrgUnitsOnGeneration = settings?.orgUnitSelection !== "import";
-
-    const handleOrgUnitTreeClick2 = orgUnitPaths => {
-        setState(state => ({
-            ...state,
-            orgUnitTreeSelected2: _.takeRight(orgUnitPaths, 1),
-        }));
+    const onOrgUnitChange = (orgUnitPaths: string[]) => {
+        setSelectedOrgUnits(_.takeRight(orgUnitPaths, 1));
     };
 
-    const handleTemplateDownloadClick = async () => {
-        if (!state.template) {
-            snackbar.info(i18n.t("You need to select at least one element to export"));
-            return;
-        }
-
-        const { type, id, theme, orgUnits, populate, startDate, endDate, ...rest } = state.template;
-
-        if (type === "dataSet" && (!startDate || !endDate)) {
-            snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
-            return;
-        }
-
-        loading.show(true);
-
-        if (type === "custom") {
-            await CompositionRoot.attach().templates.downloadCustom.execute(id, theme);
-        } else {
-            await CompositionRoot.attach().templates.download.execute({
-                d2,
-                type,
-                id,
-                theme,
-                orgUnits: showOrgUnitsOnGeneration ? orgUnits : [],
-                populate: showOrgUnitsOnGeneration && populate,
-                startDate,
-                endDate,
-                ...rest,
-            });
-        }
-
-        setState(state => ({
-            ...state,
-            importDataSheet: undefined,
-            importObject: undefined,
-            importDataValues: [],
-            importOrgUnitIds: [],
-            importMessages: [],
-        }));
-
-        loading.show(false);
-    };
-
-    const onDrop = async files => {
+    const onDrop = async (files: File[]) => {
         loading.show(true);
 
         const file = files[0];
@@ -134,48 +76,39 @@ export default function LandingPage() {
                 );
             }
 
-            setState(state => ({
-                ...state,
-                importDataSheet: file,
-                importObject: object,
-                importDataValues: dataValues,
-                importOrgUnitIds: orgUnits.map(({ id }) => id),
-                importMessages: [],
-            }));
+            setOrgUnitTreeFilter(orgUnits.map(({ id }) => id));
+            setImportState({
+                dataForm: object,
+                file,
+                summary: dataValues,
+            });
         } catch (err) {
             console.error(err);
             const msg = err.message || err.toString();
             snackbar.error(msg);
-            setState(state => ({
-                ...state,
-                importDataSheet: file,
-                importObject: undefined,
-                importDataValues: [],
-                importOrgUnitIds: [],
-                importMessages: [],
-            }));
+            setImportState(undefined);
         }
 
         loading.show(false);
     };
 
     const handleDataImportClick = async () => {
-        if (!state.importObject) return;
-        if (!state.importDataSheet) return;
-        if (!state.orgUnitTreeSelected2) return;
+        if (!importState) return;
 
         try {
+            const { dataForm, file } = importState;
+
             loading.show(true);
             const result = await dhisConnector.getElementMetadata({
-                d2,
-                element: state.importObject,
-                organisationUnits: cleanOrgUnitPaths(state.orgUnitTreeSelected2),
+                api,
+                element: dataForm,
+                orgUnitIds: cleanOrgUnitPaths(selectedOrgUnits),
             });
 
             const useBuilderOrgUnits =
-                settings.orgUnitSelection !== "generation" && state.overwriteOrgUnits;
+                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
 
-            if (useBuilderOrgUnits && result.organisationUnits.length === 0) {
+            if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {
                 throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
@@ -183,19 +116,18 @@ export default function LandingPage() {
                 rowOffset,
                 colOffset,
                 orgUnits,
-            } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
+            } = await CompositionRoot.attach().templates.analyze.execute(file);
 
             const data = await sheetImport.readSheet({
                 ...result,
-                d2,
-                api,
-                file: state.importDataSheet,
+                file,
                 useBuilderOrgUnits,
                 rowOffset,
                 colOffset,
             });
 
             const removedDataValues = _.remove(
+                //@ts-ignore FIXME Create typings for sheet import code
                 data.dataValues,
                 ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
             );
@@ -233,14 +165,14 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const downloadInvalidOrganisations = dataValues => {
+    const downloadInvalidOrganisations = (dataValues: unknown) => {
         const json = JSON.stringify({ dataValues }, null, 4);
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
         saveAs(blob, `invalid-organisations-${date}.json`);
     };
 
-    const checkExistingData = async data => {
+    const checkExistingData = async (data: any) => {
         const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
 
         if (dataValues.length === 0) {
@@ -261,7 +193,13 @@ export default function LandingPage() {
         }
     };
 
-    const performImport = async ({ data, dataValues: existingDataValues, overwrite = true }) => {
+    const performImport = async ({
+        data,
+        dataValues: existingDataValues,
+        overwrite = true,
+    }: any) => {
+        if (!importState) return;
+
         loading.show(true);
 
         try {
@@ -275,26 +213,15 @@ export default function LandingPage() {
                   );
 
             const deletedCount = overwrite ? await deleteDataValues(api, existingDataValues) : 0;
-            const response = await dhisConnector.importData({
-                d2,
-                element: state.importObject,
+            const { response, importCount, description } = await dhisConnector.importData({
+                api,
+                element: importState.dataForm,
                 data: { ...data, dataValues },
             });
 
-            const imported =
-                response.data.response !== undefined
-                    ? response.data.response.imported
-                    : response.data.importCount.imported;
-            const updated =
-                response.data.response !== undefined
-                    ? response.data.response.updated
-                    : response.data.importCount.updated;
-            const ignored =
-                response.data.response !== undefined
-                    ? response.data.response.ignored
-                    : response.data.importCount.ignored;
-            const msgs = _.compact([
-                response.data.description,
+            const { imported, updated, ignored } = response ?? importCount;
+            const messages = _.compact([
+                description,
                 [
                     `${i18n.t("Imported")}: ${imported}`,
                     `${i18n.t("Updated")}: ${updated}`,
@@ -302,8 +229,9 @@ export default function LandingPage() {
                     `${i18n.t("Deleted")}: ${deletedCount}`,
                 ].join(", "),
             ]);
-            snackbar.info(msgs.join(" - "));
-            setState(state => ({ ...state, importMessages: msgs }));
+
+            snackbar.info(messages.join(" - "));
+            setMessages(messages);
         } catch (reason) {
             console.error(reason);
             snackbar.error(reason.message || reason.toString());
@@ -312,78 +240,23 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const getNameForModel = key => {
-        return {
-            dataSet: i18n.t("Data Set"),
-            program: i18n.t("Program"),
-        }[key];
+    const getNameForModel = (key: DataFormType) => {
+        switch (key) {
+            case "dataSets":
+                return i18n.t("Data Set");
+            case "programs":
+                return i18n.t("Program");
+        }
     };
 
-    const onSettingsChange = useCallback(settings => {
-        setSettings(settings);
-        setState(state => ({
-            ...state,
-            importObject: undefined,
-            orgUnitTreeSelected2: [],
-            overwriteOrgUnits: false,
-        }));
-    }, []);
-
-    const onThemesChange = useCallback(themes => {
-        setThemes(themes);
-    }, []);
-
-    const onTemplateChange = useCallback(template => {
-        setState(state => ({ ...state, template }));
-    }, []);
-
     const onOverwriteOrgUnitsChange = useCallback((_event, overwriteOrgUnits) => {
-        setState(state => ({ ...state, overwriteOrgUnits }));
+        setOverwriteOrgUnits(overwriteOrgUnits);
     }, []);
-
-    if (!settings) return null;
 
     return (
-        <div className="main-container" style={{ margin: "1em", marginTop: "3em" }}>
-            {settings.areSettingsVisibleForCurrentUser() && (
-                <React.Fragment>
-                    <ThemeListDialog onChange={onThemesChange} />
-                    <SettingsComponent settings={settings} onChange={onSettingsChange} />
-                </React.Fragment>
-            )}
-
+        <React.Fragment>
             <ModalComponent maxWidth={"xl"} />
 
-            <Paper
-                style={{
-                    margin: "2em",
-                    marginTop: "2em",
-                    padding: "2em",
-                    width: "50%",
-                    display: settings.isTemplateGenerationVisible() ? "block" : "none",
-                }}
-            >
-                <h1>{i18n.t("Template Generation")}</h1>
-
-                <TemplateSelector settings={settings} themes={themes} onChange={onTemplateChange} />
-
-                <div
-                    className="row"
-                    style={{
-                        marginTop: "2em",
-                        marginLeft: "2em",
-                        marginRight: "2em",
-                    }}
-                >
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleTemplateDownloadClick}
-                    >
-                        {i18n.t("Download template")}
-                    </Button>
-                </div>
-            </Paper>
             <Paper
                 style={{
                     margin: "2em",
@@ -415,7 +288,7 @@ export default function LandingPage() {
                                 <input {...getInputProps()} />
                                 <div
                                     className={"dropzoneTextStyle"}
-                                    hidden={state.importDataSheet !== undefined}
+                                    hidden={importState?.file !== undefined}
                                 >
                                     <p className={"dropzoneParagraph"}>
                                         {i18n.t("Drag and drop file to import")}
@@ -425,11 +298,11 @@ export default function LandingPage() {
                                 </div>
                                 <div
                                     className={"dropzoneTextStyle"}
-                                    hidden={state.importDataSheet === undefined}
+                                    hidden={importState?.file === undefined}
                                 >
-                                    {state.importDataSheet !== undefined && (
+                                    {importState?.file !== undefined && (
                                         <p className={"dropzoneParagraph"}>
-                                            {state.importDataSheet.name}
+                                            {importState?.file.name}
                                         </p>
                                     )}
                                     <br />
@@ -440,7 +313,7 @@ export default function LandingPage() {
                     )}
                 </Dropzone>
 
-                {state.importObject && (
+                {importState?.dataForm && (
                     <div
                         style={{
                             marginTop: 35,
@@ -449,9 +322,9 @@ export default function LandingPage() {
                             fontSize: "1.2em",
                         }}
                     >
-                        {getNameForModel(state.importObject.type)}: {state.importObject.name} (
-                        {state.importObject.id})
-                        {state.importDataValues.map((group, idx) => (
+                        {getNameForModel(importState.dataForm.type)}: {importState.dataForm.name} (
+                        {importState.dataForm.id})
+                        {importState.summary.map((group, idx) => (
                             <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
                                 {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
                                 {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
@@ -467,7 +340,7 @@ export default function LandingPage() {
                             style={{ marginTop: "1em" }}
                             control={
                                 <Checkbox
-                                    checked={state.overwriteOrgUnits}
+                                    checked={overwriteOrgUnits}
                                     onChange={onOverwriteOrgUnitsChange}
                                 />
                             }
@@ -476,14 +349,14 @@ export default function LandingPage() {
                     </div>
                 )}
 
-                {state.overwriteOrgUnits &&
-                    (state.orgUnitTreeRootIds.length > 0 ? (
+                {overwriteOrgUnits &&
+                    (orgUnitTreeRootIds.length > 0 ? (
                         <OrgUnitsSelector
                             api={api}
-                            onChange={handleOrgUnitTreeClick2}
-                            selected={state.orgUnitTreeSelected2}
-                            rootIds={state.orgUnitTreeRootIds}
-                            selectableIds={state.importOrgUnitIds}
+                            onChange={onOrgUnitChange}
+                            selected={selectedOrgUnits}
+                            rootIds={orgUnitTreeRootIds}
+                            selectableIds={orgUnitTreeFilter}
                             fullWidth={false}
                             height={220}
                             controls={{
@@ -496,7 +369,7 @@ export default function LandingPage() {
                         i18n.t("No capture org unit match element org units")
                     ))}
 
-                {state.importMessages && state.importMessages.length > 0 && (
+                {messages.length > 0 && (
                     <div
                         style={{
                             marginTop: "1em",
@@ -506,7 +379,7 @@ export default function LandingPage() {
                             padding: "1em",
                         }}
                     >
-                        {state.importMessages.map(msg => (
+                        {messages.map(msg => (
                             <div key={msg}>{msg}</div>
                         ))}
                     </div>
@@ -524,12 +397,12 @@ export default function LandingPage() {
                         variant="contained"
                         color="primary"
                         onClick={handleDataImportClick}
-                        disabled={!state.importObject}
+                        disabled={!importState?.dataForm}
                     >
                         {i18n.t("Import data")}
                     </Button>
                 </div>
             </Paper>
-        </div>
+        </React.Fragment>
     );
 }

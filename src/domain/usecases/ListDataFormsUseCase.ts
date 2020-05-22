@@ -4,9 +4,8 @@ export class ListDataFormsUseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute() {
-        const dataSet = await this.instance.getDataForms("dataSet");
-        const program = await this.instance.getDataForms("program");
-
-        return { dataSet, program, tracker: [] };
+        const dataSets = await this.instance.getDataForms("dataSets");
+        const programs = await this.instance.getDataForms("programs");
+        return { dataSets, programs };
     }
 }
