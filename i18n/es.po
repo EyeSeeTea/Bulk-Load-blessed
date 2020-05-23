@@ -54,9 +54,6 @@ msgstr "Data Set"
 msgid "Program"
 msgstr "Programa"
 
-msgid "Custom"
-msgstr ""
-
 msgid "elements"
 msgstr "elementos"
 
@@ -81,8 +78,8 @@ msgstr "Fecha de inicio"
 msgid "End date"
 msgstr "Fecha de fin"
 
-msgid "No capture organisations units"
-msgstr "No se han encontrado unidades organizativas"
+msgid "User does not have any capture organisations units"
+msgstr "El usuario no tiene unidades organizativas asociadas"
 
 msgid "Populate template with instance data"
 msgstr ""

@@ -13,11 +13,10 @@ import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
-type TemplateType = DataFormType | "custom";
-type DataSource = Record<TemplateType, DataForm[]>;
+type DataSource = Record<DataFormType, DataForm[]>;
 
 interface TemplateSelectorState {
-    type: TemplateType;
+    type: DataFormType;
     id: string;
     populate: boolean;
     language: string;
@@ -48,6 +47,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
+    const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
     const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
@@ -71,16 +71,12 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         value: "program",
                         label: i18n.t("Program"),
                     },
-                    dataSource.custom.length > 0 && {
-                        value: "custom",
-                        label: i18n.t("Custom"),
-                    },
                 ]);
 
                 setDataSource(dataSource);
                 setModels(modelOptions);
                 if (modelOptions.length === 1) {
-                    const model = modelOptions[0].value as TemplateType;
+                    const model = modelOptions[0].value as DataFormType;
                     const templates = modelToSelectOption(dataSource[model]);
                     setTemplates(templates);
                     setState(state => ({ ...state, type: model }));
@@ -89,7 +85,16 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     }, [settings]);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getRoots.execute().then(setOrgUnitTreeRootIds);
+        const { type, id } = state;
+        if (type && id) {
+            CompositionRoot.attach()
+                .orgUnits.getRootsByForm.execute(type, id)
+                .then(setOrgUnitTreeFilter);
+        }
+    }, [state]);
+
+    useEffect(() => {
+        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
     }, []);
 
     useEffect(() => {
@@ -113,11 +118,12 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
 
-        const model = value as TemplateType;
+        const model = value as DataFormType;
         const options = modelToSelectOption(dataSource[model]);
 
-        setState(state => ({ ...state, type: model, id: undefined }));
+        setState(state => ({ ...state, type: model, id: undefined, populate: false }));
         setTemplates(options);
+        setSelectedOrgUnits([]);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
@@ -136,7 +142,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             }
         }
 
-        setState(state => ({ ...state, id: value }));
+        setState(state => ({ ...state, id: value, populate: false }));
+        setSelectedOrgUnits([]);
     };
 
     const onThemeChange = ({ value }: SelectOption) => {
@@ -164,10 +171,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const onLanguageChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            language: value,
-        }));
+        setState(state => ({ ...state, language: value }));
     };
 
     const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
@@ -251,25 +255,28 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             </div>
 
             {!_.isEmpty(orgUnitTreeRootIds) ? (
-                settings.showOrgUnitsOnGeneration && state.type !== "custom" ? (
+                settings.showOrgUnitsOnGeneration ? (
                     <div className={classes.orgUnitSelector}>
                         <OrgUnitsSelector
                             api={api}
-                            onChange={onOrgUnitChange}
+                            rootIds={orgUnitTreeRootIds}
+                            selectableIds={orgUnitTreeFilter}
                             selected={selectedOrgUnits}
+                            onChange={onOrgUnitChange}
+                            fullWidth={false}
+                            height={250}
                             controls={{
                                 filterByLevel: true,
                                 filterByGroup: true,
                                 selectAll: true,
                             }}
-                            rootIds={orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={250}
                         />
                     </div>
                 ) : null
             ) : (
-                i18n.t("No capture organisations units")
+                <div className={classes.orgUnitError}>
+                    {i18n.t("User does not have any capture organisations units")}
+                </div>
             )}
 
             {settings.showOrgUnitsOnGeneration && (
@@ -301,6 +308,12 @@ const useStyles = makeStyles({
     populateCheckbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em" },
     fullWidth: { width: "100%" },
+    orgUnitError: {
+        height: 250,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {
