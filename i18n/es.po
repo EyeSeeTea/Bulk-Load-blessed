@@ -39,8 +39,8 @@ msgstr "Modelos"
 msgid "Visibility"
 msgstr "Visibilidad"
 
-msgid "Show Organisation Units On Template Generation"
-msgstr "Mostrar unidades organizativas en la plantilla de generación"
+msgid "Organisation Units visibility"
+msgstr "Visibilidad de unidades organizativas"
 
 msgid "User groups for Template Generation"
 msgstr "Grupos de usuario con acceso a la plantilla de generación"
@@ -55,7 +55,9 @@ msgid "Select Organisation Units on template import"
 msgstr "Mostrar unidades organizativas en la sección de importación"
 
 msgid "Select Organisation Units on template generation and import"
-msgstr "Mostrar unidades organizativas en la sección de generación y en la de importación"
+msgstr ""
+"Mostrar unidades organizativas en la sección de generación y en la de "
+"importación"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -208,10 +210,8 @@ msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr ""
 
 msgid "Select at least one organisation unit to import data"
-msgstr "Seleccione al menos una unidad organizativa a la que importar los datos"
-
-msgid "Selected organisation unit is not associated with the dataset"
-msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
+msgstr ""
+"Seleccione al menos una unidad organizativa a la que importar los datos"
 
 msgid "Imported"
 msgstr "Importados"
@@ -264,6 +264,9 @@ msgstr "Crear"
 msgid "data values"
 msgstr "valores de datos"
 
+msgid "Select import Organisation Unit"
+msgstr "Seleccione unidad organizativas a importar"
+
 msgid "No capture org unit match element org units"
 msgstr ""
 "Las unidades organizativas de introducción de datos y del elemento no "
@@ -271,24 +274,3 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
-
-#, fuzzy
-#~ msgid "Organisation unit group"
-#~ msgstr "No se han encontrado unidades organizativas"
-
-#, fuzzy
-#~ msgid "For organisation units within"
-#~ msgstr "No se han encontrado unidades organizativas"
-
-#, fuzzy
-#~ msgid "For all organisation units"
-#~ msgstr "No se han encontrado unidades organizativas"
-
-#~ msgid "Object not found in database"
-#~ msgstr "No se ha encontrado el objeto en la base de datos"
-
-#~ msgid "export"
-#~ msgstr "exportar"
-
-#~ msgid "Save"
-#~ msgstr "Guardar"
