@@ -195,7 +195,7 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr ""
 
-msgid "You need to select start and end dates for dataSet templates"
+msgid "You need to select start and end dates"
 msgstr ""
 
 msgid "Cannot read file"
