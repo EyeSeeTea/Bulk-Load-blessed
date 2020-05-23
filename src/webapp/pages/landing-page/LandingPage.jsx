@@ -182,6 +182,7 @@ export default function LandingPage() {
                 rowOffset,
                 colOffset,
                 orgUnits,
+                object,
             } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
 
             const data = await sheetImport.readSheet({
@@ -195,7 +196,7 @@ export default function LandingPage() {
             });
 
             const removedDataValues = _.remove(
-                data.dataValues,
+                data.dataValues ?? data.events,
                 ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
             );
 
@@ -216,7 +217,7 @@ export default function LandingPage() {
                         updateDialog(null);
                     },
                     onInfoAction: () => {
-                        downloadInvalidOrganisations(removedDataValues);
+                        downloadInvalidOrganisations(object.type, removedDataValues);
                     },
                     cancelText: i18n.t("Cancel"),
                     saveText: i18n.t("Ok"),
@@ -231,8 +232,9 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const downloadInvalidOrganisations = dataValues => {
-        const json = JSON.stringify({ dataValues }, null, 4);
+    const downloadInvalidOrganisations = (type, elements) => {
+        const object = type === "dataSet" ? { dataValues: elements } : { events: elements };
+        const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
         saveAs(blob, `invalid-organisations-${date}.json`);
