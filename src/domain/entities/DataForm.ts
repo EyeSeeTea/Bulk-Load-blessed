@@ -11,4 +11,6 @@ export interface DataForm {
         attribute: { code: string };
         value: string;
     }[];
+    readAccess: boolean;
+    writeAccess: boolean;
 }

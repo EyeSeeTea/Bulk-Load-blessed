@@ -31,6 +31,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 name: true,
                 attributeValues: { value: true, attribute: { code: true } },
                 periodType: true,
+                access: true,
             },
             filter: {
                 id: ids ? { in: ids } : undefined,
@@ -42,10 +43,14 @@ export class InstanceDhisRepository implements InstanceRepository {
             ? this.api.models.dataSets.get(params).getData()
             : this.api.models.programs.get(params).getData());
 
-        return objects.map(({ displayName, name, ...rest }) => ({
+        return objects.map(({ displayName, name, access, ...rest }) => ({
             ...rest,
             type,
             name: displayName ?? name,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            readAccess: access.data?.read,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            writeAccess: access.data?.write,
         }));
     }
 
@@ -145,7 +150,8 @@ export class InstanceDhisRepository implements InstanceRepository {
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
         const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
         if (categoryOptions.length === 0) {
-            throw new Error(`Could not find category options for the program ${id}`);
+            console.error(`Could not find category options for the program ${id}`);
+            return [];
         }
 
         try {

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-21T13:58:30.275Z\n"
-"PO-Revision-Date: 2020-05-21T13:58:30.275Z\n"
+"POT-Creation-Date: 2020-05-19T09:51:33.954Z\n"
+"PO-Revision-Date: 2020-05-19T09:51:33.954Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -187,6 +187,9 @@ msgid "You need to select start and end dates"
 msgstr ""
 
 msgid "Cannot read file"
+msgstr ""
+
+msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr ""
 
 msgid "Select a organisation units to import data"
