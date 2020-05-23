@@ -8,11 +8,10 @@ module.exports = {
         "\\.(css|scss)$": "<rootDir>/config/styleMock.js",
         "\\.(jpg|jpeg|png|svg)$": "<rootDir>/config/fileMock.js",
     },
-    transform: {
-        "^.+\\.jsx?$": "babel-jest",
-        "^.+\\.tsx?$": "ts-jest",
+    "transform": {
+        "^.+\\.[t|j]sx?$": "babel-jest"
     },
-    testRegex: "/src/.*/__tests__/.*(test|spec)\\.(jsx?|tsx?)$",
+    testRegex: "/src/.*/.*(test|spec)\\.(jsx?|tsx?)$",
     moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
     testEnvironment: "jsdom",
     globals: {
@@ -20,9 +19,5 @@ module.exports = {
         document: true,
         navigator: true,
         Element: true,
-        "ts-jest": {
-            tsConfig: "tsconfig.test.json",
-        },
     },
-    snapshotSerializers: ["enzyme-to-json/serializer"],
 };
