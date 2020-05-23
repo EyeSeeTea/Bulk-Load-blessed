@@ -15,9 +15,9 @@ const defaultName = "Bulk Load Storage";
 export class StorageConstantRepository extends StorageRepository {
     private api: D2Api;
 
-    constructor({ url }: DhisInstance) {
+    constructor({ url }: DhisInstance, mockApi?: D2Api) {
         super();
-        this.api = new D2ApiDefault({ baseUrl: url });
+        this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
     private buildDefault<T extends object>(key: string, value: T): Constant {

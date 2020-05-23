@@ -15,8 +15,8 @@ import { promiseMap } from "../webapp/utils/common";
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
 
-    constructor({ url }: DhisInstance) {
-        this.api = new D2ApiDefault({ baseUrl: url });
+    constructor({ url }: DhisInstance, mockApi?: D2Api) {
+        this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
     public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
