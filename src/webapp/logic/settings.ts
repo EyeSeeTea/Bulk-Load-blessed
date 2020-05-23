@@ -82,39 +82,31 @@ export default class Settings {
 
         const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
 
-        const defaultData = {
-            models: { dataSet: true, program: true },
-            userGroupsForGeneration: [],
-            userGroupsForSettings: [],
-            orgUnitSelection: "both",
-            ...defaultSettings,
-        };
-
         const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
             Settings.constantCode,
-            defaultData
+            defaultSettings
         );
 
         const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
             userGroups,
             data.userGroupsForGeneration,
-            defaultData.userGroupsForGeneration
+            defaultSettings.userGroupsForGeneration
         );
 
         const userGroupsForSettings = getUserGroupsWithSettingEnabled(
             userGroups,
             data.userGroupsForSettings,
-            defaultData.userGroupsForSettings
+            defaultSettings.userGroupsForSettings
         );
 
         return new Settings({
             api,
             currentUser,
             userGroups: userGroups,
-            models: data.models ?? defaultData.models,
+            models: data.models ?? defaultSettings.models,
             userGroupsForGeneration,
             userGroupsForSettings,
-            orgUnitSelection: data.orgUnitSelection ?? defaultData.orgUnitSelection,
+            orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
         });
     }
 
