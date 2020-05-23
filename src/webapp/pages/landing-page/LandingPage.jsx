@@ -1,7 +1,7 @@
 import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
@@ -10,7 +10,6 @@ import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import useModal from "../../components/modal/useModal";
 import SettingsComponent from "../../components/settings/SettingsDialog";
 import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import ThemeListDialog from "../../components/theme-list/ThemeListDialog";
@@ -25,10 +24,10 @@ export default function LandingPage() {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const { d2, api } = useAppContext();
-    const [ModalComponent, updateModal, closeModal] = useModal();
 
     const [settings, setSettings] = useState();
     const [themes, setThemes] = useState();
+    const [dialogProps, updateDialog] = useState(null);
     const [state, setState] = useState({
         template: null,
         orgUnitTreeSelected2: [],
@@ -203,18 +202,18 @@ export default function LandingPage() {
             if (removedDataValues.length === 0) {
                 await checkExistingData(data);
             } else {
-                updateModal({
+                updateDialog({
                     title: i18n.t("Invalid organisation units found"),
                     description: i18n.t(
                         "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and import them back once the organisation unit is created or assigned to this template.",
                         { number: removedDataValues.length }
                     ),
                     onCancel: () => {
-                        closeModal();
+                        updateDialog(null);
                     },
                     onSave: () => {
                         checkExistingData(data);
-                        closeModal();
+                        updateDialog(null);
                     },
                     onInfoAction: () => {
                         downloadInvalidOrganisations(removedDataValues);
@@ -222,7 +221,6 @@ export default function LandingPage() {
                     cancelText: i18n.t("Cancel"),
                     saveText: i18n.t("Ok"),
                     infoActionText: i18n.t("Download data values with invalid organisation units"),
-                    autoClose: false,
                 });
             }
         } catch (reason) {
@@ -246,14 +244,23 @@ export default function LandingPage() {
         if (dataValues.length === 0) {
             await performImport({ data, dataValues });
         } else {
-            updateModal({
+            updateDialog({
                 title: i18n.t("Existing data values"),
                 description: i18n.t(
                     "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
                     { dataValuesSize: dataValues.length }
                 ),
-                onSave: () => performImport({ data, dataValues }),
-                onInfoAction: () => performImport({ data, dataValues, overwrite: false }),
+                onSave: () => {
+                    performImport({ data, dataValues });
+                    updateDialog(null);
+                },
+                onInfoAction: () => {
+                    performImport({ data, dataValues, overwrite: false });
+                    updateDialog(null);
+                },
+                onCancel: () => {
+                    updateDialog(null);
+                },
                 saveText: i18n.t("Proceed"),
                 cancelText: i18n.t("Cancel"),
                 infoActionText: i18n.t("Import only new data values"),
@@ -352,7 +359,7 @@ export default function LandingPage() {
                 </React.Fragment>
             )}
 
-            <ModalComponent maxWidth={"xl"} />
+            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
             <Paper
                 style={{
