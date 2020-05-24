@@ -40,7 +40,7 @@ msgid "Visibility"
 msgstr "Visibilidad"
 
 msgid "Organisation Units visibility"
-msgstr ""
+msgstr "Visibilidad de unidades organizativas"
 
 msgid "User groups for Template Generation"
 msgstr "Grupos de usuario con acceso a la plantilla de generación"
@@ -48,17 +48,16 @@ msgstr "Grupos de usuario con acceso a la plantilla de generación"
 msgid "User groups with access to Settings"
 msgstr "Grupos de usuario con acceso a la configuración"
 
-#, fuzzy
 msgid "Select Organisation Units on template generation"
-msgstr "Mostrar unidades organizativas en la plantilla de generación"
+msgstr "Mostrar unidades organizativas en la sección de generación"
 
-#, fuzzy
 msgid "Select Organisation Units on template import"
-msgstr "Seleccione una unidad organizativa en la que importar los datos"
+msgstr "Mostrar unidades organizativas en la sección de importación"
 
-#, fuzzy
 msgid "Select Organisation Units on template generation and import"
-msgstr "Mostrar unidades organizativas en la plantilla de generación"
+msgstr ""
+"Mostrar unidades organizativas en la sección de generación y en la de "
+"importación"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -72,9 +71,8 @@ msgstr "elementos"
 msgid "Model"
 msgstr "Modelo"
 
-#, fuzzy
 msgid "Select {{elementLabel}} to export..."
-msgstr "Seleccione {{element}} a {{action}}..."
+msgstr "Seleccione {{element}} a exportar..."
 
 msgid "Language"
 msgstr ""
@@ -85,21 +83,17 @@ msgstr ""
 msgid "No theme"
 msgstr ""
 
-#, fuzzy
 msgid "Start date"
-msgstr "Año inicial"
+msgstr "Fecha de inicio"
 
-#, fuzzy
 msgid "End date"
-msgstr "Año final"
+msgstr "Fecha de fin"
 
-#, fuzzy
 msgid "Select available Organisation Units"
-msgstr "Seleccione una unidad organizativa en la que importar los datos"
+msgstr "Seleccione unidad organizativas disponibles"
 
-#, fuzzy
 msgid "User does not have any capture organisations units"
-msgstr "No se han encontrado unidades organizativas"
+msgstr "El usuario no tiene unidades organizativas asociadas"
 
 msgid "Populate template with instance data"
 msgstr ""
@@ -131,7 +125,6 @@ msgstr ""
 msgid "Logo"
 msgstr ""
 
-#, fuzzy
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
 
@@ -204,13 +197,11 @@ msgstr ""
 "No se puede importar: Las versiones no coinciden (base de "
 "datos={{dbVersion}}, fichero={{sheetVersion}})"
 
-#, fuzzy
 msgid "You need to select at least one element to export"
-msgstr "Seleccione al menos un {{element}}"
+msgstr "Seleccione al menos un elemento a exportar"
 
-#, fuzzy
-msgid "You need to select start and end dates for dataSet templates"
-msgstr "Seleccione al menos un {{element}}"
+msgid "You need to select start and end dates"
+msgstr "Seleccione fecha de inicio y de fin"
 
 msgid "Cannot read file"
 msgstr "No se puede leer el fichero"
@@ -218,9 +209,9 @@ msgstr "No se puede leer el fichero"
 msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr ""
 
-#, fuzzy
 msgid "Select at least one organisation unit to import data"
-msgstr "Seleccione una unidad organizativa en la que importar los datos"
+msgstr ""
+"Seleccione al menos una unidad organizativa a la que importar los datos"
 
 msgid "Imported"
 msgstr "Importados"
@@ -252,9 +243,8 @@ msgstr "Continuar"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#, fuzzy
 msgid "Import only new data values"
-msgstr "valores de datos"
+msgstr "Importar solo nuevos data values"
 
 msgid "Template Generation"
 msgstr "Generación de plantilla"
@@ -268,17 +258,15 @@ msgstr "Importación"
 msgid "Drag and drop file to import"
 msgstr "Mueva aquí los ficheros a importar"
 
-#, fuzzy
 msgid "Update"
-msgstr "Actualizados"
+msgstr "Actualizar"
 
 msgid "Create"
-msgstr ""
+msgstr "Crear"
 
 msgid "data values"
 msgstr "valores de datos"
 
-#, fuzzy
 msgid "Select import Organisation Unit"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"
 
@@ -289,31 +277,3 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
-
-#~ msgid "Save"
-#~ msgstr "Guardar"
-
-#, fuzzy
-#~ msgid "Data Element"
-#~ msgstr "Data Set"
-
-#, fuzzy
-#~ msgid "Import Value"
-#~ msgstr "Importados"
-
-#, fuzzy
-#~ msgid "Toggle ignore data value"
-#~ msgstr "Se ha producido un error borrando valores de datos"
-
-#, fuzzy
-#~ msgid "Include data value"
-#~ msgstr "valores de datos"
-
-#~ msgid "Selected organisation unit is not associated with the dataset"
-#~ msgstr "La unidad organizativa seleccionada no está asociada con el dataset"
-
-#~ msgid "Object not found in database"
-#~ msgstr "No se ha encontrado el objeto en la base de datos"
-
-#~ msgid "export"
-#~ msgstr "exportar"

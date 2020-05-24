@@ -181,7 +181,7 @@ export async function readSheet({
             row.eachCell((cell, colNumber) => {
                 if (isProgram && colNumber > 4 + colOffset) {
                     const id = columns[colNumber].formula.substr(1);
-                    let cellValue =
+                    const cellValue =
                         cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
 
                     const dataElement = elementMetadata.get(id);
