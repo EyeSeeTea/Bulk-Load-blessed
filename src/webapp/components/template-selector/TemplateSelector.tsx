@@ -52,6 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(true);
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
@@ -105,12 +106,14 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     useEffect(() => {
         const { type, id, ...rest } = state;
         if (type && id) {
-            const orgUnits = cleanOrgUnitPaths(selectedOrgUnits);
+            const orgUnits = filterOrgUnits
+                ? cleanOrgUnitPaths(selectedOrgUnits)
+                : orgUnitTreeFilter;
             onChange({ type, id, orgUnits, ...rest });
         } else {
             onChange(null);
         }
-    }, [state, selectedOrgUnits, onChange]);
+    }, [state, selectedOrgUnits, filterOrgUnits, orgUnitTreeFilter, onChange]);
 
     const showModelSelector = models.length > 1;
     const elementLabel = showModelSelector ? i18n.t("elements") : models[0]?.label;
@@ -125,6 +128,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, type: model, id: undefined, populate: false }));
         setTemplates(options);
         setSelectedOrgUnits([]);
+        setUserHasReadAccess(false);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
@@ -170,15 +174,18 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setSelectedOrgUnits(orgUnitPaths);
     };
 
-    const onPopulateChange = (_event: React.ChangeEvent, checked: boolean) => {
-        setState(state => ({ ...state, populate: checked }));
+    const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
+        setState(state => ({ ...state, populate }));
+    };
+
+    const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
+        setState(state => ({ ...state, populate: false }));
+        setFilterOrgUnits(filterOrgUnits);
     };
 
     const onLanguageChange = ({ value }: SelectOption) => {
         setState(state => ({ ...state, language: value }));
     };
-
-    const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
 
     return (
         <React.Fragment>
@@ -258,42 +265,55 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             </div>
 
-            {settings.showOrgUnitsOnGeneration && (
+            {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
-                    {!_.isEmpty(orgUnitTreeRootIds) ? (
-                        <div className={classes.orgUnitSelector}>
-                            <OrgUnitsSelector
-                                api={api}
-                                rootIds={orgUnitTreeRootIds}
-                                selectableIds={orgUnitTreeFilter}
-                                selected={selectedOrgUnits}
-                                onChange={onOrgUnitChange}
-                                fullWidth={false}
-                                height={250}
-                                controls={{
-                                    filterByLevel: true,
-                                    filterByGroup: true,
-                                    selectAll: true,
-                                }}
-                            />
-                        </div>
-                    ) : (
-                        <div className={classes.orgUnitError}>
-                            {i18n.t("User does not have any capture organisations units")}
-                        </div>
-                    )}
-
-                    {userHasReadAccess && (
+                    <div>
                         <FormControlLabel
-                            disabled={!enablePopulate}
-                            className={classes.populateCheckbox}
+                            className={classes.checkbox}
                             control={
-                                <Checkbox checked={state.populate} onChange={onPopulateChange} />
+                                <Checkbox
+                                    checked={filterOrgUnits}
+                                    onChange={onFilterOrgUnitsChange}
+                                />
                             }
-                            label={i18n.t("Populate template with instance data")}
+                            label={i18n.t("Select available Organisation Units")}
                         />
-                    )}
+                    </div>
+
+                    {filterOrgUnits &&
+                        (!_.isEmpty(orgUnitTreeRootIds) ? (
+                            <div className={classes.orgUnitSelector}>
+                                <OrgUnitsSelector
+                                    api={api}
+                                    rootIds={orgUnitTreeRootIds}
+                                    selectableIds={orgUnitTreeFilter}
+                                    selected={selectedOrgUnits}
+                                    onChange={onOrgUnitChange}
+                                    fullWidth={false}
+                                    height={250}
+                                    controls={{
+                                        filterByLevel: true,
+                                        filterByGroup: true,
+                                        selectAll: true,
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <div className={classes.orgUnitError}>
+                                {i18n.t("User does not have any capture organisations units")}
+                            </div>
+                        ))}
                 </React.Fragment>
+            )}
+
+            {userHasReadAccess && (
+                <div>
+                    <FormControlLabel
+                        className={classes.checkbox}
+                        control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
+                        label={i18n.t("Populate template with instance data")}
+                    />
+                </div>
             )}
         </React.Fragment>
     );
@@ -313,7 +333,7 @@ const useStyles = makeStyles({
     themeSelect: { flexBasis: "30%", margin: "0.5em" },
     startDateSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
     endDateSelect: { flexBasis: "30%", margin: "0.5em" },
-    populateCheckbox: { marginTop: "1em" },
+    checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em" },
     fullWidth: { width: "100%" },
     orgUnitError: {

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-19T09:51:33.954Z\n"
-"PO-Revision-Date: 2020-05-19T09:51:33.954Z\n"
+"POT-Creation-Date: 2020-05-20T11:09:11.652Z\n"
+"PO-Revision-Date: 2020-05-20T11:09:11.652Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -38,13 +38,22 @@ msgstr ""
 msgid "Visibility"
 msgstr ""
 
-msgid "Show Organisation Units On Template Generation"
+msgid "Organisation Units visibility"
 msgstr ""
 
 msgid "User groups for Template Generation"
 msgstr ""
 
 msgid "User groups with access to Settings"
+msgstr ""
+
+msgid "Select Organisation Units on template generation"
+msgstr ""
+
+msgid "Select Organisation Units on template import"
+msgstr ""
+
+msgid "Select Organisation Units on template generation and import"
 msgstr ""
 
 msgid "Data Set"
@@ -75,6 +84,9 @@ msgid "Start date"
 msgstr ""
 
 msgid "End date"
+msgstr ""
+
+msgid "Select available Organisation Units"
 msgstr ""
 
 msgid "User does not have any capture organisations units"
@@ -192,10 +204,7 @@ msgstr ""
 msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr ""
 
-msgid "Select a organisation units to import data"
-msgstr ""
-
-msgid "Selected organisation unit is not associated with the dataset"
+msgid "Select at least one organisation unit to import data"
 msgstr ""
 
 msgid "Imported"
@@ -244,6 +253,9 @@ msgid "Create"
 msgstr ""
 
 msgid "data values"
+msgstr ""
+
+msgid "Select import Organisation Unit"
 msgstr ""
 
 msgid "No capture org unit match element org units"

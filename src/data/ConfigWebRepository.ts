@@ -1,9 +1,10 @@
-import { ConfigRepository, AppStorageType } from "../domain/repositories/ConfigRepository";
+import { AppSettings } from "../domain/entities/AppSettings";
+import { AppStorageType, ConfigRepository } from "../domain/repositories/ConfigRepository";
 
 interface JsonConfig {
     appKey?: string;
     storage?: AppStorageType;
-    defaultSettings?: object;
+    defaultSettings?: AppSettings;
 }
 
 export class ConfigWebRepository implements ConfigRepository {
@@ -17,7 +18,17 @@ export class ConfigWebRepository implements ConfigRepository {
         return this.jsonConfig.storage ?? "dataStore";
     }
 
-    getDefaultSettings(): object {
-        return this.jsonConfig.defaultSettings ?? {};
+    getDefaultSettings(): AppSettings {
+        return (
+            this.jsonConfig.defaultSettings ?? {
+                models: {
+                    dataSet: true,
+                    program: true,
+                },
+                userGroupsForGeneration: [],
+                userGroupsForSettings: [],
+                orgUnitSelection: "both",
+            }
+        );
     }
 }
