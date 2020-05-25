@@ -1,6 +1,7 @@
 import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
 import i18n from "../../locales";
+import { promiseMap } from "../utils/common";
 
 interface DataValuesData {
     dataSet: Id;
@@ -16,13 +17,13 @@ interface DataValuesData {
 
 export async function getDataValuesFromData(api: D2Api, data: DataValuesData) {
     const { dataSet, orgUnit, dataValues } = data;
-    const periods = dataValues.map(dataValue => dataValue.period.toString());
+    const allPeriods = dataValues.map(dataValue => dataValue.period.toString());
 
-    const dbDataValues = await api.dataValues
-        .getSet({ dataSet: [dataSet], orgUnit: [orgUnit], period: periods })
-        .getData();
+    const dbDataValues = await promiseMap(_.chunk(allPeriods, 300), period =>
+        api.dataValues.getSet({ dataSet: [dataSet], orgUnit: [orgUnit], period }).getData()
+    );
 
-    return dbDataValues.dataValues;
+    return dbDataValues.flatMap(({ dataValues }) => dataValues);
 }
 
 export async function deleteDataValues(
