@@ -2,6 +2,7 @@ import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { ConfirmationDialog, OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -26,6 +27,7 @@ export default function LandingPage() {
 
     const [settings, setSettings] = useState();
     const [themes, setThemes] = useState();
+    const [dialogProps, updateDialog] = useState(null);
     const [state, setState] = useState({
         template: null,
         orgUnitTreeSelected2: [],
@@ -36,7 +38,6 @@ export default function LandingPage() {
         importDataSheet: undefined,
         importMessages: [],
         importDataValues: [],
-        confirmOnExistingData: undefined,
     });
 
     useEffect(() => {
@@ -162,14 +163,12 @@ export default function LandingPage() {
         if (!state.importDataSheet) return;
         if (!state.orgUnitTreeSelected2) return;
 
-        const orgUnits = cleanOrgUnitPaths(state.orgUnitTreeSelected2);
-
         try {
             loading.show(true);
             const result = await dhisConnector.getElementMetadata({
                 d2,
                 element: state.importObject,
-                organisationUnits: orgUnits,
+                organisationUnits: cleanOrgUnitPaths(state.orgUnitTreeSelected2),
             });
 
             const useBuilderOrgUnits =
@@ -182,6 +181,8 @@ export default function LandingPage() {
             const {
                 rowOffset,
                 colOffset,
+                orgUnits,
+                object,
             } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
 
             const data = await sheetImport.readSheet({
@@ -194,13 +195,34 @@ export default function LandingPage() {
                 colOffset,
             });
 
-            const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
-            const info = { data, dataValues };
+            const removedDataValues = _.remove(
+                data.dataValues ?? data.events,
+                ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
+            );
 
-            if (_.isEmpty(dataValues)) {
-                await performImport(info);
+            if (removedDataValues.length === 0) {
+                await checkExistingData(data);
             } else {
-                setState(state => ({ ...state, confirmOnExistingData: info }));
+                updateDialog({
+                    title: i18n.t("Invalid organisation units found"),
+                    description: i18n.t(
+                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
+                        { number: removedDataValues.length }
+                    ),
+                    onCancel: () => {
+                        updateDialog(null);
+                    },
+                    onSave: () => {
+                        checkExistingData(data);
+                        updateDialog(null);
+                    },
+                    onInfoAction: () => {
+                        downloadInvalidOrganisations(object.type, removedDataValues);
+                    },
+                    cancelText: i18n.t("Cancel"),
+                    saveText: i18n.t("Proceed"),
+                    infoActionText: i18n.t("Download data values with invalid organisation units"),
+                });
             }
         } catch (reason) {
             console.error(reason);
@@ -210,9 +232,46 @@ export default function LandingPage() {
         loading.show(false);
     };
 
-    const performImport = async ({ data, dataValues: existingDataValues }, overwrite = true) => {
+    const downloadInvalidOrganisations = (type, elements) => {
+        const object = type === "dataSet" ? { dataValues: elements } : { events: elements };
+        const json = JSON.stringify(object, null, 4);
+        const blob = new Blob([json], { type: "application/json" });
+        const date = moment().format("YYYYMMDDHHmm");
+        saveAs(blob, `invalid-organisations-${date}.json`);
+    };
+
+    const checkExistingData = async data => {
+        const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
+
+        if (dataValues.length === 0) {
+            await performImport({ data, dataValues });
+        } else {
+            updateDialog({
+                title: i18n.t("Existing data values"),
+                description: i18n.t(
+                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { dataValuesSize: dataValues.length }
+                ),
+                onSave: () => {
+                    performImport({ data, dataValues });
+                    updateDialog(null);
+                },
+                onInfoAction: () => {
+                    performImport({ data, dataValues, overwrite: false });
+                    updateDialog(null);
+                },
+                onCancel: () => {
+                    updateDialog(null);
+                },
+                saveText: i18n.t("Proceed"),
+                cancelText: i18n.t("Cancel"),
+                infoActionText: i18n.t("Import only new data values"),
+            });
+        }
+    };
+
+    const performImport = async ({ data, dataValues: existingDataValues, overwrite = true }) => {
         loading.show(true);
-        setState(state => ({ ...state, confirmOnExistingData: undefined }));
 
         try {
             const dataValues = overwrite
@@ -291,29 +350,6 @@ export default function LandingPage() {
         setState(state => ({ ...state, overwriteOrgUnits }));
     }, []);
 
-    const ConfirmationOnExistingData = () => {
-        const { confirmOnExistingData } = state;
-
-        if (!confirmOnExistingData) return null;
-
-        return (
-            <ConfirmationDialog
-                isOpen={true}
-                title={i18n.t("Existing data values")}
-                description={i18n.t(
-                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { dataValuesSize: confirmOnExistingData.dataValues.length }
-                )}
-                onCancel={() => setState(state => ({ ...state, confirmOnExistingData: undefined }))}
-                onSave={() => performImport(confirmOnExistingData)}
-                onInfoAction={() => performImport(confirmOnExistingData, false)}
-                saveText={i18n.t("Proceed")}
-                cancelText={i18n.t("Cancel")}
-                infoActionText={i18n.t("Import only new data values")}
-            />
-        );
-    };
-
     if (!settings) return null;
 
     return (
@@ -325,7 +361,7 @@ export default function LandingPage() {
                 </React.Fragment>
             )}
 
-            <ConfirmationOnExistingData />
+            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
             <Paper
                 style={{

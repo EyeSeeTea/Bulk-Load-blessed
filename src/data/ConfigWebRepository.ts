@@ -19,16 +19,16 @@ export class ConfigWebRepository implements ConfigRepository {
     }
 
     getDefaultSettings(): AppSettings {
-        return (
-            this.jsonConfig.defaultSettings ?? {
-                models: {
-                    dataSet: true,
-                    program: true,
-                },
-                userGroupsForGeneration: [],
-                userGroupsForSettings: [],
-                orgUnitSelection: "both",
-            }
-        );
+        const defaultSettings = this.jsonConfig.defaultSettings ?? {};
+        return {
+            models: {
+                dataSet: true,
+                program: true,
+            },
+            userGroupsForGeneration: [],
+            userGroupsForSettings: [],
+            orgUnitSelection: "both",
+            ...defaultSettings,
+        };
     }
 }

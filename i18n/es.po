@@ -1,16 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-21T05:31:12.177Z\n"
+"POT-Creation-Date: 2020-05-21T07:15:28.660Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#, fuzzy
 msgid "Template not loaded"
-msgstr "Generación de plantilla"
+msgstr "Plantilla no cargada"
 
 msgid "Tracker programs are not supported"
 msgstr ""
@@ -216,14 +215,18 @@ msgstr ""
 msgid "Imported"
 msgstr "Importados"
 
-msgid "Updated"
-msgstr "Actualizados"
+msgid ""
+"There are {{number}} data values with an invalid organisation unit that will "
+"be ignored during import.\n"
+"You can still download them and import them back once the organisation unit "
+"is created or assigned to this template."
+msgstr ""
 
 msgid "Ignored"
 msgstr "Ignorados"
 
-msgid "Deleted"
-msgstr "Borrados"
+msgid "Download data values with invalid organisation units"
+msgstr "Descargar los valores de datos para las unidades organizativas invalidas"
 
 msgid "Existing data values"
 msgstr "Existen valores de datos"
@@ -240,11 +243,20 @@ msgstr ""
 msgid "Proceed"
 msgstr "Continuar"
 
-msgid "Cancel"
-msgstr "Cancelar"
-
 msgid "Import only new data values"
 msgstr "Importar solo nuevos data values"
+
+msgid "Imported"
+msgstr "Importados"
+
+msgid "Updated"
+msgstr "Actualizados"
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Deleted"
+msgstr "Borrados"
 
 msgid "Template Generation"
 msgstr "Generación de plantilla"
