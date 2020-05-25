@@ -1,7 +1,13 @@
 import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import { OrgUnitsSelector, useLoading, useSnackbar } from "d2-ui-components";
+import {
+    ConfirmationDialog,
+    ConfirmationDialogProps,
+    OrgUnitsSelector,
+    useLoading,
+    useSnackbar,
+} from "d2-ui-components";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
@@ -11,7 +17,6 @@ import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import useModal from "../../components/modal/useModal";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
@@ -36,7 +41,6 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
     const loading = useLoading();
     const snackbar = useSnackbar();
     const { api } = useAppContext();
-    const [ModalComponent, updateModal, closeModal] = useModal();
 
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
@@ -44,6 +48,7 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
     const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
     const [importState, setImportState] = useState<ImportState>();
     const [messages, setMessages] = useState<string[]>([]);
+    const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     useEffect(() => {
         CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
@@ -116,6 +121,7 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
                 rowOffset,
                 colOffset,
                 orgUnits,
+                object,
             } = await CompositionRoot.attach().templates.analyze.execute(file);
 
             const data = await sheetImport.readSheet({
@@ -128,33 +134,32 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
 
             const removedDataValues = _.remove(
                 //@ts-ignore FIXME Create typings for sheet import code
-                data.dataValues,
+                data.dataValues ?? data.events,
                 ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
             );
 
             if (removedDataValues.length === 0) {
                 await checkExistingData(data);
             } else {
-                updateModal({
+                updateDialog({
                     title: i18n.t("Invalid organisation units found"),
                     description: i18n.t(
-                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and import them back once the organisation unit is created or assigned to this template.",
+                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
                         { number: removedDataValues.length }
                     ),
                     onCancel: () => {
-                        closeModal();
+                        updateDialog(null);
                     },
                     onSave: () => {
                         checkExistingData(data);
-                        closeModal();
+                        updateDialog(null);
                     },
                     onInfoAction: () => {
-                        downloadInvalidOrganisations(removedDataValues);
+                        downloadInvalidOrganisations(object.type, removedDataValues);
                     },
                     cancelText: i18n.t("Cancel"),
-                    saveText: i18n.t("Ok"),
+                    saveText: i18n.t("Proceed"),
                     infoActionText: i18n.t("Download data values with invalid organisation units"),
-                    autoClose: false,
                 });
             }
         } catch (reason) {
@@ -165,8 +170,9 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
         loading.show(false);
     };
 
-    const downloadInvalidOrganisations = (dataValues: unknown) => {
-        const json = JSON.stringify({ dataValues }, null, 4);
+    const downloadInvalidOrganisations = (type: DataFormType, elements: unknown) => {
+        const object = type === "dataSets" ? { dataValues: elements } : { events: elements };
+        const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
         saveAs(blob, `invalid-organisations-${date}.json`);
@@ -178,14 +184,23 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
         if (dataValues.length === 0) {
             await performImport({ data, dataValues });
         } else {
-            updateModal({
+            updateDialog({
                 title: i18n.t("Existing data values"),
                 description: i18n.t(
                     "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
                     { dataValuesSize: dataValues.length }
                 ),
-                onSave: () => performImport({ data, dataValues }),
-                onInfoAction: () => performImport({ data, dataValues, overwrite: false }),
+                onSave: () => {
+                    performImport({ data, dataValues });
+                    updateDialog(null);
+                },
+                onInfoAction: () => {
+                    performImport({ data, dataValues, overwrite: false });
+                    updateDialog(null);
+                },
+                onCancel: () => {
+                    updateDialog(null);
+                },
                 saveText: i18n.t("Proceed"),
                 cancelText: i18n.t("Cancel"),
                 infoActionText: i18n.t("Import only new data values"),
@@ -255,7 +270,7 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
 
     return (
         <React.Fragment>
-            <ModalComponent maxWidth={"xl"} />
+            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
             <Paper
                 style={{

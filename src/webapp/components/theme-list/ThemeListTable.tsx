@@ -13,6 +13,7 @@ import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { promiseMap } from "../../utils/common";
+import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 
 interface WarningDialog {
@@ -27,6 +28,7 @@ export interface ThemeDetail {
     title: string;
     subtitle: string;
     logo: ReactNode;
+    palette: string[];
 }
 
 interface ThemeListTableProps {
@@ -100,6 +102,11 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     const columns: TableColumn<ThemeDetail>[] = [
         { name: "name", text: i18n.t("Name") },
         { name: "logo", text: i18n.t("Logo") },
+        {
+            name: "palette",
+            text: i18n.t("Color options"),
+            getValue: ({ palette }: ThemeDetail) => <ColorScale colors={palette} />,
+        },
         { name: "title", text: i18n.t("Title") },
         { name: "subtitle", text: i18n.t("Subtitle") },
     ];
@@ -167,7 +174,7 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
 }
 
 function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
-    return themes.map(({ id, name, sections, pictures }) => ({
+    return themes.map(({ id, name, sections, pictures, palette }) => ({
         id,
         name,
         title: sections?.title?.text ?? "-",
@@ -175,5 +182,6 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
         logo: pictures?.logo?.src ? (
             <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
         ) : null,
+        palette,
     }));
 }
