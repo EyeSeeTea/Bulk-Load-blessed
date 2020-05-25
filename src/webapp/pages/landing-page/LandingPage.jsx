@@ -206,7 +206,7 @@ export default function LandingPage() {
                 updateDialog({
                     title: i18n.t("Invalid organisation units found"),
                     description: i18n.t(
-                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and import them back once the organisation unit is created or assigned to this template.",
+                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
                         { number: removedDataValues.length }
                     ),
                     onCancel: () => {
@@ -220,7 +220,7 @@ export default function LandingPage() {
                         downloadInvalidOrganisations(object.type, removedDataValues);
                     },
                     cancelText: i18n.t("Cancel"),
-                    saveText: i18n.t("Ok"),
+                    saveText: i18n.t("Proceed"),
                     infoActionText: i18n.t("Download data values with invalid organisation units"),
                 });
             }

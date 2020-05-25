@@ -8,9 +8,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#, fuzzy
 msgid "Template not loaded"
-msgstr "Generación de plantilla"
+msgstr "Plantilla no cargada"
 
 msgid "Tracker programs are not supported"
 msgstr ""
@@ -54,7 +53,6 @@ msgstr "Mostrar unidades organizativas en la sección de generación"
 msgid "Select Organisation Units on template import"
 msgstr "Mostrar unidades organizativas en la sección de importación"
 
-#, fuzzy
 msgid "Select Organisation Units on template generation and import"
 msgstr ""
 "Mostrar unidades organizativas en la sección de generación y en la de "
