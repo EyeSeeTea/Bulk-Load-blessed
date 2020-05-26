@@ -197,10 +197,12 @@ export async function readSheet({
                         dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
 
                     const { type } = elementMetadata.get(id);
-                    const isDisaggregated = type === "categoryOptionCombo";
+                    const isDisaggregated = type === "categoryOptionCombos";
 
                     const dataElement = elementMetadata.get(dataElementId);
-                    const cellValue = cell.value?.toString();
+                    const cellValue =
+                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+
                     const value = formatValue({
                         dataElement,
                         cellValue,
