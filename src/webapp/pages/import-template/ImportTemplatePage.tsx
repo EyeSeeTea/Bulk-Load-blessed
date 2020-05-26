@@ -20,12 +20,8 @@ import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
-import Settings from "../../logic/settings";
 import * as sheetImport from "../../logic/sheetImport";
-
-interface ImportTemplatePageProps {
-    settings: Settings;
-}
+import { RouteComponentProps } from "../root/RootPage";
 
 interface ImportState {
     dataForm: DataForm;
@@ -37,7 +33,7 @@ interface ImportState {
     }[];
 }
 
-export default function ImportTemplatePage({ settings }: ImportTemplatePageProps) {
+export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
@@ -273,7 +269,7 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
-            <h1>{i18n.t("Bulk Import")}</h1>
+            <h3>{i18n.t("Bulk Import")}</h3>
 
             <Dropzone
                 accept={

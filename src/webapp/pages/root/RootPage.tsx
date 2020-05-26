@@ -116,9 +116,7 @@ const routes: AppRoute[] = [
         icon: "cloud_upload",
         path: "/import",
         section: "main",
-        component: ({ settings }: RouteComponentProps) => (
-            <ImportTemplatePage settings={settings} />
-        ),
+        component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
     },
     {
         key: "themes",
