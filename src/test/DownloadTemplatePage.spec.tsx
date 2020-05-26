@@ -1,12 +1,12 @@
 import "@testing-library/jest-dom/extend-expect";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, wait, fireEvent } from "@testing-library/react";
 import { LoadingProvider, SnackbarProvider } from "d2-ui-components";
 import _ from "lodash";
 import React from "react";
 import { CompositionRoot } from "../CompositionRoot";
 import { AppContext } from "../webapp/contexts/api-context";
 import Settings from "../webapp/logic/settings";
-import ImportTemplatePage from "../webapp/pages/import-template/ImportTemplatePage";
+import DownloadTemplatePage from "../webapp/pages/download-template/DownloadTemplatePage";
 import { initializeMockServer } from "./mocks/server";
 
 let settings: Settings;
@@ -18,7 +18,7 @@ const renderComponent = async () => {
             <AppContext.Provider value={{ api, d2: {} }}>
                 <LoadingProvider>
                     <SnackbarProvider>
-                        <ImportTemplatePage
+                        <DownloadTemplatePage
                             settings={settings}
                             themes={[]}
                             setSettings={_.noop}
@@ -48,9 +48,9 @@ describe("ImportTemplatePage", () => {
     test("Renders correctly", async () => {
         await renderComponent();
 
-        expect(screen.getByRole("heading", { name: "Bulk Import" })).toBeInTheDocument();
-        expect(screen.getByText(/drag and drop/i)).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Import data" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Template properties" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Advanced properties" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Download template" })).toBeInTheDocument();
     });
 });
 
