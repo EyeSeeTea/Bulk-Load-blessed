@@ -281,9 +281,6 @@ msgstr ""
 msgid "Import data"
 msgstr "Importar datos"
 
-msgid "Import template"
-msgstr "Importar datos"
-
 msgid "Themes"
 msgstr "Temas"
 
