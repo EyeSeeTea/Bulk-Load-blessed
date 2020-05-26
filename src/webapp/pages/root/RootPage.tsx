@@ -83,16 +83,14 @@ const Root = () => {
                             )}
 
                             {userRoutes.map(({ key, path, component }) => (
-                                <Route
-                                    key={key}
-                                    path={path}
-                                    children={component({
+                                <Route key={key} path={path}>
+                                    {component({
                                         settings,
                                         themes,
                                         setSettings,
                                         setThemes,
                                     })}
-                                />
+                                </Route>
                             ))}
                         </Switch>
                     </Paper>
