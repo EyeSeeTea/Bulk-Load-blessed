@@ -15,7 +15,7 @@ import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { RouteComponentProps } from "../../pages/root/RootPage";
-import { promiseMap } from "../../utils/common";
+import { promiseMap } from "../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 
@@ -40,12 +40,13 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const snackbar = useSnackbar();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
+    const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
+    const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
     const [sorting, setSorting] = useState<TableSorting<ThemeDetail>>({
         field: "name",
         order: "asc",
     });
-    const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
-    const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
+
     const rows = buildThemeDetails(themes, sorting);
 
     const newTheme = () => {

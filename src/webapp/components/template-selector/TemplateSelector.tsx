@@ -283,7 +283,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
             {availableLanguages.length > 0 && (
                 <div className={classes.row}>
-                    {" "}
                     <div className={classes.fullWidthSelect}>
                         <Select
                             placeholder={i18n.t("Language")}
@@ -291,12 +290,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             options={availableLanguages}
                             value={state.language ?? ""}
                         />
-                    </div>{" "}
+                    </div>
                 </div>
             )}
             {themeOptions.length > 0 && (
                 <div className={classes.row}>
-                    {" "}
                     <div className={classes.fullWidthSelect}>
                         <Select
                             placeholder={i18n.t("Theme")}
@@ -306,7 +304,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             emptyLabel={i18n.t("No theme")}
                             value={state.theme ?? ""}
                         />
-                    </div>{" "}
+                    </div>
                 </div>
             )}
 

@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { promiseMap } from "../utils/common";
+import { promiseMap } from "../utils/promises";
 
 export async function getElement(api, type, id) {
     const fields =

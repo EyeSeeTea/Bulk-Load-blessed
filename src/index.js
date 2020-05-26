@@ -1,11 +1,9 @@
-import React from "react";
-import axios from "axios";
-import ReactDOM from "react-dom";
 import { Provider } from "@dhis2/app-runtime";
-
-import App from "./webapp/components/app/App";
+import axios from "axios";
+import React from "react";
+import ReactDOM from "react-dom";
 import "./locales";
-import "./index.css";
+import App from "./webapp/components/app/App";
 
 async function getBaseUrl() {
     if (process.env.NODE_ENV === "development") {

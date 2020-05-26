@@ -10,7 +10,7 @@ import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
-import { promiseMap } from "../webapp/utils/common";
+import { promiseMap } from "../webapp/utils/promises";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;

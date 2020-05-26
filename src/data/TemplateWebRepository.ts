@@ -9,12 +9,9 @@ import * as templates from "./templates";
 const themeCollectionKey = "themes";
 
 export function getTemplates(): Template[] {
-    return _(templates)
-        .mapValues(TemplateClass => {
-            return new TemplateClass();
-        })
-        .values()
-        .value();
+    return _.values(templates).map(TemplateClass => {
+        return new TemplateClass();
+    });
 }
 
 export class TemplateWebRepository implements TemplateRepository {
