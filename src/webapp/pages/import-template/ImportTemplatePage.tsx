@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControlLabel, Paper } from "@material-ui/core";
+import { Button, Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import CloudDoneIcon from "@material-ui/icons/CloudDone";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import {
@@ -40,6 +40,7 @@ interface ImportState {
 export default function ImportTemplatePage({ settings }: ImportTemplatePageProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
+    const classes = useStyles();
     const { api } = useAppContext();
 
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
@@ -272,152 +273,189 @@ export default function ImportTemplatePage({ settings }: ImportTemplatePageProps
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
-            <Paper
-                style={{
-                    margin: "2em",
-                    marginTop: "2em",
-                    padding: "2em",
-                    width: "50%",
-                }}
+            <h1>{i18n.t("Bulk Import")}</h1>
+
+            <Dropzone
+                accept={
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
+                }
+                onDrop={onDrop}
+                multiple={false}
             >
-                <h1>{i18n.t("Bulk Import")}</h1>
-
-                <Dropzone
-                    accept={
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
-                    }
-                    onDrop={onDrop}
-                    multiple={false}
-                >
-                    {({ getRootProps, getInputProps, isDragActive, isDragAccept }) => (
-                        <section>
+                {({ getRootProps, getInputProps, isDragActive, isDragAccept }) => (
+                    <section>
+                        <div
+                            {...getRootProps({
+                                className: isDragActive
+                                    ? `${classes.stripes} ${
+                                          isDragAccept
+                                              ? classes.acceptStripes
+                                              : classes.rejectStripes
+                                      }`
+                                    : classes.dropzone,
+                            })}
+                        >
+                            <input {...getInputProps()} />
                             <div
-                                {...getRootProps({
-                                    className: isDragActive
-                                        ? isDragAccept
-                                            ? "stripes"
-                                            : "rejectStripes"
-                                        : "dropZone",
-                                })}
+                                className={classes.dropzoneTextStyle}
+                                hidden={importState?.file !== undefined}
                             >
-                                <input {...getInputProps()} />
-                                <div
-                                    className={"dropzoneTextStyle"}
-                                    hidden={importState?.file !== undefined}
-                                >
-                                    <p className={"dropzoneParagraph"}>
-                                        {i18n.t("Drag and drop file to import")}
-                                    </p>
-                                    <br />
-                                    <CloudUploadIcon className={"uploadIconSize"} />
-                                </div>
-                                <div
-                                    className={"dropzoneTextStyle"}
-                                    hidden={importState?.file === undefined}
-                                >
-                                    {importState?.file !== undefined && (
-                                        <p className={"dropzoneParagraph"}>
-                                            {importState?.file.name}
-                                        </p>
-                                    )}
-                                    <br />
-                                    <CloudDoneIcon className={"uploadIconSize"} />
-                                </div>
+                                <p className={classes.dropzoneParagraph}>
+                                    {i18n.t("Drag and drop file to import")}
+                                </p>
+                                <br />
+                                <CloudUploadIcon className={classes.uploadIconSize} />
                             </div>
-                        </section>
-                    )}
-                </Dropzone>
-
-                {importState?.dataForm && (
-                    <div
-                        style={{
-                            marginTop: 35,
-                            marginBottom: 15,
-                            marginLeft: 0,
-                            fontSize: "1.2em",
-                        }}
-                    >
-                        {getNameForModel(importState.dataForm.type)}: {importState.dataForm.name} (
-                        {importState.dataForm.id})
-                        {importState.summary.map((group, idx) => (
-                            <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                                {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
-                                {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
-                                {i18n.t("data values")} {group.id && `(${group.id})`}
-                            </li>
-                        ))}
-                    </div>
+                            <div
+                                className={classes.dropzoneTextStyle}
+                                hidden={importState?.file === undefined}
+                            >
+                                {importState?.file !== undefined && (
+                                    <p className={classes.dropzoneParagraph}>
+                                        {importState?.file.name}
+                                    </p>
+                                )}
+                                <br />
+                                <CloudDoneIcon className={classes.uploadIconSize} />
+                            </div>
+                        </div>
+                    </section>
                 )}
+            </Dropzone>
 
-                {settings.orgUnitSelection !== "generation" && (
-                    <div>
-                        <FormControlLabel
-                            style={{ marginTop: "1em" }}
-                            control={
-                                <Checkbox
-                                    checked={overwriteOrgUnits}
-                                    onChange={onOverwriteOrgUnitsChange}
-                                />
-                            }
-                            label={i18n.t("Select import Organisation Unit")}
-                        />
-                    </div>
-                )}
-
-                {overwriteOrgUnits &&
-                    (orgUnitTreeRootIds.length > 0 ? (
-                        <OrgUnitsSelector
-                            api={api}
-                            onChange={onOrgUnitChange}
-                            selected={selectedOrgUnits}
-                            rootIds={orgUnitTreeRootIds}
-                            selectableIds={orgUnitTreeFilter}
-                            fullWidth={false}
-                            height={220}
-                            controls={{
-                                filterByLevel: false,
-                                filterByGroup: false,
-                                selectAll: false,
-                            }}
-                        />
-                    ) : (
-                        i18n.t("No capture org unit match element org units")
-                    ))}
-
-                {messages.length > 0 && (
-                    <div
-                        style={{
-                            marginTop: "1em",
-                            marginRight: "2em",
-                            fontSize: "1.2em",
-                            border: "1px solid",
-                            padding: "1em",
-                        }}
-                    >
-                        {messages.map(msg => (
-                            <div key={msg}>{msg}</div>
-                        ))}
-                    </div>
-                )}
-
+            {importState?.dataForm && (
                 <div
-                    className="row"
                     style={{
-                        marginTop: "1.5em",
-                        marginLeft: "1em",
-                        marginRight: "1em",
+                        marginTop: 35,
+                        marginBottom: 15,
+                        marginLeft: 0,
+                        fontSize: "1.2em",
                     }}
                 >
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleDataImportClick}
-                        disabled={!importState?.dataForm}
-                    >
-                        {i18n.t("Import data")}
-                    </Button>
+                    {getNameForModel(importState.dataForm.type)}: {importState.dataForm.name} (
+                    {importState.dataForm.id})
+                    {importState.summary.map((group, idx) => (
+                        <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
+                            {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                            {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                            {i18n.t("data values")} {group.id && `(${group.id})`}
+                        </li>
+                    ))}
                 </div>
-            </Paper>
+            )}
+
+            {settings.orgUnitSelection !== "generation" && (
+                <div>
+                    <FormControlLabel
+                        style={{ marginTop: "1em" }}
+                        control={
+                            <Checkbox
+                                checked={overwriteOrgUnits}
+                                onChange={onOverwriteOrgUnitsChange}
+                            />
+                        }
+                        label={i18n.t("Select import Organisation Unit")}
+                    />
+                </div>
+            )}
+
+            {overwriteOrgUnits &&
+                (orgUnitTreeRootIds.length > 0 ? (
+                    <OrgUnitsSelector
+                        api={api}
+                        onChange={onOrgUnitChange}
+                        selected={selectedOrgUnits}
+                        rootIds={orgUnitTreeRootIds}
+                        selectableIds={orgUnitTreeFilter}
+                        fullWidth={false}
+                        height={220}
+                        controls={{
+                            filterByLevel: false,
+                            filterByGroup: false,
+                            selectAll: false,
+                        }}
+                    />
+                ) : (
+                    i18n.t("No capture org unit match element org units")
+                ))}
+
+            {messages.length > 0 && (
+                <div
+                    style={{
+                        marginTop: "1em",
+                        marginRight: "2em",
+                        fontSize: "1.2em",
+                        border: "1px solid",
+                        padding: "1em",
+                    }}
+                >
+                    {messages.map(msg => (
+                        <div key={msg}>{msg}</div>
+                    ))}
+                </div>
+            )}
+
+            <div
+                className="row"
+                style={{
+                    marginTop: "1.5em",
+                    marginLeft: "1em",
+                    marginRight: "1em",
+                }}
+            >
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleDataImportClick}
+                    disabled={!importState?.dataForm}
+                >
+                    {i18n.t("Import data")}
+                </Button>
+            </div>
         </React.Fragment>
     );
 }
+
+const useStyles = makeStyles({
+    dropzoneTextStyle: { textAlign: "center", top: "15%", position: "relative" },
+    dropzoneParagraph: { fontSize: 20 },
+    uploadIconSize: { width: 50, height: 50, color: "#909090" },
+    dropzone: {
+        position: "relative",
+        width: "100%",
+        height: 270,
+        backgroundColor: "#f0f0f0",
+        border: "dashed",
+        borderColor: "#c8c8c8",
+        cursor: "pointer",
+    },
+    stripes: {
+        width: "100%",
+        height: 270,
+        cursor: "pointer",
+        border: "solid",
+        borderColor: "#c8c8c8",
+        "-webkit-animation": "progress 2s linear infinite !important",
+        "-moz-animation": "progress 2s linear infinite !important",
+        animation: "progress 2s linear infinite !important",
+        backgroundSize: "150% 100%",
+    },
+    acceptStripes: {
+        backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            #f0f0f0,
+            #f0f0f0 25px,
+            #c8c8c8 25px,
+            #c8c8c8 50px
+        )`,
+    },
+    rejectStripes: {
+        backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            #fc8785,
+            #fc8785 25px,
+            #f4231f 25px,
+            #f4231f 50px
+        )`,
+    },
+});

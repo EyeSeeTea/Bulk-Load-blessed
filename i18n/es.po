@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-25T17:10:53.119Z\n"
+"POT-Creation-Date: 2020-05-26T06:09:46.470Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,24 +63,16 @@ msgstr "Data Set"
 msgid "Program"
 msgstr "Programa"
 
-msgid "elements"
-msgstr "elementos"
+#, fuzzy
+msgid "Template properties"
+msgstr "Generación de plantilla"
 
 msgid "Model"
 msgstr "Modelo"
 
 #, fuzzy
-msgid "Select {{elementLabel}} to export..."
+msgid "Select element to export..."
 msgstr "Seleccione {{element}} a {{action}}..."
-
-msgid "Language"
-msgstr ""
-
-msgid "Theme"
-msgstr ""
-
-msgid "No theme"
-msgstr ""
 
 #, fuzzy
 msgid "Start date"
@@ -91,12 +83,28 @@ msgid "End date"
 msgstr "Año final"
 
 #, fuzzy
+msgid "Organisation units"
+msgstr "Seleccione una unidad organizativa en la que importar los datos"
+
+#, fuzzy
 msgid "Select available Organisation Units"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"
 
 #, fuzzy
 msgid "User does not have any capture organisations units"
 msgstr "No se han encontrado unidades organizativas"
+
+msgid "Advanced properties"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "No theme"
+msgstr ""
 
 msgid "Populate template with instance data"
 msgstr ""
@@ -136,12 +144,6 @@ msgid "Pattern"
 msgstr ""
 
 msgid "Fixed"
-msgstr ""
-
-msgid "Themes"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "An error ocurred while saving theme"
@@ -208,9 +210,6 @@ msgstr "Seleccione al menos un {{element}}"
 #, fuzzy
 msgid "You need to select start and end dates for dataSet templates"
 msgstr "Seleccione al menos un {{element}}"
-
-msgid "Template Generation"
-msgstr "Generación de plantilla"
 
 msgid "Download template"
 msgstr "Descargar plantilla"
@@ -298,6 +297,16 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar datos"
+
+#, fuzzy
+msgid "Import template"
+msgstr "Importar datos"
+
+msgid "Themes"
+msgstr ""
+
+#~ msgid "elements"
+#~ msgstr "elementos"
 
 #~ msgid "Save"
 #~ msgstr "Guardar"

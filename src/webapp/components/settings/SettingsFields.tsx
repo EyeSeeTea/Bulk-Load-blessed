@@ -61,7 +61,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
     return (
         <div>
-            <FieldTitle>{i18n.t("Models")}</FieldTitle>
+            <h3>{i18n.t("Models")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
@@ -79,7 +79,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 ))}
             </FormGroup>
 
-            <FieldTitle>{i18n.t("Visibility")}</FieldTitle>
+            <h3>{i18n.t("Visibility")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
@@ -92,7 +92,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
+            <h3>{i18n.t("User groups for Template Generation")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
@@ -108,7 +108,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <FieldTitle>{i18n.t("User groups with access to Settings")}</FieldTitle>
+            <h3>{i18n.t("User groups with access to Settings")}</h3>
 
             <FormGroup row={true}>
                 <div className={classes.fullWidth}>
@@ -132,10 +132,6 @@ const useStyles = makeStyles({
     content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
     checkbox: { padding: 9 },
 });
-
-function FieldTitle(props: { children: React.ReactNode }) {
-    return <h3>{props.children}</h3>;
-}
 
 const orgUnitSelectionOptions: { value: OrgUnitSelectionSetting; label: string }[] = [
     {

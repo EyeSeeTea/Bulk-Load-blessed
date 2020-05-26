@@ -115,8 +115,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         }
     }, [state, selectedOrgUnits, filterOrgUnits, orgUnitTreeFilter, onChange]);
 
-    const showModelSelector = models.length > 1;
-    const elementLabel = showModelSelector ? i18n.t("elements") : models[0]?.label;
     const themeOptions = dataSource ? modelToSelectOption(themes) : [];
 
     const onModelChange = ({ value }: SelectOption) => {
@@ -189,23 +187,21 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     return (
         <React.Fragment>
-            <div className={classes.row}>
-                {showModelSelector && (
-                    <div className={classes.modelSelect}>
-                        <Select
-                            placeholder={i18n.t("Model")}
-                            onChange={onModelChange}
-                            options={models}
-                            value={state.type ?? ""}
-                        />
-                    </div>
-                )}
+            <h3>{i18n.t("Template properties")}</h3>
 
-                <div className={classes.templateSelect}>
+            <div className={classes.row}>
+                <div className={classes.halfWidthSelect}>
                     <Select
-                        placeholder={i18n.t("Select {{elementLabel}} to export...", {
-                            elementLabel,
-                        })}
+                        placeholder={i18n.t("Model")}
+                        onChange={onModelChange}
+                        options={models}
+                        value={state.type ?? ""}
+                    />
+                </div>
+
+                <div className={classes.halfWidthSelect}>
+                    <Select
+                        placeholder={i18n.t("Select element to export...")}
                         onChange={onTemplateChange}
                         options={templates}
                         value={state.id ?? ""}
@@ -214,32 +210,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             </div>
 
             <div className={classes.row}>
-                {availableLanguages.length > 0 && (
-                    <div className={classes.languageSelect}>
-                        <Select
-                            placeholder={i18n.t("Language")}
-                            onChange={onLanguageChange}
-                            options={availableLanguages}
-                            value={state.language ?? ""}
-                        />
-                    </div>
-                )}
-                {themeOptions.length > 0 && (
-                    <div className={classes.themeSelect}>
-                        <Select
-                            placeholder={i18n.t("Theme")}
-                            onChange={onThemeChange}
-                            options={themeOptions}
-                            allowEmpty={true}
-                            emptyLabel={i18n.t("No theme")}
-                            value={state.theme ?? ""}
-                        />
-                    </div>
-                )}
-            </div>
-
-            <div className={classes.row}>
-                <div className={classes.startDateSelect}>
+                <div className={classes.halfWidthSelect}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("Start date")}
@@ -251,7 +222,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         InputLabelProps={{ style: { color: "#494949" } }}
                     />
                 </div>
-                <div className={classes.endDateSelect}>
+                <div className={classes.halfWidthSelect}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("End date")}
@@ -267,9 +238,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
             {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
+                    <h3>{i18n.t("Organisation units")}</h3>
+
                     <div>
                         <FormControlLabel
-                            className={classes.checkbox}
                             control={
                                 <Checkbox
                                     checked={filterOrgUnits}
@@ -296,6 +268,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                         filterByGroup: true,
                                         selectAll: true,
                                     }}
+                                    withElevation={false}
                                 />
                             </div>
                         ) : (
@@ -306,10 +279,41 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </React.Fragment>
             )}
 
+            <h3>{i18n.t("Advanced properties")}</h3>
+
+            {availableLanguages.length > 0 && (
+                <div className={classes.row}>
+                    {" "}
+                    <div className={classes.fullWidthSelect}>
+                        <Select
+                            placeholder={i18n.t("Language")}
+                            onChange={onLanguageChange}
+                            options={availableLanguages}
+                            value={state.language ?? ""}
+                        />
+                    </div>{" "}
+                </div>
+            )}
+            {themeOptions.length > 0 && (
+                <div className={classes.row}>
+                    {" "}
+                    <div className={classes.fullWidthSelect}>
+                        <Select
+                            placeholder={i18n.t("Theme")}
+                            onChange={onThemeChange}
+                            options={themeOptions}
+                            allowEmpty={true}
+                            emptyLabel={i18n.t("No theme")}
+                            value={state.theme ?? ""}
+                        />
+                    </div>{" "}
+                </div>
+            )}
+
             {userHasReadAccess && (
                 <div>
                     <FormControlLabel
-                        className={classes.checkbox}
+                        className={classes.populateCheckbox}
                         control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
                         label={i18n.t("Populate template with instance data")}
                     />
@@ -324,17 +328,12 @@ const useStyles = makeStyles({
         display: "flex",
         flexFlow: "row nowrap",
         justifyContent: "space-around",
-        marginTop: "0.5em",
         marginRight: "1em",
     },
-    modelSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    templateSelect: { flexBasis: "70%", margin: "0.5em" },
-    languageSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    themeSelect: { flexBasis: "30%", margin: "0.5em" },
-    startDateSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    endDateSelect: { flexBasis: "30%", margin: "0.5em" },
-    checkbox: { marginTop: "1em" },
-    orgUnitSelector: { marginTop: "1em" },
+    halfWidthSelect: { flexBasis: "50%", margin: "0.5em", marginLeft: 0 },
+    fullWidthSelect: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    populateCheckbox: { marginTop: "1em" },
+    orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },
     orgUnitError: {
         height: 250,

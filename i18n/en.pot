@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-25T17:10:53.119Z\n"
-"PO-Revision-Date: 2020-05-25T17:10:53.119Z\n"
+"POT-Creation-Date: 2020-05-26T06:09:46.470Z\n"
+"PO-Revision-Date: 2020-05-26T06:09:46.470Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -59,13 +59,31 @@ msgstr ""
 msgid "Program"
 msgstr ""
 
-msgid "elements"
+msgid "Template properties"
 msgstr ""
 
 msgid "Model"
 msgstr ""
 
-msgid "Select {{elementLabel}} to export..."
+msgid "Select element to export..."
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
+msgstr ""
+
+msgid "Organisation units"
+msgstr ""
+
+msgid "Select available Organisation Units"
+msgstr ""
+
+msgid "User does not have any capture organisations units"
+msgstr ""
+
+msgid "Advanced properties"
 msgstr ""
 
 msgid "Language"
@@ -75,18 +93,6 @@ msgid "Theme"
 msgstr ""
 
 msgid "No theme"
-msgstr ""
-
-msgid "Start date"
-msgstr ""
-
-msgid "End date"
-msgstr ""
-
-msgid "Select available Organisation Units"
-msgstr ""
-
-msgid "User does not have any capture organisations units"
 msgstr ""
 
 msgid "Populate template with instance data"
@@ -126,12 +132,6 @@ msgid "Pattern"
 msgstr ""
 
 msgid "Fixed"
-msgstr ""
-
-msgid "Themes"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "An error ocurred while saving theme"
@@ -193,9 +193,6 @@ msgid "You need to select at least one element to export"
 msgstr ""
 
 msgid "You need to select start and end dates for dataSet templates"
-msgstr ""
-
-msgid "Template Generation"
 msgstr ""
 
 msgid "Download template"
@@ -274,4 +271,10 @@ msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"
+msgstr ""
+
+msgid "Import template"
+msgstr ""
+
+msgid "Themes"
 msgstr ""

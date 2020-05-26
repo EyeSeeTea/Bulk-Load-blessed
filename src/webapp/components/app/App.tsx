@@ -1,7 +1,5 @@
 //@ts-ignore
 import { useConfig, useDataQuery } from "@dhis2/app-runtime";
-//@ts-ignore
-import { HeaderBar } from "@dhis2/ui-widgets";
 import { LinearProgress } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 //@ts-ignore
@@ -15,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
 import { AppContext, AppContextI } from "../../contexts/api-context";
-import Root from "../../pages/root/Root";
+import Root from "../../pages/root/RootPage";
 import Share from "../share/Share";
 import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
@@ -132,14 +130,11 @@ const App = () => {
                 <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                     <LoadingProvider>
                         <SnackbarProvider>
-                            <HeaderBar appName={"Bulk Load"} />
-
-                            <div id="app" className="content">
+                            <div id="app">
                                 <AppContext.Provider value={appContext}>
                                     <Root />
                                 </AppContext.Provider>
                             </div>
-
                             <Share visible={showShareButton} />
                         </SnackbarProvider>
                     </LoadingProvider>
