@@ -25,8 +25,8 @@ export class ConfigWebRepository implements ConfigRepository {
                 dataSet: true,
                 program: true,
             },
-            userGroupsForGeneration: [],
-            userGroupsForSettings: [],
+            permissionsForGeneration: [],
+            permissionsForSettings: [],
             orgUnitSelection: "both",
             ...defaultSettings,
         };

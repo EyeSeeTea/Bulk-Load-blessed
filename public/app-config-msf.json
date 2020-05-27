@@ -10,7 +10,7 @@
             "dataSet": true,
             "program": false
         },
-        "userGroupsForGeneration": [
+        "permissionsForGeneration": [
             "HMIS Officers"
         ],
         "orgUnitSelection": "import"

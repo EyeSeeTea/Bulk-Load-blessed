@@ -6,7 +6,7 @@ export type OrgUnitSelectionSetting = "generation" | "import" | "both";
 
 export interface AppSettings {
     models: Record<Model, boolean>;
-    userGroupsForGeneration: string[];
-    userGroupsForSettings: string[];
+    permissionsForGeneration: string[];
+    permissionsForSettings: string[];
     orgUnitSelection: OrgUnitSelectionSetting;
 }

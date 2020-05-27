@@ -15,10 +15,20 @@ export function initializeMockServer() {
     // App Storage
     mock.onGet("/dataStore/bulk-load/BULK_LOAD_SETTINGS").reply(200, {
         models: { dataSet: true, program: true },
-        userGroupsForGeneration: ["BwyMfDBLih9"],
-        userGroupsForSettings: ["BwyMfDBLih9"],
+        permissionsForGeneration: ["BwyMfDBLih9"],
+        permissionsForSettings: ["BwyMfDBLih9"],
         orgUnitSelection: "both",
     });
+
+    // Permissions
+    mock.onGet("/metadata", {
+        params: {
+            "userGroups:fields": "displayName,id",
+            "userGroups:filter": ["identifiable:in:[BwyMfDBLih9]"],
+            "users:fields": "displayName,id",
+            "users:filter": ["identifiable:in:[BwyMfDBLih9]"],
+        },
+    }).reply(200, {});
 
     // Locales
     mock.onGet("/locales/dbLocales").reply(200, [

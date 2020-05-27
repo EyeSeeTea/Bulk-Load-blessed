@@ -1,49 +1,38 @@
-import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
-import { Id } from "d2-api";
-import { MultiSelector } from "d2-ui-components";
-import React, { ChangeEvent, useCallback, useMemo } from "react";
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Icon,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    makeStyles,
+} from "@material-ui/core";
+import { D2Api } from "d2-api";
+import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
+import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
 import { OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
-import Settings, { Model } from "../../logic/settings";
+import Settings, { Model, PermissionSetting, PermissionType } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
 export interface SettingsFieldsProps {
     settings: Settings;
-    onChange: (settings: Settings) => void;
+    onChange: (settings: Settings) => Promise<void>;
 }
 
 export default function SettingsFields(props: SettingsFieldsProps) {
-    const { d2 } = useAppContext();
     const { settings, onChange } = props;
     const classes = useStyles();
-
-    const options = useMemo(() => {
-        return settings.userGroups.map(userGroup => ({
-            value: userGroup.id,
-            text: userGroup.displayName,
-        }));
-    }, [settings.userGroups]);
+    const { api } = useAppContext();
+    const [sharingDialogType, setSharingDialogType] = useState<PermissionSetting | null>(null);
 
     const setModel = useCallback(
         (model: Model) => {
             return (ev: ChangeEvent<HTMLInputElement>) => {
                 onChange(settings.setModel(model, ev.target.checked));
             };
-        },
-        [settings, onChange]
-    );
-
-    const setUserGroupsForGeneration = useCallback(
-        (userGroupIds: Id[]) => {
-            onChange(settings.setUserGroupsForGenerationFromIds(userGroupIds));
-        },
-        [settings, onChange]
-    );
-
-    const setUserGroupsForSettings = useCallback(
-        (userGroupIds: Id[]) => {
-            onChange(settings.setUserGroupsForSettingsFromIds(userGroupIds));
         },
         [settings, onChange]
     );
@@ -77,8 +66,99 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         []
     );
 
+    const search = React.useCallback((query: string) => searchUsers(api, query), [api]);
+
+    const buildMetaObject = useCallback(
+        (setting: PermissionSetting) => {
+            const displayName =
+                setting === "generation"
+                    ? i18n.t("Access to Template Generation")
+                    : i18n.t("Access to Settings and Themes");
+
+            const buildSharings = (type: PermissionType) =>
+                settings.getPermissions(setting, type).map(sharing => ({ ...sharing, access: "" }));
+
+            return {
+                meta: {
+                    allowPublicAccess: false,
+                    allowExternalAccess: false,
+                },
+                object: {
+                    id: "",
+                    displayName,
+                    externalAccess: false,
+                    publicAccess: "",
+                    userAccesses: buildSharings("user"),
+                    userGroupAccesses: buildSharings("userGroup"),
+                },
+            };
+        },
+        [settings]
+    );
+
+    const onUpdateSharingOptions = useCallback(
+        (setting: PermissionSetting) => {
+            return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
+                const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
+                    rule?.map(({ id, displayName }) => ({ id, displayName })) ??
+                    settings.getPermissions(setting, type);
+
+                const newSettings = settings
+                    .setPermissions(setting, "user", buildPermission("user", users))
+                    .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
+
+                await onChange(newSettings);
+            };
+        },
+        [onChange, settings]
+    );
+
+    const buildSharingDescription = useCallback(
+        (setting: PermissionSetting) => {
+            const users = settings.getPermissions(setting, "user").length;
+            const userGroups = settings.getPermissions(setting, "userGroup").length;
+
+            if (users > 0 && userGroups > 0) {
+                return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {
+                    users,
+                    userGroups,
+                });
+            } else if (users > 0) {
+                return i18n.t("Accessible to {{users}} users", { users });
+            } else if (userGroups > 0) {
+                return i18n.t("Accessible to {{userGroups}} user groups", { userGroups });
+            } else if (setting === "settings") {
+                return i18n.t("Only accessible to system administrators");
+            } else {
+                return i18n.t("Not accessible");
+            }
+        },
+        [settings]
+    );
+
     return (
-        <div>
+        <React.Fragment>
+            {!!sharingDialogType && (
+                <ConfirmationDialog
+                    isOpen={true}
+                    fullWidth={true}
+                    onCancel={() => setSharingDialogType(null)}
+                    cancelText={i18n.t("Close")}
+                >
+                    <Sharing
+                        meta={buildMetaObject(sharingDialogType)}
+                        showOptions={{
+                            dataSharing: false,
+                            publicSharing: false,
+                            externalSharing: false,
+                            permissionPicker: false,
+                        }}
+                        onSearch={search}
+                        onChange={onUpdateSharingOptions(sharingDialogType)}
+                    />
+                </ConfirmationDialog>
+            )}
+
             <h3>{i18n.t("Models")}</h3>
 
             <FormGroup className={classes.content} row={true}>
@@ -110,38 +190,29 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3>{i18n.t("Access to Template Generation")}</h3>
+            <h3>{i18n.t("Permissions")}</h3>
 
             <FormGroup className={classes.content} row={true}>
-                <div className={classes.fullWidth}>
-                    <MultiSelector
-                        d2={d2}
-                        searchFilterLabel={true}
-                        ordered={false}
-                        height={200}
-                        onChange={setUserGroupsForGeneration}
-                        options={options}
-                        selected={settings.userGroupsForGeneration.map(userGroup => userGroup.id)}
+                <ListItem button onClick={() => setSharingDialogType("generation")}>
+                    <ListItemIcon>
+                        <Icon>cloud_download</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={"Access to Template Generation"}
+                        secondary={buildSharingDescription("generation")}
                     />
-                </div>
-            </FormGroup>
-
-            <h3>{i18n.t("Access to Settings and Themes")}</h3>
-
-            <FormGroup row={true}>
-                <div className={classes.fullWidth}>
-                    <MultiSelector
-                        d2={d2}
-                        searchFilterLabel={true}
-                        ordered={false}
-                        height={200}
-                        onChange={setUserGroupsForSettings}
-                        options={options}
-                        selected={settings.userGroupsForSettings.map(userGroup => userGroup.id)}
+                </ListItem>
+                <ListItem button onClick={() => setSharingDialogType("settings")}>
+                    <ListItemIcon>
+                        <Icon>settings</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={"Access to Settings and Themes"}
+                        secondary={buildSharingDescription("settings")}
                     />
-                </div>
+                </ListItem>
             </FormGroup>
-        </div>
+        </React.Fragment>
     );
 }
 
@@ -150,3 +221,11 @@ const useStyles = makeStyles({
     content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
     checkbox: { padding: 9 },
 });
+
+function searchUsers(api: D2Api, query: string) {
+    const options = {
+        fields: { id: true, displayName: true },
+        filter: { displayName: { ilike: query } },
+    };
+    return api.metadata.get({ users: options, userGroups: options }).getData();
+}

@@ -2,13 +2,7 @@ import { useSnackbar } from "d2-ui-components";
 import React from "react";
 import i18n from "../../../locales";
 import SettingsFields from "../../components/settings/SettingsFields";
-import Settings from "../../logic/settings";
 import { RouteComponentProps } from "../root/RootPage";
-
-export interface SettingsProps {
-    settings: Settings;
-    onChange: (settings: Settings) => void;
-}
 
 export default function SettingsPage({ settings, setSettings }: RouteComponentProps) {
     const snackbar = useSnackbar();
