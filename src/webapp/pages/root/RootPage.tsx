@@ -1,7 +1,8 @@
 //@ts-ignore
 import { HeaderBar } from "@dhis2/ui-widgets";
+import { makeStyles, Paper } from "@material-ui/core";
 import { useSnackbar } from "d2-ui-components";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
@@ -13,7 +14,6 @@ import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
 import ImportTemplatePage from "../import-template/ImportTemplatePage";
 import SettingsPage from "../settings/SettingsPage";
 import ThemesPage from "../themes/ThemesPage";
-import { Paper, makeStyles } from "@material-ui/core";
 
 export interface RouteComponentProps {
     settings: Settings;
@@ -51,6 +51,47 @@ const Root = () => {
     useEffect(() => {
         CompositionRoot.attach().themes.list.execute().then(setThemes);
     }, []);
+
+    const routes: AppRoute[] = useMemo(
+        () => [
+            {
+                key: "download",
+                name: i18n.t("Download template"),
+                icon: "cloud_download",
+                path: "/download",
+                section: "main",
+                auth: (settings: Settings) => settings.isTemplateGenerationVisible(),
+                component: (props: RouteComponentProps) => <DownloadTemplatePage {...props} />,
+            },
+            {
+                key: "import",
+                name: i18n.t("Import data"),
+                icon: "cloud_upload",
+                path: "/import",
+                section: "main",
+                component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
+            },
+            {
+                key: "themes",
+                name: i18n.t("Themes"),
+                icon: "format_paint",
+                path: "/themes",
+                section: "settings",
+                auth: (settings: Settings) => settings.areSettingsVisibleForCurrentUser(),
+                component: (props: RouteComponentProps) => <ThemesPage {...props} />,
+            },
+            {
+                key: "settings",
+                name: i18n.t("Settings"),
+                icon: "settings",
+                path: "/settings",
+                section: "settings",
+                auth: (settings: Settings) => settings.areSettingsVisibleForCurrentUser(),
+                component: (props: RouteComponentProps) => <SettingsPage {...props} />,
+            },
+        ],
+        []
+    );
 
     if (!settings) return null;
 
@@ -99,44 +140,6 @@ const Root = () => {
         </HashRouter>
     );
 };
-
-const routes: AppRoute[] = [
-    {
-        key: "download",
-        name: i18n.t("Download template"),
-        icon: "cloud_download",
-        path: "/download",
-        section: "main",
-        auth: (settings: Settings) => settings.isTemplateGenerationVisible(),
-        component: (props: RouteComponentProps) => <DownloadTemplatePage {...props} />,
-    },
-    {
-        key: "import",
-        name: i18n.t("Import data"),
-        icon: "cloud_upload",
-        path: "/import",
-        section: "main",
-        component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
-    },
-    {
-        key: "themes",
-        name: i18n.t("Themes"),
-        icon: "format_paint",
-        path: "/themes",
-        section: "settings",
-        auth: (settings: Settings) => settings.areSettingsVisibleForCurrentUser(),
-        component: (props: RouteComponentProps) => <ThemesPage {...props} />,
-    },
-    {
-        key: "settings",
-        name: i18n.t("Settings"),
-        icon: "settings",
-        path: "/settings",
-        section: "settings",
-        auth: (settings: Settings) => settings.areSettingsVisibleForCurrentUser(),
-        component: (props: RouteComponentProps) => <SettingsPage {...props} />,
-    },
-];
 
 const useStyles = makeStyles({
     flex: { display: "flex" },

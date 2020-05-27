@@ -2,7 +2,6 @@ import { Provider } from "@dhis2/app-runtime";
 import axios from "axios";
 import React from "react";
 import ReactDOM from "react-dom";
-import "./locales";
 import App from "./webapp/components/app/App";
 
 async function getBaseUrl() {

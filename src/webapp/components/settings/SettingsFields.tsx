@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
 import { Id } from "d2-api";
 import { MultiSelector } from "d2-ui-components";
-import React from "react";
+import React, { ChangeEvent, useCallback, useMemo } from "react";
 import { OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
@@ -18,46 +18,64 @@ export default function SettingsFields(props: SettingsFieldsProps) {
     const { settings, onChange } = props;
     const classes = useStyles();
 
-    const options = React.useMemo(() => {
+    const options = useMemo(() => {
         return settings.userGroups.map(userGroup => ({
             value: userGroup.id,
             text: userGroup.displayName,
         }));
     }, [settings.userGroups]);
 
-    const setModel = React.useCallback(
+    const setModel = useCallback(
         (model: Model) => {
-            return (ev: React.ChangeEvent<HTMLInputElement>) => {
+            return (ev: ChangeEvent<HTMLInputElement>) => {
                 onChange(settings.setModel(model, ev.target.checked));
             };
         },
         [settings, onChange]
     );
 
-    const setUserGroupsForGeneration = React.useCallback(
+    const setUserGroupsForGeneration = useCallback(
         (userGroupIds: Id[]) => {
             onChange(settings.setUserGroupsForGenerationFromIds(userGroupIds));
         },
         [settings, onChange]
     );
 
-    const setUserGroupsForSettings = React.useCallback(
+    const setUserGroupsForSettings = useCallback(
         (userGroupIds: Id[]) => {
             onChange(settings.setUserGroupsForSettingsFromIds(userGroupIds));
         },
         [settings, onChange]
     );
 
-    const setOrgUnitSelection = React.useCallback(
+    const setOrgUnitSelection = useCallback(
         ({ value }: SelectOption) => {
             onChange(settings.update({ orgUnitSelection: value as OrgUnitSelectionSetting }));
         },
         [settings, onChange]
     );
 
-    const modelsInfo = React.useMemo(() => {
+    const modelsInfo = useMemo(() => {
         return settings.getModelsInfo();
     }, [settings]);
+
+    const orgUnitSelectionOptions: { value: OrgUnitSelectionSetting; label: string }[] = useMemo(
+        () => [
+            {
+                value: "generation",
+                label: i18n.t("Select Organisation Units on template generation"),
+            },
+            {
+                value: "import",
+                label: i18n.t("Select Organisation Units on template import"),
+            },
+            {
+                value: "both",
+                label: i18n.t("Select Organisation Units on template generation and import"),
+            },
+        ],
+        []
+    );
 
     return (
         <div>
@@ -132,18 +150,3 @@ const useStyles = makeStyles({
     content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
     checkbox: { padding: 9 },
 });
-
-const orgUnitSelectionOptions: { value: OrgUnitSelectionSetting; label: string }[] = [
-    {
-        value: "generation",
-        label: i18n.t("Select Organisation Units on template generation"),
-    },
-    {
-        value: "import",
-        label: i18n.t("Select Organisation Units on template import"),
-    },
-    {
-        value: "both",
-        label: i18n.t("Select Organisation Units on template generation and import"),
-    },
-];
