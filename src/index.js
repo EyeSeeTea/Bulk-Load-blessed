@@ -60,8 +60,8 @@ async function main() {
                 {` ${baseUrl}`}
             </h3>
         ) : (
-                err.toString()
-            );
+            err.toString()
+        );
         ReactDOM.render(<div>{message}</div>, document.getElementById("root"));
     }
 }
