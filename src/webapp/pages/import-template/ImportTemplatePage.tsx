@@ -57,6 +57,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
     const onDrop = async (files: File[]) => {
         loading.show(true);
+        setMessages([]);
 
         const file = files[0];
         if (!file) {
