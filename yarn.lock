@@ -994,6 +994,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.9.1":
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.10.0.tgz#2cdcd6d7a391c24f7154235134c830cfb58ac0b1"
+  integrity sha512-tgYb3zVApHbLHYOPWtVwg25sBqHhfBXRKeKoTIyoheIxln1nA7oBl7SfHfiTG2GhDPI8EUBkOD/0wJCP/3HN4Q==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/runtime@^7.9.6":
   version "7.9.6"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.9.6.tgz#a9102eb5cadedf3f31d08a9ecf294af7827ea29f"
@@ -4329,6 +4336,11 @@ compression@^1.7.4:
     safe-buffer "5.1.2"
     vary "~1.1.2"
 
+compute-scroll-into-view@^1.0.13:
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/compute-scroll-into-view/-/compute-scroll-into-view-1.0.13.tgz#be1b1663b0e3f56cd5f7713082549f562a3477e2"
+  integrity sha512-o+w9w7A98aAFi/GjK8cxSV+CdASuPa2rR5UWs3+yHkJzWqaKoBEufFNWYaXInCSmUfDCVhesG+v9MTWqOjsxFg==
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
@@ -4958,10 +4970,10 @@ d2-manifest@1.0.0:
     minimist "^1.1.0"
     readline-sync "^1.4.1"
 
-d2-ui-components@1.4.0-beta.1:
-  version "1.4.0-beta.1"
-  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.4.0-beta.1.tgz#fb391d994aa3425e5e06d6afdbb99ff055d2c66e"
-  integrity sha512-9ixqZiwh24EpzjssDm2sjVCFU/RpRfjheC7MSHn1L4y6PMuDJU7hMXt6WRxqK9SNomcoc/VucihqB2Yapwu2hg==
+d2-ui-components@1.4.0-beta.2:
+  version "1.4.0-beta.2"
+  resolved "https://registry.yarnpkg.com/d2-ui-components/-/d2-ui-components-1.4.0-beta.2.tgz#bb236b876f41b0ef8013f46fdb14d17dedf30256"
+  integrity sha512-Fn46cxCNqJ98KGmO0leXYso2EbY0ibyt1Q0AqnJL1tsrUHU3oOUfP16QoMXX6GCdiw+ir0212cd8i9r/isx5Ew==
   dependencies:
     "@date-io/core" "^1.3.6"
     "@date-io/moment" "^1.0.2"
@@ -4970,11 +4982,13 @@ d2-ui-components@1.4.0-beta.1:
     "@material-ui/icons" "4.9.1"
     "@material-ui/pickers" "3.2.10"
     classnames "^2.2.6"
+    downshift "^5.4.2"
     lodash "4.17.15"
     moment "^2.22.2"
     nano-memoize "1.1.10"
     node-sass "^4.12.0"
     react-linkify "^1.0.0-alpha"
+    rxjs-compat "6.5.4"
     throttle-debounce "^2.1.0"
 
 d2@31.8.1, d2@^31.8.1:
@@ -5412,6 +5426,16 @@ dotenv@8.2.0, dotenv@^8.0.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
   integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
+
+downshift@^5.4.2:
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/downshift/-/downshift-5.4.2.tgz#3f6b7bf4ad7e0ff5503414efe3a398421763ebae"
+  integrity sha512-IVwIc4iw5OF5Bi/MbITarW2E8/5akm++5b6UL7aXyPoZmuVe4ilFGaQaktdFW/IwuzHieIwaWj4AQgI0lQNslQ==
+  dependencies:
+    "@babel/runtime" "^7.9.1"
+    compute-scroll-into-view "^1.0.13"
+    prop-types "^15.7.2"
+    react-is "^16.13.1"
 
 duplexer2@~0.1.4:
   version "0.1.4"
@@ -12232,7 +12256,7 @@ react-event-listener@^0.6.2:
     prop-types "^15.6.0"
     warning "^4.0.1"
 
-react-is@^16.12.0, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.0, react-is@^16.8.1, react-is@^16.8.4:
+react-is@^16.12.0, react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.0, react-is@^16.8.1, react-is@^16.8.4:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
@@ -12944,6 +12968,11 @@ run-queue@^1.0.0, run-queue@^1.0.3:
   integrity sha1-6Eg5bwV9Ij8kOGkkYY4laUFh7Ec=
   dependencies:
     aproba "^1.1.1"
+
+rxjs-compat@6.5.4:
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/rxjs-compat/-/rxjs-compat-6.5.4.tgz#03825692af3fe363e04c43f41ff4113d76bbd305"
+  integrity sha512-rkn+lbOHUQOurdd74J/hjmDsG9nFx0z66fvnbs8M95nrtKvNqCKdk7iZqdY51CGmDemTQk+kUPy4s8HVOHtkfA==
 
 rxjs@^5.5.7:
   version "5.5.12"
