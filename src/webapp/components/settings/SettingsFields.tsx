@@ -108,7 +108,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3>{i18n.t("User groups with access to Settings")}</h3>
+            <h3>{i18n.t("User groups with access to Settings and Themes")}</h3>
 
             <FormGroup row={true}>
                 <div className={classes.fullWidth}>
