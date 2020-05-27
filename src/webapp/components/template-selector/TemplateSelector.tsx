@@ -2,7 +2,7 @@ import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
 import moment, { Moment } from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
@@ -59,16 +59,20 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         language: "en",
     });
 
-    const models = _.compact([
-        settings.isModelEnabled("dataSet") && {
-            value: "dataSets",
-            label: i18n.t("Data Set"),
-        },
-        settings.isModelEnabled("program") && {
-            value: "programs",
-            label: i18n.t("Program"),
-        },
-    ]);
+    const models = useMemo(
+        () =>
+            _.compact([
+                settings.isModelEnabled("dataSet") && {
+                    value: "dataSets",
+                    label: i18n.t("Data Set"),
+                },
+                settings.isModelEnabled("program") && {
+                    value: "programs",
+                    label: i18n.t("Program"),
+                },
+            ]),
+        [settings]
+    );
 
     useEffect(() => {
         CompositionRoot.attach()
