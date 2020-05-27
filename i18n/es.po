@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-05-27T06:29:00.407Z\n"
+"POT-Creation-Date: 2020-05-27T11:36:29.814Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,12 +23,6 @@ msgstr "Campo {{field}} no puede ser vacio"
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
 
-msgid "Settings saved"
-msgstr "Configuración guardada"
-
-msgid "Settings"
-msgstr "Configuración"
-
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas en la sección de generación"
 
@@ -40,6 +34,30 @@ msgstr ""
 "Mostrar unidades organizativas en la sección de generación y en la de "
 "importación"
 
+msgid "Access to Template Generation"
+msgstr "Acceso a la sección de generación de plantillas"
+
+msgid "Access to Settings and Themes"
+msgstr "Acceso a la configuración y los temas"
+
+msgid "Accessible to {{users}} users and {{userGroups}} user groups"
+msgstr "Accesible a {{users}} usuarios y {{userGroups}} grupos de usuarios"
+
+msgid "Accessible to {{users}} users"
+msgstr "Accesible a {{users}} usuarios"
+
+msgid "Accessible to {{userGroups}} user groups"
+msgstr "Accesible a {{userGroups}} grupos de usuarios"
+
+msgid "Only accessible to system administrators"
+msgstr "Solo accesible a los administradores del sistema"
+
+msgid "Not accessible"
+msgstr "No accesible"
+
+msgid "Close"
+msgstr "Cerrar"
+
 msgid "Models"
 msgstr "Modelos"
 
@@ -49,11 +67,8 @@ msgstr "Visibilidad"
 msgid "Organisation Units visibility"
 msgstr "Visibilidad de unidades organizativas"
 
-msgid "Access to Template Generation"
-msgstr "Acceso a la sección de generación de plantillas"
-
-msgid "Access to Settings and Themes"
-msgstr "Acceso a la configuración y los temas"
+msgid "Permissions"
+msgstr "Permisos"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -288,6 +303,15 @@ msgstr "Importar datos"
 
 msgid "Themes"
 msgstr "Temas"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Settings saved"
+msgstr "Configuración guardada"
+
+#~ msgid "Created by"
+#~ msgstr "Creado por"
 
 #~ msgid "Import template"
 #~ msgstr "Importar datos"

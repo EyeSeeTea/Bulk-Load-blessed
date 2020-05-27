@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-27T06:29:00.407Z\n"
-"PO-Revision-Date: 2020-05-27T06:29:00.407Z\n"
+"POT-Creation-Date: 2020-05-27T11:36:29.814Z\n"
+"PO-Revision-Date: 2020-05-27T11:36:29.814Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -23,12 +23,6 @@ msgstr ""
 msgid "You need to select at least one {{element}}"
 msgstr ""
 
-msgid "Settings saved"
-msgstr ""
-
-msgid "Settings"
-msgstr ""
-
 msgid "Select Organisation Units on template generation"
 msgstr ""
 
@@ -36,6 +30,30 @@ msgid "Select Organisation Units on template import"
 msgstr ""
 
 msgid "Select Organisation Units on template generation and import"
+msgstr ""
+
+msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Settings and Themes"
+msgstr ""
+
+msgid "Accessible to {{users}} users and {{userGroups}} user groups"
+msgstr ""
+
+msgid "Accessible to {{users}} users"
+msgstr ""
+
+msgid "Accessible to {{userGroups}} user groups"
+msgstr ""
+
+msgid "Only accessible to system administrators"
+msgstr ""
+
+msgid "Not accessible"
+msgstr ""
+
+msgid "Close"
 msgstr ""
 
 msgid "Models"
@@ -47,10 +65,7 @@ msgstr ""
 msgid "Organisation Units visibility"
 msgstr ""
 
-msgid "Access to Template Generation"
-msgstr ""
-
-msgid "Access to Settings and Themes"
+msgid "Permissions"
 msgstr ""
 
 msgid "Data Set"
@@ -274,4 +289,10 @@ msgid "Import data"
 msgstr ""
 
 msgid "Themes"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Settings saved"
 msgstr ""
