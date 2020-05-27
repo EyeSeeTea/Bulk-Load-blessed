@@ -110,7 +110,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3>{i18n.t("User groups for Template Generation")}</h3>
+            <h3>{i18n.t("Access to Template Generation")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
@@ -126,7 +126,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3>{i18n.t("User groups with access to Settings and Themes")}</h3>
+            <h3>{i18n.t("Access to Settings and Themes")}</h3>
 
             <FormGroup row={true}>
                 <div className={classes.fullWidth}>

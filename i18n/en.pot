@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-27T06:18:40.167Z\n"
-"PO-Revision-Date: 2020-05-27T06:18:40.167Z\n"
+"POT-Creation-Date: 2020-05-27T06:29:00.407Z\n"
+"PO-Revision-Date: 2020-05-27T06:29:00.407Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -47,10 +47,10 @@ msgstr ""
 msgid "Organisation Units visibility"
 msgstr ""
 
-msgid "User groups for Template Generation"
+msgid "Access to Template Generation"
 msgstr ""
 
-msgid "User groups with access to Settings and Themes"
+msgid "Access to Settings and Themes"
 msgstr ""
 
 msgid "Data Set"
