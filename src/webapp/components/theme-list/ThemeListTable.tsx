@@ -7,6 +7,7 @@ import {
     TableSelection,
     TableSorting,
     TableState,
+    useLoading,
     useSnackbar,
 } from "d2-ui-components";
 import _ from "lodash";
@@ -38,6 +39,7 @@ type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
 
 export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
     const snackbar = useSnackbar();
+    const loading = useLoading();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
@@ -59,6 +61,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 
     const saveTheme = async (theme: Theme) => {
         try {
+            loading.show();
             const errors = await CompositionRoot.attach().themes.save.execute(theme);
             if (errors.length === 0) {
                 closeThemeEdit();
@@ -70,6 +73,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             console.error(error);
             snackbar.error(i18n.t("An error ocurred while saving theme"));
         }
+        loading.hide();
     };
 
     const editTheme = (ids: string[]) => {
@@ -78,18 +82,18 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     };
 
     const deleteThemes = (ids: string[]) => {
-        const deleteAction = async () => {
-            await promiseMap(ids, id => {
-                return CompositionRoot.attach().themes.delete.execute(id);
-            });
-            setSelection([]);
-            setThemes(_.reject(themes, ({ id }) => ids.includes(id)));
-        };
-
         setWarningDialog({
             title: i18n.t("Delete {{count}} themes", { count: ids.length }),
             description: i18n.t("Are you sure you want to remove selected themes"),
-            action: deleteAction,
+            action: async () => {
+                loading.show();
+                await promiseMap(ids, id => {
+                    return CompositionRoot.attach().themes.delete.execute(id);
+                });
+                setSelection([]);
+                setThemes(_.reject(themes, ({ id }) => ids.includes(id)));
+                loading.hide();
+            },
         });
     };
 
