@@ -44,7 +44,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const { api } = useAppContext();
 
     const [dataSource, setDataSource] = useState<DataSource>();
-    const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
@@ -60,31 +59,30 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         language: "en",
     });
 
+    const models = _.compact([
+        settings.isModelEnabled("dataSet") && {
+            value: "dataSets",
+            label: i18n.t("Data Set"),
+        },
+        settings.isModelEnabled("program") && {
+            value: "programs",
+            label: i18n.t("Program"),
+        },
+    ]);
+
     useEffect(() => {
         CompositionRoot.attach()
             .templates.list.execute()
             .then(dataSource => {
-                const modelOptions = _.compact([
-                    settings.isModelEnabled("dataSet") && {
-                        value: "dataSets",
-                        label: i18n.t("Data Set"),
-                    },
-                    settings.isModelEnabled("program") && {
-                        value: "programs",
-                        label: i18n.t("Program"),
-                    },
-                ]);
-
                 setDataSource(dataSource);
-                setModels(modelOptions);
-                if (modelOptions.length === 1) {
-                    const model = modelOptions[0].value as DataFormType;
+                if (models.length === 1) {
+                    const model = models[0].value as DataFormType;
                     const templates = modelToSelectOption(dataSource[model]);
                     setTemplates(templates);
                     setState(state => ({ ...state, type: model }));
                 }
             });
-    }, [settings]);
+    }, [models]);
 
     useEffect(() => {
         const { type, id } = state;
@@ -185,21 +183,25 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, language: value }));
     };
 
+    const showModelsSelector = models.length > 1;
+
     return (
         <React.Fragment>
             <h3>{i18n.t("Template properties")}</h3>
 
             <div className={classes.row}>
-                <div className={classes.halfWidthSelect}>
-                    <Select
-                        placeholder={i18n.t("Model")}
-                        onChange={onModelChange}
-                        options={models}
-                        value={state.type ?? ""}
-                    />
-                </div>
+                {showModelsSelector && (
+                    <div className={classes.select}>
+                        <Select
+                            placeholder={i18n.t("Model")}
+                            onChange={onModelChange}
+                            options={models}
+                            value={state.type ?? ""}
+                        />
+                    </div>
+                )}
 
-                <div className={classes.halfWidthSelect}>
+                <div className={classes.select}>
                     <Select
                         placeholder={i18n.t("Select element to export...")}
                         onChange={onTemplateChange}
@@ -210,7 +212,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             </div>
 
             <div className={classes.row}>
-                <div className={classes.halfWidthSelect}>
+                <div className={classes.select}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("Start date")}
@@ -222,7 +224,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         InputLabelProps={{ style: { color: "#494949" } }}
                     />
                 </div>
-                <div className={classes.halfWidthSelect}>
+                <div className={classes.select}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("End date")}
@@ -283,7 +285,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
             {availableLanguages.length > 0 && (
                 <div className={classes.row}>
-                    <div className={classes.fullWidthSelect}>
+                    <div className={classes.select}>
                         <Select
                             placeholder={i18n.t("Language")}
                             onChange={onLanguageChange}
@@ -295,7 +297,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             )}
             {themeOptions.length > 0 && (
                 <div className={classes.row}>
-                    <div className={classes.fullWidthSelect}>
+                    <div className={classes.select}>
                         <Select
                             placeholder={i18n.t("Theme")}
                             onChange={onThemeChange}
@@ -311,7 +313,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             {userHasReadAccess && (
                 <div>
                     <FormControlLabel
-                        className={classes.populateCheckbox}
+                        className={classes.checkbox}
                         control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
                         label={i18n.t("Populate template with instance data")}
                     />
@@ -328,9 +330,8 @@ const useStyles = makeStyles({
         justifyContent: "space-around",
         marginRight: "1em",
     },
-    halfWidthSelect: { flexBasis: "50%", margin: "0.5em", marginLeft: 0 },
-    fullWidthSelect: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
-    populateCheckbox: { marginTop: "1em" },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },
     orgUnitError: {
