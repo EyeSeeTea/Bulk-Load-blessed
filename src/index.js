@@ -35,7 +35,7 @@ async function main() {
     const baseUrl = await getBaseUrl();
 
     try {
-        const d2 = await init({ baseUrl: baseUrl + "/api" });
+        const d2 = await init({ baseUrl: baseUrl + "/api", schemas: [] });
         const api = new D2ApiDefault({ baseUrl });
         Object.assign(window, { bulkLoad: { d2, api } });
 
