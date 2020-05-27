@@ -112,7 +112,7 @@ const routes: AppRoute[] = [
     },
     {
         key: "import",
-        name: i18n.t("Import template"),
+        name: i18n.t("Import data"),
         icon: "cloud_upload",
         path: "/import",
         section: "main",

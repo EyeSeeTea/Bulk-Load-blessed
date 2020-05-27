@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/extend-expect";
-import { act, render, screen, wait, fireEvent } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { LoadingProvider, SnackbarProvider } from "d2-ui-components";
 import _ from "lodash";
 import React from "react";
