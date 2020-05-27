@@ -122,7 +122,6 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
         {
             name: "delete",
             text: i18n.t("Delete"),
-            multiple: true,
             onClick: deleteThemes,
             icon: <Icon>delete</Icon>,
         },
@@ -165,6 +164,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
                 selection={selection}
                 sorting={sorting}
                 onChange={onTableChange}
+                forceSelectionColumn={true}
                 filterComponents={
                     <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
                         {i18n.t("Create theme")}
