@@ -1,4 +1,5 @@
-import { ConfigWebRepository } from "./data/ConfigWebRepository";
+import { D2Api } from "d2-api";
+import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
 import { StorageConstantRepository } from "./data/StorageConstantRepository";
@@ -17,16 +18,17 @@ import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCa
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
-import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
+import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 
 export interface CompositionRootOptions {
-    appConfig: ConfigRepository;
+    appConfig: JsonConfig;
     dhisInstance: DhisInstance;
+    mockApi?: D2Api;
 }
 
 export class CompositionRoot {
@@ -37,13 +39,13 @@ export class CompositionRoot {
     private readonly templateManager: TemplateRepository;
     private readonly excelReader: ExcelRepository;
 
-    private constructor({ appConfig, dhisInstance }: CompositionRootOptions) {
-        this.instance = new InstanceDhisRepository(dhisInstance);
-        this.config = new ConfigWebRepository(appConfig as any);
+    private constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+        this.instance = new InstanceDhisRepository(dhisInstance, mockApi);
+        this.config = new ConfigWebRepository(appConfig);
         this.storage =
             this.config.getAppStorage() === "dataStore"
-                ? new StorageDataStoreRepository(dhisInstance)
-                : new StorageConstantRepository(dhisInstance);
+                ? new StorageDataStoreRepository(dhisInstance, mockApi)
+                : new StorageConstantRepository(dhisInstance, mockApi);
         this.templateManager = new TemplateWebRepository(this.storage);
         this.excelReader = new ExcelPopulateRepository();
     }

@@ -26,7 +26,7 @@ export async function getBasicInfoFromSheet(file) {
             .range(metadataSheet.rowCount + 1)
             .map(nRow => metadataSheet.getRow(nRow).values)
             .map(values => ({ id: values[1], type: values[2], name: values[3] }))
-            .find(item => item.type === "program" || item.type === "dataSet") ?? {}
+            .find(item => item.type === "programs" || item.type === "dataSets") ?? {}
     );
 }
 
@@ -46,8 +46,8 @@ export async function getDataValues(file, object, rowOffset, colOffset) {
 
 function getDataValuesFromRow(row, object, colOffset) {
     const infoByType = {
-        dataSet: { periodCol: 2, initialValuesCol: 4 },
-        program: { periodCol: 4, initialValuesCol: 5 },
+        dataSets: { periodCol: 2, initialValuesCol: 4 },
+        programs: { periodCol: 4, initialValuesCol: 5 },
     };
     const info = infoByType[object.type];
     if (!info) return;
@@ -61,7 +61,7 @@ function getDataValuesFromRow(row, object, colOffset) {
         .reject(_.isNil)
         .size();
 
-    const id = object.type === "program" && colOffset > 1 ? values[5] : undefined;
+    const id = object.type === "programs" && colOffset > 1 ? values[5] : undefined;
 
     return { period, count, id };
 }
@@ -73,14 +73,6 @@ async function getWorkbook(file) {
     return workbook;
 }
 
-/**
- * Import sheet information
- * @param builder:
- *      - d2: DHIS2 Library
- *      - element: Element to be parsed
- *      - file: File to be imported
- * @returns {Promise<>}
- */
 export async function readSheet({
     file,
     element,
@@ -95,7 +87,7 @@ export async function readSheet({
     const metadataSheet = workbook.getWorksheet("Metadata");
     const validationSheet = workbook.getWorksheet("Validation");
 
-    const isProgram = element.type === "program";
+    const isProgram = element.type === "programs";
 
     let columns;
     let stageColumns;
@@ -163,13 +155,13 @@ export async function readSheet({
                 result.attributeOptionCombo = parseMetadataId(
                     metadataSheet,
                     row.values[4],
-                    "categoryOptionCombo"
+                    "categoryOptionCombos"
                 );
             } else if (!isProgram && row.values[3] !== undefined) {
                 result.attributeOptionCombo = parseMetadataId(
                     metadataSheet,
                     row.values[3],
-                    "categoryOptionCombo"
+                    "categoryOptionCombos"
                 );
             }
 
@@ -205,10 +197,12 @@ export async function readSheet({
                         dataEntrySheet.getCell(stageColumn.sharedFormula).value.formula.substr(1);
 
                     const { type } = elementMetadata.get(id);
-                    const isDisaggregated = type === "categoryOptionCombo";
+                    const isDisaggregated = type === "categoryOptionCombos";
 
                     const dataElement = elementMetadata.get(dataElementId);
-                    const cellValue = cell.value?.toString();
+                    const cellValue =
+                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+
                     const value = formatValue({
                         dataElement,
                         cellValue,
@@ -243,7 +237,7 @@ export async function readSheet({
 
 function formatValue({ dataElement, cellValue, elementMetadata, metadataSheet }) {
     if (dataElement.optionSet !== undefined) {
-        const optionId = parseMetadataId(metadataSheet, cellValue, "option");
+        const optionId = parseMetadataId(metadataSheet, cellValue, "options");
         const option = elementMetadata.get(optionId);
         return option?.code ?? cellValue;
     } else if (dataElement.valueType === "DATE") {

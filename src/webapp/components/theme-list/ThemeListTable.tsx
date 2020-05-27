@@ -5,14 +5,18 @@ import {
     TableAction,
     TableColumn,
     TableSelection,
+    TableSorting,
     TableState,
+    useLoading,
     useSnackbar,
 } from "d2-ui-components";
-import React, { ReactNode, useEffect, useState } from "react";
+import _ from "lodash";
+import React, { ReactNode, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
-import { promiseMap } from "../../utils/common";
+import { RouteComponentProps } from "../../pages/root/RootPage";
+import { promiseMap } from "../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 
@@ -31,49 +35,45 @@ export interface ThemeDetail {
     palette: string[];
 }
 
-interface ThemeListTableProps {
-    onChange?: (themes: Theme[]) => void;
-}
+type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
 
-export default function ThemeListTable({ onChange }: ThemeListTableProps) {
+export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
     const snackbar = useSnackbar();
+    const loading = useLoading();
 
-    const [themes, setThemes] = useState<Theme[]>([]);
     const [selection, setSelection] = useState<TableSelection[]>([]);
-    const rows = buildThemeDetails(themes);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
-    const [reloadKey, setReloadKey] = useState<number>();
+    const [sorting, setSorting] = useState<TableSorting<ThemeDetail>>({
+        field: "name",
+        order: "asc",
+    });
 
-    useEffect(() => {
-        CompositionRoot.attach()
-            .themes.list.execute()
-            .then(themes => {
-                setThemes(themes);
-                if (reloadKey && onChange) onChange(themes);
-            });
-    }, [reloadKey, onChange]);
+    const rows = buildThemeDetails(themes, sorting);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
     };
 
-    const cancelThemeEdit = () => {
+    const closeThemeEdit = () => {
         setThemeEdit(undefined);
     };
 
     const saveTheme = async (theme: Theme) => {
         try {
+            loading.show();
             const errors = await CompositionRoot.attach().themes.save.execute(theme);
-            if (errors.length > 0) {
-                snackbar.error(errors.join("\n"));
+            if (errors.length === 0) {
+                closeThemeEdit();
+                setThemes(_.uniqBy([theme, ...themes], "id"));
             } else {
-                cancelThemeEdit();
-                setReloadKey(Math.random());
+                snackbar.error(errors.join("\n"));
             }
         } catch (error) {
+            console.error(error);
             snackbar.error(i18n.t("An error ocurred while saving theme"));
         }
+        loading.hide();
     };
 
     const editTheme = (ids: string[]) => {
@@ -82,18 +82,18 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     };
 
     const deleteThemes = (ids: string[]) => {
-        const deleteAction = async () => {
-            await promiseMap(ids, id => {
-                return CompositionRoot.attach().themes.delete.execute(id);
-            });
-            setReloadKey(Math.random());
-            setSelection([]);
-        };
-
         setWarningDialog({
             title: i18n.t("Delete {{count}} themes", { count: ids.length }),
             description: i18n.t("Are you sure you want to remove selected themes"),
-            action: deleteAction,
+            action: async () => {
+                loading.show();
+                await promiseMap(ids, id => {
+                    return CompositionRoot.attach().themes.delete.execute(id);
+                });
+                setSelection([]);
+                setThemes(_.reject(themes, ({ id }) => ids.includes(id)));
+                loading.hide();
+            },
         });
     };
 
@@ -122,14 +122,14 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
         {
             name: "delete",
             text: i18n.t("Delete"),
-            multiple: true,
             onClick: deleteThemes,
             icon: <Icon>delete</Icon>,
         },
     ];
 
-    const onTableChange = (state: TableState<ThemeDetail>) => {
-        setSelection(state.selection);
+    const onTableChange = ({ selection, sorting }: TableState<ThemeDetail>) => {
+        setSelection(selection);
+        setSorting(sorting);
     };
 
     return (
@@ -153,7 +153,7 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
                     type={themeEdit.type}
                     theme={themeEdit.theme}
                     onSave={saveTheme}
-                    onCancel={cancelThemeEdit}
+                    onCancel={closeThemeEdit}
                 />
             )}
 
@@ -162,6 +162,7 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
                 columns={columns}
                 actions={actions}
                 selection={selection}
+                sorting={sorting}
                 onChange={onTableChange}
                 filterComponents={
                     <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
@@ -173,15 +174,18 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     );
 }
 
-function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
-    return themes.map(({ id, name, sections, pictures, palette }) => ({
-        id,
-        name,
-        title: sections?.title?.text ?? "-",
-        subtitle: sections?.subtitle?.text ?? "-",
-        logo: pictures?.logo?.src ? (
-            <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
-        ) : null,
-        palette,
-    }));
+function buildThemeDetails(themes: Theme[], sorting: TableSorting<ThemeDetail>): ThemeDetail[] {
+    return _(themes)
+        .map(({ id, name, sections, pictures, palette }) => ({
+            id,
+            name,
+            title: sections?.title?.text ?? "-",
+            subtitle: sections?.subtitle?.text ?? "-",
+            logo: pictures?.logo?.src ? (
+                <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
+            ) : null,
+            palette,
+        }))
+        .orderBy([sorting.field], [sorting.order])
+        .value();
 }

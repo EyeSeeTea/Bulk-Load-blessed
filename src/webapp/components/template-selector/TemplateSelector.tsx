@@ -2,7 +2,7 @@ import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
 import moment, { Moment } from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
@@ -15,7 +15,7 @@ import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<DataFormType, DataForm[]>;
 
-interface TemplateSelectorState {
+export interface TemplateSelectorState {
     type: DataFormType;
     id: string;
     populate: boolean;
@@ -44,7 +44,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const { api } = useAppContext();
 
     const [dataSource, setDataSource] = useState<DataSource>();
-    const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
@@ -60,31 +59,34 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         language: "en",
     });
 
+    const models = useMemo(
+        () =>
+            _.compact([
+                settings.isModelEnabled("dataSet") && {
+                    value: "dataSets",
+                    label: i18n.t("Data Set"),
+                },
+                settings.isModelEnabled("program") && {
+                    value: "programs",
+                    label: i18n.t("Program"),
+                },
+            ]),
+        [settings]
+    );
+
     useEffect(() => {
         CompositionRoot.attach()
             .templates.list.execute()
             .then(dataSource => {
-                const modelOptions = _.compact([
-                    settings.isModelEnabled("dataSet") && {
-                        value: "dataSet",
-                        label: i18n.t("Data Set"),
-                    },
-                    settings.isModelEnabled("program") && {
-                        value: "program",
-                        label: i18n.t("Program"),
-                    },
-                ]);
-
                 setDataSource(dataSource);
-                setModels(modelOptions);
-                if (modelOptions.length === 1) {
-                    const model = modelOptions[0].value as DataFormType;
+                if (models.length === 1) {
+                    const model = models[0].value as DataFormType;
                     const templates = modelToSelectOption(dataSource[model]);
                     setTemplates(templates);
                     setState(state => ({ ...state, type: model }));
                 }
             });
-    }, [settings]);
+    }, [models]);
 
     useEffect(() => {
         const { type, id } = state;
@@ -115,8 +117,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         }
     }, [state, selectedOrgUnits, filterOrgUnits, orgUnitTreeFilter, onChange]);
 
-    const showModelSelector = models.length > 1;
-    const elementLabel = showModelSelector ? i18n.t("elements") : models[0]?.label;
     const themeOptions = dataSource ? modelToSelectOption(themes) : [];
 
     const onModelChange = ({ value }: SelectOption) => {
@@ -187,11 +187,15 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, language: value }));
     };
 
+    const showModelsSelector = models.length > 1;
+
     return (
         <React.Fragment>
+            <h3>{i18n.t("Template properties")}</h3>
+
             <div className={classes.row}>
-                {showModelSelector && (
-                    <div className={classes.modelSelect}>
+                {showModelsSelector && (
+                    <div className={classes.select}>
                         <Select
                             placeholder={i18n.t("Model")}
                             onChange={onModelChange}
@@ -201,11 +205,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 )}
 
-                <div className={classes.templateSelect}>
+                <div className={classes.select}>
                     <Select
-                        placeholder={i18n.t("Select {{elementLabel}} to export...", {
-                            elementLabel,
-                        })}
+                        placeholder={i18n.t("Select element to export...")}
                         onChange={onTemplateChange}
                         options={templates}
                         value={state.id ?? ""}
@@ -214,32 +216,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             </div>
 
             <div className={classes.row}>
-                {availableLanguages.length > 0 && (
-                    <div className={classes.languageSelect}>
-                        <Select
-                            placeholder={i18n.t("Language")}
-                            onChange={onLanguageChange}
-                            options={availableLanguages}
-                            value={state.language ?? ""}
-                        />
-                    </div>
-                )}
-                {themeOptions.length > 0 && (
-                    <div className={classes.themeSelect}>
-                        <Select
-                            placeholder={i18n.t("Theme")}
-                            onChange={onThemeChange}
-                            options={themeOptions}
-                            allowEmpty={true}
-                            emptyLabel={i18n.t("No theme")}
-                            value={state.theme ?? ""}
-                        />
-                    </div>
-                )}
-            </div>
-
-            <div className={classes.row}>
-                <div className={classes.startDateSelect}>
+                <div className={classes.select}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("Start date")}
@@ -251,7 +228,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         InputLabelProps={{ style: { color: "#494949" } }}
                     />
                 </div>
-                <div className={classes.endDateSelect}>
+                <div className={classes.select}>
                     <DatePicker
                         className={classes.fullWidth}
                         label={i18n.t("End date")}
@@ -267,9 +244,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
             {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
+                    <h3>{i18n.t("Organisation units")}</h3>
+
                     <div>
                         <FormControlLabel
-                            className={classes.checkbox}
                             control={
                                 <Checkbox
                                     checked={filterOrgUnits}
@@ -296,6 +274,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                         filterByGroup: true,
                                         selectAll: true,
                                     }}
+                                    withElevation={false}
                                 />
                             </div>
                         ) : (
@@ -304,6 +283,35 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             </div>
                         ))}
                 </React.Fragment>
+            )}
+
+            <h3>{i18n.t("Advanced properties")}</h3>
+
+            {availableLanguages.length > 0 && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <Select
+                            placeholder={i18n.t("Language")}
+                            onChange={onLanguageChange}
+                            options={availableLanguages}
+                            value={state.language ?? ""}
+                        />
+                    </div>
+                </div>
+            )}
+            {themeOptions.length > 0 && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <Select
+                            placeholder={i18n.t("Theme")}
+                            onChange={onThemeChange}
+                            options={themeOptions}
+                            allowEmpty={true}
+                            emptyLabel={i18n.t("No theme")}
+                            value={state.theme ?? ""}
+                        />
+                    </div>
+                </div>
             )}
 
             {userHasReadAccess && (
@@ -324,17 +332,11 @@ const useStyles = makeStyles({
         display: "flex",
         flexFlow: "row nowrap",
         justifyContent: "space-around",
-        marginTop: "0.5em",
         marginRight: "1em",
     },
-    modelSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    templateSelect: { flexBasis: "70%", margin: "0.5em" },
-    languageSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    themeSelect: { flexBasis: "30%", margin: "0.5em" },
-    startDateSelect: { flexBasis: "30%", margin: "0.5em", marginLeft: 0 },
-    endDateSelect: { flexBasis: "30%", margin: "0.5em" },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
     checkbox: { marginTop: "1em" },
-    orgUnitSelector: { marginTop: "1em" },
+    orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },
     orgUnitError: {
         height: 250,

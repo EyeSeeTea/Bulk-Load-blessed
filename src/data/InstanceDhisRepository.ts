@@ -10,19 +10,16 @@ import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
-import i18n from "../locales";
-import { promiseMap } from "../webapp/utils/common";
+import { promiseMap } from "../webapp/utils/promises";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
 
-    constructor({ url }: DhisInstance) {
-        this.api = new D2ApiDefault({ baseUrl: url });
+    constructor({ url }: DhisInstance, mockApi?: D2Api) {
+        this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
     public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        if (type === "tracker") throw new Error(i18n.t("Tracker programs are not supported"));
-
         const params = {
             paging: false,
             fields: {
@@ -35,11 +32,11 @@ export class InstanceDhisRepository implements InstanceRepository {
             },
             filter: {
                 id: ids ? { in: ids } : undefined,
-                programType: type === "program" ? { eq: "WITHOUT_REGISTRATION" } : undefined,
+                programType: type === "programs" ? { eq: "WITHOUT_REGISTRATION" } : undefined,
             },
         } as const;
 
-        const { objects } = await (type === "dataSet"
+        const { objects } = await (type === "dataSets"
             ? this.api.models.dataSets.get(params).getData()
             : this.api.models.programs.get(params).getData());
 
@@ -65,7 +62,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             },
         } as const;
 
-        const { objects } = await (type === "dataSet"
+        const { objects } = await (type === "dataSets"
             ? this.api.models.dataSets.get(params).getData()
             : this.api.models.programs.get(params).getData());
 
@@ -87,9 +84,9 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
         switch (params.type) {
-            case "dataSet":
+            case "dataSets":
                 return this.getDataSetPackage(params);
-            case "program":
+            case "programs":
                 return this.getProgramPackage(params);
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);

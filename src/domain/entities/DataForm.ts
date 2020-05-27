@@ -1,6 +1,6 @@
 import { Id } from "./ReferenceObject";
 
-export type DataFormType = "dataSet" | "program" | "tracker";
+export type DataFormType = "dataSets" | "programs";
 
 export interface DataForm {
     type: DataFormType;

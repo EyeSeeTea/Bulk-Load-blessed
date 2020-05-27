@@ -5,13 +5,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-25T09:51:58.428Z\n"
-"PO-Revision-Date: 2020-05-25T09:51:58.428Z\n"
+"POT-Creation-Date: 2020-05-27T06:29:00.407Z\n"
+"PO-Revision-Date: 2020-05-27T06:29:00.407Z\n"
 
 msgid "Template not loaded"
-msgstr ""
-
-msgid "Tracker programs are not supported"
 msgstr ""
 
 msgid "Element not found"
@@ -32,21 +29,6 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-msgid "Models"
-msgstr ""
-
-msgid "Visibility"
-msgstr ""
-
-msgid "Organisation Units visibility"
-msgstr ""
-
-msgid "User groups for Template Generation"
-msgstr ""
-
-msgid "User groups with access to Settings"
-msgstr ""
-
 msgid "Select Organisation Units on template generation"
 msgstr ""
 
@@ -56,19 +38,52 @@ msgstr ""
 msgid "Select Organisation Units on template generation and import"
 msgstr ""
 
+msgid "Models"
+msgstr ""
+
+msgid "Visibility"
+msgstr ""
+
+msgid "Organisation Units visibility"
+msgstr ""
+
+msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Settings and Themes"
+msgstr ""
+
 msgid "Data Set"
 msgstr ""
 
 msgid "Program"
 msgstr ""
 
-msgid "elements"
+msgid "Template properties"
 msgstr ""
 
 msgid "Model"
 msgstr ""
 
-msgid "Select {{elementLabel}} to export..."
+msgid "Select element to export..."
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
+msgstr ""
+
+msgid "Organisation units"
+msgstr ""
+
+msgid "Select available Organisation Units"
+msgstr ""
+
+msgid "User does not have any capture organisations units"
+msgstr ""
+
+msgid "Advanced properties"
 msgstr ""
 
 msgid "Language"
@@ -78,18 +93,6 @@ msgid "Theme"
 msgstr ""
 
 msgid "No theme"
-msgstr ""
-
-msgid "Start date"
-msgstr ""
-
-msgid "End date"
-msgstr ""
-
-msgid "Select available Organisation Units"
-msgstr ""
-
-msgid "User does not have any capture organisations units"
 msgstr ""
 
 msgid "Populate template with instance data"
@@ -129,12 +132,6 @@ msgid "Pattern"
 msgstr ""
 
 msgid "Fixed"
-msgstr ""
-
-msgid "Themes"
-msgstr ""
-
-msgid "Close"
 msgstr ""
 
 msgid "An error ocurred while saving theme"
@@ -195,7 +192,10 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr ""
 
-msgid "You need to select start and end dates"
+msgid "You need to select start and end dates for dataSet templates"
+msgstr ""
+
+msgid "Download template"
 msgstr ""
 
 msgid "Cannot read file"
@@ -249,12 +249,6 @@ msgstr ""
 msgid "Deleted"
 msgstr ""
 
-msgid "Template Generation"
-msgstr ""
-
-msgid "Download template"
-msgstr ""
-
 msgid "Bulk Import"
 msgstr ""
 
@@ -277,4 +271,7 @@ msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"
+msgstr ""
+
+msgid "Themes"
 msgstr ""

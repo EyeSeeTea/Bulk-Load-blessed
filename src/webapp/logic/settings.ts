@@ -81,7 +81,6 @@ export default class Settings {
             .getData();
 
         const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
-
         const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
             Settings.constantCode,
             defaultSettings

@@ -1,7 +1,7 @@
 import { AppSettings } from "../domain/entities/AppSettings";
 import { AppStorageType, ConfigRepository } from "../domain/repositories/ConfigRepository";
 
-interface JsonConfig {
+export interface JsonConfig {
     appKey?: string;
     storage?: AppStorageType;
     defaultSettings?: AppSettings;

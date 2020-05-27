@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { removeCharacters } from "../../utils/string";
-import { promiseMap } from "../../webapp/utils/common";
+import { promiseMap } from "../../webapp/utils/promises";
 import { DataPackage } from "../entities/DataPackage";
 import { CellRef, Range, RowDataSource, SheetRef, Template } from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
