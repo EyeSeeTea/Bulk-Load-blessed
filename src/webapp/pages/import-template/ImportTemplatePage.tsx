@@ -177,7 +177,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const checkExistingData = async (data: any) => {
-        const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
+        const dataValues = data.dataSet ? _.compact(await getDataValuesFromData(api, data)) : [];
 
         if (dataValues.length === 0) {
             await performImport({ data, dataValues });
