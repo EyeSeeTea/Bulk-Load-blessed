@@ -164,7 +164,6 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
                 selection={selection}
                 sorting={sorting}
                 onChange={onTableChange}
-                forceSelectionColumn={true}
                 filterComponents={
                     <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
                         {i18n.t("Create theme")}
