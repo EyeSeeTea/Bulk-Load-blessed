@@ -55,7 +55,7 @@ const Root = () => {
     if (!settings) return null;
 
     const userRoutes = routes.filter(({ auth }) => !auth || auth(settings));
-    const defaultRoute = userRoutes.find(({ defaultRoute }) => defaultRoute);
+    const defaultRoute = userRoutes.find(({ defaultRoute }) => defaultRoute) ?? userRoutes[0];
 
     return (
         <HashRouter>
@@ -107,7 +107,7 @@ const routes: AppRoute[] = [
         icon: "cloud_download",
         path: "/download",
         section: "main",
-        defaultRoute: true,
+        auth: (settings: Settings) => settings.isTemplateGenerationVisible(),
         component: (props: RouteComponentProps) => <DownloadTemplatePage {...props} />,
     },
     {
