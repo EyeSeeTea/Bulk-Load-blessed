@@ -18,7 +18,7 @@ import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
-import { deleteDataValues, getDataValuesFromData } from "../../logic/dataValues";
+import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
 import { RouteComponentProps } from "../root/RootPage";
@@ -183,23 +183,23 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const checkExistingData = async (data: any) => {
-        const dataValues = data.dataSet ? _.compact(await getDataValuesFromData(api, data)) : [];
+        const { newValues, existingValues } = await getDataValuesFromData(data);
 
-        if (dataValues.length === 0) {
-            await performImport({ data, dataValues });
+        if (existingValues.length === 0) {
+            await performImport(newValues);
         } else {
             updateDialog({
                 title: i18n.t("Existing data values"),
                 description: i18n.t(
-                    "There are {{dataValuesSize}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { dataValuesSize: dataValues.length }
+                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { totalExisting: existingValues.length }
                 ),
                 onSave: () => {
-                    performImport({ data, dataValues });
+                    performImport([...newValues, ...existingValues]);
                     updateDialog(null);
                 },
                 onInfoAction: () => {
-                    performImport({ data, dataValues, overwrite: false });
+                    performImport(newValues);
                     updateDialog(null);
                 },
                 onCancel: () => {
@@ -212,30 +212,101 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
     };
 
-    const performImport = async ({
-        data,
-        dataValues: existingDataValues,
-        overwrite = true,
-    }: any) => {
+    const getDataValuesFromData = async ({
+        program,
+        dataSet,
+        events,
+        dataValues,
+    }: SheetImportResponse): Promise<{
+        newValues: any;
+        existingValues: any;
+    }> => {
+        const isProgram = !!program && !!events && !dataSet && !dataValues;
+        const isDataSet = !program && !events && !!dataSet && !!dataValues;
+        const type = isProgram ? "programs" : "dataSets";
+        const id = isProgram ? program : dataSet;
+
+        if (!isProgram && !isDataSet) throw new Error("Invalid form type");
+        if (!id) throw new Error("Invalid program or dataSet");
+
+        const periods = isProgram
+            ? undefined
+            : _.uniq(dataValues?.map(({ period }) => period.toString()));
+        const orgUnits = isProgram
+            ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
+            : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
+
+        const result = await CompositionRoot.attach().form.getDataPackage.execute({
+            id,
+            periods,
+            orgUnits,
+            type,
+        });
+
+        if (isProgram) {
+            const existingEvents = _.remove(
+                events ?? [],
+                ({ event, eventDate, orgUnit, attributeOptionCombo }) => {
+                    return result.find(({ id, period, orgUnit: eventOrgUnit, attribute }) => {
+                        const sameEvent = event === id;
+                        const samePeriod =
+                            moment
+                                .duration(moment(eventDate).diff(moment(period)))
+                                .abs()
+                                .asDays() <= 1;
+                        const sameOrgUnit = orgUnit === eventOrgUnit;
+                        const sameAttribute =
+                            !attributeOptionCombo ||
+                            !attribute ||
+                            attributeOptionCombo === attribute;
+                        return sameEvent || (samePeriod && sameOrgUnit && sameAttribute);
+                    });
+                }
+            );
+
+            return {
+                newValues: events,
+                existingValues: existingEvents,
+            };
+        } else {
+            const existingDataValues = _.remove(
+                dataValues ?? [],
+                ({ period, orgUnit, attributeOptionCombo }) => {
+                    return result.find(
+                        ({ period: eventPeriod, orgUnit: eventOrgUnit, attribute }) => {
+                            const samePeriod = eventPeriod === String(period);
+                            const sameOrgUnit = orgUnit === eventOrgUnit;
+                            const sameAttribute =
+                                !attributeOptionCombo ||
+                                !attribute ||
+                                attributeOptionCombo === attribute;
+                            return samePeriod && sameOrgUnit && sameAttribute;
+                        }
+                    );
+                }
+            );
+
+            return {
+                newValues: dataValues,
+                existingValues: existingDataValues,
+            };
+        }
+    };
+
+    const performImport = async (dataValues: any[]) => {
         if (!importState) return;
 
         loading.show(true);
 
         try {
-            const dataValues = overwrite
-                ? data.dataValues
-                : _.differenceBy(
-                      data.dataValues,
-                      existingDataValues,
-                      ({ dataElement, categoryOptionCombo, period, orgUnit }) =>
-                          [dataElement, categoryOptionCombo, period, orgUnit].join("-")
-                  );
-
-            const deletedCount = overwrite ? await deleteDataValues(api, existingDataValues) : 0;
+            const deletedCount =
+                importState.dataForm.type === "dataSets"
+                    ? await deleteDataValues(api, dataValues)
+                    : 0;
             const { response, importCount, description } = await dhisConnector.importData({
                 api,
                 element: importState.dataForm,
-                data: { ...data, dataValues },
+                data: dataValues,
             });
 
             const { imported, updated, ignored } = response ?? importCount;

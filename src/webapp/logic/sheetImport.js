@@ -224,15 +224,13 @@ export async function readSheet({
             else {
                 dataToImport = {
                     dataSet: result.dataSet,
-                    // "completeDate": result.completeDate,
-                    orgUnit: result.orgUnit,
                     dataValues: dataToImport.dataValues.concat(result.dataValues),
                 };
             }
         }
     });
 
-    return isProgram ? { events: dataToImport } : dataToImport;
+    return isProgram ? { events: dataToImport, program: element.id } : dataToImport;
 }
 
 function formatValue({ dataElement, cellValue, elementMetadata, metadataSheet }) {

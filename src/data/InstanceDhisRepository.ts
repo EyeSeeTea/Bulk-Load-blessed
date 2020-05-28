@@ -1,4 +1,4 @@
-import { D2Api, D2ApiDefault } from "d2-api";
+import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormType } from "../domain/entities/DataForm";
@@ -101,20 +101,31 @@ export class InstanceDhisRepository implements InstanceRepository {
     private async getDataSetPackage({
         id,
         orgUnits,
+        periods = [],
         startDate,
         endDate,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
-        const { dataValues } = await this.api
-            .get<AggregatedPackage>("/dataValueSets", {
-                dataSet: id,
-                startDate: startDate?.format("YYYY-MM-DD"),
-                endDate: endDate?.format("YYYY-MM-DD"),
-                orgUnit: orgUnits,
-            })
-            .getData();
+        const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
+            const query = (period?: string[]): Promise<DataValueSetsGetResponse> =>
+                this.api.dataValues
+                    .getSet({
+                        dataSet: [id],
+                        orgUnit,
+                        period,
+                        startDate: startDate?.format("YYYY-MM-DD"),
+                        endDate: endDate?.format("YYYY-MM-DD"),
+                    })
+                    .getData();
 
-        return _(dataValues)
+            return periods.length > 0
+                ? await promiseMap(_.chunk(periods, 200), query)
+                : [await query()];
+        });
+
+        return _(response)
+            .flatten()
+            .flatMap(({ dataValues = [] }) => dataValues)
             .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
                 [period, orgUnit, attributeOptionCombo].join("-")
             )
@@ -241,7 +252,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 }
 
-interface EventsPackage {
+export interface EventsPackage {
     events: Array<{
         event?: string;
         orgUnit: string;
@@ -257,18 +268,6 @@ interface EventsPackage {
             dataElement: string;
             value: string | number;
         }>;
-    }>;
-}
-
-interface AggregatedPackage {
-    dataValues: Array<{
-        dataElement: string;
-        period: string;
-        orgUnit: string;
-        value: string;
-        comment?: string;
-        categoryOptionCombo?: string;
-        attributeOptionCombo?: string;
     }>;
 }
 

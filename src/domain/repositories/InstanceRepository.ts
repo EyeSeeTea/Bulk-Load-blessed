@@ -9,6 +9,7 @@ export interface GetDataPackageParams {
     type: DataFormType;
     id: Id;
     orgUnits: Id[];
+    periods?: Id[];
     startDate?: Moment;
     endDate?: Moment;
 }
