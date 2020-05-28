@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
+import { DataPackage } from "../../../domain/entities/DataPackage";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -241,56 +242,82 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             periods,
             orgUnits,
             type,
+            translateCodes: false,
         });
 
         if (isProgram) {
             const existingEvents = _.remove(
                 events ?? [],
-                ({ event, eventDate, orgUnit, attributeOptionCombo }) => {
-                    return result.find(({ id, period, orgUnit: eventOrgUnit, attribute }) => {
-                        const sameEvent = event === id;
-                        const samePeriod =
-                            moment
-                                .duration(moment(eventDate).diff(moment(period)))
-                                .abs()
-                                .asDays() <= 1;
-                        const sameOrgUnit = orgUnit === eventOrgUnit;
-                        const sameAttribute =
-                            !attributeOptionCombo ||
-                            !attribute ||
-                            attributeOptionCombo === attribute;
-                        return sameEvent || (samePeriod && sameOrgUnit && sameAttribute);
-                    });
-                }
-            );
-
-            return {
-                newValues: events,
-                existingValues: existingEvents,
-            };
-        } else {
-            const existingDataValues = _.remove(
-                dataValues ?? [],
-                ({ period, orgUnit, attributeOptionCombo }) => {
-                    return result.find(
-                        ({ period: eventPeriod, orgUnit: eventOrgUnit, attribute }) => {
-                            const samePeriod = eventPeriod === String(period);
-                            const sameOrgUnit = orgUnit === eventOrgUnit;
-                            const sameAttribute =
-                                !attributeOptionCombo ||
-                                !attribute ||
-                                attributeOptionCombo === attribute;
-                            return samePeriod && sameOrgUnit && sameAttribute;
-                        }
+                ({ eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
+                    return result.find(dataPackage =>
+                        compareDataPackages(
+                            { period: String(eventDate), orgUnit, attribute, dataValues },
+                            dataPackage,
+                            1
+                        )
                     );
                 }
             );
 
-            return {
-                newValues: dataValues,
-                existingValues: existingDataValues,
-            };
+            return { newValues: events, existingValues: existingEvents };
+        } else {
+            const existingDataValues = _.remove(
+                dataValues ?? [],
+                ({ period, orgUnit, attributeOptionCombo: attribute }) => {
+                    return result.find(dataPackage =>
+                        compareDataPackages(
+                            { period: String(period), orgUnit, attribute, dataValues: [] },
+                            dataPackage
+                        )
+                    );
+                }
+            );
+
+            return { newValues: dataValues, existingValues: existingDataValues };
         }
+    };
+
+    const compareDataPackages = (
+        base: DataPackage,
+        compare: DataPackage,
+        periodDays = 0
+    ): boolean => {
+        const properties = _.compact([
+            periodDays === 0 ? "period" : undefined,
+            "orgUnit",
+            "attribute",
+        ]);
+
+        for (const property of properties) {
+            const baseValue = _.get(base, property);
+            const compareValue = _.get(compare, property);
+            const areEqual = _.isEqual(baseValue, compareValue);
+            if (baseValue && compareValue && !areEqual) return false;
+        }
+
+        if (
+            periodDays > 0 &&
+            moment
+                .duration(moment(base.period).diff(moment(compare.period)))
+                .abs()
+                .asDays() > periodDays
+        ) {
+            return false;
+        }
+
+        if (
+            !_.isEqualWith(base.dataValues, compare.dataValues, (base, compare) => {
+                const sameSize = base.length === compare.length;
+                const values = ({ dataElement, value }: any) => `${dataElement}-${value}`;
+                const sameValues = _.intersectionBy(base, compare, values).length === base.length;
+                console.log({ sameSize, sameValues, base, compare });
+                return sameSize && sameValues;
+            })
+        ) {
+            return false;
+        }
+
+        return true;
     };
 
     const performImport = async (dataValues: any[]) => {

@@ -104,6 +104,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         periods = [],
         startDate,
         endDate,
+        translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
         const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
@@ -139,7 +140,12 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
                             category: categoryOptionCombo,
-                            value: this.formatDataValue(dataElement, value, metadata),
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
                             comment,
                         })
                     ),
@@ -153,6 +159,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         orgUnits,
         startDate,
         endDate,
+        translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
@@ -200,7 +207,12 @@ export class InstanceDhisRepository implements InstanceRepository {
                         coordinate,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
-                            value: this.formatDataValue(dataElement, value, metadata),
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
                         })),
                     })
                 )
@@ -214,10 +226,11 @@ export class InstanceDhisRepository implements InstanceRepository {
     private formatDataValue(
         dataElement: string,
         value: string | number,
-        metadata: MetadataPackage
+        metadata: MetadataPackage,
+        translateCodes: boolean
     ): string | number {
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
-        if (!optionSet) return value;
+        if (!translateCodes || !optionSet) return value;
 
         // Format options from CODE to UID
         const options = _.filter(metadata.options, { optionSet: { id: optionSet } });

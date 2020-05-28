@@ -12,6 +12,7 @@ export interface GetDataPackageParams {
     periods?: Id[];
     startDate?: Moment;
     endDate?: Moment;
+    translateCodes?: boolean;
 }
 
 export interface InstanceRepository {
