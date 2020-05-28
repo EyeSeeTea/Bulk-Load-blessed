@@ -12,7 +12,7 @@ interface DownloadTemplateProps {
     api: unknown;
     type: DataFormType;
     id: string;
-    orgUnits: string[];
+    orgUnits?: string[];
     populate: boolean;
     startDate?: Moment;
     endDate?: Moment;
@@ -32,7 +32,7 @@ export class DownloadTemplateUseCase {
         type,
         id,
         theme: themeId,
-        orgUnits,
+        orgUnits = [],
         populate,
         startDate,
         endDate,
