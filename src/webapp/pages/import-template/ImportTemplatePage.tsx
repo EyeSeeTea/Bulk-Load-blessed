@@ -58,6 +58,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const onDrop = async (files: File[]) => {
         loading.show(true);
         setMessages([]);
+        setSelectedOrgUnits([]);
+        setOrgUnitTreeFilter([]);
 
         const file = files[0];
         if (!file) {
@@ -130,10 +132,14 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 colOffset,
             });
 
+            const filterOrgUnits = useBuilderOrgUnits
+                ? cleanOrgUnitPaths(selectedOrgUnits)
+                : _.map(orgUnits, "id");
+
             const removedDataValues = _.remove(
                 //@ts-ignore FIXME Create typings for sheet import code
                 data.dataValues ?? data.events,
-                ({ orgUnit }) => !orgUnits.find(({ id }) => id === orgUnit)
+                ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
             );
 
             if (removedDataValues.length === 0) {

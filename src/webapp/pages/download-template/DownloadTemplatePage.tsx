@@ -24,7 +24,7 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             return;
         }
 
-        const { type, orgUnits = [], populate, startDate, endDate, ...rest } = template;
+        const { type, startDate, endDate, ...rest } = template;
 
         if (type === "dataSets" && (!startDate || !endDate)) {
             snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
@@ -33,12 +33,9 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
 
         loading.show(true);
 
-        const showOrgUnitsOnGeneration = settings?.orgUnitSelection !== "import";
         await CompositionRoot.attach().templates.download.execute({
             api,
             type,
-            orgUnits: showOrgUnitsOnGeneration ? orgUnits : [],
-            populate: showOrgUnitsOnGeneration && populate,
             startDate,
             endDate,
             ...rest,

@@ -43,6 +43,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const classes = useStyles();
     const { api } = useAppContext();
 
+    const orgUnitSelectionEnabled = settings.orgUnitSelection !== "import";
     const [dataSource, setDataSource] = useState<DataSource>();
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
@@ -51,7 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
-    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(true);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(orgUnitSelectionEnabled);
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
@@ -128,6 +129,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, type: model, id: undefined, populate: false }));
         setTemplates(options);
         setSelectedOrgUnits([]);
+        setOrgUnitTreeFilter([]);
         setUserHasReadAccess(false);
     };
 
@@ -242,7 +244,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             </div>
 
-            {settings.orgUnitSelection !== "import" && (
+            {orgUnitSelectionEnabled && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
