@@ -198,7 +198,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                         <Icon>cloud_download</Icon>
                     </ListItemIcon>
                     <ListItemText
-                        primary={"Access to Template Generation"}
+                        primary={i18n.t("Access to Template Generation")}
                         secondary={buildSharingDescription("generation")}
                     />
                 </ListItem>
@@ -207,7 +207,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                         <Icon>settings</Icon>
                     </ListItemIcon>
                     <ListItemText
-                        primary={"Access to Settings and Themes"}
+                        primary={i18n.t("Access to Settings and Themes")}
                         secondary={buildSharingDescription("settings")}
                     />
                 </ListItem>
