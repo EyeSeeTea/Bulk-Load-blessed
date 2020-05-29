@@ -57,7 +57,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const onDrop = async (files: File[]) => {
-        loading.show(true);
+        loading.show(true, i18n.t("Reading file..."));
         setMessages([]);
         setSelectedOrgUnits([]);
         setOrgUnitTreeFilter([]);
@@ -104,7 +104,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         try {
             const { dataForm, file } = importState;
 
-            loading.show(true);
+            loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
                 api,
                 element: dataForm,
@@ -330,7 +330,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const performImport = async (dataValues: any[]) => {
         if (!importState) return;
 
-        loading.show(true);
+        loading.show(true, i18n.t("Importing data..."));
 
         try {
             const deletedCount =

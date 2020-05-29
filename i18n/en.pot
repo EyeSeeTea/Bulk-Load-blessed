@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-29T13:49:24.117Z\n"
-"PO-Revision-Date: 2020-05-29T13:49:24.117Z\n"
+"POT-Creation-Date: 2020-05-29T14:02:23.688Z\n"
+"PO-Revision-Date: 2020-05-29T14:02:23.688Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -210,13 +210,22 @@ msgstr ""
 msgid "You need to select start and end dates for dataSet templates"
 msgstr ""
 
+msgid "Downloading template..."
+msgstr ""
+
 msgid "Download template"
+msgstr ""
+
+msgid "Reading file..."
 msgstr ""
 
 msgid "Cannot read file"
 msgstr ""
 
 msgid "You don't have write permissions for {{type}} {{name}}"
+msgstr ""
+
+msgid "Reading data..."
 msgstr ""
 
 msgid "Select at least one organisation unit to import data"
@@ -256,6 +265,9 @@ msgid "Existing data values"
 msgstr ""
 
 msgid "Import only new data values"
+msgstr ""
+
+msgid "Importing data..."
 msgstr ""
 
 msgid "Imported"
