@@ -144,7 +144,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             );
 
             if (removedDataValues.length === 0) {
-                await checkExistingData(data);
+                await checkExistingData(object.type, data);
             } else {
                 updateDialog({
                     title: i18n.t("Invalid organisation units found"),
@@ -156,7 +156,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         updateDialog(null);
                     },
                     onSave: () => {
-                        checkExistingData(data);
+                        checkExistingData(object.type, data);
                         updateDialog(null);
                     },
                     onInfoAction: () => {
@@ -183,18 +183,25 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         saveAs(blob, `invalid-organisations-${date}.json`);
     };
 
-    const checkExistingData = async (data: any) => {
+    const checkExistingData = async (type: DataFormType, data: any) => {
         const { newValues, existingValues } = await getDataValuesFromData(data);
 
         if (existingValues.length === 0) {
             await performImport(newValues);
         } else {
+            const dataSetMessage = i18n.t(
+                "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                { totalExisting: existingValues.length }
+            );
+
+            const programMessage = i18n.t(
+                "There are {{totalExisting}} events in the database for this organisation, data values and similar event date. If you proceed, the data values without an event id will be duplicated. Are you sure?",
+                { totalExisting: existingValues.length }
+            );
+
             updateDialog({
                 title: i18n.t("Existing data values"),
-                description: i18n.t(
-                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { totalExisting: existingValues.length }
-                ),
+                description: type === "dataSets" ? dataSetMessage : programMessage,
                 onSave: () => {
                     performImport([...newValues, ...existingValues]);
                     updateDialog(null);

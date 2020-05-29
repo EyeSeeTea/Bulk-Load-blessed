@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-28T12:51:56.464Z\n"
-"PO-Revision-Date: 2020-05-28T12:51:56.464Z\n"
+"POT-Creation-Date: 2020-05-29T06:08:10.857Z\n"
+"PO-Revision-Date: 2020-05-29T06:08:10.857Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -240,13 +240,19 @@ msgstr ""
 msgid "Download data values with invalid organisation units"
 msgstr ""
 
-msgid "Existing data values"
-msgstr ""
-
 msgid ""
 "There are {{totalExisting}} data values in the database for this "
 "organisation unit and periods. If you proceed, all those data values will "
 "be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+
+msgid ""
+"There are {{totalExisting}} events in the database for this organisation, "
+"data values and similar event date. If you proceed, the data values without "
+"an event id will be duplicated. Are you sure?"
+msgstr ""
+
+msgid "Existing data values"
 msgstr ""
 
 msgid "Import only new data values"
