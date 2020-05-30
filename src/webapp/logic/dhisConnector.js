@@ -35,6 +35,7 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
 
 export async function importData({ element, api, data }) {
     const endpoint = element.type === "programs" ? "/events" : "/dataValueSets";
-    const response = await api.post(endpoint, {}, data).getData();
+    const object = element.type === "programs" ? { events: data } : { dataValues: data };
+    const response = await api.post(endpoint, {}, object).getData();
     return response;
 }
