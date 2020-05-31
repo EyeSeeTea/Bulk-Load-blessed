@@ -1,21 +1,15 @@
 //@ts-ignore
-import { useConfig, useDataQuery } from "@dhis2/app-runtime";
-//@ts-ignore
-import { HeaderBar } from "@dhis2/ui-widgets";
+import { useConfig } from "@dhis2/app-runtime";
 import { LinearProgress } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
-//@ts-ignore
-import { init } from "d2";
-import { D2ApiDefault } from "d2-api";
 import { LoadingProvider, SnackbarProvider } from "d2-ui-components";
 import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
-import i18n from "../../../locales";
-import { AppContext, AppContextI } from "../../contexts/api-context";
-import Root from "../../pages/root/Root";
+import { useAppContext } from "../../contexts/api-context";
+import Root from "../../pages/root/RootPage";
 import Share from "../share/Share";
 import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
@@ -43,25 +37,17 @@ interface AppConfig {
     };
 }
 
-type D2 = object;
-
 interface AppWindow extends Window {
     $: {
         feedbackDhis2: (
-            d2: D2,
+            d2: unknown,
             appKey: string,
             appConfig: AppConfig["feedback"]["feedbackOptions"]
         ) => void;
     };
 }
 
-function isLangRTL(code: string): boolean {
-    const langs = ["ar", "fa", "ur"];
-    const prefixed = langs.map(c => `${c}-`);
-    return _(langs).includes(code) || prefixed.filter(c => code && code.startsWith(c)).length > 0;
-}
-
-function initFeedbackTool(d2: D2, appConfig: AppConfig): void {
+function initFeedbackTool(d2: unknown, appConfig: AppConfig): void {
     const appKey = _(appConfig).get("appKey");
 
     if (appConfig && appConfig.feedback) {
@@ -73,80 +59,49 @@ function initFeedbackTool(d2: D2, appConfig: AppConfig): void {
     }
 }
 
-function configI18n(userSettings: { keyUiLocale: string }) {
-    const uiLocale = userSettings.keyUiLocale;
-    i18n.changeLanguage(uiLocale);
-    document.documentElement.setAttribute("dir", isLangRTL(uiLocale) ? "rtl" : "ltr");
-}
-
-const settingsQuery = { userSettings: { resource: "/userSettings" } };
-
 const App = () => {
     const { baseUrl } = useConfig();
-    const [appContext, setAppContext] = useState<AppContextI | null>(null);
+    const { d2 } = useAppContext();
 
     const [showShareButton, setShowShareButton] = useState(false);
-    const { loading, error, data } = useDataQuery(settingsQuery);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const run = async () => {
             const appConfig = await fetch("app-config.json").then(res => res.json());
-            const d2 = await init({ baseUrl: baseUrl + "/api" });
-            const api = new D2ApiDefault({ baseUrl });
-            (window as any).bulkLoad = { d2, api };
-
             CompositionRoot.initialize({ appConfig, dhisInstance: { url: baseUrl } });
 
-            configI18n(data.userSettings);
-            const appContext: AppContextI = { d2, api };
-            setAppContext(appContext);
-            Object.assign(window, { bulkLoad: appContext });
-
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
-
             initFeedbackTool(d2, appConfig);
+            setLoading(false);
         };
 
-        if (data) run();
-    }, [data, baseUrl]);
+        run();
+    }, [d2, baseUrl]);
 
-    if (error) {
-        return (
-            <h3 style={{ margin: 20 }}>
-                <a rel="noopener noreferrer" target="_blank" href={baseUrl}>
-                    Login
-                </a>
-                {` ${baseUrl}`}
-            </h3>
-        );
-    } else if (loading || !appContext) {
+    if (loading) {
         return (
             <div style={{ margin: 20 }}>
                 <h3>Connecting to {baseUrl}...</h3>
                 <LinearProgress />
             </div>
         );
-    } else {
-        return (
-            <MuiThemeProvider theme={muiTheme}>
-                <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
-                    <LoadingProvider>
-                        <SnackbarProvider>
-                            <HeaderBar appName={"Bulk Load"} />
-
-                            <div id="app" className="content">
-                                <AppContext.Provider value={appContext}>
-                                    <Root />
-                                </AppContext.Provider>
-                            </div>
-
-                            <Share visible={showShareButton} />
-                        </SnackbarProvider>
-                    </LoadingProvider>
-                </OldMuiThemeProvider>
-            </MuiThemeProvider>
-        );
     }
+
+    return (
+        <MuiThemeProvider theme={muiTheme}>
+            <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
+                <LoadingProvider>
+                    <SnackbarProvider>
+                        <div id="app">
+                            <Root />
+                        </div>
+                        <Share visible={showShareButton} />
+                    </SnackbarProvider>
+                </LoadingProvider>
+            </OldMuiThemeProvider>
+        </MuiThemeProvider>
+    );
 };
 
 export default App;

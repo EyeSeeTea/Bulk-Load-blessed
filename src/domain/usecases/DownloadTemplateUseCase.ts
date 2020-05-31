@@ -1,5 +1,7 @@
 import { saveAs } from "file-saver";
 import { Moment } from "moment";
+import * as dhisConnector from "../../webapp/logic/dhisConnector";
+import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -7,14 +9,14 @@ import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
 interface DownloadTemplateProps {
+    api: unknown;
     type: DataFormType;
     id: string;
-    name: string;
-    orgUnits: string[];
+    orgUnits?: string[];
     populate: boolean;
     startDate?: Moment;
     endDate?: Moment;
-    file: File;
+    language?: string;
     theme?: Id;
 }
 
@@ -26,25 +28,44 @@ export class DownloadTemplateUseCase {
     ) {}
 
     public async execute({
+        api,
         type,
         id,
-        name,
-        file,
         theme: themeId,
-        orgUnits,
+        orgUnits = [],
         populate,
         startDate,
         endDate,
+        language,
     }: DownloadTemplateProps): Promise<void> {
         try {
-            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v2";
+            const templateId = type === "dataSets" ? dataSetId : programId;
             const template = this.templateRepository.getTemplate(templateId);
+            const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
+
+            const element = await dhisConnector.getElement(api, type, id);
+            const result = await dhisConnector.getElementMetadata({
+                api,
+                element,
+                orgUnitIds: orgUnits,
+            });
+
+            // FIXME: Legacy code, sheet generator
+            const builderOutput = new SheetBuilder({
+                ...result,
+                startDate,
+                endDate,
+                language,
+                theme,
+                template,
+            });
+
+            const name = element.displayName ?? element.name;
+            const file = await builderOutput.toBlob();
+
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
-            if (themeId) {
-                const theme = await this.templateRepository.getTheme(themeId);
-                await this.excelRepository.applyTheme(template, theme);
-            }
+            if (theme) await this.excelRepository.applyTheme(template, theme);
 
             if (populate) {
                 const dataPackage = await this.instance.getDataPackage({

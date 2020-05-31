@@ -1,15 +1,15 @@
+import _ from "lodash";
 import { Id } from "../domain/entities/ReferenceObject";
 import { Template } from "../domain/entities/Template";
 import { Theme } from "../domain/entities/Theme";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 import { TemplateRepository } from "../domain/repositories/TemplateRepository";
+import * as templates from "./templates";
 
 const themeCollectionKey = "themes";
 
 export function getTemplates(): Template[] {
-    const tasks = require.context("./templates", false, /.*\.ts$/);
-    return tasks.keys().map(key => {
-        const TemplateClass = tasks(key).default;
+    return _.values(templates).map(TemplateClass => {
         return new TemplateClass();
     });
 }

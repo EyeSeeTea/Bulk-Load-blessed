@@ -9,9 +9,9 @@ export class StorageDataStoreRepository extends StorageRepository {
     private api: D2Api;
     private dataStore: DataStore;
 
-    constructor({ url }: DhisInstance) {
+    constructor({ url }: DhisInstance, mockApi?: D2Api) {
         super();
-        this.api = new D2ApiDefault({ baseUrl: url });
+        this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
         this.dataStore = this.api.dataStore(dataStoreNamespace);
     }
 
