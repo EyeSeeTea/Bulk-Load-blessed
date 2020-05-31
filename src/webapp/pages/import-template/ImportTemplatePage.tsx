@@ -273,7 +273,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
-                            { period: String(period), orgUnit, attribute, dataValues: [] },
+                            { period: String(period), orgUnit, attribute },
                             dataPackage
                         )
                     );
@@ -285,8 +285,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const compareDataPackages = (
-        base: DataPackage,
-        compare: DataPackage,
+        base: Partial<DataPackage>,
+        compare: Partial<DataPackage>,
         periodDays = 0
     ): boolean => {
         const properties = _.compact([
@@ -313,11 +313,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
 
         if (
+            base.dataValues &&
+            compare.dataValues &&
             !_.isEqualWith(base.dataValues, compare.dataValues, (base, compare) => {
                 const sameSize = base.length === compare.length;
                 const values = ({ dataElement, value }: any) => `${dataElement}-${value}`;
                 const sameValues = _.intersectionBy(base, compare, values).length === base.length;
-                console.log({ sameSize, sameValues, base, compare });
                 return sameSize && sameValues;
             })
         ) {
