@@ -255,10 +255,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (isProgram) {
             const existingEvents = _.remove(
                 events ?? [],
-                ({ eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
+                ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
-                            { period: String(eventDate), orgUnit, attribute, dataValues },
+                            { id: event, period: String(eventDate), orgUnit, attribute, dataValues },
                             dataPackage,
                             1
                         )
@@ -312,6 +312,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return false;
         }
 
+        // Ignore data packages with event id set
+        if (base.id && compare.id) return false;
+        
         if (
             base.dataValues &&
             compare.dataValues &&
