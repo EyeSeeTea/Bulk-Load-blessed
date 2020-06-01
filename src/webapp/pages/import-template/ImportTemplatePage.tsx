@@ -184,7 +184,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const checkExistingData = async (type: DataFormType, data: any) => {
+        loading.show(true, i18n.t("Checking duplicates"))
         const { newValues, existingValues } = await getDataValuesFromData(data);
+        loading.reset();
 
         if (existingValues.length === 0) {
             await performImport(newValues);
