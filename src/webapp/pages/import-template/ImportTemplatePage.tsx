@@ -57,7 +57,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const onDrop = async (files: File[]) => {
-        loading.show(true);
+        loading.show(true, i18n.t("Reading file..."));
         setMessages([]);
         setSelectedOrgUnits([]);
         setOrgUnitTreeFilter([]);
@@ -104,7 +104,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         try {
             const { dataForm, file } = importState;
 
-            loading.show(true);
+            loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
                 api,
                 element: dataForm,
@@ -184,7 +184,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const checkExistingData = async (type: DataFormType, data: any) => {
+        loading.show(true, i18n.t("Checking duplicates..."));
         const { newValues, existingValues } = await getDataValuesFromData(data);
+        loading.reset();
 
         if (existingValues.length === 0) {
             await performImport(newValues);
@@ -255,10 +257,16 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (isProgram) {
             const existingEvents = _.remove(
                 events ?? [],
-                ({ eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
+                ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
-                            { period: String(eventDate), orgUnit, attribute, dataValues },
+                            {
+                                id: event,
+                                period: String(eventDate),
+                                orgUnit,
+                                attribute,
+                                dataValues,
+                            },
                             dataPackage,
                             1
                         )
@@ -312,6 +320,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return false;
         }
 
+        // Ignore data packages with event id set
+        if (base.id && compare.id) return false;
+
         if (
             base.dataValues &&
             compare.dataValues &&
@@ -331,7 +342,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const performImport = async (dataValues: any[]) => {
         if (!importState) return;
 
-        loading.show(true);
+        loading.show(true, i18n.t("Importing data..."));
 
         try {
             const deletedCount =

@@ -199,7 +199,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 {showModelsSelector && (
                     <div className={classes.select}>
                         <Select
-                            placeholder={i18n.t("Model")}
+                            placeholder={i18n.t("Data Model")}
                             onChange={onModelChange}
                             options={models}
                             value={state.type ?? ""}
@@ -309,7 +309,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             onChange={onThemeChange}
                             options={themeOptions}
                             allowEmpty={true}
-                            emptyLabel={i18n.t("No theme")}
+                            emptyLabel={i18n.t("<No value>")}
                             value={state.theme ?? ""}
                         />
                     </div>
@@ -321,7 +321,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     <FormControlLabel
                         className={classes.checkbox}
                         control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                        label={i18n.t("Populate template with instance data")}
+                        label={i18n.t("Populate template with data")}
                     />
                 </div>
             )}
