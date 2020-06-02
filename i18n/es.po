@@ -109,8 +109,8 @@ msgstr "Idioma"
 msgid "Theme"
 msgstr "Tema"
 
-msgid "No theme"
-msgstr "Sin tema"
+msgid "<No value>"
+msgstr "<Sin valor>"
 
 msgid "Populate template with data"
 msgstr "Rellenar plantilla con datos"
@@ -342,6 +342,9 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
+
+#~ msgid "No theme"
+#~ msgstr "Sin tema"
 
 #~ msgid "Model"
 #~ msgstr "Modelo"
