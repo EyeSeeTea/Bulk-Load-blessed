@@ -333,18 +333,3 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#~ msgid "No theme"
-#~ msgstr "Sin tema"
-
-#~ msgid "Model"
-#~ msgstr "Modelo"
-
-#~ msgid "Sections"
-#~ msgstr "Secciones"
-
-#~ msgid "Created by"
-#~ msgstr "Creado por"
-
-#~ msgid "Import template"
-#~ msgstr "Importar datos"
