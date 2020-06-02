@@ -184,7 +184,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const checkExistingData = async (type: DataFormType, data: any) => {
-        loading.show(true, i18n.t("Checking duplicates"))
+        loading.show(true, i18n.t("Checking duplicates"));
         const { newValues, existingValues } = await getDataValuesFromData(data);
         loading.reset();
 
@@ -260,7 +260,13 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
-                            { id: event, period: String(eventDate), orgUnit, attribute, dataValues },
+                            {
+                                id: event,
+                                period: String(eventDate),
+                                orgUnit,
+                                attribute,
+                                dataValues,
+                            },
                             dataPackage,
                             1
                         )
@@ -316,7 +322,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
         // Ignore data packages with event id set
         if (base.id && compare.id) return false;
-        
+
         if (
             base.dataValues &&
             compare.dataValues &&
