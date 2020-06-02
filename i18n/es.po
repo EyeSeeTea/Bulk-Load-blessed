@@ -1,7 +1,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2020-06-02T05:19:33.233Z\n"
+=======
+"POT-Creation-Date: 2020-06-02T14:22:35.930Z\n"
+>>>>>>> development
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -266,8 +270,8 @@ msgstr "Continuar"
 msgid "Download data values with invalid organisation units"
 msgstr ""
 
-msgid "Checking duplicates"
-msgstr "Comprobando duplicados"
+msgid "Checking duplicates..."
+msgstr "Comprobando duplicados..."
 
 msgid ""
 "There are {{totalExisting}} data values in the database for this "
@@ -294,7 +298,7 @@ msgid "Import only new data values"
 msgstr "Importar solo nuevos data values"
 
 msgid "Importing data..."
-msgstr "Importando datos"
+msgstr "Importando datos..."
 
 msgid "Imported"
 msgstr "Importados"
@@ -342,18 +346,3 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#~ msgid "No theme"
-#~ msgstr "Sin tema"
-
-#~ msgid "Model"
-#~ msgstr "Modelo"
-
-#~ msgid "Sections"
-#~ msgstr "Secciones"
-
-#~ msgid "Created by"
-#~ msgstr "Creado por"
-
-#~ msgid "Import template"
-#~ msgstr "Importar datos"

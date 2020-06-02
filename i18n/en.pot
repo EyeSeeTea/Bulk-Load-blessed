@@ -5,8 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2020-06-02T05:19:33.233Z\n"
 "PO-Revision-Date: 2020-06-02T05:19:33.233Z\n"
+=======
+"POT-Creation-Date: 2020-06-02T14:22:35.930Z\n"
+"PO-Revision-Date: 2020-06-02T14:22:35.930Z\n"
+>>>>>>> development
 
 msgid "Template not loaded"
 msgstr ""
@@ -258,7 +263,7 @@ msgstr ""
 msgid "Download data values with invalid organisation units"
 msgstr ""
 
-msgid "Checking duplicates"
+msgid "Checking duplicates..."
 msgstr ""
 
 msgid ""
