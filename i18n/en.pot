@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-01T17:25:41.393Z\n"
-"PO-Revision-Date: 2020-06-01T17:25:41.393Z\n"
+"POT-Creation-Date: 2020-06-02T05:19:33.233Z\n"
+"PO-Revision-Date: 2020-06-02T05:19:33.233Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -83,10 +83,10 @@ msgstr ""
 msgid "Select element to export..."
 msgstr ""
 
-msgid "Start date"
+msgid "Start period"
 msgstr ""
 
-msgid "End date"
+msgid "End period"
 msgstr ""
 
 msgid "Organisation units"
@@ -111,6 +111,12 @@ msgid "No theme"
 msgstr ""
 
 msgid "Populate template with data"
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
 msgstr ""
 
 msgid "Edit theme"
@@ -207,7 +213,10 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr ""
 
-msgid "You need to select start and end dates for dataSet templates"
+msgid "You need to select start and end periods for dataSet templates"
+msgstr ""
+
+msgid "You need to select start and end dates to populate template"
 msgstr ""
 
 msgid "Downloading template..."
