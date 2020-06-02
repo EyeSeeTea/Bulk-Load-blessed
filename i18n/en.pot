@@ -107,7 +107,7 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-msgid "No theme"
+msgid "<No value>"
 msgstr ""
 
 msgid "Populate template with data"

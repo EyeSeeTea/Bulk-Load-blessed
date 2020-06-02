@@ -309,7 +309,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             onChange={onThemeChange}
                             options={themeOptions}
                             allowEmpty={true}
-                            emptyLabel={i18n.t("No theme")}
+                            emptyLabel={i18n.t("<No value>")}
                             value={state.theme ?? ""}
                         />
                     </div>
