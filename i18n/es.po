@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-04T06:36:53.631Z\n"
+"POT-Creation-Date: 2020-06-04T10:42:30.065Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,6 +22,15 @@ msgstr "Campo {{field}} no puede ser vacio"
 
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
+
+msgid "Exclude data elements for duplicate detection in programs"
+msgstr "Excluir data elements en la detección de duplicados para programas"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Program"
+msgstr "Programa"
 
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas en la sección de generación"
@@ -67,9 +76,6 @@ msgstr "Solo accesible a los administradores del sistema"
 msgid "Not accessible"
 msgstr "No accesible"
 
-msgid "Close"
-msgstr "Cerrar"
-
 msgid "Models"
 msgstr "Modelos"
 
@@ -93,9 +99,6 @@ msgstr "Permisos"
 
 msgid "Data Set"
 msgstr "Data Set"
-
-msgid "Program"
-msgstr "Programa"
 
 msgid "Template properties"
 msgstr "Propiedades de plantilla"

@@ -21,6 +21,7 @@ import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import Settings, { PermissionSetting, PermissionType } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
+import DataElementsFilterDialog from "./DataElementsFilterDialog";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -31,7 +32,9 @@ export default function SettingsFields(props: SettingsFieldsProps) {
     const { settings, onChange } = props;
     const classes = useStyles();
     const { api } = useAppContext();
+
     const [sharingDialogType, setSharingDialogType] = useState<PermissionSetting | null>(null);
+    const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
 
     const setModel = useCallback(
         (model: Model) => {
@@ -170,6 +173,14 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
     return (
         <React.Fragment>
+            {!!isExclusionDialogVisible && (
+                <DataElementsFilterDialog
+                    onClose={() => showExclusionDialog(false)}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
+
             {!!sharingDialogType && (
                 <ConfirmationDialog
                     isOpen={true}
@@ -239,7 +250,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             </FormGroup>
 
             <FormGroup className={classes.content} row={true}>
-                <ListItem button onClick={() => ({})}>
+                <ListItem button onClick={() => showExclusionDialog(true)}>
                     <ListItemIcon>
                         <Icon>filter_list</Icon>
                     </ListItemIcon>

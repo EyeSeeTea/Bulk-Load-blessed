@@ -3,11 +3,13 @@ import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
     AppSettings,
+    DuplicateExclusion,
     DuplicateToleranceUnit,
     Model,
     Models,
     OrgUnitSelectionSetting,
 } from "../../domain/entities/AppSettings";
+import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { GetArrayInnerType } from "../../utils/types";
 
@@ -20,6 +22,7 @@ const publicFields = [
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
+    "duplicateExclusion",
     "duplicateTolerance",
     "duplicateToleranceUnit",
 ] as const;
@@ -52,6 +55,7 @@ export default class Settings {
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
+    public duplicateExclusion: DuplicateExclusion;
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
 
@@ -65,6 +69,7 @@ export default class Settings {
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
+        this.duplicateExclusion = options.duplicateExclusion;
         this.duplicateTolerance = options.duplicateTolerance;
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
     }
@@ -125,6 +130,7 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
+            duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
             duplicateToleranceUnit:
                 data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
@@ -146,6 +152,7 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
+            duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
         } = this;
@@ -167,6 +174,7 @@ export default class Settings {
             permissionsForGeneration,
             permissionsForSettings,
             orgUnitSelection,
+            duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
         };
@@ -206,6 +214,15 @@ export default class Settings {
     ): Settings {
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
+        });
+    }
+
+    setDuplicateExclusions(program: Id, exclusions: Id[]): Settings {
+        return this.updateOptions({
+            duplicateExclusion: {
+                ...this.duplicateExclusion,
+                [program]: exclusions,
+            },
         });
     }
 

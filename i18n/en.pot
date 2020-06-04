@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-04T06:36:53.631Z\n"
-"PO-Revision-Date: 2020-06-04T06:36:53.631Z\n"
+"POT-Creation-Date: 2020-06-04T10:42:30.065Z\n"
+"PO-Revision-Date: 2020-06-04T10:42:30.065Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -21,6 +21,15 @@ msgid "Field {{field}} cannot be blank"
 msgstr ""
 
 msgid "You need to select at least one {{element}}"
+msgstr ""
+
+msgid "Exclude data elements for duplicate detection in programs"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Program"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -65,9 +74,6 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
-msgid "Close"
-msgstr ""
-
 msgid "Models"
 msgstr ""
 
@@ -90,9 +96,6 @@ msgid "Permissions"
 msgstr ""
 
 msgid "Data Set"
-msgstr ""
-
-msgid "Program"
 msgstr ""
 
 msgid "Template properties"
