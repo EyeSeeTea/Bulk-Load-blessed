@@ -1,7 +1,7 @@
 import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
-import { DataForm, DataFormType } from "../domain/entities/DataForm";
+import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
@@ -20,34 +20,92 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        const params = {
-            paging: false,
-            fields: {
-                id: true,
-                displayName: true,
-                name: true,
-                attributeValues: { value: true, attribute: { code: true } },
-                periodType: true,
-                access: true,
-            },
-            filter: {
-                id: ids ? { in: ids } : undefined,
-                programType: type === "programs" ? { eq: "WITHOUT_REGISTRATION" } : undefined,
-            },
-        } as const;
+        switch (type) {
+            case "dataSets":
+                return this.getDataSets(ids);
+            case "programs":
+                return this.getPrograms(ids);
+            default:
+                throw new Error(`Unsupported type ${type} for data package`);
+        }
+    }
 
-        const { objects } = await (type === "dataSets"
-            ? this.api.models.dataSets.get(params).getData()
-            : this.api.models.programs.get(params).getData());
+    private async getDataSets(ids?: string[]): Promise<DataForm[]> {
+        const { objects } = await this.api.models.dataSets
+            .get({
+                paging: false,
+                fields: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    attributeValues: { value: true, attribute: { code: true } },
+                    dataSetElements: { dataElement: { id: true, formName: true, name: true } },
+                    periodType: true,
+                    access: true,
+                },
+                filter: {
+                    id: ids ? { in: ids } : undefined,
+                },
+            })
+            .getData();
 
-        return objects.map(({ displayName, name, access, ...rest }) => ({
+        return objects.map(
+            ({ displayName, name, access, periodType, dataSetElements, ...rest }) => ({
+                ...rest,
+                type: "dataSets",
+                name: displayName ?? name,
+                periodType: periodType as DataFormPeriod,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: dataSetElements
+                    .map(({ dataElement }) => dataElement)
+                    .map(({ formName, name, ...rest }) => ({
+                        ...rest,
+                        name: formName ?? name,
+                    })),
+            })
+        );
+    }
+
+    private async getPrograms(ids?: string[]): Promise<DataForm[]> {
+        const { objects } = await this.api.models.programs
+            .get({
+                paging: false,
+                fields: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    attributeValues: { value: true, attribute: { code: true } },
+                    programStages: {
+                        programStageDataElements: {
+                            dataElement: { id: true, formName: true, name: true },
+                        },
+                    },
+                    access: true,
+                },
+                filter: {
+                    id: ids ? { in: ids } : undefined,
+                    programType: { eq: "WITHOUT_REGISTRATION" },
+                },
+            })
+            .getData();
+
+        return objects.map(({ displayName, name, access, programStages, ...rest }) => ({
             ...rest,
-            type,
+            type: "programs",
             name: displayName ?? name,
+            periodType: "Daily",
             //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
             readAccess: access.data?.read,
             //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
             writeAccess: access.data?.write,
+            dataElements: programStages
+                .flatMap(({ programStageDataElements }) =>
+                    programStageDataElements.map(({ dataElement }) => dataElement)
+                )
+                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
         }));
     }
 
