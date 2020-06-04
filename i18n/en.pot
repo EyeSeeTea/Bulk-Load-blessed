@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-04T10:46:34.846Z\n"
-"PO-Revision-Date: 2020-06-04T10:46:34.846Z\n"
+"POT-Creation-Date: 2020-06-04T11:36:59.775Z\n"
+"PO-Revision-Date: 2020-06-04T11:36:59.775Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -84,6 +84,9 @@ msgid "Organisation Units visibility"
 msgstr ""
 
 msgid "Duplicate detection for programs"
+msgstr ""
+
+msgid "Event date absolute difference"
 msgstr ""
 
 msgid "Data elements filter"

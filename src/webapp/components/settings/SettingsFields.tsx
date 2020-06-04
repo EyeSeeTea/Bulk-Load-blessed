@@ -236,6 +236,9 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <h3 className={classes.title}>{i18n.t("Duplicate detection for programs")}</h3>
 
             <FormGroup className={classes.content} row={true}>
+                <p className={classes.duplicateToleranceLabel}>
+                    {i18n.t("Event date absolute difference")}
+                </p>
                 <TextField
                     className={classes.duplicateTolerance}
                     type="number"
@@ -293,6 +296,7 @@ const useStyles = makeStyles({
     checkbox: { padding: 9 },
     title: { marginTop: 35 },
     duplicateTolerance: { margin: 0, marginRight: 15, width: 35 },
+    duplicateToleranceLabel: { margin: 0, marginRight: 15, alignSelf: "center" },
 });
 
 function searchUsers(api: D2Api, query: string) {
