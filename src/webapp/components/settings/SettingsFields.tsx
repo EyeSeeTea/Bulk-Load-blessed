@@ -191,7 +191,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </ConfirmationDialog>
             )}
 
-            <h3>{i18n.t("Models")}</h3>
+            <h3 className={classes.title}>{i18n.t("Models")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
@@ -209,7 +209,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 ))}
             </FormGroup>
 
-            <h3>{i18n.t("Visibility")}</h3>
+            <h3 className={classes.title}>{i18n.t("Visibility")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
@@ -222,17 +222,20 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3>{i18n.t("Duplicate tolerance for programs")}</h3>
+            <h3 className={classes.title}>{i18n.t("Duplicate tolerance for programs")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <TextField
+                    className={classes.duplicateTolerance}
                     type="number"
                     variant="outlined"
+                    margin="dense"
                     onChange={setDuplicateTolerance}
                     value={settings.duplicateTolerance}
                 />
                 <Select
                     variant="outlined"
+                    margin="dense"
                     onChange={setDuplicateToleranceUnit}
                     options={duplicateToleranceUnits}
                     value={settings.duplicateToleranceUnit}
@@ -251,7 +254,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </ListItem>
             </FormGroup>
 
-            <h3>{i18n.t("Permissions")}</h3>
+            <h3 className={classes.title}>{i18n.t("Permissions")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <ListItem button onClick={() => setSharingDialogType("generation")}>
@@ -279,8 +282,10 @@ export default function SettingsFields(props: SettingsFieldsProps) {
 
 const useStyles = makeStyles({
     fullWidth: { width: "100%" },
-    content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
+    content: { margin: "1rem", marginLeft: 0 },
     checkbox: { padding: 9 },
+    title: { marginTop: 35 },
+    duplicateTolerance: { margin: 0, marginRight: 15, width: 75 },
 });
 
 function searchUsers(api: D2Api, query: string) {

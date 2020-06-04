@@ -1,11 +1,17 @@
-import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from "@material-ui/core";
+import {
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select as MuiSelect,
+    SelectProps as MuiSelectProps,
+} from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 import React from "react";
 
 export type SelectOption = { value: string; label: string };
 
-export interface SelectProps {
+export interface SelectProps extends Omit<MuiSelectProps, "onChange"> {
     placeholder?: string;
     options: Array<SelectOption>;
     onChange: (option: SelectOption) => void;
@@ -13,7 +19,6 @@ export interface SelectProps {
     value?: string;
     allowEmpty?: boolean;
     emptyLabel?: string;
-    variant?: "filled" | "outlined";
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -24,7 +29,7 @@ export const Select: React.FC<SelectProps> = ({
     value,
     allowEmpty = false,
     emptyLabel = "",
-    variant,
+    ...rest
 }) => {
     const classes = useStyles();
     const [stateValue, setValue] = React.useState(defaultValue ? defaultValue.value : "");
@@ -50,7 +55,7 @@ export const Select: React.FC<SelectProps> = ({
                     onChange={handleChange}
                     value={value ?? stateValue}
                     autoWidth={true}
-                    variant={variant}
+                    {...rest}
                 >
                     {!!defaultLabel && (
                         <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
