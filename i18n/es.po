@@ -85,11 +85,11 @@ msgstr "Modelo de Datos"
 msgid "Select element to export..."
 msgstr "Seleccione elemento a exportar..."
 
-msgid "Start date"
-msgstr "Fecha inicial"
+msgid "Start period"
+msgstr "Periodo inicial"
 
-msgid "End date"
-msgstr "Fecha final"
+msgid "End period"
+msgstr "Periodo final"
 
 msgid "Organisation units"
 msgstr "Unidades Organizativas"
@@ -114,6 +114,12 @@ msgstr "<Sin valor>"
 
 msgid "Populate template with data"
 msgstr "Rellenar plantilla con datos"
+
+msgid "Start date"
+msgstr "Fecha inicial"
+
+msgid "End date"
+msgstr "Fecha final"
 
 msgid "Edit theme"
 msgstr "Editar tema"
@@ -211,8 +217,11 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr "Seleccione al menos un elemento a exportar"
 
-msgid "You need to select start and end dates for dataSet templates"
-msgstr "Seleccione fecha de inicio y de fin"
+msgid "You need to select start and end periods for dataSet templates"
+msgstr "Seleccione periodos de inicio y de fin para plantillas de tipo dataSet"
+
+msgid "You need to select start and end dates to populate template"
+msgstr "Seleccione fecha de inicio y de fin para rellenar la plantilla"
 
 msgid "Downloading template..."
 msgstr "Descargando plantilla..."

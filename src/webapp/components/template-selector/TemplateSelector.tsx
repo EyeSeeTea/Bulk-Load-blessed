@@ -1,11 +1,12 @@
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
-import moment, { Moment } from "moment";
-import React, { useEffect, useState, useMemo } from "react";
+import moment from "moment";
+import React, { useEffect, useMemo, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
+import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { PartialBy } from "../../../utils/types";
@@ -14,17 +15,6 @@ import Settings from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<DataFormType, DataForm[]>;
-
-export interface TemplateSelectorState {
-    type: DataFormType;
-    id: string;
-    populate: boolean;
-    language: string;
-    orgUnits?: string[];
-    theme?: string;
-    startDate?: Moment;
-    endDate?: Moment;
-}
 
 type PickerUnit = "year" | "month" | "date";
 interface PickerFormat {
@@ -36,7 +26,7 @@ interface PickerFormat {
 export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
-    onChange(state: TemplateSelectorState | null): void;
+    onChange(state: DownloadTemplateProps | null): void;
 }
 
 export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
@@ -53,7 +43,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
     const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(orgUnitSelectionEnabled);
-    const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
+    const [state, setState] = useState<PartialBy<DownloadTemplateProps, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
         populate: false,
@@ -120,13 +110,18 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const themeOptions = dataSource ? modelToSelectOption(themes) : [];
 
+    const clearPopulateDates = () => {
+        setState(state => ({ ...state, populateStartDate: undefined, populateEndDate: undefined }));
+    };
+
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
 
-        const model = value as DataFormType;
-        const options = modelToSelectOption(dataSource[model]);
+        const type = value as DataFormType;
+        const options = modelToSelectOption(dataSource[type]);
 
-        setState(state => ({ ...state, type: model, id: undefined, populate: false }));
+        setState(state => ({ ...state, type, id: undefined, populate: false }));
+        clearPopulateDates();
         setTemplates(options);
         setSelectedOrgUnits([]);
         setOrgUnitTreeFilter([]);
@@ -153,6 +148,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         }
 
         setState(state => ({ ...state, id: value, populate: false }));
+        clearPopulateDates();
         setSelectedOrgUnits([]);
     };
 
@@ -160,16 +156,18 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, theme: value }));
     };
 
-    const onStartDateChange = (date: Date) => {
+    const onStartDateChange = (field: keyof DownloadTemplateProps, date: Date, clear = false) => {
         const { unit = "date" } = datePickerFormat ?? {};
         const startDate = date ? moment(date).startOf(unit) : undefined;
-        setState(state => ({ ...state, startDate }));
+        setState(state => ({ ...state, [field]: startDate }));
+        if (clear) clearPopulateDates();
     };
 
-    const onEndDateChange = (date: Date) => {
+    const onEndDateChange = (field: keyof DownloadTemplateProps, date: Date, clear = false) => {
         const { unit = "date" } = datePickerFormat ?? {};
         const endDate = date ? moment(date).endOf(unit) : undefined;
-        setState(state => ({ ...state, endDate }));
+        setState(state => ({ ...state, [field]: endDate }));
+        if (clear) clearPopulateDates();
     };
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
@@ -182,6 +180,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
         setState(state => ({ ...state, populate: false }));
+        clearPopulateDates();
         setFilterOrgUnits(filterOrgUnits);
     };
 
@@ -217,32 +216,34 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             </div>
 
-            <div className={classes.row}>
-                <div className={classes.select}>
-                    <DatePicker
-                        className={classes.fullWidth}
-                        label={i18n.t("Start date")}
-                        value={state.startDate ?? null}
-                        onChange={onStartDateChange}
-                        maxDate={state.endDate}
-                        views={datePickerFormat?.views}
-                        format={datePickerFormat?.format}
-                        InputLabelProps={{ style: { color: "#494949" } }}
-                    />
+            {state.type === "dataSets" && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("Start period")}
+                            value={state.startDate ?? null}
+                            onChange={(date: Date) => onStartDateChange("startDate", date, true)}
+                            maxDate={state.endDate}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("End period")}
+                            value={state.endDate ?? null}
+                            onChange={(date: Date) => onEndDateChange("endDate", date, true)}
+                            minDate={state.startDate}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
                 </div>
-                <div className={classes.select}>
-                    <DatePicker
-                        className={classes.fullWidth}
-                        label={i18n.t("End date")}
-                        value={state.endDate ?? null}
-                        onChange={onEndDateChange}
-                        minDate={state.startDate}
-                        views={datePickerFormat?.views}
-                        format={datePickerFormat?.format}
-                        InputLabelProps={{ style: { color: "#494949" } }}
-                    />
-                </div>
-            </div>
+            )}
 
             {orgUnitSelectionEnabled && (
                 <React.Fragment>
@@ -323,6 +324,55 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
                         label={i18n.t("Populate template with data")}
                     />
+                </div>
+            )}
+
+            {state.populate && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("Start date")}
+                            value={state.populateStartDate ?? null}
+                            onChange={(date: Date) => onStartDateChange("populateStartDate", date)}
+                            minDate={
+                                state.type === "dataSets"
+                                    ? state.startDate?.startOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
+                            maxDate={moment.min(
+                                _.compact([
+                                    state.type === "dataSets" && state.endDate,
+                                    state.populateEndDate,
+                                ])
+                            )}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("End date")}
+                            value={state.populateEndDate ?? null}
+                            onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
+                            minDate={moment.max(
+                                _.compact([
+                                    state.type === "dataSets" && state.startDate,
+                                    state.populateStartDate,
+                                ])
+                            )}
+                            maxDate={
+                                state.type === "dataSets"
+                                    ? state.endDate?.endOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
                 </div>
             )}
         </React.Fragment>

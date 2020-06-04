@@ -83,10 +83,10 @@ msgstr ""
 msgid "Select element to export..."
 msgstr ""
 
-msgid "Start date"
+msgid "Start period"
 msgstr ""
 
-msgid "End date"
+msgid "End period"
 msgstr ""
 
 msgid "Organisation units"
@@ -111,6 +111,12 @@ msgid "<No value>"
 msgstr ""
 
 msgid "Populate template with data"
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
 msgstr ""
 
 msgid "Edit theme"
@@ -207,7 +213,10 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr ""
 
-msgid "You need to select start and end dates for dataSet templates"
+msgid "You need to select start and end periods for dataSet templates"
+msgstr ""
+
+msgid "You need to select start and end dates to populate template"
 msgstr ""
 
 msgid "Downloading template..."
