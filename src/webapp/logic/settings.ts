@@ -3,10 +3,10 @@ import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
     AppSettings,
+    DuplicateToleranceUnit,
     Model,
     Models,
     OrgUnitSelectionSetting,
-    PopulateToleranceUnit,
 } from "../../domain/entities/AppSettings";
 import i18n from "../../locales";
 import { GetArrayInnerType } from "../../utils/types";
@@ -20,8 +20,8 @@ const publicFields = [
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
-    "populateTolerance",
-    "populateToleranceUnit",
+    "duplicateTolerance",
+    "duplicateToleranceUnit",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -52,8 +52,8 @@ export default class Settings {
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
-    public populateTolerance: number;
-    public populateToleranceUnit: PopulateToleranceUnit;
+    public duplicateTolerance: number;
+    public duplicateToleranceUnit: DuplicateToleranceUnit;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -65,8 +65,8 @@ export default class Settings {
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
-        this.populateTolerance = options.populateTolerance;
-        this.populateToleranceUnit = options.populateToleranceUnit;
+        this.duplicateTolerance = options.duplicateTolerance;
+        this.duplicateToleranceUnit = options.duplicateToleranceUnit;
     }
 
     static async build(api: D2Api): Promise<Settings> {
@@ -125,9 +125,9 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
-            populateTolerance: data.populateTolerance ?? defaultSettings.populateTolerance,
-            populateToleranceUnit:
-                data.populateToleranceUnit ?? defaultSettings.populateToleranceUnit,
+            duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
+            duplicateToleranceUnit:
+                data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
         });
     }
 
@@ -146,8 +146,8 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
-            populateTolerance,
-            populateToleranceUnit,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -167,8 +167,8 @@ export default class Settings {
             permissionsForGeneration,
             permissionsForSettings,
             orgUnitSelection,
-            populateTolerance,
-            populateToleranceUnit,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         };
 
         try {

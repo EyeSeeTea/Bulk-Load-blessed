@@ -28,8 +28,8 @@ export class ConfigWebRepository implements ConfigRepository {
             permissionsForGeneration: [],
             permissionsForSettings: [],
             orgUnitSelection: "both",
-            populateTolerance: 1,
-            populateToleranceUnit: "day",
+            duplicateTolerance: 1,
+            duplicateToleranceUnit: "day",
             ...defaultSettings,
         };
     }

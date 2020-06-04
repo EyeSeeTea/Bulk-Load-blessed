@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-04T05:41:13.569Z\n"
-"PO-Revision-Date: 2020-06-04T05:41:13.569Z\n"
+"POT-Creation-Date: 2020-06-04T06:36:53.631Z\n"
+"PO-Revision-Date: 2020-06-04T06:36:53.631Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -30,6 +30,18 @@ msgid "Select Organisation Units on template import"
 msgstr ""
 
 msgid "Select Organisation Units on template generation and import"
+msgstr ""
+
+msgid "Days"
+msgstr ""
+
+msgid "Weeks"
+msgstr ""
+
+msgid "Months"
+msgstr ""
+
+msgid "Years"
 msgstr ""
 
 msgid "Access to Template Generation"
@@ -63,6 +75,15 @@ msgid "Visibility"
 msgstr ""
 
 msgid "Organisation Units visibility"
+msgstr ""
+
+msgid "Duplicate tolerance for programs"
+msgstr ""
+
+msgid "Data elements filter"
+msgstr ""
+
+msgid "Used to assess if a record is a duplicated"
 msgstr ""
 
 msgid "Permissions"

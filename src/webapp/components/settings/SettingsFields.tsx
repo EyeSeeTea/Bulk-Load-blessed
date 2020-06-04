@@ -7,11 +7,16 @@ import {
     ListItemIcon,
     ListItemText,
     makeStyles,
+    TextField,
 } from "@material-ui/core";
 import { D2Api } from "d2-api";
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
-import { Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
+import {
+    DuplicateToleranceUnit,
+    Model,
+    OrgUnitSelectionSetting,
+} from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import Settings, { PermissionSetting, PermissionType } from "../../logic/settings";
@@ -44,11 +49,28 @@ export default function SettingsFields(props: SettingsFieldsProps) {
         [settings, onChange]
     );
 
+    const setDuplicateTolerance = useCallback(
+        (event: ChangeEvent<HTMLInputElement>) => {
+            const duplicateTolerance = parseInt(event.target.value);
+            if (!isNaN(duplicateTolerance) && duplicateTolerance >= 0 && duplicateTolerance <= 10) {
+                onChange(settings.update({ duplicateTolerance }));
+            }
+        },
+        [settings, onChange]
+    );
+
+    const setDuplicateToleranceUnit = useCallback(
+        ({ value }: SelectOption) => {
+            onChange(settings.update({ duplicateToleranceUnit: value as DuplicateToleranceUnit }));
+        },
+        [settings, onChange]
+    );
+
     const modelsInfo = useMemo(() => {
         return settings.getModelsInfo();
     }, [settings]);
 
-    const orgUnitSelectionOptions: { value: OrgUnitSelectionSetting; label: string }[] = useMemo(
+    const orgUnitSelectionOptions: SelectOption[] = useMemo(
         () => [
             {
                 value: "generation",
@@ -62,6 +84,16 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 value: "both",
                 label: i18n.t("Select Organisation Units on template generation and import"),
             },
+        ],
+        []
+    );
+
+    const duplicateToleranceUnits: SelectOption[] = useMemo(
+        () => [
+            { value: "day", label: i18n.t("Days") },
+            { value: "week", label: i18n.t("Weeks") },
+            { value: "month", label: i18n.t("Months") },
+            { value: "year", label: i18n.t("Years") },
         ],
         []
     );
@@ -188,6 +220,35 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                         value={settings.orgUnitSelection}
                     />
                 </div>
+            </FormGroup>
+
+            <h3>{i18n.t("Duplicate tolerance for programs")}</h3>
+
+            <FormGroup className={classes.content} row={true}>
+                <TextField
+                    type="number"
+                    variant="outlined"
+                    onChange={setDuplicateTolerance}
+                    value={settings.duplicateTolerance}
+                />
+                <Select
+                    variant="outlined"
+                    onChange={setDuplicateToleranceUnit}
+                    options={duplicateToleranceUnits}
+                    value={settings.duplicateToleranceUnit}
+                />
+            </FormGroup>
+
+            <FormGroup className={classes.content} row={true}>
+                <ListItem button onClick={() => ({})}>
+                    <ListItemIcon>
+                        <Icon>access_time</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={i18n.t("Data elements filter")}
+                        secondary={i18n.t("Used to assess if a record is a duplicated")}
+                    />
+                </ListItem>
             </FormGroup>
 
             <h3>{i18n.t("Permissions")}</h3>

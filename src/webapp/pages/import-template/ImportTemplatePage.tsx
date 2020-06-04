@@ -332,7 +332,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             moment
                 .duration(moment(base.period).diff(moment(compare.period)))
                 .abs()
-                .asDays() > periodDays
+                .as(settings.duplicateToleranceUnit) > settings.duplicateTolerance
         ) {
             return false;
         }
