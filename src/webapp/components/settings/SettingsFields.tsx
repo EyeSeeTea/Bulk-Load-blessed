@@ -11,10 +11,10 @@ import {
 import { D2Api } from "d2-api";
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
-import { OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
+import { Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
-import Settings, { Model, PermissionSetting, PermissionType } from "../../logic/settings";
+import Settings, { PermissionSetting, PermissionType } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
 export interface SettingsFieldsProps {

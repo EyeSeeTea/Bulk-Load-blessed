@@ -1,12 +1,17 @@
 import { D2Api, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
-import { AppSettings, OrgUnitSelectionSetting } from "../../domain/entities/AppSettings";
+import {
+    AppSettings,
+    Model,
+    Models,
+    OrgUnitSelectionSetting,
+    PopulateToleranceUnit,
+} from "../../domain/entities/AppSettings";
 import i18n from "../../locales";
+import { GetArrayInnerType } from "../../utils/types";
 
-const models = ["dataSet", "program"] as const;
-
-const privateFields = ["api", "currentUser"] as const;
+const privateFields = ["currentUser"] as const;
 
 const publicFields = [
     "models",
@@ -15,14 +20,12 @@ const publicFields = [
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
+    "populateTolerance",
+    "populateToleranceUnit",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
 
-type GetArrayInnerType<T extends readonly any[]> = T[number];
-export type Model = GetArrayInnerType<typeof models>;
-
-type Models = Record<Model, boolean>;
 type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
 type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
@@ -42,7 +45,6 @@ interface CurrentUser extends Ref {
 type OkOrError = { status: true } | { status: false; error: string };
 
 export default class Settings {
-    public api: D2Api;
     public currentUser: CurrentUser;
     public models: Models;
     public userPermissionsForGeneration: NamedObject[];
@@ -50,11 +52,12 @@ export default class Settings {
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
+    public populateTolerance: number;
+    public populateToleranceUnit: PopulateToleranceUnit;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
     constructor(options: Options) {
-        this.api = options.api;
         this.currentUser = options.currentUser;
         this.models = options.models;
         this.userPermissionsForGeneration = options.userPermissionsForGeneration;
@@ -62,6 +65,8 @@ export default class Settings {
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
+        this.populateTolerance = options.populateTolerance;
+        this.populateToleranceUnit = options.populateToleranceUnit;
     }
 
     static async build(api: D2Api): Promise<Settings> {
@@ -113,7 +118,6 @@ export default class Settings {
             .getData();
 
         return new Settings({
-            api,
             currentUser,
             models: data.models ?? defaultSettings.models,
             userPermissionsForGeneration,
@@ -121,6 +125,9 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
+            populateTolerance: data.populateTolerance ?? defaultSettings.populateTolerance,
+            populateToleranceUnit:
+                data.populateToleranceUnit ?? defaultSettings.populateToleranceUnit,
         });
     }
 
@@ -139,6 +146,8 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
+            populateTolerance,
+            populateToleranceUnit,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -158,6 +167,8 @@ export default class Settings {
             permissionsForGeneration,
             permissionsForSettings,
             orgUnitSelection,
+            populateTolerance,
+            populateToleranceUnit,
         };
 
         try {
