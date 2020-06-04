@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackage } from "../../../domain/entities/DataPackage";
+import { DataPackage, DataValue } from "../../../domain/entities/DataPackage";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -277,6 +277,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
+                            id,
                             {
                                 id: event,
                                 period: String(eventDate),
@@ -298,6 +299,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
+                            id,
                             { period: String(period), orgUnit, attribute },
                             dataPackage
                         )
@@ -309,7 +311,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
     };
 
+    // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
     const compareDataPackages = (
+        id: string,
         base: Partial<DataPackage>,
         compare: Partial<DataPackage>,
         periodDays = 0
@@ -340,15 +344,22 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         // Ignore data packages with event id set
         if (base.id && compare.id) return false;
 
+        const exclusions = settings.duplicateExclusion[id] ?? [];
+        const filter = (values: DataValue[]) =>
+            values.filter(({ dataElement }) => !exclusions.includes(dataElement));
+
         if (
             base.dataValues &&
             compare.dataValues &&
-            !_.isEqualWith(base.dataValues, compare.dataValues, (base, compare) => {
-                const sameSize = base.length === compare.length;
-                const values = ({ dataElement, value }: any) => `${dataElement}-${value}`;
-                const sameValues = _.intersectionBy(base, compare, values).length === base.length;
-                return sameSize && sameValues;
-            })
+            !_.isEqualWith(
+                filter(base.dataValues),
+                filter(compare.dataValues),
+                (base: DataValue[], compare: DataValue[]) => {
+                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                    const intersection = _.intersectionBy(base, compare, values);
+                    return base.length === compare.length && intersection.length === base.length;
+                }
+            )
         ) {
             return false;
         }
