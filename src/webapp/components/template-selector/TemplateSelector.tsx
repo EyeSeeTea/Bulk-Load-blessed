@@ -335,7 +335,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             label={i18n.t("Start date")}
                             value={state.populateStartDate ?? null}
                             onChange={(date: Date) => onStartDateChange("populateStartDate", date)}
-                            minDate={state.type === "dataSets" ? state.startDate : undefined}
+                            minDate={
+                                state.type === "dataSets"
+                                    ? state.startDate?.startOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
                             maxDate={moment.min(
                                 _.compact([
                                     state.type === "dataSets" && state.endDate,
@@ -359,7 +363,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     state.populateStartDate,
                                 ])
                             )}
-                            maxDate={state.type === "dataSets" ? state.endDate : undefined}
+                            maxDate={
+                                state.type === "dataSets"
+                                    ? state.endDate?.endOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
                             views={datePickerFormat?.views}
                             format={datePickerFormat?.format}
                             InputLabelProps={{ style: { color: "#494949" } }}
