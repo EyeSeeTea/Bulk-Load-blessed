@@ -191,19 +191,36 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (existingValues.length === 0) {
             await performImport(newValues);
         } else {
-            const dataSetMessage = i18n.t(
-                "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                { totalExisting: existingValues.length }
-            );
+            const dataSetConfig = {
+                title: i18n.t("Existing data values"),
+                message: i18n.t(
+                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { totalExisting: existingValues.length }
+                ),
+                save: i18n.t("Proceed"),
+                cancel: i18n.t("Cancel"),
+                info: i18n.t("Import only new data values"),
+            };
 
-            const programMessage = i18n.t(
-                "There are {{totalExisting}} events in the database for this organisation, data values and similar event date. If you proceed, the data values without an event id will be duplicated. Are you sure?",
-                { totalExisting: existingValues.length }
-            );
+            const programConfig = {
+                title: i18n.t("Warning: Your upload may result in the generation of duplicates", {
+                    nsSeparator: "-",
+                }),
+                message: i18n.t(
+                    "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
+                    { totalExisting: existingValues.length }
+                ),
+                save: i18n.t("Import everything anyway"),
+                cancel: i18n.t("Cancel import"),
+                info: i18n.t("Import only new records"),
+            };
+
+            const { title, message, save, cancel, info } =
+                type === "dataSets" ? dataSetConfig : programConfig;
 
             updateDialog({
-                title: i18n.t("Existing data values"),
-                description: type === "dataSets" ? dataSetMessage : programMessage,
+                title,
+                description: message,
                 onSave: () => {
                     performImport([...newValues, ...existingValues]);
                     updateDialog(null);
@@ -215,9 +232,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 onCancel: () => {
                     updateDialog(null);
                 },
-                saveText: i18n.t("Proceed"),
-                cancelText: i18n.t("Cancel"),
-                infoActionText: i18n.t("Import only new data values"),
+                saveText: save,
+                cancelText: cancel,
+                infoActionText: info,
             });
         }
     };

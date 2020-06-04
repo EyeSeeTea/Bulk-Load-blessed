@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-02T14:22:35.930Z\n"
+"POT-Creation-Date: 2020-06-04T05:41:13.569Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -269,6 +269,9 @@ msgstr ""
 msgid "Checking duplicates..."
 msgstr "Comprobando duplicados..."
 
+msgid "Existing data values"
+msgstr "Existen valores de datos"
+
 msgid ""
 "There are {{totalExisting}} data values in the database for this "
 "organisation unit and periods. If you proceed, all those data values will be "
@@ -278,20 +281,29 @@ msgstr ""
 "organizativa y periodos. Si continua, todos los valores serán borrados, y "
 "solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
 
-msgid ""
-"There are {{totalExisting}} events in the database for this organisation, "
-"data values and similar event date. If you proceed, the data values without "
-"an event id will be duplicated. Are you sure?"
-msgstr ""
-"Existen {{totalExisting}} eventos en la base de datos para esta unidad "
-"organizativa, valores de datos y periodos. Si continua, los eventos sin un "
-"identificador de evento serán duplicados. ¿Está seguro?"
-
-msgid "Existing data values"
-msgstr "Existen valores de datos"
-
 msgid "Import only new data values"
-msgstr "Importar solo nuevos data values"
+msgstr "Importar solo nuevos valores de datos"
+
+msgid "Warning: Your upload may result in the generation of duplicates"
+msgstr "Alerta: Tu importación puede generar duplicados"
+
+msgid ""
+"There are {{totalExisting}} records in your template with very similar or "
+"exact values as other records that already exist. If you proceed, you risk "
+"creating duplicates. What would you like to do?"
+msgstr ""
+"Existen {{totalExisting}} entradas en su plantilla con valores muy similares "
+"o idénticos a otros que ya existen. Si continua, se arriesga de crear duplicados "
+"¿Está seguro?"
+
+msgid "Import everything anyway"
+msgstr "Importarlo todo"
+
+msgid "Cancel import"
+msgstr "Cancelar importación"
+
+msgid "Import only new records"
+msgstr "Importar solo nuevas entradas"
 
 msgid "Importing data..."
 msgstr "Importando datos..."
