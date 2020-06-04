@@ -226,7 +226,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             onChange={(date: Date) => onStartDateChange("startDate", date, true)}
                             maxDate={state.endDate}
                             views={datePickerFormat?.views}
-                            format={datePickerFormat?.format}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
@@ -238,7 +238,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             onChange={(date: Date) => onEndDateChange("endDate", date, true)}
                             minDate={state.startDate}
                             views={datePickerFormat?.views}
-                            format={datePickerFormat?.format}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
@@ -347,7 +347,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                 ])
                             )}
                             views={datePickerFormat?.views}
-                            format={datePickerFormat?.format}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
@@ -369,7 +369,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     : undefined
                             }
                             views={datePickerFormat?.views}
-                            format={datePickerFormat?.format}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
