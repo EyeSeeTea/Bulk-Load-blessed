@@ -228,14 +228,10 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 <TextField
                     className={classes.duplicateTolerance}
                     type="number"
-                    variant="outlined"
-                    margin="dense"
                     onChange={setDuplicateTolerance}
                     value={settings.duplicateTolerance}
                 />
                 <Select
-                    variant="outlined"
-                    margin="dense"
                     onChange={setDuplicateToleranceUnit}
                     options={duplicateToleranceUnits}
                     value={settings.duplicateToleranceUnit}
@@ -285,7 +281,7 @@ const useStyles = makeStyles({
     content: { margin: "1rem", marginLeft: 0 },
     checkbox: { padding: 9 },
     title: { marginTop: 35 },
-    duplicateTolerance: { margin: 0, marginRight: 15, width: 75 },
+    duplicateTolerance: { margin: 0, marginRight: 15, width: 35 },
 });
 
 function searchUsers(api: D2Api, query: string) {
