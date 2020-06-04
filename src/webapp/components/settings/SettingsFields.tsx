@@ -233,7 +233,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 </div>
             </FormGroup>
 
-            <h3 className={classes.title}>{i18n.t("Duplicate tolerance for programs")}</h3>
+            <h3 className={classes.title}>{i18n.t("Duplicate detection for programs")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <TextField
