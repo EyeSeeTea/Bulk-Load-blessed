@@ -245,7 +245,7 @@ export default function SettingsFields(props: SettingsFieldsProps) {
             <FormGroup className={classes.content} row={true}>
                 <ListItem button onClick={() => ({})}>
                     <ListItemIcon>
-                        <Icon>access_time</Icon>
+                        <Icon>filter_list</Icon>
                     </ListItemIcon>
                     <ListItemText
                         primary={i18n.t("Data elements filter")}
