@@ -55,7 +55,7 @@ export default function DataElementsFilterDialog({
             onCancel={onClose}
             cancelText={i18n.t("Close")}
         >
-            <div className={classes.fullWidth}>
+            <div className={classes.row}>
                 <Select
                     placeholder={i18n.t("Program")}
                     options={modelToSelectOption(programs)}
@@ -64,7 +64,7 @@ export default function DataElementsFilterDialog({
                 />
             </div>
 
-            <div className={classes.fullWidth}>
+            <div className={classes.row}>
                 <MultiSelector
                     d2={d2}
                     height={300}
@@ -78,8 +78,9 @@ export default function DataElementsFilterDialog({
 }
 
 const useStyles = makeStyles({
-    fullWidth: {
+    row: {
         width: "100%",
+        marginBottom: "2em",
     },
 });
 
