@@ -170,7 +170,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                 </div>
             </FormGroup>
 
-            <h3 className={classes.title}>{i18n.t("Duplicate detection for programs")}</h3>
+            <h3 className={classes.title}>{i18n.t("Duplicate detection for events (programs)")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <p className={classes.duplicateToleranceLabel}>
