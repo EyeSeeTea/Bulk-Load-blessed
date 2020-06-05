@@ -196,7 +196,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                     </ListItemIcon>
                     <ListItemText
                         primary={i18n.t("Data elements filter")}
-                        secondary={i18n.t("Used to assess if a record is a duplicated")}
+                        secondary={i18n.t("Data elements used for duplication assessment")}
                     />
                 </ListItem>
             </FormGroup>
