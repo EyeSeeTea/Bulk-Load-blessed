@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-05T05:36:58.932Z\n"
+"POT-Creation-Date: 2020-06-05T05:38:28.136Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,8 +23,8 @@ msgstr "Campo {{field}} no puede ser vacio"
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
 
-msgid "Exclude data elements for duplicate detection in programs"
-msgstr "Excluir data elements en la detección de duplicados para programas"
+msgid "Data elements used for duplication assessment"
+msgstr "Data elements usados para determinar los duplicados"
 
 msgid "Close"
 msgstr "Cerrar"
@@ -93,9 +93,6 @@ msgstr "Diferencia absoluta sobre la fecha reportada"
 
 msgid "Data elements filter"
 msgstr "Filtro de data elements"
-
-msgid "Data elements used for duplication assessment"
-msgstr "Data elements usados para determinar los duplicados"
 
 msgid "Permissions"
 msgstr "Permisos"
@@ -381,6 +378,9 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
+
+#~ msgid "Exclude data elements for duplicate detection in programs"
+#~ msgstr "Excluir data elements en la detección de duplicados para programas"
 
 #~ msgid "Used to assess if a record is a duplicated"
 #~ msgstr "Se usa para determinar si una entrada es un duplicado"

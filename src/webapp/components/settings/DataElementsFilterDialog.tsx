@@ -49,7 +49,7 @@ export default function DataElementsFilterDialog({
     return (
         <ConfirmationDialog
             isOpen={true}
-            title={i18n.t("Exclude data elements for duplicate detection in programs")}
+            title={i18n.t("Data elements used for duplication assessment")}
             maxWidth="lg"
             fullWidth={true}
             onCancel={onClose}
