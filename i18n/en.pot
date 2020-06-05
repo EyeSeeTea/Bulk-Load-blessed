@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-04T11:36:59.775Z\n"
-"PO-Revision-Date: 2020-06-04T11:36:59.775Z\n"
+"POT-Creation-Date: 2020-06-05T05:33:56.782Z\n"
+"PO-Revision-Date: 2020-06-05T05:33:56.782Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -32,6 +32,12 @@ msgstr ""
 msgid "Program"
 msgstr ""
 
+msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Settings and Themes"
+msgstr ""
+
 msgid "Select Organisation Units on template generation"
 msgstr ""
 
@@ -51,12 +57,6 @@ msgid "Months"
 msgstr ""
 
 msgid "Years"
-msgstr ""
-
-msgid "Access to Template Generation"
-msgstr ""
-
-msgid "Access to Settings and Themes"
 msgstr ""
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
