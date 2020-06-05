@@ -8,6 +8,7 @@ import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/api-context";
 import { Select, SelectOption } from "../select/Select";
 import { SettingsFieldsProps } from "./SettingsFields";
+import _ from "lodash";
 
 interface DataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
@@ -39,12 +40,22 @@ export default function DataElementsFilterDialog({
 
     const onChangeExclude = useCallback(
         (ids: string[]) => {
-            if (selectedProgram) onChange(settings.setDuplicateExclusions(selectedProgram.id, ids));
+            if (selectedProgram) {
+                const exclusions = _.difference(
+                    selectedProgram.dataElements.map(({ id }) => id),
+                    ids
+                );
+                onChange(settings.setDuplicateExclusions(selectedProgram.id, exclusions));
+            }
         },
         [onChange, selectedProgram, settings]
     );
 
-    const excluded = selectedProgram ? settings.duplicateExclusion[selectedProgram.id] : undefined;
+    const excluded = selectedProgram ? settings.duplicateExclusion[selectedProgram.id] : [];
+    const selection = _.difference(
+        selectedProgram?.dataElements.map(({ id }) => id),
+        excluded
+    );
 
     return (
         <ConfirmationDialog
@@ -70,7 +81,7 @@ export default function DataElementsFilterDialog({
                     height={300}
                     onChange={onChangeExclude}
                     options={modelToSelectOption(selectedProgram?.dataElements)}
-                    selected={excluded ?? []}
+                    selected={selection}
                 />
             </div>
         </ConfirmationDialog>
