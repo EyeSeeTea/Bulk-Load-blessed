@@ -218,12 +218,19 @@ export default class Settings {
     }
 
     setDuplicateExclusions(program: Id, exclusions: Id[]): Settings {
-        return this.updateOptions({
-            duplicateExclusion: {
+        const duplicateExclusion = _.transform(
+            {
                 ...this.duplicateExclusion,
                 [program]: exclusions,
             },
-        });
+            (result, value, key) => {
+                // Clean-up empty arrays from exclusions
+                if (value.length > 0) result[key] = value;
+            },
+            {} as DuplicateExclusion
+        );
+
+        return this.updateOptions({ duplicateExclusion });
     }
 
     isModelEnabled(key: Model) {
