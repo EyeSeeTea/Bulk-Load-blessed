@@ -233,6 +233,10 @@ export default class Settings {
         return this.updateOptions({ duplicateExclusion });
     }
 
+    allModelsEnabled() {
+        return _.every(this.models, Boolean);
+    }
+
     isModelEnabled(key: Model) {
         return this.models[key];
     }
