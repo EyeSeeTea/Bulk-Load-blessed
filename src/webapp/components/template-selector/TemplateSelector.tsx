@@ -107,9 +107,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     useEffect(() => {
         const { type, id, ...rest } = state;
         if (type && id) {
-            const orgUnits = filterOrgUnits
-                ? cleanOrgUnitPaths(selectedOrgUnits)
-                : orgUnitTreeFilter;
+            const orgUnits = filterOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : [];
             onChange({ type, id, orgUnits, ...rest });
         } else {
             onChange(null);
