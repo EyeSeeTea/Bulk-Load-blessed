@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackage } from "../../../domain/entities/DataPackage";
+import { DataPackage, DataValue } from "../../../domain/entities/DataPackage";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -191,19 +191,36 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (existingValues.length === 0) {
             await performImport(newValues);
         } else {
-            const dataSetMessage = i18n.t(
-                "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                { totalExisting: existingValues.length }
-            );
+            const dataSetConfig = {
+                title: i18n.t("Existing data values"),
+                message: i18n.t(
+                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                    { totalExisting: existingValues.length }
+                ),
+                save: i18n.t("Proceed"),
+                cancel: i18n.t("Cancel"),
+                info: i18n.t("Import only new data values"),
+            };
 
-            const programMessage = i18n.t(
-                "There are {{totalExisting}} events in the database for this organisation, data values and similar event date. If you proceed, the data values without an event id will be duplicated. Are you sure?",
-                { totalExisting: existingValues.length }
-            );
+            const programConfig = {
+                title: i18n.t("Warning: Your upload may result in the generation of duplicates", {
+                    nsSeparator: "-",
+                }),
+                message: i18n.t(
+                    "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
+                    { totalExisting: existingValues.length }
+                ),
+                save: i18n.t("Import everything anyway"),
+                cancel: i18n.t("Cancel import"),
+                info: i18n.t("Import only new records"),
+            };
+
+            const { title, message, save, cancel, info } =
+                type === "dataSets" ? dataSetConfig : programConfig;
 
             updateDialog({
-                title: i18n.t("Existing data values"),
-                description: type === "dataSets" ? dataSetMessage : programMessage,
+                title,
+                description: message,
                 onSave: () => {
                     performImport([...newValues, ...existingValues]);
                     updateDialog(null);
@@ -215,9 +232,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 onCancel: () => {
                     updateDialog(null);
                 },
-                saveText: i18n.t("Proceed"),
-                cancelText: i18n.t("Cancel"),
-                infoActionText: i18n.t("Import only new data values"),
+                saveText: save,
+                cancelText: cancel,
+                infoActionText: info,
             });
         }
     };
@@ -260,6 +277,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
+                            id,
                             {
                                 id: event,
                                 period: String(eventDate),
@@ -281,6 +299,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
                     return result.find(dataPackage =>
                         compareDataPackages(
+                            id,
                             { period: String(period), orgUnit, attribute },
                             dataPackage
                         )
@@ -292,7 +311,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
     };
 
+    // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
     const compareDataPackages = (
+        id: string,
         base: Partial<DataPackage>,
         compare: Partial<DataPackage>,
         periodDays = 0
@@ -315,7 +336,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             moment
                 .duration(moment(base.period).diff(moment(compare.period)))
                 .abs()
-                .asDays() > periodDays
+                .as(settings.duplicateToleranceUnit) > settings.duplicateTolerance
         ) {
             return false;
         }
@@ -323,15 +344,22 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         // Ignore data packages with event id set
         if (base.id && compare.id) return false;
 
+        const exclusions = settings.duplicateExclusion[id] ?? [];
+        const filter = (values: DataValue[]) =>
+            values.filter(({ dataElement }) => !exclusions.includes(dataElement));
+
         if (
             base.dataValues &&
             compare.dataValues &&
-            !_.isEqualWith(base.dataValues, compare.dataValues, (base, compare) => {
-                const sameSize = base.length === compare.length;
-                const values = ({ dataElement, value }: any) => `${dataElement}-${value}`;
-                const sameValues = _.intersectionBy(base, compare, values).length === base.length;
-                return sameSize && sameValues;
-            })
+            !_.isEqualWith(
+                filter(base.dataValues),
+                filter(compare.dataValues),
+                (base: DataValue[], compare: DataValue[]) => {
+                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                    const intersection = _.intersectionBy(base, compare, values);
+                    return base.length === compare.length && intersection.length === base.length;
+                }
+            )
         ) {
             return false;
         }

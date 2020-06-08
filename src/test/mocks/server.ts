@@ -80,7 +80,8 @@ export function initializeMockServer() {
     mock.onGet("/dataSets", {
         params: {
             paging: false,
-            fields: "access,attributeValues[attribute[code],value],displayName,id,name,periodType",
+            fields:
+                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[formName,id,name]],displayName,id,name,periodType",
             filter: [],
         },
     }).reply(200, {
@@ -103,6 +104,7 @@ export function initializeMockServer() {
                     },
                 },
                 attributeValues: [],
+                dataSetElements: [],
             },
         ],
     });
@@ -111,7 +113,8 @@ export function initializeMockServer() {
     mock.onGet("/programs", {
         params: {
             paging: false,
-            fields: "access,attributeValues[attribute[code],value],displayName,id,name,periodType",
+            fields:
+                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[programStageDataElements[dataElement[formName,id,name]]]",
             filter: ["programType:eq:WITHOUT_REGISTRATION"],
         },
     }).reply(200, {
@@ -133,6 +136,7 @@ export function initializeMockServer() {
                     },
                 },
                 attributeValues: [],
+                programStages: [],
             },
         ],
     });

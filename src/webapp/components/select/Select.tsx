@@ -1,12 +1,18 @@
-import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from "@material-ui/core";
+import {
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select as MuiSelect,
+    SelectProps as MuiSelectProps,
+} from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 import React from "react";
 
 export type SelectOption = { value: string; label: string };
 
-export interface SelectProps {
-    placeholder: string;
+export interface SelectProps extends Omit<MuiSelectProps, "onChange"> {
+    placeholder?: string;
     options: Array<SelectOption>;
     onChange: (option: SelectOption) => void;
     defaultValue?: SelectOption;
@@ -23,6 +29,7 @@ export const Select: React.FC<SelectProps> = ({
     value,
     allowEmpty = false,
     emptyLabel = "",
+    ...rest
 }) => {
     const classes = useStyles();
     const [stateValue, setValue] = React.useState(defaultValue ? defaultValue.value : "");
@@ -36,14 +43,25 @@ export const Select: React.FC<SelectProps> = ({
         if (option) onChange(option);
     };
 
+    const defaultLabel = allowEmpty ? emptyLabel : placeholder;
+
     return (
         <div>
             <FormControl className={classes.formControl}>
-                <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
-                <MuiSelect onChange={handleChange} value={value ?? stateValue} autoWidth={true}>
-                    <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
-                        {allowEmpty ? emptyLabel : placeholder}
-                    </MenuItem>
+                {!!placeholder && (
+                    <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
+                )}
+                <MuiSelect
+                    onChange={handleChange}
+                    value={value ?? stateValue}
+                    autoWidth={true}
+                    {...rest}
+                >
+                    {!!defaultLabel && (
+                        <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
+                            {defaultLabel}
+                        </MenuItem>
+                    )}
                     {options.map(option => (
                         <MenuItem
                             key={option.value}

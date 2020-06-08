@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-02T14:22:35.930Z\n"
+"POT-Creation-Date: 2020-06-05T05:38:28.136Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,6 +23,21 @@ msgstr "Campo {{field}} no puede ser vacio"
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
 
+msgid "Data elements used for duplication assessment"
+msgstr "Data elements usados para determinar los duplicados"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Program"
+msgstr "Programa"
+
+msgid "Access to Template Generation"
+msgstr "Acceso a la sección de generación de plantillas"
+
+msgid "Access to Settings and Themes"
+msgstr "Acceso a la configuración y los temas"
+
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas en la sección de generación"
 
@@ -34,11 +49,17 @@ msgstr ""
 "Mostrar unidades organizativas en la sección de generación y en la de "
 "importación"
 
-msgid "Access to Template Generation"
-msgstr "Acceso a la sección de generación de plantillas"
+msgid "Days"
+msgstr "Días"
 
-msgid "Access to Settings and Themes"
-msgstr "Acceso a la configuración y los temas"
+msgid "Weeks"
+msgstr "Semanas"
+
+msgid "Months"
+msgstr "Meses"
+
+msgid "Years"
+msgstr "Años"
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
 msgstr "Accesible a {{users}} usuarios y {{userGroups}} grupos de usuarios"
@@ -55,9 +76,6 @@ msgstr "Solo accesible a los administradores del sistema"
 msgid "Not accessible"
 msgstr "No accesible"
 
-msgid "Close"
-msgstr "Cerrar"
-
 msgid "Models"
 msgstr "Modelos"
 
@@ -67,14 +85,20 @@ msgstr "Visibilidad"
 msgid "Organisation Units visibility"
 msgstr "Visibilidad de unidades organizativas"
 
+msgid "Duplicate detection for events (programs)"
+msgstr "Detección de duplicados para eventos (programas)"
+
+msgid "Event date absolute difference"
+msgstr "Diferencia absoluta sobre la fecha reportada"
+
+msgid "Data elements filter"
+msgstr "Filtro de data elements"
+
 msgid "Permissions"
 msgstr "Permisos"
 
 msgid "Data Set"
 msgstr "Data Set"
-
-msgid "Program"
-msgstr "Programa"
 
 msgid "Template properties"
 msgstr "Propiedades de plantilla"
@@ -269,6 +293,9 @@ msgstr ""
 msgid "Checking duplicates..."
 msgstr "Comprobando duplicados..."
 
+msgid "Existing data values"
+msgstr "Existen valores de datos"
+
 msgid ""
 "There are {{totalExisting}} data values in the database for this "
 "organisation unit and periods. If you proceed, all those data values will be "
@@ -278,20 +305,29 @@ msgstr ""
 "organizativa y periodos. Si continua, todos los valores serán borrados, y "
 "solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
 
-msgid ""
-"There are {{totalExisting}} events in the database for this organisation, "
-"data values and similar event date. If you proceed, the data values without "
-"an event id will be duplicated. Are you sure?"
-msgstr ""
-"Existen {{totalExisting}} eventos en la base de datos para esta unidad "
-"organizativa, valores de datos y periodos. Si continua, los eventos sin un "
-"identificador de evento serán duplicados. ¿Está seguro?"
-
-msgid "Existing data values"
-msgstr "Existen valores de datos"
-
 msgid "Import only new data values"
-msgstr "Importar solo nuevos data values"
+msgstr "Importar solo nuevos valores de datos"
+
+msgid "Warning: Your upload may result in the generation of duplicates"
+msgstr "Alerta: Tu importación puede generar duplicados"
+
+msgid ""
+"There are {{totalExisting}} records in your template with very similar or "
+"exact values as other records that already exist. If you proceed, you risk "
+"creating duplicates. What would you like to do?"
+msgstr ""
+"Existen {{totalExisting}} entradas en su plantilla con valores muy similares "
+"o idénticos a otros que ya existen. Si continua, se arriesga de crear "
+"duplicados ¿Está seguro?"
+
+msgid "Import everything anyway"
+msgstr "Importarlo todo"
+
+msgid "Cancel import"
+msgstr "Cancelar importación"
+
+msgid "Import only new records"
+msgstr "Importar solo nuevas entradas"
 
 msgid "Importing data..."
 msgstr "Importando datos..."
@@ -342,3 +378,9 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
+
+#~ msgid "Exclude data elements for duplicate detection in programs"
+#~ msgstr "Excluir data elements en la detección de duplicados para programas"
+
+#~ msgid "Used to assess if a record is a duplicated"
+#~ msgstr "Se usa para determinar si una entrada es un duplicado"
