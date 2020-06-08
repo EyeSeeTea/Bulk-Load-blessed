@@ -74,7 +74,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 const dataSource: DataSource = {
                     dataSets,
                     programs,
-                    all: [...dataSets, ...programs],
+                    all: _.sortBy([...dataSets, ...programs], ["name"]),
                 };
 
                 setDataSource(dataSource);
