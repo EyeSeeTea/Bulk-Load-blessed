@@ -33,7 +33,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const classes = useStyles();
     const { api } = useAppContext();
 
-    const orgUnitSelectionEnabled = settings.orgUnitSelection !== "import";
     const [dataSource, setDataSource] = useState<DataSource>();
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
@@ -42,7 +41,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
-    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(orgUnitSelectionEnabled);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [state, setState] = useState<PartialBy<DownloadTemplateProps, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
@@ -250,7 +249,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {orgUnitSelectionEnabled && (
+            {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
