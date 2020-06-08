@@ -321,7 +321,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {userHasReadAccess && (
+            {userHasReadAccess && filterOrgUnits && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}
