@@ -223,62 +223,42 @@ export class InstanceDhisRepository implements InstanceRepository {
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
         const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
         if (categoryOptions.length === 0) {
-            console.error(`Could not find category options for the program ${id}`);
-            return [];
+            throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        try {
-            const response = await promiseMap(orgUnits, async orgUnit => {
-                // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-                return promiseMap(categoryOptions, categoryOptionId =>
-                    this.api
-                        .get<EventsPackage>("/events", {
-                            program: id,
-                            orgUnit,
-                            paging: false,
-                            attributeCc: categoryComboId,
-                            attributeCos: categoryOptionId,
-                            startDate: startDate?.format("YYYY-MM-DD"),
-                            endDate: endDate?.format("YYYY-MM-DD"),
-                        })
-                        .getData()
-                );
-            });
-
-            return _(response)
-                .flatten()
-                .map(({ events }) => events)
-                .flatten()
-                .map(
-                    ({
-                        event,
+        const response = await promiseMap(orgUnits, async orgUnit => {
+            // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
+            return promiseMap(categoryOptions, categoryOptionId =>
+                this.api
+                    .get<EventsPackage>("/events", {
+                        program: id,
                         orgUnit,
-                        eventDate,
-                        attributeOptionCombo,
-                        coordinate,
-                        dataValues,
-                    }) => ({
-                        id: event,
-                        orgUnit,
-                        period: moment(eventDate).format("YYYY-MM-DD"),
-                        attribute: attributeOptionCombo,
-                        coordinate,
-                        dataValues: dataValues.map(({ dataElement, value }) => ({
-                            dataElement,
-                            value: this.formatDataValue(
-                                dataElement,
-                                value,
-                                metadata,
-                                translateCodes
-                            ),
-                        })),
+                        paging: false,
+                        attributeCc: categoryComboId,
+                        attributeCos: categoryOptionId,
+                        startDate: startDate?.format("YYYY-MM-DD"),
+                        endDate: endDate?.format("YYYY-MM-DD"),
                     })
-                )
-                .value();
-        } catch (error) {
-            console.error("Error fetching events", error);
-            return [];
-        }
+                    .getData()
+            );
+        });
+
+        return _(response)
+            .flatten()
+            .map(({ events }) => events)
+            .flatten()
+            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
+                id: event,
+                orgUnit,
+                period: moment(eventDate).format("YYYY-MM-DD"),
+                attribute: attributeOptionCombo,
+                coordinate,
+                dataValues: dataValues.map(({ dataElement, value }) => ({
+                    dataElement,
+                    value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                })),
+            }))
+            .value();
     }
 
     private formatDataValue(
