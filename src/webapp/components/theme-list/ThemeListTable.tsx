@@ -5,7 +5,6 @@ import {
     TableAction,
     TableColumn,
     TableSelection,
-    TableSorting,
     TableState,
     useLoading,
     useSnackbar,
@@ -44,12 +43,8 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const [selection, setSelection] = useState<TableSelection[]>([]);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
-    const [sorting, setSorting] = useState<TableSorting<ThemeDetail>>({
-        field: "name",
-        order: "asc",
-    });
 
-    const rows = buildThemeDetails(themes, sorting);
+    const rows = buildThemeDetails(themes);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
@@ -127,9 +122,8 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
         },
     ];
 
-    const onTableChange = ({ selection, sorting }: TableState<ThemeDetail>) => {
+    const onTableChange = ({ selection }: TableState<ThemeDetail>) => {
         setSelection(selection);
-        setSorting(sorting);
     };
 
     return (
@@ -162,7 +156,6 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
                 columns={columns}
                 actions={actions}
                 selection={selection}
-                sorting={sorting}
                 onChange={onTableChange}
                 filterComponents={
                     <Button variant="contained" color="primary" onClick={newTheme} disableElevation>
@@ -174,18 +167,15 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     );
 }
 
-function buildThemeDetails(themes: Theme[], sorting: TableSorting<ThemeDetail>): ThemeDetail[] {
-    return _(themes)
-        .map(({ id, name, sections, pictures, palette }) => ({
-            id,
-            name,
-            title: sections?.title?.text ?? "-",
-            subtitle: sections?.subtitle?.text ?? "-",
-            logo: pictures?.logo?.src ? (
-                <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
-            ) : null,
-            palette,
-        }))
-        .orderBy([sorting.field], [sorting.order])
-        .value();
+function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
+    return themes.map(({ id, name, sections, pictures, palette }) => ({
+        id,
+        name,
+        title: sections?.title?.text ?? "-",
+        subtitle: sections?.subtitle?.text ?? "-",
+        logo: pictures?.logo?.src ? (
+            <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
+        ) : null,
+        palette,
+    }));
 }
