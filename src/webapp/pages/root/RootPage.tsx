@@ -34,11 +34,11 @@ export interface AppRoute {
 }
 
 const Root = () => {
-    const [isOpen, setOpen] = useState(true);
     const { api } = useAppContext();
     const snackbar = useSnackbar();
     const classes = useStyles();
 
+    const [isOpen, setOpen] = useState(true);
     const [settings, setSettings] = useState<Settings>();
     const [themes, setThemes] = useState<Theme[]>([]);
 

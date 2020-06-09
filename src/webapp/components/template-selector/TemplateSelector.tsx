@@ -4,7 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
-import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
+import { DataForm } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
 import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
@@ -14,7 +14,7 @@ import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
-type DataSource = Record<DataFormType, DataForm[]>;
+type DataSource = Record<string, DataForm[]>;
 
 type PickerUnit = "year" | "month" | "date";
 interface PickerFormat {
@@ -33,7 +33,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const classes = useStyles();
     const { api } = useAppContext();
 
-    const orgUnitSelectionEnabled = settings.orgUnitSelection !== "import";
     const [dataSource, setDataSource] = useState<DataSource>();
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
@@ -42,7 +41,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
     const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
-    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(orgUnitSelectionEnabled);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
+    const [selectedModel, setSelectedModel] = useState<string>("");
     const [state, setState] = useState<PartialBy<DownloadTemplateProps, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
@@ -50,31 +50,38 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         language: "en",
     });
 
-    const models = useMemo(
-        () =>
-            _.compact([
-                settings.isModelEnabled("dataSet") && {
-                    value: "dataSets",
-                    label: i18n.t("Data Set"),
-                },
-                settings.isModelEnabled("program") && {
-                    value: "programs",
-                    label: i18n.t("Program"),
-                },
-            ]),
-        [settings]
-    );
+    const models = useMemo(() => {
+        return _.compact([
+            settings.allModelsEnabled() && {
+                value: "all",
+                label: i18n.t("All"),
+            },
+            settings.isModelEnabled("dataSet") && {
+                value: "dataSets",
+                label: i18n.t("Data Set"),
+            },
+            settings.isModelEnabled("program") && {
+                value: "programs",
+                label: i18n.t("Program"),
+            },
+        ]);
+    }, [settings]);
 
     useEffect(() => {
         CompositionRoot.attach()
             .templates.list.execute()
-            .then(dataSource => {
+            .then(({ dataSets, programs }) => {
+                const dataSource: DataSource = {
+                    dataSets,
+                    programs,
+                    all: _.sortBy([...dataSets, ...programs], ["name"]),
+                };
+
                 setDataSource(dataSource);
-                if (models.length === 1) {
-                    const model = models[0].value as DataFormType;
-                    const templates = modelToSelectOption(dataSource[model]);
-                    setTemplates(templates);
-                    setState(state => ({ ...state, type: model }));
+                if (models.length > 0) {
+                    const model = models[0].value;
+                    setTemplates(modelToSelectOption(dataSource[model]));
+                    setSelectedModel(model);
                 }
             });
     }, [models]);
@@ -99,9 +106,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     useEffect(() => {
         const { type, id, ...rest } = state;
         if (type && id) {
-            const orgUnits = filterOrgUnits
-                ? cleanOrgUnitPaths(selectedOrgUnits)
-                : orgUnitTreeFilter;
+            const orgUnits = filterOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : [];
             onChange({ type, id, orgUnits, ...rest });
         } else {
             onChange(null);
@@ -116,11 +121,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
+        const options = modelToSelectOption(dataSource[value]);
 
-        const type = value as DataFormType;
-        const options = modelToSelectOption(dataSource[type]);
-
-        setState(state => ({ ...state, type, id: undefined, populate: false }));
+        setSelectedModel(value);
+        setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
         clearPopulateDates();
         setTemplates(options);
         setSelectedOrgUnits([]);
@@ -129,9 +133,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
-        if (dataSource && state.type) {
-            const { periodType, readAccess = false } =
-                dataSource[state.type].find(({ id }) => id === value) ?? {};
+        if (dataSource) {
+            const { periodType, type, readAccess = false } =
+                dataSource[selectedModel].find(({ id }) => id === value) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {
@@ -145,11 +149,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             } else {
                 setDatePickerFormat(undefined);
             }
-        }
 
-        setState(state => ({ ...state, id: value, populate: false }));
-        clearPopulateDates();
-        setSelectedOrgUnits([]);
+            setState(state => ({ ...state, id: value, type, populate: false }));
+            clearPopulateDates();
+            setSelectedOrgUnits([]);
+        }
     };
 
     const onThemeChange = ({ value }: SelectOption) => {
@@ -201,7 +205,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             placeholder={i18n.t("Data Model")}
                             onChange={onModelChange}
                             options={models}
-                            value={state.type ?? ""}
+                            value={selectedModel}
                         />
                     </div>
                 )}
@@ -245,7 +249,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {orgUnitSelectionEnabled && (
+            {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
@@ -317,7 +321,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {userHasReadAccess && (
+            {userHasReadAccess && filterOrgUnits && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}
