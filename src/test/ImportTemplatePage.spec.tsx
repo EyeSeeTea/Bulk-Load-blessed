@@ -48,7 +48,7 @@ describe("ImportTemplatePage", () => {
     test("Renders correctly", async () => {
         await renderComponent();
 
-        expect(screen.getByRole("heading", { name: "Bulk Import" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Bulk data import" })).toBeInTheDocument();
         expect(screen.getByText(/drag and drop/i)).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Import data" })).toBeInTheDocument();
     });
