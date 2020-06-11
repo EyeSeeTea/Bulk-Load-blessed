@@ -139,7 +139,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                 />
             )}
 
-            <h3 className={classes.title}>{i18n.t("Models")}</h3>
+            <h3 className={classes.title}>{i18n.t("Data model")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
@@ -157,12 +157,11 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                 ))}
             </FormGroup>
 
-            <h3 className={classes.title}>{i18n.t("Visibility")}</h3>
+            <h3 className={classes.title}>{i18n.t("Organisation Unit Visibility")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
                     <Select
-                        placeholder={i18n.t("Organisation Units visibility")}
                         onChange={setOrgUnitSelection}
                         options={orgUnitSelectionOptions}
                         value={settings.orgUnitSelection}
@@ -172,34 +171,34 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
             <h3 className={classes.title}>{i18n.t("Duplicate detection for events (programs)")}</h3>
 
-            <FormGroup className={classes.content} row={true}>
-                <p className={classes.duplicateToleranceLabel}>
-                    {i18n.t("Event date absolute difference")}
-                </p>
-                <TextField
-                    className={classes.duplicateTolerance}
-                    type="number"
-                    onChange={setDuplicateTolerance}
-                    value={settings.duplicateTolerance}
-                />
-                <Select
-                    onChange={setDuplicateToleranceUnit}
-                    options={duplicateToleranceUnits}
-                    value={settings.duplicateToleranceUnit}
-                />
-            </FormGroup>
+            <div className={classes.content}>
+                <FormGroup className={classes.eventDateTime} row={true}>
+                    <p className={classes.duplicateToleranceLabel}>
+                        {i18n.t("Event date time difference")}
+                    </p>
+                    <TextField
+                        className={classes.duplicateTolerance}
+                        type="number"
+                        onChange={setDuplicateTolerance}
+                        value={settings.duplicateTolerance}
+                    />
+                    <Select
+                        onChange={setDuplicateToleranceUnit}
+                        options={duplicateToleranceUnits}
+                        value={settings.duplicateToleranceUnit}
+                    />
+                </FormGroup>
 
-            <FormGroup className={classes.content} row={true}>
                 <ListItem button onClick={() => showExclusionDialog(true)}>
                     <ListItemIcon>
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
                     <ListItemText
                         primary={i18n.t("Data elements filter")}
-                        secondary={i18n.t("Data elements used for duplication assessment")}
+                        secondary={i18n.t("Data elements used for duplicates identification")}
                     />
                 </ListItem>
-            </FormGroup>
+            </div>
 
             <h3 className={classes.title}>{i18n.t("Permissions")}</h3>
 
@@ -229,9 +228,10 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
 const useStyles = makeStyles({
     fullWidth: { width: "100%" },
-    content: { margin: "1rem", marginLeft: 0 },
+    content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
     checkbox: { padding: 9 },
-    title: { marginTop: 35 },
+    title: { marginTop: 0 },
+    eventDateTime: { marginBottom: 15 },
     duplicateTolerance: { margin: 0, marginRight: 15, width: 35 },
     duplicateToleranceLabel: { margin: 0, marginRight: 15, alignSelf: "center" },
 });
