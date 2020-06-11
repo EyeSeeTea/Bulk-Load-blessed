@@ -128,7 +128,7 @@ export default function ThemeEditDialog({
             </div>
 
             <div className={classes.group}>
-                <Typography variant="h6">{i18n.t("Sections")}</Typography>
+                <Typography variant="h6">{i18n.t("Headings")}</Typography>
                 <TextField
                     className={classes.text}
                     label={i18n.t("Title text")}

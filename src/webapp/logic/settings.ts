@@ -1,12 +1,19 @@
 import { D2Api, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
-import { AppSettings, OrgUnitSelectionSetting } from "../../domain/entities/AppSettings";
+import {
+    AppSettings,
+    DuplicateExclusion,
+    DuplicateToleranceUnit,
+    Model,
+    Models,
+    OrgUnitSelectionSetting,
+} from "../../domain/entities/AppSettings";
+import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
+import { GetArrayInnerType } from "../../utils/types";
 
-const models = ["dataSet", "program"] as const;
-
-const privateFields = ["api", "currentUser"] as const;
+const privateFields = ["currentUser"] as const;
 
 const publicFields = [
     "models",
@@ -15,14 +22,13 @@ const publicFields = [
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
+    "duplicateExclusion",
+    "duplicateTolerance",
+    "duplicateToleranceUnit",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
 
-type GetArrayInnerType<T extends readonly any[]> = T[number];
-export type Model = GetArrayInnerType<typeof models>;
-
-type Models = Record<Model, boolean>;
 type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
 type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
@@ -42,7 +48,6 @@ interface CurrentUser extends Ref {
 type OkOrError = { status: true } | { status: false; error: string };
 
 export default class Settings {
-    public api: D2Api;
     public currentUser: CurrentUser;
     public models: Models;
     public userPermissionsForGeneration: NamedObject[];
@@ -50,11 +55,13 @@ export default class Settings {
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
+    public duplicateExclusion: DuplicateExclusion;
+    public duplicateTolerance: number;
+    public duplicateToleranceUnit: DuplicateToleranceUnit;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
     constructor(options: Options) {
-        this.api = options.api;
         this.currentUser = options.currentUser;
         this.models = options.models;
         this.userPermissionsForGeneration = options.userPermissionsForGeneration;
@@ -62,6 +69,9 @@ export default class Settings {
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
+        this.duplicateExclusion = options.duplicateExclusion;
+        this.duplicateTolerance = options.duplicateTolerance;
+        this.duplicateToleranceUnit = options.duplicateToleranceUnit;
     }
 
     static async build(api: D2Api): Promise<Settings> {
@@ -113,7 +123,6 @@ export default class Settings {
             .getData();
 
         return new Settings({
-            api,
             currentUser,
             models: data.models ?? defaultSettings.models,
             userPermissionsForGeneration,
@@ -121,6 +130,10 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
+            duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
+            duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
+            duplicateToleranceUnit:
+                data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
         });
     }
 
@@ -139,6 +152,9 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -158,6 +174,9 @@ export default class Settings {
             permissionsForGeneration,
             permissionsForSettings,
             orgUnitSelection,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         };
 
         try {
@@ -196,6 +215,26 @@ export default class Settings {
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });
+    }
+
+    setDuplicateExclusions(program: Id, exclusions: Id[]): Settings {
+        const duplicateExclusion = _.transform(
+            {
+                ...this.duplicateExclusion,
+                [program]: exclusions,
+            },
+            (result, value, key) => {
+                // Clean-up empty arrays from exclusions
+                if (value.length > 0) result[key] = value;
+            },
+            {} as DuplicateExclusion
+        );
+
+        return this.updateOptions({ duplicateExclusion });
+    }
+
+    allModelsEnabled() {
+        return _.every(this.models, Boolean);
     }
 
     isModelEnabled(key: Model) {

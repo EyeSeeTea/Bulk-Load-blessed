@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-05-29T06:08:10.857Z\n"
-"PO-Revision-Date: 2020-05-29T06:08:10.857Z\n"
+"POT-Creation-Date: 2020-06-06T17:53:55.382Z\n"
+"PO-Revision-Date: 2020-06-06T17:53:55.382Z\n"
 
 msgid "Template not loaded"
 msgstr ""
@@ -23,6 +23,21 @@ msgstr ""
 msgid "You need to select at least one {{element}}"
 msgstr ""
 
+msgid "Data elements used for duplication assessment"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Program"
+msgstr ""
+
+msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Settings and Themes"
+msgstr ""
+
 msgid "Select Organisation Units on template generation"
 msgstr ""
 
@@ -32,10 +47,16 @@ msgstr ""
 msgid "Select Organisation Units on template generation and import"
 msgstr ""
 
-msgid "Access to Template Generation"
+msgid "Days"
 msgstr ""
 
-msgid "Access to Settings and Themes"
+msgid "Weeks"
+msgstr ""
+
+msgid "Months"
+msgstr ""
+
+msgid "Years"
 msgstr ""
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
@@ -53,9 +74,6 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
-msgid "Close"
-msgstr ""
-
 msgid "Models"
 msgstr ""
 
@@ -65,28 +83,37 @@ msgstr ""
 msgid "Organisation Units visibility"
 msgstr ""
 
+msgid "Duplicate detection for events (programs)"
+msgstr ""
+
+msgid "Event date absolute difference"
+msgstr ""
+
+msgid "Data elements filter"
+msgstr ""
+
 msgid "Permissions"
+msgstr ""
+
+msgid "All"
 msgstr ""
 
 msgid "Data Set"
 msgstr ""
 
-msgid "Program"
-msgstr ""
-
 msgid "Template properties"
 msgstr ""
 
-msgid "Model"
+msgid "Data Model"
 msgstr ""
 
 msgid "Select element to export..."
 msgstr ""
 
-msgid "Start date"
+msgid "Start period"
 msgstr ""
 
-msgid "End date"
+msgid "End period"
 msgstr ""
 
 msgid "Organisation units"
@@ -107,10 +134,16 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-msgid "No theme"
+msgid "<No value>"
 msgstr ""
 
-msgid "Populate template with instance data"
+msgid "Populate template with data"
+msgstr ""
+
+msgid "Start date"
+msgstr ""
+
+msgid "End date"
 msgstr ""
 
 msgid "Edit theme"
@@ -128,7 +161,7 @@ msgstr ""
 msgid "Color options"
 msgstr ""
 
-msgid "Sections"
+msgid "Headings"
 msgstr ""
 
 msgid "Title text"
@@ -207,16 +240,28 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr ""
 
-msgid "You need to select start and end dates for dataSet templates"
+msgid "You need to select start and end periods for dataSet templates"
+msgstr ""
+
+msgid "You need to select start and end dates to populate template"
+msgstr ""
+
+msgid "Downloading template..."
 msgstr ""
 
 msgid "Download template"
+msgstr ""
+
+msgid "Reading file..."
 msgstr ""
 
 msgid "Cannot read file"
 msgstr ""
 
 msgid "You don't have write permissions for {{type}} {{name}}"
+msgstr ""
+
+msgid "Reading data..."
 msgstr ""
 
 msgid "Select at least one organisation unit to import data"
@@ -240,22 +285,40 @@ msgstr ""
 msgid "Download data values with invalid organisation units"
 msgstr ""
 
+msgid "Checking duplicates..."
+msgstr ""
+
+msgid "Existing data values"
+msgstr ""
+
 msgid ""
 "There are {{totalExisting}} data values in the database for this "
 "organisation unit and periods. If you proceed, all those data values will "
 "be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
 msgstr ""
 
-msgid ""
-"There are {{totalExisting}} events in the database for this organisation, "
-"data values and similar event date. If you proceed, the data values without "
-"an event id will be duplicated. Are you sure?"
-msgstr ""
-
-msgid "Existing data values"
-msgstr ""
-
 msgid "Import only new data values"
+msgstr ""
+
+msgid "Warning: Your upload may result in the generation of duplicates"
+msgstr ""
+
+msgid ""
+"There are {{totalExisting}} records in your template with very similar or "
+"exact values as other records that already exist. If you proceed, you risk "
+"creating duplicates. What would you like to do?"
+msgstr ""
+
+msgid "Import everything anyway"
+msgstr ""
+
+msgid "Cancel import"
+msgstr ""
+
+msgid "Import only new records"
+msgstr ""
+
+msgid "Importing data..."
 msgstr ""
 
 msgid "Imported"

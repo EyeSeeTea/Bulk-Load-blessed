@@ -2,11 +2,9 @@ import { Button, makeStyles } from "@material-ui/core";
 import { useLoading, useSnackbar } from "d2-ui-components";
 import React, { useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
-import {
-    TemplateSelector,
-    TemplateSelectorState,
-} from "../../components/template-selector/TemplateSelector";
+import { TemplateSelector } from "../../components/template-selector/TemplateSelector";
 import { useAppContext } from "../../contexts/api-context";
 import { RouteComponentProps } from "../root/RootPage";
 
@@ -16,7 +14,7 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
     const classes = useStyles();
     const { api } = useAppContext();
 
-    const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
+    const [template, setTemplate] = useState<DownloadTemplateProps | null>(null);
 
     const handleTemplateDownloadClick = async () => {
         if (!template) {
@@ -24,23 +22,20 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             return;
         }
 
-        const { type, startDate, endDate, ...rest } = template;
+        const { type, startDate, endDate, populate, populateStartDate, populateEndDate } = template;
 
         if (type === "dataSets" && (!startDate || !endDate)) {
-            snackbar.info(i18n.t("You need to select start and end dates for dataSet templates"));
+            snackbar.info(i18n.t("You need to select start and end periods for dataSet templates"));
             return;
         }
 
-        loading.show(true);
+        if (populate && (!populateStartDate || !populateEndDate)) {
+            snackbar.info(i18n.t("You need to select start and end dates to populate template"));
+            return;
+        }
 
-        await CompositionRoot.attach().templates.download.execute({
-            api,
-            type,
-            startDate,
-            endDate,
-            ...rest,
-        });
-
+        loading.show(true, i18n.t("Downloading template..."));
+        await CompositionRoot.attach().templates.download.execute(api, template);
         loading.show(false);
     };
 

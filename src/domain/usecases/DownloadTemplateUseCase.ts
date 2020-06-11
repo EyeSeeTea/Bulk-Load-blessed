@@ -8,16 +8,17 @@ import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
-interface DownloadTemplateProps {
-    api: unknown;
+export interface DownloadTemplateProps {
     type: DataFormType;
-    id: string;
+    id: Id;
+    language: string;
     orgUnits?: string[];
-    populate: boolean;
+    theme?: Id;
     startDate?: Moment;
     endDate?: Moment;
-    language?: string;
-    theme?: Id;
+    populate: boolean;
+    populateStartDate?: Moment;
+    populateEndDate?: Moment;
 }
 
 export class DownloadTemplateUseCase {
@@ -27,17 +28,21 @@ export class DownloadTemplateUseCase {
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute({
-        api,
-        type,
-        id,
-        theme: themeId,
-        orgUnits = [],
-        populate,
-        startDate,
-        endDate,
-        language,
-    }: DownloadTemplateProps): Promise<void> {
+    public async execute(
+        api: unknown,
+        {
+            type,
+            id,
+            theme: themeId,
+            orgUnits = [],
+            startDate,
+            endDate,
+            language,
+            populate,
+            populateStartDate,
+            populateEndDate,
+        }: DownloadTemplateProps
+    ): Promise<void> {
         try {
             const templateId = type === "dataSets" ? dataSetId : programId;
             const template = this.templateRepository.getTemplate(templateId);
@@ -67,13 +72,13 @@ export class DownloadTemplateUseCase {
 
             if (theme) await this.excelRepository.applyTheme(template, theme);
 
-            if (populate) {
+            if (populate && populateStartDate && populateEndDate) {
                 const dataPackage = await this.instance.getDataPackage({
                     type,
                     id,
                     orgUnits,
-                    startDate,
-                    endDate,
+                    startDate: populateStartDate,
+                    endDate: populateEndDate,
                 });
                 await this.excelRepository.populateTemplate(template, dataPackage);
             }

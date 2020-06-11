@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import _ from "lodash";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { AppRoute } from "../../pages/root/RootPage";
 
 export interface AppDrawerProps {
@@ -23,6 +23,7 @@ export interface AppDrawerProps {
 export const AppDrawer = ({ isOpen, routes }: AppDrawerProps) => {
     const classes = useStyles();
     const history = useHistory();
+    const { pathname } = useLocation();
 
     const sections = _.groupBy(routes, "section");
 
@@ -40,6 +41,7 @@ export const AppDrawer = ({ isOpen, routes }: AppDrawerProps) => {
                                 button={true}
                                 key={`list-item-${key}`}
                                 onClick={() => handleDrawerClick(path)}
+                                selected={pathname === path}
                             >
                                 <ListItemIcon>
                                     <Icon>{icon}</Icon>
