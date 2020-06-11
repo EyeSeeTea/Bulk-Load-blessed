@@ -238,6 +238,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         attributeCos: categoryOptionId,
                         startDate: startDate?.format("YYYY-MM-DD"),
                         endDate: endDate?.format("YYYY-MM-DD"),
+                        cache: Math.random(),
                     })
                     .getData()
             );

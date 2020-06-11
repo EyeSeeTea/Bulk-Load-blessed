@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-06T17:53:55.382Z\n"
+"POT-Creation-Date: 2020-06-11T08:45:45.996Z\n"
 "PO-Revision-Date: 2019-10-10T10:41:21.864Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -74,22 +74,22 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
-msgid "Models"
+msgid "Data model"
 msgstr ""
 
-msgid "Visibility"
-msgstr ""
-
-msgid "Organisation Units visibility"
+msgid "Organisation Unit Visibility"
 msgstr ""
 
 msgid "Duplicate detection for events (programs)"
 msgstr ""
 
-msgid "Event date absolute difference"
+msgid "Event date time difference"
 msgstr ""
 
 msgid "Data elements filter"
+msgstr ""
+
+msgid "Data elements used for duplicates identification"
 msgstr ""
 
 msgid "Permissions"
@@ -101,13 +101,13 @@ msgstr ""
 msgid "Data Set"
 msgstr ""
 
-msgid "Template properties"
+msgid "Template"
+msgstr ""
+
+msgid "Select template to export..."
 msgstr ""
 
 msgid "Data Model"
-msgstr ""
-
-msgid "Select element to export..."
 msgstr ""
 
 msgid "Start period"
@@ -119,13 +119,13 @@ msgstr ""
 msgid "Organisation units"
 msgstr ""
 
-msgid "Select available Organisation Units"
+msgid "Select available organisation units to include in the template"
 msgstr ""
 
 msgid "User does not have any capture organisations units"
 msgstr ""
 
-msgid "Advanced properties"
+msgid "Advanced template properties"
 msgstr ""
 
 msgid "Language"
@@ -333,7 +333,7 @@ msgstr ""
 msgid "Deleted"
 msgstr ""
 
-msgid "Bulk Import"
+msgid "Bulk data import"
 msgstr ""
 
 msgid "Drag and drop file to import"

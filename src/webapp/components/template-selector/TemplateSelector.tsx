@@ -196,9 +196,18 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     return (
         <React.Fragment>
-            <h3>{i18n.t("Template properties")}</h3>
+            <h3 className={classes.title}>{i18n.t("Template")}</h3>
 
             <div className={classes.row}>
+                <div className={classes.select}>
+                    <Select
+                        placeholder={i18n.t("Select template to export...")}
+                        onChange={onTemplateChange}
+                        options={templates}
+                        value={state.id ?? ""}
+                    />
+                </div>
+
                 {showModelsSelector && (
                     <div className={classes.select}>
                         <Select
@@ -209,15 +218,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         />
                     </div>
                 )}
-
-                <div className={classes.select}>
-                    <Select
-                        placeholder={i18n.t("Select element to export...")}
-                        onChange={onTemplateChange}
-                        options={templates}
-                        value={state.id ?? ""}
-                    />
-                </div>
             </div>
 
             {state.type === "dataSets" && (
@@ -261,7 +261,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     onChange={onFilterOrgUnitsChange}
                                 />
                             }
-                            label={i18n.t("Select available Organisation Units")}
+                            label={i18n.t(
+                                "Select available organisation units to include in the template"
+                            )}
                         />
                     </div>
 
@@ -292,7 +294,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </React.Fragment>
             )}
 
-            <h3>{i18n.t("Advanced properties")}</h3>
+            <h3>{i18n.t("Advanced template properties")}</h3>
 
             {availableLanguages.length > 0 && (
                 <div className={classes.row}>
@@ -390,6 +392,7 @@ const useStyles = makeStyles({
         justifyContent: "space-around",
         marginRight: "1em",
     },
+    title: { marginBottom: 0 },
     select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
     checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
