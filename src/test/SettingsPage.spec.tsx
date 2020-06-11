@@ -43,8 +43,10 @@ describe("ImportTemplatePage", () => {
     test("Renders correctly", async () => {
         await renderComponent();
 
-        expect(screen.getByRole("heading", { name: "Models" })).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Visibility" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Data model" })).toBeInTheDocument();
+        expect(
+            screen.getByRole("heading", { name: "Organisation Unit Visibility" })
+        ).toBeInTheDocument();
     });
 });
 

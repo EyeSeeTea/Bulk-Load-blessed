@@ -48,8 +48,10 @@ describe("ImportTemplatePage", () => {
     test("Renders correctly", async () => {
         await renderComponent();
 
-        expect(screen.getByRole("heading", { name: "Template properties" })).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Advanced properties" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Template" })).toBeInTheDocument();
+        expect(
+            screen.getByRole("heading", { name: "Advanced template properties" })
+        ).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Download template" })).toBeInTheDocument();
     });
 });

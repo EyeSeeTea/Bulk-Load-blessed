@@ -421,7 +421,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
-            <h3>{i18n.t("Bulk Import")}</h3>
+            <h3>{i18n.t("Bulk data import")}</h3>
 
             <Dropzone
                 accept={
