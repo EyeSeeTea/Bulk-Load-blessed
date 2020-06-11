@@ -381,18 +381,3 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#~ msgid "Models"
-#~ msgstr "Modelos"
-
-#~ msgid "Visibility"
-#~ msgstr "Visibilidad"
-
-#~ msgid "Template properties"
-#~ msgstr "Propiedades de plantilla"
-
-#~ msgid "Exclude data elements for duplicate detection in programs"
-#~ msgstr "Excluir data elements en la detección de duplicados para programas"
-
-#~ msgid "Used to assess if a record is a duplicated"
-#~ msgstr "Se usa para determinar si una entrada es un duplicado"
