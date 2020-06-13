@@ -178,7 +178,7 @@ export default function LandingPage() {
         if (!state.orgUnitTreeSelected2) return;
 
         const orgUnits = cleanOrgUnitPaths(state.orgUnitTreeSelected2);
-
+        
         try {
             loading.show(true);
             const result = await dhisConnector.getElementMetadata({
@@ -204,16 +204,45 @@ export default function LandingPage() {
                 colOffset,
             } = await CompositionRoot.attach().templates.analyze.execute(state.importDataSheet);
 
+            
+            const organisationUnits = result.organisationUnits;
+
+            if (result.element.type === "program") {
+                
+                var usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                    ...result,
+                    d2,
+                    api,
+                    file: state.importDataSheet,
+                    useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
+                    organisationUnits,
+                    rowOffset,
+                    colOffset,
+                });
+                
+                usedOrgUnitsUIDs = Array.from(usedOrgUnitsUIDs);
+
+                var orgUnitCoordMap = new Map();
+
+                for (var i = 0; i < usedOrgUnitsUIDs.length; ++i) {
+                    const uid = usedOrgUnitsUIDs[i];
+                    const orgUnitData = await dhisConnector.importOrgUnitByUID(d2, uid);
+                    orgUnitCoordMap.set(uid, orgUnitData);
+                }
+            }
+
             const data = await sheetImport.readSheet({
                 ...result,
                 d2,
                 api,
                 file: state.importDataSheet,
                 useBuilderOrgUnits: !settings.showOrgUnitsOnGeneration,
+                organisationUnits,
+                orgUnitCoordMap,
                 rowOffset,
                 colOffset,
             });
-
+            
             const dataValues = data.dataSet ? await getDataValuesFromData(api, data) : [];
             const info = { data, dataValues };
 

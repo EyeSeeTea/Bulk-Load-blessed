@@ -18,11 +18,15 @@ export async function getDataValuesFromData(api: D2Api, data: DataValuesData) {
     const { dataSet, orgUnit, dataValues } = data;
     const periods = dataValues.map(dataValue => dataValue.period.toString());
 
-    const dbDataValues = await api.dataValues
-        .getSet({ dataSet: [dataSet], orgUnit: [orgUnit], period: periods })
-        .getData();
+    if (data.dataValues.length !== 0) {
+        const dbDataValues = await api.dataValues
+            .getSet({ dataSet: [dataSet], orgUnit: [orgUnit], period: periods })
+            .getData();
+        return dbDataValues.dataValues;
+    }
+    const ret = new Array();
+    return ret;
 
-    return dbDataValues.dataValues;
 }
 
 export async function deleteDataValues(

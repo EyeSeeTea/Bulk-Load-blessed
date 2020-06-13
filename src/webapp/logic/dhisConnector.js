@@ -80,7 +80,6 @@ export function getElementMetadata(builder) {
  *      - data: Data to import
  */
 export function importData(builder) {
-    console.log(builder.data);
     return new Promise(function (resolve, reject) {
         const isProgram = builder.element.type === "program";
         const endpoint = isProgram ? "/events" : "/dataValueSets";
@@ -95,4 +94,11 @@ export function importData(builder) {
                 reject(reason);
             });
     });
+}
+
+
+export function importOrgUnitByUID(d2, uid) {
+    let baseUrl = d2.Api.getApi().baseUrl;
+    baseUrl += "/organisationUnits/" + uid;
+    return getJSON(d2, baseUrl);
 }
