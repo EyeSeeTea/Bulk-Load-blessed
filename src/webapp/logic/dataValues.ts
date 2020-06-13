@@ -24,8 +24,7 @@ export async function getDataValuesFromData(api: D2Api, data: DataValuesData) {
             .getData();
         return dbDataValues.dataValues;
     }
-    const ret = new Array();
-    return ret;
+    return null;
 
 }
 
