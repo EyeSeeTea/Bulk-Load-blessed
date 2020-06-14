@@ -1,32 +1,25 @@
 import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
+import { EventsPackage } from "../../data/InstanceDhisRepository";
 import i18n from "../../locales";
 
-interface DataValuesData {
+interface SheetImportDataSet {
     dataSet: Id;
-    orgUnit: Id;
     dataValues: Array<{
         dataElement: Id;
         categoryOptionCombo: Id;
+        attributeOptionCombo?: Id;
         value: string;
         period: string | number;
         orgUnit: string;
     }>;
 }
 
-export async function getDataValuesFromData(api: D2Api, data: DataValuesData) {
-    const { dataSet, orgUnit, dataValues } = data;
-    const periods = dataValues.map(dataValue => dataValue.period.toString());
-
-    if (data.dataValues.length !== 0) {
-        const dbDataValues = await api.dataValues
-            .getSet({ dataSet: [dataSet], orgUnit: [orgUnit], period: periods })
-            .getData();
-        return dbDataValues.dataValues;
-    }
-    return null;
-
+interface SheetImportProgram extends EventsPackage {
+    program: Id;
 }
+
+export type SheetImportResponse = Partial<SheetImportDataSet & SheetImportProgram>;
 
 export async function deleteDataValues(
     api: D2Api,

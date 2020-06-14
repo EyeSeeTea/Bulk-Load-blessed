@@ -1,49 +1,111 @@
-import { D2Api, D2ApiDefault } from "d2-api";
+import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
-import { DataForm, DataFormType } from "../domain/entities/DataForm";
+import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
+import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
-import i18n from "../locales";
-import { promiseMap } from "../webapp/utils/common";
+import { promiseMap } from "../webapp/utils/promises";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
 
-    constructor({ url }: DhisInstance) {
-        this.api = new D2ApiDefault({ baseUrl: url });
+    constructor({ url }: DhisInstance, mockApi?: D2Api) {
+        this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
     public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        if (type === "tracker") throw new Error(i18n.t("Tracker programs are not supported"));
+        switch (type) {
+            case "dataSets":
+                return this.getDataSets(ids);
+            case "programs":
+                return this.getPrograms(ids);
+            default:
+                throw new Error(`Unsupported type ${type} for data package`);
+        }
+    }
 
-        const params = {
-            paging: false,
-            fields: {
-                id: true,
-                displayName: true,
-                name: true,
-                attributeValues: { value: true, attribute: { code: true } },
-            },
-            filter: {
-                id: ids ? { in: ids } : undefined,
-                programType: type === "program" ? { eq: "WITHOUT_REGISTRATION" } : undefined,
-            },
-        } as const;
+    private async getDataSets(ids?: string[]): Promise<DataForm[]> {
+        const { objects } = await this.api.models.dataSets
+            .get({
+                paging: false,
+                fields: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    attributeValues: { value: true, attribute: { code: true } },
+                    dataSetElements: { dataElement: { id: true, formName: true, name: true } },
+                    periodType: true,
+                    access: true,
+                },
+                filter: {
+                    id: ids ? { in: ids } : undefined,
+                },
+            })
+            .getData();
 
-        const { objects } = await (type === "dataSet"
-            ? this.api.models.dataSets.get(params).getData()
-            : this.api.models.programs.get(params).getData());
+        return objects.map(
+            ({ displayName, name, access, periodType, dataSetElements, ...rest }) => ({
+                ...rest,
+                type: "dataSets",
+                name: displayName ?? name,
+                periodType: periodType as DataFormPeriod,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: dataSetElements
+                    .map(({ dataElement }) => dataElement)
+                    .map(({ formName, name, ...rest }) => ({
+                        ...rest,
+                        name: formName ?? name,
+                    })),
+            })
+        );
+    }
 
-        return objects.map(({ displayName, name, ...rest }) => ({
+    private async getPrograms(ids?: string[]): Promise<DataForm[]> {
+        const { objects } = await this.api.models.programs
+            .get({
+                paging: false,
+                fields: {
+                    id: true,
+                    displayName: true,
+                    name: true,
+                    attributeValues: { value: true, attribute: { code: true } },
+                    programStages: {
+                        programStageDataElements: {
+                            dataElement: { id: true, formName: true, name: true },
+                        },
+                    },
+                    access: true,
+                },
+                filter: {
+                    id: ids ? { in: ids } : undefined,
+                    programType: { eq: "WITHOUT_REGISTRATION" },
+                },
+            })
+            .getData();
+
+        return objects.map(({ displayName, name, access, programStages, ...rest }) => ({
             ...rest,
-            type,
+            type: "programs",
             name: displayName ?? name,
+            periodType: "Daily",
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            readAccess: access.data?.read,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            writeAccess: access.data?.write,
+            dataElements: programStages
+                .flatMap(({ programStageDataElements }) =>
+                    programStageDataElements.map(({ dataElement }) => dataElement)
+                )
+                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
         }));
     }
 
@@ -58,7 +120,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             },
         } as const;
 
-        const { objects } = await (type === "dataSet"
+        const { objects } = await (type === "dataSets"
             ? this.api.models.dataSets.get(params).getData()
             : this.api.models.programs.get(params).getData());
 
@@ -80,32 +142,49 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
         switch (params.type) {
-            case "dataSet":
+            case "dataSets":
                 return this.getDataSetPackage(params);
-            case "program":
+            case "programs":
                 return this.getProgramPackage(params);
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
     }
 
+    public async getLocales(): Promise<Locale[]> {
+        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
+        return locales;
+    }
+
     private async getDataSetPackage({
         id,
         orgUnits,
+        periods = [],
         startDate,
         endDate,
+        translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
-        const { dataValues } = await this.api
-            .get<AggregatedPackage>("/dataValueSets", {
-                dataSet: id,
-                startDate: startDate?.format("YYYY-MM-DD"),
-                endDate: endDate?.format("YYYY-MM-DD"),
-                orgUnit: orgUnits,
-            })
-            .getData();
+        const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
+            const query = (period?: string[]): Promise<DataValueSetsGetResponse> =>
+                this.api.dataValues
+                    .getSet({
+                        dataSet: [id],
+                        orgUnit,
+                        period,
+                        startDate: startDate?.format("YYYY-MM-DD"),
+                        endDate: endDate?.format("YYYY-MM-DD"),
+                    })
+                    .getData();
 
-        return _(dataValues)
+            return periods.length > 0
+                ? await promiseMap(_.chunk(periods, 200), query)
+                : [await query()];
+        });
+
+        return _(response)
+            .flatten()
+            .flatMap(({ dataValues = [] }) => dataValues)
             .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
                 [period, orgUnit, attributeOptionCombo].join("-")
             )
@@ -119,7 +198,12 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
                             category: categoryOptionCombo,
-                            value: this.formatDataValue(dataElement, value, metadata),
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
                             comment,
                         })
                     ),
@@ -131,6 +215,9 @@ export class InstanceDhisRepository implements InstanceRepository {
     private async getProgramPackage({
         id,
         orgUnits,
+        startDate,
+        endDate,
+        translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage[]> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
@@ -139,60 +226,50 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        try {
-            const response = await promiseMap(orgUnits, async orgUnit => {
-                // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-                return promiseMap(categoryOptions, categoryOptionId =>
-                    this.api
-                        .get<EventsPackage>("/events", {
-                            program: id,
-                            orgUnit,
-                            paging: false,
-                            attributeCc: categoryComboId,
-                            attributeCos: categoryOptionId,
-                        })
-                        .getData()
-                );
-            });
-
-            return _(response)
-                .flatten()
-                .map(({ events }) => events)
-                .flatten()
-                .map(
-                    ({
-                        event,
+        const response = await promiseMap(orgUnits, async orgUnit => {
+            // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
+            return promiseMap(categoryOptions, categoryOptionId =>
+                this.api
+                    .get<EventsPackage>("/events", {
+                        program: id,
                         orgUnit,
-                        eventDate,
-                        attributeOptionCombo,
-                        coordinate,
-                        dataValues,
-                    }) => ({
-                        id: event,
-                        orgUnit,
-                        period: moment(eventDate).format("YYYY-MM-DD"),
-                        attribute: attributeOptionCombo,
-                        coordinate,
-                        dataValues: dataValues.map(({ dataElement, value }) => ({
-                            dataElement,
-                            value: this.formatDataValue(dataElement, value, metadata),
-                        })),
+                        paging: false,
+                        attributeCc: categoryComboId,
+                        attributeCos: categoryOptionId,
+                        startDate: startDate?.format("YYYY-MM-DD"),
+                        endDate: endDate?.format("YYYY-MM-DD"),
+                        cache: Math.random(),
                     })
-                )
-                .value();
-        } catch (error) {
-            console.error("Error fetching events", error);
-            return [];
-        }
+                    .getData()
+            );
+        });
+
+        return _(response)
+            .flatten()
+            .map(({ events }) => events)
+            .flatten()
+            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
+                id: event,
+                orgUnit,
+                period: moment(eventDate).format("YYYY-MM-DD"),
+                attribute: attributeOptionCombo,
+                coordinate,
+                dataValues: dataValues.map(({ dataElement, value }) => ({
+                    dataElement,
+                    value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                })),
+            }))
+            .value();
     }
 
     private formatDataValue(
         dataElement: string,
         value: string | number,
-        metadata: MetadataPackage
+        metadata: MetadataPackage,
+        translateCodes: boolean
     ): string | number {
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
-        if (!optionSet) return value;
+        if (!translateCodes || !optionSet) return value;
 
         // Format options from CODE to UID
         const options = _.filter(metadata.options, { optionSet: { id: optionSet } });
@@ -227,7 +304,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 }
 
-interface EventsPackage {
+export interface EventsPackage {
     events: Array<{
         event?: string;
         orgUnit: string;
@@ -243,18 +320,6 @@ interface EventsPackage {
             dataElement: string;
             value: string | number;
         }>;
-    }>;
-}
-
-interface AggregatedPackage {
-    dataValues: Array<{
-        dataElement: string;
-        period: string;
-        orgUnit: string;
-        value: string;
-        comment?: string;
-        categoryOptionCombo?: string;
-        attributeOptionCombo?: string;
     }>;
 }
 

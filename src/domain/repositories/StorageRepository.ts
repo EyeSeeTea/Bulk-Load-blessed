@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { ReferenceObject } from "../entities/ReferenceObject";
+import { Ref } from "../entities/ReferenceObject";
 
 export abstract class StorageRepository {
     // Object operations
@@ -7,11 +7,11 @@ export abstract class StorageRepository {
     public abstract saveObject<T extends object>(key: string, value: T): Promise<void>;
     public abstract removeObject(key: string): Promise<void>;
 
-    public async listObjectsInCollection<T extends ReferenceObject>(key: string): Promise<T[]> {
+    public async listObjectsInCollection<T extends Ref>(key: string): Promise<T[]> {
         return await this.getObject<T[]>(key, []);
     }
 
-    public async getObjectInCollection<T extends ReferenceObject>(
+    public async getObjectInCollection<T extends Ref>(
         key: string,
         id: string
     ): Promise<T | undefined> {
@@ -19,18 +19,15 @@ export abstract class StorageRepository {
         return _.find(rawData, element => element.id === id);
     }
 
-    public async saveObjectInCollection<T extends ReferenceObject>(
-        key: string,
-        element: T
-    ): Promise<void> {
-        const oldData = await this.getObject(key, [] as ReferenceObject[]);
+    public async saveObjectInCollection<T extends Ref>(key: string, element: T): Promise<void> {
+        const oldData = await this.getObject(key, [] as Ref[]);
         const cleanData = oldData.filter(item => item.id !== element.id);
         const newData = [...cleanData, element];
         await this.saveObject(key, newData);
     }
 
     public async removeObjectInCollection(key: string, id: string): Promise<void> {
-        const oldData = await this.getObject(key, [] as ReferenceObject[]);
+        const oldData = await this.getObject(key, [] as Ref[]);
         const newData = _.reject(oldData, { id });
         await this.saveObject(key, newData);
     }

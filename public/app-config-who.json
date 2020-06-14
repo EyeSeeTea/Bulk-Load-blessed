@@ -24,6 +24,6 @@
             "dataSet": true,
             "program": true
         },
-        "showOrgUnitsOnGeneration": true
+        "orgUnitSelection": "both"
     }
 }

@@ -1,35 +1,32 @@
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import { OrgUnitsSelector } from "d2-ui-components";
+import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
-import { DataFormType } from "../../../domain/entities/DataForm";
+import { DataForm } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
+import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import { PartialBy } from "../../../utils/types";
 import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
-import { buildPossibleYears } from "../../utils/periods";
 import { Select, SelectOption } from "../select/Select";
 
-type TemplateType = DataFormType | "custom";
-type DataSource = Record<TemplateType, { id: string; name: string }[]>;
+type DataSource = Record<string, DataForm[]>;
 
-interface TemplateSelectorState {
-    type: TemplateType;
-    id: string;
-    populate: boolean;
-    orgUnits?: string[];
-    theme?: string;
-    startYear?: string;
-    endYear?: string;
+type PickerUnit = "year" | "month" | "date";
+interface PickerFormat {
+    unit: PickerUnit;
+    views: PickerUnit[];
+    format: string;
 }
 
 export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
-    onChange(state: TemplateSelectorState | null): void;
+    onChange(state: DownloadTemplateProps | null): void;
 }
 
 export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
@@ -37,202 +34,352 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const { api } = useAppContext();
 
     const [dataSource, setDataSource] = useState<DataSource>();
-    const [models, setModels] = useState<{ value: string; label: string }[]>([]);
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
+    const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
+    const [availableLanguages, setAvailableLanguages] = useState<SelectOption[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
-    const [state, setState] = useState<Partial<TemplateSelectorState>>({
-        startYear: "2010",
-        endYear: moment().year().toString(),
+    const [datePickerFormat, setDatePickerFormat] = useState<PickerFormat>();
+    const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
+    const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
+    const [selectedModel, setSelectedModel] = useState<string>("");
+    const [state, setState] = useState<PartialBy<DownloadTemplateProps, "type" | "id">>({
+        startDate: moment().add("-1", "year").startOf("year"),
+        endDate: moment(),
         populate: false,
+        language: "en",
     });
+
+    const models = useMemo(() => {
+        return _.compact([
+            settings.allModelsEnabled() && {
+                value: "all",
+                label: i18n.t("All"),
+            },
+            settings.isModelEnabled("dataSet") && {
+                value: "dataSets",
+                label: i18n.t("Data Set"),
+            },
+            settings.isModelEnabled("program") && {
+                value: "programs",
+                label: i18n.t("Program"),
+            },
+        ]);
+    }, [settings]);
 
     useEffect(() => {
         CompositionRoot.attach()
             .templates.list.execute()
-            .then(dataSource => {
-                const modelOptions = _.compact([
-                    settings.isModelEnabled("dataSet") && {
-                        value: "dataSet",
-                        label: i18n.t("Data Set"),
-                    },
-                    settings.isModelEnabled("program") && {
-                        value: "program",
-                        label: i18n.t("Program"),
-                    },
-                    dataSource.custom.length > 0 && {
-                        value: "custom",
-                        label: i18n.t("Custom"),
-                    },
-                ]);
+            .then(({ dataSets, programs }) => {
+                const dataSource: DataSource = {
+                    dataSets,
+                    programs,
+                    all: _.sortBy([...dataSets, ...programs], ["name"]),
+                };
 
                 setDataSource(dataSource);
-                setModels(modelOptions);
-                if (modelOptions.length === 1) {
-                    const model = modelOptions[0].value as TemplateType;
-                    const templates = modelToSelectOption(dataSource[model]);
-                    setTemplates(templates);
-                    setState(state => ({ ...state, type: model }));
+                if (models.length > 0) {
+                    const model = models[0].value;
+                    setTemplates(modelToSelectOption(dataSource[model]));
+                    setSelectedModel(model);
                 }
             });
-    }, [settings]);
+    }, [models]);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getRoots.execute().then(setOrgUnitTreeRootIds);
+        const { type, id } = state;
+        if (type && id) {
+            CompositionRoot.attach()
+                .orgUnits.getRootsByForm.execute(type, id)
+                .then(setOrgUnitTreeFilter);
+        }
+    }, [state]);
+
+    useEffect(() => {
+        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
     }, []);
 
     useEffect(() => {
-        const { type, id, theme, startYear, endYear, populate = false } = state;
+        CompositionRoot.attach().languages.list.execute().then(setAvailableLanguages);
+    }, []);
+
+    useEffect(() => {
+        const { type, id, ...rest } = state;
         if (type && id) {
-            const orgUnits = cleanOrgUnitPaths(selectedOrgUnits);
-            onChange({ type, id, theme, orgUnits, startYear, endYear, populate });
+            const orgUnits = filterOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : [];
+            onChange({ type, id, orgUnits, ...rest });
         } else {
             onChange(null);
         }
-    }, [state, selectedOrgUnits, onChange]);
+    }, [state, selectedOrgUnits, filterOrgUnits, orgUnitTreeFilter, onChange]);
 
-    const showModelSelector = models.length > 1;
-    const elementLabel = showModelSelector ? i18n.t("elements") : models[0]?.label;
     const themeOptions = dataSource ? modelToSelectOption(themes) : [];
+
+    const clearPopulateDates = () => {
+        setState(state => ({ ...state, populateStartDate: undefined, populateEndDate: undefined }));
+    };
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
+        const options = modelToSelectOption(dataSource[value]);
 
-        const model = value as TemplateType;
-        const options = modelToSelectOption(dataSource[model]);
-
-        setState(state => ({ ...state, type: model, id: undefined }));
+        setSelectedModel(value);
+        setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
+        clearPopulateDates();
         setTemplates(options);
+        setSelectedOrgUnits([]);
+        setOrgUnitTreeFilter([]);
+        setUserHasReadAccess(false);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
-        setState(state => ({ ...state, id: value }));
+        if (dataSource) {
+            const { periodType, type, readAccess = false } =
+                dataSource[selectedModel].find(({ id }) => id === value) ?? {};
+            setUserHasReadAccess(readAccess);
+
+            if (periodType === "Yearly") {
+                setDatePickerFormat({ unit: "year", views: ["year"], format: "YYYY" });
+            } else if (periodType === "Monthly") {
+                setDatePickerFormat({
+                    unit: "month",
+                    views: ["year", "month"],
+                    format: "MMMM YYYY",
+                });
+            } else {
+                setDatePickerFormat(undefined);
+            }
+
+            setState(state => ({ ...state, id: value, type, populate: false }));
+            clearPopulateDates();
+            setSelectedOrgUnits([]);
+        }
     };
 
     const onThemeChange = ({ value }: SelectOption) => {
         setState(state => ({ ...state, theme: value }));
     };
 
-    const onStartYearChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            startYear: value,
-        }));
+    const onStartDateChange = (field: keyof DownloadTemplateProps, date: Date, clear = false) => {
+        const { unit = "date" } = datePickerFormat ?? {};
+        const startDate = date ? moment(date).startOf(unit) : undefined;
+        setState(state => ({ ...state, [field]: startDate }));
+        if (clear) clearPopulateDates();
     };
 
-    const onEndYearChange = ({ value }: SelectOption) => {
-        setState(state => ({
-            ...state,
-            endYear: value,
-        }));
+    const onEndDateChange = (field: keyof DownloadTemplateProps, date: Date, clear = false) => {
+        const { unit = "date" } = datePickerFormat ?? {};
+        const endDate = date ? moment(date).endOf(unit) : undefined;
+        setState(state => ({ ...state, [field]: endDate }));
+        if (clear) clearPopulateDates();
     };
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(orgUnitPaths);
     };
 
-    const onPopulateChange = (_event: React.ChangeEvent, checked: boolean) => {
-        setState(state => ({ ...state, populate: checked }));
+    const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
+        setState(state => ({ ...state, populate }));
     };
 
-    const enablePopulate = state.type && state.id && selectedOrgUnits.length > 0;
+    const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
+        setState(state => ({ ...state, populate: false }));
+        clearPopulateDates();
+        setFilterOrgUnits(filterOrgUnits);
+    };
+
+    const onLanguageChange = ({ value }: SelectOption) => {
+        setState(state => ({ ...state, language: value }));
+    };
+
+    const showModelsSelector = models.length > 1;
 
     return (
         <React.Fragment>
-            <div className={classes.row}>
-                {showModelSelector && (
-                    <div className={classes.modelSelect}>
-                        <Select
-                            placeholder={i18n.t("Model")}
-                            onChange={onModelChange}
-                            options={models}
-                            value={state.type ?? ""}
-                        />
-                    </div>
-                )}
+            <h3 className={classes.title}>{i18n.t("Template")}</h3>
 
-                <div className={classes.templateSelect}>
+            <div className={classes.row}>
+                <div className={classes.select}>
                     <Select
-                        placeholder={i18n.t("Select {{elementLabel}} to export...", {
-                            elementLabel,
-                        })}
+                        placeholder={i18n.t("Select template to export...")}
                         onChange={onTemplateChange}
                         options={templates}
                         value={state.id ?? ""}
                     />
                 </div>
 
-                {themeOptions.length > 0 && (
-                    <div className={classes.themeSelect}>
+                {showModelsSelector && (
+                    <div className={classes.select}>
+                        <Select
+                            placeholder={i18n.t("Data Model")}
+                            onChange={onModelChange}
+                            options={models}
+                            value={selectedModel}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {state.type === "dataSets" && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("Start period")}
+                            value={state.startDate ?? null}
+                            onChange={(date: Date) => onStartDateChange("startDate", date, true)}
+                            maxDate={state.endDate}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("End period")}
+                            value={state.endDate ?? null}
+                            onChange={(date: Date) => onEndDateChange("endDate", date, true)}
+                            minDate={state.startDate}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {settings.orgUnitSelection !== "import" && (
+                <React.Fragment>
+                    <h3>{i18n.t("Organisation units")}</h3>
+
+                    <div>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={filterOrgUnits}
+                                    onChange={onFilterOrgUnitsChange}
+                                />
+                            }
+                            label={i18n.t(
+                                "Select available organisation units to include in the template"
+                            )}
+                        />
+                    </div>
+
+                    {filterOrgUnits &&
+                        (!_.isEmpty(orgUnitTreeRootIds) ? (
+                            <div className={classes.orgUnitSelector}>
+                                <OrgUnitsSelector
+                                    api={api}
+                                    rootIds={orgUnitTreeRootIds}
+                                    selectableIds={orgUnitTreeFilter}
+                                    selected={selectedOrgUnits}
+                                    onChange={onOrgUnitChange}
+                                    fullWidth={false}
+                                    height={250}
+                                    controls={{
+                                        filterByLevel: true,
+                                        filterByGroup: true,
+                                        selectAll: true,
+                                    }}
+                                    withElevation={false}
+                                />
+                            </div>
+                        ) : (
+                            <div className={classes.orgUnitError}>
+                                {i18n.t("User does not have any capture organisations units")}
+                            </div>
+                        ))}
+                </React.Fragment>
+            )}
+
+            <h3>{i18n.t("Advanced template properties")}</h3>
+
+            {availableLanguages.length > 0 && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <Select
+                            placeholder={i18n.t("Language")}
+                            onChange={onLanguageChange}
+                            options={availableLanguages}
+                            value={state.language ?? ""}
+                        />
+                    </div>
+                </div>
+            )}
+            {themeOptions.length > 0 && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
                         <Select
                             placeholder={i18n.t("Theme")}
                             onChange={onThemeChange}
                             options={themeOptions}
                             allowEmpty={true}
-                            emptyLabel={i18n.t("No theme")}
+                            emptyLabel={i18n.t("<No value>")}
                             value={state.theme ?? ""}
-                        />
-                    </div>
-                )}
-            </div>
-            {state.type === "dataSet" && (
-                <div className={classes.row}>
-                    <div className={classes.startYearSelect}>
-                        <Select
-                            placeholder={i18n.t("Start Year")}
-                            options={buildPossibleYears("1970", state.endYear)}
-                            defaultValue={{
-                                value: moment("2010-01-01").year().toString(),
-                                label: moment("2010-01-01").year().toString(),
-                            }}
-                            onChange={onStartYearChange}
-                        />
-                    </div>
-                    <div className={classes.endYearSelect}>
-                        <Select
-                            placeholder={i18n.t("End Year")}
-                            options={buildPossibleYears(
-                                state.startYear,
-                                moment().year().toString()
-                            )}
-                            defaultValue={{
-                                value: moment().year().toString(),
-                                label: moment().year().toString(),
-                            }}
-                            onChange={onEndYearChange}
                         />
                     </div>
                 </div>
             )}
-            {!_.isEmpty(orgUnitTreeRootIds) ? (
-                settings.showOrgUnitsOnGeneration && state.type !== "custom" ? (
-                    <div className={classes.orgUnitSelector}>
-                        <OrgUnitsSelector
-                            api={api}
-                            onChange={onOrgUnitChange}
-                            selected={selectedOrgUnits}
-                            controls={{
-                                filterByLevel: true,
-                                filterByGroup: true,
-                                selectAll: true,
-                            }}
-                            rootIds={orgUnitTreeRootIds}
-                            fullWidth={false}
-                            height={250}
-                        />
-                    </div>
-                ) : null
-            ) : (
-                i18n.t("No capture organisations units")
+
+            {userHasReadAccess && filterOrgUnits && (
+                <div>
+                    <FormControlLabel
+                        className={classes.checkbox}
+                        control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
+                        label={i18n.t("Populate template with data")}
+                    />
+                </div>
             )}
 
-            {settings.showOrgUnitsOnGeneration && (
-                <FormControlLabel
-                    disabled={!enablePopulate}
-                    className={classes.populateCheckbox}
-                    control={<Checkbox checked={state.populate} onChange={onPopulateChange} />}
-                    label="Populate template with instance data"
-                />
+            {state.populate && (
+                <div className={classes.row}>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("Start date")}
+                            value={state.populateStartDate ?? null}
+                            onChange={(date: Date) => onStartDateChange("populateStartDate", date)}
+                            minDate={
+                                state.type === "dataSets"
+                                    ? state.startDate?.startOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
+                            maxDate={moment.min(
+                                _.compact([
+                                    state.type === "dataSets" && state.endDate,
+                                    state.populateEndDate,
+                                ])
+                            )}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("End date")}
+                            value={state.populateEndDate ?? null}
+                            onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
+                            minDate={moment.max(
+                                _.compact([
+                                    state.type === "dataSets" && state.startDate,
+                                    state.populateStartDate,
+                                ])
+                            )}
+                            maxDate={
+                                state.type === "dataSets"
+                                    ? state.endDate?.endOf(datePickerFormat?.unit ?? "day")
+                                    : undefined
+                            }
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
+                </div>
             )}
         </React.Fragment>
     );
@@ -243,21 +390,26 @@ const useStyles = makeStyles({
         display: "flex",
         flexFlow: "row nowrap",
         justifyContent: "space-around",
-        marginTop: "1em",
         marginRight: "1em",
     },
-    modelSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
-    templateSelect: { flexBasis: "70%", margin: "1em" },
-    themeSelect: { flexBasis: "30%", margin: "1em" },
-    startYearSelect: { flexBasis: "30%", margin: "1em", marginLeft: 0 },
-    endYearSelect: { flexBasis: "30%", margin: "1em" },
-    populateCheckbox: { marginTop: "1em" },
-    orgUnitSelector: { marginTop: "1em" },
+    title: { marginBottom: 0 },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    checkbox: { marginTop: "1em" },
+    orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
+    fullWidth: { width: "100%" },
+    orgUnitError: {
+        height: 250,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });
 
 function modelToSelectOption<T extends { id: string; name: string }>(array: T[]) {
-    return array.map(({ id, name }) => ({
-        value: id,
-        label: name,
-    }));
+    return (
+        array?.map(({ id, name }) => ({
+            value: id,
+            label: name,
+        })) ?? []
+    );
 }

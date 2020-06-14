@@ -1,21 +1,24 @@
 import { saveAs } from "file-saver";
 import { Moment } from "moment";
+import * as dhisConnector from "../../webapp/logic/dhisConnector";
+import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
-interface DownloadTemplateProps {
+export interface DownloadTemplateProps {
     type: DataFormType;
-    id: string;
-    name: string;
-    orgUnits: string[];
-    populate: boolean;
+    id: Id;
+    language: string;
+    orgUnits?: string[];
+    theme?: Id;
     startDate?: Moment;
     endDate?: Moment;
-    file: File;
-    theme?: Id;
+    populate: boolean;
+    populateStartDate?: Moment;
+    populateEndDate?: Moment;
 }
 
 export class DownloadTemplateUseCase {
@@ -25,34 +28,57 @@ export class DownloadTemplateUseCase {
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute({
-        type,
-        id,
-        name,
-        file,
-        theme: themeId,
-        orgUnits,
-        populate,
-        startDate,
-        endDate,
-    }: DownloadTemplateProps): Promise<void> {
+    public async execute(
+        api: unknown,
+        {
+            type,
+            id,
+            theme: themeId,
+            orgUnits = [],
+            startDate,
+            endDate,
+            language,
+            populate,
+            populateStartDate,
+            populateEndDate,
+        }: DownloadTemplateProps
+    ): Promise<void> {
         try {
-            const templateId = type === "dataSet" ? "DATASET_GENERATED_v1" : "PROGRAM_GENERATED_v2";
+            const templateId = type === "dataSets" ? dataSetId : programId;
             const template = this.templateRepository.getTemplate(templateId);
+            const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
+
+            const element = await dhisConnector.getElement(api, type, id);
+            const result = await dhisConnector.getElementMetadata({
+                api,
+                element,
+                orgUnitIds: orgUnits,
+            });
+
+            // FIXME: Legacy code, sheet generator
+            const builderOutput = new SheetBuilder({
+                ...result,
+                startDate,
+                endDate,
+                language,
+                theme,
+                template,
+            });
+
+            const name = element.displayName ?? element.name;
+            const file = await builderOutput.toBlob();
+
             await this.excelRepository.loadTemplate(template, { type: "file", file });
 
-            if (themeId) {
-                const theme = await this.templateRepository.getTheme(themeId);
-                await this.excelRepository.applyTheme(template, theme);
-            }
+            if (theme) await this.excelRepository.applyTheme(template, theme);
 
-            if (populate) {
+            if (populate && populateStartDate && populateEndDate) {
                 const dataPackage = await this.instance.getDataPackage({
                     type,
                     id,
                     orgUnits,
-                    startDate,
-                    endDate,
+                    startDate: populateStartDate,
+                    endDate: populateEndDate,
                 });
                 await this.excelRepository.populateTemplate(template, dataPackage);
             }

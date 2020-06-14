@@ -6,13 +6,17 @@ import {
     TableColumn,
     TableSelection,
     TableState,
+    useLoading,
     useSnackbar,
 } from "d2-ui-components";
-import React, { ReactNode, useEffect, useState } from "react";
+import _ from "lodash";
+import React, { ReactNode, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
-import { promiseMap } from "../../utils/common";
+import { RouteComponentProps } from "../../pages/root/RootPage";
+import { promiseMap } from "../../utils/promises";
+import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 
 interface WarningDialog {
@@ -24,56 +28,47 @@ interface WarningDialog {
 export interface ThemeDetail {
     id: string;
     name: string;
-    header: string;
-    footer: string;
     title: string;
     subtitle: string;
     logo: ReactNode;
+    palette: string[];
 }
 
-interface ThemeListTableProps {
-    onChange?: (themes: Theme[]) => void;
-}
+type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
 
-export default function ThemeListTable({ onChange }: ThemeListTableProps) {
+export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
     const snackbar = useSnackbar();
+    const loading = useLoading();
 
-    const [themes, setThemes] = useState<Theme[]>([]);
     const [selection, setSelection] = useState<TableSelection[]>([]);
-    const rows = buildThemeDetails(themes);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
-    const [reloadKey, setReloadKey] = useState<number>();
 
-    useEffect(() => {
-        CompositionRoot.attach()
-            .themes.list.execute()
-            .then(themes => {
-                setThemes(themes);
-                if (reloadKey && onChange) onChange(themes);
-            });
-    }, [reloadKey, onChange]);
+    const rows = buildThemeDetails(themes);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
     };
 
-    const cancelThemeEdit = () => {
+    const closeThemeEdit = () => {
         setThemeEdit(undefined);
     };
 
     const saveTheme = async (theme: Theme) => {
         try {
+            loading.show();
             const errors = await CompositionRoot.attach().themes.save.execute(theme);
-            if (errors.length > 0) {
-                snackbar.error(errors.join("\n"));
+            if (errors.length === 0) {
+                closeThemeEdit();
+                setThemes(_.uniqBy([theme, ...themes], "id"));
             } else {
-                cancelThemeEdit();
-                setReloadKey(Math.random());
+                snackbar.error(errors.join("\n"));
             }
         } catch (error) {
+            console.error(error);
             snackbar.error(i18n.t("An error ocurred while saving theme"));
         }
+        loading.hide();
     };
 
     const editTheme = (ids: string[]) => {
@@ -82,18 +77,18 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     };
 
     const deleteThemes = (ids: string[]) => {
-        const deleteAction = async () => {
-            await promiseMap(ids, id => {
-                return CompositionRoot.attach().themes.delete.execute(id);
-            });
-            setReloadKey(Math.random());
-            setSelection([]);
-        };
-
         setWarningDialog({
             title: i18n.t("Delete {{count}} themes", { count: ids.length }),
             description: i18n.t("Are you sure you want to remove selected themes"),
-            action: deleteAction,
+            action: async () => {
+                loading.show();
+                await promiseMap(ids, id => {
+                    return CompositionRoot.attach().themes.delete.execute(id);
+                });
+                setSelection([]);
+                setThemes(_.reject(themes, ({ id }) => ids.includes(id)));
+                loading.hide();
+            },
         });
     };
 
@@ -102,8 +97,11 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
     const columns: TableColumn<ThemeDetail>[] = [
         { name: "name", text: i18n.t("Name") },
         { name: "logo", text: i18n.t("Logo") },
-        { name: "header", text: i18n.t("Header") },
-        { name: "footer", text: i18n.t("Footer") },
+        {
+            name: "palette",
+            text: i18n.t("Color options"),
+            getValue: ({ palette }: ThemeDetail) => <ColorScale colors={palette} />,
+        },
         { name: "title", text: i18n.t("Title") },
         { name: "subtitle", text: i18n.t("Subtitle") },
     ];
@@ -119,14 +117,13 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
         {
             name: "delete",
             text: i18n.t("Delete"),
-            multiple: true,
             onClick: deleteThemes,
             icon: <Icon>delete</Icon>,
         },
     ];
 
-    const onTableChange = (state: TableState<ThemeDetail>) => {
-        setSelection(state.selection);
+    const onTableChange = ({ selection }: TableState<ThemeDetail>) => {
+        setSelection(selection);
     };
 
     return (
@@ -150,7 +147,7 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
                     type={themeEdit.type}
                     theme={themeEdit.theme}
                     onSave={saveTheme}
-                    onCancel={cancelThemeEdit}
+                    onCancel={closeThemeEdit}
                 />
             )}
 
@@ -171,15 +168,14 @@ export default function ThemeListTable({ onChange }: ThemeListTableProps) {
 }
 
 function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
-    return themes.map(({ id, name, sections, pictures }) => ({
+    return themes.map(({ id, name, sections, pictures, palette }) => ({
         id,
         name,
-        header: sections?.header?.text ?? "-",
-        footer: sections?.footer?.text ?? "-",
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
         logo: pictures?.logo?.src ? (
             <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
         ) : null,
+        palette,
     }));
 }

@@ -1,70 +1,145 @@
-import { Checkbox, FormControlLabel, FormGroup, makeStyles } from "@material-ui/core";
-import { Id } from "d2-api";
-import { MultiSelector } from "d2-ui-components";
-import React from "react";
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Icon,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    makeStyles,
+    TextField,
+} from "@material-ui/core";
+import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
+import {
+    DuplicateToleranceUnit,
+    Model,
+    OrgUnitSelectionSetting,
+} from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
-import { useAppContext } from "../../contexts/api-context";
-import Settings, { Model } from "../../logic/settings";
+import Settings, { PermissionSetting } from "../../logic/settings";
+import { Select, SelectOption } from "../select/Select";
+import DataElementsFilterDialog from "./DataElementsFilterDialog";
+import PermissionsDialog from "./PermissionsDialog";
 
 export interface SettingsFieldsProps {
     settings: Settings;
-    onChange: (settings: Settings) => void;
+    onChange: (settings: Settings) => Promise<void>;
 }
 
-type BooleanField = "showOrgUnitsOnGeneration";
-
-export default function SettingsFields(props: SettingsFieldsProps) {
-    const { d2 } = useAppContext();
-    const { settings, onChange } = props;
+export default function SettingsFields({ settings, onChange }: SettingsFieldsProps) {
     const classes = useStyles();
 
-    const options = React.useMemo(() => {
-        return settings.userGroups.map(userGroup => ({
-            value: userGroup.id,
-            text: userGroup.displayName,
-        }));
-    }, [settings.userGroups]);
+    const [permissionsType, setPermissionsType] = useState<PermissionSetting | null>(null);
+    const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
 
-    const setModel = React.useCallback(
+    const setModel = useCallback(
         (model: Model) => {
-            return (ev: React.ChangeEvent<HTMLInputElement>) => {
+            return (ev: ChangeEvent<HTMLInputElement>) => {
                 onChange(settings.setModel(model, ev.target.checked));
             };
         },
         [settings, onChange]
     );
 
-    const setUserGroupsForGeneration = React.useCallback(
-        (userGroupIds: Id[]) => {
-            onChange(settings.setUserGroupsForGenerationFromIds(userGroupIds));
+    const setOrgUnitSelection = useCallback(
+        ({ value }: SelectOption) => {
+            onChange(settings.update({ orgUnitSelection: value as OrgUnitSelectionSetting }));
         },
         [settings, onChange]
     );
 
-    const setUserGroupsForSettings = React.useCallback(
-        (userGroupIds: Id[]) => {
-            onChange(settings.setUserGroupsForSettingsFromIds(userGroupIds));
+    const setDuplicateTolerance = useCallback(
+        (event: ChangeEvent<HTMLInputElement>) => {
+            const duplicateTolerance = parseInt(event.target.value);
+            if (!isNaN(duplicateTolerance) && duplicateTolerance >= 0 && duplicateTolerance <= 10) {
+                onChange(settings.update({ duplicateTolerance }));
+            }
         },
         [settings, onChange]
     );
 
-    const updateBoolean = React.useCallback(
-        (field: BooleanField) => {
-            return (ev: React.ChangeEvent<HTMLInputElement>) => {
-                const newSettings = settings.update({ [field]: ev.target.checked });
-                onChange(newSettings);
-            };
+    const setDuplicateToleranceUnit = useCallback(
+        ({ value }: SelectOption) => {
+            onChange(settings.update({ duplicateToleranceUnit: value as DuplicateToleranceUnit }));
         },
         [settings, onChange]
     );
 
-    const modelsInfo = React.useMemo(() => {
+    const modelsInfo = useMemo(() => {
         return settings.getModelsInfo();
     }, [settings]);
 
+    const orgUnitSelectionOptions: SelectOption[] = useMemo(
+        () => [
+            {
+                value: "generation",
+                label: i18n.t("Select Organisation Units on template generation"),
+            },
+            {
+                value: "import",
+                label: i18n.t("Select Organisation Units on template import"),
+            },
+            {
+                value: "both",
+                label: i18n.t("Select Organisation Units on template generation and import"),
+            },
+        ],
+        []
+    );
+
+    const duplicateToleranceUnits: SelectOption[] = useMemo(
+        () => [
+            { value: "day", label: i18n.t("Days") },
+            { value: "week", label: i18n.t("Weeks") },
+            { value: "month", label: i18n.t("Months") },
+            { value: "year", label: i18n.t("Years") },
+        ],
+        []
+    );
+
+    const buildSharingDescription = useCallback(
+        (setting: PermissionSetting) => {
+            const users = settings.getPermissions(setting, "user").length;
+            const userGroups = settings.getPermissions(setting, "userGroup").length;
+
+            if (users > 0 && userGroups > 0) {
+                return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {
+                    users,
+                    userGroups,
+                });
+            } else if (users > 0) {
+                return i18n.t("Accessible to {{users}} users", { users });
+            } else if (userGroups > 0) {
+                return i18n.t("Accessible to {{userGroups}} user groups", { userGroups });
+            } else if (setting === "settings") {
+                return i18n.t("Only accessible to system administrators");
+            } else {
+                return i18n.t("Not accessible");
+            }
+        },
+        [settings]
+    );
+
     return (
-        <div>
-            <FieldTitle>{i18n.t("Models")}</FieldTitle>
+        <React.Fragment>
+            {!!isExclusionDialogVisible && (
+                <DataElementsFilterDialog
+                    onClose={() => showExclusionDialog(false)}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
+
+            {!!permissionsType && (
+                <PermissionsDialog
+                    onClose={() => setPermissionsType(null)}
+                    permissionsType={permissionsType}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
+
+            <h3 className={classes.title}>{i18n.t("Data model")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 {modelsInfo.map(({ key, name, value }) => (
@@ -82,53 +157,72 @@ export default function SettingsFields(props: SettingsFieldsProps) {
                 ))}
             </FormGroup>
 
-            <FieldTitle>{i18n.t("Visibility")}</FieldTitle>
-
-            <FormGroup className={classes.content} row={true}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            className={classes.checkbox}
-                            checked={settings.showOrgUnitsOnGeneration}
-                            onChange={updateBoolean("showOrgUnitsOnGeneration")}
-                        />
-                    }
-                    label={i18n.t("Show Organisation Units On Template Generation")}
-                />
-            </FormGroup>
-
-            <FieldTitle>{i18n.t("User groups for Template Generation")}</FieldTitle>
+            <h3 className={classes.title}>{i18n.t("Organisation Unit Visibility")}</h3>
 
             <FormGroup className={classes.content} row={true}>
                 <div className={classes.fullWidth}>
-                    <MultiSelector
-                        d2={d2}
-                        searchFilterLabel={true}
-                        ordered={false}
-                        height={200}
-                        onChange={setUserGroupsForGeneration}
-                        options={options}
-                        selected={settings.userGroupsForGeneration.map(userGroup => userGroup.id)}
+                    <Select
+                        onChange={setOrgUnitSelection}
+                        options={orgUnitSelectionOptions}
+                        value={settings.orgUnitSelection}
                     />
                 </div>
             </FormGroup>
 
-            <FieldTitle>{i18n.t("User groups with access to Settings")}</FieldTitle>
+            <h3 className={classes.title}>{i18n.t("Duplicate detection for events (programs)")}</h3>
 
-            <FormGroup row={true}>
-                <div className={classes.fullWidth}>
-                    <MultiSelector
-                        d2={d2}
-                        searchFilterLabel={true}
-                        ordered={false}
-                        height={200}
-                        onChange={setUserGroupsForSettings}
-                        options={options}
-                        selected={settings.userGroupsForSettings.map(userGroup => userGroup.id)}
+            <div className={classes.content}>
+                <FormGroup className={classes.eventDateTime} row={true}>
+                    <p className={classes.duplicateToleranceLabel}>
+                        {i18n.t("Event date time difference")}
+                    </p>
+                    <TextField
+                        className={classes.duplicateTolerance}
+                        type="number"
+                        onChange={setDuplicateTolerance}
+                        value={settings.duplicateTolerance}
                     />
-                </div>
+                    <Select
+                        onChange={setDuplicateToleranceUnit}
+                        options={duplicateToleranceUnits}
+                        value={settings.duplicateToleranceUnit}
+                    />
+                </FormGroup>
+
+                <ListItem button onClick={() => showExclusionDialog(true)}>
+                    <ListItemIcon>
+                        <Icon>filter_list</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={i18n.t("Data elements filter")}
+                        secondary={i18n.t("Data elements used for duplicates identification")}
+                    />
+                </ListItem>
+            </div>
+
+            <h3 className={classes.title}>{i18n.t("Permissions")}</h3>
+
+            <FormGroup className={classes.content} row={true}>
+                <ListItem button onClick={() => setPermissionsType("generation")}>
+                    <ListItemIcon>
+                        <Icon>cloud_download</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={i18n.t("Access to Template Generation")}
+                        secondary={buildSharingDescription("generation")}
+                    />
+                </ListItem>
+                <ListItem button onClick={() => setPermissionsType("settings")}>
+                    <ListItemIcon>
+                        <Icon>settings</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={i18n.t("Access to Settings and Themes")}
+                        secondary={buildSharingDescription("settings")}
+                    />
+                </ListItem>
             </FormGroup>
-        </div>
+        </React.Fragment>
     );
 }
 
@@ -136,8 +230,8 @@ const useStyles = makeStyles({
     fullWidth: { width: "100%" },
     content: { margin: "1rem", marginBottom: 35, marginLeft: 0 },
     checkbox: { padding: 9 },
+    title: { marginTop: 0 },
+    eventDateTime: { marginBottom: 15 },
+    duplicateTolerance: { margin: 0, marginRight: 15, width: 35 },
+    duplicateToleranceLabel: { margin: 0, marginRight: 15, alignSelf: "center" },
 });
-
-function FieldTitle(props: { children: React.ReactNode }) {
-    return <h3>{props.children}</h3>;
-}

@@ -1,13 +1,21 @@
 import { Id } from "./ReferenceObject";
 
-export type DataFormType = "dataSet" | "program" | "tracker";
+export type DataFormType = "dataSets" | "programs";
+export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
 
 export interface DataForm {
     type: DataFormType;
     id: Id;
     name: string;
+    periodType?: DataFormPeriod;
+    dataElements: {
+        id: Id;
+        name: string;
+    }[];
     attributeValues: {
         attribute: { code: string };
         value: string;
     }[];
+    readAccess: boolean;
+    writeAccess: boolean;
 }

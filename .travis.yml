@@ -34,7 +34,7 @@ before_install:
 install:
     - yarn install --frozen-lockfile
     - yarn cy:verify
-    - yarn test
+    - yarn localize
     - yarn start &
 env:
     global:
@@ -45,6 +45,7 @@ env:
         - CYPRESS_ROOT_URL=http://localhost:8081
         - NODE_OPTIONS=--max-old-space-size=8192
 script:
+    - yarn test
     - yarn wait-on http-get://localhost:8080
     - yarn wait-on http-get://localhost:8081
     - yarn cy:e2e:run --browser chrome

@@ -1,44 +1,46 @@
-import { D2Api, Id, Ref } from "d2-api";
+import { D2Api, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
+import {
+    AppSettings,
+    DuplicateExclusion,
+    DuplicateToleranceUnit,
+    Model,
+    Models,
+    OrgUnitSelectionSetting,
+} from "../../domain/entities/AppSettings";
+import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
+import { GetArrayInnerType } from "../../utils/types";
 
-const models = ["dataSet", "program"] as const;
-
-const privateFields = ["api", "currentUser", "userGroups"] as const;
+const privateFields = ["currentUser"] as const;
 
 const publicFields = [
     "models",
-    "userGroupsForGeneration",
-    "userGroupsForSettings",
-    "showOrgUnitsOnGeneration",
+    "userPermissionsForGeneration",
+    "userGroupPermissionsForGeneration",
+    "userPermissionsForSettings",
+    "userGroupPermissionsForSettings",
+    "orgUnitSelection",
+    "duplicateExclusion",
+    "duplicateTolerance",
+    "duplicateToleranceUnit",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
 
-type GetArrayInnerType<T extends readonly any[]> = T[number];
-export type Model = GetArrayInnerType<typeof models>;
-
-type Models = Record<Model, boolean>;
 type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
 type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
-export type Field = keyof PublicOption;
+export type PermissionSetting = "generation" | "settings";
+export type PermissionType = "user" | "userGroup";
 
-interface UserGroup {
+interface NamedObject {
     id: string;
-    name: string;
     displayName: string;
 }
 
-interface PersistedData {
-    models: Models;
-    userGroupForGeneration: string[];
-    userGroupForSettings: string[];
-    showOrgUnitsOnGeneration: boolean;
-}
-
-interface CurrentUser {
+interface CurrentUser extends Ref {
     userGroups: Ref[];
     authorities: Set<string>;
 }
@@ -46,31 +48,37 @@ interface CurrentUser {
 type OkOrError = { status: true } | { status: false; error: string };
 
 export default class Settings {
-    public api: D2Api;
     public currentUser: CurrentUser;
     public models: Models;
-    public userGroups: UserGroup[];
-    public userGroupsForGeneration: UserGroup[];
-    public userGroupsForSettings: UserGroup[];
-    public showOrgUnitsOnGeneration: boolean;
+    public userPermissionsForGeneration: NamedObject[];
+    public userGroupPermissionsForGeneration: NamedObject[];
+    public userPermissionsForSettings: NamedObject[];
+    public userGroupPermissionsForSettings: NamedObject[];
+    public orgUnitSelection: OrgUnitSelectionSetting;
+    public duplicateExclusion: DuplicateExclusion;
+    public duplicateTolerance: number;
+    public duplicateToleranceUnit: DuplicateToleranceUnit;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
     constructor(options: Options) {
-        this.api = options.api;
         this.currentUser = options.currentUser;
         this.models = options.models;
-        this.userGroups = options.userGroups;
-        this.userGroupsForGeneration = options.userGroupsForGeneration;
-        this.userGroupsForSettings = options.userGroupsForSettings;
-        this.showOrgUnitsOnGeneration = options.showOrgUnitsOnGeneration;
+        this.userPermissionsForGeneration = options.userPermissionsForGeneration;
+        this.userGroupPermissionsForGeneration = options.userGroupPermissionsForGeneration;
+        this.userPermissionsForSettings = options.userPermissionsForSettings;
+        this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
+        this.orgUnitSelection = options.orgUnitSelection;
+        this.duplicateExclusion = options.duplicateExclusion;
+        this.duplicateTolerance = options.duplicateTolerance;
+        this.duplicateToleranceUnit = options.duplicateToleranceUnit;
     }
 
     static async build(api: D2Api): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
         const d2CurrentUser = await api.currentUser
-            .get({ fields: { userGroups: { id: true } } })
+            .get({ fields: { id: true, userGroups: { id: true } } })
             .getData();
 
         const currentUser: CurrentUser = {
@@ -78,50 +86,54 @@ export default class Settings {
             authorities: new Set(authorities),
         };
 
-        const { userGroups } = await api.metadata
+        const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
+        const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
+            Settings.constantCode,
+            defaultSettings
+        );
+
+        const query = (prop: "permissionsForGeneration" | "permissionsForSettings") => {
+            const storedValues = data[prop] ?? [];
+            const defaultValues = defaultSettings[prop] ?? [];
+
+            return {
+                fields: { id: true, displayName: true },
+                filter: { identifiable: { in: [...storedValues, ...defaultValues] } },
+            };
+        };
+
+        const {
+            users: userPermissionsForGeneration,
+            userGroups: userGroupPermissionsForGeneration,
+        } = await api.metadata
             .get({
-                userGroups: {
-                    fields: { id: true, name: true, displayName: true },
-                },
+                userGroups: query("permissionsForGeneration"),
+                users: query("permissionsForGeneration"),
             })
             .getData();
 
-        const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
-
-        const defaultData = {
-            models: { dataSet: true, program: true },
-            userGroupsForGeneration: [],
-            userGroupsForSettings: [],
-            showOrgUnitsOnGeneration: false,
-            ...defaultSettings,
-        };
-
-        const data = await CompositionRoot.attach().settings.read.execute<Partial<PersistedData>>(
-            Settings.constantCode,
-            defaultData
-        );
-
-        const userGroupsForGeneration = getUserGroupsWithSettingEnabled(
-            userGroups,
-            data.userGroupForGeneration,
-            defaultData.userGroupsForGeneration
-        );
-
-        const userGroupsForSettings = getUserGroupsWithSettingEnabled(
-            userGroups,
-            data.userGroupForSettings,
-            defaultData.userGroupsForSettings
-        );
+        const {
+            users: userPermissionsForSettings,
+            userGroups: userGroupPermissionsForSettings,
+        } = await api.metadata
+            .get({
+                userGroups: query("permissionsForSettings"),
+                users: query("permissionsForSettings"),
+            })
+            .getData();
 
         return new Settings({
-            api,
             currentUser,
-            userGroups: userGroups,
-            models: data.models || defaultData.models,
-            userGroupsForGeneration,
-            userGroupsForSettings,
-            showOrgUnitsOnGeneration:
-                data.showOrgUnitsOnGeneration || defaultData.showOrgUnitsOnGeneration,
+            models: data.models ?? defaultSettings.models,
+            userPermissionsForGeneration,
+            userGroupPermissionsForGeneration,
+            userPermissionsForSettings,
+            userGroupPermissionsForSettings,
+            orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
+            duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
+            duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
+            duplicateToleranceUnit:
+                data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
         });
     }
 
@@ -135,22 +147,40 @@ export default class Settings {
     async save(): Promise<OkOrError> {
         const {
             models,
-            userGroupsForGeneration,
-            userGroupsForSettings,
-            showOrgUnitsOnGeneration,
+            userPermissionsForGeneration,
+            userGroupPermissionsForGeneration,
+            userPermissionsForSettings,
+            userGroupPermissionsForSettings,
+            orgUnitSelection,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const data: PersistedData = {
+        const permissionsForGeneration = [
+            ...userPermissionsForGeneration,
+            ...userGroupPermissionsForGeneration,
+        ].map(ug => ug.id);
+
+        const permissionsForSettings = [
+            ...userPermissionsForSettings,
+            ...userGroupPermissionsForSettings,
+        ].map(ug => ug.id);
+
+        const data: AppSettings = {
             models,
-            userGroupForGeneration: userGroupsForGeneration.map(ug => ug.id),
-            userGroupForSettings: userGroupsForSettings.map(ug => ug.id),
-            showOrgUnitsOnGeneration,
+            permissionsForGeneration,
+            permissionsForSettings,
+            orgUnitSelection,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
         };
 
         try {
-            await CompositionRoot.attach().settings.write.execute<PersistedData>(
+            await CompositionRoot.attach().settings.write.execute<AppSettings>(
                 Settings.constantCode,
                 data
             );
@@ -173,16 +203,38 @@ export default class Settings {
         return this.updateOptions({ models: { ...this.models, [model]: value } });
     }
 
-    setUserGroupsForGenerationFromIds(userGroupIds: Id[]) {
+    getPermissions(setting: PermissionSetting, type: PermissionType): NamedObject[] {
+        return this[this.getPermissionField(setting, type)];
+    }
+
+    setPermissions(
+        setting: PermissionSetting,
+        type: PermissionType,
+        collection: NamedObject[]
+    ): Settings {
         return this.updateOptions({
-            userGroupsForGeneration: this.getUserGroupsFromIds(userGroupIds),
+            [this.getPermissionField(setting, type)]: collection,
         });
     }
 
-    setUserGroupsForSettingsFromIds(userGroupIds: Id[]) {
-        return this.updateOptions({
-            userGroupsForSettings: this.getUserGroupsFromIds(userGroupIds),
-        });
+    setDuplicateExclusions(program: Id, exclusions: Id[]): Settings {
+        const duplicateExclusion = _.transform(
+            {
+                ...this.duplicateExclusion,
+                [program]: exclusions,
+            },
+            (result, value, key) => {
+                // Clean-up empty arrays from exclusions
+                if (value.length > 0) result[key] = value;
+            },
+            {} as DuplicateExclusion
+        );
+
+        return this.updateOptions({ duplicateExclusion });
+    }
+
+    allModelsEnabled() {
+        return _.every(this.models, Boolean);
     }
 
     isModelEnabled(key: Model) {
@@ -190,12 +242,19 @@ export default class Settings {
     }
 
     isTemplateGenerationVisible() {
-        return this.hasCurrentUserAnyGroup(this.userGroupsForGeneration);
+        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
+        const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
+
+        return hasGroupAccess || hasUserAccess;
     }
 
     areSettingsVisibleForCurrentUser(): boolean {
         const { authorities } = this.currentUser;
-        return authorities.has("ALL") || this.hasCurrentUserAnyGroup(this.userGroupsForSettings);
+        const isUserAdmin = authorities.has("ALL");
+        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForSettings);
+        const hasUserAccess = this.findCurrentUser(this.userPermissionsForSettings);
+
+        return isUserAdmin || hasGroupAccess || hasUserAccess;
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -205,27 +264,23 @@ export default class Settings {
         ];
     }
 
-    private getUserGroupsFromIds(userGroupIds: Id[]): UserGroup[] {
-        return _(this.userGroups)
-            .keyBy(userGroup => userGroup.id)
-            .at(userGroupIds)
-            .compact()
-            .value();
+    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup") {
+        if (setting === "generation" && kind === "user") {
+            return "userPermissionsForGeneration";
+        } else if (setting === "generation" && kind === "userGroup") {
+            return "userGroupPermissionsForGeneration";
+        } else if (setting === "settings" && kind === "user") {
+            return "userPermissionsForSettings";
+        } else if (setting === "settings" && kind === "userGroup") {
+            return "userGroupPermissionsForSettings";
+        } else {
+            throw new Error("Unsupported field");
+        }
     }
 
-    private hasCurrentUserAnyGroup(userGroups: UserGroup[]): boolean {
-        return !_(this.currentUser.userGroups)
-            .intersectionBy(userGroups, userGroup => userGroup.id)
+    private findCurrentUser(collection: NamedObject[]): boolean {
+        return !_([this.currentUser, ...this.currentUser.userGroups])
+            .intersectionBy(collection, userGroup => userGroup.id)
             .isEmpty();
     }
-}
-
-function getUserGroupsWithSettingEnabled(
-    allUserGroups: UserGroup[],
-    ids: Id[] | undefined,
-    defaultNames: string[]
-) {
-    return allUserGroups.filter(userGroup =>
-        ids ? ids.includes(userGroup.id) : defaultNames.includes(userGroup.name)
-    );
 }

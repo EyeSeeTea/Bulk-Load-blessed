@@ -1,11 +1,12 @@
 import { generateUid } from "d2/uid";
 import _ from "lodash";
+import { defaultColorScale } from "../../webapp/utils/colors";
 import { Id } from "./ReferenceObject";
 import { Validation } from "./Validation";
 
 export type Color = string;
 
-export type ThemeableSections = "header" | "title" | "subtitle" | "footer";
+export type ThemeableSections = "title" | "subtitle";
 export type ImageSections = "logo";
 
 export interface ThemeStyle {
@@ -26,6 +27,7 @@ export class Theme {
     public readonly id: Id;
     public readonly name: string;
     public readonly templates: Id[];
+    public readonly palette: string[];
     public readonly sections?: {
         [key in ThemeableSections]?: ThemeStyle;
     };
@@ -37,17 +39,19 @@ export class Theme {
         id = generateUid(),
         name = "",
         templates = [],
+        palette = defaultColorScale,
         sections = {},
         pictures = {},
     }: Partial<Theme> = {}) {
         this.id = id;
         this.name = name;
         this.templates = templates;
+        this.palette = palette;
         this.sections = sections;
         this.pictures = pictures;
     }
 
-    public update(partialUpdate: Partial<Theme>): Theme {
+    private update(partialUpdate: Partial<Theme>): Theme {
         return new Theme({ ...this, ...partialUpdate });
     }
 
@@ -67,6 +71,10 @@ export class Theme {
     public updatePicture(section: ImageSections, image: CellImage): Theme {
         const pictures = { ...this.pictures, [section]: image };
         return this.update({ pictures });
+    }
+
+    public updateColorPalette(palette: string[]): Theme {
+        return this.update({ palette });
     }
 
     public validate(): Validation {
