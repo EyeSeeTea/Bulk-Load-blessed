@@ -275,14 +275,14 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         dataEntrySheet,
         itemRow,
         columnId++,
-        "Org Unit",
+        element.type === "program" ? "Org Unit*" : "Org Unit",
         null,
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
     if (element.type === "programs") {
-        this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
-        this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude*");
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude*");
     } else if (element.type === "dataSets") {
         this.createColumn(
             dataEntrySheet,
@@ -338,13 +338,18 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                             const validation = dataElement.optionSet
                                 ? dataElement.optionSet.id
                                 : dataElement.valueType;
+
+                            const defaultLabel = categoryOptionCombo.code === "default";
+                            //console.log(defaultLabel);
                             this.createColumn(
                                 dataEntrySheet,
                                 itemRow,
                                 columnId,
                                 `_${categoryOptionCombo.id}`,
                                 groupId,
-                                this.validations.get(validation)
+                                this.validations.get(validation),
+                                undefined,
+                                defaultLabel
                             );
 
                             columnId++;
@@ -382,7 +387,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 dataEntrySheet,
                 itemRow,
                 columnId++,
-                programStage.executionDateLabel ?? "Date"
+                programStage.executionDateLabel ?? "Date*"
             );
 
             if (programStage.programStageSections.length === 0) {
@@ -484,11 +489,18 @@ SheetBuilder.prototype.createColumn = function (
     label,
     groupId = null,
     validation = null,
-    validationMessage = "Invalid choice was chosen"
+    validationMessage ="Invalid choice was chosen",
+    defaultLabel = false
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
-    cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+   
+    if (!defaultLabel)
+        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+    else {
+        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle)
+            .style(this.transparentFontStyle(groupId));
+    }
 
     if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
@@ -522,6 +534,16 @@ SheetBuilder.prototype.createColumn = function (
         });
     }
 };
+
+SheetBuilder.prototype.transparentFontStyle = function (groupId) {
+    const { palette = defaultColorScale } = this.builder.theme ?? {};
+
+    return {
+        font: {
+            color: palette[groupId % palette.length],
+        }
+    };
+}
 
 SheetBuilder.prototype.groupStyle = function (groupId) {
     const { palette = defaultColorScale } = this.builder.theme ?? {};
