@@ -5,22 +5,22 @@ import i18n from "../../locales";
 import { stringEquals } from "../utils/strings";
 import { getObjectVersion } from "./utils";
 
-
 // Algorithm based on:
 // https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 function checkCoordinates(coord, vs) {
-    
-    const x = coord.longitude, y = coord.latitude;
+    const x = coord.longitude,
+        y = coord.latitude;
 
-    for (var l = 0; l < vs.length; ++l) {
-        for (var k = 0; k < vs[l].length; ++k) {
-            var inside = false;
-            for (var i = 0, j = vs[l][k].length - 1; i < vs[l][k].length; j = i++) {
-                const xi = vs[l][k][i][0], yi = vs[l][k][i][1];
-                const xj = vs[l][k][j][0], yj = vs[l][k][j][1];
-                
-                const intersect = ((yi > y) !== (yj > y))
-                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    for (let l = 0; l < vs.length; ++l) {
+        for (let k = 0; k < vs[l].length; ++k) {
+            let inside = false;
+            for (let i = 0, j = vs[l][k].length - 1; i < vs[l][k].length; j = i++) {
+                const xi = vs[l][k][i][0],
+                    yi = vs[l][k][i][1];
+                const xj = vs[l][k][j][0],
+                    yj = vs[l][k][j][1];
+
+                const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
                 if (intersect) inside = !inside;
             }
             if (inside) return true;
@@ -28,26 +28,21 @@ function checkCoordinates(coord, vs) {
     }
 
     return false;
-
-};
+}
 
 export async function getUsedOrgUnits({
     file,
-    element,
-    elementMetadata,
     useBuilderOrgUnits,
     organisationUnits,
     rowOffset = 0,
-    colOffset = 0,
 }) {
-
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
     const metadataSheet = workbook.getWorksheet("Metadata");
     const validationSheet = workbook.getWorksheet("Validation");
 
-    let result = {}; 
-    let set = new Set();
+    const result = {};
+    const set = new Set();
 
     // Iterate over all rows that have values in a worksheet
     dataEntrySheet.eachRow((row, rowNumber) => {
@@ -206,9 +201,21 @@ export async function readSheet({
                     longitude: row.values[3],
                 };
 
-            if (isProgram && !checkCoordinates(result.coordinate, JSON.parse(orgUnitCoordMap.get(result.orgUnit).coordinates))) {
-                throw new Error(i18n.t("Location not valid. Check row number " + rowNumber 
-                                + ". Country: " + orgUnitCoordMap.get(result.orgUnit).displayName));
+            if (
+                isProgram &&
+                !checkCoordinates(
+                    result.coordinate,
+                    JSON.parse(orgUnitCoordMap.get(result.orgUnit).coordinates)
+                )
+            ) {
+                throw new Error(
+                    i18n.t(
+                        "Location not valid. Check row number " +
+                            rowNumber +
+                            ". Country: " +
+                            orgUnitCoordMap.get(result.orgUnit).displayName
+                    )
+                );
             }
 
             if (isProgram && row.values[4 + colOffset] !== undefined) {

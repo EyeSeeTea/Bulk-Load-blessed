@@ -31,10 +31,15 @@ export async function deleteDataValues(
         .postSet({ importStrategy: "DELETE" }, { dataValues })
         .getData();
 
-    if (response.status !== "SUCCESS") {
+    if (response.status !== "SUCCESS" && response.status !== "WARNING") {
         const details = JSON.stringify(response.conflicts, null, 2);
         throw new Error(i18n.t("Error deleting data values") + ": " + details);
+    } else if (response.status === "WARNING") {
+        const details = JSON.stringify(response.conflicts, null, 2);
+        console.warn("Warning deleting data values: " + details);
+        return response.importCount.deleted;
     } else {
         return response.importCount.deleted;
     }
+
 }

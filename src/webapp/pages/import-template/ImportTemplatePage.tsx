@@ -126,27 +126,21 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             } = await CompositionRoot.attach().templates.analyze.execute(file);
 
             //const organisationUnits = result.organisationUnits;
-            var orgUnitCoordMap = new Map();
-            
+            const orgUnitCoordMap = new Map();
+
             if (result.element.type === "programs") {
-                
-                var usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
                     ...result,
                     file,
                     useBuilderOrgUnits,
                     rowOffset,
-                    colOffset,
                 });
-                
 
-
-                for (let uid of usedOrgUnitsUIDs.values()) {
+                for (const uid of usedOrgUnitsUIDs.values()) {
                     const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
                     orgUnitCoordMap.set(uid, orgUnitData);
                 }
             }
-
-
 
             const data = await sheetImport.readSheet({
                 ...result,
@@ -280,14 +274,13 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (!isProgram && !isDataSet) throw new Error("Invalid form type");
         if (!id) throw new Error("Invalid program or dataSet");
 
-        var periods = isProgram
+        const periods = isProgram
             ? undefined
             : _.uniq(dataValues?.map(({ period }) => period.toString()));
 
         const orgUnits = isProgram
             ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
             : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
-
 
         const result = await CompositionRoot.attach().form.getDataPackage.execute({
             id,
@@ -320,7 +313,6 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
             return { newValues: events, existingValues: existingEvents };
         } else {
-
             const existingDataValues = _.remove(
                 dataValues ?? [],
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {

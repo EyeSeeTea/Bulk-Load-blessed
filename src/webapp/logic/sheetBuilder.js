@@ -489,17 +489,17 @@ SheetBuilder.prototype.createColumn = function (
     label,
     groupId = null,
     validation = null,
-    validationMessage ="Invalid choice was chosen",
+    validationMessage = "Invalid choice was chosen",
     defaultLabel = false
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
-   
-    if (!defaultLabel)
-        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+
+    if (!defaultLabel) cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
     else {
-        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle)
-            .style(this.transparentFontStyle(groupId));
+        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle).style(
+            this.transparentFontStyle(groupId)
+        );
     }
 
     if (label.startsWith("_")) cell.formula(label);
@@ -541,9 +541,9 @@ SheetBuilder.prototype.transparentFontStyle = function (groupId) {
     return {
         font: {
             color: palette[groupId % palette.length],
-        }
+        },
     };
-}
+};
 
 SheetBuilder.prototype.groupStyle = function (groupId) {
     const { palette = defaultColorScale } = this.builder.theme ?? {};
