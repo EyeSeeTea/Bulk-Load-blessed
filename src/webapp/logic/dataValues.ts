@@ -36,7 +36,7 @@ export async function deleteDataValues(
         throw new Error(i18n.t("Error deleting data values") + ": " + details);
     } else if (response.status === "WARNING") {
         const details = JSON.stringify(response.conflicts, null, 2);
-        console.warn("Warning deleting data values: " + details);
+        console.error("Warning deleting data values: " + details);
         return response.importCount.deleted;
     } else {
         return response.importCount.deleted;
