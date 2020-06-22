@@ -249,6 +249,7 @@ export async function readSheet({
                 result.event = row.values[5];
             }
 
+
             row.eachCell((cell, colNumber) => {
                 if (isProgram && colNumber > 4 + colOffset) {
                     const id = columns[colNumber].formula.substr(1);
@@ -295,6 +296,7 @@ export async function readSheet({
                         value,
                         period: result.period,
                         orgUnit: result.orgUnit,
+                        attributeOptionCombo: result.attributeOptionCombo,
                     });
                 }
             });
