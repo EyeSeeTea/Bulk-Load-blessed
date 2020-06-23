@@ -188,20 +188,14 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             .map(option => this.translate(option).name)
             .join(", ");
 
+        const { compulsory } =
+            this.builder.rawMetadata.programStageDataElements?.find(
+                ({ dataElement }) => dataElement.id === item.id
+            ) ?? {};
+
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
-        metadataSheet.cell(rowId, 3).string(name ?? "");
-
-        if (value.type === "dataElement") {
-            let elements = this.builder.rawMetadata.programStageDataElements;
-            for (let i = 0; i < elements.length; ++i)
-                if (elements[i].dataElement.id === value.id) {
-                    if (elements[i].compulsory) metadataSheet.cell(rowId, 3).string(name ? name.concat("*") : "");
-                    else metadataSheet.cell(rowId, 3).string(name ? name : "");
-                    break;
-                }
-        } else metadataSheet.cell(rowId, 3).string(name ?? "");
-
+        metadataSheet.cell(rowId, 3).string(name?.concat(compulsory ? " *" : "") ?? "");
         metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
         metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
         metadataSheet.cell(rowId, 6).string(options ?? "");
