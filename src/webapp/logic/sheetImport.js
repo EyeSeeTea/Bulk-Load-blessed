@@ -209,12 +209,11 @@ export async function readSheet({
                     JSON.parse(orgUnitCoordMap.get(result.orgUnit).coordinates)
                 )
             ) {
+                const country = orgUnitCoordMap.get(result.orgUnit)?.displayName ?? "Unknown";
                 throw new Error(
                     i18n.t(
-                        "Location not valid. Check row number " +
-                            rowNumber +
-                            ". Country: " +
-                            orgUnitCoordMap.get(result.orgUnit).displayName
+                        "Location not valid. Check row number {{rowNumber}} for country {{country}}",
+                        { rowNumber, country }
                     )
                 );
             }
