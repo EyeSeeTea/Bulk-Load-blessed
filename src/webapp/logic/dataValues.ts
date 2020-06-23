@@ -31,7 +31,7 @@ export async function deleteDataValues(
         .postSet({ importStrategy: "DELETE" }, { dataValues })
         .getData();
 
-    if (response.status !== "SUCCESS" && response.status !== "WARNING") {
+    if (response.status === "ERROR") {
         const details = JSON.stringify(response.conflicts, null, 2);
         throw new Error(i18n.t("Error deleting data values") + ": " + details);
     } else if (response.status === "WARNING") {
