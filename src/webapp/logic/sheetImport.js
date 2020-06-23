@@ -20,6 +20,7 @@ function checkCoordinates(coord, vs) {
                 const xj = vs[l][k][j][0],
                     yj = vs[l][k][j][1];
 
+                // eslint-disable-next-line
                 const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
                 if (intersect) inside = !inside;
             }
