@@ -1,388 +1,473 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
-"PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Bulk Load App\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: 
 msgid "Template not loaded"
-msgstr "Plantilla no cargada"
+msgstr "La plantilla no se pudo cargar"
 
+#: 
 msgid "Element not found"
-msgstr "Elemento no encontrado"
+msgstr "No se encontró el elemento"
 
+#: 
 msgid "Program or DataSet not found in instance"
-msgstr "No se ha encontrado el programa o el dataset en la instancia"
+msgstr "No se encontraron el programa o el set de datos en la instancia"
 
+#: 
 msgid "Field {{field}} cannot be blank"
-msgstr "Campo {{field}} no puede ser vacio"
+msgstr "El campo {{field}} no se puede dejar vacio"
 
+#: 
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
 
+#: 
 msgid "Data elements used for duplication assessment"
-msgstr "Data elements usados para determinar los duplicados"
+msgstr "Elementos de datos usados para determinar los duplicados"
 
+#: 
 msgid "Close"
 msgstr "Cerrar"
 
+#: 
 msgid "Program"
 msgstr "Programa"
 
+#: 
 msgid "Access to Template Generation"
-msgstr "Acceso a la sección de generación de plantillas"
+msgstr "Acceso a la generación de plantillas"
 
+#: 
 msgid "Access to Settings and Themes"
-msgstr "Acceso a la configuración y los temas"
+msgstr "Acceso al área de configuración y a los temas"
 
+#: 
 msgid "Select Organisation Units on template generation"
-msgstr "Mostrar unidades organizativas en la sección de generación"
+msgstr "Mostrar unidades organizativas durante la generación de la plantilla"
 
+#: 
 msgid "Select Organisation Units on template import"
-msgstr "Seleccione una unidad organizativa en la que importar los datos"
+msgstr "Mostrar la unidad organizativa al importar los datos"
 
+#: 
 msgid "Select Organisation Units on template generation and import"
-msgstr ""
-"Mostrar unidades organizativas en la sección de generación y en la de "
-"importación"
+msgstr "Mostrar unidades organizativas durante la generación de la plantilla y al importar datos"
 
+#: 
 msgid "Days"
 msgstr "Días"
 
+#: 
 msgid "Weeks"
 msgstr "Semanas"
 
+#: 
 msgid "Months"
 msgstr "Meses"
 
+#: 
 msgid "Years"
 msgstr "Años"
 
+#: 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
-msgstr "Accesible a {{users}} usuarios y {{userGroups}} grupos de usuarios"
+msgstr "Accesible a los usuarios {{users}} y los grupos de usuarios {{userGroups}}"
 
+#: 
 msgid "Accessible to {{users}} users"
-msgstr "Accesible a {{users}} usuarios"
+msgstr "Accesible a los usuarios {{users}}"
 
+#: 
 msgid "Accessible to {{userGroups}} user groups"
-msgstr "Accesible a {{userGroups}} grupos de usuarios"
+msgstr "Accesible a los grupos de usuarios {{userGroups}}"
 
+#: 
 msgid "Only accessible to system administrators"
 msgstr "Solo accesible a los administradores del sistema"
 
+#: 
 msgid "Not accessible"
 msgstr "No accesible"
 
+#: 
 msgid "Data model"
 msgstr "Modelos de Datos"
 
+#: 
 msgid "Organisation Unit Visibility"
 msgstr "Visibilidad de unidades organizativas"
 
+#: 
 msgid "Duplicate detection for events (programs)"
 msgstr "Detección de duplicados para eventos (programas)"
 
+#: 
 msgid "Event date time difference"
-msgstr "Diferencia de tiempo sobre la fecha reportada"
+msgstr "Diferencia aceptada entre las fechas de los eventos para la identificación de duplicados"
 
+#: 
 msgid "Data elements filter"
-msgstr "Filtro de data elements"
+msgstr "Filtro de elementos de datos"
 
+#: 
 msgid "Data elements used for duplicates identification"
-msgstr "Data elements usados para identificar los duplicados"
+msgstr "Elementos de datos usados para identificar los duplicados"
 
+#: 
 msgid "Permissions"
 msgstr "Permisos"
 
+#: 
 msgid "All"
 msgstr "Todos"
 
+#: 
 msgid "Data Set"
 msgstr "Data Set"
 
+#: 
 msgid "Template"
 msgstr "Plantilla"
 
+#: 
 msgid "Select template to export..."
 msgstr "Seleccione plantilla para exportar..."
 
+#: 
 msgid "Data Model"
 msgstr "Modelo de Datos"
 
+#: 
 msgid "Start period"
 msgstr "Periodo inicial"
 
+#: 
 msgid "End period"
 msgstr "Periodo final"
 
+#: 
 msgid "Organisation units"
 msgstr "Unidades Organizativas"
 
+#: 
 msgid "Select available organisation units to include in the template"
 msgstr "Seleccione las unidades organizativas para añadir a la plantilla"
 
+#: 
 msgid "User does not have any capture organisations units"
 msgstr "El usuario no tiene unidades organizativas asociadas"
 
+#: 
 msgid "Advanced template properties"
 msgstr "Propiedades avanzadas de la plantilla"
 
+#: 
 msgid "Language"
 msgstr "Idioma"
 
+#: 
 msgid "Theme"
 msgstr "Tema"
 
+#: 
 msgid "<No value>"
 msgstr "<Sin valor>"
 
+#: 
 msgid "Populate template with data"
-msgstr "Rellenar plantilla con datos"
+msgstr "Rellenar la plantilla con datos"
 
+#: 
 msgid "Start date"
 msgstr "Fecha inicial"
 
+#: 
 msgid "End date"
 msgstr "Fecha final"
 
+#: 
 msgid "Edit theme"
 msgstr "Editar tema"
 
+#: 
 msgid "New theme"
 msgstr "Nuevo tema"
 
+#: 
 msgid "Theme name"
 msgstr "Nombre del tema"
 
+#: 
 msgid "Colors"
 msgstr "Colores"
 
+#: 
 msgid "Color options"
 msgstr "Opciones de color"
 
+#: 
 msgid "Headings"
 msgstr "Encabezamientos"
 
+#: 
 msgid "Title text"
 msgstr "Título"
 
+#: 
 msgid "Subtitle text"
 msgstr "Subtítulo"
 
+#: 
 msgid "Logo"
 msgstr "Logo"
 
+#: 
 msgid "Drag and drop logo file"
 msgstr "Mueva aquí los ficheros a importar"
 
+#: 
 msgid "Pattern"
 msgstr "Patrón de colores"
 
+#: 
 msgid "Fixed"
 msgstr "Fijo"
 
+#: 
 msgid "An error ocurred while saving theme"
 msgstr "Ha ocurrido un error mientras se guardaba el tema"
 
+#: 
 msgid "Delete {{count}} themes"
 msgid_plural "Delete {{count}} themes"
-msgstr[0] ""
+msgstr[0] "Borrar {{count}} temas"
 msgstr[1] ""
 
+#: 
 msgid "Are you sure you want to remove selected themes"
 msgstr "Esta seguro que quiere borrar los temas seleccionados"
 
+#: 
 msgid "Name"
 msgstr "Nombre"
 
+#: 
 msgid "Title"
 msgstr "Título"
 
+#: 
 msgid "Subtitle"
 msgstr "Subtítulo"
 
+#: 
 msgid "Edit"
 msgstr "Editar"
 
+#: 
 msgid "Delete"
 msgstr "Borrar"
 
+#: 
 msgid "Ok"
 msgstr "Ok"
 
+#: 
 msgid "Create theme"
 msgstr "Crear tema"
 
+#: 
 msgid "Error deleting data values"
 msgstr "Se ha producido un error borrando valores de datos"
 
+#: 
 msgid "Select at least one model"
-msgstr "Seleccione al menos un modelo"
+msgstr "Seleccione al menos una plantilla"
 
+#: 
 msgid "Data set"
-msgstr "Data set"
+msgstr "Set de datos"
 
+#: 
 msgid "Cannot get data entry sheet"
 msgstr "No se puede leer la hoja de entrada de datos"
 
+#: 
 msgid "Cannot get metadata sheet"
 msgstr "No se puede leer la hoja de metadata"
 
-msgid ""
-"Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr ""
-"Ubicación no válida. Comprueba la fila {{rowNumber}} para el país {{country}}"
-
+#: 
 msgid "Event date is empty"
-msgstr "La fecha de evento esta vacia"
+msgstr "La fecha del evento esta vacia"
 
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
-msgstr ""
-"No se puede importar: Las versiones no coinciden (base de "
-"datos={{dbVersion}}, fichero={{sheetVersion}})"
+#: 
+msgid "Cannot import: Versions do not match (database={{dbVersion}}, file={{sheetVersion}})"
+msgstr "No se puede importar: Las versiones no coinciden (base de datos={{dbVersion}}, fichero={{sheetVersion}})"
 
+#: 
 msgid "You need to select at least one element to export"
 msgstr "Seleccione al menos un elemento a exportar"
 
+#: 
 msgid "You need to select start and end periods for dataSet templates"
-msgstr "Seleccione periodos de inicio y de fin para plantillas de tipo dataSet"
+msgstr "Seleccione periodos de inicio y de fin para plantillas de tipo set de datos"
 
+#: 
 msgid "You need to select start and end dates to populate template"
 msgstr "Seleccione fecha de inicio y de fin para rellenar la plantilla"
 
+#: 
 msgid "Downloading template..."
 msgstr "Descargando plantilla..."
 
+#: 
 msgid "Download template"
 msgstr "Descargar plantilla"
 
+#: 
 msgid "Reading file..."
 msgstr "Leyendo archivo..."
 
+#: 
 msgid "Cannot read file"
-msgstr "No se puede leer el fichero"
+msgstr "No se puede leer el archivo"
 
+#: 
 msgid "You don't have write permissions for {{type}} {{name}}"
 msgstr "No tiene permisos de escritura para {{type}} {{name}}"
 
+#: 
 msgid "Reading data..."
 msgstr "Leyendo datos..."
 
+#: 
 msgid "Select at least one organisation unit to import data"
-msgstr ""
-"Seleccione al menos una unidad organizativa a la que importar los datos"
+msgstr "Seleccione al menos una unidad organizativa a la que asignar los datos"
 
+#: 
 msgid "Invalid organisation units found"
 msgstr "Encontradas unidades organizativas no validas"
 
-msgid ""
-"There are {{number}} data values with an invalid organisation unit that will "
-"be ignored during import.\n"
+#: 
+msgid "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
-msgstr ""
-"Existen {{number}} valores asociados a unidades organziativas no validas que "
-"seran ignorados durante la importación.Ahora puede descargar esos datos y "
-"enviarselos a su administrador."
+msgstr "Existen {{number}} valores asociados a unidades organziativas no válidas que seran ignorados durante la importación. Por favor, descarguese estos datos y envieselos a su administrador o gestor de DHIS2"
 
+#: 
 msgid "Cancel"
 msgstr "Cancelar"
 
+#: 
 msgid "Proceed"
 msgstr "Continuar"
 
+#: 
 msgid "Download data values with invalid organisation units"
-msgstr ""
+msgstr "Descargar datos con unidades organizativas no válidas"
 
+#: 
 msgid "Checking duplicates..."
 msgstr "Comprobando duplicados..."
 
+#: 
 msgid "Existing data values"
-msgstr "Existen valores de datos"
+msgstr "Existen valores para estos elementos de datos"
 
-msgid ""
-"There are {{totalExisting}} data values in the database for this "
-"organisation unit and periods. If you proceed, all those data values will be "
-"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
-msgstr ""
-"Existen {{totalExisting}} valores en la base de datos para esta unidad "
-"organizativa y periodos. Si continua, todos los valores serán borrados, y "
-"solo aquellos presentes en el fichero se guardarán. ¿Está seguro?"
+#: 
+msgid "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr "Existen {{totalExisting}} valores en la base de datos para esta unidad organizativa y periodos. Si continua, todos los valores se borrarán y se remplazarán por aquellos presentes en el archivo. ¿Está seguro que desea continuar?"
 
+#: 
 msgid "Import only new data values"
 msgstr "Importar solo nuevos valores de datos"
 
+#: 
 msgid "Warning: Your upload may result in the generation of duplicates"
-msgstr "Alerta: Tu importación puede generar duplicados"
+msgstr "Alerta: Su importación puede generar duplicados"
 
-msgid ""
-"There are {{totalExisting}} records in your template with very similar or "
-"exact values as other records that already exist. If you proceed, you risk "
-"creating duplicates. What would you like to do?"
-msgstr ""
-"Existen {{totalExisting}} entradas en su plantilla con valores muy similares "
-"o idénticos a otros que ya existen. Si continua, se arriesga de crear "
-"duplicados ¿Está seguro?"
+#: 
+msgid "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?"
+msgstr "Existen {{totalExisting}} entradas en su plantilla con valores muy similares o idénticos a otros que ya registrados en el sistema. Si continua, se arriesga a crear duplicados ¿Qué desea hacer?"
 
+#: 
 msgid "Import everything anyway"
-msgstr "Importarlo todo"
+msgstr "Importar todo, incluyendo los datos que pudieran ser duplicados"
 
+#: 
 msgid "Cancel import"
 msgstr "Cancelar importación"
 
+#: 
 msgid "Import only new records"
-msgstr "Importar solo nuevas entradas"
+msgstr "Importar solo los datos nuevos"
 
+#: 
 msgid "Importing data..."
 msgstr "Importando datos..."
 
+#: 
 msgid "Imported"
 msgstr "Importados"
 
+#: 
 msgid "Updated"
 msgstr "Actualizados"
 
+#: 
 msgid "Ignored"
 msgstr "Ignorados"
 
+#: 
 msgid "Deleted"
 msgstr "Borrados"
 
+#: 
 msgid "Bulk data import"
 msgstr "Importación de datos"
 
+#: 
 msgid "Drag and drop file to import"
 msgstr "Mueva aquí los ficheros a importar"
 
+#: 
 msgid "Update"
 msgstr "Actualizar"
 
+#: 
 msgid "Create"
 msgstr "Crear"
 
+#: 
 msgid "data values"
 msgstr "valores de datos"
 
+#: 
 msgid "Select import Organisation Unit"
 msgstr "Seleccione una unidad organizativa en la que importar los datos"
 
+#: 
 msgid "No capture org unit match element org units"
-msgstr ""
-"Las unidades organizativas de introducción de datos y del elemento no "
-"coinciden"
+msgstr "Las unidades organizativas de introducción de datos y del elemento no coinciden"
 
+#: 
 msgid "Import data"
 msgstr "Importar datos"
 
+#: 
 msgid "Themes"
 msgstr "Temas"
 
+#: 
 msgid "Settings"
 msgstr "Configuración"
 
+#: 
 msgid "Settings saved"
 msgstr "Configuración guardada"
+
