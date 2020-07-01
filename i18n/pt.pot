@@ -7,361 +7,352 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "POT-Creation-Date: 2020-06-11T08:45:45.996Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
-
 msgid "Template not loaded"
-msgstr ""
+msgstr "Planilha não carregada"
 
 msgid "Element not found"
-msgstr ""
+msgstr "Elemento não encontrado"
 
 msgid "Program or DataSet not found in instance"
-msgstr ""
+msgstr "Programa ou DataSet não encontrado na instância"
 
 msgid "Field {{field}} cannot be blank"
-msgstr ""
+msgstr "O campo {{field}} não pode ficar em branco"
 
 msgid "You need to select at least one {{element}}"
-msgstr ""
+msgstr "Você precisa selecionar pelo menos um {{element}}"
 
 msgid "Data elements used for duplication assessment"
-msgstr ""
+msgstr "Elementos de dados usados para avaliação de duplicação"
 
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 msgid "Program"
-msgstr ""
+msgstr "Programa"
 
 msgid "Access to Template Generation"
-msgstr ""
+msgstr "Acesso à geração de planilhas"
 
 msgid "Access to Settings and Themes"
-msgstr ""
+msgstr "Acesso a configurações e temas"
 
 msgid "Select Organisation Units on template generation"
-msgstr ""
+msgstr "Selecione unidades organizacionais na geração de planilhas"
 
 msgid "Select Organisation Units on template import"
-msgstr ""
+msgstr "Selecione unidades organizacionais na importação de planilhas com dados"
 
 msgid "Select Organisation Units on template generation and import"
-msgstr ""
+msgstr "Selecione Unidades da organização na geração e importação de planilhas"
 
 msgid "Days"
-msgstr ""
+msgstr "Dias"
 
 msgid "Weeks"
-msgstr ""
+msgstr "Semanas"
 
 msgid "Months"
-msgstr ""
+msgstr "Meses"
 
 msgid "Years"
-msgstr ""
+msgstr "Anos"
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
-msgstr ""
+msgstr "Acessível aos usuários {{users}} e os grupos de usuários {{userGroups}}"
 
 msgid "Accessible to {{users}} users"
-msgstr ""
+msgstr "Acessível aos usuários {{users}}"
 
 msgid "Accessible to {{userGroups}} user groups"
-msgstr ""
+msgstr "Acessível aos grupos de usuários {{userGroups}}"
 
 msgid "Only accessible to system administrators"
-msgstr ""
+msgstr "Acessível apenas para administradores de sistema"
 
 msgid "Not accessible"
-msgstr ""
+msgstr "Não acessível"
 
 msgid "Data model"
-msgstr ""
+msgstr "Modelo de dados"
 
 msgid "Organisation Unit Visibility"
-msgstr ""
+msgstr "Visibilidade da unidade organizacional"
 
 msgid "Duplicate detection for events (programs)"
-msgstr ""
+msgstr "Detecção duplicada de eventos (programas)"
 
 msgid "Event date time difference"
-msgstr ""
+msgstr "Diferença de data e hora do evento"
 
 msgid "Data elements filter"
-msgstr ""
+msgstr "Filtro de elementos de dados"
 
 msgid "Data elements used for duplicates identification"
-msgstr ""
+msgstr "Elementos de dados usados para identificação de duplicatas"
 
 msgid "Permissions"
-msgstr ""
+msgstr "Permissões"
 
 msgid "All"
-msgstr ""
+msgstr "Tudo"
 
 msgid "Data Set"
-msgstr ""
+msgstr "Data Set"
 
 msgid "Template"
-msgstr ""
+msgstr "Modelo"
 
 msgid "Select template to export..."
-msgstr ""
+msgstr "Selecione o planilha para exportar ..."
 
 msgid "Data Model"
-msgstr ""
+msgstr "Modelo de dados"
 
 msgid "Start period"
-msgstr ""
+msgstr "Período inicial"
 
 msgid "End period"
-msgstr ""
+msgstr "Período final"
 
 msgid "Organisation units"
-msgstr ""
+msgstr "Unidades organizacionais"
 
 msgid "Select available organisation units to include in the template"
-msgstr ""
+msgstr "Selecione as unidades organizacionais para incluir na planilha"
 
 msgid "User does not have any capture organisations units"
-msgstr ""
+msgstr "O usuário não tem accesso a nenhuma unidade organizacional"
 
 msgid "Advanced template properties"
-msgstr ""
+msgstr "Propriedades avançadas da planilha"
 
 msgid "Language"
-msgstr ""
+msgstr "Língua"
 
 msgid "Theme"
-msgstr ""
+msgstr "Tema"
 
 msgid "<No value>"
-msgstr ""
+msgstr "<Sem valor>"
 
 msgid "Populate template with data"
-msgstr ""
+msgstr "Preencher a planilha com dados"
 
 msgid "Start date"
-msgstr ""
+msgstr "Data de início"
 
 msgid "End date"
-msgstr ""
+msgstr "Data de fim"
 
 msgid "Edit theme"
-msgstr ""
+msgstr "Editar tema"
 
 msgid "New theme"
-msgstr ""
+msgstr "Novo tema"
 
 msgid "Theme name"
-msgstr ""
+msgstr "Nome do tema"
 
 msgid "Colors"
-msgstr ""
+msgstr "Cores"
 
 msgid "Color options"
-msgstr ""
+msgstr "Opções de cores"
 
 msgid "Headings"
-msgstr ""
+msgstr "Cabeçalhos"
 
 msgid "Title text"
-msgstr ""
-
+msgstr "Texto do título"
+ 
 msgid "Subtitle text"
-msgstr ""
+msgstr "Texto da legenda"
 
 msgid "Logo"
-msgstr ""
+msgstr "Logotipo"
 
 msgid "Drag and drop logo file"
-msgstr ""
-
+msgstr "Arraste e solte o logotipo aqui"
+ 
 msgid "Pattern"
-msgstr ""
+msgstr "Padrão"
 
 msgid "Fixed"
-msgstr ""
+msgstr "Fixo"
 
 msgid "An error ocurred while saving theme"
-msgstr ""
+msgstr "Ocorreu um erro ao salvar o tema"
 
 msgid "Delete {{count}} themes"
 msgid_plural "Delete {{count}} themes"
-msgstr[0] ""
+msgstr[0] "Excluir {{count}} temas"
 msgstr[1] ""
 
 msgid "Are you sure you want to remove selected themes"
-msgstr ""
-
+msgstr "Tem certeza de que deseja excluir os temas selecionados"
+ 
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 msgid "Subtitle"
-msgstr ""
+msgstr "Legenda"
 
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 msgid "Delete"
-msgstr ""
+msgstr "Excluir"
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Create theme"
-msgstr ""
+msgstr "Criar tema"
 
 msgid "Error deleting data values"
-msgstr ""
+msgstr "Erro ao excluir valores de dados"
 
 msgid "Select at least one model"
-msgstr ""
+msgstr "Selecione pelo menos uma planilha"
 
 msgid "Data set"
-msgstr ""
+msgstr "Data Set"
 
 msgid "Cannot get data entry sheet"
-msgstr ""
+msgstr "Não é possível obter a folha de registro de dados"
 
 msgid "Cannot get metadata sheet"
-msgstr ""
+msgstr "Não é possível obter a folha de metadados"
 
 msgid "Event date is empty"
-msgstr ""
+msgstr "A data do evento está vazia"
 
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
-msgstr ""
+msgid "Cannot import: Versions do not match (database={{dbVersion}}, file={{sheetVersion}})"
+msgstr "Não é possível importar: as versões não correspondem (banco de dados = {{dbVersion}}, arquivo = {{sheetVersion}})"
 
 msgid "You need to select at least one element to export"
-msgstr ""
+msgstr "Você precisa selecionar pelo menos um elemento para exportar"
 
+ 
 msgid "You need to select start and end periods for dataSet templates"
-msgstr ""
+msgstr "Você precisa selecionar os períodos inicial e final da planilha do DataSet"
 
 msgid "You need to select start and end dates to populate template"
-msgstr ""
+msgstr "Você precisa selecionar as datas de início e fim para preencher a planilha com dados"
 
 msgid "Downloading template..."
-msgstr ""
+msgstr "Descarregando a planilha..."
 
 msgid "Download template"
-msgstr ""
+msgstr "Descarregar a planilha"
 
 msgid "Reading file..."
-msgstr ""
+msgstr "Lendo arquivo ..."
 
 msgid "Cannot read file"
-msgstr ""
-
+msgstr "Não é possível ler o arquivo"
+ 
 msgid "You don't have write permissions for {{type}} {{name}}"
-msgstr ""
-
+msgstr "Você não tem permissões de gravação para {{type}} {{name}}"
+ 
 msgid "Reading data..."
-msgstr ""
-
+msgstr "Lendo dados ..."
+ 
 msgid "Select at least one organisation unit to import data"
-msgstr ""
-
+msgstr "Selecione pelo menos uma unidade organizacional para importar dados"
+ 
 msgid "Invalid organisation units found"
-msgstr ""
-
-msgid ""
-"There are {{number}} data values with an invalid organisation unit that "
-"will be ignored during import.\n"
+msgstr "Unidades organizacionais inválidas encontradas"
+ 
+msgid "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
-msgstr ""
-
+msgstr "Existem {{number}} valores de dados com uma unidade organizacional inválida que serão ignorados durante a importação.\n"
+"Você debe baixá-los e enviá-los ao administrador do DHIS2"
+ 
 msgid "Cancel"
-msgstr ""
-
+msgstr "Cancelar"
+ 
 msgid "Proceed"
-msgstr ""
-
+msgstr "Continuar"
+ 
 msgid "Download data values with invalid organisation units"
-msgstr ""
-
+msgstr "Descarregar dados com unidades organizacionais inválidas"
+ 
 msgid "Checking duplicates..."
-msgstr ""
-
+msgstr "Verificando duplicados..."
+ 
 msgid "Existing data values"
-msgstr ""
-
-msgid ""
-"There are {{totalExisting}} data values in the database for this "
-"organisation unit and periods. If you proceed, all those data values will "
-"be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
-msgstr ""
-
+msgstr "Valores de dados existentes"
+ 
+msgid "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr "Existem {{totalExisting}} valores de dados no banco de dados para esta unidade e períodos da organização. Se você continuar, todos esses valores de dados serão excluídos e remplazados pelos dados da planilha. Tem certeza que deseja continuar?"
+ 
 msgid "Import only new data values"
-msgstr ""
-
+msgstr "Importar apenas novos valores de dados"
+ 
 msgid "Warning: Your upload may result in the generation of duplicates"
-msgstr ""
-
-msgid ""
-"There are {{totalExisting}} records in your template with very similar or "
-"exact values as other records that already exist. If you proceed, you risk "
-"creating duplicates. What would you like to do?"
-msgstr ""
-
+msgstr "Aviso: seu upload pode resultar na geração de duplicados"
+ 
+msgid "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?"
+msgstr "Existem registros {{totalExisting}} no seu modelo com valores exatos ou muito semelhantes a outros registros do sistema. Se você continuar, corre o risco de criar duplicados. O que você gostaria de fazer?"
+ 
 msgid "Import everything anyway"
-msgstr ""
-
+msgstr "Importar tudo de qualquer maneira"
+ 
 msgid "Cancel import"
-msgstr ""
-
+msgstr "Cancelar importação"
+ 
 msgid "Import only new records"
-msgstr ""
-
+msgstr "Importar apenas novos registros"
+ 
 msgid "Importing data..."
-msgstr ""
-
+msgstr "Importando dados ..."
+ 
 msgid "Imported"
-msgstr ""
-
+msgstr "Importado"
+ 
 msgid "Updated"
-msgstr ""
-
+msgstr "Atualizada"
+ 
 msgid "Ignored"
-msgstr ""
-
+msgstr "Ignorado"
+ 
 msgid "Deleted"
-msgstr ""
-
+msgstr "Excluído"
+ 
 msgid "Bulk data import"
-msgstr ""
-
+msgstr "Importação de dados em massa"
+ 
 msgid "Drag and drop file to import"
-msgstr ""
+msgstr "Arraste e solte o arquivo para importar"
 
 msgid "Update"
-msgstr ""
-
+msgstr "Atualizar"
+ 
 msgid "Create"
-msgstr ""
+msgstr "Crio"
 
 msgid "data values"
-msgstr ""
+msgstr "valores de dados"
 
 msgid "Select import Organisation Unit"
-msgstr ""
-
+msgstr "Selecione a unidade organizacional para importar os dados"
+ 
 msgid "No capture org unit match element org units"
-msgstr ""
-
+msgstr "Nenhuma unidade organizacional de captura corresponde às unidades organizacionais do elemento"
+ 
 msgid "Import data"
-msgstr ""
-
+msgstr "Importar dados"
+ 
 msgid "Themes"
-msgstr ""
-
+msgstr "Temas"
+ 
 msgid "Settings"
-msgstr ""
-
+msgstr "Configurações"
+ 
 msgid "Settings saved"
-msgstr ""
+msgstr "Configurações salvas"
