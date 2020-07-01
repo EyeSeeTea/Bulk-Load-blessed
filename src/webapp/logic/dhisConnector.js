@@ -39,3 +39,7 @@ export async function importData({ element, api, data }) {
     const response = await api.post(endpoint, {}, object).getData();
     return response;
 }
+
+export function importOrgUnitByUID(api, uid) {
+    return api.get("/organisationUnits/" + uid).getData();
+}

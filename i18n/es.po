@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-11T08:45:45.996Z\n"
+"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -230,6 +230,11 @@ msgstr "No se puede leer la hoja de entrada de datos"
 
 msgid "Cannot get metadata sheet"
 msgstr "No se puede leer la hoja de metadata"
+
+msgid ""
+"Location not valid. Check row number {{rowNumber}} for country {{country}}"
+msgstr ""
+"Ubicación no válida. Comprueba la fila {{rowNumber}} para el país {{country}}"
 
 msgid "Event date is empty"
 msgstr "La fecha de evento esta vacia"
