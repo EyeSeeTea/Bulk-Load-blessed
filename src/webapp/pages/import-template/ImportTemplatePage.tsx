@@ -125,10 +125,28 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 object,
             } = await CompositionRoot.attach().templates.analyze.execute(file);
 
+            //const organisationUnits = result.organisationUnits;
+            const orgUnitCoordMap = new Map();
+
+            if (result.element.type === "programs") {
+                const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                    ...result,
+                    file,
+                    useBuilderOrgUnits,
+                    rowOffset,
+                });
+
+                for (const uid of usedOrgUnitsUIDs.values()) {
+                    const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
+                    orgUnitCoordMap.set(uid, orgUnitData);
+                }
+            }
+
             const data = await sheetImport.readSheet({
                 ...result,
                 file,
                 useBuilderOrgUnits,
+                orgUnitCoordMap,
                 rowOffset,
                 colOffset,
             });

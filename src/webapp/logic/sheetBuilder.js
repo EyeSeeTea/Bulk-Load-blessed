@@ -188,9 +188,14 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             .map(option => this.translate(option).name)
             .join(", ");
 
+        const { compulsory } =
+            this.builder.rawMetadata.programStageDataElements?.find(
+                ({ dataElement }) => dataElement.id === item.id
+            ) ?? {};
+
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
-        metadataSheet.cell(rowId, 3).string(name ?? "");
+        metadataSheet.cell(rowId, 3).string(name?.concat(compulsory ? " *" : "") ?? "");
         metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
         metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
         metadataSheet.cell(rowId, 6).string(options ?? "");
@@ -275,7 +280,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         dataEntrySheet,
         itemRow,
         columnId++,
-        "Org Unit",
+        "Org Unit *",
         null,
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
@@ -344,7 +349,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                                 columnId,
                                 `_${categoryOptionCombo.id}`,
                                 groupId,
-                                this.validations.get(validation)
+                                this.validations.get(validation),
+                                undefined,
+                                categoryOptionCombo.code === "default"
                             );
 
                             columnId++;
@@ -382,7 +389,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 dataEntrySheet,
                 itemRow,
                 columnId++,
-                programStage.executionDateLabel ?? "Date"
+                `${programStage.executionDateLabel ?? "Date"} *`
             );
 
             if (programStage.programStageSections.length === 0) {
@@ -484,11 +491,18 @@ SheetBuilder.prototype.createColumn = function (
     label,
     groupId = null,
     validation = null,
-    validationMessage = "Invalid choice was chosen"
+    validationMessage = "Invalid choice was chosen",
+    defaultLabel = false
 ) {
     sheet.column(columnId).setWidth(20);
     const cell = sheet.cell(rowId, columnId);
-    cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+
+    if (!defaultLabel) cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
+    else {
+        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle).style(
+            this.transparentFontStyle(groupId)
+        );
+    }
 
     if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
@@ -521,6 +535,16 @@ SheetBuilder.prototype.createColumn = function (
             }), // a style object containing styles to apply
         });
     }
+};
+
+SheetBuilder.prototype.transparentFontStyle = function (groupId) {
+    const { palette = defaultColorScale } = this.builder.theme ?? {};
+
+    return {
+        font: {
+            color: palette[groupId % palette.length],
+        },
+    };
 };
 
 SheetBuilder.prototype.groupStyle = function (groupId) {
