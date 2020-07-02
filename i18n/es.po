@@ -237,7 +237,7 @@ msgstr "No se puede leer la hoja de metadata"
 
 msgid ""
 "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr ""
+msgstr "Localización inválida. Por favor compruebe la fila {{rowNumber}} para el país {{country}}"
 
 msgid "Event date is empty"
 msgstr "La fecha del evento esta vacia"
