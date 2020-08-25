@@ -98,7 +98,7 @@ export default class Settings {
 
             return {
                 fields: { id: true, displayName: true },
-                filter: { identifiable: { in: [...storedValues, ...defaultValues] } },
+                filter: { id: { in: [...storedValues, ...defaultValues] } },
             };
         };
 
