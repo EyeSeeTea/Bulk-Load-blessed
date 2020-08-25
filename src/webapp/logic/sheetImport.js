@@ -7,6 +7,8 @@ import { getObjectVersion } from "./utils";
 
 // Algorithm based on:
 // https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+
+/*
 function checkCoordinates(coord, vs) {
     const x = coord.longitude,
         y = coord.latitude;
@@ -30,6 +32,7 @@ function checkCoordinates(coord, vs) {
 
     return false;
 }
+*/
 
 export async function getUsedOrgUnits({
     file,
@@ -141,7 +144,7 @@ export async function readSheet({
     elementMetadata,
     useBuilderOrgUnits,
     organisationUnits,
-    orgUnitCoordMap,
+    orgUnitCoordMap: _orgUnitCoordMap,
     rowOffset = 0,
     colOffset = 0,
 }) {
