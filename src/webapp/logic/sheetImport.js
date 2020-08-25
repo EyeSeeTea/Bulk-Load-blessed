@@ -202,6 +202,12 @@ export async function readSheet({
                     longitude: row.values[3],
                 };
 
+            /* TODO: Disable temporarily. This code must be refactored:
+                - Support API>=2.32 geometry field.
+                - Check if row has coordinates.
+                - Check orgUnit coordinate type.
+            */
+            /*
             if (
                 isProgram &&
                 !checkCoordinates(
@@ -217,6 +223,7 @@ export async function readSheet({
                     )
                 );
             }
+            */
 
             if (isProgram && row.values[4 + colOffset] !== undefined) {
                 result.eventDate = dateFormat(new Date(row.values[4 + colOffset]), "yyyy-mm-dd");
