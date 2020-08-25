@@ -259,8 +259,7 @@ export async function readSheet({
             row.eachCell((cell, colNumber) => {
                 if (isProgram && colNumber > 4 + colOffset) {
                     const id = columns[colNumber].formula.substr(1);
-                    const cellValue =
-                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+                    const cellValue = getCellValue(cell);
 
                     const dataElement = elementMetadata.get(id);
                     const value = formatValue({
@@ -286,8 +285,7 @@ export async function readSheet({
                     const isDisaggregated = type === "categoryOptionCombos";
 
                     const dataElement = elementMetadata.get(dataElementId);
-                    const cellValue =
-                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+                    const cellValue = getCellValue(cell);
 
                     const value = formatValue({
                         dataElement,
@@ -318,6 +316,15 @@ export async function readSheet({
     });
 
     return isProgram ? { events: dataToImport, program: element.id } : dataToImport;
+}
+
+function getCellValue(cell) {
+    return (
+        cell.value?.text ??
+        cell.value?.result ??
+        (cell.type === ExcelJS.ValueType.Formula ? 0 : null) ??
+        cell.value?.toString()
+    );
 }
 
 function formatValue({ dataElement, cellValue, elementMetadata, metadataSheet }) {
