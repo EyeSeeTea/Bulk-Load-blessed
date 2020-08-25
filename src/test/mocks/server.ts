@@ -24,9 +24,9 @@ export function initializeMockServer() {
     mock.onGet("/metadata", {
         params: {
             "userGroups:fields": "displayName,id",
-            "userGroups:filter": ["identifiable:in:[BwyMfDBLih9]"],
+            "userGroups:filter": ["id:in:[BwyMfDBLih9]"],
             "users:fields": "displayName,id",
-            "users:filter": ["identifiable:in:[BwyMfDBLih9]"],
+            "users:filter": ["id:in:[BwyMfDBLih9]"],
         },
     }).reply(200, {});
 

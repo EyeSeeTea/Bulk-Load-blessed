@@ -7,6 +7,8 @@ import { getObjectVersion } from "./utils";
 
 // Algorithm based on:
 // https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+
+/*
 function checkCoordinates(coord, vs) {
     const x = coord.longitude,
         y = coord.latitude;
@@ -30,6 +32,7 @@ function checkCoordinates(coord, vs) {
 
     return false;
 }
+*/
 
 export async function getUsedOrgUnits({
     file,
@@ -141,7 +144,7 @@ export async function readSheet({
     elementMetadata,
     useBuilderOrgUnits,
     organisationUnits,
-    orgUnitCoordMap,
+    orgUnitCoordMap: _orgUnitCoordMap,
     rowOffset = 0,
     colOffset = 0,
 }) {
@@ -202,6 +205,12 @@ export async function readSheet({
                     longitude: row.values[3],
                 };
 
+            /* TODO: Disable temporarily. This code must be refactored:
+                - Support API>=2.32 geometry field.
+                - Check if row has coordinates.
+                - Check orgUnit coordinate type.
+            */
+            /*
             if (
                 isProgram &&
                 !checkCoordinates(
@@ -217,6 +226,7 @@ export async function readSheet({
                     )
                 );
             }
+            */
 
             if (isProgram && row.values[4 + colOffset] !== undefined) {
                 result.eventDate = dateFormat(new Date(row.values[4 + colOffset]), "yyyy-mm-dd");
@@ -252,8 +262,7 @@ export async function readSheet({
             row.eachCell((cell, colNumber) => {
                 if (isProgram && colNumber > 4 + colOffset) {
                     const id = columns[colNumber].formula.substr(1);
-                    const cellValue =
-                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+                    const cellValue = getCellValue(cell);
 
                     const dataElement = elementMetadata.get(id);
                     const value = formatValue({
@@ -279,8 +288,7 @@ export async function readSheet({
                     const isDisaggregated = type === "categoryOptionCombos";
 
                     const dataElement = elementMetadata.get(dataElementId);
-                    const cellValue =
-                        cell.value?.text ?? cell.value?.result ?? cell.value?.toString();
+                    const cellValue = getCellValue(cell);
 
                     const value = formatValue({
                         dataElement,
@@ -311,6 +319,15 @@ export async function readSheet({
     });
 
     return isProgram ? { events: dataToImport, program: element.id } : dataToImport;
+}
+
+function getCellValue(cell) {
+    return (
+        cell.value?.text ??
+        cell.value?.result ??
+        (cell.type === ExcelJS.ValueType.Formula ? 0 : null) ??
+        cell.value?.toString()
+    );
 }
 
 function formatValue({ dataElement, cellValue, elementMetadata, metadataSheet }) {
