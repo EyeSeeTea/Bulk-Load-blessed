@@ -1,4 +1,4 @@
-import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
+import { DataSource, GeneratedTemplate, StyleSource } from "../../../domain/entities/Template";
 
 export class OldGenerated01 implements GeneratedTemplate {
     public readonly id = "OLD_GENERATED_v1";

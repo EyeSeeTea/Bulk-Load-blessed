@@ -1,11 +1,11 @@
-import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
+import { DataSource, GeneratedTemplate, StyleSource } from "../../../domain/entities/Template";
 
-export class DataSetGenerated02 implements GeneratedTemplate {
-    public readonly id = "DATASET_GENERATED_v2";
-    public readonly name = "Auto-generated dataSet template";
+export class ProgramGenerated03 implements GeneratedTemplate {
+    public readonly id = "PROGRAM_GENERATED_v3";
+    public readonly name = "Auto-generated program template";
 
     public readonly rowOffset = 3;
-    public readonly colOffset = 0;
+    public readonly colOffset = 2;
 
     public readonly dataSources: DataSource[] = [
         {
@@ -15,27 +15,27 @@ export class DataSetGenerated02 implements GeneratedTemplate {
                 type: "column",
                 ref: "A",
             },
-            period: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "B",
-            },
             attribute: {
                 sheet: "Data Entry",
                 type: "column",
-                ref: "C",
+                ref: "D",
+            },
+            eventId: {
+                sheet: "Data Entry",
+                type: "column",
+                ref: "E",
+            },
+            period: {
+                sheet: "Data Entry",
+                type: "column",
+                ref: "F",
             },
             range: {
                 sheet: "Data Entry",
                 rowStart: 6,
-                columnStart: "D",
+                columnStart: "G",
             },
             dataElement: {
-                sheet: "Data Entry",
-                type: "row",
-                ref: 4,
-            },
-            categoryOption: {
                 sheet: "Data Entry",
                 type: "row",
                 ref: 5,
