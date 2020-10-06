@@ -2,7 +2,7 @@ import { Id } from "./ReferenceObject";
 import { ThemeableSections, ImageSections } from "./Theme";
 
 export type RefType = "row" | "column" | "cell" | "range" | "value";
-export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef | ValueRef;
+export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 export type DataSource = RowDataSource | ColumnDataSource | CellDataSource | GenericDataSource;
 
 export type StyleSource = {
@@ -71,12 +71,12 @@ export interface Range {
 interface BaseDataSource {
     type: "row" | "column" | "cell" | "generic";
     range: Partial<Range>;
-    orgUnit: SheetRef;
-    period: SheetRef;
-    dataElement: SheetRef;
-    categoryOption?: SheetRef;
-    attribute?: SheetRef;
-    eventId?: SheetRef;
+    orgUnit: SheetRef | ValueRef;
+    period: SheetRef | ValueRef;
+    dataElement: SheetRef | ValueRef;
+    categoryOption?: SheetRef | ValueRef;
+    attribute?: SheetRef | ValueRef;
+    eventId?: SheetRef | ValueRef;
 }
 
 export interface RowDataSource extends BaseDataSource {
@@ -115,10 +115,10 @@ export interface CellDataSource extends BaseDataSource {
 export interface GenericDataSource extends BaseDataSource {
     type: "generic";
     range: Partial<Range>;
-    orgUnit: SheetRef;
-    period: SheetRef;
-    dataElement: SheetRef;
-    categoryOption?: SheetRef;
-    attribute?: SheetRef;
-    eventId?: SheetRef;
+    orgUnit: SheetRef | ValueRef;
+    period: SheetRef | ValueRef;
+    dataElement: SheetRef | ValueRef;
+    categoryOption?: SheetRef | ValueRef;
+    attribute?: SheetRef | ValueRef;
+    eventId?: SheetRef | ValueRef;
 }
