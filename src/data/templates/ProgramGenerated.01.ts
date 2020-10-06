@@ -1,6 +1,6 @@
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
 
-export default class implements GeneratedTemplate {
+export class ProgramGenerated01 implements GeneratedTemplate {
     public readonly id = "PROGRAM_GENERATED_v1";
     public readonly name = "Auto-generated program template";
 
