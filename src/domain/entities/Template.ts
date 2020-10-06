@@ -1,9 +1,9 @@
 import { Id } from "./ReferenceObject";
 import { ThemeableSections, ImageSections } from "./Theme";
 
-export type RefType = "row" | "column" | "cell" | "range";
-export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
-export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
+export type RefType = "row" | "column" | "cell" | "range" | "value";
+export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef | ValueRef;
+export type DataSource = RowDataSource | ColumnDataSource | CellDataSource | GenericDataSource;
 
 export type StyleSource = {
     section: ThemeableSections | ImageSections;
@@ -55,6 +55,11 @@ export interface RangeRef extends GenericSheetRef {
     ref: string;
 }
 
+export interface ValueRef {
+    type: "value";
+    id: string;
+}
+
 export interface Range {
     sheet: string;
     rowStart: number;
@@ -63,8 +68,8 @@ export interface Range {
     columnEnd?: string;
 }
 
-export interface GenericDataSource {
-    type: "row" | "column" | "cell";
+interface BaseDataSource {
+    type: "row" | "column" | "cell" | "generic";
     range: Partial<Range>;
     orgUnit: SheetRef;
     period: SheetRef;
@@ -74,7 +79,7 @@ export interface GenericDataSource {
     eventId?: SheetRef;
 }
 
-export interface RowDataSource extends GenericDataSource {
+export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
     orgUnit: ColumnRef | CellRef;
@@ -85,7 +90,7 @@ export interface RowDataSource extends GenericDataSource {
     eventId?: ColumnRef | CellRef;
 }
 
-export interface ColumnDataSource extends GenericDataSource {
+export interface ColumnDataSource extends BaseDataSource {
     type: "column";
     range: Range;
     orgUnit: RowRef | CellRef;
@@ -96,7 +101,7 @@ export interface ColumnDataSource extends GenericDataSource {
     eventId?: RowRef | CellRef;
 }
 
-export interface CellDataSource extends GenericDataSource {
+export interface CellDataSource extends BaseDataSource {
     type: "cell";
     ref: CellRef;
     orgUnit: CellRef;
@@ -105,4 +110,15 @@ export interface CellDataSource extends GenericDataSource {
     categoryOption?: CellRef;
     attribute?: CellRef;
     eventId?: CellRef;
+}
+
+export interface GenericDataSource extends BaseDataSource {
+    type: "generic";
+    range: Partial<Range>;
+    orgUnit: SheetRef;
+    period: SheetRef;
+    dataElement: SheetRef;
+    categoryOption?: SheetRef;
+    attribute?: SheetRef;
+    eventId?: SheetRef;
 }
