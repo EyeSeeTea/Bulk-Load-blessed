@@ -1,7 +1,8 @@
 import { Id } from "./ReferenceObject";
 import { ThemeableSections, ImageSections } from "./Theme";
 
-export type RefType = "row" | "column" | "cell" | "range" | "value";
+export type DataSourceType = "row" | "column" | "cell" | "generic";
+export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 export type DataSource = RowDataSource | ColumnDataSource | CellDataSource | GenericDataSource;
 
@@ -69,7 +70,7 @@ export interface Range {
 }
 
 interface BaseDataSource {
-    type: "row" | "column" | "cell" | "generic";
+    type: DataSourceType;
     range: Partial<Range>;
     orgUnit: SheetRef | ValueRef;
     period: SheetRef | ValueRef;
