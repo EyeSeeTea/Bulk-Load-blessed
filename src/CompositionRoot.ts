@@ -19,6 +19,7 @@ import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsU
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
+import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
@@ -89,6 +90,7 @@ export class CompositionRoot {
                 this.templateManager,
                 this.excelReader
             ),
+            import: new ImportTemplateUseCase(),
             list: new ListDataFormsUseCase(this.instance),
         });
     }

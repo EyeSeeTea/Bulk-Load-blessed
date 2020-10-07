@@ -63,6 +63,10 @@ export abstract class ExcelRepository {
         }
     }
 
+    public async readTemplate(_template: Template): Promise<DataPackage[]> {
+        return [];
+    }
+
     private async fillRows(template: Template, dataSource: RowDataSource, payload: DataPackage[]) {
         let { rowStart } = dataSource.range;
 

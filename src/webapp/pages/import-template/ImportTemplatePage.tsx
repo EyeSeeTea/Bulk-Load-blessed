@@ -104,15 +104,17 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         try {
             const { dataForm, file } = importState;
 
+            const useBuilderOrgUnits =
+                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
+
+            await CompositionRoot.attach().templates.import(dataForm, file, useBuilderOrgUnits);
+
             loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
                 api,
                 element: dataForm,
                 orgUnitIds: cleanOrgUnitPaths(selectedOrgUnits),
             });
-
-            const useBuilderOrgUnits =
-                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
 
             if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {
                 throw new Error(i18n.t("Select at least one organisation unit to import data"));
