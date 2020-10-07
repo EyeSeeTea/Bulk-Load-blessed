@@ -1,6 +1,7 @@
+import { UseCase } from "../../CompositionRoot";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 
-export class ListDataFormsUseCase {
+export class ListDataFormsUseCase implements UseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute() {

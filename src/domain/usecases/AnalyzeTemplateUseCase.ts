@@ -1,3 +1,4 @@
+import { UseCase } from "../../CompositionRoot";
 import i18n from "../../locales";
 import {
     checkVersion,
@@ -8,7 +9,7 @@ import {
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
-export class AnalyzeTemplateUseCase {
+export class AnalyzeTemplateUseCase implements UseCase {
     constructor(
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository

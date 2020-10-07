@@ -1,5 +1,6 @@
 import { saveAs } from "file-saver";
 import { Moment } from "moment";
+import { UseCase } from "../../CompositionRoot";
 import * as dhisConnector from "../../webapp/logic/dhisConnector";
 import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
@@ -21,7 +22,7 @@ export interface DownloadTemplateProps {
     populateEndDate?: Moment;
 }
 
-export class DownloadTemplateUseCase {
+export class DownloadTemplateUseCase implements UseCase {
     constructor(
         private instance: InstanceRepository,
         private templateRepository: TemplateRepository,

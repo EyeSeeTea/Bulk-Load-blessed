@@ -86,8 +86,8 @@ export default class Settings {
             authorities: new Set(authorities),
         };
 
-        const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
-        const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
+        const defaultSettings = CompositionRoot.attach().settings.getDefault();
+        const data = await CompositionRoot.attach().settings.read<Partial<AppSettings>>(
             Settings.constantCode,
             defaultSettings
         );
@@ -180,10 +180,7 @@ export default class Settings {
         };
 
         try {
-            await CompositionRoot.attach().settings.write.execute<AppSettings>(
-                Settings.constantCode,
-                data
-            );
+            await CompositionRoot.attach().settings.write<AppSettings>(Settings.constantCode, data);
             return { status: true };
         } catch (error) {
             return { status: false, error };

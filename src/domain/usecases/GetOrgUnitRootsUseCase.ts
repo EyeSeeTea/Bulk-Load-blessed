@@ -1,6 +1,7 @@
+import { UseCase } from "../../CompositionRoot";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 
-export class GetOrgUnitRootsUseCase {
+export class GetOrgUnitRootsUseCase implements UseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute(): Promise<string[]> {

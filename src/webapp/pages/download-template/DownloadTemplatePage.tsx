@@ -35,7 +35,7 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
         }
 
         loading.show(true, i18n.t("Downloading template..."));
-        await CompositionRoot.attach().templates.download.execute(api, template);
+        await CompositionRoot.attach().templates.download(api, template);
         loading.show(false);
     };
 

@@ -65,20 +65,20 @@ export class CompositionRoot {
     }
 
     public get orgUnits() {
-        return {
+        return getExecute({
             getUserRoots: new GetOrgUnitRootsUseCase(this.instance),
             getRootsByForm: new GetFormOrgUnitRootsUseCase(this.instance),
-        };
+        });
     }
 
     public get form() {
-        return {
+        return getExecute({
             getDataPackage: new GetFormDataPackageUseCase(this.instance),
-        };
+        });
     }
 
     public get templates() {
-        return {
+        return getExecute({
             analyze: new AnalyzeTemplateUseCase(this.instance, this.templateManager),
             download: new DownloadTemplateUseCase(
                 this.instance,
@@ -90,28 +90,46 @@ export class CompositionRoot {
                 this.excelReader
             ),
             list: new ListDataFormsUseCase(this.instance),
-        };
+        });
     }
 
     public get themes() {
-        return {
+        return getExecute({
             list: new ListThemesUseCase(this.templateManager),
             save: new SaveThemeUseCase(this.templateManager),
             delete: new DeleteThemeUseCase(this.templateManager),
-        };
+        });
     }
 
     public get settings() {
-        return {
+        return getExecute({
             getDefault: new GetDefaultSettingsUseCase(this.config),
             read: new ReadSettingsUseCase(this.storage),
             write: new WriteSettingsUseCase(this.storage),
-        };
+        });
     }
 
     public get languages() {
-        return {
+        return getExecute({
             list: new ListLanguagesUseCase(this.instance),
-        };
+        });
     }
+}
+
+function getExecute<UseCases extends Record<Key, UseCase>, Key extends keyof UseCases>(
+    useCases: UseCases
+): { [K in Key]: UseCases[K]["execute"] } {
+    const keys = Object.keys(useCases) as Key[];
+    const initialOutput = {} as { [K in Key]: UseCases[K]["execute"] };
+
+    return keys.reduce((output, key) => {
+        const useCase = useCases[key];
+        const execute = useCase.execute.bind(useCase) as UseCases[typeof key]["execute"];
+        output[key] = execute;
+        return output;
+    }, initialOutput);
+}
+
+export interface UseCase {
+    execute: Function;
 }

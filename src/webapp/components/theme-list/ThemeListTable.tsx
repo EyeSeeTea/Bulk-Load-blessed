@@ -57,7 +57,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const saveTheme = async (theme: Theme) => {
         try {
             loading.show();
-            const errors = await CompositionRoot.attach().themes.save.execute(theme);
+            const errors = await CompositionRoot.attach().themes.save(theme);
             if (errors.length === 0) {
                 closeThemeEdit();
                 setThemes(_.uniqBy([theme, ...themes], "id"));
@@ -83,7 +83,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             action: async () => {
                 loading.show();
                 await promiseMap(ids, id => {
-                    return CompositionRoot.attach().themes.delete.execute(id);
+                    return CompositionRoot.attach().themes.delete(id);
                 });
                 setSelection([]);
                 setThemes(_.reject(themes, ({ id }) => ids.includes(id)));

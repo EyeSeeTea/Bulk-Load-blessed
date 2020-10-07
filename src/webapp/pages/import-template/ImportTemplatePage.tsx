@@ -49,7 +49,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
+        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
     }, []);
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
@@ -74,7 +74,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 object,
                 dataValues,
                 orgUnits,
-            } = await CompositionRoot.attach().templates.analyze.execute(file);
+            } = await CompositionRoot.attach().templates.analyze(file);
 
             if (!object.writeAccess) {
                 throw new Error(
@@ -123,7 +123,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 colOffset,
                 orgUnits,
                 object,
-            } = await CompositionRoot.attach().templates.analyze.execute(file);
+            } = await CompositionRoot.attach().templates.analyze(file);
 
             //const organisationUnits = result.organisationUnits;
             const orgUnitCoordMap = new Map();
@@ -281,7 +281,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
             : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
 
-        const result = await CompositionRoot.attach().form.getDataPackage.execute({
+        const result = await CompositionRoot.attach().form.getDataPackage({
             id,
             periods,
             orgUnits,
