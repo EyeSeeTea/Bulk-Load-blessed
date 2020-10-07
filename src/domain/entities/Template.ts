@@ -1,10 +1,10 @@
 import { Id } from "./ReferenceObject";
 import { ThemeableSections, ImageSections } from "./Theme";
 
-export type DataSourceType = "row" | "column" | "cell" | "generic";
+export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
-export type DataSource = RowDataSource | ColumnDataSource | CellDataSource | GenericDataSource;
+export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
 
 export type StyleSource = {
     section: ThemeableSections | ImageSections;
@@ -105,21 +105,10 @@ export interface ColumnDataSource extends BaseDataSource {
 export interface CellDataSource extends BaseDataSource {
     type: "cell";
     ref: CellRef;
-    orgUnit: CellRef;
-    period: CellRef;
-    dataElement: CellRef;
-    categoryOption?: CellRef;
-    attribute?: CellRef;
-    eventId?: CellRef;
-}
-
-export interface GenericDataSource extends BaseDataSource {
-    type: "generic";
-    range: Partial<Range>;
-    orgUnit: SheetRef | ValueRef;
-    period: SheetRef | ValueRef;
-    dataElement: SheetRef | ValueRef;
-    categoryOption?: SheetRef | ValueRef;
-    attribute?: SheetRef | ValueRef;
-    eventId?: SheetRef | ValueRef;
+    orgUnit: CellRef | ValueRef;
+    period: CellRef | ValueRef;
+    dataElement: CellRef | ValueRef;
+    categoryOption?: CellRef | ValueRef;
+    attribute?: CellRef | ValueRef;
+    eventId?: CellRef | ValueRef;
 }
