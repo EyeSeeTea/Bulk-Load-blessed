@@ -3,7 +3,7 @@ import { promiseMap } from "../utils/promises";
 
 export async function getElement(api, type, id) {
     const fields =
-        "id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value],categoryCombo,dataSetElements,sections,periodType,programStages";
+        "id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value],categoryCombo,dataSetElements,formType,sections[id,sortOrder,dataElements[id]],periodType,programStages";
     const response = await api.get(`/${type}/${id}`, { fields }).getData();
     return { ...response, type };
 }
