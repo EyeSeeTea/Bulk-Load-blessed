@@ -71,7 +71,8 @@ export interface Range {
 
 interface BaseDataSource {
     type: DataSourceType;
-    range: Partial<Range>;
+    range?: Partial<Range>;
+    ref?: CellRef;
     orgUnit: SheetRef | ValueRef;
     period: SheetRef | ValueRef;
     dataElement: SheetRef | ValueRef;
