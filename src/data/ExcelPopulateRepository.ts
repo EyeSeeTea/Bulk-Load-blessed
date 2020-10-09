@@ -1,10 +1,10 @@
 import _ from "lodash";
-import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populate";
+import XLSX, { Cell as ExcelCell, FormulaError, Workbook as ExcelWorkbook } from "xlsx-populate";
 import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
-import { removeCharacters } from "../utils/string";
 import i18n from "../locales";
+import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
@@ -45,7 +45,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(template);
 
         if (location?.type === "cell") {
-            const destination = workbook.sheet(location.sheet).cell(location.ref);
+            const destination = workbook.sheet(location.sheet)?.cell(location.ref);
+            if (!destination) return undefined;
             return { type: "cell", sheet: destination.sheet().name(), ref: destination.address() };
         } else if (location && cellRef) {
             const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
@@ -93,7 +94,9 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        return String(destination.value() ?? destination.formula());
+        const value = destination.value() ?? destination.formula();
+        if (!value || value instanceof FormulaError) return "";
+        return String(value);
     }
 
     public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
