@@ -1,13 +1,19 @@
+import _ from "lodash";
 import { UseCase } from "../../CompositionRoot";
+import { DataForm } from "../entities/DataForm";
+import { DataPackage } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
+import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
-export type ImportTemplateError = {
-    type: "INVALID_DATA_FORM_ID" | "DATA_FORM_NOT_FOUND" | "PROVIDE_ORG_UNITS_TO_OVERRIDE";
-};
+export type ImportTemplateError =
+    | {
+          type: "INVALID_DATA_FORM_ID" | "DATA_FORM_NOT_FOUND" | "INVALID_OVERRIDE_ORG_UNIT";
+      }
+    | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage[]; invalidDataValues: DataPackage[] };
 
 export interface ImportTemplateUseCaseParams {
     file: File;
@@ -27,8 +33,8 @@ export class ImportTemplateUseCase implements UseCase {
         useBuilderOrgUnits = false,
         selectedOrgUnits = [],
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, void>> {
-        if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {
-            return Either.error({ type: "PROVIDE_ORG_UNITS_TO_OVERRIDE" });
+        if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
+            return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
 
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
@@ -40,17 +46,22 @@ export class ImportTemplateUseCase implements UseCase {
         }
 
         const [dataForm] = await this.instanceRepository.getDataForms({ ids: [dataFormId] });
-        if (!dataForm) return Either.error({ type: "DATA_FORM_NOT_FOUND" });
+        if (!dataForm) {
+            return Either.error({ type: "DATA_FORM_NOT_FOUND" });
+        }
 
-        const reader = new ExcelReader(this.excelRepository);
-        const dataValues = await reader.readTemplate(template);
-
-        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
-            dataForm.type,
-            dataForm.id
+        const { dataValues, invalidDataValues } = await this.readDataValues(
+            template,
+            dataForm,
+            useBuilderOrgUnits,
+            selectedOrgUnits
         );
 
-        console.log({ dataValues, template, dataForm, dataFormOrgUnits });
+        if (invalidDataValues.length > 0) {
+            return Either.error({ type: "INVALID_ORG_UNITS", dataValues, invalidDataValues });
+        }
+
+        console.log({ dataValues, template, dataForm });
 
         return Either.success(undefined);
 
@@ -61,5 +72,33 @@ export class ImportTemplateUseCase implements UseCase {
         // Detect invalid organisation units -> Error
         // Detect existing values for duplicates -> Error
         // Finally import data
+    }
+
+    private async readDataValues(
+        template: Template,
+        dataForm: DataForm,
+        useBuilderOrgUnits: boolean,
+        selectedOrgUnits: string[]
+    ) {
+        const reader = new ExcelReader(this.excelRepository);
+        const rawDataValues = await reader.readTemplate(template);
+        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
+            dataForm.type,
+            dataForm.id
+        );
+
+        // Override org unit if needed
+        const dataValues = rawDataValues.map(({ orgUnit, ...rest }) => ({
+            ...rest,
+            orgUnit: useBuilderOrgUnits ? selectedOrgUnits[0] : orgUnit,
+        }));
+
+        // Remove data values assigned to invalid org unit
+        const invalidDataValues = _.remove(
+            dataValues,
+            ({ orgUnit }) => !dataFormOrgUnits.find(({ id }) => id === orgUnit)
+        );
+
+        return { dataValues, invalidDataValues };
     }
 }
