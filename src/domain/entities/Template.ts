@@ -1,5 +1,5 @@
 import { Id } from "./ReferenceObject";
-import { ThemeableSections, ImageSections } from "./Theme";
+import { ImageSections, ThemeableSections } from "./Theme";
 
 export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
@@ -11,23 +11,26 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
-export type Template = GeneratedTemplate;
+export type Template = GeneratedTemplate | CustomTemplate;
 
-export interface GeneratedTemplate {
+interface BaseTemplate {
+    type: "generated" | "custom";
     id: Id;
     name: string;
-    rowOffset: number;
-    colOffset: number;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
 }
 
-export interface CustomTemplate {
-    id: Id;
-    name: string;
+export interface GeneratedTemplate extends BaseTemplate {
+    type: "generated";
+    rowOffset: number;
+    colOffset: number;
+}
+
+export interface CustomTemplate extends BaseTemplate {
+    type: "custom";
     url?: string;
-    dataSources: DataSource[];
-    styleSources: StyleSource[];
+    dataFormId: CellRef;
 }
 
 export interface GenericSheetRef {

@@ -20,10 +20,11 @@ export class AnalyzeTemplateUseCase implements UseCase {
         if (!id) throw new Error(i18n.t("Element not found"));
 
         const templateVersion = await getVersion(file);
-        const { rowOffset = 0, colOffset = 0 } = this.templateRepository.getTemplate(
-            templateVersion
-        );
+        const template = this.templateRepository.getTemplate(templateVersion);
 
+        if (template.type === "custom") throw new Error("Custom templates not supported");
+
+        const { rowOffset = 0, colOffset = 0 } = template;
         const [object] = await this.instanceRepository.getDataForms(type, [id]);
         if (!object) throw new Error(i18n.t("Program or DataSet not found in instance"));
 

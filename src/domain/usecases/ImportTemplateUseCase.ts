@@ -1,5 +1,4 @@
 import { UseCase } from "../../CompositionRoot";
-import { NHWAModule101 } from "../../data/templates";
 import { DataForm } from "../entities/DataForm";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -18,19 +17,13 @@ export class ImportTemplateUseCase implements UseCase {
         file: File,
         useBuilderOrgUnits: boolean
     ): Promise<void> {
-        console.log(
-            dataForm,
-            file,
-            useBuilderOrgUnits,
-            this.instance,
-            this.templateRepository,
-            this.excelRepository
-        );
+        console.log(dataForm, file, useBuilderOrgUnits, this.instance);
 
-        const template = new NHWAModule101();
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
+        const template = this.templateRepository.getTemplate(templateId);
+
         const foo = await new ExcelReader(this.excelRepository).readTemplate(template);
-        console.log({ foo, templateId });
+        console.log({ foo, template });
 
         // Get metadata from dataForm
         // Check organisation units that user has at least one orgUnit -> Error

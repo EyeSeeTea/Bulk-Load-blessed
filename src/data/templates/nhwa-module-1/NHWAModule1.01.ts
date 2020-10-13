@@ -1,11 +1,10 @@
-import { DataSource, GeneratedTemplate, StyleSource } from "../../../domain/entities/Template";
+import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
 
-export class NHWAModule101 implements GeneratedTemplate {
+export class NHWAModule101 implements CustomTemplate {
+    public readonly type = "custom";
     public readonly id = "NHWA_MODULE_1_v1";
     public readonly name = "NHWA Module 1";
-
-    public readonly rowOffset = 3;
-    public readonly colOffset = 0;
+    public readonly dataFormId = { type: "cell" as const, sheet: "Demographic", ref: "W2" };
 
     public readonly dataSources: DataSource[] = [
         {
