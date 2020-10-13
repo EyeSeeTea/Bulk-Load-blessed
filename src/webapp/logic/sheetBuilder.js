@@ -32,6 +32,7 @@ SheetBuilder.prototype.generate = async function () {
             const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
             this.programStageSheets[programStageT.id] = sheet;
         });
+        this.relationshipsSheet = this.workbook.addWorksheet("Relationships", protectedSheet);
     } else {
         this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
     }
@@ -43,6 +44,7 @@ SheetBuilder.prototype.generate = async function () {
     if (isTrackerProgram(element)) {
         await this.fillInstancesSheet();
         this.fillProgramStageSheets();
+        this.fillRelationshipsSheet();
     } else {
         this.fillDataEntrySheet();
     }
@@ -52,6 +54,14 @@ SheetBuilder.prototype.generate = async function () {
     this.fillLegendSheet();
 
     return this.workbook;
+};
+
+SheetBuilder.prototype.fillRelationshipsSheet = function () {
+    const sheet = this.relationshipsSheet;
+
+    this.createColumn(sheet, 1, 1, "Type");
+    this.createColumn(sheet, 1, 2, "From TEI");
+    this.createColumn(sheet, 1, 3, "To TEI");
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {

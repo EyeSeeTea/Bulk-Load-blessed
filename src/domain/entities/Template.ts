@@ -7,7 +7,8 @@ export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 export type DataSourceValue =
     | RowDataSource
     | TeiRowDataSource
-    | TrackedEventRowDataSource
+    | TrackerEventRowDataSource
+    | TrackerRelationship
     | ColumnDataSource
     | CellDataSource;
 
@@ -95,13 +96,21 @@ export interface TeiRowDataSource {
     attributes: Range;
 }
 
-export interface TrackedEventRowDataSource {
+export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
     teiId: ColumnRef;
     eventId: ColumnRef;
     date: ColumnRef;
     range: Range;
     dataElement: RowRef;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    range: Range;
+    typeName: ColumnRef;
+    from: ColumnRef;
+    to: ColumnRef;
 }
 
 export interface RowDataSource extends GenericDataSource {

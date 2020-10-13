@@ -10,12 +10,15 @@ import {
     SheetRef,
     Template,
     TeiRowDataSource,
-    TrackedEventRowDataSource,
+    TrackerEventRowDataSource,
     DataSource,
     DataSourceValue,
+    TrackerRelationship,
+    GeneratedTemplate,
 } from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
 import dateFormat from "dateformat";
+import { getRelationships } from "../entities/TrackedEntityInstance";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
 
@@ -79,7 +82,10 @@ export abstract class ExcelRepository {
                     await this.fillTeiRows(template, dataSource, payload);
                     break;
                 case "rowTrackedEvent":
-                    await this.fillTrackedEventRows(template, dataSource, payload);
+                    await this.fillTrackerEventRows(template, dataSource, payload);
+                    break;
+                case "rowTeiRelationship":
+                    await this.fillTrackerRelationshipRows(template, dataSource, payload);
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
@@ -143,9 +149,48 @@ export abstract class ExcelRepository {
         }
     }
 
-    private async fillTrackedEventRows(
+    private async fillCell(
+        template: GeneratedTemplate,
+        cells: CellRef[],
+        sheetRef: SheetRef,
+        value: string | number | boolean
+    ) {
+        const cell = await this.findRelativeCell(template, sheetRef, cells[0]);
+
+        if (cell && !_.isNil(value)) {
+            await this.writeCell(template, cell, value);
+        }
+    }
+
+    private async fillTrackerRelationshipRows(
         template: Template,
-        dataSource: TrackedEventRowDataSource,
+        dataSource: TrackerRelationship,
+        payload: DataPackage
+    ) {
+        if (payload.type !== "trackerPrograms") return;
+
+        const relationships = getRelationships(payload.trackedEntityInstances);
+
+        let { rowStart } = dataSource.range;
+
+        for (const relationship of relationships) {
+            const cells = await this.getCellsInRange(template, {
+                ...dataSource.range,
+                rowStart,
+                rowEnd: rowStart,
+            });
+
+            await this.fillCell(template, cells, dataSource.typeName, relationship.typeName);
+            await this.fillCell(template, cells, dataSource.from, relationship.fromId);
+            await this.fillCell(template, cells, dataSource.to, relationship.toId);
+
+            rowStart += 1;
+        }
+    }
+
+    private async fillTrackerEventRows(
+        template: Template,
+        dataSource: TrackerEventRowDataSource,
         payload: DataPackage
     ) {
         let { rowStart } = dataSource.range;

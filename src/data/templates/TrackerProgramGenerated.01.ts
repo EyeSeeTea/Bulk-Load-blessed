@@ -31,6 +31,29 @@ export default class implements GeneratedTemplate {
                 columnStart: "D",
             },
         },
+        {
+            type: "rowTeiRelationship",
+            range: {
+                sheet: "Relationships",
+                rowStart: 2,
+                columnStart: "A",
+            },
+            typeName: {
+                sheet: "Relationships",
+                type: "column",
+                ref: "A",
+            },
+            from: {
+                sheet: "Relationships",
+                type: "column",
+                ref: "B",
+            },
+            to: {
+                sheet: "Relationships",
+                type: "column",
+                ref: "C",
+            },
+        },
         (sheet: string) =>
             isStageSheet(sheet) && {
                 type: "rowTrackedEvent",
