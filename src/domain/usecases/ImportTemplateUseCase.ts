@@ -1,5 +1,4 @@
 import { UseCase } from "../../CompositionRoot";
-import { DataForm } from "../entities/DataForm";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -7,23 +6,25 @@ import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export class ImportTemplateUseCase implements UseCase {
     constructor(
-        private instance: InstanceRepository,
+        private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute(
-        dataForm: DataForm | undefined,
-        file: File,
-        useBuilderOrgUnits: boolean
-    ): Promise<void> {
-        console.log(dataForm, file, useBuilderOrgUnits, this.instance);
-
+    public async execute(file: File, _useBuilderOrgUnits: boolean): Promise<void> {
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
         const template = this.templateRepository.getTemplate(templateId);
 
-        const foo = await new ExcelReader(this.excelRepository).readTemplate(template);
-        console.log({ foo, template });
+        const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId);
+        if (!dataFormId || typeof dataFormId !== "string") throw new Error("Invalid data form id");
+
+        const [dataForm] = await this.instanceRepository.getDataForms({ ids: [dataFormId] });
+        if (!dataForm) throw new Error("Program or DataSet not found in instance");
+
+        const reader = new ExcelReader(this.excelRepository);
+        const dataValues = await reader.readTemplate(template);
+
+        console.log({ dataValues, template, dataForm });
 
         // Get metadata from dataForm
         // Check organisation units that user has at least one orgUnit -> Error

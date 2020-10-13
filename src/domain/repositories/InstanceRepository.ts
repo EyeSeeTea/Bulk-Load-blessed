@@ -15,9 +15,14 @@ export interface GetDataPackageParams {
     translateCodes?: boolean;
 }
 
+export interface GetDataFormsParams {
+    ids?: string[];
+    type?: DataFormType[];
+}
+
 export interface InstanceRepository {
     getUserOrgUnits(): Promise<OrgUnit[]>;
-    getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]>;
+    getDataForms(options?: GetDataFormsParams): Promise<DataForm[]>;
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
     getLocales(): Promise<Locale[]>;

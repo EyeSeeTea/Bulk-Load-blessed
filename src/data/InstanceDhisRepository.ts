@@ -7,9 +7,11 @@ import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
+    GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
+import { cache } from "../utils/cache";
 import { promiseMap } from "../webapp/utils/promises";
 
 export class InstanceDhisRepository implements InstanceRepository {
@@ -19,17 +21,17 @@ export class InstanceDhisRepository implements InstanceRepository {
         this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
-    public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        switch (type) {
-            case "dataSets":
-                return this.getDataSets(ids);
-            case "programs":
-                return this.getPrograms(ids);
-            default:
-                throw new Error(`Unsupported type ${type} for data package`);
-        }
+    public async getDataForms({
+        type = ["dataSets", "programs"],
+        ids,
+    }: GetDataFormsParams = {}): Promise<DataForm[]> {
+        const dataSets = type.includes("dataSets") ? await this.getDataSets(ids) : [];
+        const programs = type.includes("programs") ? await this.getPrograms(ids) : [];
+
+        return [...dataSets, ...programs];
     }
 
+    @cache()
     private async getDataSets(ids?: string[]): Promise<DataForm[]> {
         const { objects } = await this.api.models.dataSets
             .get({
@@ -69,6 +71,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         );
     }
 
+    @cache()
     private async getPrograms(ids?: string[]): Promise<DataForm[]> {
         const { objects } = await this.api.models.programs
             .get({

@@ -4,6 +4,7 @@ export class ProgramGenerated02 implements GeneratedTemplate {
     public readonly type = "generated";
     public readonly id = "PROGRAM_GENERATED_v2";
     public readonly name = "Auto-generated program template";
+    public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A6" };
 
     public readonly rowOffset = 5;
     public readonly colOffset = 2;

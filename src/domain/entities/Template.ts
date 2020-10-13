@@ -19,6 +19,7 @@ interface BaseTemplate {
     name: string;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
+    dataFormId: CellRef;
 }
 
 export interface GeneratedTemplate extends BaseTemplate {
@@ -30,7 +31,6 @@ export interface GeneratedTemplate extends BaseTemplate {
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url?: string;
-    dataFormId: CellRef;
 }
 
 export interface GenericSheetRef {

@@ -25,7 +25,7 @@ export class AnalyzeTemplateUseCase implements UseCase {
         if (template.type === "custom") throw new Error("Custom templates not supported");
 
         const { rowOffset = 0, colOffset = 0 } = template;
-        const [object] = await this.instanceRepository.getDataForms(type, [id]);
+        const [object] = await this.instanceRepository.getDataForms({ ids: [id] });
         if (!object) throw new Error(i18n.t("Program or DataSet not found in instance"));
 
         await checkVersion(file, object);
