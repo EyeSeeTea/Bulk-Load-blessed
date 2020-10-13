@@ -69,7 +69,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return;
         }
 
-        await CompositionRoot.attach().templates.import(file, false);
+        await CompositionRoot.attach().templates.import({ file });
         loading.show(false);
 
         return;
@@ -112,7 +112,11 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             const useBuilderOrgUnits =
                 settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
 
-            await CompositionRoot.attach().templates.import(file, useBuilderOrgUnits);
+            await CompositionRoot.attach().templates.import({
+                file,
+                useBuilderOrgUnits,
+                selectedOrgUnits,
+            });
 
             loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
