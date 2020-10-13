@@ -1,4 +1,4 @@
-import { D2Api } from "d2-api";
+import { D2Api } from "./types/d2-api";
 import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
@@ -40,7 +40,7 @@ export class CompositionRoot {
     private readonly templateManager: TemplateRepository;
     private readonly excelReader: ExcelRepository;
 
-    private constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+    constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
         this.instance = new InstanceDhisRepository(dhisInstance, mockApi);
         this.config = new ConfigWebRepository(appConfig);
         this.storage =

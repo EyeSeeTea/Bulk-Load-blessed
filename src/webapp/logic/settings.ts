@@ -1,4 +1,4 @@
-import { D2Api, Ref } from "d2-api";
+import { D2Api, Ref } from "../../types/d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {

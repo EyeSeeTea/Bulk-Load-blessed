@@ -1,5 +1,4 @@
-import { D2Api, D2ApiDefault } from "d2-api";
-import DataStore from "d2-api/api/dataStore";
+import { D2Api, D2ApiDefault, DataStore } from "../types/d2-api";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 

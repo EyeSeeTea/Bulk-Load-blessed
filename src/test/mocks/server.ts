@@ -1,4 +1,4 @@
-import { getMockApi } from "d2-api";
+import { getMockApi } from "../../types/d2-api";
 
 export function initializeMockServer() {
     const { api, mock } = getMockApi();
