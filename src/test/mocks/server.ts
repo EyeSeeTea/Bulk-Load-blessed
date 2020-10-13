@@ -114,8 +114,8 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[programStageDataElements[dataElement[formName,id,name]]]",
-            filter: ["programType:eq:WITHOUT_REGISTRATION"],
+                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[programStageDataElements[dataElement[formName,id,name]]],programType",
+            filter: [],
         },
     }).reply(200, {
         programs: [
