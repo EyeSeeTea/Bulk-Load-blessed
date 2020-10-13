@@ -3,7 +3,18 @@ import { ThemeableSections, ImageSections } from "./Theme";
 
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
-export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
+
+export type DataSourceValue =
+    | RowDataSource
+    | TeiRowDataSource
+    | TrackedEventRowDataSource
+    | ColumnDataSource
+    | CellDataSource;
+
+// Use to reference data sources for dynamic sheets
+type DataSourceValueGetter = (sheet: string) => DataSourceValue | false;
+
+export type DataSource = DataSourceValue | DataSourceValueGetter;
 
 export type StyleSource = {
     section: ThemeableSections | ImageSections;
@@ -32,8 +43,10 @@ export interface CustomTemplate {
 export interface GenericSheetRef {
     type: RefType;
     ref: string | number;
-    sheet: string | number;
+    sheet: Sheet;
 }
+
+type Sheet = string | number;
 
 export interface RowRef extends GenericSheetRef {
     type: "row";
@@ -56,7 +69,7 @@ export interface RangeRef extends GenericSheetRef {
 }
 
 export interface Range {
-    sheet: string;
+    sheet: Sheet;
     rowStart: number;
     rowEnd?: number;
     columnStart: string;
@@ -72,6 +85,23 @@ export interface GenericDataSource {
     categoryOption?: SheetRef;
     attribute?: SheetRef;
     eventId?: SheetRef;
+}
+
+export interface TeiRowDataSource {
+    type: "rowTei";
+    teiId: ColumnRef;
+    orgUnit: ColumnRef;
+    date: ColumnRef;
+    attributes: Range;
+}
+
+export interface TrackedEventRowDataSource {
+    type: "rowTrackedEvent";
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    range: Range;
+    dataElement: RowRef;
 }
 
 export interface RowDataSource extends GenericDataSource {

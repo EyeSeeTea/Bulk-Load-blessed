@@ -1,6 +1,7 @@
 import { Id } from "./ReferenceObject";
 
-export type DataFormType = "dataSets" | "programs";
+export type DataFormMainType = "dataSets" | "programs";
+export type DataFormType = "dataSets" | "programs" | "trackerPrograms";
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
 
 export interface DataForm {

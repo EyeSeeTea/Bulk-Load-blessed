@@ -1,26 +1,199 @@
 import * as Excel from "excel4node";
 import _ from "lodash";
+import Blob from "cross-blob";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v3";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
+
+const orgNonExistingMessage =
+    "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
     this.validations = new Map();
+};
 
-    this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+SheetBuilder.prototype.generate = async function () {
+    const { builder } = this;
+    const { element } = builder;
+
+    if (isTrackerProgram(element)) {
+        const { element, elementMetadata: metadata } = builder;
+        this.instancesSheet = this.workbook.addWorksheet("TEI Instances");
+        this.programStageSheets = {};
+
+        _.forEach(element.programStages, programStageT => {
+            const programStage = metadata.get(programStageT.id);
+            const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
+            this.programStageSheets[programStageT.id] = sheet;
+        });
+    } else {
+        this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+    }
+
     this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
     this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
     this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
 
+    if (isTrackerProgram(element)) {
+        await this.fillInstancesSheet();
+        this.fillProgramStageSheets();
+    } else {
+        this.fillDataEntrySheet();
+    }
+
     this.fillValidationSheet();
     this.fillMetadataSheet();
     this.fillLegendSheet();
-    this.fillDataEntrySheet();
+
+    return this.workbook;
+};
+
+SheetBuilder.prototype.fillProgramStageSheets = function () {
+    const { elementMetadata: metadata } = this.builder;
+
+    _.forEach(this.programStageSheets, (dataEntrySheet, programStageId) => {
+        const programStageT = { id: programStageId };
+        const programStage = metadata.get(programStageId);
+
+        const rowOffset = 0;
+        const sectionRow = rowOffset + 1;
+        const itemRow = rowOffset + 2;
+
+        // Freeze and format column titles
+        dataEntrySheet.row(itemRow).freeze();
+        dataEntrySheet.row(sectionRow).setHeight(30);
+        dataEntrySheet.row(itemRow).setHeight(50);
+
+        // Add template version
+        dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+
+        // Add column titles
+        let columnId = 1;
+        let groupId = 0;
+
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "TEI id");
+
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
+
+        this.createColumn(
+            dataEntrySheet,
+            itemRow,
+            columnId++,
+            `${programStage.executionDateLabel ?? "Date"} *`
+        );
+
+        if (programStage.programStageSections.length === 0) {
+            programStage.programStageSections.push({
+                dataElements: programStage.programStageDataElements.map(e => e.dataElement),
+                id: programStageT.id,
+            });
+        }
+
+        _.forEach(programStage.programStageSections, programStageSectionT => {
+            const programStageSection = programStageSectionT.dataElements
+                ? programStageSectionT
+                : metadata.get(programStageSectionT.id);
+            const firstColumnId = columnId;
+
+            _.forEach(programStageSection.dataElements, dataElementT => {
+                const dataElement = metadata.get(dataElementT.id);
+                const { name, description } = this.translate(dataElement);
+
+                const validation = dataElement.optionSet
+                    ? dataElement.optionSet.id
+                    : dataElement.valueType;
+                this.createColumn(
+                    dataEntrySheet,
+                    itemRow,
+                    columnId,
+                    `_${dataElement.id}`,
+                    groupId,
+                    this.validations.get(validation)
+                );
+                dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                if (description !== undefined) {
+                    dataEntrySheet.cell(itemRow, columnId).comment(description, {
+                        height: "100pt",
+                        width: "160pt",
+                    });
+                }
+
+                columnId++;
+            });
+
+            if (firstColumnId < columnId)
+                dataEntrySheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .formula(`_${programStageSection.id}`)
+                    .style(this.groupStyle(groupId));
+
+            groupId++;
+        });
+    });
+};
+
+SheetBuilder.prototype.fillInstancesSheet = async function () {
+    const { element: program } = this.builder;
+    const { rowOffset = 0 } = this.builder.template;
+    const sheet = this.instancesSheet;
+
+    // Add cells for themes
+    const sectionRow = rowOffset + 1;
+    const itemRow = rowOffset + 2;
+
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        sheet.row(row).hide();
+    }
+
+    // Freeze and format column titles
+    sheet.row(itemRow).freeze();
+    sheet.row(sectionRow).setHeight(30);
+    sheet.row(itemRow).setHeight(50);
+
+    // Add template version
+    sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+
+    this.createColumn(sheet, itemRow, 1, "TEI id");
+
+    this.createColumn(
+        sheet,
+        itemRow,
+        2,
+        "Org Unit *",
+        null,
+        this.validations.get("organisationUnits"),
+        orgNonExistingMessage
+    );
+
+    this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Date") + " *");
+
+    const programAttributes = program.programTrackedEntityAttributes || [];
+
+    programAttributes.forEach((attribute, idx) => {
+        const name = attribute.trackedEntityAttribute.name;
+        this.createColumn(sheet, itemRow, 4 + idx, name, 1);
+    });
+
+    // Data: move to use case?
+
+    /*
+    enrollmentRows.forEach((row, rowIdx) => {
+        row.forEach((value, colIdx) => {
+            sheet
+                .cell(6 + rowIdx, 1 + colIdx)
+                .string(value || "")
+                .style(baseStyle);
+        });
+    });
+    */
 };
 
 SheetBuilder.prototype.fillLegendSheet = function () {
@@ -235,8 +408,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     rowId++;
 
     metadataSheet.cell(rowId, 1).string("false");
-    metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("No");
+    metadataSheet.cell(rowId, 2).string("boolean");
     this.workbook.definedNameCollection.addDefinedName({
         refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_false",
@@ -246,7 +419,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion = element.type === "dataSets" ? dataSetId : programId;
+    const defaultVersion = getTemplateId(element);
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -285,6 +458,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
+
     if (element.type === "programs") {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
@@ -586,3 +760,20 @@ const protectedSheet = {
         password: "Wiscentd2019!",
     },
 };
+
+function isTrackerProgram(element) {
+    return element.type === "trackerPrograms";
+}
+
+export function getTemplateId(element) {
+    switch (element.type) {
+        case "dataSets":
+            return dataSetId;
+        case "programs":
+            return programId;
+        case "trackerPrograms":
+            return trackerProgramId;
+        default:
+            throw new Error("Unsupported type");
+    }
+}

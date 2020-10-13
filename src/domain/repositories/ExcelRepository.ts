@@ -3,8 +3,19 @@ import { fromBase64 } from "../../utils/files";
 import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../webapp/utils/promises";
 import { DataPackage } from "../entities/DataPackage";
-import { CellRef, Range, RowDataSource, SheetRef, Template } from "../entities/Template";
+import {
+    CellRef,
+    Range,
+    RowDataSource,
+    SheetRef,
+    Template,
+    TeiRowDataSource,
+    TrackedEventRowDataSource,
+    DataSource,
+    DataSourceValue,
+} from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
+import dateFormat from "dateformat";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
 
@@ -27,6 +38,7 @@ export interface FileLoadOptions extends BaseLoadOptions {
 export abstract class ExcelRepository {
     public abstract async loadTemplate(template: Template, options: LoadOptions): Promise<void>;
     public abstract async toBlob(template: Template): Promise<Blob>;
+    public abstract async toBuffer(template: Template): Promise<Buffer>;
     public abstract async findRelativeCell(
         template: Template,
         location?: SheetRef,
@@ -50,12 +62,24 @@ export abstract class ExcelRepository {
         style: ThemeStyle
     ): Promise<void>;
 
-    public async populateTemplate(template: Template, payload: DataPackage[]): Promise<void> {
+    abstract getDataSourceValues(
+        template: Template,
+        dataSources: DataSource[]
+    ): Promise<DataSourceValue[]>;
+
+    public async populateTemplate(template: Template, payload: DataPackage): Promise<void> {
         const { dataSources = [] } = template;
-        for (const dataSource of dataSources) {
+        const dataSourceValues = await this.getDataSourceValues(template, dataSources);
+        for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
                 case "row":
                     await this.fillRows(template, dataSource, payload);
+                    break;
+                case "rowTei":
+                    await this.fillTeiRows(template, dataSource, payload);
+                    break;
+                case "rowTrackedEvent":
+                    await this.fillTrackedEventRows(template, dataSource, payload);
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
@@ -63,10 +87,135 @@ export abstract class ExcelRepository {
         }
     }
 
-    private async fillRows(template: Template, dataSource: RowDataSource, payload: DataPackage[]) {
+    private async fillTeiRows(
+        template: Template,
+        dataSource: TeiRowDataSource,
+        payload: DataPackage
+    ) {
+        let { rowStart } = dataSource.attributes;
+        if (payload.type !== "trackerPrograms") return;
+
+        for (const trackedEntityInstance of payload.trackedEntityInstances) {
+            const { program, orgUnit, id, enrollment } = trackedEntityInstance;
+
+            const cells = await this.getCellsInRange(template, {
+                ...dataSource.attributes,
+                rowStart,
+                rowEnd: rowStart,
+            });
+
+            const orgUnitCell = await this.findRelativeCell(template, dataSource.orgUnit, cells[0]);
+            if (orgUnitCell && orgUnit) {
+                await this.writeCell(template, orgUnitCell, orgUnit.id);
+            }
+
+            const teiIdCell = await this.findRelativeCell(template, dataSource.teiId, cells[0]);
+            if (teiIdCell && id) {
+                await this.writeCell(template, teiIdCell, id);
+            }
+
+            const dateCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
+            if (dateCell && enrollment)
+                await this.writeCell(
+                    template,
+                    dateCell,
+                    dateFormat(new Date(enrollment.date), "yyyy-mm-dd")
+                );
+
+            const values = program.attributes.map(
+                attribute =>
+                    trackedEntityInstance.attributeValues.find(
+                        attributeValue => attributeValue.id === attribute.id
+                    )?.value
+            );
+
+            await Promise.all(
+                _(cells)
+                    .zip(values)
+                    .map(([cell, value]) =>
+                        cell && value ? this.writeCell(template, cell, value) : null
+                    )
+                    .compact()
+                    .value()
+            );
+
+            rowStart += 1;
+        }
+    }
+
+    private async fillTrackedEventRows(
+        template: Template,
+        dataSource: TrackedEventRowDataSource,
+        payload: DataPackage
+    ) {
+        let { rowStart } = dataSource.range;
+        const cells = await this.getCellsInRange(template, dataSource.range);
+
+        const dataElementIds = cells.map(async cell => {
+            const dataElementCell = await this.findRelativeCell(
+                template,
+                dataSource.dataElement,
+                cell
+            );
+
+            const dataElementId = dataElementCell
+                ? removeCharacters(await this.readCell(template, dataElementCell))
+                : undefined;
+
+            return dataElementId;
+        });
+
+        const dataElementIdsSet = new Set(await Promise.all(dataElementIds));
+
+        for (const { id, period, dataValues, trackedEntityInstance } of payload.dataEntries) {
+            const someDataElementPresentInSheet = _(dataValues).some(dv =>
+                dataElementIdsSet.has(dv.dataElement)
+            );
+            if (!someDataElementPresentInSheet) continue;
+
+            const cells = await this.getCellsInRange(template, {
+                ...dataSource.range,
+                rowStart,
+                rowEnd: rowStart,
+            });
+
+            const teiIdCell = await this.findRelativeCell(template, dataSource.teiId, cells[0]);
+            if (teiIdCell && trackedEntityInstance) {
+                await this.writeCell(template, teiIdCell, trackedEntityInstance);
+            }
+
+            const eventIdCell = await this.findRelativeCell(template, dataSource.eventId, cells[0]);
+            if (eventIdCell && id) {
+                await this.writeCell(template, eventIdCell, id);
+            }
+
+            const periodCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
+            if (periodCell) await this.writeCell(template, periodCell, period);
+
+            for (const cell of cells) {
+                const dataElementCell = await this.findRelativeCell(
+                    template,
+                    dataSource.dataElement,
+                    cell
+                );
+
+                const dataElement = dataElementCell
+                    ? removeCharacters(await this.readCell(template, dataElementCell))
+                    : undefined;
+
+                const { value } = dataValues.find(dv => dv.dataElement === dataElement) ?? {};
+
+                if (value) await this.writeCell(template, cell, value);
+            }
+
+            rowStart += 1;
+        }
+    }
+
+    private async fillRows(template: Template, dataSource: RowDataSource, payload: DataPackage) {
         let { rowStart } = dataSource.range;
 
-        for (const { id, orgUnit, period, attribute, dataValues } of payload) {
+        for (const { id, orgUnit, period, attribute, dataValues } of payload.dataEntries) {
             const cells = await this.getCellsInRange(template, {
                 ...dataSource.range,
                 rowStart,
