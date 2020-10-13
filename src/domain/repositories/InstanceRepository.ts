@@ -26,4 +26,5 @@ export interface InstanceRepository {
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
     getLocales(): Promise<Locale[]>;
+    getDefaultIds(): Promise<string[]>;
 }

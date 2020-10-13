@@ -19,7 +19,22 @@ export class ExcelReader {
             }
         });
 
-        return _.flatten(data);
+        return _(data)
+            .flatten()
+            .groupBy(({ id, period, orgUnit, attribute }) =>
+                [id, period, orgUnit, attribute].join("-")
+            )
+            .map((items, key) => {
+                const [id, period, orgUnit, attribute] = key.split("-");
+                return {
+                    id: id ? String(id) : undefined,
+                    orgUnit: String(orgUnit),
+                    period: String(period),
+                    attribute: attribute ? String(attribute) : undefined,
+                    dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
+                };
+            })
+            .value();
     }
 
     private async readByCell(
@@ -40,10 +55,10 @@ export class ExcelReader {
 
         return [
             {
-                id: String(eventId),
+                id: eventId ? String(eventId) : undefined,
                 orgUnit: String(orgUnit),
                 period: String(period),
-                attribute: String(attribute),
+                attribute: attribute ? String(attribute) : undefined,
                 dataValues: [
                     {
                         dataElement: String(dataElement),
@@ -64,6 +79,6 @@ export class ExcelReader {
 
     private formatValue(value: Value | undefined): DataValue["value"] {
         if (value instanceof Date) return value.toISOString();
-        return value ?? "";
+        return value !== undefined ? String(value) : "";
     }
 }

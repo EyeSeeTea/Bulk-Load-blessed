@@ -167,6 +167,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         endDate,
         translateCodes = true,
     }: GetDataPackageParams): Promise<DataPackage[]> {
+        const defaultIds = await this.getDefaultIds();
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
         const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
             const query = (period?: string[]): Promise<DataValueSetsGetResponse> =>
@@ -196,11 +197,13 @@ export class InstanceDhisRepository implements InstanceRepository {
                 return {
                     orgUnit,
                     period,
-                    attribute,
+                    attribute: defaultIds.includes(attribute) ? undefined : attribute,
                     dataValues: dataValues.map(
                         ({ dataElement, categoryOptionCombo, value, comment }) => ({
                             dataElement,
-                            category: categoryOptionCombo,
+                            category: defaultIds.includes(categoryOptionCombo)
+                                ? undefined
+                                : categoryOptionCombo,
                             value: this.formatDataValue(
                                 dataElement,
                                 value,
@@ -304,6 +307,25 @@ export class InstanceDhisRepository implements InstanceRepository {
             .value();
 
         return categoryOptions.map(({ id }) => id);
+    }
+
+    @cache()
+    public async getDefaultIds(): Promise<string[]> {
+        const response = (await this.api
+            .get("/metadata", {
+                filter: "code:eq:default",
+                fields: "id",
+            })
+            .getData()) as {
+            [key: string]: { id: string }[];
+        };
+
+        return _(response)
+            .omit(["system"])
+            .values()
+            .flatten()
+            .map(({ id }) => id)
+            .value();
     }
 }
 

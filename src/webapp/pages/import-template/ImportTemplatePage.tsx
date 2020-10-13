@@ -69,7 +69,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return;
         }
 
-        await CompositionRoot.attach().templates.import({ file });
+        await CompositionRoot.attach().templates.import({
+            file,
+            duplicateExclusion: settings.duplicateExclusion,
+            duplicateTolerance: settings.duplicateTolerance,
+            duplicateToleranceUnit: settings.duplicateToleranceUnit,
+        });
         loading.show(false);
 
         return;
@@ -116,6 +121,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 file,
                 useBuilderOrgUnits,
                 selectedOrgUnits,
+                duplicateExclusion: settings.duplicateExclusion,
+                duplicateTolerance: settings.duplicateTolerance,
+                duplicateToleranceUnit: settings.duplicateToleranceUnit,
             });
 
             loading.show(true, i18n.t("Reading data..."));
