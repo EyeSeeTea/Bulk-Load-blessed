@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
+"POT-Creation-Date: 2020-10-13T06:35:58.129Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-msgid "Template not loaded"
-msgstr "Planilha não carregada"
+msgid "Template {{id}} not loaded"
+msgstr "Planilha {{id}} não carregada"
 
 msgid "Element not found"
 msgstr "Elemento não encontrado"
@@ -233,7 +233,8 @@ msgstr "Não é possível obter a folha de metadados"
 
 msgid ""
 "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr "Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
+msgstr ""
+"Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
 
 msgid "Event date is empty"
 msgstr "A data do evento está vazia"

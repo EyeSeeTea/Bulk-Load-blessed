@@ -18,9 +18,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.parseFile(options);
         const id = await this.readCellValue(workbook, { type: "cell", sheet: 0, ref: "A1" });
         if (!id || typeof id !== "string") throw new Error("Invalid id");
+        const cleanId = id.replace(/^.*?:/, "").trim();
 
-        this.workbooks[id] = workbook;
-        return id;
+        this.workbooks[cleanId] = workbook;
+        return cleanId;
     }
 
     private async parseFile(options: LoadOptions): Promise<ExcelWorkbook> {
@@ -192,8 +193,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     private async getWorkbook(id: string) {
-        if (!this.workbooks[id]) throw new Error(i18n.t("Template not loaded"));
-
+        if (!this.workbooks[id]) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
         return this.workbooks[id];
     }
 
