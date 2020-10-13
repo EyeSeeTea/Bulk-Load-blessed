@@ -26,7 +26,7 @@ export class ExcelReader {
         template: Template,
         dataSource: CellDataSource
     ): Promise<DataPackage[]> {
-        const cell = await this.excelRepository.findRelativeCell(template, dataSource.ref);
+        const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
@@ -58,8 +58,8 @@ export class ExcelReader {
     private async readCellValue(template: Template, ref?: SheetRef | ValueRef, relative?: CellRef) {
         if (!ref) return undefined;
         if (ref.type === "value") return ref.id;
-        const cell = await this.excelRepository.findRelativeCell(template, ref, relative);
-        if (cell) return this.excelRepository.readCell(template, cell);
+        const cell = await this.excelRepository.findRelativeCell(template.id, ref, relative);
+        if (cell) return this.excelRepository.readCell(template.id, cell);
     }
 
     private formatValue(value: Value | undefined): DataValue["value"] {

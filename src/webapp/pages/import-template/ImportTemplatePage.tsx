@@ -69,6 +69,11 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return;
         }
 
+        await CompositionRoot.attach().templates.import(undefined, file, false);
+        loading.show(false);
+
+        return;
+
         try {
             const {
                 object,

@@ -27,65 +27,67 @@ export class ExcelBuilder {
         let { rowStart } = dataSource.range;
 
         for (const { id, orgUnit, period, attribute, dataValues } of payload) {
-            const cells = await this.excelRepository.getCellsInRange(template, {
+            const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.range,
                 rowStart,
                 rowEnd: rowStart,
             });
 
             const orgUnitCell = await this.excelRepository.findRelativeCell(
-                template,
+                template.id,
                 dataSource.orgUnit,
                 cells[0]
             );
             if (orgUnitCell && orgUnit) {
-                await this.excelRepository.writeCell(template, orgUnitCell, orgUnit);
+                await this.excelRepository.writeCell(template.id, orgUnitCell, orgUnit);
             }
 
             const eventIdCell = await this.excelRepository.findRelativeCell(
-                template,
+                template.id,
                 dataSource.eventId,
                 cells[0]
             );
             if (eventIdCell && id) {
-                await this.excelRepository.writeCell(template, eventIdCell, id);
+                await this.excelRepository.writeCell(template.id, eventIdCell, id);
             }
 
             const periodCell = await this.excelRepository.findRelativeCell(
-                template,
+                template.id,
                 dataSource.period,
                 cells[0]
             );
-            if (periodCell) await this.excelRepository.writeCell(template, periodCell, period);
+            if (periodCell) await this.excelRepository.writeCell(template.id, periodCell, period);
 
             const attributeCell = await this.excelRepository.findRelativeCell(
-                template,
+                template.id,
                 dataSource.attribute,
                 cells[0]
             );
             if (attributeCell && attribute) {
-                await this.excelRepository.writeCell(template, attributeCell, attribute);
+                await this.excelRepository.writeCell(template.id, attributeCell, attribute);
             }
 
             for (const cell of cells) {
                 const dataElementCell = await this.excelRepository.findRelativeCell(
-                    template,
+                    template.id,
                     dataSource.dataElement,
                     cell
                 );
                 const categoryCell = await this.excelRepository.findRelativeCell(
-                    template,
+                    template.id,
                     dataSource.categoryOption,
                     cell
                 );
 
                 const dataElement = dataElementCell
                     ? removeCharacters(
-                          await this.excelRepository.readCell(template, dataElementCell)
+                          await this.excelRepository.readCell(template.id, dataElementCell)
                       )
                     : undefined;
                 const category = categoryCell
-                    ? removeCharacters(await this.excelRepository.readCell(template, categoryCell))
+                    ? removeCharacters(
+                          await this.excelRepository.readCell(template.id, categoryCell)
+                      )
                     : undefined;
 
                 const { value } =
@@ -93,7 +95,7 @@ export class ExcelBuilder {
                         dv => dv.dataElement === dataElement && dv.category === category
                     ) ?? {};
 
-                if (value) await this.excelRepository.writeCell(template, cell, value);
+                if (value) await this.excelRepository.writeCell(template.id, cell, value);
             }
 
             rowStart += 1;
@@ -104,14 +106,14 @@ export class ExcelBuilder {
         _.forOwn(theme.sections, (style: ThemeStyle, section: string) => {
             const styleSource = template.styleSources.find(source => source.section === section);
             const { source } = styleSource ?? {};
-            if (source) this.excelRepository.styleCell(template, source, style);
+            if (source) this.excelRepository.styleCell(template.id, source, style);
         });
 
         await promiseMap(_.toPairs(theme.pictures), async ([section, image]) => {
             const file = image ? await fromBase64(image.src) : undefined;
             const styleSource = template.styleSources.find(source => source.section === section);
             const { source } = styleSource ?? {};
-            if (source && file) this.excelRepository.addPicture(template, source, file);
+            if (source && file) this.excelRepository.addPicture(template.id, source, file);
         });
     }
 }

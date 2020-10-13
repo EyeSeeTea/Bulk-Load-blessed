@@ -20,7 +20,7 @@ export class DownloadCustomTemplateUseCase implements UseCase {
                 await new ExcelBuilder(this.excelRepository).applyTheme(template, theme);
             }
 
-            const data = await this.excelRepository.toBlob(template);
+            const data = await this.excelRepository.toBlob(template.id);
             saveAs(data, `${template.name}.xlsx`);
         } catch (error) {
             console.log("Failed building/downloading template");

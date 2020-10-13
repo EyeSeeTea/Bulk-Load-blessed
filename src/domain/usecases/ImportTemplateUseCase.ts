@@ -28,9 +28,9 @@ export class ImportTemplateUseCase implements UseCase {
         );
 
         const template = new NHWAModule101();
-        await this.excelRepository.loadTemplate(template, { type: "file", file });
+        const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
         const foo = await new ExcelReader(this.excelRepository).readTemplate(template);
-        console.log({ foo });
+        console.log({ foo, templateId });
 
         // Get metadata from dataForm
         // Check organisation units that user has at least one orgUnit -> Error

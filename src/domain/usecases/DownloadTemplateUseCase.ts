@@ -70,7 +70,7 @@ export class DownloadTemplateUseCase implements UseCase {
             const name = element.displayName ?? element.name;
             const file = await builderOutput.toBlob();
 
-            await this.excelRepository.loadTemplate(template, { type: "file", file });
+            await this.excelRepository.loadTemplate({ type: "file", file });
             const builder = new ExcelBuilder(this.excelRepository);
 
             if (theme) await builder.applyTheme(template, theme);
@@ -86,7 +86,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 await builder.populateTemplate(template, dataPackage);
             }
 
-            const data = await this.excelRepository.toBlob(template);
+            const data = await this.excelRepository.toBlob(templateId);
             saveAs(data, `${name}.xlsx`);
         } catch (error) {
             console.log("Failed building/downloading template");

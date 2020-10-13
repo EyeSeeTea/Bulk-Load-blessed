@@ -1,6 +1,11 @@
 import _ from "lodash";
-import XLSX, { Cell as ExcelCell, FormulaError, Workbook as ExcelWorkbook } from "xlsx-populate";
-import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
+import XLSX, {
+    Cell as ExcelCell,
+    FormulaError,
+    Workbook as ExcelWorkbook,
+    Workbook,
+} from "xlsx-populate";
+import { CellRef, Range, SheetRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions, Value } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
@@ -9,28 +14,33 @@ import { removeCharacters } from "../utils/string";
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
-    public async loadTemplate(template: Template, options: LoadOptions): Promise<void> {
-        const { id } = template;
+    public async loadTemplate(options: LoadOptions): Promise<string> {
+        const workbook = await this.parseFile(options);
+        const id = await this.readCellValue(workbook, { type: "cell", sheet: 0, ref: "A1" });
+        if (!id || typeof id !== "string") throw new Error("Invalid id");
+
+        this.workbooks[id] = workbook;
+        return id;
+    }
+
+    private async parseFile(options: LoadOptions): Promise<ExcelWorkbook> {
         switch (options.type) {
             case "url": {
                 const response = await fetch(options.url);
                 const data = await response.arrayBuffer();
-                this.workbooks[id] = await XLSX.fromDataAsync(data);
-                break;
+                return XLSX.fromDataAsync(data);
             }
             case "file": {
-                this.workbooks[id] = await XLSX.fromDataAsync(options.file);
-                break;
+                return XLSX.fromDataAsync(options.file);
             }
             default: {
-                this.workbooks[id] = await XLSX.fromBlankAsync();
-                break;
+                return XLSX.fromBlankAsync();
             }
         }
     }
 
-    public async toBlob(template: Template): Promise<Blob> {
-        const workbook = await this.getWorkbook(template);
+    public async toBlob(id: string): Promise<Blob> {
+        const workbook = await this.getWorkbook(id);
         const data = await workbook.outputAsync();
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -38,11 +48,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     public async findRelativeCell(
-        template: Template,
+        id: string,
         location?: SheetRef,
         cellRef?: CellRef
     ): Promise<CellRef | undefined> {
-        const workbook = await this.getWorkbook(template);
+        const workbook = await this.getWorkbook(id);
 
         if (location?.type === "cell") {
             const destination = workbook.sheet(location.sheet)?.cell(location.ref);
@@ -58,13 +68,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     public async writeCell(
-        template: Template,
+        id: string,
         cellRef: CellRef,
         value: string | number | boolean
     ): Promise<void> {
-        const workbook = await this.getWorkbook(template);
-        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
-        const definedNames = await this.listDefinedNames(template);
+        const workbook = await this.getWorkbook(id);
+        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const definedNames = await this.listDefinedNames(id);
         const definedName = definedNames.find(
             name => removeCharacters(name) === removeCharacters(value)
         );
@@ -87,9 +97,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async readCell(template: Template, cellRef: CellRef): Promise<Value | undefined> {
-        const workbook = await this.getWorkbook(template);
-        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
+    public async readCell(id: string, cellRef: CellRef): Promise<Value | undefined> {
+        const workbook = await this.getWorkbook(id);
+        return this.readCellValue(workbook, cellRef);
+    }
+
+    private async readCellValue(workbook: Workbook, cellRef: CellRef): Promise<Value | undefined> {
+        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
@@ -99,8 +113,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return value;
     }
 
-    public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
-        const workbook = await this.getWorkbook(template);
+    public async getCellsInRange(id: string, range: Range): Promise<CellRef[]> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
         const endCell = workbook.sheet(range.sheet).usedRange()?.endCell();
@@ -118,8 +132,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }));
     }
 
-    public async addPicture(template: Template, location: SheetRef, file: File): Promise<void> {
-        const workbook = await this.getWorkbook(template);
+    public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet, ref } = location;
         const [from, to] = location.type === "range" ? String(ref).split(":") : [ref, ref];
@@ -128,8 +142,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
     }
 
-    public async styleCell(template: Template, source: SheetRef, style: ThemeStyle): Promise<void> {
-        const workbook = await this.getWorkbook(template);
+    public async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet } = source;
         const { text, bold, italic, fontSize = 12, fontColor, fillColor } = style;
@@ -166,8 +180,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    private async buildMergedCells(template: Template, sheet: string | number) {
-        const workbook = await this.getWorkbook(template);
+    private async buildMergedCells(workbook: Workbook, sheet: string | number) {
         //@ts-ignore
         return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
             const range = workbook.sheet(sheet).range(key);
@@ -178,8 +191,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         });
     }
 
-    private async getWorkbook(template: Template) {
-        const { id } = template;
+    private async getWorkbook(id: string) {
         if (!this.workbooks[id]) throw new Error(i18n.t("Template not loaded"));
 
         return this.workbooks[id];
@@ -191,8 +203,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
             : workbook.sheet(sheet).range(`${ref}:${ref}`);
     }
 
-    private async listDefinedNames(template: Template): Promise<string[]> {
-        const workbook = await this.getWorkbook(template);
+    private async listDefinedNames(id: string): Promise<string[]> {
+        const workbook = await this.getWorkbook(id);
         try {
             //@ts-ignore Not typed, need extension
             return workbook.definedName();
