@@ -5,6 +5,7 @@ import * as dhisConnector from "../../webapp/logic/dhisConnector";
 import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
+import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
@@ -70,8 +71,9 @@ export class DownloadTemplateUseCase implements UseCase {
             const file = await builderOutput.toBlob();
 
             await this.excelRepository.loadTemplate(template, { type: "file", file });
+            const builder = new ExcelBuilder(this.excelRepository);
 
-            if (theme) await this.excelRepository.applyTheme(template, theme);
+            if (theme) await builder.applyTheme(template, theme);
 
             if (populate && populateStartDate && populateEndDate) {
                 const dataPackage = await this.instance.getDataPackage({
@@ -81,7 +83,7 @@ export class DownloadTemplateUseCase implements UseCase {
                     startDate: populateStartDate,
                     endDate: populateEndDate,
                 });
-                await this.excelRepository.populateTemplate(template, dataPackage);
+                await builder.populateTemplate(template, dataPackage);
             }
 
             const data = await this.excelRepository.toBlob(template);

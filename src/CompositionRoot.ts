@@ -90,7 +90,11 @@ export class CompositionRoot {
                 this.templateManager,
                 this.excelReader
             ),
-            import: new ImportTemplateUseCase(),
+            import: new ImportTemplateUseCase(
+                this.instance,
+                this.templateManager,
+                this.excelReader
+            ),
             list: new ListDataFormsUseCase(this.instance),
         });
     }

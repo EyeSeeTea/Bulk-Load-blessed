@@ -2,7 +2,7 @@ import _ from "lodash";
 import XLSX, { Cell as ExcelCell, FormulaError, Workbook as ExcelWorkbook } from "xlsx-populate";
 import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, LoadOptions, Value } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { removeCharacters } from "../utils/string";
 
@@ -87,7 +87,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async readCell(template: Template, cellRef: CellRef): Promise<string> {
+    public async readCell(template: Template, cellRef: CellRef): Promise<Value | undefined> {
         const workbook = await this.getWorkbook(template);
         const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
@@ -95,8 +95,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
         const value = destination.value() ?? destination.formula();
-        if (!value || value instanceof FormulaError) return "";
-        return String(value);
+        if (value instanceof FormulaError) return "";
+        return value;
     }
 
     public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {

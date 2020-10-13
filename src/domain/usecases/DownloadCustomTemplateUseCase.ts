@@ -1,6 +1,7 @@
 import { saveAs } from "file-saver";
 import { UseCase } from "../../CompositionRoot";
 import { Id } from "../entities/ReferenceObject";
+import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
@@ -16,7 +17,7 @@ export class DownloadCustomTemplateUseCase implements UseCase {
 
             if (themeId) {
                 const theme = await this.templateRepository.getTheme(themeId);
-                await this.excelRepository.applyTheme(template, theme);
+                await new ExcelBuilder(this.excelRepository).applyTheme(template, theme);
             }
 
             const data = await this.excelRepository.toBlob(template);

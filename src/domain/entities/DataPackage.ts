@@ -15,6 +15,6 @@ export interface DataPackage {
 export interface DataValue {
     dataElement: Id;
     category?: Id;
-    value: string | number;
+    value: string | number | boolean;
     comment?: string;
 }
