@@ -1,5 +1,6 @@
-import { Id, Ref } from "./ReferenceObject";
 import _ from "lodash";
+import { Id, Ref } from "./ReferenceObject";
+import { Relationship } from "./Relationship";
 
 export interface TrackedEntityInstance {
     program: Program;
@@ -29,13 +30,6 @@ export interface Program {
 export interface Attribute {
     id: Id;
     name: string;
-}
-
-export interface Relationship {
-    typeId: Id;
-    typeName: string;
-    fromId: Id;
-    toId: Id;
 }
 
 export function getRelationships(trackedEntityInstances: TrackedEntityInstance[]): Relationship[] {

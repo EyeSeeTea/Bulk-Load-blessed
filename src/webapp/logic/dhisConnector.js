@@ -43,9 +43,15 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
             .getData()
     );
 
+    const metadata = await api.metadata
+        .get({
+            relationshipTypes: { fields: { id: true, name: true } },
+        })
+        .getData();
+
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
 
-    return { element, elementMetadata, organisationUnits, rawMetadata };
+    return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }
 
 export async function importData({ element, api, data }) {

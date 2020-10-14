@@ -14,10 +14,11 @@ export async function getTrackedEntityInstances(
     options: GetOptions
 ): Promise<TrackedEntityInstance[]> {
     const { api, orgUnits, pageSize } = options;
-
     if (_.isEmpty(orgUnits)) return [];
 
-    const { objects: apiPrograms } = await api.models.programs
+    const {
+        objects: [apiProgram],
+    } = await api.models.programs
         .get({
             fields: {
                 id: true,
@@ -29,7 +30,6 @@ export async function getTrackedEntityInstances(
         })
         .getData();
 
-    const apiProgram = apiPrograms[0];
     if (!apiProgram) return [];
 
     const program: Program = {
@@ -39,7 +39,7 @@ export async function getTrackedEntityInstances(
         ),
     };
 
-    // Get TEIs for first page on every orgunit
+    // Get TEIs for first page on every org unit
     const teisFirstPageData = await runPromises(
         orgUnits.map(orgUnit => async () => {
             const apiOptions = { api, program, orgUnit, page: 1, pageSize };
@@ -48,7 +48,7 @@ export async function getTrackedEntityInstances(
         })
     );
 
-    // And now get the TEIs in other pages using the pager information from the previous requests
+    // Get TEIs in other pages using the pager information from the previous requests
     const teisInOtherPages$ = _.flatMap(teisFirstPageData, ({ orgUnit, total }) => {
         const lastPage = Math.ceil(total / pageSize);
         const pages = _.range(2, lastPage + 1);
@@ -58,6 +58,7 @@ export async function getTrackedEntityInstances(
         });
     });
 
+    // Join all TEIs
     const teisInFirstPages = _.flatMap(teisFirstPageData, data => data.trackedEntityInstances);
     const teisInOtherPages = _.flatten(await runPromises(teisInOtherPages$));
 

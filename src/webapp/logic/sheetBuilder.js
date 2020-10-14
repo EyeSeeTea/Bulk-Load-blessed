@@ -32,7 +32,7 @@ SheetBuilder.prototype.generate = async function () {
             const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
             this.programStageSheets[programStageT.id] = sheet;
         });
-        this.relationshipsSheet = this.workbook.addWorksheet("Relationships", protectedSheet);
+        this.relationshipsSheet = this.workbook.addWorksheet("Relationships");
     } else {
         this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
     }
@@ -40,6 +40,10 @@ SheetBuilder.prototype.generate = async function () {
     this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
     this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
     this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
+
+    this.fillValidationSheet();
+    this.fillMetadataSheet();
+    this.fillLegendSheet();
 
     if (isTrackerProgram(element)) {
         await this.fillInstancesSheet();
@@ -49,17 +53,13 @@ SheetBuilder.prototype.generate = async function () {
         this.fillDataEntrySheet();
     }
 
-    this.fillValidationSheet();
-    this.fillMetadataSheet();
-    this.fillLegendSheet();
-
     return this.workbook;
 };
 
 SheetBuilder.prototype.fillRelationshipsSheet = function () {
     const sheet = this.relationshipsSheet;
 
-    this.createColumn(sheet, 1, 1, "Type");
+    this.createColumn(sheet, 1, 1, "Type", null, this.validations.get("relationshipTypes"));
     this.createColumn(sheet, 1, 2, "From TEI");
     this.createColumn(sheet, 1, 3, "To TEI");
 };
@@ -191,19 +191,6 @@ SheetBuilder.prototype.fillInstancesSheet = async function () {
         const name = attribute.trackedEntityAttribute.name;
         this.createColumn(sheet, itemRow, 4 + idx, name, 1);
     });
-
-    // Data: move to use case?
-
-    /*
-    enrollmentRows.forEach((row, rowIdx) => {
-        row.forEach((value, colIdx) => {
-            sheet
-                .cell(6 + rowIdx, 1 + colIdx)
-                .string(value || "")
-                .style(baseStyle);
-        });
-    });
-    */
 };
 
 SheetBuilder.prototype.fillLegendSheet = function () {
@@ -249,6 +236,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     const {
         organisationUnits,
         element,
+        metadata,
         rawMetadata,
         elementMetadata,
         startDate,
@@ -284,6 +272,21 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         });
         this.validations.set(
             "periods",
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                columnId
+            )}$${rowId}`
+        );
+    }
+
+    if (isTrackerProgram(element)) {
+        rowId = 2;
+        columnId++;
+        validationSheet.cell(rowId++, columnId).string("Relationship Types");
+        _.forEach(metadata.relationshipTypes, relationshipType => {
+            validationSheet.cell(rowId++, columnId).formula(`_${relationshipType.id}`);
+        });
+        this.validations.set(
+            "relationshipTypes",
             `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
                 columnId
             )}$${rowId}`
@@ -405,6 +408,17 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
                 name: `_${orgUnit.id}`,
             });
 
+        rowId++;
+    });
+
+    this.builder.metadata.relationshipTypes.forEach(relationshipType => {
+        metadataSheet.cell(rowId, 1).string(relationshipType.id);
+        metadataSheet.cell(rowId, 2).string("relationshipType");
+        metadataSheet.cell(rowId, 3).string(relationshipType.name);
+        this.workbook.definedNameCollection.addDefinedName({
+            refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+            name: `_${relationshipType.id}`,
+        });
         rowId++;
     });
 
