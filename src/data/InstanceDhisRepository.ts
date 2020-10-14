@@ -32,7 +32,6 @@ export class InstanceDhisRepository implements InstanceRepository {
             case "dataSets":
                 return this.getDataSets(ids);
             case "programs":
-                //case "trackerPrograms":
                 return this.getPrograms(ids);
         }
     }

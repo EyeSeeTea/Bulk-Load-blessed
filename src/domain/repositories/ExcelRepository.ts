@@ -129,10 +129,7 @@ export abstract class ExcelRepository {
                 );
 
             const values = program.attributes.map(
-                attribute =>
-                    trackedEntityInstance.attributeValues.find(
-                        attributeValue => attributeValue.id === attribute.id
-                    )?.value
+                attr => trackedEntityInstance.attributeValues.find(av => av.id === attr.id)?.value
             );
 
             await Promise.all(
