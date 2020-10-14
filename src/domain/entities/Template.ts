@@ -88,14 +88,6 @@ export interface GenericDataSource {
     eventId?: SheetRef;
 }
 
-export interface TeiRowDataSource {
-    type: "rowTei";
-    teiId: ColumnRef;
-    orgUnit: ColumnRef;
-    date: ColumnRef;
-    attributes: Range;
-}
-
 export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
     teiId: ColumnRef;
@@ -122,6 +114,14 @@ export interface RowDataSource extends GenericDataSource {
     categoryOption?: RowRef;
     attribute?: ColumnRef | CellRef;
     eventId?: ColumnRef | CellRef;
+}
+
+export interface TeiRowDataSource {
+    type: "rowTei";
+    teiId: ColumnRef;
+    orgUnit: ColumnRef;
+    date: ColumnRef;
+    attributes: Range;
 }
 
 export interface ColumnDataSource extends GenericDataSource {

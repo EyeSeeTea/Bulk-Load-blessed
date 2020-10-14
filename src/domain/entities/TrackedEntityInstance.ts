@@ -17,9 +17,9 @@ export interface Enrollment {
 }
 
 export interface AttributeValue {
-    id: Id;
-    valueType: string;
+    attribute: Attribute;
     value: string;
+    optionIdOrValue: string;
 }
 
 export interface Program {
@@ -29,7 +29,8 @@ export interface Program {
 
 export interface Attribute {
     id: Id;
-    name: string;
+    valueType: string;
+    optionSet: { id: Id; options: Array<{ id: string; code: string }> };
 }
 
 export function getRelationships(trackedEntityInstances: TrackedEntityInstance[]): Relationship[] {

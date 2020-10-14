@@ -14,10 +14,8 @@ import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
     GetDataPackageParams,
     InstanceRepository,
-    GetTeiOptions,
 } from "../domain/repositories/InstanceRepository";
 import { promiseMap } from "../webapp/utils/promises";
-import { TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
 import { getTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
 
 export class InstanceDhisRepository implements InstanceRepository {
@@ -162,10 +160,11 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
+        const { api } = this;
         const dataPackage = await this.getProgramPackage(params);
         const orgUnits = params.orgUnits.map(id => ({ id }));
         const program = { id: params.id };
-        const trackedEntityInstances = await this.getTrackedEntityInstances({ program, orgUnits });
+        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
 
         return {
             type: "trackerPrograms",
@@ -177,15 +176,6 @@ export class InstanceDhisRepository implements InstanceRepository {
     public async getLocales(): Promise<Locale[]> {
         const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
         return locales;
-    }
-
-    public async getTrackedEntityInstances(
-        options: GetTeiOptions
-    ): Promise<TrackedEntityInstance[]> {
-        const { api } = this;
-        const { program, orgUnits } = options;
-
-        return getTrackedEntityInstances({ api, program, orgUnits, pageSize: 500 });
     }
 
     /* Private */

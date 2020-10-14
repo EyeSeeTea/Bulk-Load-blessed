@@ -67,7 +67,7 @@ SheetBuilder.prototype.fillRelationshipsSheet = function () {
 SheetBuilder.prototype.fillProgramStageSheets = function () {
     const { elementMetadata: metadata } = this.builder;
 
-    _.forEach(this.programStageSheets, (dataEntrySheet, programStageId) => {
+    _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
         const programStage = metadata.get(programStageId);
 
@@ -76,23 +76,27 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         const itemRow = rowOffset + 2;
 
         // Freeze and format column titles
-        dataEntrySheet.row(itemRow).freeze();
-        dataEntrySheet.row(sectionRow).setHeight(30);
-        dataEntrySheet.row(itemRow).setHeight(50);
+        sheet.row(itemRow).freeze();
+        sheet.row(sectionRow).setHeight(30);
+        sheet.row(itemRow).setHeight(50);
+
+        for (let row = 1; row < sectionRow; row++) {
+            sheet.row(row).hide();
+        }
 
         // Add template version
-        dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+        sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
         // Add column titles
         let columnId = 1;
         let groupId = 0;
 
-        this.createColumn(dataEntrySheet, itemRow, columnId++, "TEI id");
+        this.createColumn(sheet, itemRow, columnId++, "TEI id");
 
-        this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
+        this.createColumn(sheet, itemRow, columnId++, "Event id");
 
         this.createColumn(
-            dataEntrySheet,
+            sheet,
             itemRow,
             columnId++,
             `${programStage.executionDateLabel ?? "Date"} *`
@@ -119,17 +123,17 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
                     ? dataElement.optionSet.id
                     : dataElement.valueType;
                 this.createColumn(
-                    dataEntrySheet,
+                    sheet,
                     itemRow,
                     columnId,
                     `_${dataElement.id}`,
                     groupId,
                     this.validations.get(validation)
                 );
-                dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
+                sheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
                 if (description !== undefined) {
-                    dataEntrySheet.cell(itemRow, columnId).comment(description, {
+                    sheet.cell(itemRow, columnId).comment(description, {
                         height: "100pt",
                         width: "160pt",
                     });
@@ -139,7 +143,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
             });
 
             if (firstColumnId < columnId)
-                dataEntrySheet
+                sheet
                     .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
                     .formula(`_${programStageSection.id}`)
                     .style(this.groupStyle(groupId));
@@ -188,8 +192,10 @@ SheetBuilder.prototype.fillInstancesSheet = async function () {
     const programAttributes = program.programTrackedEntityAttributes || [];
 
     programAttributes.forEach((attribute, idx) => {
-        const name = attribute.trackedEntityAttribute.name;
-        this.createColumn(sheet, itemRow, 4 + idx, name, 1);
+        const tea = attribute.trackedEntityAttribute;
+        const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
+        const validation = this.validations.get(validationId);
+        this.createColumn(sheet, itemRow, 4 + idx, tea.name, 1, validation);
     });
 };
 
@@ -307,7 +313,13 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    _.forEach(rawMetadata.optionSets, optionSet => {
+    const programAttributes = element.programTrackedEntityAttributes || [];
+    const programOptionSets = _(programAttributes)
+        .map(pa => pa.trackedEntityAttribute?.optionSet)
+        .compact()
+        .value();
+
+    _.forEach(_.concat(programOptionSets, rawMetadata.optionSets), optionSet => {
         rowId = 2;
         columnId++;
 

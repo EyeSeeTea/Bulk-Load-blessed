@@ -101,8 +101,8 @@ export abstract class ExcelRepository {
         let { rowStart } = dataSource.attributes;
         if (payload.type !== "trackerPrograms") return;
 
-        for (const trackedEntityInstance of payload.trackedEntityInstances) {
-            const { program, orgUnit, id, enrollment } = trackedEntityInstance;
+        for (const tei of payload.trackedEntityInstances) {
+            const { program, orgUnit, id, enrollment } = tei;
 
             const cells = await this.getCellsInRange(template, {
                 ...dataSource.attributes,
@@ -129,7 +129,7 @@ export abstract class ExcelRepository {
                 );
 
             const values = program.attributes.map(
-                attr => trackedEntityInstance.attributeValues.find(av => av.id === attr.id)?.value
+                attr => tei.attributeValues.find(av => av.attribute.id === attr.id)?.optionIdOrValue
             );
 
             await Promise.all(
@@ -231,8 +231,8 @@ export abstract class ExcelRepository {
                 await this.writeCell(template, eventIdCell, id);
             }
 
-            const periodCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
-            if (periodCell) await this.writeCell(template, periodCell, period);
+            const dateCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
+            if (dateCell) await this.writeCell(template, dateCell, period);
 
             for (const cell of cells) {
                 const dataElementCell = await this.findRelativeCell(

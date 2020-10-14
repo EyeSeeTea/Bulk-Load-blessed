@@ -1,19 +1,25 @@
 import _ from "lodash";
 import { D2Api, Id, Ref } from "../types/d2-api";
 import { runPromises } from "../utils/promises";
-import { TrackedEntityInstance, Program } from "../domain/entities/TrackedEntityInstance";
+import {
+    TrackedEntityInstance,
+    Program,
+    AttributeValue,
+    Enrollment,
+} from "../domain/entities/TrackedEntityInstance";
+import { Relationship } from "../domain/entities/Relationship";
 
 export interface GetOptions {
     api: D2Api;
     program: Ref;
     orgUnits: Ref[];
-    pageSize: number;
+    pageSize?: number;
 }
 
 export async function getTrackedEntityInstances(
     options: GetOptions
 ): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, pageSize } = options;
+    const { api, orgUnits, pageSize = 500 } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const {
@@ -23,7 +29,12 @@ export async function getTrackedEntityInstances(
             fields: {
                 id: true,
                 programTrackedEntityAttributes: {
-                    trackedEntityAttribute: { id: true, name: true },
+                    trackedEntityAttribute: {
+                        id: true,
+                        name: true,
+                        valueType: true,
+                        optionSet: { id: true, options: { id: true, code: true } },
+                    },
                 },
             },
             filter: { id: { eq: options.program.id } },
@@ -164,18 +175,24 @@ async function getTeisFromApi(options: {
 
 function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEntityInstance {
     const orgUnit = { id: teiApi.orgUnit };
-    const enrollment = _(teiApi.enrollments)
+    const attributesById = _.keyBy(program.attributes, attribute => attribute.id);
+
+    const enrollment: Enrollment | undefined = _(teiApi.enrollments)
         .filter(e => e.program === program.id && orgUnit.id === e.orgUnit)
         .map(enrollmentApi => ({ date: enrollmentApi.enrollmentDate }))
         .first();
 
-    const attributeValues = teiApi.attributes.map(attrApi => ({
-        id: attrApi.attribute,
-        valueType: attrApi.valueType,
-        value: attrApi.value,
-    }));
+    const attributeValues: AttributeValue[] = teiApi.attributes.map(attrApi => {
+        const optionSet = attributesById[attrApi.attribute]?.optionSet;
+        const option = optionSet && optionSet.options.find(option => option.code === attrApi.value);
+        return {
+            attribute: { id: attrApi.attribute, valueType: attrApi.valueType, optionSet },
+            value: attrApi.value,
+            optionIdOrValue: option ? option.id : attrApi.value,
+        };
+    });
 
-    const relationships = _(teiApi.relationships)
+    const relationships: Relationship[] = _(teiApi.relationships)
         .map(relApi =>
             relApi.from.trackedEntityInstance && relApi.to.trackedEntityInstance
                 ? {
