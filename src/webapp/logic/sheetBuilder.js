@@ -9,8 +9,11 @@ export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v3";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
 
+const teiSheetName = "TEI Instances";
 const orgNonExistingMessage =
     "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
+
+const maxRow = 1048576;
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
@@ -18,13 +21,13 @@ export const SheetBuilder = function (builder) {
     this.validations = new Map();
 };
 
-SheetBuilder.prototype.generate = async function () {
+SheetBuilder.prototype.generate = function () {
     const { builder } = this;
     const { element } = builder;
 
     if (isTrackerProgram(element)) {
         const { element, elementMetadata: metadata } = builder;
-        this.instancesSheet = this.workbook.addWorksheet("TEI Instances");
+        this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
         this.programStageSheets = {};
 
         _.forEach(element.programStages, programStageT => {
@@ -46,7 +49,7 @@ SheetBuilder.prototype.generate = async function () {
     this.fillLegendSheet();
 
     if (isTrackerProgram(element)) {
-        await this.fillInstancesSheet();
+        this.fillInstancesSheet();
         this.fillProgramStageSheets();
         this.fillRelationshipsSheet();
     } else {
@@ -60,13 +63,12 @@ SheetBuilder.prototype.fillRelationshipsSheet = function () {
     const sheet = this.relationshipsSheet;
 
     this.createColumn(sheet, 1, 1, "Type", null, this.validations.get("relationshipTypes"));
-    this.createColumn(sheet, 1, 2, "From TEI");
-    this.createColumn(sheet, 1, 3, "To TEI");
+    this.createColumn(sheet, 1, 2, "From TEI", null, this.getTeiIdValidation());
+    this.createColumn(sheet, 1, 3, "To TEI", null, this.getTeiIdValidation());
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {
     const { elementMetadata: metadata } = this.builder;
-
     _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
         const programStage = metadata.get(programStageId);
@@ -91,7 +93,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         let columnId = 1;
         let groupId = 0;
 
-        this.createColumn(sheet, itemRow, columnId++, "TEI id");
+        this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
 
         this.createColumn(sheet, itemRow, columnId++, "Event id");
 
@@ -153,7 +155,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
     });
 };
 
-SheetBuilder.prototype.fillInstancesSheet = async function () {
+SheetBuilder.prototype.fillInstancesSheet = function () {
     const { element: program } = this.builder;
     const { rowOffset = 0 } = this.builder.template;
     const sheet = this.instancesSheet;
@@ -190,6 +192,7 @@ SheetBuilder.prototype.fillInstancesSheet = async function () {
     this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Date") + " *");
 
     const programAttributes = program.programTrackedEntityAttributes || [];
+    this.instancesSheetValuesRow = itemRow + 1;
 
     programAttributes.forEach((attribute, idx) => {
         const tea = attribute.trackedEntityAttribute;
@@ -319,7 +322,9 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         .compact()
         .value();
 
-    _.forEach(_.concat(programOptionSets, rawMetadata.optionSets), optionSet => {
+    const optionSets = _.concat(programOptionSets, _.toArray(rawMetadata.optionSets));
+
+    _.forEach(optionSets, optionSet => {
         rowId = 2;
         columnId++;
 
@@ -720,7 +725,7 @@ SheetBuilder.prototype.createColumn = function (
     if (validation !== null) {
         const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
             columnId
-        )}1048576`;
+        )}${maxRow}`;
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
@@ -767,6 +772,10 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
             fgColor: palette[groupId % palette.length],
         },
     };
+};
+
+SheetBuilder.prototype.getTeiIdValidation = function () {
+    return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxRow}`;
 };
 
 /**
