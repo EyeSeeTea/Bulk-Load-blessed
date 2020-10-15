@@ -38,8 +38,10 @@ export interface CustomTemplate extends BaseTemplate {
 export interface GenericSheetRef {
     type: RefType;
     ref: string | number;
-    sheet: string | number;
+    sheet: Sheet;
 }
+
+type Sheet = string | number;
 
 export interface RowRef extends GenericSheetRef {
     type: "row";
@@ -67,7 +69,7 @@ export interface ValueRef<T extends string = string> {
 }
 
 export interface Range {
-    sheet: string;
+    sheet: Sheet;
     rowStart: number;
     rowEnd?: number;
     columnStart: string;

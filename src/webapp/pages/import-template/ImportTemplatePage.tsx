@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackage, DataValue } from "../../../domain/entities/DataPackage";
+import { DataPackageData, DataPackageDataValue } from "../../../domain/entities/DataPackage";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -293,7 +293,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             const existingEvents = _.remove(
                 events ?? [],
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
-                    return result.find(dataPackage =>
+                    return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
                             id,
                             {
@@ -315,7 +315,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             const existingDataValues = _.remove(
                 dataValues ?? [],
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
-                    return result.find(dataPackage =>
+                    return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
                             id,
                             { period: String(period), orgUnit, attribute },
@@ -332,8 +332,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
     const compareDataPackages = (
         id: string,
-        base: Partial<DataPackage>,
-        compare: Partial<DataPackage>,
+        base: Partial<DataPackageData>,
+        compare: Partial<DataPackageData>,
         periodDays = 0
     ): boolean => {
         const properties = _.compact([
@@ -363,7 +363,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (base.id && compare.id) return false;
 
         const exclusions = settings.duplicateExclusion[id] ?? [];
-        const filter = (values: DataValue[]) =>
+        const filter = (values: DataPackageDataValue[]) =>
             values.filter(({ dataElement }) => !exclusions.includes(dataElement));
 
         if (
@@ -372,8 +372,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             !_.isEqualWith(
                 filter(base.dataValues),
                 filter(compare.dataValues),
-                (base: DataValue[], compare: DataValue[]) => {
-                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
+                    const values = ({ dataElement, value }: DataPackageDataValue) =>
+                        `${dataElement}-${value}`;
                     const intersection = _.intersectionBy(base, compare, values);
                     return base.length === compare.length && intersection.length === base.length;
                 }

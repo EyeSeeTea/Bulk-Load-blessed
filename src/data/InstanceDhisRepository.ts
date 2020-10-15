@@ -171,13 +171,13 @@ export class InstanceDhisRepository implements InstanceRepository {
             .value();
     }
 
-    public async deleteAggregatedData(dataPackage: DataPackage[]): Promise<ImportSummary> {
+    public async deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary> {
         return this.importAggregatedData("DELETE", dataPackage);
     }
 
     public async importDataPackage(
         type: DataFormType,
-        dataPackage: DataPackage[]
+        dataPackage: DataPackage
     ): Promise<ImportSummary> {
         switch (type) {
             case "dataSets":
@@ -191,7 +191,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private async importAggregatedData(
         importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
-        dataPackage: DataPackage[]
+        dataPackage: DataPackage
     ): Promise<ImportSummary> {
         const dataValues = this.buildAggregatedPayload(dataPackage);
 
@@ -210,7 +210,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         };
     }
 
-    private async importEventsData(dataPackage: DataPackage[]): Promise<ImportSummary> {
+    private async importEventsData(dataPackage: DataPackage): Promise<ImportSummary> {
         const events = this.buildEventsPayload(dataPackage);
         const { status, message, response } = await this.api
             .post<EventsPostResponse>("/events", {}, { events })
@@ -233,48 +233,42 @@ export class InstanceDhisRepository implements InstanceRepository {
         };
     }
 
-    private buildAggregatedPayload(dataPackage: DataPackage[]): AggregatedDataValue[] {
-        return _(dataPackage)
-            .map(({ orgUnit, period, attribute, dataValues }) =>
-                dataValues.map(({ dataElement, category, value, comment }) => ({
-                    orgUnit,
-                    period,
-                    attributeOptionCombo: attribute,
-                    dataElement,
-                    categoryOptionCombo: category,
-                    value: String(value),
-                    comment,
-                }))
-            )
-            .flatten()
-            .value();
+    private buildAggregatedPayload(dataPackage: DataPackage): AggregatedDataValue[] {
+        return _.flatMap(dataPackage.dataEntries, ({ orgUnit, period, attribute, dataValues }) =>
+            dataValues.map(({ dataElement, category, value, comment }) => ({
+                orgUnit,
+                period,
+                attributeOptionCombo: attribute,
+                dataElement,
+                categoryOptionCombo: category,
+                value: String(value),
+                comment,
+            }))
+        );
     }
 
-    private buildEventsPayload(dataPackage: DataPackage[]): Event[] {
-        return _(dataPackage)
-            .map(item => {
-                if (item.type !== "programs") return undefined;
-                const { id, orgUnit, dataForm, period, attribute, dataValues } = item;
-                return {
-                    event: id,
-                    program: dataForm,
-                    status: "COMPLETED",
-                    orgUnit,
-                    eventDate: period,
-                    attributeOptionCombo: attribute,
-                    dataValues: dataValues,
-                };
+    private buildEventsPayload(dataPackage: DataPackage): Event[] {
+        return dataPackage.dataEntries.map(
+            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+                event: id,
+                program: dataForm,
+                status: "COMPLETED",
+                orgUnit,
+                eventDate: period,
+                attributeOptionCombo: attribute,
+                dataValues: dataValues,
             })
-            .compact()
-            .value();
+        );
     }
 
-    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
+    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage> {
         switch (params.type) {
             case "dataSets":
                 return this.getDataSetPackage(params);
             case "programs":
                 return this.getProgramPackage(params);
+            case "trackerPrograms":
+                return this.getTrackerProgramPackage(params);
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
@@ -287,7 +281,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
         translateCodes = true,
-    }: GetDataPackageParams): Promise<DataPackage[]> {
+    }: GetDataPackageParams): Promise<DataPackage> {
         const defaultIds = await this.getDefaultIds();
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
         const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
@@ -307,38 +301,41 @@ export class InstanceDhisRepository implements InstanceRepository {
                 : [await query()];
         });
 
-        return _(response)
-            .flatten()
-            .flatMap(({ dataValues = [] }) => dataValues)
-            .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
-                [period, orgUnit, attributeOptionCombo].join("-")
-            )
-            .map((dataValues, key) => {
-                const [period, orgUnit, attribute] = key.split("-");
-                return {
-                    type: "dataSets" as const,
-                    dataForm: id,
-                    orgUnit,
-                    period,
-                    attribute: defaultIds.includes(attribute) ? undefined : attribute,
-                    dataValues: dataValues.map(
-                        ({ dataElement, categoryOptionCombo, value, comment }) => ({
-                            dataElement,
-                            category: defaultIds.includes(categoryOptionCombo)
-                                ? undefined
-                                : categoryOptionCombo,
-                            value: this.formatDataValue(
+        return {
+            type: "dataSets",
+            dataEntries: _(response)
+                .flatten()
+                .flatMap(({ dataValues = [] }) => dataValues)
+                .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
+                    [period, orgUnit, attributeOptionCombo].join("-")
+                )
+                .map((dataValues, key) => {
+                    const [period, orgUnit, attribute] = key.split("-");
+                    return {
+                        type: "aggregated" as const,
+                        dataForm: id,
+                        orgUnit,
+                        period,
+                        attribute: defaultIds.includes(attribute) ? undefined : attribute,
+                        dataValues: dataValues.map(
+                            ({ dataElement, categoryOptionCombo, value, comment }) => ({
                                 dataElement,
-                                value,
-                                metadata,
-                                translateCodes
-                            ),
-                            comment,
-                        })
-                    ),
-                };
-            })
-            .value();
+                                category: defaultIds.includes(categoryOptionCombo)
+                                    ? undefined
+                                    : categoryOptionCombo,
+                                value: this.formatDataValue(
+                                    dataElement,
+                                    value,
+                                    metadata,
+                                    translateCodes
+                                ),
+                                comment,
+                            })
+                        ),
+                    };
+                })
+                .value(),
+        };
     }
 
     private async getProgramPackage({
@@ -347,7 +344,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
         translateCodes = true,
-    }: GetDataPackageParams): Promise<DataPackage[]> {
+    }: GetDataPackageParams): Promise<DataPackage> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
         const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
@@ -373,34 +370,44 @@ export class InstanceDhisRepository implements InstanceRepository {
             );
         });
 
-        return _(response)
-            .flatten()
-            .map(({ events }) => events)
-            .flatten()
-            .map(
-                ({
-                    event,
-                    program,
-                    orgUnit,
-                    eventDate,
-                    attributeOptionCombo,
-                    coordinate,
-                    dataValues,
-                }) => ({
-                    type: "programs" as const,
-                    id: event,
-                    dataForm: program,
-                    orgUnit,
-                    period: moment(eventDate).format("YYYY-MM-DD"),
-                    attribute: attributeOptionCombo,
-                    coordinate,
-                    dataValues: dataValues.map(({ dataElement, value }) => ({
-                        dataElement,
-                        value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                    })),
-                })
-            )
-            .value();
+        return {
+            type: "programs",
+            dataEntries: _(response)
+                .flatten()
+                .map(({ events }) => events)
+                .flatten()
+                .map(
+                    ({
+                        event,
+                        orgUnit,
+                        eventDate,
+                        attributeOptionCombo,
+                        coordinate,
+                        dataValues,
+                    }) => ({
+                        id: event,
+                        dataForm: id,
+                        orgUnit,
+                        period: moment(eventDate).format("YYYY-MM-DD"),
+                        attribute: attributeOptionCombo,
+                        coordinate,
+                        dataValues: dataValues.map(({ dataElement, value }) => ({
+                            dataElement,
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
+                        })),
+                    })
+                )
+                .value(),
+        };
+    }
+
+    private async getTrackerProgramPackage(_params: GetDataPackageParams): Promise<DataPackage> {
+        throw new Error("Not implemented yet");
     }
 
     private formatDataValue(

@@ -25,9 +25,9 @@ export interface InstanceRepository {
     getUserOrgUnits(): Promise<OrgUnit[]>;
     getDataForms(options?: GetDataFormsParams): Promise<DataForm[]>;
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
-    getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
+    getDataPackage(params: GetDataPackageParams): Promise<DataPackage>;
     getLocales(): Promise<Locale[]>;
     getDefaultIds(): Promise<string[]>;
-    deleteAggregatedData(dataPackage: DataPackage[]): Promise<ImportSummary>;
-    importDataPackage(type: DataFormType, dataPackage: DataPackage[]): Promise<ImportSummary>;
+    deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary>;
+    importDataPackage(type: DataFormType, dataPackage: DataPackage): Promise<ImportSummary>;
 }

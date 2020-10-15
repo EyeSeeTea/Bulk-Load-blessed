@@ -1,15 +1,24 @@
 import _ from "lodash";
 import { promiseMap } from "../../webapp/utils/promises";
-import { DataFormType } from "../entities/DataForm";
-import { DataPackage, DataValue } from "../entities/DataPackage";
+import { DataPackage, DataPackageData, DataPackageValue } from "../entities/DataPackage";
 import { CellDataSource, CellRef, SheetRef, Template, ValueRef } from "../entities/Template";
-import { ExcelRepository, Value } from "../repositories/ExcelRepository";
+import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 
 export class ExcelReader {
     constructor(private excelRepository: ExcelRepository) {}
 
-    public async readTemplate(template: Template): Promise<DataPackage[]> {
+    public async readTemplate(template: Template): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
+
+        const dataFormType = await this.readCellValue(template, template.dataFormType);
+
+        if (
+            dataFormType !== "dataSets" &&
+            dataFormType !== "programs" &&
+            dataFormType !== "trackerPrograms"
+        ) {
+            return undefined;
+        }
 
         const data = await promiseMap(dataSources, dataSource => {
             switch (dataSource.type) {
@@ -20,35 +29,36 @@ export class ExcelReader {
             }
         });
 
-        return _(data)
-            .flatten()
-            .groupBy(({ type, dataForm, id, period, orgUnit, attribute }) =>
-                [type, dataForm, id, period, orgUnit, attribute].join("-")
-            )
-            .map((items, key) => {
-                const [type, dataForm, id, period, orgUnit, attribute] = key.split("-");
-                return {
-                    type: type as DataFormType,
-                    dataForm,
-                    id: id ? String(id) : undefined,
-                    orgUnit: String(orgUnit),
-                    period: String(period),
-                    attribute: attribute ? String(attribute) : undefined,
-                    dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
-                };
-            })
-            .value();
+        return {
+            type: dataFormType,
+            dataEntries: _(data)
+                .flatten()
+                .groupBy(({ dataForm, id, period, orgUnit, attribute }) =>
+                    [dataForm, id, period, orgUnit, attribute].join("-")
+                )
+                .map((items, key) => {
+                    const [dataForm, id, period, orgUnit, attribute] = key.split("-");
+                    return {
+                        dataForm,
+                        id: id ? String(id) : undefined,
+                        orgUnit: String(orgUnit),
+                        period: String(period),
+                        attribute: attribute ? String(attribute) : undefined,
+                        dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
+                    };
+                })
+                .value(),
+        };
     }
 
     private async readByCell(
         template: Template,
         dataSource: CellDataSource
-    ): Promise<DataPackage[]> {
+    ): Promise<DataPackageData[]> {
         const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
 
         const dataFormId = await this.readCellValue(template, template.dataFormId);
-        const dataFormType = await this.readCellValue(template, template.dataFormType);
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
         const period = await this.readCellValue(template, dataSource.period);
         const dataElement = await this.readCellValue(template, dataSource.dataElement);
@@ -56,18 +66,12 @@ export class ExcelReader {
         const attribute = await this.readCellValue(template, dataSource.attribute);
         const eventId = await this.readCellValue(template, dataSource.eventId);
 
-        if (
-            !orgUnit ||
-            !period ||
-            !dataElement ||
-            !dataFormId ||
-            (dataFormType !== "dataSets" && dataFormType !== "programs")
-        )
+        if (!orgUnit || !period || !dataElement || !dataFormId) {
             return [];
+        }
 
         return [
             {
-                type: dataFormType,
                 dataForm: String(dataFormId),
                 id: eventId ? String(eventId) : undefined,
                 orgUnit: String(orgUnit),
@@ -91,7 +95,7 @@ export class ExcelReader {
         if (cell) return this.excelRepository.readCell(template.id, cell);
     }
 
-    private formatValue(value: Value | undefined): DataValue["value"] {
+    private formatValue(value: ExcelValue | undefined): DataPackageValue {
         if (value instanceof Date) return value.toISOString();
         return value !== undefined ? String(value) : "";
     }

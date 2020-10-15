@@ -5,7 +5,7 @@ import { GetDataPackageParams, InstanceRepository } from "../repositories/Instan
 export class GetFormDataPackageUseCase implements UseCase {
     constructor(private instance: InstanceRepository) {}
 
-    public async execute(params: GetDataPackageParams): Promise<DataPackage[]> {
+    public async execute(params: GetDataPackageParams): Promise<DataPackage> {
         return this.instance.getDataPackage(params);
     }
 }

@@ -6,7 +6,9 @@ export class ListDataFormsUseCase implements UseCase {
 
     public async execute() {
         const dataSets = await this.instance.getDataForms({ type: ["dataSets"] });
-        const programs = await this.instance.getDataForms({ type: ["programs"] });
+        const programs = await this.instance.getDataForms({
+            type: ["programs", "trackerPrograms"],
+        });
         return { dataSets, programs };
     }
 }

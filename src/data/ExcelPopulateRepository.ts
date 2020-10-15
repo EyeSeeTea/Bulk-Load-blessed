@@ -7,7 +7,7 @@ import XLSX, {
 } from "xlsx-populate";
 import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository, LoadOptions, Value } from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, LoadOptions, ExcelValue } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { removeCharacters } from "../utils/string";
 
@@ -98,7 +98,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async readCell(id: string, cellRef?: CellRef | ValueRef): Promise<Value | undefined> {
+    public async readCell(
+        id: string,
+        cellRef?: CellRef | ValueRef
+    ): Promise<ExcelValue | undefined> {
         if (!cellRef) return undefined;
         if (cellRef.type === "value") return cellRef.id;
 
@@ -106,7 +109,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return this.readCellValue(workbook, cellRef);
     }
 
-    private async readCellValue(workbook: Workbook, cellRef: CellRef): Promise<Value | undefined> {
+    private async readCellValue(
+        workbook: Workbook,
+        cellRef: CellRef
+    ): Promise<ExcelValue | undefined> {
         const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
         const { startCell: destination = cell } =

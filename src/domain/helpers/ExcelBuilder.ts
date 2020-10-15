@@ -10,7 +10,7 @@ import { ExcelRepository } from "../repositories/ExcelRepository";
 export class ExcelBuilder {
     constructor(private excelRepository: ExcelRepository) {}
 
-    public async populateTemplate(template: Template, payload: DataPackage[]): Promise<void> {
+    public async populateTemplate(template: Template, payload: DataPackage): Promise<void> {
         const { dataSources = [] } = template;
         for (const dataSource of dataSources) {
             switch (dataSource.type) {
@@ -23,10 +23,10 @@ export class ExcelBuilder {
         }
     }
 
-    private async fillByRow(template: Template, dataSource: RowDataSource, payload: DataPackage[]) {
+    private async fillByRow(template: Template, dataSource: RowDataSource, payload: DataPackage) {
         let { rowStart } = dataSource.range;
 
-        for (const { id, orgUnit, period, attribute, dataValues } of payload) {
+        for (const { id, orgUnit, period, attribute, dataValues } of payload.dataEntries) {
             const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.range,
                 rowStart,

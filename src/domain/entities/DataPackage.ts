@@ -1,34 +1,37 @@
-import { Id } from "./ReferenceObject";
-import { FlattenUnion } from "../../types/flatten-union";
 import { DataFormType } from "./DataForm";
+import { Id } from "./ReferenceObject";
+import { TrackedEntityInstance } from "./TrackedEntityInstance";
 
-interface BaseDataPackage {
+export type DataPackage = BaseDataPackage | TrackerProgramPackage;
+export type DataPackageValue = string | number | boolean;
+
+export interface BaseDataPackage {
     type: DataFormType;
-    dataForm: string;
+    dataEntries: DataPackageData[];
+}
+
+export interface TrackerProgramPackage extends BaseDataPackage {
+    type: "trackerPrograms";
+    trackedEntityInstances: TrackedEntityInstance[];
+}
+
+export interface DataPackageData {
+    id?: Id;
+    dataForm: Id;
     orgUnit: Id;
     period: string;
     attribute?: Id;
-    dataValues: DataValue[];
-}
-
-interface AggregatedDataPackage extends BaseDataPackage {
-    type: "dataSets";
-}
-
-interface EventsDataPackage extends BaseDataPackage {
-    type: "programs";
-    id?: string;
+    trackedEntityInstance?: Id;
     coordinate?: {
         latitude: string;
         longitude: string;
     };
+    dataValues: DataPackageDataValue[];
 }
 
-export type DataPackage = FlattenUnion<AggregatedDataPackage | EventsDataPackage>;
-
-export interface DataValue {
+export interface DataPackageDataValue {
     dataElement: Id;
     category?: Id;
-    value: string | number | boolean;
+    value: DataPackageValue;
     comment?: string;
 }

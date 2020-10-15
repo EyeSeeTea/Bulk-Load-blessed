@@ -3,10 +3,9 @@ import moment from "moment";
 import { UseCase } from "../../CompositionRoot";
 import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSettings";
 import { DataForm } from "../entities/DataForm";
-import { DataPackage, DataValue } from "../entities/DataPackage";
+import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
 import { ImportSummary } from "../entities/ImportSummary";
-import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -14,10 +13,14 @@ import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export type ImportTemplateError =
     | {
-          type: "INVALID_DATA_FORM_ID" | "DATA_FORM_NOT_FOUND" | "INVALID_OVERRIDE_ORG_UNIT";
+          type:
+              | "INVALID_DATA_FORM_ID"
+              | "DATA_FORM_NOT_FOUND"
+              | "INVALID_OVERRIDE_ORG_UNIT"
+              | "MALFORMED_TEMPLATE";
       }
-    | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage[]; invalidDataValues: DataPackage[] }
-    | { type: "DUPLICATE_VALUES"; dataValues: DataPackage[]; existingDataValues: DataPackage[] };
+    | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage; invalidDataValues: DataPackage }
+    | { type: "DUPLICATE_VALUES"; dataValues: DataPackage; existingDataValues: DataPackage };
 
 export interface ImportTemplateUseCaseParams {
     file: File;
@@ -60,8 +63,14 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "DATA_FORM_NOT_FOUND" });
         }
 
+        const reader = new ExcelReader(this.excelRepository);
+        const excelDataValues = await reader.readTemplate(template);
+        if (!excelDataValues) {
+            return Either.error({ type: "MALFORMED_TEMPLATE" });
+        }
+
         const { dataValues, invalidDataValues, existingDataValues } = await this.readDataValues(
-            template,
+            excelDataValues,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,
@@ -70,11 +79,11 @@ export class ImportTemplateUseCase implements UseCase {
             duplicateToleranceUnit
         );
 
-        if (invalidDataValues.length > 0) {
+        if (invalidDataValues.dataEntries.length > 0) {
             return Either.error({ type: "INVALID_ORG_UNITS", dataValues, invalidDataValues });
         }
 
-        if (existingDataValues.length > 0) {
+        if (existingDataValues.dataEntries.length > 0) {
             return Either.error({ type: "DUPLICATE_VALUES", dataValues, existingDataValues });
         }
 
@@ -92,7 +101,7 @@ export class ImportTemplateUseCase implements UseCase {
     }
 
     private async readDataValues(
-        template: Template,
+        excelDataValues: DataPackage,
         dataForm: DataForm,
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[],
@@ -100,8 +109,6 @@ export class ImportTemplateUseCase implements UseCase {
         duplicateTolerance: number,
         duplicateToleranceUnit: DuplicateToleranceUnit
     ) {
-        const reader = new ExcelReader(this.excelRepository);
-        const excelDataValues = await reader.readTemplate(template);
         const instanceDataValues = await this.getInstanceDataValues(dataForm, excelDataValues);
         const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
             dataForm.type,
@@ -109,7 +116,7 @@ export class ImportTemplateUseCase implements UseCase {
         );
 
         // Override org unit if needed
-        const dataValues = excelDataValues.map(({ orgUnit, ...rest }) => ({
+        const dataValues = excelDataValues.dataEntries.map(({ orgUnit, ...rest }) => ({
             ...rest,
             orgUnit: useBuilderOrgUnits ? selectedOrgUnits[0] : orgUnit,
         }));
@@ -121,7 +128,7 @@ export class ImportTemplateUseCase implements UseCase {
         );
 
         const existingDataValues = _.remove(dataValues, base => {
-            return instanceDataValues.find(dataPackage =>
+            return instanceDataValues.dataEntries.find(dataPackage =>
                 compareDataPackages(
                     dataForm,
                     base,
@@ -133,12 +140,16 @@ export class ImportTemplateUseCase implements UseCase {
             );
         });
 
-        return { dataValues, invalidDataValues, existingDataValues };
+        return {
+            dataValues: { type: dataForm.type, dataEntries: dataValues },
+            invalidDataValues: { type: dataForm.type, dataEntries: invalidDataValues },
+            existingDataValues: { type: dataForm.type, dataEntries: existingDataValues },
+        };
     }
 
-    private async getInstanceDataValues(dataForm: DataForm, excelDataValues: DataPackage[]) {
-        const periods = _.uniq(excelDataValues?.map(({ period }) => period.toString()));
-        const orgUnits = _.uniq(excelDataValues?.map(({ orgUnit }) => orgUnit));
+    private async getInstanceDataValues(dataForm: DataForm, excelDataValues: DataPackage) {
+        const periods = _.uniq(excelDataValues.dataEntries.map(({ period }) => period.toString()));
+        const orgUnits = _.uniq(excelDataValues.dataEntries.map(({ orgUnit }) => orgUnit));
 
         return this.instanceRepository.getDataPackage({
             id: dataForm.id,
@@ -152,8 +163,8 @@ export class ImportTemplateUseCase implements UseCase {
 
 const compareDataPackages = (
     dataForm: DataForm,
-    base: Partial<DataPackage>,
-    compare: DataPackage,
+    base: Partial<DataPackageData>,
+    compare: DataPackageData,
     duplicateExclusion: DuplicateExclusion,
     duplicateTolerance: number,
     duplicateToleranceUnit: DuplicateToleranceUnit
@@ -185,7 +196,7 @@ const compareDataPackages = (
         if (base.id && compare.id) return false;
 
         const exclusions = duplicateExclusion[dataForm.id] ?? [];
-        const filter = (values: DataValue[]) => {
+        const filter = (values: DataPackageDataValue[]) => {
             return values.filter(({ dataElement }) => !exclusions.includes(dataElement));
         };
 
@@ -194,8 +205,9 @@ const compareDataPackages = (
             !_.isEqualWith(
                 filter(base.dataValues),
                 filter(compare.dataValues),
-                (base: DataValue[], compare: DataValue[]) => {
-                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
+                    const values = ({ dataElement, value }: DataPackageDataValue) =>
+                        `${dataElement}-${value}`;
                     const intersection = _.intersectionBy(base, compare, values);
                     return base.length === compare.length && intersection.length === base.length;
                 }
