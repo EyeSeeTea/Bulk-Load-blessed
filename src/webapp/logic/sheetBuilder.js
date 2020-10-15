@@ -86,9 +86,6 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
             sheet.row(row).hide();
         }
 
-        // Add template version
-        sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
-
         // Add column titles
         let columnId = 1;
         let groupId = 0;
