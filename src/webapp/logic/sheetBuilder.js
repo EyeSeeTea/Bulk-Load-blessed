@@ -530,66 +530,49 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         .style({ ...baseStyle, font: { size: 16, bold: true } });
 
     if (element.type === "dataSets") {
-        const categoryOptionCombos = [];
-        for (const [, value] of metadata) {
-            if (value.type === "categoryOptionCombos") {
-                categoryOptionCombos.push(value);
+        const dataElements = getDataElements(element, metadata);
+
+        _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
+            const { name, description } = this.translate(dataElement);
+            const firstColumnId = columnId;
+
+            _.forEach(categoryOptionCombos, categoryOptionCombo => {
+                const validation = dataElement.optionSet
+                    ? dataElement.optionSet.id
+                    : dataElement.valueType;
+                this.createColumn(
+                    dataEntrySheet,
+                    itemRow,
+                    columnId,
+                    `_${categoryOptionCombo.id}`,
+                    groupId,
+                    this.validations.get(validation),
+                    undefined,
+                    categoryOptionCombo.code === "default"
+                );
+
+                columnId++;
+            });
+
+            if (columnId - 1 === firstColumnId) {
+                dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
             }
-        }
 
-        const sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
-        _.forOwn(sections, (_section, categoryComboId) => {
-            const categoryCombo = metadata.get(categoryComboId);
-            if (categoryCombo !== undefined) {
-                _(element.dataSetElements)
-                    .map(({ dataElement }) => metadata.get(dataElement.id))
-                    .filter({
-                        categoryCombo: { id: categoryComboId },
-                    })
-                    .forEach(dataElement => {
-                        const { name, description } = this.translate(dataElement);
-                        const firstColumnId = columnId;
+            dataEntrySheet
+                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                .formula(`_${dataElement.id}`)
+                .style(this.groupStyle(groupId));
 
-                        const sectionCategoryOptionCombos = sections[categoryComboId];
-                        _.forEach(sectionCategoryOptionCombos, categoryOptionCombo => {
-                            const validation = dataElement.optionSet
-                                ? dataElement.optionSet.id
-                                : dataElement.valueType;
-                            this.createColumn(
-                                dataEntrySheet,
-                                itemRow,
-                                columnId,
-                                `_${categoryOptionCombo.id}`,
-                                groupId,
-                                this.validations.get(validation),
-                                undefined,
-                                categoryOptionCombo.code === "default"
-                            );
-
-                            columnId++;
-                        });
-
-                        if (columnId - 1 === firstColumnId) {
-                            dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
-                        }
-
-                        dataEntrySheet
-                            .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                            .formula(`_${dataElement.id}`)
-                            .style(this.groupStyle(groupId));
-
-                        if (description !== undefined) {
-                            dataEntrySheet
-                                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                                .comment(description, {
-                                    height: "100pt",
-                                    width: "160pt",
-                                });
-                        }
-
-                        groupId++;
+            if (description !== undefined) {
+                dataEntrySheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .comment(description, {
+                        height: "100pt",
+                        width: "160pt",
                     });
             }
+
+            groupId++;
         });
     } else {
         _.forEach(element.programStages, programStageT => {
@@ -774,6 +757,72 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
 SheetBuilder.prototype.getTeiIdValidation = function () {
     return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxRow}`;
 };
+
+function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
+    return _(dataSet.sections)
+        .sortBy(section => section.sortOrder)
+        .flatMap(section => {
+            return (
+                _(section.dataElements)
+                    .map(({ id }) => metadata.get(id))
+                    .compact()
+                    .groupBy(dataElement => dataElement.categoryCombo?.id)
+                    .toPairs()
+                    // Order of category combos is indeterminate in loadForm.action,
+                    // but apply the same criteria usen in formType DEFAULT.
+                    .sortBy(([ccId, _dataElements]) => cocsByCatComboId[ccId]?.length)
+                    .flatMap(([_categoryComboId, dataElements]) => {
+                        // Keep order for data elements in section from the response API
+                        return _(dataElements)
+                            .map(dataElement => ({
+                                dataElement,
+                                categoryOptionCombos:
+                                    cocsByCatComboId[dataElement.categoryCombo.id] || [],
+                            }))
+                            .value();
+                    })
+                    .value()
+            );
+        })
+        .value();
+}
+
+function getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId) {
+    return (
+        _(cocsByCatComboId)
+            .toPairs()
+            // Mimic loadForm.action, sort category combos by cocs length
+            .sortBy(([_ccId, categoryOptionCombos]) => categoryOptionCombos.length)
+            .flatMap(([categoryComboId, categoryOptionCombos]) => {
+                const categoryCombo = metadata.get(categoryComboId);
+                if (!categoryCombo) return [];
+
+                // Mimic loadForm.action, sort data elements (in a category combo) by name
+                return _(dataSet.dataSetElements)
+                    .map(({ dataElement }) => metadata.get(dataElement.id))
+                    .compact()
+                    .filter({ categoryCombo: { id: categoryComboId } })
+                    .sortBy(dataElement => dataElement.name)
+                    .map(dataElement => ({ dataElement, categoryOptionCombos }))
+                    .value();
+            })
+            .value()
+    );
+}
+
+function getDataElements(dataSet, metadata) {
+    const objs = Array.from(metadata.values());
+    const categoryOptionCombos = objs.filter(obj => obj.type === "categoryOptionCombos");
+    const cocsByCatComboId = _.groupBy(categoryOptionCombos, "categoryCombo.id");
+
+    switch (dataSet.formType) {
+        case "SECTION":
+            return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId);
+        default:
+            // "DEFAULT" | "CUSTOM" | "SECTION_MULTIORG"
+            return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId);
+    }
+}
 
 /**
  * Common cell style definition
