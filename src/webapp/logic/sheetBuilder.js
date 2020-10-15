@@ -68,7 +68,7 @@ SheetBuilder.prototype.fillRelationshipsSheet = function () {
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {
-    const { elementMetadata: metadata } = this.builder;
+    const { elementMetadata: metadata, element: program } = this.builder;
     _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
         const programStage = metadata.get(programStageId);
@@ -91,6 +91,19 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         let groupId = 0;
 
         this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
+
+        const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
+        const optionsTitle =
+            attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            columnId++,
+            optionsTitle,
+            null,
+            this.validations.get("options")
+        );
 
         this.createColumn(sheet, itemRow, columnId++, "Event id");
 

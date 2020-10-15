@@ -93,6 +93,7 @@ export interface TrackerEventRowDataSource {
     teiId: ColumnRef;
     eventId: ColumnRef;
     date: ColumnRef;
+    attributeOptionCombo: ColumnRef;
     range: Range;
     dataElement: RowRef;
 }

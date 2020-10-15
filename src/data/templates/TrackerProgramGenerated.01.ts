@@ -62,20 +62,25 @@ export default class implements GeneratedTemplate {
                     type: "column",
                     ref: "A",
                 },
-                eventId: {
+                attributeOptionCombo: {
                     sheet,
                     type: "column",
                     ref: "B",
                 },
-                date: {
+                eventId: {
                     sheet,
                     type: "column",
                     ref: "C",
                 },
+                date: {
+                    sheet,
+                    type: "column",
+                    ref: "D",
+                },
                 range: {
                     sheet,
                     rowStart: 3,
-                    columnStart: "D",
+                    columnStart: "E",
                 },
                 dataElement: {
                     sheet,

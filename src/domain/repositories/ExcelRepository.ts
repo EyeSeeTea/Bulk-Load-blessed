@@ -209,7 +209,13 @@ export abstract class ExcelRepository {
 
         const dataElementIdsSet = new Set(await Promise.all(dataElementIds));
 
-        for (const { id, period, dataValues, trackedEntityInstance } of payload.dataEntries) {
+        for (const {
+            id,
+            period,
+            dataValues,
+            trackedEntityInstance,
+            attribute: aocId,
+        } of payload.dataEntries) {
             const someDataElementPresentInSheet = _(dataValues).some(dv =>
                 dataElementIdsSet.has(dv.dataElement)
             );
@@ -229,6 +235,15 @@ export abstract class ExcelRepository {
             const eventIdCell = await this.findRelativeCell(template, dataSource.eventId, cells[0]);
             if (eventIdCell && id) {
                 await this.writeCell(template, eventIdCell, id);
+            }
+
+            const aocIdCell = await this.findRelativeCell(
+                template,
+                dataSource.attributeOptionCombo,
+                cells[0]
+            );
+            if (aocIdCell && aocId) {
+                await this.writeCell(template, aocIdCell, aocId);
             }
 
             const dateCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
