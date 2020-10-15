@@ -1,12 +1,7 @@
 import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "../types/d2-api";
 import _ from "lodash";
 import moment from "moment";
-import {
-    DataForm,
-    DataFormPeriod,
-    DataFormType,
-    DataFormMainType,
-} from "../domain/entities/DataForm";
+import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, BaseDataPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
@@ -25,11 +20,12 @@ export class InstanceDhisRepository implements InstanceRepository {
         this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
-    public async getDataForms(type: DataFormMainType, ids?: string[]): Promise<DataForm[]> {
+    public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
         switch (type) {
             case "dataSets":
                 return this.getDataSets(ids);
             case "programs":
+            case "trackerPrograms":
                 return this.getPrograms(ids);
         }
     }
