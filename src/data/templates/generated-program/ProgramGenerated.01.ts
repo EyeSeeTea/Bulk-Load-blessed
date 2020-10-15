@@ -5,7 +5,7 @@ export class ProgramGenerated01 implements GeneratedTemplate {
     public readonly id = "PROGRAM_GENERATED_v1";
     public readonly name = "Auto-generated program template";
     public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A6" };
-    public readonly dataFormType = { type: "value" as const, id: "events" as const };
+    public readonly dataFormType = { type: "value" as const, id: "programs" as const };
 
     public readonly rowOffset = 5;
     public readonly colOffset = 1;
