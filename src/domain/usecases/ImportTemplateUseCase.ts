@@ -15,7 +15,8 @@ export type ImportTemplateError =
     | {
           type: "INVALID_DATA_FORM_ID" | "DATA_FORM_NOT_FOUND" | "INVALID_OVERRIDE_ORG_UNIT";
       }
-    | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage[]; invalidDataValues: DataPackage[] };
+    | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage[]; invalidDataValues: DataPackage[] }
+    | { type: "DUPLICATE_VALUES"; dataValues: DataPackage[]; existingDataValues: DataPackage[] };
 
 export interface ImportTemplateUseCaseParams {
     file: File;
@@ -58,12 +59,7 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "DATA_FORM_NOT_FOUND" });
         }
 
-        const {
-            dataValues,
-            invalidDataValues,
-            existingDataValues,
-            instanceDataValues,
-        } = await this.readDataValues(
+        const { dataValues, invalidDataValues, existingDataValues } = await this.readDataValues(
             template,
             dataForm,
             useBuilderOrgUnits,
@@ -77,11 +73,14 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "INVALID_ORG_UNITS", dataValues, invalidDataValues });
         }
 
+        if (existingDataValues.length > 0) {
+            return Either.error({ type: "DUPLICATE_VALUES", dataValues, existingDataValues });
+        }
+
         console.log({
             dataValues,
             invalidDataValues,
             existingDataValues,
-            instanceDataValues,
             template,
             dataForm,
         });
@@ -139,7 +138,7 @@ export class ImportTemplateUseCase implements UseCase {
             );
         });
 
-        return { dataValues, instanceDataValues, invalidDataValues, existingDataValues };
+        return { dataValues, invalidDataValues, existingDataValues };
     }
 
     private async getInstanceDataValues(dataForm: DataForm, excelDataValues: DataPackage[]) {
@@ -177,37 +176,38 @@ const compareDataPackages = (
         if (baseValue && compareValue && !areEqual) return false;
     }
 
-    if (
-        dataForm.type === "programs" &&
-        moment
-            .duration(moment(base.period).diff(moment(compare.period)))
-            .abs()
-            .as(duplicateToleranceUnit) > duplicateTolerance
-    ) {
-        return false;
-    }
+    if (dataForm.type === "programs") {
+        if (
+            moment
+                .duration(moment(base.period).diff(moment(compare.period)))
+                .abs()
+                .as(duplicateToleranceUnit) > duplicateTolerance
+        ) {
+            return false;
+        }
 
-    // Ignore data packages with event id set
-    if (base.id && compare.id) return false;
+        // Ignore data packages with event id set
+        if (base.id && compare.id) return false;
 
-    const exclusions = duplicateExclusion[dataForm.id] ?? [];
-    const filter = (values: DataValue[]) =>
-        values.filter(({ dataElement }) => !exclusions.includes(dataElement));
+        const exclusions = duplicateExclusion[dataForm.id] ?? [];
+        const filter = (values: DataValue[]) => {
+            return values.filter(({ dataElement }) => !exclusions.includes(dataElement));
+        };
 
-    if (
-        base.dataValues &&
-        compare.dataValues &&
-        !_.isEqualWith(
-            filter(base.dataValues),
-            filter(compare.dataValues),
-            (base: DataValue[], compare: DataValue[]) => {
-                const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
-                const intersection = _.intersectionBy(base, compare, values);
-                return base.length === compare.length && intersection.length === base.length;
-            }
-        )
-    ) {
-        return false;
+        if (
+            base.dataValues &&
+            !_.isEqualWith(
+                filter(base.dataValues),
+                filter(compare.dataValues),
+                (base: DataValue[], compare: DataValue[]) => {
+                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                    const intersection = _.intersectionBy(base, compare, values);
+                    return base.length === compare.length && intersection.length === base.length;
+                }
+            )
+        ) {
+            return false;
+        }
     }
 
     return true;

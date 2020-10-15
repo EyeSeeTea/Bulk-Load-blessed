@@ -1,3 +1,4 @@
+import { DataPackageType } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
@@ -19,7 +20,8 @@ interface BaseTemplate {
     name: string;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
-    dataFormId: CellRef;
+    dataFormId: CellRef | ValueRef;
+    dataFormType: CellRef | ValueRef<DataPackageType>;
 }
 
 export interface GeneratedTemplate extends BaseTemplate {
@@ -59,9 +61,9 @@ export interface RangeRef extends GenericSheetRef {
     ref: string;
 }
 
-export interface ValueRef {
+export interface ValueRef<T extends string = string> {
     type: "value";
-    id: string;
+    id: T;
 }
 
 export interface Range {

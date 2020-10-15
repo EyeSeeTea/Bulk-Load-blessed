@@ -1,4 +1,4 @@
-import { CellRef, Range, SheetRef } from "../entities/Template";
+import { CellRef, Range, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
@@ -30,7 +30,10 @@ export abstract class ExcelRepository {
         cell?: CellRef
     ): Promise<CellRef | undefined>;
     public abstract async writeCell(id: string, cellRef: CellRef, value: Value): Promise<void>;
-    public abstract async readCell(id: string, cellRef: CellRef): Promise<Value | undefined>;
+    public abstract async readCell(
+        id: string,
+        cellRef?: CellRef | ValueRef
+    ): Promise<Value | undefined>;
     public abstract async getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
     public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;
     public abstract async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;

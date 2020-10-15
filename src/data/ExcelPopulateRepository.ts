@@ -5,7 +5,7 @@ import XLSX, {
     Workbook as ExcelWorkbook,
     Workbook,
 } from "xlsx-populate";
-import { CellRef, Range, SheetRef } from "../domain/entities/Template";
+import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions, Value } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
@@ -98,7 +98,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async readCell(id: string, cellRef: CellRef): Promise<Value | undefined> {
+    public async readCell(id: string, cellRef?: CellRef | ValueRef): Promise<Value | undefined> {
+        if (!cellRef) return undefined;
+        if (cellRef.type === "value") return cellRef.id;
+
         const workbook = await this.getWorkbook(id);
         return this.readCellValue(workbook, cellRef);
     }
