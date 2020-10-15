@@ -253,7 +253,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     private buildEventsPayload(dataPackage: DataPackage[]): Event[] {
         return _(dataPackage)
             .map(item => {
-                if (item.type !== "events") return undefined;
+                if (item.type !== "programs") return undefined;
                 const { id, orgUnit, dataForm, period, attribute, dataValues } = item;
                 return {
                     event: id,
@@ -316,7 +316,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             .map((dataValues, key) => {
                 const [period, orgUnit, attribute] = key.split("-");
                 return {
-                    type: "aggregated" as const,
+                    type: "dataSets" as const,
                     dataForm: id,
                     orgUnit,
                     period,
@@ -387,7 +387,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     coordinate,
                     dataValues,
                 }) => ({
-                    type: "events" as const,
+                    type: "programs" as const,
                     id: event,
                     dataForm: program,
                     orgUnit,

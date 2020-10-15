@@ -1,8 +1,9 @@
 import { Id } from "./ReferenceObject";
 import { FlattenUnion } from "../../types/flatten-union";
+import { DataFormType } from "./DataForm";
 
 interface BaseDataPackage {
-    type: DataPackageType;
+    type: DataFormType;
     dataForm: string;
     orgUnit: Id;
     period: string;
@@ -11,11 +12,11 @@ interface BaseDataPackage {
 }
 
 interface AggregatedDataPackage extends BaseDataPackage {
-    type: "aggregated";
+    type: "dataSets";
 }
 
 interface EventsDataPackage extends BaseDataPackage {
-    type: "events";
+    type: "programs";
     id?: string;
     coordinate?: {
         latitude: string;
@@ -23,7 +24,6 @@ interface EventsDataPackage extends BaseDataPackage {
     };
 }
 
-export type DataPackageType = "aggregated" | "events";
 export type DataPackage = FlattenUnion<AggregatedDataPackage | EventsDataPackage>;
 
 export interface DataValue {

@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { promiseMap } from "../../webapp/utils/promises";
-import { DataPackage, DataPackageType, DataValue } from "../entities/DataPackage";
+import { DataFormType } from "../entities/DataForm";
+import { DataPackage, DataValue } from "../entities/DataPackage";
 import { CellDataSource, CellRef, SheetRef, Template, ValueRef } from "../entities/Template";
 import { ExcelRepository, Value } from "../repositories/ExcelRepository";
 
@@ -27,7 +28,7 @@ export class ExcelReader {
             .map((items, key) => {
                 const [type, dataForm, id, period, orgUnit, attribute] = key.split("-");
                 return {
-                    type: type as DataPackageType,
+                    type: type as DataFormType,
                     dataForm,
                     id: id ? String(id) : undefined,
                     orgUnit: String(orgUnit),
@@ -60,7 +61,7 @@ export class ExcelReader {
             !period ||
             !dataElement ||
             !dataFormId ||
-            (dataFormType !== "events" && dataFormType !== "aggregated")
+            (dataFormType !== "dataSets" && dataFormType !== "programs")
         )
             return [];
 
