@@ -1,4 +1,4 @@
-import { DataFormType } from "./DataForm";
+import { DataPackageType } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
@@ -21,7 +21,7 @@ interface BaseTemplate {
     dataSources?: DataSource[];
     styleSources: StyleSource[];
     dataFormId: CellRef | ValueRef;
-    dataFormType: CellRef | ValueRef<DataFormType>;
+    dataFormType: CellRef | ValueRef<DataPackageType>;
 }
 
 export interface GeneratedTemplate extends BaseTemplate {

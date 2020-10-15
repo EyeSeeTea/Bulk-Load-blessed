@@ -5,7 +5,7 @@ export class OldGenerated01 implements GeneratedTemplate {
     public readonly id = "OLD_GENERATED_v1";
     public readonly name = "Auto-generated dataSet template";
     public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A1" };
-    public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
+    public readonly dataFormType = { type: "value" as const, id: "aggregated" as const };
 
     public readonly rowOffset = 0;
     public readonly colOffset = 0;
