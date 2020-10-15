@@ -449,8 +449,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
     rowId++;
 
     metadataSheet.cell(rowId, 1).string("false");
-    metadataSheet.cell(rowId, 3).string("No");
     metadataSheet.cell(rowId, 2).string("boolean");
+    metadataSheet.cell(rowId, 3).string("No");
     this.workbook.definedNameCollection.addDefinedName({
         refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
         name: "_false",
