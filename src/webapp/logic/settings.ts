@@ -11,7 +11,7 @@ import {
 } from "../../domain/entities/AppSettings";
 import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
-import { GetArrayInnerType } from "../../utils/types";
+import { GetArrayInnerType } from "../../types/utils";
 
 const privateFields = ["currentUser"] as const;
 

@@ -6,6 +6,8 @@ export type Dictionary<T> = Record<string, T>;
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
+export type GetArrayInnerType<T extends readonly any[]> = T[number];
+
 export type NonEmptyArray<T> = T[] & { 0: T };
 
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
