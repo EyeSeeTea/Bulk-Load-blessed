@@ -4,6 +4,7 @@ import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
+import { ImportSummary } from "../domain/entities/ImportSummary";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
@@ -112,6 +113,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         }));
     }
 
+    @cache()
     public async getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]> {
         const params = {
             paging: false,
@@ -133,6 +135,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             .value();
     }
 
+    @cache()
     public async getUserOrgUnits(): Promise<OrgUnit[]> {
         const { objects } = await this.api.models.organisationUnits
             .get({
@@ -141,6 +144,129 @@ export class InstanceDhisRepository implements InstanceRepository {
             })
             .getData();
         return objects.map(({ displayName, ...rest }) => ({ ...rest, name: displayName }));
+    }
+
+    @cache()
+    public async getLocales(): Promise<Locale[]> {
+        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
+        return locales;
+    }
+
+    @cache()
+    public async getDefaultIds(): Promise<string[]> {
+        const response = (await this.api
+            .get("/metadata", {
+                filter: "code:eq:default",
+                fields: "id",
+            })
+            .getData()) as {
+            [key: string]: { id: string }[];
+        };
+
+        return _(response)
+            .omit(["system"])
+            .values()
+            .flatten()
+            .map(({ id }) => id)
+            .value();
+    }
+
+    public async deleteAggregatedData(dataPackage: DataPackage[]): Promise<ImportSummary> {
+        return this.importAggregatedData("DELETE", dataPackage);
+    }
+
+    public async importDataPackage(
+        type: DataFormType,
+        dataPackage: DataPackage[]
+    ): Promise<ImportSummary> {
+        switch (type) {
+            case "dataSets":
+                return this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+            case "programs":
+                return this.importEventsData(dataPackage);
+            default:
+                throw new Error(`Unsupported type ${type} for data package`);
+        }
+    }
+
+    private async importAggregatedData(
+        importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
+        dataPackage: DataPackage[]
+    ): Promise<ImportSummary> {
+        const dataValues = this.buildAggregatedPayload(dataPackage);
+
+        const { status, description, conflicts, importCount } = await this.api.dataValues
+            .postSet({ importStrategy }, { dataValues })
+            .getData();
+
+        const { imported: created, deleted, updated, ignored } = importCount;
+        const errors = conflicts?.map(({ object, value }) => `[${object}] ${value}`) ?? [];
+
+        return {
+            status,
+            description,
+            stats: { created, deleted, updated, ignored },
+            errors,
+        };
+    }
+
+    private async importEventsData(dataPackage: DataPackage[]): Promise<ImportSummary> {
+        const events = this.buildEventsPayload(dataPackage);
+        const { status, message, response } = await this.api
+            .post<EventsPostResponse>("/events", {}, { events })
+            .getData();
+
+        const { imported: created, deleted, updated, ignored } = response;
+        const errors =
+            response.importSummaries?.flatMap(
+                ({ reference = "", description = "", conflicts = [] }) =>
+                    conflicts.map(({ object, value }) =>
+                        _([reference, description, object, value]).compact().join(" ")
+                    )
+            ) ?? [];
+
+        return {
+            status,
+            description: message ?? "",
+            stats: { created, deleted, updated, ignored },
+            errors,
+        };
+    }
+
+    private buildAggregatedPayload(dataPackage: DataPackage[]): AggregatedDataValue[] {
+        return _(dataPackage)
+            .map(({ orgUnit, period, attribute, dataValues }) =>
+                dataValues.map(({ dataElement, category, value, comment }) => ({
+                    orgUnit,
+                    period,
+                    attributeOptionCombo: attribute,
+                    dataElement,
+                    categoryOptionCombo: category,
+                    value: String(value),
+                    comment,
+                }))
+            )
+            .flatten()
+            .value();
+    }
+
+    private buildEventsPayload(dataPackage: DataPackage[]): Event[] {
+        return _(dataPackage)
+            .map(item => {
+                if (item.type !== "events") return undefined;
+                const { id, orgUnit, dataForm, period, attribute, dataValues } = item;
+                return {
+                    event: id,
+                    program: dataForm,
+                    status: "COMPLETED",
+                    orgUnit,
+                    eventDate: period,
+                    attributeOptionCombo: attribute,
+                    dataValues: dataValues,
+                };
+            })
+            .compact()
+            .value();
     }
 
     public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
@@ -152,11 +278,6 @@ export class InstanceDhisRepository implements InstanceRepository {
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
-    }
-
-    public async getLocales(): Promise<Locale[]> {
-        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
-        return locales;
     }
 
     private async getDataSetPackage({
@@ -195,6 +316,8 @@ export class InstanceDhisRepository implements InstanceRepository {
             .map((dataValues, key) => {
                 const [period, orgUnit, attribute] = key.split("-");
                 return {
+                    type: "aggregated" as const,
+                    dataForm: id,
                     orgUnit,
                     period,
                     attribute: defaultIds.includes(attribute) ? undefined : attribute,
@@ -254,26 +377,38 @@ export class InstanceDhisRepository implements InstanceRepository {
             .flatten()
             .map(({ events }) => events)
             .flatten()
-            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
-                id: event,
-                orgUnit,
-                period: moment(eventDate).format("YYYY-MM-DD"),
-                attribute: attributeOptionCombo,
-                coordinate,
-                dataValues: dataValues.map(({ dataElement, value }) => ({
-                    dataElement,
-                    value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                })),
-            }))
+            .map(
+                ({
+                    event,
+                    program,
+                    orgUnit,
+                    eventDate,
+                    attributeOptionCombo,
+                    coordinate,
+                    dataValues,
+                }) => ({
+                    type: "events" as const,
+                    id: event,
+                    dataForm: program,
+                    orgUnit,
+                    period: moment(eventDate).format("YYYY-MM-DD"),
+                    attribute: attributeOptionCombo,
+                    coordinate,
+                    dataValues: dataValues.map(({ dataElement, value }) => ({
+                        dataElement,
+                        value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                    })),
+                })
+            )
             .value();
     }
 
     private formatDataValue(
         dataElement: string,
-        value: string | number,
+        value: string | number | boolean,
         metadata: MetadataPackage,
         translateCodes: boolean
-    ): string | number {
+    ): string | number | boolean {
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
         if (!translateCodes || !optionSet) return value;
 
@@ -308,44 +443,57 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         return categoryOptions.map(({ id }) => id);
     }
-
-    @cache()
-    public async getDefaultIds(): Promise<string[]> {
-        const response = (await this.api
-            .get("/metadata", {
-                filter: "code:eq:default",
-                fields: "id",
-            })
-            .getData()) as {
-            [key: string]: { id: string }[];
-        };
-
-        return _(response)
-            .omit(["system"])
-            .values()
-            .flatten()
-            .map(({ id }) => id)
-            .value();
-    }
 }
 
 export interface EventsPackage {
-    events: Array<{
-        event?: string;
-        orgUnit: string;
-        program: string;
-        status: string;
-        eventDate: string;
-        coordinate?: {
-            latitude: string;
-            longitude: string;
-        };
-        attributeOptionCombo?: string;
-        dataValues: Array<{
-            dataElement: string;
-            value: string | number;
-        }>;
+    events: Event[];
+}
+
+export interface AggregatedDataValue {
+    dataElement: string;
+    period: string;
+    orgUnit: string;
+    categoryOptionCombo?: string;
+    attributeOptionCombo?: string;
+    value: string;
+    comment?: string;
+}
+
+export interface Event {
+    event?: string;
+    orgUnit: string;
+    program: string;
+    status: string;
+    eventDate: string;
+    coordinate?: {
+        latitude: string;
+        longitude: string;
+    };
+    attributeOptionCombo?: string;
+    dataValues: Array<{
+        dataElement: string;
+        value: string | number | boolean;
     }>;
+}
+
+interface EventsPostResponse {
+    status: "SUCCESS" | "ERROR";
+    message?: string;
+    response: {
+        imported: number;
+        updated: number;
+        deleted: number;
+        ignored: number;
+        total: number;
+        importSummaries?: {
+            description?: string;
+            reference: string;
+            conflicts?: {
+                object: string;
+                value: string;
+            }[];
+        }[];
+    };
 }
 
 interface MetadataItem {

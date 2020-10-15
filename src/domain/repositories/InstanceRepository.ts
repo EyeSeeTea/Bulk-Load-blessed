@@ -1,6 +1,7 @@
 import { Moment } from "moment";
 import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
+import { ImportSummary } from "../entities/ImportSummary";
 import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
 import { Id } from "../entities/ReferenceObject";
@@ -27,4 +28,5 @@ export interface InstanceRepository {
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]>;
     getLocales(): Promise<Locale[]>;
     getDefaultIds(): Promise<string[]>;
+    deleteAggregatedData(dataPackage: DataPackage[]): Promise<ImportSummary>;
 }
