@@ -5,6 +5,7 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
+import { ImportSummary } from "../entities/ImportSummary";
 import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -41,7 +42,7 @@ export class ImportTemplateUseCase implements UseCase {
         duplicateExclusion,
         duplicateTolerance,
         duplicateToleranceUnit,
-    }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, void>> {
+    }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, ImportSummary>> {
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
@@ -85,15 +86,9 @@ export class ImportTemplateUseCase implements UseCase {
             dataForm,
         });
 
-        return Either.success(undefined);
+        const result = await this.instanceRepository.importDataPackage(dataForm.type, dataValues);
 
-        // Get metadata from dataForm
-        // Check programs latitude/longitude to see if it fits organisation unit boundaries -> noop
-        // Read sheet
-        // Overwrite organisation units if UI said so
-        // Detect invalid organisation units -> Error
-        // Detect existing values for duplicates -> Error
-        // Finally import data
+        return Either.success(result);
     }
 
     private async readDataValues(
