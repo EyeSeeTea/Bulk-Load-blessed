@@ -80,7 +80,11 @@ export class CompositionRoot {
 
     public get templates() {
         return getExecute({
-            analyze: new AnalyzeTemplateUseCase(this.instance, this.templateManager),
+            analyze: new AnalyzeTemplateUseCase(
+                this.instance,
+                this.templateManager,
+                this.excelReader
+            ),
             download: new DownloadTemplateUseCase(
                 this.instance,
                 this.templateManager,

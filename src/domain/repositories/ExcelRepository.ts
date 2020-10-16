@@ -11,6 +11,10 @@ export interface BaseLoadOptions {
     file?: File | Blob;
 }
 
+export interface ReadCellOptions {
+    formula?: boolean;
+}
+
 export interface WebLoadOptions extends BaseLoadOptions {
     type: "url";
     url: string;
@@ -32,7 +36,8 @@ export abstract class ExcelRepository {
     public abstract async writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
     public abstract async readCell(
         id: string,
-        cellRef?: CellRef | ValueRef
+        cellRef?: CellRef | ValueRef,
+        options?: ReadCellOptions
     ): Promise<ExcelValue | undefined>;
     public abstract async getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
     public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;

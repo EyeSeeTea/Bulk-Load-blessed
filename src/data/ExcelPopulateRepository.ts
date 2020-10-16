@@ -7,7 +7,12 @@ import XLSX, {
 } from "xlsx-populate";
 import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository, LoadOptions, ExcelValue } from "../domain/repositories/ExcelRepository";
+import {
+    ExcelRepository,
+    LoadOptions,
+    ExcelValue,
+    ReadCellOptions,
+} from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { removeCharacters } from "../utils/string";
 
@@ -100,25 +105,30 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     public async readCell(
         id: string,
-        cellRef?: CellRef | ValueRef
+        cellRef?: CellRef | ValueRef,
+        options?: ReadCellOptions
     ): Promise<ExcelValue | undefined> {
         if (!cellRef) return undefined;
         if (cellRef.type === "value") return cellRef.id;
 
         const workbook = await this.getWorkbook(id);
-        return this.readCellValue(workbook, cellRef);
+        return this.readCellValue(workbook, cellRef, options?.formula);
     }
 
     private async readCellValue(
         workbook: Workbook,
-        cellRef: CellRef
+        cellRef: CellRef,
+        formula = false
     ): Promise<ExcelValue | undefined> {
         const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const value = destination.value() ?? destination.formula();
+        const value = formula
+            ? destination.formula() ?? destination.value()
+            : destination.value() ?? destination.formula();
+
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -193,7 +203,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {
         //@ts-ignore
         return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
-            const range = workbook.sheet(sheet).range(key);
+            const rangeRef = key.includes(":") ? key : `${key}:${key}`;
+            const range = workbook.sheet(sheet).range(rangeRef);
             const startCell = range.startCell();
             const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 

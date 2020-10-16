@@ -30,7 +30,7 @@ interface ImportState {
     summary: {
         period: string;
         count: number;
-        id: string;
+        id?: string;
     }[];
 }
 
@@ -71,20 +71,20 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
         try {
             const {
-                object,
+                dataForm,
                 dataValues,
                 orgUnits,
             } = await CompositionRoot.attach().templates.analyze(file);
 
-            if (!object.writeAccess) {
+            if (!dataForm.writeAccess) {
                 throw new Error(
-                    i18n.t("You don't have write permissions for {{type}} {{name}}", object)
+                    i18n.t("You don't have write permissions for {{type}} {{name}}", dataForm)
                 );
             }
 
             setOrgUnitTreeFilter(orgUnits.map(({ id }) => id));
             setImportState({
-                dataForm: object,
+                dataForm,
                 file,
                 summary: dataValues,
             });
@@ -119,71 +119,86 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             }
 
             const {
+                custom,
                 rowOffset,
                 colOffset,
                 orgUnits,
-                object,
             } = await CompositionRoot.attach().templates.analyze(file);
 
-            //const organisationUnits = result.organisationUnits;
-            const orgUnitCoordMap = new Map();
+            // TODO: Remove if condition and use only new code to import templates
+            if (custom) {
+                const result = await CompositionRoot.attach().templates.import({
+                    file,
+                    settings,
+                    useBuilderOrgUnits,
+                    selectedOrgUnits,
+                });
+                console.log(result);
 
-            if (result.element.type === "programs") {
-                const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                throw new Error("Importing custom templates is not implemented yet");
+            } else {
+                //const organisationUnits = result.organisationUnits;
+                const orgUnitCoordMap = new Map();
+
+                if (result.element.type === "programs") {
+                    const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                        ...result,
+                        file,
+                        useBuilderOrgUnits,
+                        rowOffset,
+                    });
+
+                    for (const uid of usedOrgUnitsUIDs.values()) {
+                        const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
+                        orgUnitCoordMap.set(uid, orgUnitData);
+                    }
+                }
+
+                const data = await sheetImport.readSheet({
                     ...result,
                     file,
                     useBuilderOrgUnits,
+                    orgUnitCoordMap,
                     rowOffset,
+                    colOffset,
                 });
 
-                for (const uid of usedOrgUnitsUIDs.values()) {
-                    const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
-                    orgUnitCoordMap.set(uid, orgUnitData);
+                const filterOrgUnits = useBuilderOrgUnits
+                    ? cleanOrgUnitPaths(selectedOrgUnits)
+                    : _.map(orgUnits, "id");
+
+                const removedDataValues = _.remove(
+                    //@ts-ignore FIXME Create typings for sheet import code
+                    data.dataValues ?? data.events,
+                    ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
+                );
+
+                if (removedDataValues.length === 0) {
+                    await checkExistingData(dataForm.type, data);
+                } else {
+                    updateDialog({
+                        title: i18n.t("Invalid organisation units found"),
+                        description: i18n.t(
+                            "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
+                            { number: removedDataValues.length }
+                        ),
+                        onCancel: () => {
+                            updateDialog(null);
+                        },
+                        onSave: () => {
+                            checkExistingData(dataForm.type, data);
+                            updateDialog(null);
+                        },
+                        onInfoAction: () => {
+                            downloadInvalidOrganisations(dataForm.type, removedDataValues);
+                        },
+                        cancelText: i18n.t("Cancel"),
+                        saveText: i18n.t("Proceed"),
+                        infoActionText: i18n.t(
+                            "Download data values with invalid organisation units"
+                        ),
+                    });
                 }
-            }
-
-            const data = await sheetImport.readSheet({
-                ...result,
-                file,
-                useBuilderOrgUnits,
-                orgUnitCoordMap,
-                rowOffset,
-                colOffset,
-            });
-
-            const filterOrgUnits = useBuilderOrgUnits
-                ? cleanOrgUnitPaths(selectedOrgUnits)
-                : _.map(orgUnits, "id");
-
-            const removedDataValues = _.remove(
-                //@ts-ignore FIXME Create typings for sheet import code
-                data.dataValues ?? data.events,
-                ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
-            );
-
-            if (removedDataValues.length === 0) {
-                await checkExistingData(object.type, data);
-            } else {
-                updateDialog({
-                    title: i18n.t("Invalid organisation units found"),
-                    description: i18n.t(
-                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
-                        { number: removedDataValues.length }
-                    ),
-                    onCancel: () => {
-                        updateDialog(null);
-                    },
-                    onSave: () => {
-                        checkExistingData(object.type, data);
-                        updateDialog(null);
-                    },
-                    onInfoAction: () => {
-                        downloadInvalidOrganisations(object.type, removedDataValues);
-                    },
-                    cancelText: i18n.t("Cancel"),
-                    saveText: i18n.t("Proceed"),
-                    infoActionText: i18n.t("Download data values with invalid organisation units"),
-                });
             }
         } catch (reason) {
             console.error(reason);

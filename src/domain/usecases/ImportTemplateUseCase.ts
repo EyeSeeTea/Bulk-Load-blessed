@@ -1,6 +1,7 @@
 import _ from "lodash";
 import moment from "moment";
 import { UseCase } from "../../CompositionRoot";
+import Settings from "../../webapp/logic/settings";
 import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSettings";
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
@@ -26,9 +27,7 @@ export interface ImportTemplateUseCaseParams {
     file: File;
     useBuilderOrgUnits?: boolean;
     selectedOrgUnits?: string[];
-    duplicateExclusion: DuplicateExclusion;
-    duplicateTolerance: number;
-    duplicateToleranceUnit: DuplicateToleranceUnit;
+    settings: Settings;
 }
 
 export class ImportTemplateUseCase implements UseCase {
@@ -42,9 +41,7 @@ export class ImportTemplateUseCase implements UseCase {
         file,
         useBuilderOrgUnits = false,
         selectedOrgUnits = [],
-        duplicateExclusion,
-        duplicateTolerance,
-        duplicateToleranceUnit,
+        settings,
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, ImportSummary>> {
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
@@ -68,6 +65,8 @@ export class ImportTemplateUseCase implements UseCase {
         if (!excelDataValues) {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
+
+        const { duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
         const { dataValues, invalidDataValues, existingDataValues } = await this.readDataValues(
             excelDataValues,
