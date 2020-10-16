@@ -23,18 +23,12 @@ let getDataElements = ({
             const [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
-                type: "generic",
+                type: "cell",
                 orgUnit: { sheet, type: "cell", ref: orgUnitCell },
                 period: { sheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
-                range: {
-                    sheet,
-                    rowStart: parseInt(i / letters.length) + dataRowStart,
-                    rowEnd: parseInt(i / letters.length) + dataRowStart,
-                    columnStart: letters[i % letters.length],
-                    columnEnd: letters[i % letters.length],
-                },
+                ref: { type: "cell", sheet, ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}` },
             };
         }
     );
