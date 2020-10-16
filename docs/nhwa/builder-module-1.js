@@ -28,7 +28,12 @@ let getDataElements = ({
                 period: { sheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: { type: "cell", sheet, ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}` },
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                        dataRowStart}`,
+                },
             };
         }
     );

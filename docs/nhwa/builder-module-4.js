@@ -1,7 +1,7 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await(await fetch("/who-prod/api/dataSets/HtZb6Cg7TXo/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/HtZb6Cg7TXo/metadata.json")).json();
 
 let metadata = new Map();
 
@@ -30,7 +30,12 @@ let getDataElements = ({
                 period: { sheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: { type: "cell", sheet, ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}` },
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                        dataRowStart}`,
+                },
             };
         }
     );
@@ -52,15 +57,16 @@ let dataSheet1 = [
         tabSelector: "#tab0",
         letters: ["Q", "R", "S"],
         dataRowStart: 18,
-        type: "input.entrytrueonly"
-    }), ...getDataElements({
+        type: "input.entrytrueonly",
+    }),
+    ...getDataElements({
         sheet: "Entry into Labour Market",
         orgUnitCell: "V2",
         periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["F"],
         dataRowStart: 15,
-        type: "textarea"
+        type: "textarea",
     }),
 ];
 

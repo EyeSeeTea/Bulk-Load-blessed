@@ -1,62 +1,67 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await(await fetch("/api/dataSets/cxfAcMbSZe1/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/cxfAcMbSZe1/metadata.json")).json();
+
 let metadata = new Map();
+
 for (const type in rawMetadata) {
     const elements = rawMetadata[type];
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
-let getDataElements = (tabSelector, letters, dataRowStart, type = "entryfield") => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`input.${type}`)).map((input, i) => {
-        const id = input.getAttribute("id");
-        const data = id.split("-");
+let getDataElements = ({
+    sheet,
+    orgUnitCell,
+    periodCell,
+    tabSelector,
+    letters,
+    dataRowStart,
+    type = "input.entryfield",
+}) => {
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+        (input, i) => {
+            const id = input.getAttribute("id");
+            const [dataElement, categoryOptionCombo] = id.split("-");
 
-        return {
-            deuid: data[0],
-            cocuid: data[1],
-            cell_no: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}`,
-            total: input.disabled,
-            name: `${metadata.get(data[0]).name} ${metadata.get(data[1]).name}`
-        };
-    });
+            return {
+                type: "cell",
+                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
+                period: { sheet, type: "cell", ref: periodCell },
+                dataElement: { type: "value", id: dataElement },
+                categoryOption: { type: "value", id: categoryOptionCombo },
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                        dataRowStart}`,
+                },
+            };
+        }
+    );
 };
 
-let dataElementsSheet1 = getDataElements("#tab0", ["D", "E", "F", "G", "H", "I", "J", "K", "L"], 9);
+let dataSheet1 = [
+    ...getDataElements({
+        sheet: "Entry into Labour Market",
+        orgUnitCell: "X2",
+        periodCell: "K4",
+        tabSelector: "#tab0",
+        letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L"],
+        dataRowStart: 9,
+    }),
+];
 
-let sheet1 = {
-    sheet_type: "AGGREGATE_STATIC",
-    sheet_no: 1,
-    sheet_name: "Entry into Labour Market",
-    orgUnitIdScheme: "UID",
-    dataElementIdScheme: "UID",
-    idScheme: "UID",
-    oucode_cell: "X2",
-    year_cell: "K4",
-    last_data_column: "ZZ",
-    agg_des: dataElementsSheet1
-};
+let dataSheet2 = [
+    ...getDataElements({
+        sheet: "Exit from Labour Market",
+        orgUnitCell: "O2",
+        periodCell: "J4",
+        tabSelector: "#tab1",
+        letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M"],
+        dataRowStart: 9,
+    }),
+];
 
-let dataElementsSheet2 = getDataElements("#tab1", ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M"], 9);
-
-let sheet2 = {
-    sheet_type: "AGGREGATE_STATIC",
-    sheet_no: 2,
-    sheet_name: "Exit from Labour Market",
-    orgUnitIdScheme: "UID",
-    dataElementIdScheme: "UID",
-    idScheme: "UID",
-    oucode_cell: "O2",
-    year_cell: "J4",
-    last_data_column: "ZZ",
-    agg_des: dataElementsSheet2
-};
-
-let module5 = {
-    name: "Module 5 Template",
-    file: "Module_5_Template.xlsx",
-    sheets: [sheet1, sheet2],
-};
-
-JSON.stringify(module5);
+let result = [...dataSheet1, ...dataSheet2];
+console.log(result);

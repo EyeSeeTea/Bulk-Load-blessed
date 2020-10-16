@@ -1,14 +1,13 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await(await fetch("/who-prod/api/dataSets/m5MiTPdlK17/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/m5MiTPdlK17/metadata.json")).json();
 
 let metadata = new Map();
 
 for (const type in rawMetadata) {
     const elements = rawMetadata[type];
-    if (Array.isArray(elements))
-        elements.map(element => metadata.set(element.id, element));
+    if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
 let getDataElements = ({
@@ -31,7 +30,12 @@ let getDataElements = ({
                 period: { sheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: { type: "cell", sheet, ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}` },
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                        dataRowStart}`,
+                },
             };
         }
     );
@@ -67,7 +71,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["R", "S", "T"],
         dataRowStart: 6,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Institutions",
@@ -76,7 +80,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["F"],
         dataRowStart: 8,
-        type: "textarea.entryfield"
+        type: "textarea.entryfield",
     }),
     ...getDataElements({
         sheet: "Institutions",
@@ -96,7 +100,7 @@ let dataSheet4 = [
         tabSelector: "#tab0",
         letters: ["P", "Q", "R", "S"],
         dataRowStart: 8,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
 ];
 

@@ -1,7 +1,7 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await(await fetch("/who-prod/api/dataSets/pZ3XRBi9gYE/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/pZ3XRBi9gYE/metadata.json")).json();
 
 let metadata = new Map();
 
@@ -30,7 +30,12 @@ let getDataElements = ({
                 period: { sheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: { type: "cell", sheet, ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}` },
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                        dataRowStart}`,
+                },
             };
         }
     );
@@ -44,7 +49,7 @@ let dataSheet1 = [
         tabSelector: "#tab0",
         letters: ["F", "G", "H"],
         dataRowStart: 7,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Regulation",
@@ -53,7 +58,7 @@ let dataSheet1 = [
         tabSelector: "#tab0",
         letters: ["I"],
         dataRowStart: 7,
-        type: "textarea"
+        type: "textarea",
     }),
 ];
 
@@ -63,9 +68,28 @@ let dataSheet2 = [
         orgUnitCell: "AT2",
         periodCell: "P4",
         tabSelector: "#tab1",
-        letters: ["F", "G", "H", "L", "M", "N", "R", "S", "T", "X", "Y", "Z", "AD", "AE", "AF", "AJ", "AK", "AL"],
+        letters: [
+            "F",
+            "G",
+            "H",
+            "L",
+            "M",
+            "N",
+            "R",
+            "S",
+            "T",
+            "X",
+            "Y",
+            "Z",
+            "AD",
+            "AE",
+            "AF",
+            "AJ",
+            "AK",
+            "AL",
+        ],
         dataRowStart: 7,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Acreditation",
@@ -74,7 +98,7 @@ let dataSheet2 = [
         tabSelector: "#tab1",
         letters: ["I", "O", "U", "AA", "AG", "AM"],
         dataRowStart: 7,
-        type: "textarea"
+        type: "textarea",
     }),
 ];
 
@@ -86,7 +110,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["F", "G", "H", "L", "M", "N"],
         dataRowStart: 7,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Lifelong Learning",
@@ -95,7 +119,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["I", "O"],
         dataRowStart: 7,
-        type: "textarea"
+        type: "textarea",
     }),
 ];
 
