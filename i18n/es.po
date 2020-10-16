@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-10-16T10:31:58.692Z\n"
+"POT-Creation-Date: 2020-10-16T15:54:51.220Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -304,8 +304,20 @@ msgstr "Continuar"
 msgid "Download data values with invalid organisation units"
 msgstr "Descargar datos con unidades organizativas no válidas"
 
-msgid "Checking duplicates..."
-msgstr "Comprobando duplicados..."
+msgid "Importing data..."
+msgstr "Importando datos..."
+
+msgid "Imported"
+msgstr "Importados"
+
+msgid "Updated"
+msgstr "Actualizados"
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Deleted"
+msgstr "Borrados"
 
 msgid "Existing data values"
 msgstr "Existen valores para estos elementos de datos"
@@ -344,20 +356,18 @@ msgstr "Cancelar importación"
 msgid "Import only new records"
 msgstr "Importar solo los datos nuevos"
 
-msgid "Importing data..."
-msgstr "Importando datos..."
+#, fuzzy
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
+msgstr ""
+"Existen {{number}} valores asociados a unidades organziativas no válidas que "
+"seran ignorados durante la importación. Por favor, descarguese estos datos y "
+"envieselos a su administrador o gestor de DHIS2"
 
-msgid "Imported"
-msgstr "Importados"
-
-msgid "Updated"
-msgstr "Actualizados"
-
-msgid "Ignored"
-msgstr "Ignorados"
-
-msgid "Deleted"
-msgstr "Borrados"
+msgid "Checking duplicates..."
+msgstr "Comprobando duplicados..."
 
 msgid "Bulk data import"
 msgstr "Importación de datos"

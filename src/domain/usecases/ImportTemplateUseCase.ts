@@ -23,10 +23,15 @@ export type ImportTemplateError =
     | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage; invalidDataValues: DataPackage }
     | { type: "DUPLICATE_VALUES"; dataValues: DataPackage; existingDataValues: DataPackage };
 
+export type DuplicateImportStrategy = "ERROR" | "IMPORT" | "IGNORE";
+export type OrganisationUnitImportStrategy = "ERROR" | "IGNORE";
+
 export interface ImportTemplateUseCaseParams {
     file: File;
     useBuilderOrgUnits?: boolean;
     selectedOrgUnits?: string[];
+    duplicateStrategy?: DuplicateImportStrategy;
+    organisationUnitStrategy?: OrganisationUnitImportStrategy;
     settings: Settings;
 }
 
@@ -41,6 +46,8 @@ export class ImportTemplateUseCase implements UseCase {
         file,
         useBuilderOrgUnits = false,
         selectedOrgUnits = [],
+        duplicateStrategy = "ERROR",
+        organisationUnitStrategy = "ERROR",
         settings,
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, ImportSummary>> {
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
@@ -66,34 +73,24 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
-        const { duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
-
         const { dataValues, invalidDataValues, existingDataValues } = await this.readDataValues(
             excelDataValues,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,
-            duplicateExclusion,
-            duplicateTolerance,
-            duplicateToleranceUnit
+            settings,
+            duplicateStrategy
         );
 
-        if (invalidDataValues.dataEntries.length > 0) {
+        if (organisationUnitStrategy === "ERROR" && invalidDataValues.dataEntries.length > 0) {
             return Either.error({ type: "INVALID_ORG_UNITS", dataValues, invalidDataValues });
         }
 
-        if (existingDataValues.dataEntries.length > 0) {
+        if (duplicateStrategy === "ERROR" && existingDataValues.dataEntries.length > 0) {
             return Either.error({ type: "DUPLICATE_VALUES", dataValues, existingDataValues });
         }
 
-        console.log({
-            dataValues,
-            invalidDataValues,
-            existingDataValues,
-            template,
-            dataForm,
-        });
-
+        // TODO: DELETE EXISTING
         const result = await this.instanceRepository.importDataPackage(dataForm.type, dataValues);
 
         return Either.success(result);
@@ -104,10 +101,11 @@ export class ImportTemplateUseCase implements UseCase {
         dataForm: DataForm,
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[],
-        duplicateExclusion: DuplicateExclusion,
-        duplicateTolerance: number,
-        duplicateToleranceUnit: DuplicateToleranceUnit
+        settings: Settings,
+        duplicateStrategy: DuplicateImportStrategy
     ) {
+        const { duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
+
         const instanceDataValues = await this.getInstanceDataValues(dataForm, excelDataValues);
         const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
             dataForm.type,
@@ -126,18 +124,21 @@ export class ImportTemplateUseCase implements UseCase {
             ({ orgUnit }) => !dataFormOrgUnits.find(({ id }) => id === orgUnit)
         );
 
-        const existingDataValues = _.remove(dataValues, base => {
-            return instanceDataValues.dataEntries.find(dataPackage =>
-                compareDataPackages(
-                    dataForm,
-                    base,
-                    dataPackage,
-                    duplicateExclusion,
-                    duplicateTolerance,
-                    duplicateToleranceUnit
-                )
-            );
-        });
+        const existingDataValues =
+            duplicateStrategy === "IMPORT"
+                ? []
+                : _.remove(dataValues, base => {
+                      return instanceDataValues.dataEntries.find(dataPackage =>
+                          compareDataPackages(
+                              dataForm,
+                              base,
+                              dataPackage,
+                              duplicateExclusion,
+                              duplicateTolerance,
+                              duplicateToleranceUnit
+                          )
+                      );
+                  });
 
         return {
             dataValues: { type: dataForm.type, dataEntries: dataValues },
