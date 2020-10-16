@@ -1,13 +1,18 @@
+import { FlattenUnion } from "../../types/flatten-union";
 import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { TrackedEntityInstance } from "./TrackedEntityInstance";
 
-export type DataPackage = BaseDataPackage | TrackerProgramPackage;
+export type DataPackage = FlattenUnion<GenericProgramPackage | TrackerProgramPackage>;
 export type DataPackageValue = string | number | boolean;
 
 export interface BaseDataPackage {
     type: DataFormType;
     dataEntries: DataPackageData[];
+}
+
+export interface GenericProgramPackage extends BaseDataPackage {
+    type: "dataSets" | "programs";
 }
 
 export interface TrackerProgramPackage extends BaseDataPackage {

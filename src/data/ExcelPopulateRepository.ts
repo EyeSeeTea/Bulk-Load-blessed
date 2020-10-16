@@ -1,3 +1,4 @@
+import Blob from "cross-blob";
 import _ from "lodash";
 import XLSX, {
     Cell as ExcelCell,
@@ -5,12 +6,13 @@ import XLSX, {
     Workbook as ExcelWorkbook,
     Workbook,
 } from "xlsx-populate";
+import { Sheet } from "../domain/entities/Sheet";
 import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import {
     ExcelRepository,
-    LoadOptions,
     ExcelValue,
+    LoadOptions,
     ReadCellOptions,
 } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
@@ -46,11 +48,15 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     public async toBlob(id: string): Promise<Blob> {
-        const workbook = await this.getWorkbook(id);
-        const data = await workbook.outputAsync();
+        const data = await this.toBuffer(id);
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
+    }
+
+    public async toBuffer(id: string): Promise<Buffer> {
+        const workbook = await this.getWorkbook(id);
+        return (workbook.outputAsync() as unknown) as Buffer;
     }
 
     public async findRelativeCell(
@@ -113,6 +119,16 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         const workbook = await this.getWorkbook(id);
         return this.readCellValue(workbook, cellRef, options?.formula);
+    }
+
+    public async getSheets(id: string): Promise<Sheet[]> {
+        const workbook = await this.getWorkbook(id);
+
+        return workbook.sheets().map((sheet, index) => ({
+            index,
+            name: sheet.name(),
+            active: sheet.active(),
+        }));
     }
 
     private async readCellValue(

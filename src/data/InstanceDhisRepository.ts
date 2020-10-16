@@ -1,4 +1,3 @@
-import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
@@ -12,8 +11,10 @@ import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
+import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { promiseMap } from "../webapp/utils/promises";
+import { getTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -88,29 +89,31 @@ export class InstanceDhisRepository implements InstanceRepository {
                         },
                     },
                     access: true,
+                    programType: true,
                 },
                 filter: {
                     id: ids ? { in: ids } : undefined,
-                    programType: { eq: "WITHOUT_REGISTRATION" },
                 },
             })
             .getData();
 
-        return objects.map(({ displayName, name, access, programStages, ...rest }) => ({
-            ...rest,
-            type: "programs",
-            name: displayName ?? name,
-            periodType: "Daily",
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: programStages
-                .flatMap(({ programStageDataElements }) =>
-                    programStageDataElements.map(({ dataElement }) => dataElement)
-                )
-                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
-        }));
+        return objects.map(
+            ({ displayName, name, access, programStages, programType, ...rest }) => ({
+                ...rest,
+                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                name: displayName ?? name,
+                periodType: "Daily",
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: programStages
+                    .flatMap(({ programStageDataElements }) =>
+                        programStageDataElements.map(({ dataElement }) => dataElement)
+                    )
+                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+            })
+        );
     }
 
     @cache()
@@ -274,6 +277,22 @@ export class InstanceDhisRepository implements InstanceRepository {
         }
     }
 
+    public async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
+        const { api } = this;
+        const dataPackage = await this.getProgramPackage(params);
+        const orgUnits = params.orgUnits.map(id => ({ id }));
+        const program = { id: params.id };
+        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
+
+        return {
+            type: "trackerPrograms",
+            trackedEntityInstances,
+            dataEntries: dataPackage.dataEntries,
+        };
+    }
+
+    /* Private */
+
     private async getDataSetPackage({
         id,
         orgUnits,
@@ -384,6 +403,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         attributeOptionCombo,
                         coordinate,
                         dataValues,
+                        trackedEntityInstance,
                     }) => ({
                         id: event,
                         dataForm: id,
@@ -391,6 +411,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         period: moment(eventDate).format("YYYY-MM-DD"),
                         attribute: attributeOptionCombo,
                         coordinate,
+                        trackedEntityInstance,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
                             value: this.formatDataValue(
@@ -404,10 +425,6 @@ export class InstanceDhisRepository implements InstanceRepository {
                 )
                 .value(),
         };
-    }
-
-    private async getTrackerProgramPackage(_params: GetDataPackageParams): Promise<DataPackage> {
-        throw new Error("Not implemented yet");
     }
 
     private formatDataValue(
@@ -477,6 +494,7 @@ export interface Event {
         longitude: string;
     };
     attributeOptionCombo?: string;
+    trackedEntityInstance?: string;
     dataValues: Array<{
         dataElement: string;
         value: string | number | boolean;

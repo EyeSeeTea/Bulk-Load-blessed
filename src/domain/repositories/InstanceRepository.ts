@@ -18,7 +18,7 @@ export interface GetDataPackageParams {
 
 export interface GetDataFormsParams {
     ids?: string[];
-    type?: DataFormType[];
+    type?: Array<"dataSets" | "programs">;
 }
 
 export interface InstanceRepository {

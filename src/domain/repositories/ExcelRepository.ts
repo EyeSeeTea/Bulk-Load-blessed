@@ -1,3 +1,4 @@
+import { Sheet } from "../entities/Sheet";
 import { CellRef, Range, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
@@ -28,6 +29,7 @@ export interface FileLoadOptions extends BaseLoadOptions {
 export abstract class ExcelRepository {
     public abstract async loadTemplate(options: LoadOptions): Promise<string>;
     public abstract async toBlob(id: string): Promise<Blob>;
+    public abstract async toBuffer(id: string): Promise<Buffer>;
     public abstract async findRelativeCell(
         id: string,
         location?: SheetRef,
@@ -42,4 +44,5 @@ export abstract class ExcelRepository {
     public abstract async getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
     public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;
     public abstract async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
+    public abstract async getSheets(id: string): Promise<Sheet[]>;
 }

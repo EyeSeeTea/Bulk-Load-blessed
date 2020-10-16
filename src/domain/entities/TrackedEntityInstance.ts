@@ -13,7 +13,8 @@ export interface TrackedEntityInstance {
 }
 
 export interface Enrollment {
-    date: string;
+    enrollmentDate: string;
+    incidentDate: string;
 }
 
 export interface AttributeValue {

@@ -1,7 +1,7 @@
-import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
 import { EventsPackage } from "../../data/InstanceDhisRepository";
 import i18n from "../../locales";
+import { D2Api, DataValueSetsDataValue, Id } from "../../types/d2-api";
 
 interface SheetImportDataSet {
     dataSet: Id;
