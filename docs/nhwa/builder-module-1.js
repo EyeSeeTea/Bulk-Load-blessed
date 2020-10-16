@@ -15,9 +15,9 @@ let getDataElements = ({
     tabSelector,
     letters,
     dataRowStart,
-    type = "entryfield",
+    type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`input.${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
         (input, i) => {
             const id = input.getAttribute("id");
             const [dataElement, categoryOptionCombo] = id.split("-");
@@ -105,7 +105,7 @@ let dataSheet4 = [
         tabSelector: "#tab0",
         letters: ["P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA"],
         dataRowStart: 8,
-        type: "entrytrueonly",
+        type: "input.entrytrueonly",
     }),
 ];
 
