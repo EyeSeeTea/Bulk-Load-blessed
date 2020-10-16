@@ -20,6 +20,8 @@ import { Theme, ThemeStyle } from "../entities/Theme";
 import dateFormat from "dateformat";
 import { getRelationships } from "../entities/TrackedEntityInstance";
 
+const dateFormatPattern = "yyyy-mm-dd";
+
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
 
 export interface BaseLoadOptions {
@@ -120,12 +122,28 @@ export abstract class ExcelRepository {
                 await this.writeCell(template, teiIdCell, id);
             }
 
-            const dateCell = await this.findRelativeCell(template, dataSource.date, cells[0]);
-            if (dateCell && enrollment)
+            const enrollmentDateCell = await this.findRelativeCell(
+                template,
+                dataSource.enrollmentDate,
+                cells[0]
+            );
+            if (enrollmentDateCell && enrollment)
                 await this.writeCell(
                     template,
-                    dateCell,
-                    dateFormat(new Date(enrollment.date), "yyyy-mm-dd")
+                    enrollmentDateCell,
+                    dateFormat(new Date(enrollment.enrollmentDate), dateFormatPattern)
+                );
+
+            const incidentDateCell = await this.findRelativeCell(
+                template,
+                dataSource.incidentDate,
+                cells[0]
+            );
+            if (incidentDateCell && enrollment)
+                await this.writeCell(
+                    template,
+                    incidentDateCell,
+                    dateFormat(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
             const values = program.attributes.map(

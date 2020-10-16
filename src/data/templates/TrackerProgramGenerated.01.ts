@@ -20,15 +20,20 @@ export default class implements GeneratedTemplate {
                 type: "column",
                 ref: "B",
             },
-            date: {
+            enrollmentDate: {
                 sheet: "TEI Instances",
                 type: "column",
                 ref: "C",
             },
+            incidentDate: {
+                sheet: "TEI Instances",
+                type: "column",
+                ref: "D",
+            },
             attributes: {
                 sheet: "TEI Instances",
                 rowStart: 6,
-                columnStart: "D",
+                columnStart: "E",
             },
         },
         {

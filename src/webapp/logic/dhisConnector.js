@@ -16,6 +16,7 @@ export async function getElement(api, type, id) {
         "programStages",
         "programType",
         "enrollmentDateLabel",
+        "incidentDateLabel",
         "captureCoordinates",
         "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,optionSet[id,name,options[id]]]],",
     ].join(",");

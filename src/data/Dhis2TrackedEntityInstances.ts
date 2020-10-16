@@ -134,6 +134,7 @@ interface EnrollmentApi {
     program: Id;
     orgUnit: Id;
     enrollmentDate: string;
+    incidentDate: string;
 }
 
 async function getTeisFromApi(options: {
@@ -179,7 +180,10 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
 
     const enrollment: Enrollment | undefined = _(teiApi.enrollments)
         .filter(e => e.program === program.id && orgUnit.id === e.orgUnit)
-        .map(enrollmentApi => ({ date: enrollmentApi.enrollmentDate }))
+        .map(enrollmentApi => ({
+            enrollmentDate: enrollmentApi.enrollmentDate,
+            incidentDate: enrollmentApi.incidentDate,
+        }))
         .first();
 
     const attributeValues: AttributeValue[] = teiApi.attributes.map(attrApi => {

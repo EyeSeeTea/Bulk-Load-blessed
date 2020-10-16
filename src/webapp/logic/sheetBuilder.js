@@ -199,7 +199,9 @@ SheetBuilder.prototype.fillInstancesSheet = function () {
         orgNonExistingMessage
     );
 
-    this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Date") + " *");
+    this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
+
+    this.createColumn(sheet, itemRow, 4, (program.incidentDateLabel || "Incident Date") + " *");
 
     const programAttributes = program.programTrackedEntityAttributes || [];
     this.instancesSheetValuesRow = itemRow + 1;
@@ -208,7 +210,7 @@ SheetBuilder.prototype.fillInstancesSheet = function () {
         const tea = attribute.trackedEntityAttribute;
         const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
         const validation = this.validations.get(validationId);
-        this.createColumn(sheet, itemRow, 4 + idx, tea.name, 1, validation);
+        this.createColumn(sheet, itemRow, 5 + idx, tea.name, 1, validation);
     });
 };
 

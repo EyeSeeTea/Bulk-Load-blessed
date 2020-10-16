@@ -121,7 +121,8 @@ export interface TeiRowDataSource {
     type: "rowTei";
     teiId: ColumnRef;
     orgUnit: ColumnRef;
-    date: ColumnRef;
+    enrollmentDate: ColumnRef;
+    incidentDate: ColumnRef;
     attributes: Range;
 }
 
