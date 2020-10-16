@@ -300,6 +300,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     coordinate,
                     dataValues,
                     trackedEntityInstance,
+                    programStage,
                 }) => ({
                     id: event,
                     orgUnit,
@@ -307,6 +308,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     attribute: attributeOptionCombo,
                     coordinate,
                     trackedEntityInstance,
+                    programStage,
                     dataValues: dataValues.map(({ dataElement, value }) => ({
                         dataElement,
                         value: this.formatDataValue(dataElement, value, metadata, translateCodes),
@@ -373,6 +375,7 @@ export interface EventsPackage {
         };
         attributeOptionCombo?: string;
         trackedEntityInstance?: string;
+        programStage?: string;
         dataValues: Array<{
             dataElement: string;
             value: string | number;

@@ -161,22 +161,50 @@ function getApiEvents(teis: TrackedEntityInstance[], dataEntries: Data[]): Event
                 return null;
             }
 
+            if (!data.programStage) {
+                console.error(`Data without programStage ${data}`);
+                return null;
+            }
+
             const dataValues: DataValueApi[] = _(data.dataValues)
                 .flatMap(dataValue => _.pick(dataValue, ["dataElement", "value"]))
                 .value();
 
-            return {
-                event: data.id,
+            const eventSelector: EventSelector = {
+                trackedEntityInstance: { id: teiId },
+                program: { id: program },
+                orgUnit: { id: data.orgUnit },
+                eventDate: data.period,
+            };
+
+            const eventApi: EventApi = {
+                event: getEventId(data.id, eventSelector),
                 trackedEntityInstance: teiId,
                 program: program,
                 orgUnit: data.orgUnit,
                 eventDate: data.period,
                 status: "COMPLETED" as const,
+                programStage: data.programStage,
                 dataValues,
             };
+
+            return eventApi;
         })
         .compact()
         .value();
+}
+
+interface EventSelector {
+    trackedEntityInstance: Ref;
+    program: Ref;
+    orgUnit: Ref;
+    eventDate: string;
+}
+
+function getEventId(eventId: Id | undefined, eventSelector: EventSelector) {
+    const s = eventSelector;
+    const key = [s.trackedEntityInstance.id, s.program.id, s.orgUnit.id, s.eventDate].join("-");
+    return eventId || getUid(key);
 }
 
 function getApiTeiToUpload(tei: TrackedEntityInstance): TrackedEntityInstanceApiUpload {
@@ -293,7 +321,7 @@ interface EventApi {
     event?: Id;
     orgUnit: Id;
     program: Id;
-    //programStage: Id;
+    programStage: Id;
     eventDate: string;
     status: EventStatusApi;
     trackedEntityInstance: Id;
