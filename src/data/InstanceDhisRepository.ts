@@ -2,7 +2,11 @@ import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "../types/d2-api";
 import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
-import { DataPackage, BaseDataPackage } from "../domain/entities/DataPackage";
+import {
+    DataPackage,
+    BaseDataPackage,
+    TrackerProgramPackage,
+} from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
@@ -11,7 +15,10 @@ import {
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
 import { promiseMap } from "../webapp/utils/promises";
-import { getTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
+import {
+    getTrackedEntityInstances,
+    updateTrackedEntityInstances,
+} from "./Dhis2TrackedEntityInstances";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -174,7 +181,21 @@ export class InstanceDhisRepository implements InstanceRepository {
         return locales;
     }
 
+    public async uploadDataPackage(dataPackage: DataPackage): Promise<void> {
+        switch (dataPackage.type) {
+            case "trackerPrograms":
+                return this.uploadTrackerProgramPackage(dataPackage);
+            default:
+                throw new Error(`Unsupported type ${dataPackage.type} for data package`);
+        }
+    }
+
     /* Private */
+
+    private async uploadTrackerProgramPackage(dataPackage: TrackerProgramPackage) {
+        const { trackedEntityInstances, dataEntries } = dataPackage;
+        await updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
+    }
 
     private async getDataSetPackage({
         id,
