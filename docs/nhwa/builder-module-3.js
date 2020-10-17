@@ -5,8 +5,8 @@ let rawMetadata = await (await fetch("/who-prod/api/dataSets/pZ3XRBi9gYE/metadat
 
 let metadata = new Map();
 
-for (const type in rawMetadata) {
-    const elements = rawMetadata[type];
+for (let type in rawMetadata) {
+    let elements = rawMetadata[type];
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
@@ -21,8 +21,8 @@ let getDataElements = ({
 }) => {
     return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
         (input, i) => {
-            const id = input.getAttribute("id");
-            const [dataElement, categoryOptionCombo] = id.split("-");
+            let id = input.getAttribute("id");
+            let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",

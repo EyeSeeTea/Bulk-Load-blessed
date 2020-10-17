@@ -55,8 +55,8 @@ let getDataElements = ({
 }) => {
     return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
         (input, i) => {
-            const id = input.getAttribute("id");
-            const [dataElement, categoryOptionCombo] = id.split("-");
+            let id = input.getAttribute("id");
+            let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
@@ -89,9 +89,9 @@ let getDataElementsCustomRows = ({
     let allFields = rows.map((row, i) => {
         let fields = [];
         for (i = 0; i < row.nrOfElements; i++) {
-            const field = entryfields[elementCount + i];
-            const id = field.getAttribute("id");
-            const [dataElement, categoryOptionCombo] = id.split("-");
+            let field = entryfields[elementCount + i];
+            let id = field.getAttribute("id");
+            let [dataElement, categoryOptionCombo] = id.split("-");
 
             fields.push({
                 type: "cell",
@@ -169,7 +169,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["P", "Q", "R"],
         rows: customRowsTab3YesPartialNo,
-        type: "input.entrytrueonly"
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Regulation",
@@ -178,7 +178,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["O"],
         dataRowStart: 20,
-        type: "input.entryselect[value=true]"
+        type: "input.entryselect[value=true]",
     }),
     ...getDataElementsCustomRows({
         sheet: "Regulation",
@@ -187,7 +187,7 @@ let dataSheet3 = [
         tabSelector: "#tab2",
         letters: ["E"],
         rows: customRowsTab3Comments,
-        type: "textarea.entryfield"
+        type: "textarea.entryfield",
     }),
 ];
 
