@@ -79,7 +79,7 @@ let dataSheet3 = [
         periodCell: "J4",
         tabSelector: "#tab2",
         letters: ["F"],
-        dataRowStart: 8,
+        dataRowStart: 18,
         type: "textarea.entryfield",
     }),
     ...getDataElements({
