@@ -3,7 +3,19 @@ import { ThemeableSections, ImageSections } from "./Theme";
 
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
-export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
+
+export type DataSourceValue =
+    | RowDataSource
+    | TeiRowDataSource
+    | TrackerEventRowDataSource
+    | TrackerRelationship
+    | ColumnDataSource
+    | CellDataSource;
+
+// Use to reference data sources for dynamic sheets
+type DataSourceValueGetter = (sheet: string) => DataSourceValue | false;
+
+export type DataSource = DataSourceValue | DataSourceValueGetter;
 
 export type StyleSource = {
     section: ThemeableSections | ImageSections;
@@ -32,8 +44,10 @@ export interface CustomTemplate {
 export interface GenericSheetRef {
     type: RefType;
     ref: string | number;
-    sheet: string | number;
+    sheet: Sheet;
 }
+
+type Sheet = string | number;
 
 export interface RowRef extends GenericSheetRef {
     type: "row";
@@ -56,7 +70,7 @@ export interface RangeRef extends GenericSheetRef {
 }
 
 export interface Range {
-    sheet: string;
+    sheet: Sheet;
     rowStart: number;
     rowEnd?: number;
     columnStart: string;
@@ -74,6 +88,24 @@ export interface GenericDataSource {
     eventId?: SheetRef;
 }
 
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    attributeOptionCombo: ColumnRef;
+    range: Range;
+    dataElement: RowRef;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    range: Range;
+    typeName: ColumnRef;
+    from: ColumnRef;
+    to: ColumnRef;
+}
+
 export interface RowDataSource extends GenericDataSource {
     type: "row";
     range: Range;
@@ -83,6 +115,15 @@ export interface RowDataSource extends GenericDataSource {
     categoryOption?: RowRef;
     attribute?: ColumnRef | CellRef;
     eventId?: ColumnRef | CellRef;
+}
+
+export interface TeiRowDataSource {
+    type: "rowTei";
+    teiId: ColumnRef;
+    orgUnit: ColumnRef;
+    enrollmentDate: ColumnRef;
+    incidentDate: ColumnRef;
+    attributes: Range;
 }
 
 export interface ColumnDataSource extends GenericDataSource {

@@ -1,6 +1,14 @@
 import _ from "lodash";
+import Blob from "cross-blob";
 import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populate";
-import { CellRef, Range, SheetRef, Template } from "../domain/entities/Template";
+import {
+    CellRef,
+    Range,
+    SheetRef,
+    Template,
+    DataSourceValue,
+    DataSource,
+} from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
 import { removeCharacters } from "../utils/string";
@@ -34,6 +42,29 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const data = await workbook.outputAsync();
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+    }
+
+    public async toBuffer(template: Template): Promise<Buffer> {
+        const workbook = await this.getWorkbook(template);
+        return (workbook.outputAsync() as unknown) as Buffer;
+    }
+
+    async getDataSourceValues(
+        template: Template,
+        dataSources: DataSource[]
+    ): Promise<DataSourceValue[]> {
+        const workbook = await this.getWorkbook(template);
+
+        return _.flatMap(dataSources, dataSource => {
+            if (typeof dataSource === "function") {
+                return _(workbook.sheets())
+                    .map(sheet => dataSource(sheet.name()))
+                    .compact()
+                    .value();
+            } else {
+                return [dataSource];
+            }
         });
     }
 

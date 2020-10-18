@@ -1,18 +1,45 @@
 import * as Excel from "excel4node";
 import _ from "lodash";
+import Blob from "cross-blob";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v3";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
+
+const teiSheetName = "TEI Instances";
+const orgNonExistingMessage =
+    "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
+
+const maxRow = 1048576;
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
     this.validations = new Map();
+};
 
-    this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+SheetBuilder.prototype.generate = function () {
+    const { builder } = this;
+    const { element } = builder;
+
+    if (isTrackerProgram(element)) {
+        const { element, elementMetadata: metadata } = builder;
+        this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
+        this.programStageSheets = {};
+
+        _.forEach(element.programStages, programStageT => {
+            const programStage = metadata.get(programStageT.id);
+            const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
+            this.programStageSheets[programStageT.id] = sheet;
+        });
+        this.relationshipsSheet = this.workbook.addWorksheet("Relationships");
+    } else {
+        this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+    }
+
     this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
     this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
     this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
@@ -20,7 +47,171 @@ export const SheetBuilder = function (builder) {
     this.fillValidationSheet();
     this.fillMetadataSheet();
     this.fillLegendSheet();
-    this.fillDataEntrySheet();
+
+    if (isTrackerProgram(element)) {
+        this.fillInstancesSheet();
+        this.fillProgramStageSheets();
+        this.fillRelationshipsSheet();
+    } else {
+        this.fillDataEntrySheet();
+    }
+
+    return this.workbook;
+};
+
+SheetBuilder.prototype.fillRelationshipsSheet = function () {
+    const sheet = this.relationshipsSheet;
+
+    this.createColumn(sheet, 1, 1, "Type", null, this.validations.get("relationshipTypes"));
+    this.createColumn(sheet, 1, 2, "From TEI", null, this.getTeiIdValidation());
+    this.createColumn(sheet, 1, 3, "To TEI", null, this.getTeiIdValidation());
+};
+
+SheetBuilder.prototype.fillProgramStageSheets = function () {
+    const { elementMetadata: metadata, element: program } = this.builder;
+    _.forEach(this.programStageSheets, (sheet, programStageId) => {
+        const programStageT = { id: programStageId };
+        const programStage = metadata.get(programStageId);
+
+        const rowOffset = 0;
+        const sectionRow = rowOffset + 1;
+        const itemRow = rowOffset + 2;
+
+        // Freeze and format column titles
+        sheet.row(itemRow).freeze();
+        sheet.row(sectionRow).setHeight(30);
+        sheet.row(itemRow).setHeight(50);
+
+        for (let row = 1; row < sectionRow; row++) {
+            sheet.row(row).hide();
+        }
+
+        // Add column titles
+        let columnId = 1;
+        let groupId = 0;
+
+        this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
+
+        const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
+        const optionsTitle =
+            attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            columnId++,
+            optionsTitle,
+            null,
+            this.validations.get("options")
+        );
+
+        this.createColumn(sheet, itemRow, columnId++, "Event id");
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            columnId++,
+            `${programStage.executionDateLabel ?? "Date"} *`
+        );
+
+        if (programStage.programStageSections.length === 0) {
+            programStage.programStageSections.push({
+                dataElements: programStage.programStageDataElements.map(e => e.dataElement),
+                id: programStageT.id,
+            });
+        }
+
+        _.forEach(programStage.programStageSections, programStageSectionT => {
+            const programStageSection = programStageSectionT.dataElements
+                ? programStageSectionT
+                : metadata.get(programStageSectionT.id);
+            const firstColumnId = columnId;
+
+            _.forEach(programStageSection.dataElements, dataElementT => {
+                const dataElement = metadata.get(dataElementT.id);
+                const { name, description } = this.translate(dataElement);
+
+                const validation = dataElement.optionSet
+                    ? dataElement.optionSet.id
+                    : dataElement.valueType;
+                this.createColumn(
+                    sheet,
+                    itemRow,
+                    columnId,
+                    `_${dataElement.id}`,
+                    groupId,
+                    this.validations.get(validation)
+                );
+                sheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                if (description !== undefined) {
+                    sheet.cell(itemRow, columnId).comment(description, {
+                        height: "100pt",
+                        width: "160pt",
+                    });
+                }
+
+                columnId++;
+            });
+
+            if (firstColumnId < columnId)
+                sheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .formula(`_${programStageSection.id}`)
+                    .style(this.groupStyle(groupId));
+
+            groupId++;
+        });
+    });
+};
+
+SheetBuilder.prototype.fillInstancesSheet = function () {
+    const { element: program } = this.builder;
+    const { rowOffset = 0 } = this.builder.template;
+    const sheet = this.instancesSheet;
+
+    // Add cells for themes
+    const sectionRow = rowOffset + 1;
+    const itemRow = rowOffset + 2;
+
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        sheet.row(row).hide();
+    }
+
+    // Freeze and format column titles
+    sheet.row(itemRow).freeze();
+    sheet.row(sectionRow).setHeight(30);
+    sheet.row(itemRow).setHeight(50);
+
+    // Add template version
+    sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+
+    this.createColumn(sheet, itemRow, 1, "TEI id");
+
+    this.createColumn(
+        sheet,
+        itemRow,
+        2,
+        "Org Unit *",
+        null,
+        this.validations.get("organisationUnits"),
+        orgNonExistingMessage
+    );
+
+    this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
+
+    this.createColumn(sheet, itemRow, 4, (program.incidentDateLabel || "Incident Date") + " *");
+
+    const programAttributes = program.programTrackedEntityAttributes || [];
+    this.instancesSheetValuesRow = itemRow + 1;
+
+    programAttributes.forEach((attribute, idx) => {
+        const tea = attribute.trackedEntityAttribute;
+        const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
+        const validation = this.validations.get(validationId);
+        this.createColumn(sheet, itemRow, 5 + idx, tea.name, 1, validation);
+    });
 };
 
 SheetBuilder.prototype.fillLegendSheet = function () {
@@ -66,6 +257,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     const {
         organisationUnits,
         element,
+        metadata,
         rawMetadata,
         elementMetadata,
         startDate,
@@ -107,6 +299,21 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         );
     }
 
+    if (isTrackerProgram(element)) {
+        rowId = 2;
+        columnId++;
+        validationSheet.cell(rowId++, columnId).string("Relationship Types");
+        _.forEach(metadata.relationshipTypes, relationshipType => {
+            validationSheet.cell(rowId++, columnId).formula(`_${relationshipType.id}`);
+        });
+        this.validations.set(
+            "relationshipTypes",
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                columnId
+            )}$${rowId}`
+        );
+    }
+
     rowId = 2;
     columnId++;
     validationSheet.cell(rowId++, columnId).string("Options");
@@ -121,7 +328,15 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    _.forEach(rawMetadata.optionSets, optionSet => {
+    const programAttributes = element.programTrackedEntityAttributes || [];
+    const programOptionSets = _(programAttributes)
+        .map(pa => pa.trackedEntityAttribute?.optionSet)
+        .compact()
+        .value();
+
+    const optionSets = _.concat(programOptionSets, _.toArray(rawMetadata.optionSets));
+
+    _.forEach(optionSets, optionSet => {
         rowId = 2;
         columnId++;
 
@@ -225,6 +440,17 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         rowId++;
     });
 
+    this.builder.metadata.relationshipTypes.forEach(relationshipType => {
+        metadataSheet.cell(rowId, 1).string(relationshipType.id);
+        metadataSheet.cell(rowId, 2).string("relationshipType");
+        metadataSheet.cell(rowId, 3).string(relationshipType.name);
+        this.workbook.definedNameCollection.addDefinedName({
+            refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+            name: `_${relationshipType.id}`,
+        });
+        rowId++;
+    });
+
     metadataSheet.cell(rowId, 1).string("true");
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("Yes");
@@ -246,7 +472,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion = element.type === "dataSets" ? dataSetId : programId;
+    const defaultVersion = getTemplateId(element);
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -285,6 +511,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
+
     if (element.type === "programs") {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
@@ -493,7 +720,7 @@ SheetBuilder.prototype.createColumn = function (
     if (validation !== null) {
         const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
             columnId
-        )}1048576`;
+        )}${maxRow}`;
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
@@ -540,6 +767,10 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
             fgColor: palette[groupId % palette.length],
         },
     };
+};
+
+SheetBuilder.prototype.getTeiIdValidation = function () {
+    return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxRow}`;
 };
 
 function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
@@ -635,3 +866,20 @@ const protectedSheet = {
         password: "Wiscentd2019!",
     },
 };
+
+function isTrackerProgram(element) {
+    return element.type === "trackerPrograms";
+}
+
+export function getTemplateId(element) {
+    switch (element.type) {
+        case "dataSets":
+            return dataSetId;
+        case "programs":
+            return programId;
+        case "trackerPrograms":
+            return trackerProgramId;
+        default:
+            throw new Error("Unsupported type");
+    }
+}

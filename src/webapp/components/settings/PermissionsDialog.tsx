@@ -1,4 +1,4 @@
-import { D2Api } from "d2-api";
+import { D2Api } from "../../../types/d2-api";
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
 import React, { useCallback } from "react";
 import i18n from "../../../locales";
