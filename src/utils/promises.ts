@@ -14,3 +14,7 @@ export function runPromises<T>(
     promiseGetters.forEach(promiseGetter => pool.add(promiseGetter));
     return pool.all();
 }
+
+export const timeout = (ms: number) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};

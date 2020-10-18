@@ -11,8 +11,14 @@ import {
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
-import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "../types/d2-api";
+import {
+    D2Api,
+    D2ApiDefault,
+    DataValueSetsGetResponse,
+    DataValueSetsPostResponse,
+} from "../types/d2-api";
 import { cache } from "../utils/cache";
+import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
 import { getTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
 
@@ -198,8 +204,29 @@ export class InstanceDhisRepository implements InstanceRepository {
     ): Promise<ImportSummary> {
         const dataValues = this.buildAggregatedPayload(dataPackage);
 
-        const { status, description, conflicts, importCount } = await this.api.dataValues
-            .postSet({ importStrategy }, { dataValues })
+        const {
+            response: { id, jobType },
+        } = ((await this.api.dataValues
+            .postSet({ importStrategy, async: true }, { dataValues })
+            .getData()) as unknown) as AsyncDataValueSetResponse;
+
+        const checkTask = async () => {
+            const [{ completed }] =
+                (await this.api
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
+                    .getData()) ?? [];
+
+            return !completed;
+        };
+
+        do {
+            await timeout(1500);
+        } while (await checkTask());
+
+        const { status, description, conflicts, importCount } = await this.api
+            .get<DataValueSetsPostResponse>(`/system/taskSummaries/${jobType}/${id}`)
             .getData();
 
         const { imported: created, deleted, updated, ignored } = importCount;
@@ -528,3 +555,17 @@ interface MetadataItem {
 }
 
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
+
+interface AsyncDataValueSetResponse {
+    httStatus: string;
+    httpStatusCode: number;
+    message: string;
+    response: {
+        created: string;
+        id: string;
+        jobType: string;
+        name: string;
+        relativeNotifierEndpoint: string;
+    };
+    status: string;
+}
