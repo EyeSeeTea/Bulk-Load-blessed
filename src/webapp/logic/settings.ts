@@ -1,4 +1,3 @@
-import { D2Api, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
@@ -11,6 +10,7 @@ import {
 } from "../../domain/entities/AppSettings";
 import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
+import { D2Api, Ref } from "../../types/d2-api";
 import { GetArrayInnerType } from "../../types/utils";
 
 const privateFields = ["currentUser"] as const;

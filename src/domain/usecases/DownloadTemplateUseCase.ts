@@ -1,8 +1,9 @@
 import { saveAs } from "file-saver";
+import fs from "fs";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
 import * as dhisConnector from "../../webapp/logic/dhisConnector";
-import { dataSetId, programId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
+import { getTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
 import { ExcelBuilder } from "../helpers/ExcelBuilder";
@@ -21,6 +22,7 @@ export interface DownloadTemplateProps {
     populate: boolean;
     populateStartDate?: Moment;
     populateEndDate?: Moment;
+    writeFile?: string;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -43,10 +45,11 @@ export class DownloadTemplateUseCase implements UseCase {
             populate,
             populateStartDate,
             populateEndDate,
+            writeFile,
         }: DownloadTemplateProps
     ): Promise<void> {
         try {
-            const templateId = type === "dataSets" ? dataSetId : programId;
+            const templateId = getTemplateId({ type });
             const template = this.templateRepository.getTemplate(templateId);
             const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
@@ -58,7 +61,7 @@ export class DownloadTemplateUseCase implements UseCase {
             });
 
             // FIXME: Legacy code, sheet generator
-            const builderOutput = new SheetBuilder({
+            const sheetBuilder = new SheetBuilder({
                 ...result,
                 startDate,
                 endDate,
@@ -66,9 +69,10 @@ export class DownloadTemplateUseCase implements UseCase {
                 theme,
                 template,
             });
+            const workbook = await sheetBuilder.generate();
 
             const name = element.displayName ?? element.name;
-            const file = await builderOutput.toBlob();
+            const file = await workbook.writeToBuffer();
 
             await this.excelRepository.loadTemplate({ type: "file", file });
             const builder = new ExcelBuilder(this.excelRepository);
@@ -86,8 +90,15 @@ export class DownloadTemplateUseCase implements UseCase {
                 await builder.populateTemplate(template, dataPackage);
             }
 
-            const data = await this.excelRepository.toBlob(templateId);
-            saveAs(data, `${name}.xlsx`);
+            const filename = `${name}.xlsx`;
+
+            if (writeFile) {
+                const buffer = await this.excelRepository.toBuffer(templateId);
+                fs.writeFileSync(writeFile, buffer);
+            } else {
+                const data = await this.excelRepository.toBlob(templateId);
+                saveAs(data, filename);
+            }
         } catch (error) {
             console.log("Failed building/downloading template");
             throw error;

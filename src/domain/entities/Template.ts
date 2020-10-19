@@ -5,7 +5,19 @@ import { ImageSections, ThemeableSections } from "./Theme";
 export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
-export type DataSource = RowDataSource | ColumnDataSource | CellDataSource;
+
+export type DataSourceValue =
+    | RowDataSource
+    | TeiRowDataSource
+    | TrackerEventRowDataSource
+    | TrackerRelationship
+    | ColumnDataSource
+    | CellDataSource;
+
+// Use to reference data sources for dynamic sheets
+type DataSourceValueGetter = (sheet: string) => DataSourceValue | false;
+
+export type DataSource = DataSourceValue | DataSourceValueGetter;
 
 export type StyleSource = {
     section: ThemeableSections | ImageSections;
@@ -88,6 +100,24 @@ interface BaseDataSource {
     eventId?: SheetRef | ValueRef;
 }
 
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    attributeOptionCombo: ColumnRef;
+    range: Range;
+    dataElement: RowRef;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    range: Range;
+    typeName: ColumnRef;
+    from: ColumnRef;
+    to: ColumnRef;
+}
+
 export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
@@ -97,6 +127,15 @@ export interface RowDataSource extends BaseDataSource {
     categoryOption?: RowRef;
     attribute?: ColumnRef | CellRef;
     eventId?: ColumnRef | CellRef;
+}
+
+export interface TeiRowDataSource {
+    type: "rowTei";
+    teiId: ColumnRef;
+    orgUnit: ColumnRef;
+    enrollmentDate: ColumnRef;
+    incidentDate: ColumnRef;
+    attributes: Range;
 }
 
 export interface ColumnDataSource extends BaseDataSource {

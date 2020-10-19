@@ -1,7 +1,15 @@
 import _ from "lodash";
 import { promiseMap } from "../../webapp/utils/promises";
 import { DataPackage, DataPackageData, DataPackageValue } from "../entities/DataPackage";
-import { CellDataSource, CellRef, SheetRef, Template, ValueRef } from "../entities/Template";
+import {
+    CellDataSource,
+    CellRef,
+    DataSource,
+    DataSourceValue,
+    SheetRef,
+    Template,
+    ValueRef,
+} from "../entities/Template";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 
 export class ExcelReader {
@@ -11,16 +19,13 @@ export class ExcelReader {
         const { dataSources = [] } = template;
 
         const dataFormType = await this.readCellValue(template, template.dataFormType);
+        const dataSourceValues = await this.getDataSourceValues(template, dataSources);
 
-        if (
-            dataFormType !== "dataSets" &&
-            dataFormType !== "programs" &&
-            dataFormType !== "trackerPrograms"
-        ) {
+        if (dataFormType !== "dataSets" && dataFormType !== "programs") {
             return undefined;
         }
 
-        const data = await promiseMap(dataSources, dataSource => {
+        const data = await promiseMap(dataSourceValues, dataSource => {
             switch (dataSource.type) {
                 case "cell":
                     return this.readByCell(template, dataSource);
@@ -98,5 +103,23 @@ export class ExcelReader {
     private formatValue(value: ExcelValue | undefined): DataPackageValue {
         if (value instanceof Date) return value.toISOString();
         return value !== undefined ? String(value) : "";
+    }
+
+    private async getDataSourceValues(
+        template: Template,
+        dataSources: DataSource[]
+    ): Promise<DataSourceValue[]> {
+        const sheets = await this.excelRepository.getSheets(template.id);
+
+        return _.flatMap(dataSources, dataSource => {
+            if (typeof dataSource === "function") {
+                return _(sheets)
+                    .map(sheet => dataSource(sheet.name))
+                    .compact()
+                    .value();
+            } else {
+                return [dataSource];
+            }
+        });
     }
 }
