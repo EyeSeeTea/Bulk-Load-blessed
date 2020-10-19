@@ -1,4 +1,3 @@
-import { D2Api } from "./types/d2-api";
 import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
@@ -12,6 +11,7 @@ import { InstanceRepository } from "./domain/repositories/InstanceRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
+import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
@@ -26,6 +26,7 @@ import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
+import { D2Api } from "./types/d2-api";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -75,6 +76,7 @@ export class CompositionRoot {
     public get form() {
         return getExecute({
             getDataPackage: new GetFormDataPackageUseCase(this.instance),
+            convertDataPackage: new ConvertDataPackageUseCase(this.instance),
         });
     }
 
