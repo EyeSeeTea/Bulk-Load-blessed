@@ -127,7 +127,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             } = await CompositionRoot.attach().templates.analyze(file);
 
             // TODO: Remove if condition and use only new code to import templates
-            if (custom) {
+            if (custom || dataForm.type === "trackerPrograms") {
                 await startImport({
                     file,
                     settings,
