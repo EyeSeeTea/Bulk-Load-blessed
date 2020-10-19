@@ -54,27 +54,33 @@ export class DownloadTemplateUseCase implements UseCase {
             const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
             const element = await dhisConnector.getElement(api, type, id);
-            const result = await dhisConnector.getElementMetadata({
-                api,
-                element,
-                orgUnitIds: orgUnits,
-            });
-
-            // FIXME: Legacy code, sheet generator
-            const sheetBuilder = new SheetBuilder({
-                ...result,
-                startDate,
-                endDate,
-                language,
-                theme,
-                template,
-            });
-            const workbook = await sheetBuilder.generate();
-
             const name = element.displayName ?? element.name;
-            const file = await workbook.writeToBuffer();
 
-            await this.excelRepository.loadTemplate({ type: "file", file });
+            if (template.type === "custom") {
+                await this.excelRepository.loadTemplate({ type: "url", url: template.url });
+            } else {
+                const result = await dhisConnector.getElementMetadata({
+                    api,
+                    element,
+                    orgUnitIds: orgUnits,
+                });
+
+                // FIXME: Legacy code, sheet generator
+                const sheetBuilder = new SheetBuilder({
+                    ...result,
+                    startDate,
+                    endDate,
+                    language,
+                    theme,
+                    template,
+                });
+                const workbook = await sheetBuilder.generate();
+
+                const file = await workbook.writeToBuffer();
+
+                await this.excelRepository.loadTemplate({ type: "file", file });
+            }
+
             const builder = new ExcelBuilder(this.excelRepository);
 
             if (theme) await builder.applyTheme(template, theme);
