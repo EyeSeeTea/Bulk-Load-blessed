@@ -29,6 +29,9 @@ export class ExcelBuilder {
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
         for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
+                case "cell":
+                    console.log("TODO", { dataSource }); 
+                    break;
                 case "row":
                     await this.fillRows(template, dataSource, payload);
                     break;
