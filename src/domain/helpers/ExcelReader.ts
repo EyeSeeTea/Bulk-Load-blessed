@@ -71,7 +71,7 @@ export class ExcelReader {
         const attribute = await this.readCellValue(template, dataSource.attribute);
         const eventId = await this.readCellValue(template, dataSource.eventId);
 
-        if (!orgUnit || !period || !dataElement || !dataFormId) {
+        if (!orgUnit || !period || !dataElement || !dataFormId || !value) {
             return [];
         }
 

@@ -16,6 +16,7 @@ import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { DataPackageData, DataPackageDataValue } from "../../../domain/entities/DataPackage";
+import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
@@ -127,15 +128,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
             // TODO: Remove if condition and use only new code to import templates
             if (custom) {
-                const result = await CompositionRoot.attach().templates.import({
+                await startImport({
                     file,
                     settings,
                     useBuilderOrgUnits,
                     selectedOrgUnits,
                 });
-                console.log(result);
-
-                throw new Error("Importing custom templates is not implemented yet");
             } else {
                 //const organisationUnits = result.organisationUnits;
                 const orgUnitCoordMap = new Map();
@@ -206,6 +204,153 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
 
         loading.show(false);
+    };
+
+    const startImport = async (params: ImportTemplateUseCaseParams) => {
+        loading.show(true, i18n.t("Importing data..."));
+
+        const result = await CompositionRoot.attach().templates.import(params);
+
+        result.match({
+            success: importSummary => {
+                loading.reset();
+
+                const { created, updated, ignored, deleted } = importSummary.stats;
+                const messages = _.compact([
+                    importSummary.description,
+                    [
+                        `${i18n.t("Imported")}: ${created}`,
+                        `${i18n.t("Updated")}: ${updated}`,
+                        `${i18n.t("Ignored")}: ${ignored}`,
+                        `${i18n.t("Deleted")}: ${deleted}`,
+                    ].join(", "),
+                ]);
+
+                snackbar.info(messages.join("\n"));
+                setMessages(messages);
+            },
+            error: error => {
+                loading.reset();
+
+                switch (error.type) {
+                    case "DUPLICATE_VALUES":
+                        {
+                            const { existingDataValues, dataValues } = error;
+
+                            const totalExisting = _.flatMap(
+                                existingDataValues.dataEntries,
+                                ({ dataValues }) => dataValues
+                            ).length;
+
+                            const dataSetConfig = {
+                                title: i18n.t("Existing data values"),
+                                message: i18n.t(
+                                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                                    { totalExisting }
+                                ),
+                                save: i18n.t("Proceed"),
+                                cancel: i18n.t("Cancel"),
+                                info: i18n.t("Import only new data values"),
+                            };
+
+                            const programConfig = {
+                                title: i18n.t(
+                                    "Warning: Your upload may result in the generation of duplicates",
+                                    {
+                                        nsSeparator: "-",
+                                    }
+                                ),
+                                message: i18n.t(
+                                    "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
+                                    { totalExisting: existingDataValues.dataEntries.length }
+                                ),
+                                save: i18n.t("Import everything anyway"),
+                                cancel: i18n.t("Cancel import"),
+                                info: i18n.t("Import only new records"),
+                            };
+
+                            const { title, message, save, cancel, info } =
+                                dataValues.type === "dataSets" ? dataSetConfig : programConfig;
+
+                            updateDialog({
+                                title,
+                                description: message,
+                                onSave: async () => {
+                                    updateDialog(null);
+                                    loading.show(true, i18n.t("Importing data..."));
+                                    await startImport({ ...params, duplicateStrategy: "IMPORT" });
+                                    loading.reset();
+                                },
+                                onInfoAction: async () => {
+                                    updateDialog(null);
+                                    loading.show(true, i18n.t("Importing data..."));
+                                    await startImport({ ...params, duplicateStrategy: "IGNORE" });
+                                    loading.reset();
+                                },
+                                onCancel: () => {
+                                    updateDialog(null);
+                                },
+                                saveText: save,
+                                cancelText: cancel,
+                                infoActionText: info,
+                            });
+                        }
+                        break;
+
+                    case "INVALID_ORG_UNITS":
+                        {
+                            const { invalidDataValues, dataValues } = error;
+
+                            const totalInvalid = _.flatMap(
+                                invalidDataValues.dataEntries,
+                                ({ dataValues }) => dataValues
+                            ).length;
+
+                            updateDialog({
+                                title: i18n.t("Invalid organisation units found"),
+                                description: i18n.t(
+                                    "There are {{totalInvalid}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
+                                    { totalInvalid }
+                                ),
+                                onCancel: () => {
+                                    updateDialog(null);
+                                },
+                                onSave: async () => {
+                                    updateDialog(null);
+                                    await startImport({
+                                        ...params,
+                                        organisationUnitStrategy: "IGNORE",
+                                    });
+                                },
+                                onInfoAction: () => {
+                                    downloadInvalidOrganisations(
+                                        dataValues.type,
+                                        invalidDataValues.dataEntries
+                                    );
+                                },
+                                cancelText: i18n.t("Cancel"),
+                                saveText: i18n.t("Proceed"),
+                                infoActionText: i18n.t(
+                                    "Download data values with invalid organisation units"
+                                ),
+                            });
+                        }
+                        break;
+                    case "DATA_FORM_NOT_FOUND":
+                        snackbar.error("Couldn't find data form");
+                        break;
+                    case "INVALID_DATA_FORM_ID":
+                        snackbar.error("Invalid data form id");
+                        break;
+                    case "INVALID_OVERRIDE_ORG_UNIT":
+                        snackbar.error("Invalid org units to override");
+                        break;
+                    case "MALFORMED_TEMPLATE":
+                        snackbar.error("Malformed template");
+                        break;
+                }
+            },
+        });
     };
 
     const downloadInvalidOrganisations = (type: DataFormType, elements: unknown) => {

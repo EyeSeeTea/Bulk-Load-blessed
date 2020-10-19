@@ -1,8 +1,10 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await (await fetch("/who-prod/api/dataSets/Tu81BTLUuCT/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/m5MiTPdlK17/metadata.json")).json();
+
 let metadata = new Map();
+
 for (let type in rawMetadata) {
     let elements = rawMetadata[type];
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
@@ -41,57 +43,51 @@ let getDataElements = ({
 
 let dataSheet1 = [
     ...getDataElements({
-        sheet: "Demographic",
+        sheet: "Input",
         orgUnitCell: "V2",
-        periodCell: "Q4",
+        periodCell: "L4",
         tabSelector: "#tab0",
-        letters: ["D", "E", "F", "G"],
-        dataRowStart: 8,
-    }),
-    ...getDataElements({
-        sheet: "Demographic",
-        orgUnitCell: "V2",
-        periodCell: "Q4",
-        tabSelector: "#tab1",
-        letters: ["H", "I", "J", "K", "L", "M", "N", "O"],
-        dataRowStart: 8,
-    }),
-    ...getDataElements({
-        sheet: "Demographic",
-        orgUnitCell: "V2",
-        periodCell: "Q4",
-        tabSelector: "#tab2",
-        letters: ["P", "Q", "R", "S", "T"],
+        letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L"],
         dataRowStart: 8,
     }),
 ];
 
 let dataSheet2 = [
     ...getDataElements({
-        sheet: "OtherDetails",
-        orgUnitCell: "N2",
-        periodCell: "M4",
-        tabSelector: "#tab4 div#cde:nth-child(4)",
-        letters: ["E", "F", "G", "H", "I", "J", "K", "L", "M"],
-        dataRowStart: 13,
-    }),
-    ...getDataElements({
-        sheet: "OtherDetails",
-        orgUnitCell: "N2",
-        periodCell: "M4",
-        tabSelector: "#tab4 div#cde:nth-child(2)",
-        letters: ["D"],
+        sheet: "Output",
+        orgUnitCell: "P2",
+        periodCell: "K4",
+        tabSelector: "#tab1",
+        letters: ["D", "E", "F", "G", "H", "I", "J", "K"],
         dataRowStart: 8,
     }),
 ];
 
 let dataSheet3 = [
     ...getDataElements({
-        sheet: "ForeignTrained",
-        orgUnitCell: "Q2",
-        periodCell: "O4",
-        tabSelector: "#tab3",
-        letters: ["D", "E"],
+        sheet: "Institutions",
+        orgUnitCell: "P2",
+        periodCell: "J4",
+        tabSelector: "#tab2",
+        letters: ["R", "S", "T"],
+        dataRowStart: 6,
+        type: "input.entrytrueonly",
+    }),
+    ...getDataElements({
+        sheet: "Institutions",
+        orgUnitCell: "P2",
+        periodCell: "J4",
+        tabSelector: "#tab2",
+        letters: ["F"],
+        dataRowStart: 18,
+        type: "textarea.entryfield",
+    }),
+    ...getDataElements({
+        sheet: "Institutions",
+        orgUnitCell: "P2",
+        periodCell: "J4",
+        tabSelector: "#tab2",
+        letters: ["D", "E", "F"],
         dataRowStart: 8,
     }),
 ];
@@ -100,9 +96,9 @@ let dataSheet4 = [
     ...getDataElements({
         sheet: "Sourcetype",
         orgUnitCell: "P2",
-        periodCell: "M4",
+        periodCell: "I4",
         tabSelector: "#tab0",
-        letters: ["P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA"],
+        letters: ["P", "Q", "R", "S"],
         dataRowStart: 8,
         type: "input.entrytrueonly",
     }),

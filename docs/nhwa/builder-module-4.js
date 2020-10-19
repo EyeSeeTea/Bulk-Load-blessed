@@ -1,8 +1,10 @@
 // This script is meant to be executed with a window object (JS document)
 // You can run it in the Chrome Development Console and retrieve the results in JSON
 
-let rawMetadata = await (await fetch("/who-prod/api/dataSets/Tu81BTLUuCT/metadata.json")).json();
+let rawMetadata = await (await fetch("/who-prod/api/dataSets/HtZb6Cg7TXo/metadata.json")).json();
+
 let metadata = new Map();
+
 for (let type in rawMetadata) {
     let elements = rawMetadata[type];
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
@@ -41,72 +43,54 @@ let getDataElements = ({
 
 let dataSheet1 = [
     ...getDataElements({
-        sheet: "Demographic",
+        sheet: "Entry into Labour Market",
         orgUnitCell: "V2",
-        periodCell: "Q4",
+        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["D", "E", "F", "G"],
-        dataRowStart: 8,
+        dataRowStart: 9,
     }),
     ...getDataElements({
-        sheet: "Demographic",
+        sheet: "Entry into Labour Market",
         orgUnitCell: "V2",
-        periodCell: "Q4",
-        tabSelector: "#tab1",
-        letters: ["H", "I", "J", "K", "L", "M", "N", "O"],
-        dataRowStart: 8,
+        periodCell: "I4",
+        tabSelector: "#tab0",
+        letters: ["Q", "R", "S"],
+        dataRowStart: 18,
+        type: "input.entrytrueonly",
     }),
     ...getDataElements({
-        sheet: "Demographic",
+        sheet: "Entry into Labour Market",
         orgUnitCell: "V2",
-        periodCell: "Q4",
-        tabSelector: "#tab2",
-        letters: ["P", "Q", "R", "S", "T"],
-        dataRowStart: 8,
+        periodCell: "I4",
+        tabSelector: "#tab0",
+        letters: ["F"],
+        dataRowStart: 15,
+        type: "textarea",
     }),
 ];
 
 let dataSheet2 = [
     ...getDataElements({
-        sheet: "OtherDetails",
+        sheet: "Cost per program",
         orgUnitCell: "N2",
-        periodCell: "M4",
-        tabSelector: "#tab4 div#cde:nth-child(4)",
-        letters: ["E", "F", "G", "H", "I", "J", "K", "L", "M"],
-        dataRowStart: 13,
-    }),
-    ...getDataElements({
-        sheet: "OtherDetails",
-        orgUnitCell: "N2",
-        periodCell: "M4",
-        tabSelector: "#tab4 div#cde:nth-child(2)",
-        letters: ["D"],
-        dataRowStart: 8,
+        periodCell: "I4",
+        tabSelector: "#tab1",
+        letters: ["D", "E", "F", "G", "H", "I"],
+        dataRowStart: 10,
     }),
 ];
 
 let dataSheet3 = [
     ...getDataElements({
-        sheet: "ForeignTrained",
-        orgUnitCell: "Q2",
-        periodCell: "O4",
-        tabSelector: "#tab3",
-        letters: ["D", "E"],
-        dataRowStart: 8,
+        sheet: "Lifelong Learning",
+        orgUnitCell: "N2",
+        periodCell: "I4",
+        tabSelector: "#tab2",
+        letters: ["D", "E", "F", "G"],
+        dataRowStart: 11,
     }),
 ];
 
-let dataSheet4 = [
-    ...getDataElements({
-        sheet: "Sourcetype",
-        orgUnitCell: "P2",
-        periodCell: "M4",
-        tabSelector: "#tab0",
-        letters: ["P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA"],
-        dataRowStart: 8,
-        type: "input.entrytrueonly",
-    }),
-];
-
-let result = [...dataSheet1, ...dataSheet2, ...dataSheet3, ...dataSheet4];
+let result = [...dataSheet1, ...dataSheet2, ...dataSheet3];
 console.log(result);

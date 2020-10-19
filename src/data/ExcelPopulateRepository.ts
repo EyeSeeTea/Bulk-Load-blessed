@@ -141,10 +141,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const value = formula
-            ? destination.formula() ?? destination.value()
-            : destination.value() ?? destination.formula();
-
+        const value = formula ? destination.formula() : destination.value();
         if (value instanceof FormulaError) return "";
         return value;
     }
