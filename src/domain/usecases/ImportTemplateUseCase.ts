@@ -57,7 +57,10 @@ export class ImportTemplateUseCase implements UseCase {
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
         const template = this.templateRepository.getTemplate(templateId);
 
-        const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId);
+        const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId, {
+            formula: true,
+        });
+
         if (!dataFormId || typeof dataFormId !== "string") {
             return Either.error({ type: "INVALID_DATA_FORM_ID" });
         }
