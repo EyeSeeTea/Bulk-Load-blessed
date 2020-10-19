@@ -19,6 +19,7 @@ export interface Data {
     period: string;
     attribute?: Id;
     trackedEntityInstance?: Id;
+    programStage?: Id;
     coordinate?: {
         latitude: string;
         longitude: string;
