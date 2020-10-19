@@ -118,6 +118,24 @@ export interface TrackerRelationship {
     to: ColumnRef;
 }
 
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    attributeOptionCombo: ColumnRef;
+    range: Range;
+    dataElement: RowRef;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    range: Range;
+    typeName: ColumnRef;
+    from: ColumnRef;
+    to: ColumnRef;
+}
+
 export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;

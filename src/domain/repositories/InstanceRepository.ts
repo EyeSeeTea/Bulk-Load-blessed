@@ -29,5 +29,5 @@ export interface InstanceRepository {
     getLocales(): Promise<Locale[]>;
     getDefaultIds(): Promise<string[]>;
     deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary>;
-    importDataPackage(type: DataFormType, dataPackage: DataPackage): Promise<ImportSummary>;
+    importDataPackage(dataPackage: DataPackage): Promise<ImportSummary>;
 }

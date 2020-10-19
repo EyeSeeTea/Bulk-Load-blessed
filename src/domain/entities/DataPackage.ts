@@ -1,9 +1,8 @@
-import { FlattenUnion } from "../../types/flatten-union";
 import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { TrackedEntityInstance } from "./TrackedEntityInstance";
 
-export type DataPackage = FlattenUnion<GenericProgramPackage | TrackerProgramPackage>;
+export type DataPackage = GenericProgramPackage | TrackerProgramPackage;
 export type DataPackageValue = string | number | boolean;
 
 export interface BaseDataPackage {
@@ -27,6 +26,7 @@ export interface DataPackageData {
     period: string;
     attribute?: Id;
     trackedEntityInstance?: Id;
+    programStage?: Id;
     coordinate?: {
         latitude: string;
         longitude: string;

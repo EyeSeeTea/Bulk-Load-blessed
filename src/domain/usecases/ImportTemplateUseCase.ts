@@ -90,8 +90,8 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "DUPLICATE_VALUES", dataValues, existingDataValues });
         }
 
-        // TODO: DELETE EXISTING
-        const result = await this.instanceRepository.importDataPackage(dataForm.type, dataValues);
+        // TODO: @SferaDev DELETE EXISTING
+        const result = await this.instanceRepository.importDataPackage(dataValues);
 
         return Either.success(result);
     }
@@ -141,9 +141,21 @@ export class ImportTemplateUseCase implements UseCase {
                   });
 
         return {
-            dataValues: { type: dataForm.type, dataEntries: dataValues },
-            invalidDataValues: { type: dataForm.type, dataEntries: invalidDataValues },
-            existingDataValues: { type: dataForm.type, dataEntries: existingDataValues },
+            dataValues: {
+                type: dataForm.type,
+                dataEntries: dataValues,
+                trackedEntityInstances: [],
+            },
+            invalidDataValues: {
+                type: dataForm.type,
+                dataEntries: invalidDataValues,
+                trackedEntityInstances: [],
+            },
+            existingDataValues: {
+                type: dataForm.type,
+                dataEntries: existingDataValues,
+                trackedEntityInstances: [],
+            },
         };
     }
 

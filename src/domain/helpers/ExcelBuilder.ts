@@ -64,7 +64,6 @@ export class ExcelBuilder {
             }
         });
     }
-
     private async fillTeiRows(
         template: Template,
         dataSource: TeiRowDataSource,
@@ -124,9 +123,10 @@ export class ExcelBuilder {
                     dateFormat(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
-            const values = program.attributes.map(
-                attr => tei.attributeValues.find(av => av.attribute.id === attr.id)?.optionIdOrValue
-            );
+            const values = program.attributes.map(attr => {
+                const attributeValue = tei.attributeValues.find(av => av.attribute.id === attr.id);
+                return attributeValue ? attributeValue.optionId || attributeValue.value : undefined;
+            });
 
             await Promise.all(
                 _(cells)

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
-import { DataPackage } from "../domain/entities/DataPackage";
+import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { ImportSummary } from "../domain/entities/ImportSummary";
 import { Locale } from "../domain/entities/Locale";
@@ -20,7 +20,10 @@ import {
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
-import { getTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
+import {
+    getTrackedEntityInstances,
+    updateTrackedEntityInstances,
+} from "./Dhis2TrackedEntityInstances";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -184,18 +187,74 @@ export class InstanceDhisRepository implements InstanceRepository {
         return this.importAggregatedData("DELETE", dataPackage);
     }
 
-    public async importDataPackage(
-        type: DataFormType,
-        dataPackage: DataPackage
-    ): Promise<ImportSummary> {
-        switch (type) {
+    public async importDataPackage(dataPackage: DataPackage): Promise<ImportSummary> {
+        switch (dataPackage.type) {
             case "dataSets":
                 return this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
             case "programs":
                 return this.importEventsData(dataPackage);
+            case "trackerPrograms":
+                return this.importTrackerData(dataPackage);
             default:
-                throw new Error(`Unsupported type ${type} for data package`);
+                throw new Error(`Unsupported type for data package`);
         }
+    }
+
+    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage> {
+        switch (params.type) {
+            case "dataSets":
+                return this.getDataSetPackage(params);
+            case "programs":
+                return this.getProgramPackage(params);
+            case "trackerPrograms":
+                return this.getTrackerProgramPackage(params);
+            default:
+                throw new Error(`Unsupported type ${params.type} for data package`);
+        }
+    }
+
+    public async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
+        const { api } = this;
+        const dataPackage = await this.getProgramPackage(params);
+        const orgUnits = params.orgUnits.map(id => ({ id }));
+        const program = { id: params.id };
+        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
+
+        return {
+            type: "trackerPrograms",
+            trackedEntityInstances,
+            dataEntries: dataPackage.dataEntries,
+        };
+    }
+
+    /* Private */
+
+    private buildAggregatedPayload(dataPackage: DataPackage): AggregatedDataValue[] {
+        return _.flatMap(dataPackage.dataEntries, ({ orgUnit, period, attribute, dataValues }) =>
+            dataValues.map(({ dataElement, category, value, comment }) => ({
+                orgUnit,
+                period,
+                attributeOptionCombo: attribute,
+                dataElement,
+                categoryOptionCombo: category,
+                value: String(value),
+                comment,
+            }))
+        );
+    }
+
+    private buildEventsPayload(dataPackage: DataPackage): Event[] {
+        return dataPackage.dataEntries.map(
+            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+                event: id,
+                program: dataForm,
+                status: "COMPLETED",
+                orgUnit,
+                eventDate: period,
+                attributeOptionCombo: attribute,
+                dataValues: dataValues,
+            })
+        );
     }
 
     private async importAggregatedData(
@@ -263,62 +322,13 @@ export class InstanceDhisRepository implements InstanceRepository {
         };
     }
 
-    private buildAggregatedPayload(dataPackage: DataPackage): AggregatedDataValue[] {
-        return _.flatMap(dataPackage.dataEntries, ({ orgUnit, period, attribute, dataValues }) =>
-            dataValues.map(({ dataElement, category, value, comment }) => ({
-                orgUnit,
-                period,
-                attributeOptionCombo: attribute,
-                dataElement,
-                categoryOptionCombo: category,
-                value: String(value),
-                comment,
-            }))
-        );
+    private async importTrackerData(dataPackage: TrackerProgramPackage): Promise<ImportSummary> {
+        const { trackedEntityInstances, dataEntries } = dataPackage;
+        await updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
+
+        // TODO: @tokland pending
+        return {} as ImportSummary;
     }
-
-    private buildEventsPayload(dataPackage: DataPackage): Event[] {
-        return dataPackage.dataEntries.map(
-            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
-                event: id,
-                program: dataForm,
-                status: "COMPLETED",
-                orgUnit,
-                eventDate: period,
-                attributeOptionCombo: attribute,
-                dataValues: dataValues,
-            })
-        );
-    }
-
-    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage> {
-        switch (params.type) {
-            case "dataSets":
-                return this.getDataSetPackage(params);
-            case "programs":
-                return this.getProgramPackage(params);
-            case "trackerPrograms":
-                return this.getTrackerProgramPackage(params);
-            default:
-                throw new Error(`Unsupported type ${params.type} for data package`);
-        }
-    }
-
-    public async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
-        const { api } = this;
-        const dataPackage = await this.getProgramPackage(params);
-        const orgUnits = params.orgUnits.map(id => ({ id }));
-        const program = { id: params.id };
-        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
-
-        return {
-            type: "trackerPrograms",
-            trackedEntityInstances,
-            dataEntries: dataPackage.dataEntries,
-        };
-    }
-
-    /* Private */
 
     private async getDataSetPackage({
         id,
@@ -431,6 +441,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         coordinate,
                         dataValues,
                         trackedEntityInstance,
+                        programStage,
                     }) => ({
                         id: event,
                         dataForm: id,
@@ -439,6 +450,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         attribute: attributeOptionCombo,
                         coordinate,
                         trackedEntityInstance,
+                        programStage,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
                             value: this.formatDataValue(
@@ -522,6 +534,7 @@ export interface Event {
     };
     attributeOptionCombo?: string;
     trackedEntityInstance?: string;
+    programStage?: string;
     dataValues: Array<{
         dataElement: string;
         value: string | number | boolean;
