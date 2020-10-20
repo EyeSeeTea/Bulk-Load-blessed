@@ -16,6 +16,7 @@ import {
     ReadCellOptions,
 } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
+import { cache } from "../utils/cache";
 import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
@@ -109,6 +110,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
+    @cache()
     public async readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
