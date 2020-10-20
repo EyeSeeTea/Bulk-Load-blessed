@@ -93,6 +93,23 @@ export class DownloadTemplateUseCase implements UseCase {
                     startDate: populateStartDate,
                     endDate: populateEndDate,
                 });
+
+                if (template.type === "custom" && template.fixedOrgUnit) {
+                    await this.excelRepository.writeCell(
+                        template.id,
+                        template.fixedOrgUnit,
+                        dataPackage.dataEntries[0]?.orgUnit
+                    );
+                }
+
+                if (template.type === "custom" && template.fixedPeriod) {
+                    await this.excelRepository.writeCell(
+                        template.id,
+                        template.fixedPeriod,
+                        dataPackage.dataEntries[0]?.period
+                    );
+                }
+
                 await builder.populateTemplate(template, dataPackage);
             }
 

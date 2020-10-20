@@ -45,6 +45,8 @@ export interface GeneratedTemplate extends BaseTemplate {
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
+    fixedOrgUnit?: CellRef;
+    fixedPeriod?: CellRef;
 }
 
 export interface GenericSheetRef {

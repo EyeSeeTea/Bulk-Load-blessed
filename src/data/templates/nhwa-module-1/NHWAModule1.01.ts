@@ -7,6 +7,8 @@ export class NHWAModule101 implements CustomTemplate {
     public readonly url = "templates/NHWA_Module_1.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "Tu81BTLUuCT" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
+    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "Demographic", ref: "V2" };
+    public readonly fixedPeriod = { type: "cell" as const, sheet: "Demographic", ref: "Q4" };
 
     public readonly dataSources: DataSource[] = [
         {
