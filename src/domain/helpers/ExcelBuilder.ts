@@ -30,7 +30,7 @@ export class ExcelBuilder {
         for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
                 case "cell":
-                    console.log("TODO", { dataSource }); 
+                    console.log("TODO", { dataSource });
                     break;
                 case "row":
                     await this.fillRows(template, dataSource, payload);
