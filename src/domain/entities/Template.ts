@@ -1,6 +1,8 @@
+import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
-import { ThemeableSections, ImageSections } from "./Theme";
+import { ImageSections, ThemeableSections } from "./Theme";
 
+export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
 
@@ -22,23 +24,27 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
-export type Template = GeneratedTemplate;
+export type Template = GeneratedTemplate | CustomTemplate;
 
-export interface GeneratedTemplate {
+interface BaseTemplate {
+    type: "generated" | "custom";
     id: Id;
     name: string;
-    rowOffset: number;
-    colOffset: number;
     dataSources?: DataSource[];
     styleSources: StyleSource[];
+    dataFormId: CellRef | ValueRef;
+    dataFormType: CellRef | ValueRef<DataFormType>;
 }
 
-export interface CustomTemplate {
-    id: Id;
-    name: string;
-    url?: string;
-    dataSources: DataSource[];
-    styleSources: StyleSource[];
+export interface GeneratedTemplate extends BaseTemplate {
+    type: "generated";
+    rowOffset: number;
+    colOffset: number;
+}
+
+export interface CustomTemplate extends BaseTemplate {
+    type: "custom";
+    url: string;
 }
 
 export interface GenericSheetRef {
@@ -69,6 +75,11 @@ export interface RangeRef extends GenericSheetRef {
     ref: string;
 }
 
+export interface ValueRef<T extends string = string> {
+    type: "value";
+    id: T;
+}
+
 export interface Range {
     sheet: Sheet;
     rowStart: number;
@@ -77,15 +88,16 @@ export interface Range {
     columnEnd?: string;
 }
 
-export interface GenericDataSource {
-    type: "row" | "column" | "cell";
-    range: Partial<Range>;
-    orgUnit: SheetRef;
-    period: SheetRef;
-    dataElement: SheetRef;
-    categoryOption?: SheetRef;
-    attribute?: SheetRef;
-    eventId?: SheetRef;
+interface BaseDataSource {
+    type: DataSourceType;
+    range?: Partial<Range>;
+    ref?: CellRef;
+    orgUnit: SheetRef | ValueRef;
+    period: SheetRef | ValueRef;
+    dataElement: SheetRef | ValueRef;
+    categoryOption?: SheetRef | ValueRef;
+    attribute?: SheetRef | ValueRef;
+    eventId?: SheetRef | ValueRef;
 }
 
 export interface TrackerEventRowDataSource {
@@ -106,7 +118,25 @@ export interface TrackerRelationship {
     to: ColumnRef;
 }
 
-export interface RowDataSource extends GenericDataSource {
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    attributeOptionCombo: ColumnRef;
+    range: Range;
+    dataElement: RowRef;
+}
+
+export interface TrackerRelationship {
+    type: "rowTeiRelationship";
+    range: Range;
+    typeName: ColumnRef;
+    from: ColumnRef;
+    to: ColumnRef;
+}
+
+export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
     orgUnit: ColumnRef | CellRef;
@@ -126,7 +156,7 @@ export interface TeiRowDataSource {
     attributes: Range;
 }
 
-export interface ColumnDataSource extends GenericDataSource {
+export interface ColumnDataSource extends BaseDataSource {
     type: "column";
     range: Range;
     orgUnit: RowRef | CellRef;
@@ -137,13 +167,13 @@ export interface ColumnDataSource extends GenericDataSource {
     eventId?: RowRef | CellRef;
 }
 
-export interface CellDataSource extends GenericDataSource {
+export interface CellDataSource extends BaseDataSource {
     type: "cell";
     ref: CellRef;
-    orgUnit: CellRef;
-    period: CellRef;
-    dataElement: CellRef;
-    categoryOption?: CellRef;
-    attribute?: CellRef;
-    eventId?: CellRef;
+    orgUnit: CellRef | ValueRef;
+    period: CellRef | ValueRef;
+    dataElement: CellRef | ValueRef;
+    categoryOption?: CellRef | ValueRef;
+    attribute?: CellRef | ValueRef;
+    eventId?: CellRef | ValueRef;
 }

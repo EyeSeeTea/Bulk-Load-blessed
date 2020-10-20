@@ -1,8 +1,11 @@
 import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
 
-export default class implements GeneratedTemplate {
+export class TrackerProgramGenerated01 implements GeneratedTemplate {
+    public readonly type = "generated";
     public readonly id = "TRACKER_PROGRAM_GENERATED_v1";
     public readonly name = "Auto-generated Tracker Program template v1";
+    public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A4" };
+    public readonly dataFormType = { type: "value" as const, id: "programs" as const };
 
     public readonly rowOffset = 3;
     public readonly colOffset = 0;

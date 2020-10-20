@@ -1,6 +1,6 @@
+import Blob from "cross-blob";
 import * as Excel from "excel4node";
 import _ from "lodash";
-import Blob from "cross-blob";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";

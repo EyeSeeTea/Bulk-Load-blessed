@@ -1,16 +1,16 @@
 import _ from "lodash";
-import { D2Api, Id, Ref } from "../types/d2-api";
-import { runPromises } from "../utils/promises";
+import { DataPackageData } from "../domain/entities/DataPackage";
+import { Relationship } from "../domain/entities/Relationship";
 import {
-    TrackedEntityInstance,
-    Program,
     AttributeValue,
     Enrollment,
     isRelationshipValid,
+    Program,
+    TrackedEntityInstance,
     updateTeiIds,
 } from "../domain/entities/TrackedEntityInstance";
-import { Relationship } from "../domain/entities/Relationship";
-import { Data } from "../domain/entities/DataPackage";
+import { D2Api, Id, Ref } from "../types/d2-api";
+import { runPromises } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 
 export interface GetOptions {
@@ -88,7 +88,7 @@ export async function getTrackedEntityInstances(
 export async function updateTrackedEntityInstances(
     api: D2Api,
     trackedEntityInstances: TrackedEntityInstance[],
-    dataEntries: Data[]
+    dataEntries: DataPackageData[]
 ): Promise<void> {
     const teis = updateTeiIds(trackedEntityInstances);
     const teisWithChanges = await getTeisWithChanges(api, teis);
@@ -140,7 +140,7 @@ async function getTeisWithChanges(
     return teisWithChanges;
 }
 
-function getApiEvents(teis: TrackedEntityInstance[], dataEntries: Data[]): EventApi[] {
+function getApiEvents(teis: TrackedEntityInstance[], dataEntries: DataPackageData[]): EventApi[] {
     const programByTei: Record<Id, Id> = _(teis)
         .map(tei => [tei.id, tei.program.id] as const)
         .fromPairs()
@@ -330,7 +330,7 @@ interface EventApi {
 
 interface DataValueApi {
     dataElement: Id;
-    value: string | number;
+    value: string | number | boolean;
 }
 
 async function getTeisFromApi(options: {

@@ -1,82 +1,74 @@
-import _ from "lodash";
 import Blob from "cross-blob";
-import XLSX, { Cell as ExcelCell, Workbook as ExcelWorkbook } from "xlsx-populate";
-import {
-    CellRef,
-    Range,
-    SheetRef,
-    Template,
-    DataSourceValue,
-    DataSource,
-} from "../domain/entities/Template";
+import _ from "lodash";
+import XLSX, {
+    Cell as ExcelCell,
+    FormulaError,
+    Workbook as ExcelWorkbook,
+    Workbook,
+} from "xlsx-populate";
+import { Sheet } from "../domain/entities/Sheet";
+import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import { ExcelRepository, LoadOptions } from "../domain/repositories/ExcelRepository";
-import { removeCharacters } from "../utils/string";
+import {
+    ExcelRepository,
+    ExcelValue,
+    LoadOptions,
+    ReadCellOptions,
+} from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
+import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
 
-    public async loadTemplate(template: Template, options: LoadOptions): Promise<void> {
-        const { id } = template;
+    public async loadTemplate(options: LoadOptions): Promise<string> {
+        const workbook = await this.parseFile(options);
+        const id = await this.readCellValue(workbook, { type: "cell", sheet: 0, ref: "A1" });
+        if (!id || typeof id !== "string") throw new Error("Invalid id");
+        const cleanId = id.replace(/^.*?:/, "").trim();
+
+        this.workbooks[cleanId] = workbook;
+        return cleanId;
+    }
+
+    private async parseFile(options: LoadOptions): Promise<ExcelWorkbook> {
         switch (options.type) {
             case "url": {
                 const response = await fetch(options.url);
                 const data = await response.arrayBuffer();
-                this.workbooks[id] = await XLSX.fromDataAsync(data);
-                break;
+                return XLSX.fromDataAsync(data);
             }
             case "file": {
-                this.workbooks[id] = await XLSX.fromDataAsync(options.file);
-                break;
+                return XLSX.fromDataAsync(options.file);
             }
             default: {
-                this.workbooks[id] = await XLSX.fromBlankAsync();
-                break;
+                return XLSX.fromBlankAsync();
             }
         }
     }
 
-    public async toBlob(template: Template): Promise<Blob> {
-        const workbook = await this.getWorkbook(template);
-        const data = await workbook.outputAsync();
+    public async toBlob(id: string): Promise<Blob> {
+        const data = await this.toBuffer(id);
         return new Blob([data], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
     }
 
-    public async toBuffer(template: Template): Promise<Buffer> {
-        const workbook = await this.getWorkbook(template);
+    public async toBuffer(id: string): Promise<Buffer> {
+        const workbook = await this.getWorkbook(id);
         return (workbook.outputAsync() as unknown) as Buffer;
     }
 
-    async getDataSourceValues(
-        template: Template,
-        dataSources: DataSource[]
-    ): Promise<DataSourceValue[]> {
-        const workbook = await this.getWorkbook(template);
-
-        return _.flatMap(dataSources, dataSource => {
-            if (typeof dataSource === "function") {
-                return _(workbook.sheets())
-                    .map(sheet => dataSource(sheet.name()))
-                    .compact()
-                    .value();
-            } else {
-                return [dataSource];
-            }
-        });
-    }
-
     public async findRelativeCell(
-        template: Template,
+        id: string,
         location?: SheetRef,
         cellRef?: CellRef
     ): Promise<CellRef | undefined> {
-        const workbook = await this.getWorkbook(template);
+        const workbook = await this.getWorkbook(id);
 
         if (location?.type === "cell") {
-            const destination = workbook.sheet(location.sheet).cell(location.ref);
+            const destination = workbook.sheet(location.sheet)?.cell(location.ref);
+            if (!destination) return undefined;
             return { type: "cell", sheet: destination.sheet().name(), ref: destination.address() };
         } else if (location && cellRef) {
             const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
@@ -88,13 +80,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     public async writeCell(
-        template: Template,
+        id: string,
         cellRef: CellRef,
         value: string | number | boolean
     ): Promise<void> {
-        const workbook = await this.getWorkbook(template);
-        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
-        const definedNames = await this.listDefinedNames(template);
+        const workbook = await this.getWorkbook(id);
+        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const definedNames = await this.listDefinedNames(id);
         const definedName = definedNames.find(
             name => removeCharacters(name) === removeCharacters(value)
         );
@@ -117,18 +109,45 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async readCell(template: Template, cellRef: CellRef): Promise<string> {
-        const workbook = await this.getWorkbook(template);
-        const mergedCells = await this.buildMergedCells(template, cellRef.sheet);
+    public async readCell(
+        id: string,
+        cellRef?: CellRef | ValueRef,
+        options?: ReadCellOptions
+    ): Promise<ExcelValue | undefined> {
+        if (!cellRef) return undefined;
+        if (cellRef.type === "value") return cellRef.id;
+
+        const workbook = await this.getWorkbook(id);
+        return this.readCellValue(workbook, cellRef, options?.formula);
+    }
+
+    public async getSheets(id: string): Promise<Sheet[]> {
+        const workbook = await this.getWorkbook(id);
+
+        return workbook.sheets().map((sheet, index) => ({
+            index,
+            name: sheet.name(),
+            active: sheet.active(),
+        }));
+    }
+
+    private async readCellValue(
+        workbook: Workbook,
+        cellRef: CellRef,
+        formula = false
+    ): Promise<ExcelValue | undefined> {
+        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
         const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        return String(destination.value() ?? destination.formula());
+        const value = formula ? destination.formula() : destination.value();
+        if (value instanceof FormulaError) return "";
+        return value;
     }
 
-    public async getCellsInRange(template: Template, range: Range): Promise<CellRef[]> {
-        const workbook = await this.getWorkbook(template);
+    public async getCellsInRange(id: string, range: Range): Promise<CellRef[]> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
         const endCell = workbook.sheet(range.sheet).usedRange()?.endCell();
@@ -146,8 +165,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }));
     }
 
-    public async addPicture(template: Template, location: SheetRef, file: File): Promise<void> {
-        const workbook = await this.getWorkbook(template);
+    public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet, ref } = location;
         const [from, to] = location.type === "range" ? String(ref).split(":") : [ref, ref];
@@ -156,8 +175,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         workbook.sheet(sheet).drawings("logo", file).from(from).to(to);
     }
 
-    public async styleCell(template: Template, source: SheetRef, style: ThemeStyle): Promise<void> {
-        const workbook = await this.getWorkbook(template);
+    public async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void> {
+        const workbook = await this.getWorkbook(id);
 
         const { sheet } = source;
         const { text, bold, italic, fontSize = 12, fontColor, fillColor } = style;
@@ -194,11 +213,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    private async buildMergedCells(template: Template, sheet: string | number) {
-        const workbook = await this.getWorkbook(template);
+    private async buildMergedCells(workbook: Workbook, sheet: string | number) {
         //@ts-ignore
         return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
-            const range = workbook.sheet(sheet).range(key);
+            const rangeRef = key.includes(":") ? key : `${key}:${key}`;
+            const range = workbook.sheet(sheet).range(rangeRef);
             const startCell = range.startCell();
             const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 
@@ -206,10 +225,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
         });
     }
 
-    private async getWorkbook(template: Template) {
-        const { id } = template;
-        if (!this.workbooks[id]) throw new Error(i18n.t("Template not loaded"));
-
+    private async getWorkbook(id: string) {
+        if (!this.workbooks[id]) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
         return this.workbooks[id];
     }
 
@@ -219,8 +236,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
             : workbook.sheet(sheet).range(`${ref}:${ref}`);
     }
 
-    private async listDefinedNames(template: Template): Promise<string[]> {
-        const workbook = await this.getWorkbook(template);
+    private async listDefinedNames(id: string): Promise<string[]> {
+        const workbook = await this.getWorkbook(id);
         try {
             //@ts-ignore Not typed, need extension
             return workbook.definedName();

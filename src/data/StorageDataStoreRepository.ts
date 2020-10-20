@@ -1,6 +1,6 @@
-import { D2Api, D2ApiDefault, DataStore } from "../types/d2-api";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
+import { D2Api, D2ApiDefault, DataStore } from "../types/d2-api";
 
 const dataStoreNamespace = "bulk-load";
 

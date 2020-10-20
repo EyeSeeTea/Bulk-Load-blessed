@@ -1,7 +1,8 @@
+import { UseCase } from "../../CompositionRoot";
 import { DataFormType } from "../entities/DataForm";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 
-export class GetFormOrgUnitRootsUseCase {
+export class GetFormOrgUnitRootsUseCase implements UseCase {
     constructor(private instance: InstanceRepository) {}
 
     public async execute(type: DataFormType, id: string): Promise<string[]> {

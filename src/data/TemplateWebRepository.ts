@@ -28,7 +28,7 @@ export class TemplateWebRepository implements TemplateRepository {
     public getTemplate(templateId: Id): Template {
         const template = this.templates.find(({ id }) => id === templateId);
         if (!template) throw new Error(`Attempt to read from invalid template ${templateId}`);
-        else return template;
+        return template;
     }
 
     public async listThemes(): Promise<Theme[]> {

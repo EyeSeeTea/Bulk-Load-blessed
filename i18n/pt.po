@@ -1,18 +1,19 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
+"POT-Creation-Date: 2020-10-16T15:54:51.220Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-msgid "Template not loaded"
-msgstr "Planilha não carregada"
+msgid "Template {{id}} not loaded"
+msgstr "Planilha {{id}} não carregada"
 
-msgid "Element not found"
-msgstr "Elemento não encontrado"
+#, fuzzy
+msgid "Cannot read data form id"
+msgstr "Não é possível ler o arquivo"
 
 msgid "Program or DataSet not found in instance"
 msgstr "Programa ou DataSet não encontrado na instância"
@@ -233,7 +234,8 @@ msgstr "Não é possível obter a folha de metadados"
 
 msgid ""
 "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr "Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
+msgstr ""
+"Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
 
 msgid "Event date is empty"
 msgstr "A data do evento está vazia"
@@ -299,8 +301,20 @@ msgstr "Continuar"
 msgid "Download data values with invalid organisation units"
 msgstr "Descarregar dados com unidades organizacionais inválidas"
 
-msgid "Checking duplicates..."
-msgstr "Verificando duplicados..."
+msgid "Importing data..."
+msgstr "Importando dados ..."
+
+msgid "Imported"
+msgstr "Importado"
+
+msgid "Updated"
+msgstr "Atualizada"
+
+msgid "Ignored"
+msgstr "Ignorado"
+
+msgid "Deleted"
+msgstr "Excluído"
 
 msgid "Existing data values"
 msgstr "Valores de dados existentes"
@@ -339,20 +353,18 @@ msgstr "Cancelar importação"
 msgid "Import only new records"
 msgstr "Importar apenas novos registros"
 
-msgid "Importing data..."
-msgstr "Importando dados ..."
+#, fuzzy
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
+msgstr ""
+"Existem {{number}} valores de dados com uma unidade organizacional inválida "
+"que serão ignorados durante a importação.\n"
+"Você debe baixá-los e enviá-los ao administrador do DHIS2"
 
-msgid "Imported"
-msgstr "Importado"
-
-msgid "Updated"
-msgstr "Atualizada"
-
-msgid "Ignored"
-msgstr "Ignorado"
-
-msgid "Deleted"
-msgstr "Excluído"
+msgid "Checking duplicates..."
+msgstr "Verificando duplicados..."
 
 msgid "Bulk data import"
 msgstr "Importação de dados em massa"
@@ -388,3 +400,6 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+
+#~ msgid "Element not found"
+#~ msgstr "Elemento não encontrado"

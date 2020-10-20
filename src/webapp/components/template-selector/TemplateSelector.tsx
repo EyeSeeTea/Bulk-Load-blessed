@@ -8,8 +8,8 @@ import { DataForm } from "../../../domain/entities/DataForm";
 import { Theme } from "../../../domain/entities/Theme";
 import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
+import { PartialBy } from "../../../types/utils";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import { PartialBy } from "../../../utils/types";
 import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
@@ -69,7 +69,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     useEffect(() => {
         CompositionRoot.attach()
-            .templates.list.execute()
+            .templates.list()
             .then(({ dataSets, programs }) => {
                 const dataSource: DataSource = {
                     dataSets,
@@ -89,18 +89,16 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     useEffect(() => {
         const { type, id } = state;
         if (type && id) {
-            CompositionRoot.attach()
-                .orgUnits.getRootsByForm.execute(type, id)
-                .then(setOrgUnitTreeFilter);
+            CompositionRoot.attach().orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
         }
     }, [state]);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
+        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
     }, []);
 
     useEffect(() => {
-        CompositionRoot.attach().languages.list.execute().then(setAvailableLanguages);
+        CompositionRoot.attach().languages.list().then(setAvailableLanguages);
     }, []);
 
     useEffect(() => {

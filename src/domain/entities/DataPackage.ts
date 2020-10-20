@@ -1,20 +1,27 @@
+import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { TrackedEntityInstance } from "./TrackedEntityInstance";
 
+export type DataPackage = GenericProgramPackage | TrackerProgramPackage;
+export type DataPackageValue = string | number | boolean;
+
 export interface BaseDataPackage {
-    type: "data";
-    dataEntries: Data[];
+    type: DataFormType;
+    dataEntries: DataPackageData[];
 }
 
-export interface TrackerProgramPackage {
+export interface GenericProgramPackage extends BaseDataPackage {
+    type: "dataSets" | "programs";
+}
+
+export interface TrackerProgramPackage extends BaseDataPackage {
     type: "trackerPrograms";
     trackedEntityInstances: TrackedEntityInstance[];
-    dataEntries: Data[];
 }
-export type DataPackage = BaseDataPackage | TrackerProgramPackage;
 
-export interface Data {
+export interface DataPackageData {
     id?: Id;
+    dataForm: Id;
     orgUnit: Id;
     period: string;
     attribute?: Id;
@@ -24,12 +31,12 @@ export interface Data {
         latitude: string;
         longitude: string;
     };
-    dataValues: DataValue[];
+    dataValues: DataPackageDataValue[];
 }
 
-export interface DataValue {
+export interface DataPackageDataValue {
     dataElement: Id;
     category?: Id;
-    value: string | number;
+    value: DataPackageValue;
     comment?: string;
 }

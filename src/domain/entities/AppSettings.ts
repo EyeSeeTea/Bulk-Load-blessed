@@ -1,4 +1,4 @@
-import { GetArrayInnerType } from "../../utils/types";
+import { GetArrayInnerType } from "../../types/utils";
 import { Id } from "./ReferenceObject";
 
 const models = ["dataSet", "program"] as const;
