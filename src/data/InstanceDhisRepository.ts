@@ -2,6 +2,12 @@ import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
+import {
+    AggregatedDataValue,
+    EventsPackage,
+    AggregatedPackage,
+    Event,
+} from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { ImportSummary } from "../domain/entities/ImportSummary";
 import { Locale } from "../domain/entities/Locale";
@@ -27,7 +33,7 @@ import {
     getProgram,
 } from "./Dhis2TrackedEntityInstances";
 import { Program } from "../domain/entities/TrackedEntityInstance";
-import { Event, postEvents } from "./Dhis2Events";
+import { postEvents } from "./Dhis2Events";
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -236,6 +242,19 @@ export class InstanceDhisRepository implements InstanceRepository {
             dataEntries: dataPackage.dataEntries,
         };
     }
+
+    public convertDataPackage(dataPackage: DataPackage): EventsPackage | AggregatedPackage {
+        switch (dataPackage.type) {
+            case "dataSets":
+                return { dataValues: this.buildAggregatedPayload(dataPackage) };
+            case "programs":
+                return { events: this.buildEventsPayload(dataPackage) };
+            default:
+                throw new Error(`Unsupported type ${dataPackage.type} to convert data package`);
+        }
+    }
+
+    /* Private */
 
     private buildAggregatedPayload(dataPackage: DataPackage): AggregatedDataValue[] {
         return _.flatMap(dataPackage.dataEntries, ({ orgUnit, period, attribute, dataValues }) =>
@@ -493,20 +512,6 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         return categoryOptions.map(({ id }) => id);
     }
-}
-
-export interface EventsPackage {
-    events: Event[];
-}
-
-export interface AggregatedDataValue {
-    dataElement: string;
-    period: string;
-    orgUnit: string;
-    categoryOptionCombo?: string;
-    attributeOptionCombo?: string;
-    value: string;
-    comment?: string;
 }
 
 interface MetadataItem {

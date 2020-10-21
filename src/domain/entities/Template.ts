@@ -44,7 +44,7 @@ export interface GeneratedTemplate extends BaseTemplate {
 
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
-    url?: string;
+    url: string;
 }
 
 export interface GenericSheetRef {

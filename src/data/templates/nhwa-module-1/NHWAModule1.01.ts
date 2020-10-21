@@ -4,6 +4,7 @@ export class NHWAModule101 implements CustomTemplate {
     public readonly type = "custom";
     public readonly id = "NHWA_MODULE_1_v1";
     public readonly name = "NHWA Module 1";
+    public readonly url = "templates/NHWA_Module_1.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "Tu81BTLUuCT" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
 

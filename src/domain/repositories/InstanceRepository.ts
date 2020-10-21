@@ -1,6 +1,7 @@
 import { Moment } from "moment";
 import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
+import { AggregatedPackage, EventsPackage } from "../entities/DhisDataPackage";
 import { ImportSummary } from "../entities/ImportSummary";
 import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
@@ -32,4 +33,5 @@ export interface InstanceRepository {
     deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary>;
     importDataPackage(dataPackage: DataPackage): Promise<ImportSummary>;
     getProgram(programId: Id): Promise<Program | undefined>;
+    convertDataPackage(dataPackage: DataPackage): EventsPackage | AggregatedPackage;
 }

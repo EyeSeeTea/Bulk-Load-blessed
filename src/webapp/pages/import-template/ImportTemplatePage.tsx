@@ -15,7 +15,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackageData, DataPackageDataValue } from "../../../domain/entities/DataPackage";
+import {
+    DataPackage,
+    DataPackageData,
+    DataPackageDataValue,
+} from "../../../domain/entities/DataPackage";
 import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
@@ -188,7 +192,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             updateDialog(null);
                         },
                         onInfoAction: () => {
-                            downloadInvalidOrganisations(dataForm.type, removedDataValues);
+                            downloadInvalidOrganisationsOld(dataForm.type, removedDataValues);
                         },
                         cancelText: i18n.t("Cancel"),
                         saveText: i18n.t("Proceed"),
@@ -299,7 +303,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
                     case "INVALID_ORG_UNITS":
                         {
-                            const { invalidDataValues, dataValues } = error;
+                            const { invalidDataValues } = error;
 
                             const totalInvalid = _.flatMap(
                                 invalidDataValues.dataEntries,
@@ -323,10 +327,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                     });
                                 },
                                 onInfoAction: () => {
-                                    downloadInvalidOrganisations(
-                                        dataValues.type,
-                                        invalidDataValues.dataEntries
-                                    );
+                                    downloadInvalidOrganisations(invalidDataValues);
                                 },
                                 cancelText: i18n.t("Cancel"),
                                 saveText: i18n.t("Proceed"),
@@ -353,7 +354,15 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         });
     };
 
-    const downloadInvalidOrganisations = (type: DataFormType, elements: unknown) => {
+    const downloadInvalidOrganisations = (dataPackage: DataPackage) => {
+        const object = CompositionRoot.attach().form.convertDataPackage(dataPackage);
+        const json = JSON.stringify(object, null, 4);
+        const blob = new Blob([json], { type: "application/json" });
+        const date = moment().format("YYYYMMDDHHmm");
+        saveAs(blob, `invalid-organisations-${date}.json`);
+    };
+
+    const downloadInvalidOrganisationsOld = (type: DataFormType, elements: unknown) => {
         const object = type === "dataSets" ? { dataValues: elements } : { events: elements };
         const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
