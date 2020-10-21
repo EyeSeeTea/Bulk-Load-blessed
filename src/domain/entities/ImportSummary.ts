@@ -11,3 +11,10 @@ export interface ImportSummaryStats {
     deleted: number;
     ignored: number;
 }
+
+export const emptyImportSummary: ImportSummary = {
+    status: "SUCCESS",
+    stats: { created: 0, updated: 0, deleted: 0, ignored: 0 },
+    description: "",
+    errors: [],
+};

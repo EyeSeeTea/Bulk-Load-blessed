@@ -5,6 +5,7 @@ import { ImportSummary } from "../entities/ImportSummary";
 import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
 import { Id } from "../entities/ReferenceObject";
+import { Program } from "../entities/TrackedEntityInstance";
 
 export interface GetDataPackageParams {
     type: DataFormType;
@@ -30,4 +31,5 @@ export interface InstanceRepository {
     getDefaultIds(): Promise<string[]>;
     deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary>;
     importDataPackage(dataPackage: DataPackage): Promise<ImportSummary>;
+    getProgram(programId: Id): Promise<Program | undefined>;
 }

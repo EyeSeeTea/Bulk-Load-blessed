@@ -73,7 +73,7 @@ export class ExcelBuilder {
         if (payload.type !== "trackerPrograms") return;
 
         for (const tei of payload.trackedEntityInstances ?? []) {
-            const { program, orgUnit, id, enrollment } = tei;
+            const { orgUnit, id, enrollment } = tei;
 
             const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.attributes,
@@ -123,22 +123,33 @@ export class ExcelBuilder {
                     dateFormat(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
-            const values = program.attributes.map(attr => {
-                const attributeValue = tei.attributeValues.find(av => av.attribute.id === attr.id);
-                return attributeValue ? attributeValue.optionId || attributeValue.value : undefined;
-            });
+            for (const cell of cells) {
+                const attributeIdCell = await this.excelRepository.findRelativeCell(
+                    template.id,
+                    dataSource.attributeId,
+                    cell
+                );
 
-            await Promise.all(
-                _(cells)
-                    .zip(values)
-                    .map(([cell, value]) =>
-                        cell && value
-                            ? this.excelRepository.writeCell(template.id, cell, value)
-                            : null
-                    )
-                    .compact()
-                    .value()
-            );
+                const attributeId = attributeIdCell
+                    ? removeCharacters(
+                          await this.excelRepository.readCell(template.id, attributeIdCell, {
+                              formula: true,
+                          })
+                      )
+                    : undefined;
+
+                const attributeValue = tei.attributeValues.find(
+                    av => av.attribute.id === attributeId
+                );
+
+                const value = attributeValue
+                    ? attributeValue.optionId || attributeValue.value
+                    : undefined;
+
+                if (value) {
+                    this.excelRepository.writeCell(template.id, cell, value);
+                }
+            }
 
             rowStart += 1;
         }
@@ -188,33 +199,30 @@ export class ExcelBuilder {
         dataSource: TrackerEventRowDataSource,
         payload: DataPackage
     ) {
-        let { rowStart } = dataSource.range;
-        const cells = await this.excelRepository.getCellsInRange(template.id, dataSource.range);
+        let { rowStart } = dataSource.dataValues;
+        const dataElementCells = await this.excelRepository.getCellsInRange(
+            template.id,
+            dataSource.dataElements
+        );
 
-        const dataElementIds = cells.map(async cell => {
-            const dataElementCell = await this.excelRepository.findRelativeCell(
-                template.id,
-                dataSource.dataElement,
-                cell
-            );
+        const dataElementIds = await Promise.all(
+            dataElementCells.map(async dataElementCell => {
+                return removeCharacters(
+                    await this.excelRepository.readCell(template.id, dataElementCell, {
+                        formula: true,
+                    })
+                );
+            })
+        );
 
-            const dataElementId = dataElementCell
-                ? removeCharacters(
-                      await this.excelRepository.readCell(template.id, dataElementCell)
-                  )
-                : undefined;
-
-            return dataElementId;
-        });
-
-        const dataElementIdsSet = new Set(await Promise.all(dataElementIds));
+        const dataElementIdsSet = new Set(dataElementIds);
 
         for (const {
             id,
             period,
             dataValues,
             trackedEntityInstance,
-            attribute: aocId,
+            attribute: cocId,
         } of payload.dataEntries) {
             const someDataElementPresentInSheet = _(dataValues).some(dv =>
                 dataElementIdsSet.has(dv.dataElement)
@@ -222,7 +230,7 @@ export class ExcelBuilder {
             if (!someDataElementPresentInSheet) continue;
 
             const cells = await this.excelRepository.getCellsInRange(template.id, {
-                ...dataSource.range,
+                ...dataSource.dataValues,
                 rowStart,
                 rowEnd: rowStart,
             });
@@ -245,13 +253,13 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(template.id, eventIdCell, id);
             }
 
-            const aocIdCell = await this.excelRepository.findRelativeCell(
+            const cocIdCell = await this.excelRepository.findRelativeCell(
                 template.id,
-                dataSource.attributeOptionCombo,
+                dataSource.categoryOptionCombo,
                 cells[0]
             );
-            if (aocIdCell && aocId) {
-                await this.excelRepository.writeCell(template.id, aocIdCell, aocId);
+            if (cocIdCell && cocId) {
+                await this.excelRepository.writeCell(template.id, cocIdCell, cocId);
             }
 
             const dateCell = await this.excelRepository.findRelativeCell(
@@ -261,21 +269,9 @@ export class ExcelBuilder {
             );
             if (dateCell) await this.excelRepository.writeCell(template.id, dateCell, period);
 
-            for (const cell of cells) {
-                const dataElementCell = await this.excelRepository.findRelativeCell(
-                    template.id,
-                    dataSource.dataElement,
-                    cell
-                );
-
-                const dataElement = dataElementCell
-                    ? removeCharacters(
-                          await this.excelRepository.readCell(template.id, dataElementCell)
-                      )
-                    : undefined;
-
-                const { value } = dataValues.find(dv => dv.dataElement === dataElement) ?? {};
-
+            for (const [dataElementId, cell] of _.zip(dataElementIds, cells)) {
+                if (!dataElementId || !cell) continue;
+                const { value } = dataValues.find(dv => dv.dataElement === dataElementId) ?? {};
                 if (value) await this.excelRepository.writeCell(template.id, cell, value);
             }
 
