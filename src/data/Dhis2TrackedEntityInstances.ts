@@ -12,7 +12,8 @@ import { D2Api, Id, Ref } from "../types/d2-api";
 import { runPromises } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import { ImportSummary, emptyImportSummary } from "../domain/entities/ImportSummary";
-import { postEvents, Event } from "./Dhis2Events";
+import { postEvents } from "./Dhis2Events";
+import { Event } from "../domain/entities/DhisDataPackage";
 
 export interface GetOptions {
     api: D2Api;
@@ -211,7 +212,7 @@ function getApiEvents(
     teis: TrackedEntityInstance[],
     dataEntries: DataPackageData[],
     metadata: Metadata
-): EventApi[] {
+): Event[] {
     const programByTei: Record<Id, Id> = _(teis)
         .map(tei => [tei.id, tei.program.id] as const)
         .fromPairs()
@@ -254,7 +255,7 @@ function getApiEvents(
                 )
                 .value();
 
-            const eventApi: EventApi = {
+            const event: Event = {
                 event: data.id,
                 trackedEntityInstance: teiId,
                 program: program,
@@ -266,7 +267,7 @@ function getApiEvents(
                 dataValues,
             };
 
-            return eventApi;
+            return event;
         })
         .compact()
         .value();
@@ -409,10 +410,8 @@ interface EnrollmentApi {
     orgUnit: Id;
     enrollmentDate: string;
     incidentDate: string;
-    events?: EventApi[];
+    events?: Event[];
 }
-
-type EventApi = Event;
 
 interface DataValueApi {
     dataElement: Id;

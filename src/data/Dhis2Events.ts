@@ -1,27 +1,9 @@
 import _ from "lodash";
 import { ImportSummary } from "../domain/entities/ImportSummary";
 import { D2Api } from "../types/d2-api";
+import { Event } from "../domain/entities/DhisDataPackage";
 
-export interface Event {
-    event?: string;
-    orgUnit: string;
-    program: string;
-    status: string;
-    eventDate: string;
-    coordinate?: {
-        latitude: string;
-        longitude: string;
-    };
-    attributeOptionCombo?: string;
-    trackedEntityInstance?: string;
-    programStage?: string;
-    dataValues: Array<{
-        dataElement: string;
-        value: string | number | boolean;
-    }>;
-}
-
-export interface EventsPostResponse {
+interface EventsPostResponse {
     status: "SUCCESS" | "ERROR";
     message?: string;
     response: {

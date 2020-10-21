@@ -37,9 +37,9 @@ export class ExcelReader {
             return undefined;
         }
 
-        let data: DataPackageData[] = [];
-        let teis: TrackedEntityInstance[] = [];
-        let relationships: Relationship[] = [];
+        const data: DataPackageData[] = [];
+        const teis: TrackedEntityInstance[] = [];
+        const relationships: Relationship[] = [];
 
         for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
@@ -337,7 +337,7 @@ export class ExcelReader {
 
                 if (!teiId || !orgUnitId || !enrollmentDate) return;
 
-                let attributeValues = [];
+                const attributeValues = [];
                 for (const cell of attributeCells) {
                     const attributeIdCell = await this.excelRepository.findRelativeCell(
                         template.id,
