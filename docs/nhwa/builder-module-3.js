@@ -10,24 +10,26 @@ for (let type in rawMetadata) {
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
+let defaultSheet = "Regulation";
+let orgUnitCell = "X2";
+let periodCell = "M4";
+
 let getDataElements = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     dataRowStart,
     type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
         (input, i) => {
             let id = input.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -44,8 +46,6 @@ let getDataElements = ({
 let dataSheet1 = [
     ...getDataElements({
         sheet: "Regulation",
-        orgUnitCell: "X2",
-        periodCell: "M4",
         tabSelector: "#tab0",
         letters: ["F", "G", "H"],
         dataRowStart: 7,
@@ -53,8 +53,6 @@ let dataSheet1 = [
     }),
     ...getDataElements({
         sheet: "Regulation",
-        orgUnitCell: "X2",
-        periodCell: "M4",
         tabSelector: "#tab0",
         letters: ["I"],
         dataRowStart: 7,
@@ -65,8 +63,6 @@ let dataSheet1 = [
 let dataSheet2 = [
     ...getDataElements({
         sheet: "Acreditation",
-        orgUnitCell: "AT2",
-        periodCell: "P4",
         tabSelector: "#tab1",
         letters: [
             "F",
@@ -93,8 +89,6 @@ let dataSheet2 = [
     }),
     ...getDataElements({
         sheet: "Acreditation",
-        orgUnitCell: "AT2",
-        periodCell: "P4",
         tabSelector: "#tab1",
         letters: ["I", "O", "U", "AA", "AG", "AM"],
         dataRowStart: 7,
@@ -105,8 +99,6 @@ let dataSheet2 = [
 let dataSheet3 = [
     ...getDataElements({
         sheet: "Lifelong Learning",
-        orgUnitCell: "W2",
-        periodCell: "Q4",
         tabSelector: "#tab2",
         letters: ["F", "G", "H", "L", "M", "N"],
         dataRowStart: 7,
@@ -114,8 +106,6 @@ let dataSheet3 = [
     }),
     ...getDataElements({
         sheet: "Lifelong Learning",
-        orgUnitCell: "W2",
-        periodCell: "Q4",
         tabSelector: "#tab2",
         letters: ["I", "O"],
         dataRowStart: 7,

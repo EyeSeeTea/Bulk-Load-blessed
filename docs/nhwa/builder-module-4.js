@@ -10,24 +10,26 @@ for (let type in rawMetadata) {
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
+let defaultSheet = "Finance";
+let orgUnitCell = "V2";
+let periodCell = "I4";
+
 let getDataElements = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     dataRowStart,
     type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
         (input, i) => {
             let id = input.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -44,16 +46,12 @@ let getDataElements = ({
 let dataSheet1 = [
     ...getDataElements({
         sheet: "Finance",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["D", "E", "F", "G"],
         dataRowStart: 9,
     }),
     ...getDataElements({
         sheet: "Finance",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["Q", "R", "S"],
         dataRowStart: 18,
@@ -61,8 +59,6 @@ let dataSheet1 = [
     }),
     ...getDataElements({
         sheet: "Finance",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["F"],
         dataRowStart: 15,
@@ -73,8 +69,6 @@ let dataSheet1 = [
 let dataSheet2 = [
     ...getDataElements({
         sheet: "Cost per program",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["D", "E", "F", "G", "H", "I"],
         dataRowStart: 10,
@@ -84,8 +78,6 @@ let dataSheet2 = [
 let dataSheet3 = [
     ...getDataElements({
         sheet: "Lifelong Learning",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["D", "E", "F", "G"],
         dataRowStart: 11,

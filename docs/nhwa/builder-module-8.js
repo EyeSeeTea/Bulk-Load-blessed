@@ -10,24 +10,26 @@ for (const type in rawMetadata) {
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
+let defaultSheet = "M08 - Skill mix composition";
+let orgUnitCell = "V2";
+let periodCell = "I4";
+
 let getDataElements = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     dataRowStart,
     type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
         (input, i) => {
-            const id = input.getAttribute("id");
-            const [dataElement, categoryOptionCombo] = id.split("-");
+            let id = input.getAttribute("id");
+            let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -44,16 +46,12 @@ let getDataElements = ({
 let dataSheet1 = [
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["D"],
         dataRowStart: 8,
     }),
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["U", "V", "W"],
         dataRowStart: 13,
@@ -61,8 +59,6 @@ let dataSheet1 = [
     }),
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["E"],
         dataRowStart: 16,
@@ -70,8 +66,6 @@ let dataSheet1 = [
     }),
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["V", "W"],
         dataRowStart: 23,
@@ -82,8 +76,6 @@ let dataSheet1 = [
 let dataSheet2 = [
     ...getDataElements({
         sheet: "M09 - Governance and policies",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["Q", "R", "S"],
         dataRowStart: 9,
@@ -91,8 +83,6 @@ let dataSheet2 = [
     }),
     ...getDataElements({
         sheet: "M09 - Governance and policies",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["E"],
         dataRowStart: 9,
@@ -103,8 +93,6 @@ let dataSheet2 = [
 let dataSheet3 = [
     ...getDataElements({
         sheet: "M10 - Information Systems",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["Q", "R", "S"],
         dataRowStart: 9,
@@ -112,8 +100,6 @@ let dataSheet3 = [
     }),
     ...getDataElements({
         sheet: "M10 - Information Systems",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["E"],
         dataRowStart: 9,
