@@ -77,6 +77,7 @@ let getDataElementsCustomRows = ({
             let field = entryfields[elementCount + i];
             let id = field.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
+            let availableLetters = letters.slice(-row.nrOfElements);
 
             fields.push({
                 type: "cell",
@@ -87,7 +88,7 @@ let getDataElementsCustomRows = ({
                 ref: {
                     type: "cell",
                     sheet,
-                    ref: `${letters[i]}${row.row}`,
+                    ref: `${availableLetters[i]}${row.row}`,
                 },
             });
         }

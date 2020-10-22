@@ -43,7 +43,7 @@ let getDataElements = ({
 
 let dataSheet1 = [
     ...getDataElements({
-        sheet: "M8 - Skill mix composition",
+        sheet: "M08 - Skill mix composition",
         orgUnitCell: "V2",
         periodCell: "I4",
         tabSelector: "#tab0",
@@ -51,7 +51,7 @@ let dataSheet1 = [
         dataRowStart: 8,
     }),
     ...getDataElements({
-        sheet: "M8 - Skill mix composition",
+        sheet: "M08 - Skill mix composition",
         orgUnitCell: "V2",
         periodCell: "I4",
         tabSelector: "#tab0",
@@ -60,7 +60,7 @@ let dataSheet1 = [
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
-        sheet: "M8 - Skill mix composition",
+        sheet: "M08 - Skill mix composition",
         orgUnitCell: "V2",
         periodCell: "I4",
         tabSelector: "#tab0",
@@ -69,7 +69,7 @@ let dataSheet1 = [
         type: "textarea",
     }),
     ...getDataElements({
-        sheet: "M8 - Skill mix composition",
+        sheet: "M08 - Skill mix composition",
         orgUnitCell: "V2",
         periodCell: "I4",
         tabSelector: "#tab0",
@@ -102,7 +102,7 @@ let dataSheet2 = [
 
 let dataSheet3 = [
     ...getDataElements({
-        sheet: "M09 - Governance and policies",
+        sheet: "M10 - Information Systems",
         orgUnitCell: "N2",
         periodCell: "I4",
         tabSelector: "#tab2",
@@ -111,7 +111,7 @@ let dataSheet3 = [
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
-        sheet: "M09 - Governance and policies",
+        sheet: "M10 - Information Systems",
         orgUnitCell: "N2",
         periodCell: "I4",
         tabSelector: "#tab2",

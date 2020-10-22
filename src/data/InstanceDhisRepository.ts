@@ -311,10 +311,27 @@ export class InstanceDhisRepository implements InstanceRepository {
             await timeout(1500);
         } while (await checkTask());
 
-        const { status, description, conflicts, importCount } = await this.api
-            .get<DataValueSetsPostResponse>(`/system/taskSummaries/${jobType}/${id}`)
+        const importSummary = await this.api
+            .get<DataValueSetsPostResponse | null>(`/system/taskSummaries/${jobType}/${id}`)
             .getData();
 
+        if (!importSummary) {
+            const [{ message }] =
+                (await this.api
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
+                    .getData()) ?? [];
+
+            return {
+                status: "ERROR",
+                description: message,
+                stats: { created: 0, deleted: 0, updated: 0, ignored: 0 },
+                errors: [],
+            };
+        }
+
+        const { status, description, conflicts, importCount } = importSummary;
         const { imported: created, deleted, updated, ignored } = importCount;
         const errors = conflicts?.map(({ object, value }) => `[${object}] ${value}`) ?? [];
 
