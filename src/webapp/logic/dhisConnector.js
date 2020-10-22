@@ -18,7 +18,7 @@ export async function getElement(api, type, id) {
         "enrollmentDateLabel",
         "incidentDateLabel",
         "captureCoordinates",
-        "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,optionSet[id,name,options[id]]]],",
+        "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
     ].join(",");
     const response = await api.get(`/${endpoint}/${id}`, { fields }).getData();
     return { ...response, type };
