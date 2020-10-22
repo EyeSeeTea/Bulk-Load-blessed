@@ -99,10 +99,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
             destination.value(Number(value));
         } else if (String(value).startsWith("=")) {
             destination.formula(String(value));
-        } else if (String(value) === "true") {
-            destination.value("Yes");
-        } else if (String(value) === "false") {
-            destination.value("No");
         } else if (definedName) {
             destination.formula(`=${definedName}`);
         } else {
@@ -161,9 +157,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const value = formula
-            ? getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination)
-            : destination.value();
+        const formulaValue = getFormulaWithValidation(
+            workbook,
+            sheet as SheetWithValidations,
+            destination
+        );
+
+        const value = formula ? formulaValue : destination.value() ?? formulaValue;
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -289,7 +289,9 @@ function getFormulaWithValidation(
     if (defaultValue || !value) return defaultValue;
 
     // Support only for data validations over ranges
-    const range = Object.keys(sheet._dataValidations)
+    const range = _(sheet._dataValidations)
+        .keys()
+        .flatMap(validations => validations.split(" "))
         .filter(s => s.includes(":"))
         .map(address => sheet.range(address))
         .find(range => {
