@@ -258,7 +258,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {settings.orgUnitSelection !== "import" && state.templateType !== "custom" && (
+            {settings.orgUnitSelection !== "import" && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
@@ -270,9 +270,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     onChange={onFilterOrgUnitsChange}
                                 />
                             }
-                            label={i18n.t(
-                                "Select available organisation units to include in the template"
-                            )}
+                            label={
+                                state.templateType === "custom"
+                                    ? i18n.t("Select organisation unit to populate data")
+                                    : i18n.t(
+                                          "Select available organisation units to include in the template"
+                                      )
+                            }
                         />
                     </div>
 
@@ -288,11 +292,15 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     fullWidth={false}
                                     height={250}
                                     controls={{
-                                        filterByLevel: true,
-                                        filterByGroup: true,
-                                        selectAll: true,
+                                        filterByLevel: state.templateType !== "custom",
+                                        filterByGroup: state.templateType !== "custom",
+                                        selectAll: state.templateType !== "custom",
                                     }}
                                     withElevation={false}
+                                    singleSelection={state.templateType === "custom"}
+                                    typeInput={
+                                        state.templateType === "custom" ? "radio" : undefined
+                                    }
                                 />
                             </div>
                         ) : (
@@ -303,7 +311,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </React.Fragment>
             )}
 
-            <h3>{i18n.t("Advanced template properties")}</h3>
+            {state.templateType !== "custom" && <h3>{i18n.t("Advanced template properties")}</h3>}
 
             {availableLanguages.length > 0 && state.templateType !== "custom" && (
                 <div className={classes.row}>
@@ -332,7 +340,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {userHasReadAccess && (filterOrgUnits || state.templateType === "custom") && (
+            {userHasReadAccess && filterOrgUnits && state.templateType !== "custom" && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}

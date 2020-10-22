@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-10-22T10:11:09.720Z\n"
+"POT-Creation-Date: 2020-10-22T10:33:47.228Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -129,6 +129,10 @@ msgstr "Periodo final"
 
 msgid "Organisation units"
 msgstr "Unidades Organizativas"
+
+#, fuzzy
+msgid "Select organisation unit to populate data"
+msgstr "Seleccione al menos una unidad organizativa a la que asignar los datos"
 
 msgid "Select available organisation units to include in the template"
 msgstr "Seleccione las unidades organizativas para añadir a la plantilla"
