@@ -474,7 +474,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const { id: defaultVersion} = getTemplateId(element.type, element.id);
+    const { id: defaultVersion } = getTemplateId(element.type, element.id);
     return getObjectVersion(element) ?? defaultVersion;
 };
 
