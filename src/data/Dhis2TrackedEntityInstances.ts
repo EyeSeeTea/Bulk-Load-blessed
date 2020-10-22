@@ -179,11 +179,13 @@ async function uploadTeis(options: {
 
     const apiTeis = teis.map(tei => getApiTeiToUpload(program, metadata, tei, existingTeis));
 
-    return runPromises(
-        apiTeis.map(apiTei => () =>
-            api.post("/trackedEntityInstances", { strategy: "CREATE_AND_UPDATE" }, apiTei).getData()
+    return api
+        .post(
+            "/trackedEntityInstances",
+            { strategy: "CREATE_AND_UPDATE" },
+            { trackedEntityInstances: apiTeis }
         )
-    );
+        .getData();
 }
 
 interface Metadata {
