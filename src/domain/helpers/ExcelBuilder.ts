@@ -29,24 +29,26 @@ export class ExcelBuilder {
         const { dataSources = [] } = template;
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
         for (const dataSource of dataSourceValues) {
-            switch (dataSource.type) {
-                case "cell":
-                    await this.fillCells(template, dataSource, payload);
-                    break;
-                case "row":
-                    await this.fillRows(template, dataSource, payload);
-                    break;
-                case "rowTei":
-                    await this.fillTeiRows(template, dataSource, payload);
-                    break;
-                case "rowTrackedEvent":
-                    await this.fillTrackerEventRows(template, dataSource, payload);
-                    break;
-                case "rowTeiRelationship":
-                    await this.fillTrackerRelationshipRows(template, dataSource, payload);
-                    break;
-                default:
-                    throw new Error(`Type ${dataSource.type} not supported`);
+            if (!dataSource.skipPopulate) {
+                switch (dataSource.type) {
+                    case "cell":
+                        await this.fillCells(template, dataSource, payload);
+                        break;
+                    case "row":
+                        await this.fillRows(template, dataSource, payload);
+                        break;
+                    case "rowTei":
+                        await this.fillTeiRows(template, dataSource, payload);
+                        break;
+                    case "rowTrackedEvent":
+                        await this.fillTrackerEventRows(template, dataSource, payload);
+                        break;
+                    case "rowTeiRelationship":
+                        await this.fillTrackerRelationshipRows(template, dataSource, payload);
+                        break;
+                    default:
+                        throw new Error(`Type ${dataSource.type} not supported`);
+                }
             }
         }
     }

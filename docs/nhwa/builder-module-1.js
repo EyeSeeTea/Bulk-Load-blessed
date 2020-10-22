@@ -30,6 +30,7 @@ let getDataElements = ({
                 period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
+                skipPopulate: input.disabled,
                 ref: {
                     type: "cell",
                     sheet,

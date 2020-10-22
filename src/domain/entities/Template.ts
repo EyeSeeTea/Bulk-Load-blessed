@@ -92,6 +92,7 @@ export interface Range {
 
 interface BaseDataSource {
     type: DataSourceType;
+    skipPopulate?: boolean;
     range?: Partial<Range>;
     ref?: CellRef;
     orgUnit: SheetRef | ValueRef;
@@ -104,6 +105,7 @@ interface BaseDataSource {
 
 export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     eventId: ColumnRef;
     date: ColumnRef;
@@ -114,24 +116,7 @@ export interface TrackerEventRowDataSource {
 
 export interface TrackerRelationship {
     type: "rowTeiRelationship";
-    range: Range;
-    typeName: ColumnRef;
-    from: ColumnRef;
-    to: ColumnRef;
-}
-
-export interface TrackerEventRowDataSource {
-    type: "rowTrackedEvent";
-    teiId: ColumnRef;
-    eventId: ColumnRef;
-    date: ColumnRef;
-    attributeOptionCombo: ColumnRef;
-    range: Range;
-    dataElement: RowRef;
-}
-
-export interface TrackerRelationship {
-    type: "rowTeiRelationship";
+    skipPopulate?: boolean;
     range: Range;
     typeName: ColumnRef;
     from: ColumnRef;
@@ -151,6 +136,7 @@ export interface RowDataSource extends BaseDataSource {
 
 export interface TeiRowDataSource {
     type: "rowTei";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     orgUnit: ColumnRef;
     enrollmentDate: ColumnRef;
