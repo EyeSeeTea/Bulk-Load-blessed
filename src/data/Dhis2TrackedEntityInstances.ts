@@ -14,6 +14,7 @@ import { getUid } from "./dhis2-uid";
 import { ImportSummary, emptyImportSummary } from "../domain/entities/ImportSummary";
 import { postEvents } from "./Dhis2Events";
 import { Event } from "../domain/entities/DhisDataPackage";
+import { parseDate } from "../domain/helpers/ExcelReader";
 
 export interface GetOptions {
     api: D2Api;
@@ -124,7 +125,7 @@ export async function updateTrackedEntityInstances(
     const program = await getProgram(api, programId);
     if (!program) throw new Error(`Program not found: ${programId}`);
 
-    const apiEvents = getApiEvents(teis, dataEntries, metadata);
+    const apiEvents = await getApiEvents(api, teis, dataEntries, metadata);
 
     const [preTeis, postTeis] = splitTeis(teis, existingTeis);
 
@@ -201,17 +202,37 @@ async function getMetadata(api: D2Api): Promise<Metadata> {
         .getData();
 }
 
-function getApiEvents(
+async function getApiEvents(
+    api: D2Api,
     teis: TrackedEntityInstance[],
     dataEntries: DataPackageData[],
     metadata: Metadata
-): Event[] {
+): Promise<Event[]> {
     const programByTei: Record<Id, Id> = _(teis)
         .map(tei => [tei.id, tei.program.id] as const)
         .fromPairs()
         .value();
 
     const optionById = _.keyBy(metadata.options, option => option.id);
+
+    const dataElementIds = _(dataEntries)
+        .flatMap(data => data.dataValues)
+        .map(dataValue => dataValue.dataElement)
+        .value();
+
+    const { dataElements } = await api.metadata
+        .get({
+            dataElements: {
+                fields: { id: true, valueType: true },
+                filter: { id: { in: dataElementIds } },
+            },
+        })
+        .getData();
+
+    const valueTypeByDataElementId = _(dataElements)
+        .map(de => [de.id, de.valueType])
+        .fromPairs()
+        .value();
 
     return _(dataEntries)
         .map(data => {
@@ -237,9 +258,20 @@ function getApiEvents(
                 .flatMap(
                     (dataValue): DataValueApi => {
                         // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
-                        const value = dataValue.optionId
-                            ? optionById[dataValue.optionId]?.code || dataValue.optionId
-                            : dataValue.value;
+                        const valueType = valueTypeByDataElementId[dataValue.dataElement];
+                        let value: string | number | boolean;
+
+                        if (
+                            valueType === "DATE" &&
+                            typeof dataValue.value === "string" &&
+                            dataValue.value.match(/^\d+$/)
+                        ) {
+                            value = parseDate(parseInt(dataValue.value)).toString();
+                        } else {
+                            value = dataValue.optionId
+                                ? optionById[dataValue.optionId]?.code || dataValue.optionId
+                                : dataValue.value;
+                        }
                         return {
                             dataElement: dataValue.dataElement,
                             value,

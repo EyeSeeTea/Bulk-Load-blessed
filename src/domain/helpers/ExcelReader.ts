@@ -448,7 +448,7 @@ export class ExcelReader {
     }
 }
 
-function parseDate(value: ExcelValue): ExcelValue {
+export function parseDate(value: ExcelValue): ExcelValue {
     if (typeof value === "number") {
         const date = XlsxPopulate.numberToDate(value);
         return moment(date).format(dateFormat);
