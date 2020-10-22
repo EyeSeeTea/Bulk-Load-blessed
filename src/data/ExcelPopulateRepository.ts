@@ -99,10 +99,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
             destination.value(Number(value));
         } else if (String(value).startsWith("=")) {
             destination.formula(String(value));
-        } else if (String(value) === "true") {
-            destination.value("Yes");
-        } else if (String(value) === "false") {
-            destination.value("No");
         } else if (definedName) {
             destination.formula(`=${definedName}`);
         } else {
@@ -123,14 +119,32 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return this.readCellValue(workbook, cellRef, options?.formula);
     }
 
+    public async getConstants(id: string): Promise<Record<string, string>> {
+        const workbook = await this.getWorkbook(id);
+        const keys = (workbook as any).definedName() as string[];
+
+        return _(keys)
+            .map(key => {
+                const element = workbook.definedName(key);
+                if (!isCell(element)) return null;
+                const value = element.value();
+                return value ? ([key, value.toString()] as [string, string]) : null;
+            })
+            .compact()
+            .fromPairs()
+            .value();
+    }
+
     public async getSheets(id: string): Promise<Sheet[]> {
         const workbook = await this.getWorkbook(id);
 
-        return workbook.sheets().map((sheet, index) => ({
-            index,
-            name: sheet.name(),
-            active: sheet.active(),
-        }));
+        return workbook.sheets().map((sheet, index) => {
+            return {
+                index,
+                name: sheet.name(),
+                active: sheet.active(),
+            };
+        });
     }
 
     private async readCellValue(
@@ -139,11 +153,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
         formula = false
     ): Promise<ExcelValue | undefined> {
         const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
-        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+        const sheet = workbook.sheet(cellRef.sheet);
+        const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const value = formula ? destination.formula() : destination.value();
+        const formulaValue = getFormulaWithValidation(
+            workbook,
+            sheet as SheetWithValidations,
+            destination
+        );
+
+        const value = formula ? formulaValue : destination.value() ?? formulaValue;
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -215,6 +236,26 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
+    public async getSheetRowsCount(
+        id: string,
+        sheetId: string | number
+    ): Promise<number | undefined> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(sheetId);
+        if (!sheet) return;
+
+        const lastRowWithValues = _(sheet._rows)
+            .compact()
+            .dropRightWhile(row =>
+                _((row as RowWithCells)._cells)
+                    .compact()
+                    .every(c => c.value() === undefined)
+            )
+            .last();
+
+        return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
+    }
+
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {
         //@ts-ignore
         return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
@@ -248,3 +289,68 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 }
+
+function isCell(element: any): element is ExcelCell {
+    return element?.constructor?.name === "Cell";
+}
+
+interface SheetWithValidations extends XLSX.Sheet {
+    _dataValidations: Record<string, unknown>;
+    dataValidation(address: string): false | { type: string; formula1: string };
+}
+
+/* Get formula of associated cell (though data valudation). Basic implementation. No caching */
+function getFormulaWithValidation(
+    workbook: XLSX.Workbook,
+    sheet: SheetWithValidations,
+    cell: XLSX.Cell
+) {
+    const defaultValue = cell.formula();
+    const value = cell.value();
+    if (defaultValue || !value) return defaultValue;
+
+    // Support only for data validations over ranges
+    const addressMatch = _(sheet._dataValidations)
+        .keys()
+        .flatMap(validations => validations.split(" "))
+        .find(address => {
+            if (address.includes(":")) {
+                const range = sheet.range(address);
+                const rowStart = range.startCell().rowNumber();
+                const columnStart = range.startCell().columnNumber();
+                const rowEnd = range.endCell().rowNumber();
+                const columnEnd = range.endCell().columnNumber();
+                const isCellInRange =
+                    cell.columnNumber() >= columnStart &&
+                    cell.columnNumber() <= columnEnd &&
+                    cell.rowNumber() >= rowStart &&
+                    cell.rowNumber() <= rowEnd;
+
+                return isCellInRange;
+            } else {
+                return cell.address() === address;
+            }
+        });
+
+    if (!addressMatch) return defaultValue;
+
+    const validation = sheet.dataValidation(addressMatch);
+    if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
+
+    const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
+    const validationSheet = sheetName
+        ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
+        : sheet;
+    if (!validationSheet) return defaultValue;
+    const validationRange = validationSheet.range(rangeAddress);
+
+    const formulaByValue = _(validationRange.cells())
+        .map(cells => cells[0])
+        .map(cell => [cell.value(), cell.formula()])
+        .fromPairs()
+        .value();
+
+    return formulaByValue[String(value)] || defaultValue;
+}
+
+type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };

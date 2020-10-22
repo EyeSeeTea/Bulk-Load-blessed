@@ -4,8 +4,8 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
     public readonly type = "generated";
     public readonly id = "TRACKER_PROGRAM_GENERATED_v1";
     public readonly name = "Auto-generated Tracker Program template v1";
-    public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A4" };
-    public readonly dataFormType = { type: "value" as const, id: "programs" as const };
+    public readonly dataFormId = { type: "cell" as const, sheet: "Validation", ref: "A1" };
+    public readonly dataFormType = { type: "value" as const, id: "trackerPrograms" as const };
 
     public readonly rowOffset = 3;
     public readonly colOffset = 0;
@@ -37,6 +37,11 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
                 sheet: "TEI Instances",
                 rowStart: 6,
                 columnStart: "E",
+            },
+            attributeId: {
+                sheet: "TEI Instances",
+                type: "row",
+                ref: 5,
             },
         },
         {
@@ -70,7 +75,7 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
                     type: "column",
                     ref: "A",
                 },
-                attributeOptionCombo: {
+                categoryOptionCombo: {
                     sheet,
                     type: "column",
                     ref: "B",
@@ -85,15 +90,20 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
                     type: "column",
                     ref: "D",
                 },
-                range: {
+                programStage: {
+                    sheet,
+                    type: "cell",
+                    ref: "A1",
+                },
+                dataElements: {
+                    sheet,
+                    rowStart: 2,
+                    columnStart: "E",
+                },
+                dataValues: {
                     sheet,
                     rowStart: 3,
                     columnStart: "E",
-                },
-                dataElement: {
-                    sheet,
-                    type: "row",
-                    ref: 2,
                 },
             },
     ];

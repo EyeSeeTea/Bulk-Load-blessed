@@ -38,5 +38,6 @@ export interface DataPackageDataValue {
     dataElement: Id;
     category?: Id;
     value: DataPackageValue;
+    optionId?: Id;
     comment?: string;
 }

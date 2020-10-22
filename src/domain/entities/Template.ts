@@ -2,6 +2,7 @@ import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
+export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
@@ -27,7 +28,7 @@ export type StyleSource = {
 export type Template = GeneratedTemplate | CustomTemplate;
 
 interface BaseTemplate {
-    type: "generated" | "custom";
+    type: TemplateType;
     id: Id;
     name: string;
     dataSources?: DataSource[];
@@ -45,6 +46,8 @@ export interface GeneratedTemplate extends BaseTemplate {
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
+    fixedOrgUnit?: CellRef;
+    fixedPeriod?: CellRef;
 }
 
 export interface GenericSheetRef {
@@ -90,6 +93,7 @@ export interface Range {
 
 interface BaseDataSource {
     type: DataSourceType;
+    skipPopulate?: boolean;
     range?: Partial<Range>;
     ref?: CellRef;
     orgUnit: SheetRef | ValueRef;
@@ -100,18 +104,9 @@ interface BaseDataSource {
     eventId?: SheetRef | ValueRef;
 }
 
-export interface TrackerEventRowDataSource {
-    type: "rowTrackedEvent";
-    teiId: ColumnRef;
-    eventId: ColumnRef;
-    date: ColumnRef;
-    attributeOptionCombo: ColumnRef;
-    range: Range;
-    dataElement: RowRef;
-}
-
 export interface TrackerRelationship {
     type: "rowTeiRelationship";
+    skipPopulate?: boolean;
     range: Range;
     typeName: ColumnRef;
     from: ColumnRef;
@@ -120,20 +115,14 @@ export interface TrackerRelationship {
 
 export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     eventId: ColumnRef;
     date: ColumnRef;
-    attributeOptionCombo: ColumnRef;
-    range: Range;
-    dataElement: RowRef;
-}
-
-export interface TrackerRelationship {
-    type: "rowTeiRelationship";
-    range: Range;
-    typeName: ColumnRef;
-    from: ColumnRef;
-    to: ColumnRef;
+    categoryOptionCombo: ColumnRef;
+    dataValues: Range;
+    programStage: CellRef;
+    dataElements: Range;
 }
 
 export interface RowDataSource extends BaseDataSource {
@@ -149,11 +138,13 @@ export interface RowDataSource extends BaseDataSource {
 
 export interface TeiRowDataSource {
     type: "rowTei";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     orgUnit: ColumnRef;
     enrollmentDate: ColumnRef;
     incidentDate: ColumnRef;
     attributes: Range;
+    attributeId: RowRef;
 }
 
 export interface ColumnDataSource extends BaseDataSource {

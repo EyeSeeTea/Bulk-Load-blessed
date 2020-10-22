@@ -10,24 +10,26 @@ for (let type in rawMetadata) {
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
+let defaultSheet = "Entry into Labour Market";
+let orgUnitCell = "X2";
+let periodCell = "K4";
+
 let getDataElements = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     dataRowStart,
     type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
         (input, i) => {
             let id = input.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -44,8 +46,6 @@ let getDataElements = ({
 let dataSheet1 = [
     ...getDataElements({
         sheet: "Entry into Labour Market",
-        orgUnitCell: "X2",
-        periodCell: "K4",
         tabSelector: "#tab0",
         letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L"],
         dataRowStart: 9,
@@ -55,8 +55,6 @@ let dataSheet1 = [
 let dataSheet2 = [
     ...getDataElements({
         sheet: "Exit from Labour Market",
-        orgUnitCell: "O2",
-        periodCell: "J4",
         tabSelector: "#tab1",
         letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M"],
         dataRowStart: 9,

@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.5.1",
+    "version": "3.6.0",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -41,7 +41,7 @@
         "react-router-dom": "5.2.0",
         "react-scripts": "3.4.1",
         "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#development"
+        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/excel-data-validations"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",

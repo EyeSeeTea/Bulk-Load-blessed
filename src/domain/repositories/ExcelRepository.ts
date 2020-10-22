@@ -45,4 +45,9 @@ export abstract class ExcelRepository {
     public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;
     public abstract async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
     public abstract async getSheets(id: string): Promise<Sheet[]>;
+    public abstract async getConstants(id: string): Promise<Record<string, string>>;
+    public abstract async getSheetRowsCount(
+        id: string,
+        sheetId: string | number
+    ): Promise<number | undefined>;
 }

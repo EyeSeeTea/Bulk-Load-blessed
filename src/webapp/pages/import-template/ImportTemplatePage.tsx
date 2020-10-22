@@ -239,10 +239,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 switch (error.type) {
                     case "DUPLICATE_VALUES":
                         {
-                            const { existingDataValues, dataValues } = error;
+                            const { existingDataValues, dataValues, instanceDataValues } = error;
 
                             const totalExisting = _.flatMap(
-                                existingDataValues.dataEntries,
+                                instanceDataValues.dataEntries,
                                 ({ dataValues }) => dataValues
                             ).length;
 
@@ -592,11 +592,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(false);
     };
 
-    const getNameForModel = (key: DataFormType) => {
+    const getNameForModel = (key: DataFormType): string => {
         switch (key) {
             case "dataSets":
                 return i18n.t("Data Set");
             case "programs":
+            case "trackerPrograms":
                 return i18n.t("Program");
         }
     };
@@ -703,6 +704,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         selected={selectedOrgUnits}
                         rootIds={orgUnitTreeRootIds}
                         selectableIds={orgUnitTreeFilter}
+                        typeInput={"radio"}
                         fullWidth={false}
                         height={220}
                         controls={{

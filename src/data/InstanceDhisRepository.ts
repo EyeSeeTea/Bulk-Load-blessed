@@ -5,8 +5,8 @@ import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPacka
 import {
     AggregatedDataValue,
     EventsPackage,
-    Event,
     AggregatedPackage,
+    Event,
 } from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { ImportSummary } from "../domain/entities/ImportSummary";
@@ -22,6 +22,8 @@ import {
     D2ApiDefault,
     DataValueSetsGetResponse,
     DataValueSetsPostResponse,
+    Id,
+    Pager,
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
@@ -29,7 +31,14 @@ import { promiseMap } from "../webapp/utils/promises";
 import {
     getTrackedEntityInstances,
     updateTrackedEntityInstances,
+    getProgram,
 } from "./Dhis2TrackedEntityInstances";
+import { Program } from "../domain/entities/TrackedEntityInstance";
+import { postEvents } from "./Dhis2Events";
+
+interface PagedEventsApiResponse extends EventsPackage {
+    pager: Pager;
+}
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -219,7 +228,13 @@ export class InstanceDhisRepository implements InstanceRepository {
         }
     }
 
-    public async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
+    public async getProgram(programId: Id): Promise<Program | undefined> {
+        return getProgram(this.api, programId);
+    }
+
+    /* Private */
+
+    private async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
         const { api } = this;
         const dataPackage = await this.getProgramPackage(params);
         const orgUnits = params.orgUnits.map(id => ({ id }));
@@ -335,33 +350,12 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private async importEventsData(dataPackage: DataPackage): Promise<ImportSummary> {
         const events = this.buildEventsPayload(dataPackage);
-        const { status, message, response } = await this.api
-            .post<EventsPostResponse>("/events", {}, { events })
-            .getData();
-
-        const { imported: created, deleted, updated, ignored } = response;
-        const errors =
-            response.importSummaries?.flatMap(
-                ({ reference = "", description = "", conflicts = [] }) =>
-                    conflicts.map(({ object, value }) =>
-                        _([reference, description, object, value]).compact().join(" ")
-                    )
-            ) ?? [];
-
-        return {
-            status,
-            description: message ?? "",
-            stats: { created, deleted, updated, ignored },
-            errors,
-        };
+        return postEvents(this.api, events);
     }
 
     private async importTrackerData(dataPackage: TrackerProgramPackage): Promise<ImportSummary> {
         const { trackedEntityInstances, dataEntries } = dataPackage;
-        await updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
-
-        // TODO: @tokland pending
-        return {} as ImportSummary;
+        return updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
     }
 
     private async getDataSetPackage({
@@ -442,30 +436,46 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        const response = await promiseMap(orgUnits, async orgUnit => {
+        const getEvents = (
+            orgUnit: Id,
+            categoryOptionId: Id,
+            page: number
+        ): Promise<PagedEventsApiResponse> => {
             // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-            return promiseMap(categoryOptions, categoryOptionId =>
-                this.api
-                    .get<EventsPackage>("/events", {
-                        program: id,
-                        orgUnit,
-                        paging: false,
-                        attributeCc: categoryComboId,
-                        attributeCos: categoryOptionId,
-                        startDate: startDate?.format("YYYY-MM-DD"),
-                        endDate: endDate?.format("YYYY-MM-DD"),
-                        cache: Math.random(),
-                    })
-                    .getData()
-            );
-        });
+            return this.api
+                .get<PagedEventsApiResponse>("/events", {
+                    program: id,
+                    orgUnit,
+                    paging: true,
+                    totalPages: true,
+                    page,
+                    pageSize: 250,
+                    attributeCc: categoryComboId,
+                    attributeCos: categoryOptionId,
+                    startDate: startDate?.format("YYYY-MM-DD"),
+                    endDate: endDate?.format("YYYY-MM-DD"),
+                    cache: Math.random(),
+                })
+                .getData();
+        };
+
+        const events: Event[] = [];
+
+        for (const orgUnit of orgUnits) {
+            for (const categoryOptionId of categoryOptions) {
+                const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
+                events.push(...events);
+
+                await promiseMap(_.range(2, pager.pageCount + 1), async page => {
+                    const { events } = await getEvents(orgUnit, categoryOptionId, page);
+                    events.push(...events);
+                });
+            }
+        }
 
         return {
             type: "programs",
-            dataEntries: _(response)
-                .flatten()
-                .map(({ events }) => events)
-                .flatten()
+            dataEntries: _(events)
                 .map(
                     ({
                         event,
@@ -540,26 +550,6 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         return categoryOptions.map(({ id }) => id);
     }
-}
-
-interface EventsPostResponse {
-    status: "SUCCESS" | "ERROR";
-    message?: string;
-    response: {
-        imported: number;
-        updated: number;
-        deleted: number;
-        ignored: number;
-        total: number;
-        importSummaries?: {
-            description?: string;
-            reference: string;
-            conflicts?: {
-                object: string;
-                value: string;
-            }[];
-        }[];
-    };
 }
 
 interface MetadataItem {
