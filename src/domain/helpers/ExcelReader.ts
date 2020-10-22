@@ -201,14 +201,8 @@ export class ExcelReader {
             dataSource.dataElements
         );
 
-        const dataElementIds = await Promise.all(
-            dataElementCells.map(async cell =>
-                removeCharacters(
-                    await this.excelRepository.readCell(template.id, cell, {
-                        formula: true,
-                    })
-                )
-            )
+        const dataElementIds = await promiseMap(dataElementCells, cell =>
+            this.excelRepository.readCell(template.id, cell, { formula: true })
         );
 
         const events = await promiseMap(
@@ -242,7 +236,8 @@ export class ExcelReader {
                     };
                 });
 
-                const dataList = _.zip(dataItems, dataElementIds).map(([item, dataElementId]) => {
+                const dataList = _.zip(dataItems, dataElementIds).map(([item, deIdFormula]) => {
+                    const dataElementId = deIdFormula ? removeCharacters(deIdFormula) : null;
                     if (!item || !programStageId || !dataElementId || !programStageId) return null;
 
                     const { value, optionId } = item;
