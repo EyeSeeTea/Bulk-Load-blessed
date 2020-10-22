@@ -279,7 +279,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
             : workbook.sheet(sheet).range(`${ref}:${ref}`);
     }
 
-    private async listDefinedNames(id: string): Promise<string[]> {
+    public async listDefinedNames(id: string): Promise<string[]> {
         const workbook = await this.getWorkbook(id);
         try {
             //@ts-ignore Not typed, need extension
