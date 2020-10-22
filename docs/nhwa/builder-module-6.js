@@ -44,24 +44,26 @@ for (let type in rawMetadata) {
     if (Array.isArray(elements)) elements.map(element => metadata.set(element.id, element));
 }
 
+let defaultSheet = "Characteristics";
+let orgUnitCell = "V2";
+let periodCell = "I4";
+
 let getDataElements = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     dataRowStart,
     type = "input.entryfield",
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(`${type}`)).map(
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
         (input, i) => {
             let id = input.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
 
             return {
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -77,8 +79,6 @@ let getDataElements = ({
 
 let getDataElementsCustomRows = ({
     sheet,
-    orgUnitCell,
-    periodCell,
     tabSelector,
     letters,
     rows,
@@ -95,8 +95,8 @@ let getDataElementsCustomRows = ({
 
             fields.push({
                 type: "cell",
-                orgUnit: { sheet, type: "cell", ref: orgUnitCell },
-                period: { sheet, type: "cell", ref: periodCell },
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
                 dataElement: { type: "value", id: dataElement },
                 categoryOption: { type: "value", id: categoryOptionCombo },
                 ref: {
@@ -115,8 +115,6 @@ let getDataElementsCustomRows = ({
 let dataSheet1 = [
     ...getDataElementsCustomRows({
         sheet: "Characteristics",
-        orgUnitCell: "V2",
-        periodCell: "I4",
         tabSelector: "#tab0",
         letters: ["D", "E", "F", "G", "H", "I"],
         rows: customRowsTab1,
@@ -126,16 +124,12 @@ let dataSheet1 = [
 let dataSheet2 = [
     ...getDataElements({
         sheet: "Conditions",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["D", "E", "F", "G", "H"],
         dataRowStart: 16,
     }),
     ...getDataElements({
         sheet: "Conditions",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["P", "Q", "R"],
         dataRowStart: 9,
@@ -143,8 +137,6 @@ let dataSheet2 = [
     }),
     ...getDataElements({
         sheet: "Conditions",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["S"],
         dataRowStart: 10,
@@ -152,8 +144,6 @@ let dataSheet2 = [
     }),
     ...getDataElements({
         sheet: "Conditions",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab1",
         letters: ["E"],
         dataRowStart: 9,
@@ -164,8 +154,6 @@ let dataSheet2 = [
 let dataSheet3 = [
     ...getDataElementsCustomRows({
         sheet: "Regulation",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["P", "Q", "R"],
         rows: customRowsTab3YesPartialNo,
@@ -173,8 +161,6 @@ let dataSheet3 = [
     }),
     ...getDataElements({
         sheet: "Regulation",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["O"],
         dataRowStart: 20,
@@ -182,8 +168,6 @@ let dataSheet3 = [
     }),
     ...getDataElementsCustomRows({
         sheet: "Regulation",
-        orgUnitCell: "N2",
-        periodCell: "I4",
         tabSelector: "#tab2",
         letters: ["E"],
         rows: customRowsTab3Comments,

@@ -45,6 +45,8 @@ export interface GeneratedTemplate extends BaseTemplate {
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
+    fixedOrgUnit?: CellRef;
+    fixedPeriod?: CellRef;
 }
 
 export interface GenericSheetRef {
@@ -90,6 +92,7 @@ export interface Range {
 
 interface BaseDataSource {
     type: DataSourceType;
+    skipPopulate?: boolean;
     range?: Partial<Range>;
     ref?: CellRef;
     orgUnit: SheetRef | ValueRef;
@@ -102,6 +105,7 @@ interface BaseDataSource {
 
 export interface TrackerRelationship {
     type: "rowTeiRelationship";
+    skipPopulate?: boolean;
     range: Range;
     typeName: ColumnRef;
     from: ColumnRef;
@@ -110,6 +114,7 @@ export interface TrackerRelationship {
 
 export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     eventId: ColumnRef;
     date: ColumnRef;
@@ -132,6 +137,7 @@ export interface RowDataSource extends BaseDataSource {
 
 export interface TeiRowDataSource {
     type: "rowTei";
+    skipPopulate?: boolean;
     teiId: ColumnRef;
     orgUnit: ColumnRef;
     enrollmentDate: ColumnRef;

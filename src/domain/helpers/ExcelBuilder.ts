@@ -5,6 +5,7 @@ import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../webapp/utils/promises";
 import { DataPackage } from "../entities/DataPackage";
 import {
+    CellDataSource,
     CellRef,
     DataSource,
     DataSourceValue,
@@ -28,24 +29,26 @@ export class ExcelBuilder {
         const { dataSources = [] } = template;
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
         for (const dataSource of dataSourceValues) {
-            switch (dataSource.type) {
-                case "cell":
-                    console.log("TODO", { dataSource });
-                    break;
-                case "row":
-                    await this.fillRows(template, dataSource, payload);
-                    break;
-                case "rowTei":
-                    await this.fillTeiRows(template, dataSource, payload);
-                    break;
-                case "rowTrackedEvent":
-                    await this.fillTrackerEventRows(template, dataSource, payload);
-                    break;
-                case "rowTeiRelationship":
-                    await this.fillTrackerRelationshipRows(template, dataSource, payload);
-                    break;
-                default:
-                    throw new Error(`Type ${dataSource.type} not supported`);
+            if (!dataSource.skipPopulate) {
+                switch (dataSource.type) {
+                    case "cell":
+                        await this.fillCells(template, dataSource, payload);
+                        break;
+                    case "row":
+                        await this.fillRows(template, dataSource, payload);
+                        break;
+                    case "rowTei":
+                        await this.fillTeiRows(template, dataSource, payload);
+                        break;
+                    case "rowTrackedEvent":
+                        await this.fillTrackerEventRows(template, dataSource, payload);
+                        break;
+                    case "rowTeiRelationship":
+                        await this.fillTrackerRelationshipRows(template, dataSource, payload);
+                        break;
+                    default:
+                        throw new Error(`Type ${dataSource.type} not supported`);
+                }
             }
         }
     }
@@ -67,6 +70,34 @@ export class ExcelBuilder {
             }
         });
     }
+
+    private async fillCells(template: Template, dataSource: CellDataSource, payload: DataPackage) {
+        const orgUnit = await this.excelRepository.readCell(template.id, dataSource.orgUnit);
+        const dataElement = await this.excelRepository.readCell(
+            template.id,
+            dataSource.dataElement
+        );
+        const period = await this.excelRepository.readCell(template.id, dataSource.period);
+        const categoryOption = await this.excelRepository.readCell(
+            template.id,
+            dataSource.categoryOption
+        );
+
+        const { value } =
+            _(payload.dataEntries)
+                .filter(dv => dv.orgUnit === orgUnit && dv.period === String(period))
+                .flatMap(({ dataValues }) => dataValues)
+                .find(
+                    dv =>
+                        dv.dataElement === dataElement &&
+                        (!dv.category || dv.category === categoryOption)
+                ) ?? {};
+
+        if (value) {
+            await this.excelRepository.writeCell(template.id, dataSource.ref, value);
+        }
+    }
+
     private async fillTeiRows(
         template: Template,
         dataSource: TeiRowDataSource,
@@ -160,11 +191,11 @@ export class ExcelBuilder {
 
     private async fillCell(
         template: Template,
-        cells: CellRef[],
+        cellRef: CellRef,
         sheetRef: SheetRef,
         value: string | number | boolean
     ) {
-        const cell = await this.excelRepository.findRelativeCell(template.id, sheetRef, cells[0]);
+        const cell = await this.excelRepository.findRelativeCell(template.id, sheetRef, cellRef);
 
         if (cell && !_.isNil(value)) {
             await this.excelRepository.writeCell(template.id, cell, value);
@@ -189,9 +220,9 @@ export class ExcelBuilder {
                 rowEnd: rowStart,
             });
 
-            await this.fillCell(template, cells, dataSource.typeName, relationship.typeName);
-            await this.fillCell(template, cells, dataSource.from, relationship.fromId);
-            await this.fillCell(template, cells, dataSource.to, relationship.toId);
+            await this.fillCell(template, cells[0], dataSource.typeName, relationship.typeName);
+            await this.fillCell(template, cells[0], dataSource.from, relationship.fromId);
+            await this.fillCell(template, cells[0], dataSource.to, relationship.toId);
 
             rowStart += 1;
         }
@@ -351,7 +382,9 @@ export class ExcelBuilder {
 
                 const { value } =
                     dataValues.find(
-                        dv => dv.dataElement === dataElement && dv.category === category
+                        dv =>
+                            dv.dataElement === dataElement &&
+                            (!dv.category || dv.category === category)
                     ) ?? {};
 
                 if (value) await this.excelRepository.writeCell(template.id, cell, value);
