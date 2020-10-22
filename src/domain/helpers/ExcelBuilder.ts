@@ -382,7 +382,9 @@ export class ExcelBuilder {
 
                 const { value } =
                     dataValues.find(
-                        dv => dv.dataElement === dataElement && dv.category === category
+                        dv =>
+                            dv.dataElement === dataElement &&
+                            (!dv.category || dv.category === category)
                     ) ?? {};
 
                 if (value) await this.excelRepository.writeCell(template.id, cell, value);

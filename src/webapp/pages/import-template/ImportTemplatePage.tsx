@@ -239,10 +239,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 switch (error.type) {
                     case "DUPLICATE_VALUES":
                         {
-                            const { existingDataValues, dataValues } = error;
+                            const { existingDataValues, dataValues, instanceDataValues } = error;
 
                             const totalExisting = _.flatMap(
-                                existingDataValues.dataEntries,
+                                instanceDataValues.dataEntries,
                                 ({ dataValues }) => dataValues
                             ).length;
 

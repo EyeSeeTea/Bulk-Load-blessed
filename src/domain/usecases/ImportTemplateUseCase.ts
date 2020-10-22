@@ -7,7 +7,7 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
-import { ImportSummary } from "../entities/ImportSummary";
+import { ImportSummary, mergeSummaries } from "../entities/ImportSummary";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -23,7 +23,12 @@ export type ImportTemplateError =
               | "MALFORMED_TEMPLATE";
       }
     | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage; invalidDataValues: DataPackage }
-    | { type: "DUPLICATE_VALUES"; dataValues: DataPackage; existingDataValues: DataPackage };
+    | {
+          type: "DUPLICATE_VALUES";
+          dataValues: DataPackage;
+          existingDataValues: DataPackage;
+          instanceDataValues: DataPackage;
+      };
 
 export type DuplicateImportStrategy = "ERROR" | "IMPORT" | "IGNORE";
 export type OrganisationUnitImportStrategy = "ERROR" | "IGNORE";
@@ -79,7 +84,12 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
-        const { dataValues, invalidDataValues, existingDataValues } = await this.readDataValues(
+        const {
+            dataValues,
+            invalidDataValues,
+            existingDataValues,
+            instanceDataValues,
+        } = await this.readDataValues(
             excelDataValues,
             dataForm,
             useBuilderOrgUnits,
@@ -93,13 +103,22 @@ export class ImportTemplateUseCase implements UseCase {
         }
 
         if (duplicateStrategy === "ERROR" && existingDataValues.dataEntries.length > 0) {
-            return Either.error({ type: "DUPLICATE_VALUES", dataValues, existingDataValues });
+            return Either.error({
+                type: "DUPLICATE_VALUES",
+                dataValues,
+                existingDataValues,
+                instanceDataValues,
+            });
         }
 
-        // TODO: @SferaDev DELETE EXISTING
-        const result = await this.instanceRepository.importDataPackage(dataValues);
+        const deleteResult =
+            duplicateStrategy === "IGNORE" || dataForm.type !== "dataSets"
+                ? undefined
+                : await this.instanceRepository.deleteAggregatedData(instanceDataValues);
 
-        return Either.success(result);
+        const importResult = await this.instanceRepository.importDataPackage(dataValues);
+
+        return Either.success(mergeSummaries(deleteResult, importResult));
     }
 
     private async readDataValues(
@@ -167,6 +186,7 @@ export class ImportTemplateUseCase implements UseCase {
                 dataEntries: existingDataValues,
                 trackedEntityInstances: [],
             },
+            instanceDataValues,
         };
     }
 
