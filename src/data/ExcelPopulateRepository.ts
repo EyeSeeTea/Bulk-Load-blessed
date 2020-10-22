@@ -278,7 +278,7 @@ interface SheetWithValidations extends XLSX.Sheet {
     dataValidation(address: string): false | { type: string; formula1: string };
 }
 
-/* Get formula of associated cell (though data valudation). Basic implementation. */
+/* Get formula of associated cell (though data valudation). Basic implementation. No caching */
 function getFormulaWithValidation(
     workbook: XLSX.Workbook,
     sheet: SheetWithValidations,
@@ -312,7 +312,10 @@ function getFormulaWithValidation(
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
     const [sheetName, rangeAddress] = validation.formula1.split("!", 2);
-    const validationSheet = sheetName ? workbook.sheet(sheetName) : sheet;
+    const validationSheet = sheetName
+        ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
+        : sheet;
+    if (!validationSheet) return defaultValue;
     const validationRange = validationSheet.range(rangeAddress);
 
     const formulaByValue = _(validationRange.cells())
