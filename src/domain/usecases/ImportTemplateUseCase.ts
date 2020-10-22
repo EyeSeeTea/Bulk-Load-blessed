@@ -225,15 +225,13 @@ const compareDataPackages = (
         if (baseValue && compareValue && !areEqual) return false;
     }
 
-    if (dataForm.type === "programs") {
-        if (
+    if (dataForm.type === "programs" || dataForm.type === "trackerPrograms") {
+        const isWithToleranceRange =
             moment
                 .duration(moment(base.period).diff(moment(compare.period)))
                 .abs()
-                .as(duplicateToleranceUnit) > duplicateTolerance
-        ) {
-            return false;
-        }
+                .as(duplicateToleranceUnit) > duplicateTolerance;
+        if (isWithToleranceRange) return false;
 
         // Ignore data packages with event id set
         if (base.id && compare.id) return false;
