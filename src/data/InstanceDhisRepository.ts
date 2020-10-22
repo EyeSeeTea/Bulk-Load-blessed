@@ -23,6 +23,7 @@ import {
     DataValueSetsGetResponse,
     DataValueSetsPostResponse,
     Id,
+    Pager,
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
@@ -34,6 +35,10 @@ import {
 } from "./Dhis2TrackedEntityInstances";
 import { Program } from "../domain/entities/TrackedEntityInstance";
 import { postEvents } from "./Dhis2Events";
+
+interface PagedEventsApiResponse extends EventsPackage {
+    pager: Pager;
+}
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -431,30 +436,46 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        const response = await promiseMap(orgUnits, async orgUnit => {
+        const getEvents = (
+            orgUnit: Id,
+            categoryOptionId: Id,
+            page: number
+        ): Promise<PagedEventsApiResponse> => {
             // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-            return promiseMap(categoryOptions, categoryOptionId =>
-                this.api
-                    .get<EventsPackage>("/events", {
-                        program: id,
-                        orgUnit,
-                        paging: false,
-                        attributeCc: categoryComboId,
-                        attributeCos: categoryOptionId,
-                        startDate: startDate?.format("YYYY-MM-DD"),
-                        endDate: endDate?.format("YYYY-MM-DD"),
-                        cache: Math.random(),
-                    })
-                    .getData()
-            );
-        });
+            return this.api
+                .get<PagedEventsApiResponse>("/events", {
+                    program: id,
+                    orgUnit,
+                    paging: true,
+                    totalPages: true,
+                    page,
+                    pageSize: 250,
+                    attributeCc: categoryComboId,
+                    attributeCos: categoryOptionId,
+                    startDate: startDate?.format("YYYY-MM-DD"),
+                    endDate: endDate?.format("YYYY-MM-DD"),
+                    cache: Math.random(),
+                })
+                .getData();
+        };
+
+        const events: Event[] = [];
+
+        for (const orgUnit of orgUnits) {
+            for (const categoryOptionId of categoryOptions) {
+                const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
+                events.push(...events);
+
+                await promiseMap(_.range(2, pager.pageCount + 1), async page => {
+                    const { events } = await getEvents(orgUnit, categoryOptionId, page);
+                    events.push(...events);
+                });
+            }
+        }
 
         return {
             type: "programs",
-            dataEntries: _(response)
-                .flatten()
-                .map(({ events }) => events)
-                .flatten()
+            dataEntries: _(events)
                 .map(
                     ({
                         event,

@@ -208,11 +208,14 @@ SheetBuilder.prototype.fillInstancesSheet = function () {
     const programAttributes = program.programTrackedEntityAttributes || [];
     this.instancesSheetValuesRow = itemRow + 1;
 
-    programAttributes.forEach((attribute, idx) => {
+    let idx = 0;
+    programAttributes.forEach(attribute => {
         const tea = attribute.trackedEntityAttribute;
+        if (tea.confidential) return;
         const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
         const validation = this.validations.get(validationId);
         this.createColumn(sheet, itemRow, 5 + idx, `_${tea.id}`, 1, validation);
+        idx++;
     });
 };
 
