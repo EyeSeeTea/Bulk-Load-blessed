@@ -49,7 +49,7 @@ export class DownloadTemplateUseCase implements UseCase {
         }: DownloadTemplateProps
     ): Promise<void> {
         try {
-            const templateId = this.getTemplateId(type, id);
+            const { id: templateId } = getTemplateId(type, id);
             const template = this.templateRepository.getTemplate(templateId);
             const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
@@ -125,29 +125,6 @@ export class DownloadTemplateUseCase implements UseCase {
         } catch (error) {
             console.log("Failed building/downloading template");
             throw error;
-        }
-    }
-
-    private getTemplateId(type: DataFormType, id: string) {
-        switch (id) {
-            case "Tu81BTLUuCT":
-                return "NHWA_MODULE_1_v1";
-            case "m5MiTPdlK17":
-                return "NHWA_MODULE_2_v1";
-            case "pZ3XRBi9gYE":
-                return "NHWA_MODULE_3_v1";
-            case "HtZb6Cg7TXo":
-                return "NHWA_MODULE_4_v1";
-            case "cxfAcMbSZe1":
-                return "NHWA_MODULE_5_v1";
-            case "WDyQKfAvY3V":
-                return "NHWA_MODULE_6_v1";
-            case "ZRsZdd2AvAR":
-                return "NHWA_MODULE_7_v1";
-            case "p5z7F51v1ag":
-                return "NHWA_MODULE_8_v1";
-            default:
-                return getTemplateId({ type });
         }
     }
 }

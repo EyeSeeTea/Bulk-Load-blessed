@@ -474,7 +474,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion = getTemplateId(element);
+    const { id: defaultVersion} = getTemplateId(element.type, element.id);
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -873,15 +873,34 @@ function isTrackerProgram(element) {
     return element.type === "trackerPrograms";
 }
 
-export function getTemplateId(element) {
-    switch (element.type) {
-        case "dataSets":
-            return dataSetId;
-        case "programs":
-            return programId;
-        case "trackerPrograms":
-            return trackerProgramId;
+export function getTemplateId(type, id) {
+    switch (id) {
+        case "Tu81BTLUuCT":
+            return { type: "custom", id: "NHWA_MODULE_1_v1" };
+        case "m5MiTPdlK17":
+            return { type: "custom", id: "NHWA_MODULE_2_v1" };
+        case "pZ3XRBi9gYE":
+            return { type: "custom", id: "NHWA_MODULE_3_v1" };
+        case "HtZb6Cg7TXo":
+            return { type: "custom", id: "NHWA_MODULE_4_v1" };
+        case "cxfAcMbSZe1":
+            return { type: "custom", id: "NHWA_MODULE_5_v1" };
+        case "WDyQKfAvY3V":
+            return { type: "custom", id: "NHWA_MODULE_6_v1" };
+        case "ZRsZdd2AvAR":
+            return { type: "custom", id: "NHWA_MODULE_7_v1" };
+        case "p5z7F51v1ag":
+            return { type: "custom", id: "NHWA_MODULE_8_v1" };
         default:
-            throw new Error("Unsupported type");
+            switch (type) {
+                case "dataSets":
+                    return { type: "generated", id: dataSetId };
+                case "programs":
+                    return { type: "generated", id: programId };
+                case "trackerPrograms":
+                    return { type: "generated", id: trackerProgramId };
+                default:
+                    throw new Error("Unsupported type");
+            }
     }
 }

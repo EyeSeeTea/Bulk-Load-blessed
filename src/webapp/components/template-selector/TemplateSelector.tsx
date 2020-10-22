@@ -190,8 +190,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setState(state => ({ ...state, language: value }));
     };
 
-    const showModelsSelector = models.length > 1;
-
     return (
         <React.Fragment>
             <h3 className={classes.title}>{i18n.t("Template")}</h3>
@@ -206,7 +204,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     />
                 </div>
 
-                {showModelsSelector && (
+                {models.length > 1 && (
                     <div className={classes.select}>
                         <Select
                             placeholder={i18n.t("Data Model")}
