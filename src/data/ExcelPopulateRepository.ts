@@ -311,7 +311,7 @@ function getFormulaWithValidation(
     const validation = sheet.dataValidation(range.address());
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
-    const [sheetName, rangeAddress] = validation.formula1.split("!", 2);
+    const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
     const validationSheet = sheetName
         ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
         : sheet;
