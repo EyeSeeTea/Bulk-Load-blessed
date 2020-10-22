@@ -153,13 +153,8 @@ export class ExcelReader {
         ref: GenericSheetRef,
         rowStart: number
     ): Promise<number[]> {
-        const sheets = await this.excelRepository.getSheets(template.id);
-        const rowsCountBySheetName = _(sheets)
-            .map(sheet => [sheet.name, sheet.rowsCount])
-            .fromPairs()
-            .value();
-        const rowCount = rowsCountBySheetName[ref.sheet];
-        return rowCount ? _.range(rowStart, rowCount + 1) : [];
+        const rowsCount = await this.excelRepository.getSheetRowsCount(template.id, ref.sheet);
+        return rowsCount ? _.range(rowStart, rowsCount + 1) : [];
     }
 
     private async getFormulaValue(template: Template, columnRef: ColumnRef, rowIndex: number) {

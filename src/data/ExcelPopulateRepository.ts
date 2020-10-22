@@ -138,12 +138,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
     public async getSheets(id: string): Promise<Sheet[]> {
         const workbook = await this.getWorkbook(id);
 
-        return workbook.sheets().map((sheet, index) => ({
-            index,
-            name: sheet.name(),
-            active: sheet.active(),
-            rowsCount: sheet._rows.length - 1,
-        }));
+        return workbook.sheets().map((sheet, index) => {
+            return {
+                index,
+                name: sheet.name(),
+                active: sheet.active(),
+            };
+        });
     }
 
     private async readCellValue(
@@ -233,6 +234,26 @@ export class ExcelPopulateRepository extends ExcelRepository {
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
+    }
+
+    public async getSheetRowsCount(
+        id: string,
+        sheetId: string | number
+    ): Promise<number | undefined> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(sheetId);
+        if (!sheet) return;
+
+        const lastRowWithValues = _(sheet._rows)
+            .compact()
+            .dropRightWhile(row =>
+                _((row as RowWithCells)._cells)
+                    .compact()
+                    .every(c => c.value() === undefined)
+            )
+            .last();
+
+        return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
     }
 
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {
@@ -328,3 +349,5 @@ function getFormulaWithValidation(
 
     return formulaByValue[String(value)] || defaultValue;
 }
+
+type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
