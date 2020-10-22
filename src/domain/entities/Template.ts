@@ -103,17 +103,6 @@ interface BaseDataSource {
     eventId?: SheetRef | ValueRef;
 }
 
-export interface TrackerEventRowDataSource {
-    type: "rowTrackedEvent";
-    skipPopulate?: boolean;
-    teiId: ColumnRef;
-    eventId: ColumnRef;
-    date: ColumnRef;
-    attributeOptionCombo: ColumnRef;
-    range: Range;
-    dataElement: RowRef;
-}
-
 export interface TrackerRelationship {
     type: "rowTeiRelationship";
     skipPopulate?: boolean;
@@ -121,6 +110,18 @@ export interface TrackerRelationship {
     typeName: ColumnRef;
     from: ColumnRef;
     to: ColumnRef;
+}
+
+export interface TrackerEventRowDataSource {
+    type: "rowTrackedEvent";
+    skipPopulate?: boolean;
+    teiId: ColumnRef;
+    eventId: ColumnRef;
+    date: ColumnRef;
+    categoryOptionCombo: ColumnRef;
+    dataValues: Range;
+    programStage: CellRef;
+    dataElements: Range;
 }
 
 export interface RowDataSource extends BaseDataSource {
@@ -142,6 +143,7 @@ export interface TeiRowDataSource {
     enrollmentDate: ColumnRef;
     incidentDate: ColumnRef;
     attributes: Range;
+    attributeId: RowRef;
 }
 
 export interface ColumnDataSource extends BaseDataSource {

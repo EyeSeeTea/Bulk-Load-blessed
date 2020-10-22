@@ -1,7 +1,7 @@
 import { Id } from "./ReferenceObject";
 
 export interface Relationship {
-    id: Id;
+    id?: Id;
     typeId: Id;
     typeName: string;
     fromId: Id;

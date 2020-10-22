@@ -123,6 +123,22 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return this.readCellValue(workbook, cellRef, options?.formula);
     }
 
+    public async getConstants(id: string): Promise<Record<string, string>> {
+        const workbook = await this.getWorkbook(id);
+        const keys = (workbook as any).definedName() as string[];
+
+        return _(keys)
+            .map(key => {
+                const element = workbook.definedName(key);
+                if (!isCell(element)) return null;
+                const value = element.value();
+                return value ? ([key, value.toString()] as [string, string]) : null;
+            })
+            .compact()
+            .fromPairs()
+            .value();
+    }
+
     public async getSheets(id: string): Promise<Sheet[]> {
         const workbook = await this.getWorkbook(id);
 
@@ -130,6 +146,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
             index,
             name: sheet.name(),
             active: sheet.active(),
+            rowsCount: sheet._rows.length - 1,
         }));
     }
 
@@ -139,11 +156,14 @@ export class ExcelPopulateRepository extends ExcelRepository {
         formula = false
     ): Promise<ExcelValue | undefined> {
         const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
-        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+        const sheet = workbook.sheet(cellRef.sheet);
+        const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const value = formula ? destination.formula() : destination.value();
+        const value = formula
+            ? getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination)
+            : destination.value();
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -247,4 +267,59 @@ export class ExcelPopulateRepository extends ExcelRepository {
             return [];
         }
     }
+}
+
+function isCell(element: any): element is ExcelCell {
+    return element?.constructor?.name === "Cell";
+}
+
+interface SheetWithValidations extends XLSX.Sheet {
+    _dataValidations: Record<string, unknown>;
+    dataValidation(address: string): false | { type: string; formula1: string };
+}
+
+/* Get formula of associated cell (though data valudation). Basic implementation. */
+function getFormulaWithValidation(
+    workbook: XLSX.Workbook,
+    sheet: SheetWithValidations,
+    cell: XLSX.Cell
+) {
+    const defaultValue = cell.formula();
+    const value = cell.value();
+    if (defaultValue || !value) return defaultValue;
+
+    // Support only for data validations over ranges
+    const range = Object.keys(sheet._dataValidations)
+        .filter(s => s.includes(":"))
+        .map(address => sheet.range(address))
+        .find(range => {
+            const rowStart = range.startCell().rowNumber();
+            const columnStart = range.startCell().columnNumber();
+            const rowEnd = range.endCell().rowNumber();
+            const columnEnd = range.endCell().columnNumber();
+            const isCellInRange =
+                cell.columnNumber() >= columnStart &&
+                cell.columnNumber() <= columnEnd &&
+                cell.rowNumber() >= rowStart &&
+                cell.rowNumber() <= rowEnd;
+
+            return isCellInRange;
+        });
+
+    if (!range) return defaultValue;
+
+    const validation = sheet.dataValidation(range.address());
+    if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
+
+    const [sheetName, rangeAddress] = validation.formula1.split("!", 2);
+    const validationSheet = sheetName ? workbook.sheet(sheetName) : sheet;
+    const validationRange = validationSheet.range(rangeAddress);
+
+    const formulaByValue = _(validationRange.cells())
+        .map(cells => cells[0])
+        .map(cell => [cell.value(), cell.formula()])
+        .fromPairs()
+        .value();
+
+    return formulaByValue[String(value)] || defaultValue;
 }

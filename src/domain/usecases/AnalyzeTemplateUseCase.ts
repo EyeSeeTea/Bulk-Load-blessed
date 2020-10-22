@@ -36,7 +36,7 @@ export class AnalyzeTemplateUseCase implements UseCase {
             dataForm.id
         );
 
-        if (template.type === "custom") {
+        if (template.type === "custom" || dataForm.type === "trackerPrograms") {
             const reader = new ExcelReader(this.excelRepository);
             const excelDataValues = await reader.readTemplate(template);
 

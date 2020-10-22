@@ -12,6 +12,7 @@ import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
+import { removeCharacters } from "../../utils/string";
 
 export type ImportTemplateError =
     | {
@@ -58,10 +59,11 @@ export class ImportTemplateUseCase implements UseCase {
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
         const template = this.templateRepository.getTemplate(templateId);
 
-        const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId, {
-            formula: true,
-        });
-
+        const dataFormId = removeCharacters(
+            await this.excelRepository.readCell(templateId, template.dataFormId, {
+                formula: true,
+            })
+        );
         if (!dataFormId || typeof dataFormId !== "string") {
             return Either.error({ type: "INVALID_DATA_FORM_ID" });
         }
@@ -144,11 +146,16 @@ export class ImportTemplateUseCase implements UseCase {
                       );
                   });
 
+        const trackedEntityInstances =
+            excelDataValues.type === "trackerPrograms"
+                ? excelDataValues.trackedEntityInstances
+                : [];
+
         return {
             dataValues: {
                 type: dataForm.type,
                 dataEntries: dataValues,
-                trackedEntityInstances: [],
+                trackedEntityInstances,
             },
             invalidDataValues: {
                 type: dataForm.type,

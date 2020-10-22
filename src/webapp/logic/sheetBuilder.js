@@ -82,6 +82,8 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         sheet.row(sectionRow).setHeight(30);
         sheet.row(itemRow).setHeight(50);
 
+        sheet.cell(sectionRow, 1).formula(`=_${programStageId}`).style(baseStyle);
+
         for (let row = 1; row < sectionRow; row++) {
             sheet.row(row).hide();
         }
@@ -210,7 +212,7 @@ SheetBuilder.prototype.fillInstancesSheet = function () {
         const tea = attribute.trackedEntityAttribute;
         const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
         const validation = this.validations.get(validationId);
-        this.createColumn(sheet, itemRow, 5 + idx, tea.name, 1, validation);
+        this.createColumn(sheet, itemRow, 5 + idx, `_${tea.id}`, 1, validation);
     });
 };
 
