@@ -1,6 +1,7 @@
 import _ from "lodash";
 import moment from "moment";
 import { UseCase } from "../../CompositionRoot";
+import { cleanOrgUnitPath } from "../../utils/dhis";
 import Settings from "../../webapp/logic/settings";
 import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSettings";
 import { DataForm } from "../entities/DataForm";
@@ -118,7 +119,7 @@ export class ImportTemplateUseCase implements UseCase {
         // Override org unit if needed
         const dataValues = excelDataValues.dataEntries.map(({ orgUnit, ...rest }) => ({
             ...rest,
-            orgUnit: useBuilderOrgUnits ? selectedOrgUnits[0] : orgUnit,
+            orgUnit: useBuilderOrgUnits ? cleanOrgUnitPath(selectedOrgUnits[0]) : orgUnit,
         }));
 
         // Remove data values assigned to invalid org unit
