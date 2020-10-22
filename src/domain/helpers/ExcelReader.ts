@@ -19,6 +19,10 @@ import { ExcelRepository, ExcelValue, ReadCellOptions } from "../repositories/Ex
 import { TrackedEntityInstance, AttributeValue } from "../entities/TrackedEntityInstance";
 import { removeCharacters } from "../../utils/string";
 import { Relationship } from "../entities/Relationship";
+import moment from "moment";
+import XlsxPopulate from "xlsx-populate";
+
+const dateFormat = "YYYY-MM-DD";
 
 export class ExcelReader {
     constructor(private excelRepository: ExcelRepository) {}
@@ -211,7 +215,7 @@ export class ExcelReader {
                     rowIdx
                 );
                 const eventId = await getCell(template, dataSource.eventId, rowIdx);
-                const date = await getCell(template, dataSource.date, rowIdx);
+                const date = parseDate(await getCell(template, dataSource.date, rowIdx));
                 if (!teiId || !date) return [];
 
                 const tei = teiById[String(teiId)];
@@ -317,14 +321,21 @@ export class ExcelReader {
             async rowIdx => {
                 const teiId = await getCell(template, dataSource.teiId, rowIdx);
                 const orgUnitId = await this.getFormulaValue(template, dataSource.orgUnit, rowIdx);
-                const enrollmentDate = await getCell(template, dataSource.enrollmentDate, rowIdx);
-                const incidentDate = await getCell(template, dataSource.incidentDate, rowIdx);
+                const enrollmentDate = parseDate(
+                    await getCell(template, dataSource.enrollmentDate, rowIdx)
+                );
+                const incidentDate = parseDate(
+                    await getCell(template, dataSource.incidentDate, rowIdx)
+                );
+                console.log({ enrollmentDate, incidentDate });
 
                 const attributeCells = await this.excelRepository.getCellsInRange(template.id, {
                     ...dataSource.attributes,
                     rowStart: rowIdx,
                     rowEnd: rowIdx,
                 });
+
+                console.log({ teiId, orgUnitId, enrollmentDate });
 
                 if (!teiId || !orgUnitId || !enrollmentDate) return;
 
@@ -434,5 +445,14 @@ export class ExcelReader {
                 return [dataSource];
             }
         });
+    }
+}
+
+function parseDate(value: ExcelValue): ExcelValue {
+    if (typeof value === "number") {
+        const date = XlsxPopulate.numberToDate(value);
+        return moment(date).format(dateFormat);
+    } else {
+        return value;
     }
 }
