@@ -703,6 +703,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         selected={selectedOrgUnits}
                         rootIds={orgUnitTreeRootIds}
                         selectableIds={orgUnitTreeFilter}
+                        typeInput={"radio"}
                         fullWidth={false}
                         height={220}
                         controls={{

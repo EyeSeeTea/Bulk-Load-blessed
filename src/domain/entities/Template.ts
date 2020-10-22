@@ -2,6 +2,7 @@ import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
+export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
 export type RefType = "row" | "column" | "cell" | "range";
 export type SheetRef = RowRef | ColumnRef | CellRef | RangeRef;
@@ -27,7 +28,7 @@ export type StyleSource = {
 export type Template = GeneratedTemplate | CustomTemplate;
 
 interface BaseTemplate {
-    type: "generated" | "custom";
+    type: TemplateType;
     id: Id;
     name: string;
     dataSources?: DataSource[];

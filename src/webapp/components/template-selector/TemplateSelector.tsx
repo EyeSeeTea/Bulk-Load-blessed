@@ -5,6 +5,7 @@ import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm } from "../../../domain/entities/DataForm";
+import { TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
 import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
@@ -12,6 +13,7 @@ import { PartialBy } from "../../../types/utils";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/api-context";
 import Settings from "../../logic/settings";
+import { getTemplateId } from "../../logic/sheetBuilder";
 import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<string, DataForm[]>;
@@ -23,10 +25,14 @@ interface PickerFormat {
     format: string;
 }
 
+export interface TemplateSelectorState extends DownloadTemplateProps {
+    templateType?: TemplateType;
+}
+
 export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
-    onChange(state: DownloadTemplateProps | null): void;
+    onChange(state: TemplateSelectorState | null): void;
 }
 
 export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
@@ -43,7 +49,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
     const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<string>("");
-    const [state, setState] = useState<PartialBy<DownloadTemplateProps, "type" | "id">>({
+    const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment(),
         populate: false,
@@ -148,7 +154,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 setDatePickerFormat(undefined);
             }
 
-            setState(state => ({ ...state, id: value, type, populate: false }));
+            const templateType = getTemplateId(type, value).type as TemplateType;
+            setState(state => ({ ...state, id: value, type, templateType, populate: false }));
             clearPopulateDates();
             setSelectedOrgUnits([]);
         }
@@ -221,7 +228,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     <div className={classes.select}>
                         <DatePicker
                             className={classes.fullWidth}
-                            label={i18n.t("Start period")}
+                            label={
+                                state.templateType === "custom"
+                                    ? i18n.t("Period")
+                                    : i18n.t("Start period")
+                            }
                             value={state.startDate ?? null}
                             onChange={(date: Date) => onStartDateChange("startDate", date, true)}
                             maxDate={state.endDate}
@@ -230,18 +241,20 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
-                    <div className={classes.select}>
-                        <DatePicker
-                            className={classes.fullWidth}
-                            label={i18n.t("End period")}
-                            value={state.endDate ?? null}
-                            onChange={(date: Date) => onEndDateChange("endDate", date, true)}
-                            minDate={state.startDate}
-                            views={datePickerFormat?.views}
-                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                            InputLabelProps={{ style: { color: "#494949" } }}
-                        />
-                    </div>
+                    {state.templateType !== "custom" && (
+                        <div className={classes.select}>
+                            <DatePicker
+                                className={classes.fullWidth}
+                                label={i18n.t("End period")}
+                                value={state.endDate ?? null}
+                                onChange={(date: Date) => onEndDateChange("endDate", date, true)}
+                                minDate={state.startDate}
+                                views={datePickerFormat?.views}
+                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                InputLabelProps={{ style: { color: "#494949" } }}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -280,6 +293,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                         selectAll: true,
                                     }}
                                     withElevation={false}
+                                    singleSelection={state.templateType === "custom"}
+                                    typeInput={
+                                        state.templateType === "custom" ? "radio" : undefined
+                                    }
                                 />
                             </div>
                         ) : (
@@ -329,7 +346,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {state.populate && (
+            {state.populate && state.templateType !== "custom" && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <DatePicker
