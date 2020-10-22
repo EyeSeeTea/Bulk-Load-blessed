@@ -258,7 +258,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {settings.orgUnitSelection !== "import" && (
+            {settings.orgUnitSelection !== "import" && state.templateType !== "custom" && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
@@ -293,10 +293,6 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                         selectAll: true,
                                     }}
                                     withElevation={false}
-                                    singleSelection={state.templateType === "custom"}
-                                    typeInput={
-                                        state.templateType === "custom" ? "radio" : undefined
-                                    }
                                 />
                             </div>
                         ) : (
@@ -309,7 +305,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
             <h3>{i18n.t("Advanced template properties")}</h3>
 
-            {availableLanguages.length > 0 && (
+            {availableLanguages.length > 0 && state.templateType !== "custom" && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <Select
@@ -321,7 +317,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 </div>
             )}
-            {themeOptions.length > 0 && (
+            {themeOptions.length > 0 && state.templateType !== "custom" && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <Select
@@ -336,7 +332,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {userHasReadAccess && filterOrgUnits && (
+            {userHasReadAccess && (filterOrgUnits || state.templateType === "custom") && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}
