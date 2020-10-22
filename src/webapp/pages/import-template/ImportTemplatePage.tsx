@@ -592,11 +592,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(false);
     };
 
-    const getNameForModel = (key: DataFormType) => {
+    const getNameForModel = (key: DataFormType): string => {
         switch (key) {
             case "dataSets":
                 return i18n.t("Data Set");
             case "programs":
+            case "trackerPrograms":
                 return i18n.t("Program");
         }
     };
