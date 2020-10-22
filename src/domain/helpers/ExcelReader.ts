@@ -99,6 +99,7 @@ export class ExcelReader {
 
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
+            console.log({ trackedEntityInstances, dataEntries });
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
         } else {
             return { type: dataFormType, dataEntries };

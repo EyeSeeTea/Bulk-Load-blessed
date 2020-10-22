@@ -310,28 +310,31 @@ function getFormulaWithValidation(
     if (defaultValue || !value) return defaultValue;
 
     // Support only for data validations over ranges
-    const range = _(sheet._dataValidations)
+    const addressMatch = _(sheet._dataValidations)
         .keys()
         .flatMap(validations => validations.split(" "))
-        .filter(s => s.includes(":"))
-        .map(address => sheet.range(address))
-        .find(range => {
-            const rowStart = range.startCell().rowNumber();
-            const columnStart = range.startCell().columnNumber();
-            const rowEnd = range.endCell().rowNumber();
-            const columnEnd = range.endCell().columnNumber();
-            const isCellInRange =
-                cell.columnNumber() >= columnStart &&
-                cell.columnNumber() <= columnEnd &&
-                cell.rowNumber() >= rowStart &&
-                cell.rowNumber() <= rowEnd;
+        .find(address => {
+            if (address.includes(":")) {
+                const range = sheet.range(address);
+                const rowStart = range.startCell().rowNumber();
+                const columnStart = range.startCell().columnNumber();
+                const rowEnd = range.endCell().rowNumber();
+                const columnEnd = range.endCell().columnNumber();
+                const isCellInRange =
+                    cell.columnNumber() >= columnStart &&
+                    cell.columnNumber() <= columnEnd &&
+                    cell.rowNumber() >= rowStart &&
+                    cell.rowNumber() <= rowEnd;
 
-            return isCellInRange;
+                return isCellInRange;
+            } else {
+                return cell.address() === address;
+            }
         });
 
-    if (!range) return defaultValue;
+    if (!addressMatch) return defaultValue;
 
-    const validation = sheet.dataValidation(range.address());
+    const validation = sheet.dataValidation(addressMatch);
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
     const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
