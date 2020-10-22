@@ -121,13 +121,12 @@ export async function updateTrackedEntityInstances(
         orgUnits: orgUnitIDs.map(id => ({ id })),
     });
 
-    const teisWithChanges = await getTeisWithChanges([] /* DEBUG existingTeis */, teis);
     const program = await getProgram(api, programId);
     if (!program) throw new Error(`Program not found: ${programId}`);
 
     const apiEvents = getApiEvents(teis, dataEntries, metadata);
 
-    const [preTeis, postTeis] = splitTeis(teisWithChanges, existingTeis);
+    const [preTeis, postTeis] = splitTeis(teis, existingTeis);
 
     const options = { api, program, metadata, teis: preTeis, existingTeis };
     const teiResponsesPre = await uploadTeis(options);
@@ -198,14 +197,6 @@ async function getMetadata(api: D2Api): Promise<Metadata> {
             options: { fields: { id: true, code: true } },
         })
         .getData();
-}
-
-async function getTeisWithChanges(
-    existingTeis: TrackedEntityInstance[],
-    teis: TrackedEntityInstance[]
-): Promise<TrackedEntityInstance[]> {
-    const existingTeisById = _.keyBy(existingTeis, tei => tei.id);
-    return teis.filter(tei => !_.isEqual(tei, existingTeisById[tei.id]));
 }
 
 function getApiEvents(
