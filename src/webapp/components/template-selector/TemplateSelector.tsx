@@ -51,7 +51,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
-        endDate: moment(),
+        endDate: moment().add("-1", "year").endOf("year"),
         populate: false,
         language: "en",
     });
@@ -179,6 +179,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         if (clear) clearPopulateDates();
     };
 
+    const onCustomFormDateChange = (date: Date) => {
+        const { unit = "date" } = datePickerFormat ?? {};
+        const startDate = date ? moment(date).startOf(unit) : undefined;
+        const endDate = date ? moment(date).endOf(unit) : undefined;
+        setState(state => ({ ...state, startDate, endDate }));
+    };
+
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(orgUnitPaths);
     };
@@ -223,16 +230,25 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 )}
             </div>
 
-            {state.type === "dataSets" && (
+            {state.type === "dataSets" && state.templateType === "custom" && (
+                <DatePicker
+                    className={classes.fullWidth}
+                    label={i18n.t("Period")}
+                    value={state.startDate ?? null}
+                    onChange={(date: Date) => onCustomFormDateChange(date)}
+                    maxDate={state.endDate}
+                    views={datePickerFormat?.views}
+                    format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                    InputLabelProps={{ style: { color: "#494949" } }}
+                />
+            )}
+
+            {state.type === "dataSets" && state.templateType !== "custom" && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <DatePicker
                             className={classes.fullWidth}
-                            label={
-                                state.templateType === "custom"
-                                    ? i18n.t("Period")
-                                    : i18n.t("Start period")
-                            }
+                            label={i18n.t("Start period")}
                             value={state.startDate ?? null}
                             onChange={(date: Date) => onStartDateChange("startDate", date, true)}
                             maxDate={state.endDate}
@@ -241,20 +257,18 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
-                    {state.templateType !== "custom" && (
-                        <div className={classes.select}>
-                            <DatePicker
-                                className={classes.fullWidth}
-                                label={i18n.t("End period")}
-                                value={state.endDate ?? null}
-                                onChange={(date: Date) => onEndDateChange("endDate", date, true)}
-                                minDate={state.startDate}
-                                views={datePickerFormat?.views}
-                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                                InputLabelProps={{ style: { color: "#494949" } }}
-                            />
-                        </div>
-                    )}
+                    <div className={classes.select}>
+                        <DatePicker
+                            className={classes.fullWidth}
+                            label={i18n.t("End period")}
+                            value={state.endDate ?? null}
+                            onChange={(date: Date) => onEndDateChange("endDate", date, true)}
+                            minDate={state.startDate}
+                            views={datePickerFormat?.views}
+                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                            InputLabelProps={{ style: { color: "#494949" } }}
+                        />
+                    </div>
                 </div>
             )}
 
