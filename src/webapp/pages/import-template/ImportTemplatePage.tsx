@@ -673,9 +673,20 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     {importState.dataForm.id})
                     {importState.summary.map((group, idx) => (
                         <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                            {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
-                            {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
-                            {i18n.t("data values")} {group.id && `(${group.id})`}
+                            {importState.dataForm.type === "trackerPrograms" ? (
+                                <React.Fragment>
+                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                                    {group.id ? i18n.t("Create/update") : i18n.t("Create")} {""}
+                                    {i18n.t("event")} {""}
+                                    {group.id}
+                                </React.Fragment>
+                            ) : (
+                                <React.Fragment>
+                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                                    {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                                    {i18n.t("data values")} {group.id && `(${group.id})`}
+                                </React.Fragment>
+                            )}
                         </li>
                     ))}
                 </div>

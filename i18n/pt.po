@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-10-22T10:33:47.228Z\n"
+"POT-Creation-Date: 2020-10-23T10:58:28.869Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -380,11 +380,17 @@ msgstr "Importação de dados em massa"
 msgid "Drag and drop file to import"
 msgstr "Arraste e solte o arquivo para importar"
 
-msgid "Update"
-msgstr "Atualizar"
+msgid "Create/update"
+msgstr "Crio/atualizar"
 
 msgid "Create"
 msgstr "Crio"
+
+msgid "event"
+msgstr "evento"
+
+msgid "Update"
+msgstr "Atualizar"
 
 msgid "data values"
 msgstr "valores de dados"
