@@ -11,7 +11,7 @@ for (const type in rawMetadata) {
 }
 
 let defaultSheet = "M08 - Skill mix composition";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "I4";
 
 let getDataElements = ({
