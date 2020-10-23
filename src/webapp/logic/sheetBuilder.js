@@ -775,7 +775,9 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
 };
 
 SheetBuilder.prototype.getTeiIdValidation = function () {
-    return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxRow}`;
+    // Excel shows all empty rows, limit the maximum number of TEIs
+    const maxTeiRows = 1000;
+    return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
 };
 
 function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
