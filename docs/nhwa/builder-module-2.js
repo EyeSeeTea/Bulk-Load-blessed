@@ -11,7 +11,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Input";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "L4";
 
 let getDataElements = ({
@@ -88,7 +88,7 @@ let dataSheet4 = [
     ...getDataElements({
         sheet: "Sourcetype",
         tabSelector: "#tab0",
-        letters: ["P", "Q", "R", "S"],
+        letters: ["D", "E", "F", "G"],
         dataRowStart: 8,
         type: "input.entrytrueonly",
     }),

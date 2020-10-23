@@ -11,7 +11,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Finance";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "I4";
 
 let getDataElements = ({

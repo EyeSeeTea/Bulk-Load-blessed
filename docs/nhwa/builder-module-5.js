@@ -11,7 +11,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Entry into Labour Market";
-let orgUnitCell = "X2";
+let orgUnitCell = "C4";
 let periodCell = "K4";
 
 let getDataElements = ({
