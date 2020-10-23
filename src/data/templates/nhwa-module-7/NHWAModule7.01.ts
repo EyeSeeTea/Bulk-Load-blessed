@@ -441,7 +441,7 @@ export class NHWAModule701 implements CustomTemplate {
             period: { sheet: "Expenditure", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "M7R7LVsXlAN" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Remuneration", ref: "N20" },
+            ref: { type: "cell", sheet: "Remuneration", ref: "D20" },
         },
         {
             type: "cell",

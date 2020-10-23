@@ -117,7 +117,7 @@ let dataSheet2 = [
     ...getDataElements({
         sheet: "Remuneration",
         tabSelector: "#tab1",
-        letters: ["N"],
+        letters: ["D"],
         dataRowStart: 20,
         type: "input.entryselect[value='true']",
     }),
