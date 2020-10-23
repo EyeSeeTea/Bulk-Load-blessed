@@ -10,7 +10,7 @@ export class NHWAModule801 implements CustomTemplate {
     public readonly fixedOrgUnit = {
         type: "cell" as const,
         sheet: "M08 - Skill mix composition",
-        ref: "V2",
+        ref: "C4",
     };
     public readonly fixedPeriod = {
         type: "cell" as const,

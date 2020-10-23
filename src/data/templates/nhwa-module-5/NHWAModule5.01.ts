@@ -10,7 +10,7 @@ export class NHWAModule501 implements CustomTemplate {
     public readonly fixedOrgUnit = {
         type: "cell" as const,
         sheet: "Entry into Labour Market",
-        ref: "X2",
+        ref: "C4",
     };
     public readonly fixedPeriod = {
         type: "cell" as const,
