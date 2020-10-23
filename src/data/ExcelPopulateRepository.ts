@@ -320,24 +320,27 @@ function _getFormulaWithValidation(
     // Support only for data validations over ranges
     const addressMatch = _(sheet._dataValidations)
         .keys()
-        .flatMap(validations => validations.split(" "))
-        .find(address => {
-            if (address.includes(":")) {
-                const range = sheet.range(address);
-                const rowStart = range.startCell().rowNumber();
-                const columnStart = range.startCell().columnNumber();
-                const rowEnd = range.endCell().rowNumber();
-                const columnEnd = range.endCell().columnNumber();
-                const isCellInRange =
-                    cell.columnNumber() >= columnStart &&
-                    cell.columnNumber() <= columnEnd &&
-                    cell.rowNumber() >= rowStart &&
-                    cell.rowNumber() <= rowEnd;
+        .find(validationKey => {
+            const validations = validationKey.split(" ").map(address => {
+                if (address.includes(":")) {
+                    const range = sheet.range(address);
+                    const rowStart = range.startCell().rowNumber();
+                    const columnStart = range.startCell().columnNumber();
+                    const rowEnd = range.endCell().rowNumber();
+                    const columnEnd = range.endCell().columnNumber();
+                    const isCellInRange =
+                        cell.columnNumber() >= columnStart &&
+                        cell.columnNumber() <= columnEnd &&
+                        cell.rowNumber() >= rowStart &&
+                        cell.rowNumber() <= rowEnd;
 
-                return isCellInRange;
-            } else {
-                return cell.address() === address;
-            }
+                    return isCellInRange;
+                } else {
+                    return cell.address() === address;
+                }
+            });
+
+            return _.some(validations, value => value === true);
         });
 
     if (!addressMatch) return defaultValue;
