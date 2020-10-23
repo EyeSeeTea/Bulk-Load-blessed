@@ -158,13 +158,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const formulaValue = getFormulaWithValidation(
-            workbook,
-            sheet as SheetWithValidations,
-            destination
-        );
+        const formulaValue = () =>
+            getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
 
-        const value = formula ? formulaValue : destination.value() ?? formulaValue;
+        const value = formula ? formulaValue() : destination.value() ?? formulaValue();
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -301,6 +298,19 @@ interface SheetWithValidations extends XLSX.Sheet {
 
 /* Get formula of associated cell (though data valudation). Basic implementation. No caching */
 function getFormulaWithValidation(
+    workbook: XLSX.Workbook,
+    sheet: SheetWithValidations,
+    cell: XLSX.Cell
+) {
+    try {
+        return _getFormulaWithValidation(workbook, sheet, cell);
+    } catch (err) {
+        console.error(err);
+        return undefined;
+    }
+}
+
+function _getFormulaWithValidation(
     workbook: XLSX.Workbook,
     sheet: SheetWithValidations,
     cell: XLSX.Cell
