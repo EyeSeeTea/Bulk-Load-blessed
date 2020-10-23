@@ -13,16 +13,10 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "preserve",
-        "noUnusedParameters": true,
-        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
         "experimentalDecorators": true,
-        "lib": [
-            "dom",
-            "dom.iterable",
-            "esnext"
-        ]
+        "lib": ["dom", "dom.iterable", "esnext"]
     },
-    "include": [
-        "src"
-    ]
+    "include": ["src"]
 }
