@@ -92,6 +92,7 @@ export class DownloadTemplateUseCase implements UseCase {
                     orgUnits,
                     startDate: populateStartDate,
                     endDate: populateEndDate,
+                    translateCodes: template.type !== "custom",
                 });
 
                 if (template.type === "custom" && template.fixedOrgUnit) {
