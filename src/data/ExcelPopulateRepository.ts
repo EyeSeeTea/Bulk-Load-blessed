@@ -105,7 +105,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    // @cache()
     public async readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
