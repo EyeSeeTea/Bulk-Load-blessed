@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-10-22T10:33:47.228Z\n"
+"POT-Creation-Date: 2020-10-23T10:58:28.869Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -393,11 +393,17 @@ msgstr "Importation de données en masse"
 msgid "Drag and drop file to import"
 msgstr "Faites glisser et déposez le fichier à importer ici"
 
-msgid "Update"
-msgstr "Mettre à jour"
+msgid "Create/update"
+msgstr "Créer/mettre à jour"
 
 msgid "Create"
 msgstr "Créer"
+
+msgid "event"
+msgstr "événement"
+
+msgid "Update"
+msgstr "Mettre à jour"
 
 msgid "data values"
 msgstr "valeurs de données"
