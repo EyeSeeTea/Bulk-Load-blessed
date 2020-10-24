@@ -1,5 +1,6 @@
 import Blob from "cross-blob";
 import * as Excel from "excel4node";
+import "lodash.product";
 import _ from "lodash";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
@@ -832,17 +833,59 @@ function getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId) {
     );
 }
 
+/* Return a unique key for a set of categoryOptions */
+function getOptionsKey(categoryOptions) {
+    return _.sortBy(categoryOptions.map(co => co.id)).join("-");
+}
+
+/*
+Get an object with category combo IDs as keys and their related category option combos as values.
+
+Note that we cannot simply use categoryCombo.categoryOptionCombos as it contains an unsorted
+set of category option combos. Instead, use the cartesian product of category.categoryOptions
+for each category in the category combo, which yields a sorted collection.
+*/
+
+function getCocsByCategoryComboId(metadata) {
+    const objsByType = _.groupBy(Array.from(metadata.values()), obj => obj.type);
+    const getObjsOfType = type => objsByType[type] || [];
+    const categoryOptionCombos = getObjsOfType("categoryOptionCombos");
+    const unsortedCocsByCatComboId = _.groupBy(categoryOptionCombos, coc => coc.categoryCombo.id);
+    const categoryById = _.keyBy(getObjsOfType("categories"), category => category.id);
+    const cocsByKey = _.groupBy(categoryOptionCombos, coc => getOptionsKey(coc.categoryOptions));
+
+    const cocsByCategoryPairs = getObjsOfType("categoryCombos").map(categoryCombo => {
+        const unsortedCocsForCategoryCombo = unsortedCocsByCatComboId[categoryCombo.id] || [];
+        const categoryOptionsList = categoryCombo.categories.map(
+            category => categoryById[category.id]?.categoryOptions || []
+        );
+        const categoryOptionsProduct = _.product(...categoryOptionsList);
+        const cocsForCategoryCombo = _(categoryOptionsProduct)
+            .map(getOptionsKey)
+            .map(optionsKey =>
+                _(cocsByKey[optionsKey] || [])
+                    .intersectionBy(unsortedCocsForCategoryCombo, "id")
+                    .first()
+            )
+            .compact()
+            .value();
+        if (cocsForCategoryCombo.length !== categoryOptionsProduct.length)
+            console.warn(`Fewer COCs than expected for CC: ${categoryCombo.id}`);
+        return [categoryCombo.id, cocsForCategoryCombo];
+    });
+
+    return _.fromPairs(cocsByCategoryPairs);
+}
+
 function getDataElements(dataSet, metadata) {
-    const objs = Array.from(metadata.values());
-    const categoryOptionCombos = objs.filter(obj => obj.type === "categoryOptionCombos");
-    const cocsByCatComboId = _.groupBy(categoryOptionCombos, "categoryCombo.id");
+    const cocsByCategoryComboId = getCocsByCategoryComboId(metadata);
 
     switch (dataSet.formType) {
         case "SECTION":
-            return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId);
+            return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCategoryComboId);
         default:
             // "DEFAULT" | "CUSTOM" | "SECTION_MULTIORG"
-            return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId);
+            return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCategoryComboId);
     }
 }
 
