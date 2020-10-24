@@ -781,50 +781,56 @@ SheetBuilder.prototype.getTeiIdValidation = function () {
     return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
 };
 
+function getCategoryComboIdByDataElementId(dataSet, metadata) {
+    return _(dataSet.dataSetElements)
+        .map(dse => {
+            const dataElement = metadata.get(dse.dataElement.id);
+            const disaggregationId = dse.categoryCombo
+                ? dse.categoryCombo.id
+                : dataElement.categoryCombo.id;
+            return [dataElement.id, disaggregationId];
+        })
+        .fromPairs()
+        .value();
+}
+
 function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
+    const categoryComboIdByDataElementId = getCategoryComboIdByDataElementId(dataSet, metadata);
+
     return _(dataSet.sections)
         .sortBy(section => section.sortOrder)
         .flatMap(section => {
-            return (
-                _(section.dataElements)
-                    .map(({ id }) => metadata.get(id))
-                    .compact()
-                    .groupBy(dataElement => dataElement.categoryCombo?.id)
-                    .toPairs()
-                    // Order of category combos is indeterminate in loadForm.action,
-                    // but apply the same criteria usen in formType DEFAULT.
-                    .sortBy(([ccId, _dataElements]) => cocsByCatComboId[ccId]?.length)
-                    .flatMap(([_categoryComboId, dataElements]) => {
-                        // Keep order for data elements in section from the response API
-                        return _(dataElements)
-                            .map(dataElement => ({
-                                dataElement,
-                                categoryOptionCombos:
-                                    cocsByCatComboId[dataElement.categoryCombo.id] || [],
-                            }))
-                            .value();
-                    })
-                    .value()
-            );
+            return _(section.dataElements)
+                .map(({ id }) => metadata.get(id))
+                .compact()
+                .groupBy(dataElement => categoryComboIdByDataElementId[dataElement.id])
+                .toPairs()
+                .flatMap(([categoryComboId, dataElements]) => {
+                    // Keep order for data elements in section from the response API
+                    return dataElements.map(dataElement => ({
+                        dataElement,
+                        categoryOptionCombos: cocsByCatComboId[categoryComboId] || [],
+                    }));
+                })
+                .value();
         })
         .value();
 }
 
 function getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId) {
+    const categoryComboIdByDataElementId = getCategoryComboIdByDataElementId(dataSet, metadata);
+
     return (
         _(cocsByCatComboId)
             .toPairs()
             // Mimic loadForm.action, sort category combos by cocs length
             .sortBy(([_ccId, categoryOptionCombos]) => categoryOptionCombos.length)
             .flatMap(([categoryComboId, categoryOptionCombos]) => {
-                const categoryCombo = metadata.get(categoryComboId);
-                if (!categoryCombo) return [];
-
                 // Mimic loadForm.action, sort data elements (in a category combo) by name
                 return _(dataSet.dataSetElements)
-                    .map(({ dataElement }) => metadata.get(dataElement.id))
+                    .map(dse => metadata.get(dse.dataElement.id))
                     .compact()
-                    .filter({ categoryCombo: { id: categoryComboId } })
+                    .filter(de => categoryComboIdByDataElementId[de.id] === categoryComboId)
                     .sortBy(dataElement => dataElement.name)
                     .map(dataElement => ({ dataElement, categoryOptionCombos }))
                     .value();
