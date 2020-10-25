@@ -16,6 +16,7 @@ export interface ImportSummaryStats {
 }
 
 export const emptyImportSummary: SynchronizationResult = {
+    title: "",
     status: "SUCCESS",
     rawResponse: {},
 };

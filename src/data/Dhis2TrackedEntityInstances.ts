@@ -181,14 +181,20 @@ async function uploadTeis(options: {
 
     const apiTeis = teis.map(tei => getApiTeiToUpload(program, metadata, tei, existingTeis));
 
-    return postImport("trackedEntityInstances", () =>
-        api
-            .post<ImportPostResponse>(
-                "/trackedEntityInstances",
-                { strategy: "CREATE_AND_UPDATE" },
-                { trackedEntityInstances: apiTeis }
-            )
-            .getData()
+    return postImport(
+        () =>
+            api
+                .post<ImportPostResponse>(
+                    "/trackedEntityInstances",
+                    { strategy: "CREATE_AND_UPDATE" },
+                    { trackedEntityInstances: apiTeis }
+                )
+                .getData(),
+        {
+            title: "Tracked Entity Instances - Create/update",
+            model: "Tracked Entity Instance",
+            splitStatsList: false,
+        }
     );
 }
 

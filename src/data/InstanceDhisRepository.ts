@@ -35,6 +35,7 @@ import {
 import { Program } from "../domain/entities/TrackedEntityInstance";
 import { postEvents } from "./Dhis2Events";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
+import i18n from "../locales";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -297,6 +298,10 @@ export class InstanceDhisRepository implements InstanceRepository {
         dataPackage: DataPackage
     ): Promise<SynchronizationResult> {
         const dataValues = this.buildAggregatedPayload(dataPackage);
+        const title =
+            importStrategy === "DELETE"
+                ? i18n.t("Data values - Delete")
+                : i18n.t("Data values - Create/update");
 
         const {
             response: { id, jobType },
@@ -332,6 +337,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     .getData()) ?? [];
 
             return {
+                title,
                 status: "ERROR",
                 message: message,
                 stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
@@ -346,6 +352,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
 
         return {
+            title,
             status,
             message: description,
             stats: [{ imported, deleted, updated, ignored }],

@@ -552,7 +552,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(true, i18n.t("Importing data..."));
 
         try {
-            const deletedCount =
+            const deleteResponse =
                 importState.dataForm.type === "dataSets"
                     ? await deleteDataValues(api, dataValues)
                     : 0;
@@ -565,10 +565,25 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             if (importState.dataForm.type === "dataSets") {
                 const response = importResponse as DataValueSetsPostResponse;
 
-                const result: SynchronizationResult = {
+                const deleteResult: SynchronizationResult | null = deleteResponse
+                    ? {
+                          title: "Data values - Delete",
+                          status: response.status,
+                          message: response.description,
+                          stats: [{ ...response.importCount, type: "Data values" }],
+                          errors: response.conflicts?.map(conflict => ({
+                              id: conflict.object,
+                              message: conflict.value,
+                          })),
+                          rawResponse: deleteResponse,
+                      }
+                    : null;
+
+                const updateResult: SynchronizationResult = {
+                    title: "Data values - Create/update",
                     status: response.status,
                     message: response.description,
-                    stats: [{ ...response.importCount, type: "Data sets", deleted: deletedCount }],
+                    stats: [{ ...response.importCount, type: "Data values" }],
                     errors: response.conflicts?.map(conflict => ({
                         id: conflict.object,
                         message: conflict.value,
@@ -576,10 +591,15 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     rawResponse: response,
                 };
 
-                setSyncResults([result]);
+                setSyncResults(_.compact([deleteResult, updateResult]));
             } else {
                 const response = importResponse as ImportPostResponse;
-                const result = processImportResponse("Events", response);
+                const result = processImportResponse({
+                    title: i18n.t("Data values - Create/update"),
+                    model: i18n.t("Event"),
+                    importResult: response,
+                    splitStatsList: true,
+                });
                 setSyncResults([result]);
             }
 

@@ -17,6 +17,7 @@ export interface ErrorMessage {
 }
 
 export interface SynchronizationResult {
+    title: string;
     status: SynchronizationStatus;
     message?: string;
     stats?: SynchronizationStats[];

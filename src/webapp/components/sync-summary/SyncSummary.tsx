@@ -136,13 +136,17 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
             fullWidth={true}
         >
             <DialogContent>
-                {results.map(({ status, stats = [], message, errors }, idx) => (
+                {results.map(({ title, status, stats = [], message, errors }, idx) => (
                     <Accordion
                         defaultExpanded={results.length === 1}
                         className={classes.accordion}
                         key={`row-${idx}`}
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography className={classes.accordionHeading1}>
+                                {title}
+                                <br />
+                            </Typography>
                             <Typography className={classes.accordionHeading2}>
                                 {`${i18n.t("Status")}: `}
                                 {formatStatusTag(status)}

@@ -3,9 +3,12 @@ import {
     SynchronizationResult,
     SynchronizationStats,
 } from "../domain/entities/SynchronizationResult";
+import i18n from "../locales";
+
+type Status = "SUCCESS" | "ERROR";
 
 export interface ImportPostResponse {
-    status: "SUCCESS" | "ERROR";
+    status: Status;
     message?: string;
     response: {
         imported: number;
@@ -14,7 +17,16 @@ export interface ImportPostResponse {
         ignored: number;
         total: number;
         importSummaries?: {
+            responseType: "ImportSummary";
             description?: string;
+            status: Status;
+            href: string;
+            importCount: {
+                imported: number;
+                updated: number;
+                deleted: number;
+                ignored: number;
+            };
             reference: string;
             conflicts?: {
                 object: string;
@@ -24,15 +36,18 @@ export interface ImportPostResponse {
     };
 }
 
-export function processImportResponse(
-    type: string,
-    importResult: ImportPostResponse
-): SynchronizationResult {
+export function processImportResponse(options: {
+    title: string;
+    model: string;
+    importResult: ImportPostResponse;
+    splitStatsList: boolean;
+}): SynchronizationResult {
+    const { title, model, importResult, splitStatsList } = options;
     const { status, message, response } = importResult;
 
     const errors =
         response.importSummaries?.flatMap(
-            ({ reference = "", description, conflicts }) =>
+            ({ reference, description, conflicts }) =>
                 conflicts?.map(({ object, value }) => ({
                     id: reference,
                     message: _([description, object, value]).compact().join(" "),
@@ -40,23 +55,47 @@ export function processImportResponse(
         ) ?? [];
 
     const fields = ["imported", "updated", "ignored", "deleted", "total"] as const;
-    const stats: SynchronizationStats = { type, ..._.pick(response, fields) };
+    const totalStats: SynchronizationStats = { type: "TOTAL", ..._.pick(response, fields) };
 
-    return { status, message, errors, stats: [stats], rawResponse: importResult };
+    const eventStatsList = (response.importSummaries || []).map(
+        (importSummary): SynchronizationStats => {
+            return {
+                type: i18n.t(`${model} ${importSummary.reference || "-"}`),
+                ...importSummary.importCount,
+            };
+        }
+    );
+
+    const stats = splitStatsList
+        ? _.compact([eventStatsList.length === 1 ? null : totalStats, ...eventStatsList])
+        : [totalStats];
+
+    return { title, status, message, errors, stats, rawResponse: importResult };
 }
 
 export async function postImport(
-    type: string,
-    postFn: () => Promise<ImportPostResponse>
+    postFn: () => Promise<ImportPostResponse>,
+    options: { title: string; model: string; splitStatsList: boolean }
 ): Promise<SynchronizationResult> {
+    const { title, model, splitStatsList } = options;
     try {
         const response = await postFn();
-        return processImportResponse(type, response);
+        return processImportResponse({
+            title,
+            model: model,
+            importResult: response,
+            splitStatsList,
+        });
     } catch (error) {
         if (error?.response?.data) {
-            return processImportResponse(type, error.response.data);
+            return processImportResponse({
+                title,
+                model: model,
+                importResult: error.response.data,
+                splitStatsList,
+            });
         } else {
-            return { status: "NETWORK ERROR", rawResponse: {} };
+            return { title: model, status: "NETWORK ERROR", rawResponse: {} };
         }
     }
 }
