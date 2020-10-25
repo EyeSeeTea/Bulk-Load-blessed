@@ -9,7 +9,6 @@ import {
     Event,
 } from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
-import { ImportSummary } from "../domain/entities/ImportSummary";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import {
@@ -35,6 +34,7 @@ import {
 } from "./Dhis2TrackedEntityInstances";
 import { Program } from "../domain/entities/TrackedEntityInstance";
 import { postEvents } from "./Dhis2Events";
+import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -198,18 +198,21 @@ export class InstanceDhisRepository implements InstanceRepository {
             .value();
     }
 
-    public async deleteAggregatedData(dataPackage: DataPackage): Promise<ImportSummary> {
+    public async deleteAggregatedData(dataPackage: DataPackage): Promise<SynchronizationResult> {
         return this.importAggregatedData("DELETE", dataPackage);
     }
 
-    public async importDataPackage(dataPackage: DataPackage): Promise<ImportSummary> {
+    public async importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
+        let result: SynchronizationResult;
         switch (dataPackage.type) {
             case "dataSets":
-                return this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+                result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+                return [result];
             case "programs":
-                return this.importEventsData(dataPackage);
+                result = await this.importEventsData(dataPackage);
+                return [result];
             case "trackerPrograms":
-                return this.importTrackerData(dataPackage);
+                return this.importTrackerProgramData(dataPackage);
             default:
                 throw new Error(`Unsupported type for data package`);
         }
@@ -292,7 +295,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     private async importAggregatedData(
         importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
         dataPackage: DataPackage
-    ): Promise<ImportSummary> {
+    ): Promise<SynchronizationResult> {
         const dataValues = this.buildAggregatedPayload(dataPackage);
 
         const {
@@ -330,30 +333,35 @@ export class InstanceDhisRepository implements InstanceRepository {
 
             return {
                 status: "ERROR",
-                description: message,
-                stats: { created: 0, deleted: 0, updated: 0, ignored: 0 },
+                message: message,
+                stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
                 errors: [],
+                rawResponse: {},
             };
         }
 
         const { status, description, conflicts, importCount } = importSummary;
-        const { imported: created, deleted, updated, ignored } = importCount;
-        const errors = conflicts?.map(({ object, value }) => `[${object}] ${value}`) ?? [];
+        const { imported, deleted, updated, ignored } = importCount;
+        const errors =
+            conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
 
         return {
             status,
-            description,
-            stats: { created, deleted, updated, ignored },
+            message: description,
+            stats: [{ imported, deleted, updated, ignored }],
             errors,
+            rawResponse: importSummary,
         };
     }
 
-    private async importEventsData(dataPackage: DataPackage): Promise<ImportSummary> {
+    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult> {
         const events = this.buildEventsPayload(dataPackage);
         return postEvents(this.api, events);
     }
 
-    private async importTrackerData(dataPackage: TrackerProgramPackage): Promise<ImportSummary> {
+    private async importTrackerProgramData(
+        dataPackage: TrackerProgramPackage
+    ): Promise<SynchronizationResult[]> {
         const { trackedEntityInstances, dataEntries } = dataPackage;
         return updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
     }

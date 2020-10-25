@@ -28,6 +28,10 @@ import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
 import { RouteComponentProps } from "../root/RootPage";
+import SyncSummary from "../../components/sync-summary/SyncSummary";
+import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
+import { processImportResponse, ImportPostResponse } from "../../../data/Dhis2Import";
+import { DataValueSetsPostResponse } from "../../../types/d2-api";
 
 interface ImportState {
     dataForm: DataForm;
@@ -216,22 +220,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         const result = await CompositionRoot.attach().templates.import(params);
 
         result.match({
-            success: importSummary => {
+            success: syncResults => {
                 loading.reset();
-
-                const { created, updated, ignored, deleted } = importSummary.stats;
-                const messages = _.compact([
-                    importSummary.description,
-                    [
-                        `${i18n.t("Imported")}: ${created}`,
-                        `${i18n.t("Updated")}: ${updated}`,
-                        `${i18n.t("Ignored")}: ${ignored}`,
-                        `${i18n.t("Deleted")}: ${deleted}`,
-                    ].join(", "),
-                ]);
-
-                snackbar.info(messages.join("\n"));
-                setMessages(messages);
+                setSyncResults(syncResults);
             },
             error: error => {
                 loading.reset();
@@ -565,24 +556,33 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 importState.dataForm.type === "dataSets"
                     ? await deleteDataValues(api, dataValues)
                     : 0;
-            const { response, importCount, description } = await dhisConnector.importData({
+            const importResponse = await dhisConnector.importData({
                 api,
                 element: importState.dataForm,
                 data: dataValues,
             });
 
-            const { imported, updated, ignored } = response ?? importCount;
-            const messages = _.compact([
-                description,
-                [
-                    `${i18n.t("Imported")}: ${imported}`,
-                    `${i18n.t("Updated")}: ${updated}`,
-                    `${i18n.t("Ignored")}: ${ignored}`,
-                    `${i18n.t("Deleted")}: ${deletedCount}`,
-                ].join(", "),
-            ]);
+            if (importState.dataForm.type === "dataSets") {
+                const response = importResponse as DataValueSetsPostResponse;
 
-            snackbar.info(messages.join(" - "));
+                const result: SynchronizationResult = {
+                    status: response.status,
+                    message: response.description,
+                    stats: [{ ...response.importCount, type: "Data sets", deleted: deletedCount }],
+                    errors: response.conflicts?.map(conflict => ({
+                        id: conflict.object,
+                        message: conflict.value,
+                    })),
+                    rawResponse: response,
+                };
+
+                setSyncResults([result]);
+            } else {
+                const response = importResponse as ImportPostResponse;
+                const result = processImportResponse("Events", response);
+                setSyncResults([result]);
+            }
+
             setMessages(messages);
         } catch (reason) {
             console.error(reason);
@@ -606,9 +606,14 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         setOverwriteOrgUnits(overwriteOrgUnits);
     }, []);
 
+    const [syncResults, setSyncResults] = React.useState<SynchronizationResult[] | null>(null);
+    const hideSyncResults = React.useCallback(() => setSyncResults(null), [setSyncResults]);
+
     return (
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
+
+            {syncResults && <SyncSummary results={syncResults} onClose={hideSyncResults} />}
 
             <h3>{i18n.t("Bulk data import")}</h3>
 

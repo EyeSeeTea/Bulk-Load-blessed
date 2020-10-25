@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { SynchronizationResult } from "./SynchronizationResult";
 
 export interface ImportSummary {
     status: "SUCCESS" | "ERROR" | "WARNING";
@@ -14,11 +15,9 @@ export interface ImportSummaryStats {
     ignored: number;
 }
 
-export const emptyImportSummary: ImportSummary = {
+export const emptyImportSummary: SynchronizationResult = {
     status: "SUCCESS",
-    stats: { created: 0, updated: 0, deleted: 0, ignored: 0 },
-    description: "",
-    errors: [],
+    rawResponse: {},
 };
 
 export const mergeSummaries = (...array: Array<ImportSummary | undefined>): ImportSummary => {
