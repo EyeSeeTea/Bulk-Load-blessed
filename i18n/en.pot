@@ -5,10 +5,19 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-10-23T10:58:28.869Z\n"
-"PO-Revision-Date: 2020-10-23T10:58:28.869Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
+"PO-Revision-Date: 2020-10-26T07:37:10.345Z\n"
+
+msgid "Data values - Create/update"
+msgstr ""
+
+msgid "Event"
+msgstr ""
 
 msgid "Template {{id}} not loaded"
+msgstr ""
+
+msgid "Data values - Delete"
 msgstr ""
 
 msgid "Cannot read data form id"
@@ -93,6 +102,48 @@ msgid "Data elements used for duplicates identification"
 msgstr ""
 
 msgid "Permissions"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
 msgstr ""
 
 msgid "All"
@@ -214,9 +265,6 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-msgid "Ok"
-msgstr ""
-
 msgid "Create theme"
 msgstr ""
 
@@ -295,18 +343,6 @@ msgid "Download data values with invalid organisation units"
 msgstr ""
 
 msgid "Importing data..."
-msgstr ""
-
-msgid "Imported"
-msgstr ""
-
-msgid "Updated"
-msgstr ""
-
-msgid "Ignored"
-msgstr ""
-
-msgid "Deleted"
 msgstr ""
 
 msgid "Existing data values"

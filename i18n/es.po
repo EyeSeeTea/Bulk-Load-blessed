@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-10-23T10:58:28.869Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9,8 +9,20 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#, fuzzy
+msgid "Data values - Create/update"
+msgstr "Crear/actualizar"
+
+#, fuzzy
+msgid "Event"
+msgstr "evento"
+
 msgid "Template {{id}} not loaded"
 msgstr "La plantilla {{id}} no se pudo cargar"
+
+#, fuzzy
+msgid "Data values - Delete"
+msgstr "valores de datos"
 
 #, fuzzy
 msgid "Cannot read data form id"
@@ -101,6 +113,48 @@ msgstr "Elementos de datos usados para identificar los duplicados"
 
 msgid "Permissions"
 msgstr "Permisos"
+
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr "Importados"
+
+msgid "Updated"
+msgstr "Actualizados"
+
+msgid "Deleted"
+msgstr "Borrados"
+
+msgid "Ignored"
+msgstr "Ignorados"
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr "Ok"
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
+msgstr ""
 
 msgid "All"
 msgstr "Todos"
@@ -223,9 +277,6 @@ msgstr "Editar"
 msgid "Delete"
 msgstr "Borrar"
 
-msgid "Ok"
-msgstr "Ok"
-
 msgid "Create theme"
 msgstr "Crear tema"
 
@@ -314,18 +365,6 @@ msgstr "Descargar datos con unidades organizativas no válidas"
 
 msgid "Importing data..."
 msgstr "Importando datos..."
-
-msgid "Imported"
-msgstr "Importados"
-
-msgid "Updated"
-msgstr "Actualizados"
-
-msgid "Ignored"
-msgstr "Ignorados"
-
-msgid "Deleted"
-msgstr "Borrados"
 
 msgid "Existing data values"
 msgstr "Existen valores para estos elementos de datos"
@@ -417,6 +456,10 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
+
+#, fuzzy
+#~ msgid "Events - Create/update"
+#~ msgstr "Crear/actualizar"
 
 #~ msgid "Element not found"
 #~ msgstr "No se encontró el elemento"

@@ -14,15 +14,19 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import {
     DataPackage,
     DataPackageData,
     DataPackageDataValue,
 } from "../../../domain/entities/DataPackage";
+import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
 import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
+import { DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
@@ -216,22 +220,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         const result = await CompositionRoot.attach().templates.import(params);
 
         result.match({
-            success: importSummary => {
+            success: syncResults => {
                 loading.reset();
-
-                const { created, updated, ignored, deleted } = importSummary.stats;
-                const messages = _.compact([
-                    importSummary.description,
-                    [
-                        `${i18n.t("Imported")}: ${created}`,
-                        `${i18n.t("Updated")}: ${updated}`,
-                        `${i18n.t("Ignored")}: ${ignored}`,
-                        `${i18n.t("Deleted")}: ${deleted}`,
-                    ].join(", "),
-                ]);
-
-                snackbar.info(messages.join("\n"));
-                setMessages(messages);
+                setSyncResults(syncResults);
             },
             error: error => {
                 loading.reset();
@@ -561,28 +552,57 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(true, i18n.t("Importing data..."));
 
         try {
-            const deletedCount =
+            const deleteResponse =
                 importState.dataForm.type === "dataSets"
                     ? await deleteDataValues(api, dataValues)
                     : 0;
-            const { response, importCount, description } = await dhisConnector.importData({
+            const importResponse = await dhisConnector.importData({
                 api,
                 element: importState.dataForm,
                 data: dataValues,
             });
 
-            const { imported, updated, ignored } = response ?? importCount;
-            const messages = _.compact([
-                description,
-                [
-                    `${i18n.t("Imported")}: ${imported}`,
-                    `${i18n.t("Updated")}: ${updated}`,
-                    `${i18n.t("Ignored")}: ${ignored}`,
-                    `${i18n.t("Deleted")}: ${deletedCount}`,
-                ].join(", "),
-            ]);
+            if (importState.dataForm.type === "dataSets") {
+                const response = importResponse as DataValueSetsPostResponse;
 
-            snackbar.info(messages.join(" - "));
+                const deleteResult: SynchronizationResult | null = deleteResponse
+                    ? {
+                          title: "Data values - Delete",
+                          status: response.status,
+                          message: response.description,
+                          stats: [{ ...response.importCount, type: "Data values" }],
+                          errors: response.conflicts?.map(conflict => ({
+                              id: conflict.object,
+                              message: conflict.value,
+                          })),
+                          rawResponse: deleteResponse,
+                      }
+                    : null;
+
+                const updateResult: SynchronizationResult = {
+                    title: "Data values - Create/update",
+                    status: response.status,
+                    message: response.description,
+                    stats: [{ ...response.importCount, type: "Data values" }],
+                    errors: response.conflicts?.map(conflict => ({
+                        id: conflict.object,
+                        message: conflict.value,
+                    })),
+                    rawResponse: response,
+                };
+
+                setSyncResults(_.compact([deleteResult, updateResult]));
+            } else {
+                const response = importResponse as ImportPostResponse;
+                const result = processImportResponse({
+                    title: i18n.t("Data values - Create/update"),
+                    model: i18n.t("Event"),
+                    importResult: response,
+                    splitStatsList: true,
+                });
+                setSyncResults([result]);
+            }
+
             setMessages(messages);
         } catch (reason) {
             console.error(reason);
@@ -606,9 +626,14 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         setOverwriteOrgUnits(overwriteOrgUnits);
     }, []);
 
+    const [syncResults, setSyncResults] = useState<SynchronizationResult[] | null>(null);
+    const hideSyncResults = useCallback(() => setSyncResults(null), [setSyncResults]);
+
     return (
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
+
+            {syncResults && <SyncSummary results={syncResults} onClose={hideSyncResults} />}
 
             <h3>{i18n.t("Bulk data import")}</h3>
 
