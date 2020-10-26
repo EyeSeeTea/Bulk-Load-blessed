@@ -224,11 +224,6 @@ async function getApiEvents(
 
     const optionById = _.keyBy(metadata.options, option => option.id);
 
-    const dataElementIds = _(dataEntries)
-        .flatMap(data => data.dataValues)
-        .map(dataValue => dataValue.dataElement)
-        .value();
-
     const { dataElements } = await api.metadata
         .get({
             dataElements: {
