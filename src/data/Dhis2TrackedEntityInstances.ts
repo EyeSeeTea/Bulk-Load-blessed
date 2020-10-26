@@ -233,7 +233,6 @@ async function getApiEvents(
         .get({
             dataElements: {
                 fields: { id: true, valueType: true },
-                filter: { id: { in: dataElementIds } },
             },
         })
         .getData();
