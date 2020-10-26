@@ -361,7 +361,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "qqVKuhK0RgY" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "D16" },
+            ref: { type: "cell", sheet: "Conditions", ref: "D18" },
         },
         {
             type: "cell",
@@ -369,7 +369,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "iS6Vzt6PPjr" },
             categoryOption: { type: "value", id: "OYOzRJlu3B5" },
-            ref: { type: "cell", sheet: "Conditions", ref: "E16" },
+            ref: { type: "cell", sheet: "Conditions", ref: "E18" },
         },
         {
             type: "cell",
@@ -377,7 +377,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "iS6Vzt6PPjr" },
             categoryOption: { type: "value", id: "JfxMvAwKsR7" },
-            ref: { type: "cell", sheet: "Conditions", ref: "F16" },
+            ref: { type: "cell", sheet: "Conditions", ref: "F18" },
         },
         {
             type: "cell",
@@ -385,7 +385,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "iS6Vzt6PPjr" },
             categoryOption: { type: "value", id: "MfcVRlA41v6" },
-            ref: { type: "cell", sheet: "Conditions", ref: "G16" },
+            ref: { type: "cell", sheet: "Conditions", ref: "G18" },
         },
         {
             type: "cell",
@@ -393,7 +393,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "iS6Vzt6PPjr" },
             categoryOption: { type: "value", id: "xeQGICllTPa" },
-            ref: { type: "cell", sheet: "Conditions", ref: "H16" },
+            ref: { type: "cell", sheet: "Conditions", ref: "H18" },
         },
         {
             type: "cell",
@@ -401,7 +401,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LUVRqQq2NLE" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Conditions", ref: "P9" },
+            ref: { type: "cell", sheet: "Conditions", ref: "D9" },
         },
         {
             type: "cell",
@@ -409,7 +409,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LUVRqQq2NLE" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Conditions", ref: "Q9" },
+            ref: { type: "cell", sheet: "Conditions", ref: "E9" },
         },
         {
             type: "cell",
@@ -417,7 +417,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LUVRqQq2NLE" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Conditions", ref: "R9" },
+            ref: { type: "cell", sheet: "Conditions", ref: "F9" },
         },
         {
             type: "cell",
@@ -425,7 +425,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Ii26DODuUbB" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "S10" },
+            ref: { type: "cell", sheet: "Conditions", ref: "D13" },
         },
         {
             type: "cell",
@@ -433,7 +433,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "cV7DhKFPk3R" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "S11" },
+            ref: { type: "cell", sheet: "Conditions", ref: "D14" },
         },
         {
             type: "cell",
@@ -441,7 +441,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "FXC8HIEHwHI" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "E9" },
+            ref: { type: "cell", sheet: "Conditions", ref: "G9" },
         },
         {
             type: "cell",
@@ -449,7 +449,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "d7hKlZbQARX" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "E10" },
+            ref: { type: "cell", sheet: "Conditions", ref: "G13" },
         },
         {
             type: "cell",
@@ -457,7 +457,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "TiqoQCq1BL4" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Conditions", ref: "E11" },
+            ref: { type: "cell", sheet: "Conditions", ref: "G14" },
         },
         {
             type: "cell",
@@ -465,7 +465,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LYjT01KiTTw" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P9" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D9" },
         },
         {
             type: "cell",
@@ -473,7 +473,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LYjT01KiTTw" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q9" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E9" },
         },
         {
             type: "cell",
@@ -481,7 +481,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "LYjT01KiTTw" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R9" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F9" },
         },
         {
             type: "cell",
@@ -489,7 +489,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gGSJZCN2L8C" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P10" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D10" },
         },
         {
             type: "cell",
@@ -497,7 +497,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gGSJZCN2L8C" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q10" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E10" },
         },
         {
             type: "cell",
@@ -505,7 +505,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gGSJZCN2L8C" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R10" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F10" },
         },
         {
             type: "cell",
@@ -513,7 +513,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "FDUFnJmPb2t" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P11" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D11" },
         },
         {
             type: "cell",
@@ -521,7 +521,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "FDUFnJmPb2t" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q11" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E11" },
         },
         {
             type: "cell",
@@ -529,7 +529,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "FDUFnJmPb2t" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R11" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F11" },
         },
         {
             type: "cell",
@@ -537,7 +537,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "DVyhvgkJrXg" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P12" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D12" },
         },
         {
             type: "cell",
@@ -545,7 +545,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "DVyhvgkJrXg" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q12" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E12" },
         },
         {
             type: "cell",
@@ -553,7 +553,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "DVyhvgkJrXg" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R12" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F12" },
         },
         {
             type: "cell",
@@ -561,7 +561,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Uyxr85SOJiI" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P13" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D13" },
         },
         {
             type: "cell",
@@ -569,7 +569,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Uyxr85SOJiI" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q13" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E13" },
         },
         {
             type: "cell",
@@ -577,7 +577,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Uyxr85SOJiI" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R13" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F13" },
         },
         {
             type: "cell",
@@ -585,7 +585,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "I5m9Dl43XO2" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P14" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D14" },
         },
         {
             type: "cell",
@@ -593,7 +593,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "I5m9Dl43XO2" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q14" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E14" },
         },
         {
             type: "cell",
@@ -601,7 +601,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "I5m9Dl43XO2" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R14" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F14" },
         },
         {
             type: "cell",
@@ -609,7 +609,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gDinmRT6Pqb" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P15" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D15" },
         },
         {
             type: "cell",
@@ -617,7 +617,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gDinmRT6Pqb" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q15" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E15" },
         },
         {
             type: "cell",
@@ -625,7 +625,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "gDinmRT6Pqb" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R15" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F15" },
         },
         {
             type: "cell",
@@ -633,7 +633,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "lvs1RCQOOp4" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Regulation", ref: "P21" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D23" },
         },
         {
             type: "cell",
@@ -641,7 +641,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "lvs1RCQOOp4" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Regulation", ref: "Q21" },
+            ref: { type: "cell", sheet: "Regulation", ref: "E23" },
         },
         {
             type: "cell",
@@ -649,7 +649,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "lvs1RCQOOp4" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Regulation", ref: "R21" },
+            ref: { type: "cell", sheet: "Regulation", ref: "F23" },
         },
         {
             type: "cell",
@@ -657,7 +657,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "di91e0qZijs" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "O20" },
+            ref: { type: "cell", sheet: "Regulation", ref: "D19" },
         },
         {
             type: "cell",
@@ -665,7 +665,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "p9tpHX1KEpx" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E9" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G9" },
         },
         {
             type: "cell",
@@ -673,7 +673,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Vgrwxohqyex" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E10" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G10" },
         },
         {
             type: "cell",
@@ -681,7 +681,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "diMX6HJrY20" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E11" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G11" },
         },
         {
             type: "cell",
@@ -689,7 +689,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Z8z72QAYDaj" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E12" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G12" },
         },
         {
             type: "cell",
@@ -697,7 +697,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "MSX8eTjkneO" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E13" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G13" },
         },
         {
             type: "cell",
@@ -705,7 +705,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "pp4mjoKsU50" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E14" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G14" },
         },
         {
             type: "cell",
@@ -713,7 +713,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "OejaVtMvR4x" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E15" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G15" },
         },
         {
             type: "cell",
@@ -721,7 +721,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "NI5EQM6hHmc" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E20" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G19" },
         },
         {
             type: "cell",
@@ -729,7 +729,7 @@ export class NHWAModule601 implements CustomTemplate {
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "OX7yvkLP2Uj" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Regulation", ref: "E21" },
+            ref: { type: "cell", sheet: "Regulation", ref: "G23" },
         },
     ];
 
