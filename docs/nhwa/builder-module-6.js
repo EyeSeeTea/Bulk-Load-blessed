@@ -16,6 +16,12 @@ let customRowsTab1 = [
     { row: 19, nrOfElements: 6 },
 ];
 
+let customRowsTab2Comments = [
+    { row: 9, nrOfElements: 1 },
+    { row: 13, nrOfElements: 1 },
+    { row: 14, nrOfElements: 1 },
+]
+
 let customRowsTab3Comments = [
     { row: 9, nrOfElements: 1 },
     { row: 10, nrOfElements: 1 },
@@ -24,8 +30,8 @@ let customRowsTab3Comments = [
     { row: 13, nrOfElements: 1 },
     { row: 14, nrOfElements: 1 },
     { row: 15, nrOfElements: 1 },
-    { row: 20, nrOfElements: 1 },
-    { row: 21, nrOfElements: 1 },
+    { row: 19, nrOfElements: 1 },
+    { row: 23, nrOfElements: 1 },
 ];
 
 let customRowsTab3YesPartialNo = [
@@ -36,7 +42,7 @@ let customRowsTab3YesPartialNo = [
     { row: 13, nrOfElements: 3 },
     { row: 14, nrOfElements: 3 },
     { row: 15, nrOfElements: 3 },
-    { row: 21, nrOfElements: 3 },
+    { row: 23, nrOfElements: 3 },
 ];
 
 for (let type in rawMetadata) {
@@ -126,27 +132,27 @@ let dataSheet2 = [
         sheet: "Conditions",
         tabSelector: "#tab1",
         letters: ["D", "E", "F", "G", "H"],
-        dataRowStart: 16,
+        dataRowStart: 18,
     }),
     ...getDataElements({
         sheet: "Conditions",
         tabSelector: "#tab1",
-        letters: ["P", "Q", "R"],
+        letters: ["D", "E", "F"],
         dataRowStart: 9,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Conditions",
         tabSelector: "#tab1",
-        letters: ["S"],
-        dataRowStart: 10,
+        letters: ["D"],
+        dataRowStart: 13,
         type: "input.entryselect[value=true]",
     }),
-    ...getDataElements({
+    ...getDataElementsCustomRows({
         sheet: "Conditions",
         tabSelector: "#tab1",
-        letters: ["E"],
-        dataRowStart: 9,
+        letters: ["G"],
+        rows: customRowsTab2Comments,
         type: "textarea.entryfield",
     }),
 ];
@@ -155,21 +161,21 @@ let dataSheet3 = [
     ...getDataElementsCustomRows({
         sheet: "Regulation",
         tabSelector: "#tab2",
-        letters: ["P", "Q", "R"],
+        letters: ["D", "E", "F"],
         rows: customRowsTab3YesPartialNo,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Regulation",
         tabSelector: "#tab2",
-        letters: ["O"],
-        dataRowStart: 20,
+        letters: ["D"],
+        dataRowStart: 19,
         type: "input.entryselect[value=true]",
     }),
     ...getDataElementsCustomRows({
         sheet: "Regulation",
         tabSelector: "#tab2",
-        letters: ["E"],
+        letters: ["G"],
         rows: customRowsTab3Comments,
         type: "textarea.entryfield",
     }),
