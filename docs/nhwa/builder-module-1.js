@@ -61,6 +61,13 @@ let dataSheet1 = [
         letters: ["P", "Q", "R", "S", "T"],
         dataRowStart: 8,
     }),
+    ...getDataElements({
+        sheet: "Demographic",
+        tabSelector: "#tab0",
+        letters: ["B"],
+        dataRowStart: 70,
+        type: "textarea",
+    }),
 ];
 
 let dataSheet2 = [
