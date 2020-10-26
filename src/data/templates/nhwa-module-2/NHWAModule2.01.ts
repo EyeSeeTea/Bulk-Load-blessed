@@ -1353,7 +1353,7 @@ export class NHWAModule201 implements CustomTemplate {
             period: { sheet: "Input", type: "cell", ref: "L4" },
             dataElement: { type: "value", id: "EtX7FWQ8HOf" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Institutions", ref: "R6" },
+            ref: { type: "cell", sheet: "Institutions", ref: "D18" },
         },
         {
             type: "cell",
@@ -1361,7 +1361,7 @@ export class NHWAModule201 implements CustomTemplate {
             period: { sheet: "Input", type: "cell", ref: "L4" },
             dataElement: { type: "value", id: "EtX7FWQ8HOf" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Institutions", ref: "S6" },
+            ref: { type: "cell", sheet: "Institutions", ref: "E18" },
         },
         {
             type: "cell",
@@ -1369,7 +1369,7 @@ export class NHWAModule201 implements CustomTemplate {
             period: { sheet: "Input", type: "cell", ref: "L4" },
             dataElement: { type: "value", id: "EtX7FWQ8HOf" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Institutions", ref: "T6" },
+            ref: { type: "cell", sheet: "Institutions", ref: "F18" },
         },
         {
             type: "cell",
@@ -1377,7 +1377,7 @@ export class NHWAModule201 implements CustomTemplate {
             period: { sheet: "Input", type: "cell", ref: "L4" },
             dataElement: { type: "value", id: "aAuKVcYFTB8" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Institutions", ref: "F18" },
+            ref: { type: "cell", sheet: "Institutions", ref: "G18" },
         },
         {
             type: "cell",
