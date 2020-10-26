@@ -81,7 +81,7 @@ export class NHWAModule401 implements CustomTemplate {
             period: { sheet: "Finance", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Ybz3qUCWYKC" },
             categoryOption: { type: "value", id: "I93t0K7b1oN" },
-            ref: { type: "cell", sheet: "Finance", ref: "Q18" },
+            ref: { type: "cell", sheet: "Finance", ref: "D15" },
         },
         {
             type: "cell",
@@ -89,7 +89,7 @@ export class NHWAModule401 implements CustomTemplate {
             period: { sheet: "Finance", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Ybz3qUCWYKC" },
             categoryOption: { type: "value", id: "Xgr3PJxcWfJ" },
-            ref: { type: "cell", sheet: "Finance", ref: "R18" },
+            ref: { type: "cell", sheet: "Finance", ref: "E15" },
         },
         {
             type: "cell",
@@ -97,7 +97,7 @@ export class NHWAModule401 implements CustomTemplate {
             period: { sheet: "Finance", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "Ybz3qUCWYKC" },
             categoryOption: { type: "value", id: "Y7EAGQA1bfv" },
-            ref: { type: "cell", sheet: "Finance", ref: "S18" },
+            ref: { type: "cell", sheet: "Finance", ref: "F15" },
         },
         {
             type: "cell",
@@ -105,7 +105,7 @@ export class NHWAModule401 implements CustomTemplate {
             period: { sheet: "Finance", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "fXxS36qL9Vt" },
             categoryOption: { type: "value", id: "Xr12mI7VPn3" },
-            ref: { type: "cell", sheet: "Finance", ref: "F15" },
+            ref: { type: "cell", sheet: "Finance", ref: "G15" },
         },
         {
             type: "cell",
