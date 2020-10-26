@@ -5,10 +5,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-10-25T20:45:14.218Z\n"
-"PO-Revision-Date: 2020-10-25T20:45:14.218Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
+"PO-Revision-Date: 2020-10-26T07:37:10.345Z\n"
 
-msgid "Events - Create/update"
+msgid "Data values - Create/update"
 msgstr ""
 
 msgid "Event"
@@ -18,9 +18,6 @@ msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Data values - Delete"
-msgstr ""
-
-msgid "Data values - Create/update"
 msgstr ""
 
 msgid "Cannot read data form id"
