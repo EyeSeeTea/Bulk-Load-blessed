@@ -297,7 +297,10 @@ export class InstanceDhisRepository implements InstanceRepository {
         importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
         dataPackage: DataPackage
     ): Promise<SynchronizationResult> {
-        const dataValues = this.buildAggregatedPayload(dataPackage);
+        const dataValues = await this.validateAggregateImportPackage(
+            this.buildAggregatedPayload(dataPackage)
+        );
+
         const title =
             importStrategy === "DELETE"
                 ? i18n.t("Data values - Delete")
@@ -359,6 +362,28 @@ export class InstanceDhisRepository implements InstanceRepository {
             errors,
             rawResponse: importSummary,
         };
+    }
+
+    // TODO: Review when data validation comes in
+    private async validateAggregateImportPackage(dataValues: AggregatedDataValue[]) {
+        const dataElements = _.uniq(dataValues.map(({ dataElement }) => dataElement));
+        const metadata = await this.api.metadata
+            .get({
+                dataElements: {
+                    fields: { id: true, valueType: true },
+                    filter: { id: { in: dataElements } },
+                },
+            })
+            .getData();
+
+        return _.compact(
+            dataValues.map(dataValue => {
+                const { dataElement, value } = dataValue;
+                const item = metadata.dataElements.find(({ id }) => id === dataElement);
+                if (item && item.valueType === "TRUE_ONLY" && value === "false") return undefined;
+                return dataValue;
+            })
+        );
     }
 
     private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult> {
