@@ -32,16 +32,16 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             populateStartDate,
             populateEndDate,
             templateType,
+            orgUnits,
         } = template;
 
-        if (type === "dataSets" && templateType === "custom") {
-            template.endDate = template.startDate;
-        } else if (type === "dataSets" && (!startDate || !endDate)) {
+        if (type === "dataSets" && (!startDate || !endDate)) {
             snackbar.info(i18n.t("You need to select start and end periods for dataSet templates"));
             return;
         }
 
-        if (populate && templateType === "custom") {
+        if (templateType === "custom" && !!orgUnits) {
+            template.populate = true;
             template.populateStartDate = template.startDate;
             template.populateEndDate = template.endDate;
         } else if (populate && (!populateStartDate || !populateEndDate)) {

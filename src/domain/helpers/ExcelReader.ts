@@ -103,7 +103,6 @@ export class ExcelReader {
 
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
-            console.log({ trackedEntityInstances, dataEntries });
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
         } else {
             return { type: dataFormType, dataEntries };
@@ -421,7 +420,19 @@ export class ExcelReader {
         if (!ref) return undefined;
         if (ref.type === "value") return ref.id;
         const cell = await this.excelRepository.findRelativeCell(template.id, ref, relative);
-        if (cell) return this.excelRepository.readCell(template.id, cell);
+        if (cell) {
+            const value = await this.excelRepository.readCell(template.id, cell);
+            const formula = await this.excelRepository.readCell(template.id, cell, {
+                formula: true,
+            });
+
+            const definedNames = await this.excelRepository.listDefinedNames(template.id);
+            if (typeof formula === "string" && definedNames.includes(formula)) {
+                return removeCharacters(formula);
+            }
+
+            return value;
+        }
     }
 
     private formatValue(value: ExcelValue | undefined): string {

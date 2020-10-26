@@ -9,7 +9,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Demographic";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "Q4";
 
 let getDataElements = ({
@@ -61,6 +61,13 @@ let dataSheet1 = [
         letters: ["P", "Q", "R", "S", "T"],
         dataRowStart: 8,
     }),
+    ...getDataElements({
+        sheet: "Demographic",
+        tabSelector: "#tab0",
+        letters: ["B"],
+        dataRowStart: 70,
+        type: "textarea",
+    }),
 ];
 
 let dataSheet2 = [
@@ -91,7 +98,7 @@ let dataSheet4 = [
     ...getDataElements({
         sheet: "Sourcetype",
         tabSelector: "#tab0",
-        letters: ["P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA"],
+        letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"],
         dataRowStart: 8,
         type: "input.entrytrueonly",
     }),

@@ -11,7 +11,7 @@ for (const type in rawMetadata) {
 }
 
 let defaultSheet = "M08 - Skill mix composition";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "I4";
 
 let getDataElements = ({
@@ -20,9 +20,13 @@ let getDataElements = ({
     letters,
     dataRowStart,
     type = "input.entryfield",
+    offset = 0,
+    limit,
 }) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
-        (input, i) => {
+    return _.compact(Array.from(document.querySelector(tabSelector).querySelectorAll(type)).slice(offset).map(
+        (input, pos) => {
+            if (limit !== undefined && pos >= limit) return undefined;
+
             let id = input.getAttribute("id");
             let [dataElement, categoryOptionCombo] = id.split("-");
 
@@ -35,12 +39,12 @@ let getDataElements = ({
                 ref: {
                     type: "cell",
                     sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
+                    ref: `${letters[pos % letters.length]}${parseInt(pos / letters.length) +
                         dataRowStart}`,
                 },
             };
         }
-    );
+    ));
 };
 
 let dataSheet1 = [
@@ -53,22 +57,31 @@ let dataSheet1 = [
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
         tabSelector: "#tab0",
-        letters: ["U", "V", "W"],
-        dataRowStart: 13,
+        letters: ["D", "E", "F"],
+        dataRowStart: 16,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
         tabSelector: "#tab0",
-        letters: ["E"],
+        letters: ["G"],
         dataRowStart: 16,
+        limit: 1,
         type: "textarea",
     }),
     ...getDataElements({
         sheet: "M08 - Skill mix composition",
         tabSelector: "#tab0",
-        letters: ["V", "W"],
-        dataRowStart: 23,
+        letters: ["G"],
+        dataRowStart: 20,
+        offset: 1,
+        type: "textarea",
+    }),
+    ...getDataElements({
+        sheet: "M08 - Skill mix composition",
+        tabSelector: "#tab0",
+        letters: ["D"],
+        dataRowStart: 20,
         type: "input.entryoptionset",
     }),
 ];
@@ -77,14 +90,14 @@ let dataSheet2 = [
     ...getDataElements({
         sheet: "M09 - Governance and policies",
         tabSelector: "#tab1",
-        letters: ["Q", "R", "S"],
+        letters: ["D", "E", "F"],
         dataRowStart: 9,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "M09 - Governance and policies",
         tabSelector: "#tab1",
-        letters: ["E"],
+        letters: ["G"],
         dataRowStart: 9,
         type: "textarea",
     }),
@@ -94,14 +107,14 @@ let dataSheet3 = [
     ...getDataElements({
         sheet: "M10 - Information Systems",
         tabSelector: "#tab2",
-        letters: ["Q", "R", "S"],
+        letters: ["D", "E", "F"],
         dataRowStart: 9,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "M10 - Information Systems",
         tabSelector: "#tab2",
-        letters: ["E"],
+        letters: ["G"],
         dataRowStart: 9,
         type: "textarea",
     }),

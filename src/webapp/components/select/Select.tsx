@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 export type SelectOption = { value: string; label: string };
 
@@ -32,8 +32,8 @@ export const Select: React.FC<SelectProps> = ({
     ...rest
 }) => {
     const classes = useStyles();
-    const [stateValue, setValue] = React.useState(defaultValue ? defaultValue.value : "");
-    const optionsByValue = React.useMemo(() => _.keyBy(options, option => option.value), [options]);
+    const [stateValue, setValue] = useState(defaultValue ? defaultValue.value : "");
+    const optionsByValue = useMemo(() => _.keyBy(options, option => option.value), [options]);
     const defaultOption = allowEmpty ? { label: "", value: "" } : undefined;
 
     const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {

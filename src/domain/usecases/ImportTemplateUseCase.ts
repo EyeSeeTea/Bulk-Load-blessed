@@ -7,12 +7,12 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
-import { ImportSummary, mergeSummaries } from "../entities/ImportSummary";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 import { removeCharacters } from "../../utils/string";
+import { SynchronizationResult } from "../entities/SynchronizationResult";
 
 export type ImportTemplateError =
     | {
@@ -56,7 +56,7 @@ export class ImportTemplateUseCase implements UseCase {
         duplicateStrategy = "ERROR",
         organisationUnitStrategy = "ERROR",
         settings,
-    }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, ImportSummary>> {
+    }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, SynchronizationResult[]>> {
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
@@ -118,7 +118,7 @@ export class ImportTemplateUseCase implements UseCase {
 
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
-        return Either.success(mergeSummaries(deleteResult, importResult));
+        return Either.success(_.compact([deleteResult, ...importResult]));
     }
 
     private async readDataValues(

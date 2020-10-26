@@ -11,7 +11,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Input";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "L4";
 
 let getDataElements = ({
@@ -65,14 +65,14 @@ let dataSheet3 = [
     ...getDataElements({
         sheet: "Institutions",
         tabSelector: "#tab2",
-        letters: ["R", "S", "T"],
-        dataRowStart: 6,
+        letters: ["D", "E", "F"],
+        dataRowStart: 18,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Institutions",
         tabSelector: "#tab2",
-        letters: ["F"],
+        letters: ["G"],
         dataRowStart: 18,
         type: "textarea.entryfield",
     }),
@@ -88,7 +88,7 @@ let dataSheet4 = [
     ...getDataElements({
         sheet: "Sourcetype",
         tabSelector: "#tab0",
-        letters: ["P", "Q", "R", "S"],
+        letters: ["D", "E", "F", "G"],
         dataRowStart: 8,
         type: "input.entrytrueonly",
     }),

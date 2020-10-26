@@ -1,15 +1,27 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-10-22T10:33:47.228Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
+#, fuzzy
+msgid "Data values - Create/update"
+msgstr "Crio/atualizar"
+
+#, fuzzy
+msgid "Event"
+msgstr "evento"
+
 msgid "Template {{id}} not loaded"
 msgstr "Planilha {{id}} não carregada"
+
+#, fuzzy
+msgid "Data values - Delete"
+msgstr "valores de dados"
 
 #, fuzzy
 msgid "Cannot read data form id"
@@ -97,6 +109,48 @@ msgstr "Elementos de dados usados para identificação de duplicatas"
 
 msgid "Permissions"
 msgstr "Permissões"
+
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr "Importado"
+
+msgid "Updated"
+msgstr "Atualizada"
+
+msgid "Deleted"
+msgstr "Excluído"
+
+msgid "Ignored"
+msgstr "Ignorado"
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr "Ok"
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
+msgstr ""
 
 msgid "All"
 msgstr "Tudo"
@@ -219,9 +273,6 @@ msgstr "Editar"
 msgid "Delete"
 msgstr "Excluir"
 
-msgid "Ok"
-msgstr "Ok"
-
 msgid "Create theme"
 msgstr "Criar tema"
 
@@ -312,18 +363,6 @@ msgstr "Descarregar dados com unidades organizacionais inválidas"
 msgid "Importing data..."
 msgstr "Importando dados ..."
 
-msgid "Imported"
-msgstr "Importado"
-
-msgid "Updated"
-msgstr "Atualizada"
-
-msgid "Ignored"
-msgstr "Ignorado"
-
-msgid "Deleted"
-msgstr "Excluído"
-
 msgid "Existing data values"
 msgstr "Valores de dados existentes"
 
@@ -380,11 +419,17 @@ msgstr "Importação de dados em massa"
 msgid "Drag and drop file to import"
 msgstr "Arraste e solte o arquivo para importar"
 
-msgid "Update"
-msgstr "Atualizar"
+msgid "Create/update"
+msgstr "Crio/atualizar"
 
 msgid "Create"
 msgstr "Crio"
+
+msgid "event"
+msgstr "evento"
+
+msgid "Update"
+msgstr "Atualizar"
 
 msgid "data values"
 msgstr "valores de dados"
@@ -408,6 +453,10 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+
+#, fuzzy
+#~ msgid "Events - Create/update"
+#~ msgstr "Crio/atualizar"
 
 #~ msgid "Element not found"
 #~ msgstr "Elemento não encontrado"

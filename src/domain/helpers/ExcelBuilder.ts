@@ -15,10 +15,11 @@ import {
     Template,
     TrackerEventRowDataSource,
     TrackerRelationship,
+    ValueRef,
 } from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
 import { getRelationships } from "../entities/TrackedEntityInstance";
-import { ExcelRepository } from "../repositories/ExcelRepository";
+import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 
 const dateFormatPattern = "yyyy-mm-dd";
 
@@ -72,16 +73,10 @@ export class ExcelBuilder {
     }
 
     private async fillCells(template: Template, dataSource: CellDataSource, payload: DataPackage) {
-        const orgUnit = await this.excelRepository.readCell(template.id, dataSource.orgUnit);
-        const dataElement = await this.excelRepository.readCell(
-            template.id,
-            dataSource.dataElement
-        );
-        const period = await this.excelRepository.readCell(template.id, dataSource.period);
-        const categoryOption = await this.excelRepository.readCell(
-            template.id,
-            dataSource.categoryOption
-        );
+        const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
+        const dataElement = await this.readCellValue(template, dataSource.dataElement);
+        const period = await this.readCellValue(template, dataSource.period);
+        const categoryOption = await this.readCellValue(template, dataSource.categoryOption);
 
         const { value } =
             _(payload.dataEntries)
@@ -96,6 +91,10 @@ export class ExcelBuilder {
         if (value) {
             await this.excelRepository.writeCell(template.id, dataSource.ref, value);
         }
+    }
+
+    private async readCellValue(template: Template, ref?: CellRef | ValueRef): Promise<ExcelValue> {
+        return removeCharacters(await this.excelRepository.readCell(template.id, ref));
     }
 
     private async fillTeiRows(

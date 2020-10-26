@@ -11,8 +11,8 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Regulation";
-let orgUnitCell = "X2";
-let periodCell = "M4";
+let orgUnitCell = "C4";
+let periodCell = "I4";
 
 let getDataElements = ({
     sheet,
@@ -47,15 +47,15 @@ let dataSheet1 = [
     ...getDataElements({
         sheet: "Regulation",
         tabSelector: "#tab0",
-        letters: ["F", "G", "H"],
-        dataRowStart: 7,
+        letters: ["D", "E", "F"],
+        dataRowStart: 8,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Regulation",
         tabSelector: "#tab0",
-        letters: ["I"],
-        dataRowStart: 7,
+        letters: ["G"],
+        dataRowStart: 8,
         type: "textarea",
     }),
 ];
@@ -65,33 +65,33 @@ let dataSheet2 = [
         sheet: "Acreditation",
         tabSelector: "#tab1",
         letters: [
+            "D",
+            "E",
             "F",
-            "G",
             "H",
+            "I",
+            "J",
             "L",
             "M",
             "N",
+            "P",
+            "Q",
             "R",
-            "S",
             "T",
+            "U",
+            "V",
             "X",
             "Y",
             "Z",
-            "AD",
-            "AE",
-            "AF",
-            "AJ",
-            "AK",
-            "AL",
         ],
-        dataRowStart: 7,
+        dataRowStart: 8,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Acreditation",
         tabSelector: "#tab1",
-        letters: ["I", "O", "U", "AA", "AG", "AM"],
-        dataRowStart: 7,
+        letters: ["G", "K", "O", "S", "W", "AA"],
+        dataRowStart: 8,
         type: "textarea",
     }),
 ];
@@ -100,15 +100,15 @@ let dataSheet3 = [
     ...getDataElements({
         sheet: "Lifelong Learning",
         tabSelector: "#tab2",
-        letters: ["F", "G", "H", "L", "M", "N"],
-        dataRowStart: 7,
+        letters: ["D", "E", "F", "H", "I", "J"],
+        dataRowStart: 8,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Lifelong Learning",
         tabSelector: "#tab2",
-        letters: ["I", "O"],
-        dataRowStart: 7,
+        letters: ["G", "K"],
+        dataRowStart: 8,
         type: "textarea",
     }),
 ];

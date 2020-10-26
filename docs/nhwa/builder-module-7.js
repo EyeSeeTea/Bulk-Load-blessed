@@ -30,7 +30,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Expenditure";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "I4";
 
 let getDataElements = ({
@@ -117,7 +117,7 @@ let dataSheet2 = [
     ...getDataElements({
         sheet: "Remuneration",
         tabSelector: "#tab1",
-        letters: ["N"],
+        letters: ["D"],
         dataRowStart: 20,
         type: "input.entryselect[value='true']",
     }),

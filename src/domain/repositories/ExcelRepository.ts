@@ -50,4 +50,5 @@ export abstract class ExcelRepository {
         id: string,
         sheetId: string | number
     ): Promise<number | undefined>;
+    public abstract async listDefinedNames(id: string): Promise<string[]>;
 }

@@ -16,7 +16,6 @@ import {
     ReadCellOptions,
 } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
-import { cache } from "../utils/cache";
 import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
@@ -106,7 +105,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    @cache()
     public async readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
@@ -158,13 +156,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const formulaValue = getFormulaWithValidation(
-            workbook,
-            sheet as SheetWithValidations,
-            destination
-        );
+        const formulaValue = () =>
+            getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
 
-        const value = formula ? formulaValue : destination.value() ?? formulaValue;
+        const value = formula ? formulaValue() : destination.value() ?? formulaValue();
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -279,7 +274,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
             : workbook.sheet(sheet).range(`${ref}:${ref}`);
     }
 
-    private async listDefinedNames(id: string): Promise<string[]> {
+    public async listDefinedNames(id: string): Promise<string[]> {
         const workbook = await this.getWorkbook(id);
         try {
             //@ts-ignore Not typed, need extension
@@ -305,6 +300,19 @@ function getFormulaWithValidation(
     sheet: SheetWithValidations,
     cell: XLSX.Cell
 ) {
+    try {
+        return _getFormulaWithValidation(workbook, sheet, cell);
+    } catch (err) {
+        console.error(err);
+        return undefined;
+    }
+}
+
+function _getFormulaWithValidation(
+    workbook: XLSX.Workbook,
+    sheet: SheetWithValidations,
+    cell: XLSX.Cell
+) {
     const defaultValue = cell.formula();
     const value = cell.value();
     if (defaultValue || !value) return defaultValue;
@@ -312,24 +320,27 @@ function getFormulaWithValidation(
     // Support only for data validations over ranges
     const addressMatch = _(sheet._dataValidations)
         .keys()
-        .flatMap(validations => validations.split(" "))
-        .find(address => {
-            if (address.includes(":")) {
-                const range = sheet.range(address);
-                const rowStart = range.startCell().rowNumber();
-                const columnStart = range.startCell().columnNumber();
-                const rowEnd = range.endCell().rowNumber();
-                const columnEnd = range.endCell().columnNumber();
-                const isCellInRange =
-                    cell.columnNumber() >= columnStart &&
-                    cell.columnNumber() <= columnEnd &&
-                    cell.rowNumber() >= rowStart &&
-                    cell.rowNumber() <= rowEnd;
+        .find(validationKey => {
+            const validations = validationKey.split(" ").map(address => {
+                if (address.includes(":")) {
+                    const range = sheet.range(address);
+                    const rowStart = range.startCell().rowNumber();
+                    const columnStart = range.startCell().columnNumber();
+                    const rowEnd = range.endCell().rowNumber();
+                    const columnEnd = range.endCell().columnNumber();
+                    const isCellInRange =
+                        cell.columnNumber() >= columnStart &&
+                        cell.columnNumber() <= columnEnd &&
+                        cell.rowNumber() >= rowStart &&
+                        cell.rowNumber() <= rowEnd;
 
-                return isCellInRange;
-            } else {
-                return cell.address() === address;
-            }
+                    return isCellInRange;
+                } else {
+                    return cell.address() === address;
+                }
+            });
+
+            return _.some(validations, value => value === true);
         });
 
     if (!addressMatch) return defaultValue;

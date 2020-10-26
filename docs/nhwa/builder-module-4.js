@@ -11,7 +11,7 @@ for (let type in rawMetadata) {
 }
 
 let defaultSheet = "Finance";
-let orgUnitCell = "V2";
+let orgUnitCell = "C4";
 let periodCell = "I4";
 
 let getDataElements = ({
@@ -53,14 +53,14 @@ let dataSheet1 = [
     ...getDataElements({
         sheet: "Finance",
         tabSelector: "#tab0",
-        letters: ["Q", "R", "S"],
-        dataRowStart: 18,
+        letters: ["D", "E", "F"],
+        dataRowStart: 15,
         type: "input.entrytrueonly",
     }),
     ...getDataElements({
         sheet: "Finance",
         tabSelector: "#tab0",
-        letters: ["F"],
+        letters: ["G"],
         dataRowStart: 15,
         type: "textarea",
     }),
