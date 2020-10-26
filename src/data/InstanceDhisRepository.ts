@@ -4,18 +4,21 @@ import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataF
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
 import {
     AggregatedDataValue,
-    EventsPackage,
     AggregatedPackage,
     Event,
+    EventsPackage,
 } from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
+import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
+import { Program } from "../domain/entities/TrackedEntityInstance";
 import {
     GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
+import i18n from "../locales";
 import {
     D2Api,
     D2ApiDefault,
@@ -27,15 +30,12 @@ import {
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
+import { postEvents } from "./Dhis2Events";
 import {
+    getProgram,
     getTrackedEntityInstances,
     updateTrackedEntityInstances,
-    getProgram,
 } from "./Dhis2TrackedEntityInstances";
-import { Program } from "../domain/entities/TrackedEntityInstance";
-import { postEvents } from "./Dhis2Events";
-import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
-import i18n from "../locales";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -527,10 +527,12 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private formatDataValue(
         dataElement: string,
-        value: string | number | boolean,
+        value: string | number | boolean | undefined | null,
         metadata: MetadataPackage,
         translateCodes: boolean
     ): string | number | boolean {
+        if (_.isNil(value)) return "";
+
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
         if (!translateCodes || !optionSet) return value;
 
