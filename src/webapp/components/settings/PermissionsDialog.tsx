@@ -18,7 +18,7 @@ export default function PermissionsDialog({
     onChange,
 }: PermissionsDialogProps) {
     const { api } = useAppContext();
-    const search = React.useCallback((query: string) => searchUsers(api, query), [api]);
+    const search = useCallback((query: string) => searchUsers(api, query), [api]);
 
     const buildMetaObject = useCallback(
         (setting: PermissionSetting) => {

@@ -14,24 +14,24 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import {
     DataPackage,
     DataPackageData,
     DataPackageDataValue,
 } from "../../../domain/entities/DataPackage";
+import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
 import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
+import { DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
 import { RouteComponentProps } from "../root/RootPage";
-import SyncSummary from "../../components/sync-summary/SyncSummary";
-import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
-import { processImportResponse, ImportPostResponse } from "../../../data/Dhis2Import";
-import { DataValueSetsPostResponse } from "../../../types/d2-api";
 
 interface ImportState {
     dataForm: DataForm;
@@ -626,8 +626,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         setOverwriteOrgUnits(overwriteOrgUnits);
     }, []);
 
-    const [syncResults, setSyncResults] = React.useState<SynchronizationResult[] | null>(null);
-    const hideSyncResults = React.useCallback(() => setSyncResults(null), [setSyncResults]);
+    const [syncResults, setSyncResults] = useState<SynchronizationResult[] | null>(null);
+    const hideSyncResults = useCallback(() => setSyncResults(null), [setSyncResults]);
 
     return (
         <React.Fragment>

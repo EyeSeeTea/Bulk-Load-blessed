@@ -1,6 +1,3 @@
-import React from "react";
-import _ from "lodash";
-import ReactJson from "react-json-view";
 import {
     Accordion,
     AccordionDetails,
@@ -16,6 +13,9 @@ import {
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ConfirmationDialog } from "d2-ui-components";
+import _ from "lodash";
+import React, { useCallback, useMemo } from "react";
+import ReactJson from "react-json-view";
 import {
     ErrorMessage,
     SynchronizationResult,
@@ -117,7 +117,7 @@ interface SyncSummaryProps {
 
 const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
     const classes = useStyles();
-    const rawResults = React.useMemo(
+    const rawResults = useMemo(
         () =>
             _(results)
                 .map(result => result.rawResponse)
@@ -125,6 +125,10 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
                 .value(),
         [results]
     );
+
+    const copyToClipboard = useCallback((object: unknown) => {
+        navigator.clipboard.writeText(JSON.stringify(object, null, 4));
+    }, []);
 
     return (
         <ConfirmationDialog
@@ -194,7 +198,7 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
                             <ReactJson
                                 src={rawResults.length === 1 ? rawResults[0] : rawResults}
                                 collapsed={2}
-                                enableClipboard={false}
+                                enableClipboard={copyToClipboard}
                             />
                         </AccordionDetails>
                     </Accordion>

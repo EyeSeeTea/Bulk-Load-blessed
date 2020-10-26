@@ -1,5 +1,5 @@
 import { useSnackbar } from "d2-ui-components";
-import React from "react";
+import React, { useCallback } from "react";
 import i18n from "../../../locales";
 import SettingsFields from "../../components/settings/SettingsFields";
 import { RouteComponentProps } from "../root/RootPage";
@@ -7,7 +7,7 @@ import { RouteComponentProps } from "../root/RootPage";
 export default function SettingsPage({ settings, setSettings }: RouteComponentProps) {
     const snackbar = useSnackbar();
 
-    const save = React.useCallback(
+    const save = useCallback(
         async newSettings => {
             const { error } = await newSettings.save();
 
