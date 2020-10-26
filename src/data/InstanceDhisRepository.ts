@@ -499,23 +499,23 @@ export class InstanceDhisRepository implements InstanceRepository {
                 .getData();
         };
 
-        const events: Event[] = [];
+        const programEvents: Event[] = [];
 
         for (const orgUnit of orgUnits) {
             for (const categoryOptionId of categoryOptions) {
                 const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
-                events.push(...events);
+                programEvents.push(...events);
 
                 await promiseMap(_.range(2, pager.pageCount + 1), async page => {
                     const { events } = await getEvents(orgUnit, categoryOptionId, page);
-                    events.push(...events);
+                    programEvents.push(...events);
                 });
             }
         }
 
         return {
             type: "programs",
-            dataEntries: _(events)
+            dataEntries: _(programEvents)
                 .map(
                     ({
                         event,
