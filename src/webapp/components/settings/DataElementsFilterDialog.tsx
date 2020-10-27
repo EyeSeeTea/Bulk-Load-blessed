@@ -27,7 +27,7 @@ export default function DataElementsFilterDialog({
 
     useEffect(() => {
         CompositionRoot.attach()
-            .templates.list.execute()
+            .templates.list()
             .then(({ programs }) => setPrograms(programs));
     }, []);
 

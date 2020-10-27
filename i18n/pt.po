@@ -1,18 +1,31 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-msgid "Template not loaded"
-msgstr "Planilha não carregada"
+#, fuzzy
+msgid "Data values - Create/update"
+msgstr "Crio/atualizar"
 
-msgid "Element not found"
-msgstr "Elemento não encontrado"
+#, fuzzy
+msgid "Event"
+msgstr "evento"
+
+msgid "Template {{id}} not loaded"
+msgstr "Planilha {{id}} não carregada"
+
+#, fuzzy
+msgid "Data values - Delete"
+msgstr "valores de dados"
+
+#, fuzzy
+msgid "Cannot read data form id"
+msgstr "Não é possível ler o arquivo"
 
 msgid "Program or DataSet not found in instance"
 msgstr "Programa ou DataSet não encontrado na instância"
@@ -97,6 +110,48 @@ msgstr "Elementos de dados usados para identificação de duplicatas"
 msgid "Permissions"
 msgstr "Permissões"
 
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr "Importado"
+
+msgid "Updated"
+msgstr "Atualizada"
+
+msgid "Deleted"
+msgstr "Excluído"
+
+msgid "Ignored"
+msgstr "Ignorado"
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr "Ok"
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
+msgstr ""
+
 msgid "All"
 msgstr "Tudo"
 
@@ -112,6 +167,10 @@ msgstr "Selecione o planilha para exportar ..."
 msgid "Data Model"
 msgstr "Modelo de dados"
 
+#, fuzzy
+msgid "Period"
+msgstr "Período final"
+
 msgid "Start period"
 msgstr "Período inicial"
 
@@ -120,6 +179,10 @@ msgstr "Período final"
 
 msgid "Organisation units"
 msgstr "Unidades organizacionais"
+
+#, fuzzy
+msgid "Select organisation unit to populate data"
+msgstr "Selecione pelo menos uma unidade organizacional para importar dados"
 
 msgid "Select available organisation units to include in the template"
 msgstr "Selecione as unidades organizacionais para incluir na planilha"
@@ -210,9 +273,6 @@ msgstr "Editar"
 msgid "Delete"
 msgstr "Excluir"
 
-msgid "Ok"
-msgstr "Ok"
-
 msgid "Create theme"
 msgstr "Criar tema"
 
@@ -233,7 +293,8 @@ msgstr "Não é possível obter a folha de metadados"
 
 msgid ""
 "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr "Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
+msgstr ""
+"Local inválido. Verifique o número da linha {{rowNumber}} do país {{country}}"
 
 msgid "Event date is empty"
 msgstr "A data do evento está vazia"
@@ -299,8 +360,8 @@ msgstr "Continuar"
 msgid "Download data values with invalid organisation units"
 msgstr "Descarregar dados com unidades organizacionais inválidas"
 
-msgid "Checking duplicates..."
-msgstr "Verificando duplicados..."
+msgid "Importing data..."
+msgstr "Importando dados ..."
 
 msgid "Existing data values"
 msgstr "Valores de dados existentes"
@@ -339,20 +400,18 @@ msgstr "Cancelar importação"
 msgid "Import only new records"
 msgstr "Importar apenas novos registros"
 
-msgid "Importing data..."
-msgstr "Importando dados ..."
+#, fuzzy
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
+msgstr ""
+"Existem {{number}} valores de dados com uma unidade organizacional inválida "
+"que serão ignorados durante a importação.\n"
+"Você debe baixá-los e enviá-los ao administrador do DHIS2"
 
-msgid "Imported"
-msgstr "Importado"
-
-msgid "Updated"
-msgstr "Atualizada"
-
-msgid "Ignored"
-msgstr "Ignorado"
-
-msgid "Deleted"
-msgstr "Excluído"
+msgid "Checking duplicates..."
+msgstr "Verificando duplicados..."
 
 msgid "Bulk data import"
 msgstr "Importação de dados em massa"
@@ -360,11 +419,17 @@ msgstr "Importação de dados em massa"
 msgid "Drag and drop file to import"
 msgstr "Arraste e solte o arquivo para importar"
 
-msgid "Update"
-msgstr "Atualizar"
+msgid "Create/update"
+msgstr "Crio/atualizar"
 
 msgid "Create"
 msgstr "Crio"
+
+msgid "event"
+msgstr "evento"
+
+msgid "Update"
+msgstr "Atualizar"
 
 msgid "data values"
 msgstr "valores de dados"
@@ -388,3 +453,10 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+
+#, fuzzy
+#~ msgid "Events - Create/update"
+#~ msgstr "Crio/atualizar"
+
+#~ msgid "Element not found"
+#~ msgstr "Elemento não encontrado"

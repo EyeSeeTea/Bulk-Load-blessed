@@ -1,7 +1,7 @@
-import { D2Api, DataValueSetsDataValue, Id } from "d2-api";
 import _ from "lodash";
-import { EventsPackage } from "../../data/InstanceDhisRepository";
+import { EventsPackage } from "../../domain/entities/DhisDataPackage";
 import i18n from "../../locales";
+import { D2Api, DataValueSetsDataValue, Id, DataValueSetsPostResponse } from "../../types/d2-api";
 
 interface SheetImportDataSet {
     dataSet: Id;
@@ -24,8 +24,8 @@ export type SheetImportResponse = Partial<SheetImportDataSet & SheetImportProgra
 export async function deleteDataValues(
     api: D2Api,
     dataValues: DataValueSetsDataValue[]
-): Promise<number> {
-    if (_.isEmpty(dataValues)) return 0;
+): Promise<DataValueSetsPostResponse | undefined> {
+    if (_.isEmpty(dataValues)) return undefined;
 
     const response = await api.dataValues
         .postSet({ importStrategy: "DELETE" }, { dataValues })
@@ -39,5 +39,5 @@ export async function deleteDataValues(
         console.error("Warning deleting data values: " + details);
     }
 
-    return response.importCount.deleted;
+    return response;
 }

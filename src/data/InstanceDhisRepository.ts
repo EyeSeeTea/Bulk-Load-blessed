@@ -1,16 +1,45 @@
-import { D2Api, D2ApiDefault, DataValueSetsGetResponse } from "d2-api";
 import _ from "lodash";
 import moment from "moment";
 import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
-import { DataPackage } from "../domain/entities/DataPackage";
+import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
+import {
+    AggregatedDataValue,
+    AggregatedPackage,
+    Event,
+    EventsPackage,
+} from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
+import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
+import { Program } from "../domain/entities/TrackedEntityInstance";
 import {
+    GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
 } from "../domain/repositories/InstanceRepository";
+import i18n from "../locales";
+import {
+    D2Api,
+    D2ApiDefault,
+    DataValueSetsGetResponse,
+    DataValueSetsPostResponse,
+    Id,
+    Pager,
+} from "../types/d2-api";
+import { cache } from "../utils/cache";
+import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
+import { postEvents } from "./Dhis2Events";
+import {
+    getProgram,
+    getTrackedEntityInstances,
+    updateTrackedEntityInstances,
+} from "./Dhis2TrackedEntityInstances";
+
+interface PagedEventsApiResponse extends EventsPackage {
+    pager: Pager;
+}
 
 export class InstanceDhisRepository implements InstanceRepository {
     private api: D2Api;
@@ -19,17 +48,17 @@ export class InstanceDhisRepository implements InstanceRepository {
         this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
-    public async getDataForms(type: DataFormType, ids?: string[]): Promise<DataForm[]> {
-        switch (type) {
-            case "dataSets":
-                return this.getDataSets(ids);
-            case "programs":
-                return this.getPrograms(ids);
-            default:
-                throw new Error(`Unsupported type ${type} for data package`);
-        }
+    public async getDataForms({
+        type = ["dataSets", "programs"],
+        ids,
+    }: GetDataFormsParams = {}): Promise<DataForm[]> {
+        const dataSets = type.includes("dataSets") ? await this.getDataSets(ids) : [];
+        const programs = type.includes("programs") ? await this.getPrograms(ids) : [];
+
+        return [...dataSets, ...programs];
     }
 
+    @cache()
     private async getDataSets(ids?: string[]): Promise<DataForm[]> {
         const { objects } = await this.api.models.dataSets
             .get({
@@ -69,6 +98,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         );
     }
 
+    @cache()
     private async getPrograms(ids?: string[]): Promise<DataForm[]> {
         const { objects } = await this.api.models.programs
             .get({
@@ -84,31 +114,34 @@ export class InstanceDhisRepository implements InstanceRepository {
                         },
                     },
                     access: true,
+                    programType: true,
                 },
                 filter: {
                     id: ids ? { in: ids } : undefined,
-                    programType: { eq: "WITHOUT_REGISTRATION" },
                 },
             })
             .getData();
 
-        return objects.map(({ displayName, name, access, programStages, ...rest }) => ({
-            ...rest,
-            type: "programs",
-            name: displayName ?? name,
-            periodType: "Daily",
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: programStages
-                .flatMap(({ programStageDataElements }) =>
-                    programStageDataElements.map(({ dataElement }) => dataElement)
-                )
-                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
-        }));
+        return objects.map(
+            ({ displayName, name, access, programStages, programType, ...rest }) => ({
+                ...rest,
+                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                name: displayName ?? name,
+                periodType: "Daily",
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: programStages
+                    .flatMap(({ programStageDataElements }) =>
+                        programStageDataElements.map(({ dataElement }) => dataElement)
+                    )
+                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+            })
+        );
     }
 
+    @cache()
     public async getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]> {
         const params = {
             paging: false,
@@ -130,6 +163,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             .value();
     }
 
+    @cache()
     public async getUserOrgUnits(): Promise<OrgUnit[]> {
         const { objects } = await this.api.models.organisationUnits
             .get({
@@ -140,20 +174,228 @@ export class InstanceDhisRepository implements InstanceRepository {
         return objects.map(({ displayName, ...rest }) => ({ ...rest, name: displayName }));
     }
 
-    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage[]> {
+    @cache()
+    public async getLocales(): Promise<Locale[]> {
+        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
+        return locales;
+    }
+
+    @cache()
+    public async getDefaultIds(): Promise<string[]> {
+        const response = (await this.api
+            .get("/metadata", {
+                filter: "code:eq:default",
+                fields: "id",
+            })
+            .getData()) as {
+            [key: string]: { id: string }[];
+        };
+
+        return _(response)
+            .omit(["system"])
+            .values()
+            .flatten()
+            .map(({ id }) => id)
+            .value();
+    }
+
+    public async deleteAggregatedData(dataPackage: DataPackage): Promise<SynchronizationResult> {
+        return this.importAggregatedData("DELETE", dataPackage);
+    }
+
+    public async importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
+        let result: SynchronizationResult;
+        switch (dataPackage.type) {
+            case "dataSets":
+                result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+                return [result];
+            case "programs":
+                result = await this.importEventsData(dataPackage);
+                return [result];
+            case "trackerPrograms":
+                return this.importTrackerProgramData(dataPackage);
+            default:
+                throw new Error(`Unsupported type for data package`);
+        }
+    }
+
+    public async getDataPackage(params: GetDataPackageParams): Promise<DataPackage> {
         switch (params.type) {
             case "dataSets":
                 return this.getDataSetPackage(params);
             case "programs":
                 return this.getProgramPackage(params);
+            case "trackerPrograms":
+                return this.getTrackerProgramPackage(params);
             default:
                 throw new Error(`Unsupported type ${params.type} for data package`);
         }
     }
 
-    public async getLocales(): Promise<Locale[]> {
-        const locales = await this.api.get<Locale[]>("/locales/dbLocales").getData();
-        return locales;
+    public async getProgram(programId: Id): Promise<Program | undefined> {
+        return getProgram(this.api, programId);
+    }
+
+    /* Private */
+
+    private async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
+        const { api } = this;
+        const dataPackage = await this.getProgramPackage(params);
+        const orgUnits = params.orgUnits.map(id => ({ id }));
+        const program = { id: params.id };
+        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
+
+        return {
+            type: "trackerPrograms",
+            trackedEntityInstances,
+            dataEntries: dataPackage.dataEntries,
+        };
+    }
+
+    public convertDataPackage(dataPackage: DataPackage): EventsPackage | AggregatedPackage {
+        switch (dataPackage.type) {
+            case "dataSets":
+                return { dataValues: this.buildAggregatedPayload(dataPackage) };
+            case "programs":
+                return { events: this.buildEventsPayload(dataPackage) };
+            default:
+                throw new Error(`Unsupported type ${dataPackage.type} to convert data package`);
+        }
+    }
+
+    /* Private */
+
+    private buildAggregatedPayload(dataPackage: DataPackage): AggregatedDataValue[] {
+        return _.flatMap(dataPackage.dataEntries, ({ orgUnit, period, attribute, dataValues }) =>
+            dataValues.map(({ dataElement, category, value, comment }) => ({
+                orgUnit,
+                period,
+                attributeOptionCombo: attribute,
+                dataElement,
+                categoryOptionCombo: category,
+                value: String(value),
+                comment,
+            }))
+        );
+    }
+
+    private buildEventsPayload(dataPackage: DataPackage): Event[] {
+        return dataPackage.dataEntries.map(
+            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+                event: id,
+                program: dataForm,
+                status: "COMPLETED",
+                orgUnit,
+                eventDate: period,
+                attributeOptionCombo: attribute,
+                dataValues: dataValues,
+            })
+        );
+    }
+
+    private async importAggregatedData(
+        importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
+        dataPackage: DataPackage
+    ): Promise<SynchronizationResult> {
+        const dataValues = await this.validateAggregateImportPackage(
+            this.buildAggregatedPayload(dataPackage)
+        );
+
+        const title =
+            importStrategy === "DELETE"
+                ? i18n.t("Data values - Delete")
+                : i18n.t("Data values - Create/update");
+
+        const {
+            response: { id, jobType },
+        } = ((await this.api.dataValues
+            .postSet({ importStrategy, async: true }, { dataValues })
+            .getData()) as unknown) as AsyncDataValueSetResponse;
+
+        const checkTask = async () => {
+            const [{ completed }] =
+                (await this.api
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
+                    .getData()) ?? [];
+
+            return !completed;
+        };
+
+        do {
+            await timeout(1500);
+        } while (await checkTask());
+
+        const importSummary = await this.api
+            .get<DataValueSetsPostResponse | null>(`/system/taskSummaries/${jobType}/${id}`)
+            .getData();
+
+        if (!importSummary) {
+            const [{ message }] =
+                (await this.api
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
+                    .getData()) ?? [];
+
+            return {
+                title,
+                status: "ERROR",
+                message: message,
+                stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
+                errors: [],
+                rawResponse: {},
+            };
+        }
+
+        const { status, description, conflicts, importCount } = importSummary;
+        const { imported, deleted, updated, ignored } = importCount;
+        const errors =
+            conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
+
+        return {
+            title,
+            status,
+            message: description,
+            stats: [{ imported, deleted, updated, ignored }],
+            errors,
+            rawResponse: importSummary,
+        };
+    }
+
+    // TODO: Review when data validation comes in
+    private async validateAggregateImportPackage(dataValues: AggregatedDataValue[]) {
+        const dataElements = _.uniq(dataValues.map(({ dataElement }) => dataElement));
+        const metadata = await this.api.metadata
+            .get({
+                dataElements: {
+                    fields: { id: true, valueType: true },
+                    filter: { id: { in: dataElements } },
+                },
+            })
+            .getData();
+
+        return _.compact(
+            dataValues.map(dataValue => {
+                const { dataElement, value } = dataValue;
+                const item = metadata.dataElements.find(({ id }) => id === dataElement);
+                if (item && item.valueType === "TRUE_ONLY" && value === "false") return undefined;
+                return dataValue;
+            })
+        );
+    }
+
+    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult> {
+        const events = this.buildEventsPayload(dataPackage);
+        return postEvents(this.api, events);
+    }
+
+    private async importTrackerProgramData(
+        dataPackage: TrackerProgramPackage
+    ): Promise<SynchronizationResult[]> {
+        const { trackedEntityInstances, dataEntries } = dataPackage;
+        return updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
     }
 
     private async getDataSetPackage({
@@ -163,7 +405,8 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
         translateCodes = true,
-    }: GetDataPackageParams): Promise<DataPackage[]> {
+    }: GetDataPackageParams): Promise<DataPackage> {
+        const defaultIds = await this.getDefaultIds();
         const metadata = await this.api.get<MetadataPackage>(`/dataSets/${id}/metadata`).getData();
         const response = await promiseMap(_.chunk(orgUnits, 200), async orgUnit => {
             const query = (period?: string[]): Promise<DataValueSetsGetResponse> =>
@@ -182,34 +425,41 @@ export class InstanceDhisRepository implements InstanceRepository {
                 : [await query()];
         });
 
-        return _(response)
-            .flatten()
-            .flatMap(({ dataValues = [] }) => dataValues)
-            .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
-                [period, orgUnit, attributeOptionCombo].join("-")
-            )
-            .map((dataValues, key) => {
-                const [period, orgUnit, attribute] = key.split("-");
-                return {
-                    orgUnit,
-                    period,
-                    attribute,
-                    dataValues: dataValues.map(
-                        ({ dataElement, categoryOptionCombo, value, comment }) => ({
-                            dataElement,
-                            category: categoryOptionCombo,
-                            value: this.formatDataValue(
+        return {
+            type: "dataSets",
+            dataEntries: _(response)
+                .flatten()
+                .flatMap(({ dataValues = [] }) => dataValues)
+                .groupBy(({ period, orgUnit, attributeOptionCombo }) =>
+                    [period, orgUnit, attributeOptionCombo].join("-")
+                )
+                .map((dataValues, key) => {
+                    const [period, orgUnit, attribute] = key.split("-");
+                    return {
+                        type: "aggregated" as const,
+                        dataForm: id,
+                        orgUnit,
+                        period,
+                        attribute: defaultIds.includes(attribute) ? undefined : attribute,
+                        dataValues: dataValues.map(
+                            ({ dataElement, categoryOptionCombo, value, comment }) => ({
                                 dataElement,
-                                value,
-                                metadata,
-                                translateCodes
-                            ),
-                            comment,
-                        })
-                    ),
-                };
-            })
-            .value();
+                                category: defaultIds.includes(categoryOptionCombo)
+                                    ? undefined
+                                    : categoryOptionCombo,
+                                value: this.formatDataValue(
+                                    dataElement,
+                                    value,
+                                    metadata,
+                                    translateCodes
+                                ),
+                                comment,
+                            })
+                        ),
+                    };
+                })
+                .value(),
+        };
     }
 
     private async getProgramPackage({
@@ -218,7 +468,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         startDate,
         endDate,
         translateCodes = true,
-    }: GetDataPackageParams): Promise<DataPackage[]> {
+    }: GetDataPackageParams): Promise<DataPackage> {
         const metadata = await this.api.get<MetadataPackage>(`/programs/${id}/metadata`).getData();
         const categoryComboId: string = _.find(metadata.programs, { id })?.categoryCombo.id;
         const categoryOptions = this.buildProgramAttributeOptions(metadata, categoryComboId);
@@ -226,48 +476,88 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        const response = await promiseMap(orgUnits, async orgUnit => {
+        const getEvents = (
+            orgUnit: Id,
+            categoryOptionId: Id,
+            page: number
+        ): Promise<PagedEventsApiResponse> => {
             // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
-            return promiseMap(categoryOptions, categoryOptionId =>
-                this.api
-                    .get<EventsPackage>("/events", {
-                        program: id,
-                        orgUnit,
-                        paging: false,
-                        attributeCc: categoryComboId,
-                        attributeCos: categoryOptionId,
-                        startDate: startDate?.format("YYYY-MM-DD"),
-                        endDate: endDate?.format("YYYY-MM-DD"),
-                        cache: Math.random(),
-                    })
-                    .getData()
-            );
-        });
+            return this.api
+                .get<PagedEventsApiResponse>("/events", {
+                    program: id,
+                    orgUnit,
+                    paging: true,
+                    totalPages: true,
+                    page,
+                    pageSize: 250,
+                    attributeCc: categoryComboId,
+                    attributeCos: categoryOptionId,
+                    startDate: startDate?.format("YYYY-MM-DD"),
+                    endDate: endDate?.format("YYYY-MM-DD"),
+                    cache: Math.random(),
+                })
+                .getData();
+        };
 
-        return _(response)
-            .flatten()
-            .map(({ events }) => events)
-            .flatten()
-            .map(({ event, orgUnit, eventDate, attributeOptionCombo, coordinate, dataValues }) => ({
-                id: event,
-                orgUnit,
-                period: moment(eventDate).format("YYYY-MM-DD"),
-                attribute: attributeOptionCombo,
-                coordinate,
-                dataValues: dataValues.map(({ dataElement, value }) => ({
-                    dataElement,
-                    value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                })),
-            }))
-            .value();
+        const events: Event[] = [];
+
+        for (const orgUnit of orgUnits) {
+            for (const categoryOptionId of categoryOptions) {
+                const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
+                events.push(...events);
+
+                await promiseMap(_.range(2, pager.pageCount + 1), async page => {
+                    const { events } = await getEvents(orgUnit, categoryOptionId, page);
+                    events.push(...events);
+                });
+            }
+        }
+
+        return {
+            type: "programs",
+            dataEntries: _(events)
+                .map(
+                    ({
+                        event,
+                        orgUnit,
+                        eventDate,
+                        attributeOptionCombo,
+                        coordinate,
+                        dataValues,
+                        trackedEntityInstance,
+                        programStage,
+                    }) => ({
+                        id: event,
+                        dataForm: id,
+                        orgUnit,
+                        period: moment(eventDate).format("YYYY-MM-DD"),
+                        attribute: attributeOptionCombo,
+                        coordinate,
+                        trackedEntityInstance,
+                        programStage,
+                        dataValues: dataValues.map(({ dataElement, value }) => ({
+                            dataElement,
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
+                        })),
+                    })
+                )
+                .value(),
+        };
     }
 
     private formatDataValue(
         dataElement: string,
-        value: string | number,
+        value: string | number | boolean | undefined | null,
         metadata: MetadataPackage,
         translateCodes: boolean
-    ): string | number {
+    ): string | number | boolean {
+        if (_.isNil(value)) return "";
+
         const optionSet = _.find(metadata.dataElements, { id: dataElement })?.optionSet?.id;
         if (!translateCodes || !optionSet) return value;
 
@@ -304,25 +594,6 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 }
 
-export interface EventsPackage {
-    events: Array<{
-        event?: string;
-        orgUnit: string;
-        program: string;
-        status: string;
-        eventDate: string;
-        coordinate?: {
-            latitude: string;
-            longitude: string;
-        };
-        attributeOptionCombo?: string;
-        dataValues: Array<{
-            dataElement: string;
-            value: string | number;
-        }>;
-    }>;
-}
-
 interface MetadataItem {
     id: string;
     code: string;
@@ -330,3 +601,17 @@ interface MetadataItem {
 }
 
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
+
+interface AsyncDataValueSetResponse {
+    httStatus: string;
+    httpStatusCode: number;
+    message: string;
+    response: {
+        created: string;
+        id: string;
+        jobType: string;
+        name: string;
+        relativeNotifierEndpoint: string;
+    };
+    status: string;
+}

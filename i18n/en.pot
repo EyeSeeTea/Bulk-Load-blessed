@@ -5,13 +5,22 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
-"PO-Revision-Date: 2020-06-23T10:26:15.068Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
+"PO-Revision-Date: 2020-10-26T07:37:10.345Z\n"
 
-msgid "Template not loaded"
+msgid "Data values - Create/update"
 msgstr ""
 
-msgid "Element not found"
+msgid "Event"
+msgstr ""
+
+msgid "Template {{id}} not loaded"
+msgstr ""
+
+msgid "Data values - Delete"
+msgstr ""
+
+msgid "Cannot read data form id"
 msgstr ""
 
 msgid "Program or DataSet not found in instance"
@@ -95,6 +104,48 @@ msgstr ""
 msgid "Permissions"
 msgstr ""
 
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr ""
+
+msgid "Updated"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
+msgstr ""
+
 msgid "All"
 msgstr ""
 
@@ -110,6 +161,9 @@ msgstr ""
 msgid "Data Model"
 msgstr ""
 
+msgid "Period"
+msgstr ""
+
 msgid "Start period"
 msgstr ""
 
@@ -117,6 +171,9 @@ msgid "End period"
 msgstr ""
 
 msgid "Organisation units"
+msgstr ""
+
+msgid "Select organisation unit to populate data"
 msgstr ""
 
 msgid "Select available organisation units to include in the template"
@@ -208,9 +265,6 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-msgid "Ok"
-msgstr ""
-
 msgid "Create theme"
 msgstr ""
 
@@ -288,7 +342,7 @@ msgstr ""
 msgid "Download data values with invalid organisation units"
 msgstr ""
 
-msgid "Checking duplicates..."
+msgid "Importing data..."
 msgstr ""
 
 msgid "Existing data values"
@@ -321,19 +375,13 @@ msgstr ""
 msgid "Import only new records"
 msgstr ""
 
-msgid "Importing data..."
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
 msgstr ""
 
-msgid "Imported"
-msgstr ""
-
-msgid "Updated"
-msgstr ""
-
-msgid "Ignored"
-msgstr ""
-
-msgid "Deleted"
+msgid "Checking duplicates..."
 msgstr ""
 
 msgid "Bulk data import"
@@ -342,10 +390,16 @@ msgstr ""
 msgid "Drag and drop file to import"
 msgstr ""
 
-msgid "Update"
+msgid "Create/update"
 msgstr ""
 
 msgid "Create"
+msgstr ""
+
+msgid "event"
+msgstr ""
+
+msgid "Update"
 msgstr ""
 
 msgid "data values"

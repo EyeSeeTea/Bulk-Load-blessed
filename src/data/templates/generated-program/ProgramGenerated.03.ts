@@ -1,8 +1,11 @@
-import { DataSource, GeneratedTemplate, StyleSource } from "../../domain/entities/Template";
+import { DataSource, GeneratedTemplate, StyleSource } from "../../../domain/entities/Template";
 
-export default class implements GeneratedTemplate {
+export class ProgramGenerated03 implements GeneratedTemplate {
+    public readonly type = "generated";
     public readonly id = "PROGRAM_GENERATED_v3";
     public readonly name = "Auto-generated program template";
+    public readonly dataFormId = { type: "cell" as const, sheet: "Data Entry", ref: "A4" };
+    public readonly dataFormType = { type: "value" as const, id: "programs" as const };
 
     public readonly rowOffset = 3;
     public readonly colOffset = 2;

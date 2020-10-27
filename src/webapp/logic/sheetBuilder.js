@@ -1,4 +1,6 @@
+import Blob from "cross-blob";
 import * as Excel from "excel4node";
+import "lodash.product";
 import _ from "lodash";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
@@ -6,13 +8,39 @@ import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v3";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
+
+const teiSheetName = "TEI Instances";
+const orgNonExistingMessage =
+    "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
+
+const maxRow = 1048576;
 
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
     this.validations = new Map();
+};
 
-    this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+SheetBuilder.prototype.generate = function () {
+    const { builder } = this;
+    const { element } = builder;
+
+    if (isTrackerProgram(element)) {
+        const { element, elementMetadata: metadata } = builder;
+        this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
+        this.programStageSheets = {};
+
+        _.forEach(element.programStages, programStageT => {
+            const programStage = metadata.get(programStageT.id);
+            const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
+            this.programStageSheets[programStageT.id] = sheet;
+        });
+        this.relationshipsSheet = this.workbook.addWorksheet("Relationships");
+    } else {
+        this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+    }
+
     this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
     this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
     this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
@@ -20,7 +48,176 @@ export const SheetBuilder = function (builder) {
     this.fillValidationSheet();
     this.fillMetadataSheet();
     this.fillLegendSheet();
-    this.fillDataEntrySheet();
+
+    if (isTrackerProgram(element)) {
+        this.fillInstancesSheet();
+        this.fillProgramStageSheets();
+        this.fillRelationshipsSheet();
+    } else {
+        this.fillDataEntrySheet();
+    }
+
+    return this.workbook;
+};
+
+SheetBuilder.prototype.fillRelationshipsSheet = function () {
+    const sheet = this.relationshipsSheet;
+
+    this.createColumn(sheet, 1, 1, "Type", null, this.validations.get("relationshipTypes"));
+    this.createColumn(sheet, 1, 2, "From TEI", null, this.getTeiIdValidation());
+    this.createColumn(sheet, 1, 3, "To TEI", null, this.getTeiIdValidation());
+};
+
+SheetBuilder.prototype.fillProgramStageSheets = function () {
+    const { elementMetadata: metadata, element: program } = this.builder;
+    _.forEach(this.programStageSheets, (sheet, programStageId) => {
+        const programStageT = { id: programStageId };
+        const programStage = metadata.get(programStageId);
+
+        const rowOffset = 0;
+        const sectionRow = rowOffset + 1;
+        const itemRow = rowOffset + 2;
+
+        // Freeze and format column titles
+        sheet.row(itemRow).freeze();
+        sheet.row(sectionRow).setHeight(30);
+        sheet.row(itemRow).setHeight(50);
+
+        sheet.cell(sectionRow, 1).formula(`=_${programStageId}`).style(baseStyle);
+
+        for (let row = 1; row < sectionRow; row++) {
+            sheet.row(row).hide();
+        }
+
+        // Add column titles
+        let columnId = 1;
+        let groupId = 0;
+
+        this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
+
+        const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
+        const optionsTitle =
+            attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            columnId++,
+            optionsTitle,
+            null,
+            this.validations.get("options")
+        );
+
+        this.createColumn(sheet, itemRow, columnId++, "Event id");
+
+        this.createColumn(
+            sheet,
+            itemRow,
+            columnId++,
+            `${programStage.executionDateLabel ?? "Date"} *`
+        );
+
+        if (programStage.programStageSections.length === 0) {
+            programStage.programStageSections.push({
+                dataElements: programStage.programStageDataElements.map(e => e.dataElement),
+                id: programStageT.id,
+            });
+        }
+
+        _.forEach(programStage.programStageSections, programStageSectionT => {
+            const programStageSection = programStageSectionT.dataElements
+                ? programStageSectionT
+                : metadata.get(programStageSectionT.id);
+            const firstColumnId = columnId;
+
+            _.forEach(programStageSection.dataElements, dataElementT => {
+                const dataElement = metadata.get(dataElementT.id);
+                const { name, description } = this.translate(dataElement);
+
+                const validation = dataElement.optionSet
+                    ? dataElement.optionSet.id
+                    : dataElement.valueType;
+                this.createColumn(
+                    sheet,
+                    itemRow,
+                    columnId,
+                    `_${dataElement.id}`,
+                    groupId,
+                    this.validations.get(validation)
+                );
+                sheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                if (description !== undefined) {
+                    sheet.cell(itemRow, columnId).comment(description, {
+                        height: "100pt",
+                        width: "160pt",
+                    });
+                }
+
+                columnId++;
+            });
+
+            if (firstColumnId < columnId)
+                sheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .formula(`_${programStageSection.id}`)
+                    .style(this.groupStyle(groupId));
+
+            groupId++;
+        });
+    });
+};
+
+SheetBuilder.prototype.fillInstancesSheet = function () {
+    const { element: program } = this.builder;
+    const { rowOffset = 0 } = this.builder.template;
+    const sheet = this.instancesSheet;
+
+    // Add cells for themes
+    const sectionRow = rowOffset + 1;
+    const itemRow = rowOffset + 2;
+
+    // Hide theme rows by default
+    for (let row = 1; row < sectionRow; row++) {
+        sheet.row(row).hide();
+    }
+
+    // Freeze and format column titles
+    sheet.row(itemRow).freeze();
+    sheet.row(sectionRow).setHeight(30);
+    sheet.row(itemRow).setHeight(50);
+
+    // Add template version
+    sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+
+    this.createColumn(sheet, itemRow, 1, "TEI id");
+
+    this.createColumn(
+        sheet,
+        itemRow,
+        2,
+        "Org Unit *",
+        null,
+        this.validations.get("organisationUnits"),
+        orgNonExistingMessage
+    );
+
+    this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
+
+    this.createColumn(sheet, itemRow, 4, (program.incidentDateLabel || "Incident Date") + " *");
+
+    const programAttributes = program.programTrackedEntityAttributes || [];
+    this.instancesSheetValuesRow = itemRow + 1;
+
+    let idx = 0;
+    programAttributes.forEach(attribute => {
+        const tea = attribute.trackedEntityAttribute;
+        if (tea.confidential) return;
+        const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
+        const validation = this.validations.get(validationId);
+        this.createColumn(sheet, itemRow, 5 + idx, `_${tea.id}`, 1, validation);
+        idx++;
+    });
 };
 
 SheetBuilder.prototype.fillLegendSheet = function () {
@@ -66,6 +263,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
     const {
         organisationUnits,
         element,
+        metadata,
         rawMetadata,
         elementMetadata,
         startDate,
@@ -107,6 +305,21 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         );
     }
 
+    if (isTrackerProgram(element)) {
+        rowId = 2;
+        columnId++;
+        validationSheet.cell(rowId++, columnId).string("Relationship Types");
+        _.forEach(metadata.relationshipTypes, relationshipType => {
+            validationSheet.cell(rowId++, columnId).formula(`_${relationshipType.id}`);
+        });
+        this.validations.set(
+            "relationshipTypes",
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                columnId
+            )}$${rowId}`
+        );
+    }
+
     rowId = 2;
     columnId++;
     validationSheet.cell(rowId++, columnId).string("Options");
@@ -121,7 +334,15 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
     );
 
-    _.forEach(rawMetadata.optionSets, optionSet => {
+    const programAttributes = element.programTrackedEntityAttributes || [];
+    const programOptionSets = _(programAttributes)
+        .map(pa => pa.trackedEntityAttribute?.optionSet)
+        .compact()
+        .value();
+
+    const optionSets = _.concat(programOptionSets, _.toArray(rawMetadata.optionSets));
+
+    _.forEach(optionSets, optionSet => {
         rowId = 2;
         columnId++;
 
@@ -225,6 +446,17 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         rowId++;
     });
 
+    this.builder.metadata.relationshipTypes.forEach(relationshipType => {
+        metadataSheet.cell(rowId, 1).string(relationshipType.id);
+        metadataSheet.cell(rowId, 2).string("relationshipType");
+        metadataSheet.cell(rowId, 3).string(relationshipType.name);
+        this.workbook.definedNameCollection.addDefinedName({
+            refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+            name: `_${relationshipType.id}`,
+        });
+        rowId++;
+    });
+
     metadataSheet.cell(rowId, 1).string("true");
     metadataSheet.cell(rowId, 2).string("boolean");
     metadataSheet.cell(rowId, 3).string("Yes");
@@ -246,7 +478,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
 
 SheetBuilder.prototype.getVersion = function () {
     const { element } = this.builder;
-    const defaultVersion = element.type === "dataSets" ? dataSetId : programId;
+    const { id: defaultVersion } = getTemplateId(element.type, element.id);
     return getObjectVersion(element) ?? defaultVersion;
 };
 
@@ -285,6 +517,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.validations.get("organisationUnits"),
         "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
     );
+
     if (element.type === "programs") {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
@@ -318,66 +551,49 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         .style({ ...baseStyle, font: { size: 16, bold: true } });
 
     if (element.type === "dataSets") {
-        const categoryOptionCombos = [];
-        for (const [, value] of metadata) {
-            if (value.type === "categoryOptionCombos") {
-                categoryOptionCombos.push(value);
+        const dataElements = getDataElements(element, metadata);
+
+        _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
+            const { name, description } = this.translate(dataElement);
+            const firstColumnId = columnId;
+
+            _.forEach(categoryOptionCombos, categoryOptionCombo => {
+                const validation = dataElement.optionSet
+                    ? dataElement.optionSet.id
+                    : dataElement.valueType;
+                this.createColumn(
+                    dataEntrySheet,
+                    itemRow,
+                    columnId,
+                    `_${categoryOptionCombo.id}`,
+                    groupId,
+                    this.validations.get(validation),
+                    undefined,
+                    categoryOptionCombo.code === "default"
+                );
+
+                columnId++;
+            });
+
+            if (columnId - 1 === firstColumnId) {
+                dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
             }
-        }
 
-        const sections = _.groupBy(categoryOptionCombos, "categoryCombo.id");
-        _.forOwn(sections, (_section, categoryComboId) => {
-            const categoryCombo = metadata.get(categoryComboId);
-            if (categoryCombo !== undefined) {
-                _(element.dataSetElements)
-                    .map(({ dataElement }) => metadata.get(dataElement.id))
-                    .filter({
-                        categoryCombo: { id: categoryComboId },
-                    })
-                    .forEach(dataElement => {
-                        const { name, description } = this.translate(dataElement);
-                        const firstColumnId = columnId;
+            dataEntrySheet
+                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                .formula(`_${dataElement.id}`)
+                .style(this.groupStyle(groupId));
 
-                        const sectionCategoryOptionCombos = sections[categoryComboId];
-                        _.forEach(sectionCategoryOptionCombos, categoryOptionCombo => {
-                            const validation = dataElement.optionSet
-                                ? dataElement.optionSet.id
-                                : dataElement.valueType;
-                            this.createColumn(
-                                dataEntrySheet,
-                                itemRow,
-                                columnId,
-                                `_${categoryOptionCombo.id}`,
-                                groupId,
-                                this.validations.get(validation),
-                                undefined,
-                                categoryOptionCombo.code === "default"
-                            );
-
-                            columnId++;
-                        });
-
-                        if (columnId - 1 === firstColumnId) {
-                            dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
-                        }
-
-                        dataEntrySheet
-                            .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                            .formula(`_${dataElement.id}`)
-                            .style(this.groupStyle(groupId));
-
-                        if (description !== undefined) {
-                            dataEntrySheet
-                                .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                                .comment(description, {
-                                    height: "100pt",
-                                    width: "160pt",
-                                });
-                        }
-
-                        groupId++;
+            if (description !== undefined) {
+                dataEntrySheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .comment(description, {
+                        height: "100pt",
+                        width: "160pt",
                     });
             }
+
+            groupId++;
         });
     } else {
         _.forEach(element.programStages, programStageT => {
@@ -510,7 +726,7 @@ SheetBuilder.prototype.createColumn = function (
     if (validation !== null) {
         const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
             columnId
-        )}1048576`;
+        )}${maxRow}`;
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
@@ -559,6 +775,126 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
     };
 };
 
+SheetBuilder.prototype.getTeiIdValidation = function () {
+    // Excel shows all empty rows, limit the maximum number of TEIs
+    const maxTeiRows = 1000;
+    return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
+};
+
+function getCategoryComboIdByDataElementId(dataSet, metadata) {
+    return _(dataSet.dataSetElements)
+        .map(dse => {
+            const dataElement = metadata.get(dse.dataElement.id);
+            const disaggregationId = dse.categoryCombo
+                ? dse.categoryCombo.id
+                : dataElement.categoryCombo.id;
+            return [dataElement.id, disaggregationId];
+        })
+        .fromPairs()
+        .value();
+}
+
+function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
+    const categoryComboIdByDataElementId = getCategoryComboIdByDataElementId(dataSet, metadata);
+
+    return _(dataSet.sections)
+        .sortBy(section => section.sortOrder)
+        .flatMap(section => {
+            return _(section.dataElements)
+                .map(({ id }) => metadata.get(id))
+                .compact()
+                .groupBy(dataElement => categoryComboIdByDataElementId[dataElement.id])
+                .toPairs()
+                .flatMap(([categoryComboId, dataElements]) => {
+                    // Keep order for data elements in section from the response API
+                    return dataElements.map(dataElement => ({
+                        dataElement,
+                        categoryOptionCombos: cocsByCatComboId[categoryComboId] || [],
+                    }));
+                })
+                .value();
+        })
+        .value();
+}
+
+function getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId) {
+    const categoryComboIdByDataElementId = getCategoryComboIdByDataElementId(dataSet, metadata);
+
+    return (
+        _(cocsByCatComboId)
+            .toPairs()
+            // Mimic loadForm.action, sort category combos by cocs length
+            .sortBy(([_ccId, categoryOptionCombos]) => categoryOptionCombos.length)
+            .flatMap(([categoryComboId, categoryOptionCombos]) => {
+                // Mimic loadForm.action, sort data elements (in a category combo) by name
+                return _(dataSet.dataSetElements)
+                    .map(dse => metadata.get(dse.dataElement.id))
+                    .compact()
+                    .filter(de => categoryComboIdByDataElementId[de.id] === categoryComboId)
+                    .sortBy(dataElement => dataElement.name)
+                    .map(dataElement => ({ dataElement, categoryOptionCombos }))
+                    .value();
+            })
+            .value()
+    );
+}
+
+/* Return a unique key for a set of categoryOptions */
+function getOptionsKey(categoryOptions) {
+    return _.sortBy(categoryOptions.map(co => co.id)).join("-");
+}
+
+/*
+Get an object with category combo IDs as keys and their related category option combos as values.
+
+Note that we cannot simply use categoryCombo.categoryOptionCombos as it contains an unsorted
+set of category option combos. Instead, use the cartesian product of category.categoryOptions
+for each category in the category combo, which yields a sorted collection.
+*/
+
+function getCocsByCategoryComboId(metadata) {
+    const objsByType = _.groupBy(Array.from(metadata.values()), obj => obj.type);
+    const getObjsOfType = type => objsByType[type] || [];
+    const categoryOptionCombos = getObjsOfType("categoryOptionCombos");
+    const unsortedCocsByCatComboId = _.groupBy(categoryOptionCombos, coc => coc.categoryCombo.id);
+    const categoryById = _.keyBy(getObjsOfType("categories"), category => category.id);
+    const cocsByKey = _.groupBy(categoryOptionCombos, coc => getOptionsKey(coc.categoryOptions));
+
+    const cocsByCategoryPairs = getObjsOfType("categoryCombos").map(categoryCombo => {
+        const unsortedCocsForCategoryCombo = unsortedCocsByCatComboId[categoryCombo.id] || [];
+        const categoryOptionsList = categoryCombo.categories.map(
+            category => categoryById[category.id]?.categoryOptions || []
+        );
+        const categoryOptionsProduct = _.product(...categoryOptionsList);
+        const cocsForCategoryCombo = _(categoryOptionsProduct)
+            .map(getOptionsKey)
+            .map(optionsKey =>
+                _(cocsByKey[optionsKey] || [])
+                    .intersectionBy(unsortedCocsForCategoryCombo, "id")
+                    .first()
+            )
+            .compact()
+            .value();
+        if (cocsForCategoryCombo.length !== categoryOptionsProduct.length)
+            console.warn(`Fewer COCs than expected for CC: ${categoryCombo.id}`);
+        return [categoryCombo.id, cocsForCategoryCombo];
+    });
+
+    return _.fromPairs(cocsByCategoryPairs);
+}
+
+function getDataElements(dataSet, metadata) {
+    const cocsByCategoryComboId = getCocsByCategoryComboId(metadata);
+
+    switch (dataSet.formType) {
+        case "SECTION":
+            return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCategoryComboId);
+        default:
+            // "DEFAULT" | "CUSTOM" | "SECTION_MULTIORG"
+            return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCategoryComboId);
+    }
+}
+
 /**
  * Common cell style definition
  * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
@@ -586,3 +922,39 @@ const protectedSheet = {
         password: "Wiscentd2019!",
     },
 };
+
+function isTrackerProgram(element) {
+    return element.type === "trackerPrograms";
+}
+
+export function getTemplateId(type, id) {
+    switch (id) {
+        case "Tu81BTLUuCT":
+            return { type: "custom", id: "NHWA_MODULE_1_v1" };
+        case "m5MiTPdlK17":
+            return { type: "custom", id: "NHWA_MODULE_2_v1" };
+        case "pZ3XRBi9gYE":
+            return { type: "custom", id: "NHWA_MODULE_3_v1" };
+        case "HtZb6Cg7TXo":
+            return { type: "custom", id: "NHWA_MODULE_4_v1" };
+        case "cxfAcMbSZe1":
+            return { type: "custom", id: "NHWA_MODULE_5_v1" };
+        case "WDyQKfAvY3V":
+            return { type: "custom", id: "NHWA_MODULE_6_v1" };
+        case "ZRsZdd2AvAR":
+            return { type: "custom", id: "NHWA_MODULE_7_v1" };
+        case "p5z7F51v1ag":
+            return { type: "custom", id: "NHWA_MODULE_8_v1" };
+        default:
+            switch (type) {
+                case "dataSets":
+                    return { type: "generated", id: dataSetId };
+                case "programs":
+                    return { type: "generated", id: programId };
+                case "trackerPrograms":
+                    return { type: "generated", id: trackerProgramId };
+                default:
+                    throw new Error("Unsupported type");
+            }
+    }
+}

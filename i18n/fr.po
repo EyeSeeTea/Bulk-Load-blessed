@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-06-23T10:26:15.068Z\n"
+"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9,11 +9,24 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-msgid "Template not loaded"
-msgstr "Modèle non téléchargé"
+#, fuzzy
+msgid "Data values - Create/update"
+msgstr "Créer/mettre à jour"
 
-msgid "Element not found"
-msgstr "Élément pas trouvé"
+#, fuzzy
+msgid "Event"
+msgstr "événement"
+
+msgid "Template {{id}} not loaded"
+msgstr "Modèle {{id}} non téléchargé"
+
+#, fuzzy
+msgid "Data values - Delete"
+msgstr "valeurs de données"
+
+#, fuzzy
+msgid "Cannot read data form id"
+msgstr "Le fichier ne peut pas être lu"
 
 msgid "Program or DataSet not found in instance"
 msgstr "Programme ou DataSet pas trouvé dans l'instance"
@@ -100,6 +113,48 @@ msgstr "Éléments de données utilisés pour l'identification des doublons"
 msgid "Permissions"
 msgstr "Autorisations"
 
+msgid "Type"
+msgstr ""
+
+msgid "Imported"
+msgstr "Importé"
+
+msgid "Updated"
+msgstr "Actualisé"
+
+msgid "Deleted"
+msgstr "Effacé"
+
+msgid "Ignored"
+msgstr "Ignoré"
+
+msgid "Total"
+msgstr ""
+
+msgid "Identifier"
+msgstr ""
+
+msgid "Message"
+msgstr ""
+
+msgid "Synchronization Results"
+msgstr ""
+
+msgid "Ok"
+msgstr "D'accord"
+
+msgid "Status"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Messages"
+msgstr ""
+
+msgid "JSON Response"
+msgstr ""
+
 msgid "All"
 msgstr "Tout"
 
@@ -115,6 +170,10 @@ msgstr "Sélectionnez le modèle à exporter ..."
 msgid "Data Model"
 msgstr "Modèle de données"
 
+#, fuzzy
+msgid "Period"
+msgstr "Période de fin"
+
 msgid "Start period"
 msgstr "Période de début"
 
@@ -123,6 +182,11 @@ msgstr "Période de fin"
 
 msgid "Organisation units"
 msgstr "Unités d'organisation"
+
+#, fuzzy
+msgid "Select organisation unit to populate data"
+msgstr ""
+"Sélectionnez au moins une unité d'organisation pour importer des données"
 
 msgid "Select available organisation units to include in the template"
 msgstr "Sélectionnez les unités d'organisation à inclure dans le modèle"
@@ -215,9 +279,6 @@ msgstr "Éditer"
 msgid "Delete"
 msgstr "Supprimer"
 
-msgid "Ok"
-msgstr "D'accord"
-
 msgid "Create theme"
 msgstr "Créer un thème"
 
@@ -238,7 +299,9 @@ msgstr "Impossible d'obtenir la feuille de métadonnées"
 
 msgid ""
 "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr "Lieu non valide. Veuillez vérifier la ligne {{rowNumber}} pour le pays {{country}}"
+msgstr ""
+"Lieu non valide. Veuillez vérifier la ligne {{rowNumber}} pour le pays "
+"{{country}}"
 
 msgid "Event date is empty"
 msgstr "La date de l'événement est vide"
@@ -308,8 +371,8 @@ msgid "Download data values with invalid organisation units"
 msgstr ""
 "Télécharger des valeurs de données avec des unités d'organisation non valides"
 
-msgid "Checking duplicates..."
-msgstr "Vérification des doublons en cours ..."
+msgid "Importing data..."
+msgstr "Importation de données en cours ..."
 
 msgid "Existing data values"
 msgstr "Valeurs de données existantes"
@@ -350,20 +413,18 @@ msgstr "Annuler l'importation"
 msgid "Import only new records"
 msgstr "Importez quand même toutes les données"
 
-msgid "Importing data..."
-msgstr "Importation de données en cours ..."
+#, fuzzy
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
+msgstr ""
+"Il existe {{nombre}} valeurs de données avec une unité d'organisation non "
+"valide qui seront ignorées lors de l'importation.\n"
+"Vous pouvez toujours les télécharger et les envoyer à votre administrateur."
 
-msgid "Imported"
-msgstr "Importé"
-
-msgid "Updated"
-msgstr "Actualisé"
-
-msgid "Ignored"
-msgstr "Ignoré"
-
-msgid "Deleted"
-msgstr "Effacé"
+msgid "Checking duplicates..."
+msgstr "Vérification des doublons en cours ..."
 
 msgid "Bulk data import"
 msgstr "Importation de données en masse"
@@ -371,11 +432,17 @@ msgstr "Importation de données en masse"
 msgid "Drag and drop file to import"
 msgstr "Faites glisser et déposez le fichier à importer ici"
 
-msgid "Update"
-msgstr "Mettre à jour"
+msgid "Create/update"
+msgstr "Créer/mettre à jour"
 
 msgid "Create"
 msgstr "Créer"
+
+msgid "event"
+msgstr "événement"
+
+msgid "Update"
+msgstr "Mettre à jour"
 
 msgid "data values"
 msgstr "valeurs de données"
@@ -399,3 +466,10 @@ msgstr "Paramètres"
 
 msgid "Settings saved"
 msgstr "Paramètres sauvegardés"
+
+#, fuzzy
+#~ msgid "Events - Create/update"
+#~ msgstr "Créer/mettre à jour"
+
+#~ msgid "Element not found"
+#~ msgstr "Élément pas trouvé"

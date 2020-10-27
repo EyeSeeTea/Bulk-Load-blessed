@@ -14,10 +14,19 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { CompositionRoot } from "../../../CompositionRoot";
+import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackage, DataValue } from "../../../domain/entities/DataPackage";
+import {
+    DataPackage,
+    DataPackageData,
+    DataPackageDataValue,
+} from "../../../domain/entities/DataPackage";
+import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
+import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
+import { DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
@@ -30,7 +39,7 @@ interface ImportState {
     summary: {
         period: string;
         count: number;
-        id: string;
+        id?: string;
     }[];
 }
 
@@ -49,7 +58,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots.execute().then(setOrgUnitTreeRootIds);
+        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
     }, []);
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
@@ -71,20 +80,20 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
         try {
             const {
-                object,
+                dataForm,
                 dataValues,
                 orgUnits,
-            } = await CompositionRoot.attach().templates.analyze.execute(file);
+            } = await CompositionRoot.attach().templates.analyze(file);
 
-            if (!object.writeAccess) {
+            if (!dataForm.writeAccess) {
                 throw new Error(
-                    i18n.t("You don't have write permissions for {{type}} {{name}}", object)
+                    i18n.t("You don't have write permissions for {{type}} {{name}}", dataForm)
                 );
             }
 
             setOrgUnitTreeFilter(orgUnits.map(({ id }) => id));
             setImportState({
-                dataForm: object,
+                dataForm,
                 file,
                 summary: dataValues,
             });
@@ -104,6 +113,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         try {
             const { dataForm, file } = importState;
 
+            const useBuilderOrgUnits =
+                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
+
             loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
                 api,
@@ -111,79 +123,88 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 orgUnitIds: cleanOrgUnitPaths(selectedOrgUnits),
             });
 
-            const useBuilderOrgUnits =
-                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
-
             if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {
                 throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
             const {
+                custom,
                 rowOffset,
                 colOffset,
                 orgUnits,
-                object,
-            } = await CompositionRoot.attach().templates.analyze.execute(file);
+            } = await CompositionRoot.attach().templates.analyze(file);
 
-            //const organisationUnits = result.organisationUnits;
-            const orgUnitCoordMap = new Map();
+            // TODO: Remove if condition and use only new code to import templates
+            if (custom || dataForm.type === "trackerPrograms") {
+                await startImport({
+                    file,
+                    settings,
+                    useBuilderOrgUnits,
+                    selectedOrgUnits,
+                });
+            } else {
+                //const organisationUnits = result.organisationUnits;
+                const orgUnitCoordMap = new Map();
 
-            if (result.element.type === "programs") {
-                const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                if (result.element.type === "programs") {
+                    const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
+                        ...result,
+                        file,
+                        useBuilderOrgUnits,
+                        rowOffset,
+                    });
+
+                    for (const uid of usedOrgUnitsUIDs.values()) {
+                        const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
+                        orgUnitCoordMap.set(uid, orgUnitData);
+                    }
+                }
+
+                const data = await sheetImport.readSheet({
                     ...result,
                     file,
                     useBuilderOrgUnits,
+                    orgUnitCoordMap,
                     rowOffset,
+                    colOffset,
                 });
 
-                for (const uid of usedOrgUnitsUIDs.values()) {
-                    const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
-                    orgUnitCoordMap.set(uid, orgUnitData);
+                const filterOrgUnits = useBuilderOrgUnits
+                    ? cleanOrgUnitPaths(selectedOrgUnits)
+                    : _.map(orgUnits, "id");
+
+                const removedDataValues = _.remove(
+                    //@ts-ignore FIXME Create typings for sheet import code
+                    data.dataValues ?? data.events,
+                    ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
+                );
+
+                if (removedDataValues.length === 0) {
+                    await checkExistingData(dataForm.type, data);
+                } else {
+                    updateDialog({
+                        title: i18n.t("Invalid organisation units found"),
+                        description: i18n.t(
+                            "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
+                            { number: removedDataValues.length }
+                        ),
+                        onCancel: () => {
+                            updateDialog(null);
+                        },
+                        onSave: () => {
+                            checkExistingData(dataForm.type, data);
+                            updateDialog(null);
+                        },
+                        onInfoAction: () => {
+                            downloadInvalidOrganisationsOld(dataForm.type, removedDataValues);
+                        },
+                        cancelText: i18n.t("Cancel"),
+                        saveText: i18n.t("Proceed"),
+                        infoActionText: i18n.t(
+                            "Download data values with invalid organisation units"
+                        ),
+                    });
                 }
-            }
-
-            const data = await sheetImport.readSheet({
-                ...result,
-                file,
-                useBuilderOrgUnits,
-                orgUnitCoordMap,
-                rowOffset,
-                colOffset,
-            });
-
-            const filterOrgUnits = useBuilderOrgUnits
-                ? cleanOrgUnitPaths(selectedOrgUnits)
-                : _.map(orgUnits, "id");
-
-            const removedDataValues = _.remove(
-                //@ts-ignore FIXME Create typings for sheet import code
-                data.dataValues ?? data.events,
-                ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
-            );
-
-            if (removedDataValues.length === 0) {
-                await checkExistingData(object.type, data);
-            } else {
-                updateDialog({
-                    title: i18n.t("Invalid organisation units found"),
-                    description: i18n.t(
-                        "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
-                        { number: removedDataValues.length }
-                    ),
-                    onCancel: () => {
-                        updateDialog(null);
-                    },
-                    onSave: () => {
-                        checkExistingData(object.type, data);
-                        updateDialog(null);
-                    },
-                    onInfoAction: () => {
-                        downloadInvalidOrganisations(object.type, removedDataValues);
-                    },
-                    cancelText: i18n.t("Cancel"),
-                    saveText: i18n.t("Proceed"),
-                    infoActionText: i18n.t("Download data values with invalid organisation units"),
-                });
             }
         } catch (reason) {
             console.error(reason);
@@ -193,7 +214,146 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(false);
     };
 
-    const downloadInvalidOrganisations = (type: DataFormType, elements: unknown) => {
+    const startImport = async (params: ImportTemplateUseCaseParams) => {
+        loading.show(true, i18n.t("Importing data..."));
+
+        const result = await CompositionRoot.attach().templates.import(params);
+
+        result.match({
+            success: syncResults => {
+                loading.reset();
+                setSyncResults(syncResults);
+            },
+            error: error => {
+                loading.reset();
+
+                switch (error.type) {
+                    case "DUPLICATE_VALUES":
+                        {
+                            const { existingDataValues, dataValues, instanceDataValues } = error;
+
+                            const totalExisting = _.flatMap(
+                                instanceDataValues.dataEntries,
+                                ({ dataValues }) => dataValues
+                            ).length;
+
+                            const dataSetConfig = {
+                                title: i18n.t("Existing data values"),
+                                message: i18n.t(
+                                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
+                                    { totalExisting }
+                                ),
+                                save: i18n.t("Proceed"),
+                                cancel: i18n.t("Cancel"),
+                                info: i18n.t("Import only new data values"),
+                            };
+
+                            const programConfig = {
+                                title: i18n.t(
+                                    "Warning: Your upload may result in the generation of duplicates",
+                                    {
+                                        nsSeparator: "-",
+                                    }
+                                ),
+                                message: i18n.t(
+                                    "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
+                                    { totalExisting: existingDataValues.dataEntries.length }
+                                ),
+                                save: i18n.t("Import everything anyway"),
+                                cancel: i18n.t("Cancel import"),
+                                info: i18n.t("Import only new records"),
+                            };
+
+                            const { title, message, save, cancel, info } =
+                                dataValues.type === "dataSets" ? dataSetConfig : programConfig;
+
+                            updateDialog({
+                                title,
+                                description: message,
+                                onSave: async () => {
+                                    updateDialog(null);
+                                    loading.show(true, i18n.t("Importing data..."));
+                                    await startImport({ ...params, duplicateStrategy: "IMPORT" });
+                                    loading.reset();
+                                },
+                                onInfoAction: async () => {
+                                    updateDialog(null);
+                                    loading.show(true, i18n.t("Importing data..."));
+                                    await startImport({ ...params, duplicateStrategy: "IGNORE" });
+                                    loading.reset();
+                                },
+                                onCancel: () => {
+                                    updateDialog(null);
+                                },
+                                saveText: save,
+                                cancelText: cancel,
+                                infoActionText: info,
+                            });
+                        }
+                        break;
+
+                    case "INVALID_ORG_UNITS":
+                        {
+                            const { invalidDataValues } = error;
+
+                            const totalInvalid = _.flatMap(
+                                invalidDataValues.dataEntries,
+                                ({ dataValues }) => dataValues
+                            ).length;
+
+                            updateDialog({
+                                title: i18n.t("Invalid organisation units found"),
+                                description: i18n.t(
+                                    "There are {{totalInvalid}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
+                                    { totalInvalid }
+                                ),
+                                onCancel: () => {
+                                    updateDialog(null);
+                                },
+                                onSave: async () => {
+                                    updateDialog(null);
+                                    await startImport({
+                                        ...params,
+                                        organisationUnitStrategy: "IGNORE",
+                                    });
+                                },
+                                onInfoAction: () => {
+                                    downloadInvalidOrganisations(invalidDataValues);
+                                },
+                                cancelText: i18n.t("Cancel"),
+                                saveText: i18n.t("Proceed"),
+                                infoActionText: i18n.t(
+                                    "Download data values with invalid organisation units"
+                                ),
+                            });
+                        }
+                        break;
+                    case "DATA_FORM_NOT_FOUND":
+                        snackbar.error("Couldn't find data form");
+                        break;
+                    case "INVALID_DATA_FORM_ID":
+                        snackbar.error("Invalid data form id");
+                        break;
+                    case "INVALID_OVERRIDE_ORG_UNIT":
+                        snackbar.error("Invalid org units to override");
+                        break;
+                    case "MALFORMED_TEMPLATE":
+                        snackbar.error("Malformed template");
+                        break;
+                }
+            },
+        });
+    };
+
+    const downloadInvalidOrganisations = (dataPackage: DataPackage) => {
+        const object = CompositionRoot.attach().form.convertDataPackage(dataPackage);
+        const json = JSON.stringify(object, null, 4);
+        const blob = new Blob([json], { type: "application/json" });
+        const date = moment().format("YYYYMMDDHHmm");
+        saveAs(blob, `invalid-organisations-${date}.json`);
+    };
+
+    const downloadInvalidOrganisationsOld = (type: DataFormType, elements: unknown) => {
         const object = type === "dataSets" ? { dataValues: elements } : { events: elements };
         const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
@@ -281,7 +441,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
             : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
 
-        const result = await CompositionRoot.attach().form.getDataPackage.execute({
+        const result = await CompositionRoot.attach().form.getDataPackage({
             id,
             periods,
             orgUnits,
@@ -293,7 +453,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             const existingEvents = _.remove(
                 events ?? [],
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
-                    return result.find(dataPackage =>
+                    return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
                             id,
                             {
@@ -315,7 +475,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             const existingDataValues = _.remove(
                 dataValues ?? [],
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
-                    return result.find(dataPackage =>
+                    return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
                             id,
                             { period: String(period), orgUnit, attribute },
@@ -332,8 +492,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
     const compareDataPackages = (
         id: string,
-        base: Partial<DataPackage>,
-        compare: Partial<DataPackage>,
+        base: Partial<DataPackageData>,
+        compare: Partial<DataPackageData>,
         periodDays = 0
     ): boolean => {
         const properties = _.compact([
@@ -363,7 +523,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (base.id && compare.id) return false;
 
         const exclusions = settings.duplicateExclusion[id] ?? [];
-        const filter = (values: DataValue[]) =>
+        const filter = (values: DataPackageDataValue[]) =>
             values.filter(({ dataElement }) => !exclusions.includes(dataElement));
 
         if (
@@ -372,8 +532,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             !_.isEqualWith(
                 filter(base.dataValues),
                 filter(compare.dataValues),
-                (base: DataValue[], compare: DataValue[]) => {
-                    const values = ({ dataElement, value }: DataValue) => `${dataElement}-${value}`;
+                (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
+                    const values = ({ dataElement, value }: DataPackageDataValue) =>
+                        `${dataElement}-${value}`;
                     const intersection = _.intersectionBy(base, compare, values);
                     return base.length === compare.length && intersection.length === base.length;
                 }
@@ -391,28 +552,57 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(true, i18n.t("Importing data..."));
 
         try {
-            const deletedCount =
+            const deleteResponse =
                 importState.dataForm.type === "dataSets"
                     ? await deleteDataValues(api, dataValues)
                     : 0;
-            const { response, importCount, description } = await dhisConnector.importData({
+            const importResponse = await dhisConnector.importData({
                 api,
                 element: importState.dataForm,
                 data: dataValues,
             });
 
-            const { imported, updated, ignored } = response ?? importCount;
-            const messages = _.compact([
-                description,
-                [
-                    `${i18n.t("Imported")}: ${imported}`,
-                    `${i18n.t("Updated")}: ${updated}`,
-                    `${i18n.t("Ignored")}: ${ignored}`,
-                    `${i18n.t("Deleted")}: ${deletedCount}`,
-                ].join(", "),
-            ]);
+            if (importState.dataForm.type === "dataSets") {
+                const response = importResponse as DataValueSetsPostResponse;
 
-            snackbar.info(messages.join(" - "));
+                const deleteResult: SynchronizationResult | null = deleteResponse
+                    ? {
+                          title: "Data values - Delete",
+                          status: response.status,
+                          message: response.description,
+                          stats: [{ ...response.importCount, type: "Data values" }],
+                          errors: response.conflicts?.map(conflict => ({
+                              id: conflict.object,
+                              message: conflict.value,
+                          })),
+                          rawResponse: deleteResponse,
+                      }
+                    : null;
+
+                const updateResult: SynchronizationResult = {
+                    title: "Data values - Create/update",
+                    status: response.status,
+                    message: response.description,
+                    stats: [{ ...response.importCount, type: "Data values" }],
+                    errors: response.conflicts?.map(conflict => ({
+                        id: conflict.object,
+                        message: conflict.value,
+                    })),
+                    rawResponse: response,
+                };
+
+                setSyncResults(_.compact([deleteResult, updateResult]));
+            } else {
+                const response = importResponse as ImportPostResponse;
+                const result = processImportResponse({
+                    title: i18n.t("Data values - Create/update"),
+                    model: i18n.t("Event"),
+                    importResult: response,
+                    splitStatsList: true,
+                });
+                setSyncResults([result]);
+            }
+
             setMessages(messages);
         } catch (reason) {
             console.error(reason);
@@ -422,11 +612,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(false);
     };
 
-    const getNameForModel = (key: DataFormType) => {
+    const getNameForModel = (key: DataFormType): string => {
         switch (key) {
             case "dataSets":
                 return i18n.t("Data Set");
             case "programs":
+            case "trackerPrograms":
                 return i18n.t("Program");
         }
     };
@@ -435,9 +626,14 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         setOverwriteOrgUnits(overwriteOrgUnits);
     }, []);
 
+    const [syncResults, setSyncResults] = useState<SynchronizationResult[] | null>(null);
+    const hideSyncResults = useCallback(() => setSyncResults(null), [setSyncResults]);
+
     return (
         <React.Fragment>
             {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
+
+            {syncResults && <SyncSummary results={syncResults} onClose={hideSyncResults} />}
 
             <h3>{i18n.t("Bulk data import")}</h3>
 
@@ -502,9 +698,20 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     {importState.dataForm.id})
                     {importState.summary.map((group, idx) => (
                         <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
-                            {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
-                            {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
-                            {i18n.t("data values")} {group.id && `(${group.id})`}
+                            {importState.dataForm.type === "trackerPrograms" ? (
+                                <React.Fragment>
+                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                                    {group.id ? i18n.t("Create/update") : i18n.t("Create")} {""}
+                                    {i18n.t("event")} {""}
+                                    {group.id}
+                                </React.Fragment>
+                            ) : (
+                                <React.Fragment>
+                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
+                                    {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                                    {i18n.t("data values")} {group.id && `(${group.id})`}
+                                </React.Fragment>
+                            )}
                         </li>
                     ))}
                 </div>
@@ -533,6 +740,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         selected={selectedOrgUnits}
                         rootIds={orgUnitTreeRootIds}
                         selectableIds={orgUnitTreeFilter}
+                        typeInput={"radio"}
                         fullWidth={false}
                         height={220}
                         controls={{

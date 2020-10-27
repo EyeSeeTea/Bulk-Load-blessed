@@ -1,7 +1,7 @@
-import { D2Api, D2ApiDefault } from "d2-api";
 import { generateUid } from "d2/uid";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
+import { D2Api, D2ApiDefault } from "../types/d2-api";
 
 interface Constant {
     id: string;

@@ -2,15 +2,32 @@ import _ from "lodash";
 import { promiseMap } from "../utils/promises";
 
 export async function getElement(api, type, id) {
-    const fields =
-        "id,displayName,organisationUnits[id,path],attributeValues[attribute[code],value],categoryCombo,dataSetElements,sections,periodType,programStages";
-    const response = await api.get(`/${type}/${id}`, { fields }).getData();
+    const endpoint = type === "dataSets" ? "dataSets" : "programs";
+    const fields = [
+        "id",
+        "displayName",
+        "organisationUnits[id,path]",
+        "attributeValues[attribute[code],value]",
+        "categoryCombo",
+        "dataSetElements",
+        "formType",
+        "sections[id,sortOrder,dataElements[id]]",
+        "periodType",
+        "programStages",
+        "programType",
+        "enrollmentDateLabel",
+        "incidentDateLabel",
+        "captureCoordinates",
+        "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
+    ].join(",");
+    const response = await api.get(`/${endpoint}/${id}`, { fields }).getData();
     return { ...response, type };
 }
 
 export async function getElementMetadata({ element, api, orgUnitIds }) {
     const elementMetadata = new Map();
-    const rawMetadata = await api.get(`/${element.type}/${element.id}/metadata.json`).getData();
+    const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
+    const rawMetadata = await api.get(`/${endpoint}/${element.id}/metadata.json`).getData();
     _.forOwn(rawMetadata, (value, type) => {
         if (Array.isArray(value)) {
             _.forEach(value, object => {
@@ -28,14 +45,21 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
             .getData()
     );
 
+    const metadata = await api.metadata
+        .get({
+            relationshipTypes: { fields: { id: true, name: true } },
+        })
+        .getData();
+
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
 
-    return { element, elementMetadata, organisationUnits, rawMetadata };
+    return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }
 
 export async function importData({ element, api, data }) {
-    const endpoint = element.type === "programs" ? "/events" : "/dataValueSets";
-    const object = element.type === "programs" ? { events: data } : { dataValues: data };
+    const isProgram = element.type === "programs" || element.type === "trackerPrograms";
+    const endpoint = isProgram ? "/events" : "/dataValueSets";
+    const object = isProgram ? { events: data } : { dataValues: data };
     const response = await api.post(endpoint, {}, object).getData();
     return response;
 }

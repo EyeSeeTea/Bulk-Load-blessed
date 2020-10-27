@@ -1,7 +1,7 @@
-import { D2Api } from "d2-api";
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
 import React, { useCallback } from "react";
 import i18n from "../../../locales";
+import { D2Api } from "../../../types/d2-api";
 import { useAppContext } from "../../contexts/api-context";
 import { PermissionSetting, PermissionType } from "../../logic/settings";
 import { SettingsFieldsProps } from "./SettingsFields";
@@ -18,7 +18,7 @@ export default function PermissionsDialog({
     onChange,
 }: PermissionsDialogProps) {
     const { api } = useAppContext();
-    const search = React.useCallback((query: string) => searchUsers(api, query), [api]);
+    const search = useCallback((query: string) => searchUsers(api, query), [api]);
 
     const buildMetaObject = useCallback(
         (setting: PermissionSetting) => {

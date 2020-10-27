@@ -13,6 +13,9 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "preserve",
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
+        "experimentalDecorators": true,
         "lib": ["dom", "dom.iterable", "esnext"]
     },
     "include": ["src"]

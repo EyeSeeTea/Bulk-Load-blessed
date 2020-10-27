@@ -1,4 +1,3 @@
-import { D2Api } from "d2-api";
 import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
@@ -12,6 +11,7 @@ import { InstanceRepository } from "./domain/repositories/InstanceRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
+import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
@@ -19,12 +19,14 @@ import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsU
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
+import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
+import { D2Api } from "./types/d2-api";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -40,7 +42,7 @@ export class CompositionRoot {
     private readonly templateManager: TemplateRepository;
     private readonly excelReader: ExcelRepository;
 
-    private constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+    constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
         this.instance = new InstanceDhisRepository(dhisInstance, mockApi);
         this.config = new ConfigWebRepository(appConfig);
         this.storage =
@@ -65,21 +67,26 @@ export class CompositionRoot {
     }
 
     public get orgUnits() {
-        return {
+        return getExecute({
             getUserRoots: new GetOrgUnitRootsUseCase(this.instance),
             getRootsByForm: new GetFormOrgUnitRootsUseCase(this.instance),
-        };
+        });
     }
 
     public get form() {
-        return {
+        return getExecute({
             getDataPackage: new GetFormDataPackageUseCase(this.instance),
-        };
+            convertDataPackage: new ConvertDataPackageUseCase(this.instance),
+        });
     }
 
     public get templates() {
-        return {
-            analyze: new AnalyzeTemplateUseCase(this.instance, this.templateManager),
+        return getExecute({
+            analyze: new AnalyzeTemplateUseCase(
+                this.instance,
+                this.templateManager,
+                this.excelReader
+            ),
             download: new DownloadTemplateUseCase(
                 this.instance,
                 this.templateManager,
@@ -89,29 +96,52 @@ export class CompositionRoot {
                 this.templateManager,
                 this.excelReader
             ),
+            import: new ImportTemplateUseCase(
+                this.instance,
+                this.templateManager,
+                this.excelReader
+            ),
             list: new ListDataFormsUseCase(this.instance),
-        };
+        });
     }
 
     public get themes() {
-        return {
+        return getExecute({
             list: new ListThemesUseCase(this.templateManager),
             save: new SaveThemeUseCase(this.templateManager),
             delete: new DeleteThemeUseCase(this.templateManager),
-        };
+        });
     }
 
     public get settings() {
-        return {
+        return getExecute({
             getDefault: new GetDefaultSettingsUseCase(this.config),
             read: new ReadSettingsUseCase(this.storage),
             write: new WriteSettingsUseCase(this.storage),
-        };
+        });
     }
 
     public get languages() {
-        return {
+        return getExecute({
             list: new ListLanguagesUseCase(this.instance),
-        };
+        });
     }
+}
+
+function getExecute<UseCases extends Record<Key, UseCase>, Key extends keyof UseCases>(
+    useCases: UseCases
+): { [K in Key]: UseCases[K]["execute"] } {
+    const keys = Object.keys(useCases) as Key[];
+    const initialOutput = {} as { [K in Key]: UseCases[K]["execute"] };
+
+    return keys.reduce((output, key) => {
+        const useCase = useCases[key];
+        const execute = useCase.execute.bind(useCase) as UseCases[typeof key]["execute"];
+        output[key] = execute;
+        return output;
+    }, initialOutput);
+}
+
+export interface UseCase {
+    execute: Function;
 }

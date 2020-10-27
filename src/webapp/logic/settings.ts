@@ -1,4 +1,3 @@
-import { D2Api, Ref } from "d2-api";
 import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
@@ -11,7 +10,8 @@ import {
 } from "../../domain/entities/AppSettings";
 import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
-import { GetArrayInnerType } from "../../utils/types";
+import { D2Api, Ref } from "../../types/d2-api";
+import { GetArrayInnerType } from "../../types/utils";
 
 const privateFields = ["currentUser"] as const;
 
@@ -86,8 +86,8 @@ export default class Settings {
             authorities: new Set(authorities),
         };
 
-        const defaultSettings = CompositionRoot.attach().settings.getDefault.execute();
-        const data = await CompositionRoot.attach().settings.read.execute<Partial<AppSettings>>(
+        const defaultSettings = CompositionRoot.attach().settings.getDefault();
+        const data = await CompositionRoot.attach().settings.read<Partial<AppSettings>>(
             Settings.constantCode,
             defaultSettings
         );
@@ -180,10 +180,7 @@ export default class Settings {
         };
 
         try {
-            await CompositionRoot.attach().settings.write.execute<AppSettings>(
-                Settings.constantCode,
-                data
-            );
+            await CompositionRoot.attach().settings.write<AppSettings>(Settings.constantCode, data);
             return { status: true };
         } catch (error) {
             return { status: false, error };

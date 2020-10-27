@@ -49,7 +49,7 @@ const Root = () => {
     }, [api, snackbar]);
 
     useEffect(() => {
-        CompositionRoot.attach().themes.list.execute().then(setThemes);
+        CompositionRoot.attach().themes.list().then(setThemes);
     }, []);
 
     const routes: AppRoute[] = useMemo(
