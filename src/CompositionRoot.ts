@@ -94,7 +94,8 @@ export class CompositionRoot {
             ),
             downloadCustom: new DownloadCustomTemplateUseCase(
                 this.templateManager,
-                this.excelReader
+                this.excelReader,
+                this.instance
             ),
             import: new ImportTemplateUseCase(
                 this.instance,

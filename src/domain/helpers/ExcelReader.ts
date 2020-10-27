@@ -103,6 +103,7 @@ export class ExcelReader {
 
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
+            console.log({ dataEntries, trackedEntityInstances });
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
         } else {
             return { type: dataFormType, dataEntries };
@@ -326,7 +327,6 @@ export class ExcelReader {
                 const incidentDate = parseDate(
                     await getCell(template, dataSource.incidentDate, rowIdx)
                 );
-                console.log({ enrollmentDate, incidentDate });
 
                 const attributeCells = await this.excelRepository.getCellsInRange(template.id, {
                     ...dataSource.attributes,
