@@ -10,7 +10,7 @@ type Status = "SUCCESS" | "ERROR";
 export interface ImportPostResponse {
     status: Status;
     message?: string;
-    response: {
+    response?: {
         imported: number;
         updated: number;
         deleted: number;
@@ -44,6 +44,8 @@ export function processImportResponse(options: {
 }): SynchronizationResult {
     const { title, model, importResult, splitStatsList } = options;
     const { status, message, response } = importResult;
+
+    if (!response) return { title, status, message, rawResponse: importResult };
 
     const errors =
         response.importSummaries?.flatMap(

@@ -4,8 +4,8 @@ import { DataPackage } from "../entities/DataPackage";
 import { AggregatedPackage, EventsPackage } from "../entities/DhisDataPackage";
 import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
-import { Id } from "../entities/ReferenceObject";
-import { Program } from "../entities/TrackedEntityInstance";
+import { Id, NamedRef } from "../entities/ReferenceObject";
+import { Program, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { SynchronizationResult } from "../entities/SynchronizationResult";
 
 export interface GetDataPackageParams {
@@ -34,4 +34,17 @@ export interface InstanceRepository {
     importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]>;
     getProgram(programId: Id): Promise<Program | undefined>;
     convertDataPackage(dataPackage: DataPackage): EventsPackage | AggregatedPackage;
+    getBuilderMetadata(teis: TrackedEntityInstance[]): Promise<BuilderMetadata>;
 }
+
+export interface BuilderMetadata {
+    orgUnits: Record<Id, NamedRef>;
+    options: Record<Id, NamedRef & { code: string }>;
+    categoryOptionCombos: Record<Id, NamedRef>;
+}
+
+export const emptyBuilderMetadata: BuilderMetadata = {
+    orgUnits: {},
+    options: {},
+    categoryOptionCombos: {},
+};

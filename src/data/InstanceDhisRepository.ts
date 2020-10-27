@@ -12,11 +12,12 @@ import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
-import { Program } from "../domain/entities/TrackedEntityInstance";
+import { Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
 import {
     GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
+    BuilderMetadata,
 } from "../domain/repositories/InstanceRepository";
 import i18n from "../locales";
 import {
@@ -36,6 +37,7 @@ import {
     getTrackedEntityInstances,
     updateTrackedEntityInstances,
 } from "./Dhis2TrackedEntityInstances";
+import { NamedRef } from "../domain/entities/ReferenceObject";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -261,6 +263,56 @@ export class InstanceDhisRepository implements InstanceRepository {
             default:
                 throw new Error(`Unsupported type ${dataPackage.type} to convert data package`);
         }
+    }
+
+    public async getBuilderMetadata(teis: TrackedEntityInstance[]): Promise<BuilderMetadata> {
+        const orgUnitIds = teis.map(tei => tei.orgUnit.id);
+        const orgUnitIdsList = _.chunk(orgUnitIds, 250);
+
+        const orgUnits: NamedRef[] = _.flatten(
+            await promiseMap(orgUnitIdsList, async orgUnitIdsGroup => {
+                const { objects } = await this.api.models.organisationUnits
+                    .get({
+                        fields: { id: true, name: true },
+                        filter: { id: { in: orgUnitIdsGroup } },
+                        paging: false,
+                    })
+                    .getData();
+                return objects;
+            })
+        );
+
+        const { objects: apiOptions } = await this.api.models.options
+            .get({ fields: { id: true, name: true, code: true }, paging: false })
+            .getData();
+
+        const customOptions = [
+            { id: "true", name: "Yes", code: "true" },
+            { id: "false", name: "No", code: "false" },
+        ];
+
+        const options = [...apiOptions, ...customOptions];
+
+        const programIds = _.uniq(teis.map(tei => tei.program.id));
+
+        const { objects: programs } = await this.api.models.programs
+            .get({
+                fields: {
+                    id: true,
+                    categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+                },
+                paging: false,
+                filter: { id: { in: programIds } },
+            })
+            .getData();
+
+        const cocs = _.flatMap(programs, program => program.categoryCombo.categoryOptionCombos);
+
+        return {
+            orgUnits: _.keyBy(orgUnits, ou => ou.id),
+            options: _.keyBy(options, opt => opt.id),
+            categoryOptionCombos: _.keyBy(cocs, coc => coc.id),
+        };
     }
 
     /* Private */
@@ -499,23 +551,23 @@ export class InstanceDhisRepository implements InstanceRepository {
                 .getData();
         };
 
-        const events: Event[] = [];
+        const programEvents: Event[] = [];
 
         for (const orgUnit of orgUnits) {
             for (const categoryOptionId of categoryOptions) {
                 const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
-                events.push(...events);
+                programEvents.push(...events);
 
                 await promiseMap(_.range(2, pager.pageCount + 1), async page => {
                     const { events } = await getEvents(orgUnit, categoryOptionId, page);
-                    events.push(...events);
+                    programEvents.push(...events);
                 });
             }
         }
 
         return {
             type: "programs",
-            dataEntries: _(events)
+            dataEntries: _(programEvents)
                 .map(
                     ({
                         event,
