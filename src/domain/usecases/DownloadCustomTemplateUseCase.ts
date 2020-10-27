@@ -10,7 +10,7 @@ export class DownloadCustomTemplateUseCase implements UseCase {
     constructor(
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository,
-        private instanceRepository: InstanceRepository,
+        private instanceRepository: InstanceRepository
     ) {}
 
     public async execute(templateId: Id, themeId?: Id): Promise<void> {
@@ -19,7 +19,10 @@ export class DownloadCustomTemplateUseCase implements UseCase {
 
             if (themeId) {
                 const theme = await this.templateRepository.getTheme(themeId);
-                await new ExcelBuilder(this.excelRepository, this.instanceRepository).applyTheme(template, theme);
+                await new ExcelBuilder(this.excelRepository, this.instanceRepository).applyTheme(
+                    template,
+                    theme
+                );
             }
 
             const data = await this.excelRepository.toBlob(template.id);
