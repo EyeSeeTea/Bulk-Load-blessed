@@ -21,6 +21,7 @@ import { removeCharacters } from "../../utils/string";
 import { Relationship } from "../entities/Relationship";
 import moment from "moment";
 import XlsxPopulate from "xlsx-populate";
+import { generateUid } from "d2/uid";
 
 const dateFormat = "YYYY-MM-DD";
 
@@ -319,7 +320,8 @@ export class ExcelReader {
         const values = await promiseMap<number, TrackedEntityInstance | undefined>(
             rowIndexes,
             async rowIdx => {
-                const teiId = await getCell(template, dataSource.teiId, rowIdx);
+                // Generate random one UID for TEI if empty.
+                const teiId = (await getCell(template, dataSource.teiId, rowIdx)) || generateUid();
                 const orgUnitId = await this.getFormulaValue(template, dataSource.orgUnit, rowIdx);
                 const enrollmentDate = parseDate(
                     await getCell(template, dataSource.enrollmentDate, rowIdx)

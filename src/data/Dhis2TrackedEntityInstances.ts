@@ -17,6 +17,7 @@ import { Event } from "../domain/entities/DhisDataPackage";
 import { parseDate } from "../domain/helpers/ExcelReader";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 import { ImportPostResponse, postImport } from "./Dhis2Import";
+import { generateUid } from "d2/uid";
 
 export interface GetOptions {
     api: D2Api;
@@ -104,8 +105,10 @@ export async function updateTrackedEntityInstances(
 ): Promise<SynchronizationResult[]> {
     if (_.isEmpty(trackedEntityInstances)) return [emptyImportSummary];
 
+    // Non-UID tei IDS should be deterministic within a current call, use a random seed.
+    const teiSeed = generateUid();
     const metadata = await getMetadata(api);
-    const teis = updateTeiIds(trackedEntityInstances);
+    const teis = updateTeiIds(trackedEntityInstances, teiSeed);
     const programId = _(trackedEntityInstances)
         .map(tei => tei.program.id)
         .uniq()
@@ -127,10 +130,8 @@ export async function updateTrackedEntityInstances(
     const program = await getProgram(api, programId);
     if (!program) throw new Error(`Program not found: ${programId}`);
 
-    const apiEvents = await getApiEvents(api, teis, dataEntries, metadata);
-
+    const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
     const [preTeis, postTeis] = splitTeis(teis, existingTeis);
-
     const options = { api, program, metadata, existingTeis };
     const teiResponsesPre = await uploadTeis({ ...options, teis: preTeis });
     const teiResponsesPost = await uploadTeis({ ...options, teis: postTeis });
@@ -215,7 +216,8 @@ async function getApiEvents(
     api: D2Api,
     teis: TrackedEntityInstance[],
     dataEntries: DataPackageData[],
-    metadata: Metadata
+    metadata: Metadata,
+    teiSeed: string
 ): Promise<Event[]> {
     const programByTei: Record<Id, Id> = _(teis)
         .map(tei => [tei.id, tei.program.id] as const)
@@ -244,7 +246,7 @@ async function getApiEvents(
                 return null;
             }
 
-            const teiId = getUid(data.trackedEntityInstance);
+            const teiId = getUid(data.trackedEntityInstance, teiSeed);
             const program = programByTei[teiId];
 
             if (!program) {
@@ -540,15 +542,16 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
 }
 
 export function updateTeiIds(
-    trackedEntityInstances: TrackedEntityInstance[]
+    trackedEntityInstances: TrackedEntityInstance[],
+    teiSeed: string
 ): TrackedEntityInstance[] {
     return trackedEntityInstances.map(tei => ({
         ...tei,
-        id: getUid(tei.id),
+        id: getUid(tei.id, teiSeed),
         relationships: tei.relationships.map(rel => ({
             ...rel,
-            fromId: getUid(rel.fromId),
-            toId: getUid(rel.toId),
+            fromId: getUid(rel.fromId, teiSeed),
+            toId: getUid(rel.toId, teiSeed),
         })),
     }));
 }
