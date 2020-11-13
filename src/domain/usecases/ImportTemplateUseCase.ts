@@ -165,10 +165,11 @@ export class ImportTemplateUseCase implements UseCase {
                       );
                   });
 
-        const trackedEntityInstances =
-            excelDataValues.type === "trackerPrograms"
-                ? excelDataValues.trackedEntityInstances
-                : [];
+        const trackedEntityInstances = getTrackedEntityInstances(
+            excelDataValues,
+            useBuilderOrgUnits,
+            selectedOrgUnits
+        );
 
         return {
             dataValues: {
@@ -202,6 +203,20 @@ export class ImportTemplateUseCase implements UseCase {
             translateCodes: false,
         });
     }
+}
+
+function getTrackedEntityInstances(
+    excelDataValues: DataPackage,
+    useBuilderOrgUnits: boolean,
+    selectedOrgUnitPaths: string[]
+) {
+    const orgUnitOverridePath = useBuilderOrgUnits ? selectedOrgUnitPaths[0] : null;
+    const teis =
+        excelDataValues.type === "trackerPrograms" ? excelDataValues.trackedEntityInstances : [];
+
+    return orgUnitOverridePath
+        ? teis.map(tei => ({ ...tei, orgUnit: { id: cleanOrgUnitPath(orgUnitOverridePath) } }))
+        : teis;
 }
 
 const compareDataPackages = (
