@@ -1,10 +1,8 @@
 import _ from "lodash";
 import { DataPackageData } from "../domain/entities/DataPackage";
-import { Relationship } from "../domain/entities/Relationship";
 import {
     AttributeValue,
     Enrollment,
-    isRelationshipValid,
     Program,
     TrackedEntityInstance,
 } from "../domain/entities/TrackedEntityInstance";
@@ -17,6 +15,14 @@ import { Event } from "../domain/entities/DhisDataPackage";
 import { parseDate } from "../domain/helpers/ExcelReader";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 import { ImportPostResponse, postImport } from "./Dhis2Import";
+import {
+    DataValueApi,
+    TrackedEntityInstanceApiUpload,
+    TrackedEntityInstancesResponse,
+    TrackedEntityInstanceApi,
+    TrackedEntityInstancesRequest,
+} from "./TrackedEntityInstanceTypes";
+import { getApiRelationships, fromApiRelationships } from "./Dhis2RelationshipTypes";
 
 export interface GetOptions {
     api: D2Api;
@@ -204,11 +210,7 @@ interface Metadata {
 
 /* Get metadata required to map attribute values for option sets */
 async function getMetadata(api: D2Api): Promise<Metadata> {
-    return api.metadata
-        .get({
-            options: { fields: { id: true, code: true } },
-        })
-        .getData();
+    return api.metadata.get({ options: { fields: { id: true, code: true } } }).getData();
 }
 
 async function getApiEvents(
@@ -225,11 +227,7 @@ async function getApiEvents(
     const optionById = _.keyBy(metadata.options, option => option.id);
 
     const { dataElements } = await api.metadata
-        .get({
-            dataElements: {
-                fields: { id: true, valueType: true },
-            },
-        })
+        .get({ dataElements: { fields: { id: true, valueType: true } } })
         .getData();
 
     const valueTypeByDataElementId = _(dataElements)
@@ -238,7 +236,7 @@ async function getApiEvents(
         .value();
 
     return _(dataEntries)
-        .map(data => {
+        .map((data): Event | null => {
             if (!data.trackedEntityInstance) {
                 console.error(`Data without trackedEntityInstance: ${data}`);
                 return null;
@@ -283,7 +281,7 @@ async function getApiEvents(
                 )
                 .value();
 
-            const event: Event = {
+            return {
                 event: data.id,
                 trackedEntityInstance: teiId,
                 program: program,
@@ -294,8 +292,6 @@ async function getApiEvents(
                 programStage: data.programStage,
                 dataValues,
             };
-
-            return event;
         })
         .compact()
         .value();
@@ -308,38 +304,10 @@ function getApiTeiToUpload(
     existingTeis: TrackedEntityInstance[]
 ): TrackedEntityInstanceApiUpload {
     const { orgUnit, enrollment, relationships } = tei;
-
-    const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
     const optionById = _.keyBy(metadata.options, option => option.id);
 
-    const existingRelationships = existingTei?.relationships || [];
-
-    const apiRelationships = _(relationships)
-        .concat(existingRelationships)
-        .filter(isRelationshipValid)
-        .uniqBy(rel => [rel.typeId, rel.fromId, rel.toId].join("-"))
-        .map(rel => {
-            const relationshipId =
-                rel.id ||
-                existingRelationships.find(
-                    eRel =>
-                        eRel.typeId === rel.typeId &&
-                        eRel.fromId === rel.fromId &&
-                        eRel.toId === rel.toId
-                )?.id ||
-                getUid([rel.typeId, rel.fromId, rel.toId].join("-"));
-
-            const relApi: RelationshipApi = {
-                relationship: relationshipId,
-                relationshipType: rel.typeId,
-                relationshipName: rel.typeName,
-                from: { trackedEntityInstance: { trackedEntityInstance: rel.fromId } },
-                to: { trackedEntityInstance: { trackedEntityInstance: rel.toId } },
-            };
-            return relApi;
-        })
-        .compact()
-        .value();
+    const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
+    const apiRelationships = getApiRelationships(existingTei, relationships);
 
     const enrollmentId =
         existingTei?.enrollment?.id || getUid([tei.id, orgUnit.id, program.id].join("-"));
@@ -366,84 +334,6 @@ function getApiTeiToUpload(
                 : [],
         relationships: apiRelationships,
     };
-}
-
-type TrackedEntityInstancesRequest = {
-    program: Id;
-    ou: Id;
-    ouMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
-    order?: string;
-    pageSize?: number;
-    page?: number;
-    totalPages: true;
-    fields: string;
-};
-
-interface TrackedEntityInstancesResponse {
-    pager: {
-        page: number;
-        total: number;
-        pageSize: number;
-        pageCount: number;
-    };
-    trackedEntityInstances: TrackedEntityInstanceApi[];
-}
-
-interface TrackedEntityInstanceApi {
-    trackedEntityInstance: Id;
-    inactive: boolean;
-    orgUnit: Id;
-    attributes: AttributeApi[];
-    enrollments: EnrollmentApi[];
-    relationships: RelationshipApi[];
-}
-
-interface TrackedEntityInstanceApiUpload {
-    trackedEntityInstance: Id;
-    trackedEntityType: Id;
-    orgUnit: Id;
-    attributes: AttributeApiUpload[];
-    enrollments: EnrollmentApi[];
-    relationships: RelationshipApi[];
-}
-
-interface AttributeApiUpload {
-    attribute: Id;
-    value: string;
-}
-
-interface RelationshipApi {
-    relationship: Id;
-    relationshipType: Id;
-    relationshipName: string;
-    from: RelationshipItemApi;
-    to: RelationshipItemApi;
-}
-
-interface RelationshipItemApi {
-    trackedEntityInstance?: {
-        trackedEntityInstance: Id;
-    };
-}
-
-interface AttributeApi {
-    attribute: Id;
-    valueType: string;
-    value: string;
-}
-
-interface EnrollmentApi {
-    enrollment: Id;
-    program: Id;
-    orgUnit: Id;
-    enrollmentDate: string;
-    incidentDate: string;
-    events?: Event[];
-}
-
-interface DataValueApi {
-    dataElement: Id;
-    value: string | number | boolean;
 }
 
 async function getTeisFromApi(options: {
@@ -473,12 +363,6 @@ async function getTeisFromApi(options: {
         fields: fields.join(","),
     };
 
-    /*
-    console.debug(
-        "GET /trackedEntityInstances",
-        _.pick(query, ["program", "ou", "pageSize", "page"])
-    );
-    */
     const teiResponse = await api.get("/trackedEntityInstances", query).getData();
     return teiResponse as TrackedEntityInstancesResponse;
 }
@@ -513,21 +397,6 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
         }
     );
 
-    const relationships: Relationship[] = _(teiApi.relationships)
-        .map(relApi =>
-            relApi.from.trackedEntityInstance && relApi.to.trackedEntityInstance
-                ? {
-                      id: relApi.relationship,
-                      typeId: relApi.relationshipType,
-                      typeName: relApi.relationshipName,
-                      fromId: relApi.from.trackedEntityInstance.trackedEntityInstance,
-                      toId: relApi.to.trackedEntityInstance.trackedEntityInstance,
-                  }
-                : null
-        )
-        .compact()
-        .value();
-
     return {
         program: { id: program.id },
         id: teiApi.trackedEntityInstance,
@@ -535,7 +404,7 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
         disabled: teiApi.inactive || false,
         enrollment,
         attributeValues,
-        relationships,
+        relationships: fromApiRelationships(teiApi),
     };
 }
 

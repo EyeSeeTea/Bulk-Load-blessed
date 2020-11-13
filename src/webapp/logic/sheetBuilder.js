@@ -446,16 +446,20 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         rowId++;
     });
 
-    this.builder.metadata.relationshipTypes.forEach(relationshipType => {
-        metadataSheet.cell(rowId, 1).string(relationshipType.id);
-        metadataSheet.cell(rowId, 2).string("relationshipType");
-        metadataSheet.cell(rowId, 3).string(relationshipType.name);
-        this.workbook.definedNameCollection.addDefinedName({
-            refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
-            name: `_${relationshipType.id}`,
+    const { relationshipTypes } = this.builder.metadata;
+
+    if (relationshipTypes) {
+        relationshipTypes.forEach(relationshipType => {
+            metadataSheet.cell(rowId, 1).string(relationshipType.id);
+            metadataSheet.cell(rowId, 2).string("relationshipType");
+            metadataSheet.cell(rowId, 3).string(relationshipType.name);
+            this.workbook.definedNameCollection.addDefinedName({
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${relationshipType.id}`,
+            });
+            rowId++;
         });
-        rowId++;
-    });
+    }
 
     metadataSheet.cell(rowId, 1).string("true");
     metadataSheet.cell(rowId, 2).string("boolean");
