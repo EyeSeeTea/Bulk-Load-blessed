@@ -159,7 +159,7 @@ export class ExcelReader {
         rowStart: number
     ): Promise<number[]> {
         const rowsCount = await this.excelRepository.getSheetRowsCount(template.id, ref.sheet);
-        return rowsCount ? _.range(rowStart, rowsCount + 1) : [];
+        return rowsCount ? _.range(rowStart, rowsCount + 1, 1) : [];
     }
 
     private async getFormulaValue(template: Template, columnRef: ColumnRef, rowIndex: number) {

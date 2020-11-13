@@ -52,7 +52,7 @@ export async function getTrackedEntityInstances(
     // Get TEIs in other pages using the pager information from the previous requests
     const teisInOtherPages$ = _.flatMap(teisFirstPageData, ({ orgUnit, total }) => {
         const lastPage = Math.ceil(total / pageSize);
-        const pages = _.range(2, lastPage + 1);
+        const pages = _.range(2, lastPage + 1, 1);
         return pages.map(page => async () => {
             const res = await getTeisFromApi({ api, program, orgUnit, page, pageSize });
             return res.trackedEntityInstances;
