@@ -5138,10 +5138,10 @@ cypress@4.6.0:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/d2-api/-/d2-api-1.3.0.tgz#fd0f704315a3206e43530ff218adeb8494c176a8"
-  integrity sha512-Albu93nW9bjo08Nh9tXeCXkfvnyyvH8Mb1Z22O69/2JB8cDkYAfpEyRY26ztg1TQ/L7nhzT14k8lsxEDFAo/bA==
+d2-api@1.3.1-beta.3:
+  version "1.3.1-beta.3"
+  resolved "https://registry.npmjs.org/d2-api/-/d2-api-1.3.1-beta.3.tgz#87e7da267546fced24bc8ece7957a43f9340575a"
+  integrity sha512-ecRIhD9zCCivpU4jBDCDudC4a12pj9ipT1LeidcFV7XCDqzw7z2y96NdzWn9LalmDAhEj3a2+k0j/SqZNq/36w==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"

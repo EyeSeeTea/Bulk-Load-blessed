@@ -18,6 +18,7 @@ export async function getElement(api, type, id) {
         "programType",
         "enrollmentDateLabel",
         "incidentDateLabel",
+        "trackedEntityType",
         "captureCoordinates",
         "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
     ].join(",");
@@ -46,7 +47,8 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
             .getData()
     );
 
-    const metadata = element.type === "trackerPrograms" ? await getTrackerProgramMetadata(api) : {};
+    const metadata =
+        element.type === "trackerPrograms" ? await getTrackerProgramMetadata(element, api) : {};
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
 
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
