@@ -264,7 +264,7 @@ async function getApiEvents(
                     (dataValue): DataValueApi => {
                         // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
                         const valueType = valueTypeByDataElementId[dataValue.dataElement];
-                        let value: string | number | boolean;
+                        let value: string;
 
                         if (
                             valueType === "DATE" &&
@@ -273,9 +273,7 @@ async function getApiEvents(
                         ) {
                             value = parseDate(parseInt(dataValue.value)).toString();
                         } else {
-                            value = dataValue.optionId
-                                ? optionById[dataValue.optionId]?.code || dataValue.optionId
-                                : dataValue.value;
+                            value = getValue(dataValue, optionById);
                         }
                         return {
                             dataElement: dataValue.dataElement,
@@ -352,7 +350,7 @@ function getApiTeiToUpload(
         orgUnit: orgUnit.id,
         attributes: tei.attributeValues.map(av => ({
             attribute: av.attribute.id,
-            value: av.optionId ? optionById[av.optionId]?.code : av.value,
+            value: getValue(av, optionById),
         })),
         enrollments:
             enrollment && enrollment.enrollmentDate
@@ -554,4 +552,15 @@ export function updateTeiIds(
             toId: getUid(rel.toId, teiSeed),
         })),
     }));
+}
+
+function getValue(
+    dataValue: { optionId?: string; value: DataValueApi["value"] },
+    optionById: Record<Id, { id: Id; code: string } | undefined>
+): string {
+    if (dataValue.optionId) {
+        return optionById[dataValue.optionId]?.code || dataValue.optionId;
+    } else {
+        return dataValue.value.toString();
+    }
 }
