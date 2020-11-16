@@ -2,15 +2,17 @@ import _ from "lodash";
 import {
     SynchronizationResult,
     SynchronizationStats,
+    SynchronizationStatus,
 } from "../domain/entities/SynchronizationResult";
 import i18n from "../locales";
 
-type Status = "SUCCESS" | "ERROR";
+type Status = "OK" | "ERROR";
 
 export interface ImportPostResponse {
     status: Status;
     message?: string;
     response?: {
+        status: SynchronizationStatus;
         imported: number;
         updated: number;
         deleted: number;
@@ -43,7 +45,8 @@ export function processImportResponse(options: {
     splitStatsList: boolean;
 }): SynchronizationResult {
     const { title, model, importResult, splitStatsList } = options;
-    const { status, message, response } = importResult;
+    const { message, response } = importResult;
+    const status = response ? response.status : "ERROR";
 
     if (!response) return { title, status, message, rawResponse: importResult };
 

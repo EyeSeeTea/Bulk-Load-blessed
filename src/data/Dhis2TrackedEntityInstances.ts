@@ -116,15 +116,12 @@ export async function updateTrackedEntityInstances(
         .first();
     if (!programId) throw new Error("Cannot get program from TEIs");
 
-    const orgUnitIDs = _(teis)
-        .map(tei => tei.orgUnit.id)
-        .uniq()
-        .value();
+    const orgUnitIds = _.uniq(teis.map(tei => tei.orgUnit.id));
 
     const existingTeis = await getTrackedEntityInstances({
         api,
         program: { id: programId },
-        orgUnits: orgUnitIDs.map(id => ({ id })),
+        orgUnits: orgUnitIds.map(id => ({ id })),
     });
 
     const program = await getProgram(api, programId);
@@ -133,11 +130,24 @@ export async function updateTrackedEntityInstances(
     const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
     const [preTeis, postTeis] = splitTeis(teis, existingTeis);
     const options = { api, program, metadata, existingTeis };
-    const teiResponsesPre = await uploadTeis({ ...options, teis: preTeis });
-    const teiResponsesPost = await uploadTeis({ ...options, teis: postTeis });
-    const eventsResponse = await postEvents(api, apiEvents);
 
-    return _.compact([teiResponsesPre, teiResponsesPost, eventsResponse]);
+    return runSequentialPromisesOnSuccess([
+        () => uploadTeis({ ...options, teis: preTeis }),
+        () => uploadTeis({ ...options, teis: postTeis }),
+        () => postEvents(api, apiEvents),
+    ]);
+}
+
+async function runSequentialPromisesOnSuccess(
+    fns: Array<() => Promise<SynchronizationResult | undefined>>
+): Promise<SynchronizationResult[]> {
+    const output: SynchronizationResult[] = [];
+    for (const fn of fns) {
+        const res = await fn();
+        if (res) output.push(res);
+        if (res && res.status !== "SUCCESS") break;
+    }
+    return output;
 }
 
 // Private
