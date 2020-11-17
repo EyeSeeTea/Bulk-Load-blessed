@@ -1,4 +1,6 @@
 import _ from "lodash";
+import { generateUid } from "d2/uid";
+
 import { DataPackageData } from "../domain/entities/DataPackage";
 import {
     AttributeValue,
@@ -54,14 +56,12 @@ export async function getTrackedEntityInstances(
 
     for (const orgUnits of orgUnitsList) {
         // Limit response size by requesting paginated TEIs
-        let page = 1;
-        do {
+        for (let page = 1; page++; ) {
             const apiOptions = { api, program, orgUnits, page, pageSize };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
             apiTeis.push(...trackedEntityInstances);
             if (pager.pageCount <= page) break;
-            page++;
-        } while (true);
+        }
     }
 
     return apiTeis.map(tei => buildTei(metadata, program, tei));
@@ -108,8 +108,10 @@ export async function updateTrackedEntityInstances(
 ): Promise<SynchronizationResult[]> {
     if (_.isEmpty(trackedEntityInstances)) return [emptyImportSummary];
 
+    // Non-UID tei IDS should be deterministic within a current call, use a random seed.
+    const teiSeed = generateUid();
     const metadata = await getMetadata(api);
-    const teis = updateTeiIds(trackedEntityInstances);
+    const teis = updateTeiIds(trackedEntityInstances, teiSeed);
     const programId = _(trackedEntityInstances)
         .map(tei => tei.program.id)
         .uniq()
@@ -117,30 +119,38 @@ export async function updateTrackedEntityInstances(
         .first();
     if (!programId) throw new Error("Cannot get program from TEIs");
 
-    const orgUnitIDs = _(teis)
-        .map(tei => tei.orgUnit.id)
-        .uniq()
-        .value();
+    const orgUnitIds = _.uniq(teis.map(tei => tei.orgUnit.id));
 
     const existingTeis = await getTrackedEntityInstances({
         api,
         program: { id: programId },
-        orgUnits: orgUnitIDs.map(id => ({ id })),
+        orgUnits: orgUnitIds.map(id => ({ id })),
     });
 
     const program = await getProgram(api, programId);
     if (!program) throw new Error(`Program not found: ${programId}`);
 
-    const apiEvents = await getApiEvents(api, teis, dataEntries, metadata);
-
+    const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
     const [preTeis, postTeis] = splitTeis(teis, existingTeis);
-
     const options = { api, program, metadata, existingTeis };
-    const teiResponsesPre = await uploadTeis({ ...options, teis: preTeis });
-    const teiResponsesPost = await uploadTeis({ ...options, teis: postTeis });
-    const eventsResponse = await postEvents(api, apiEvents);
 
-    return _.compact([teiResponsesPre, teiResponsesPost, eventsResponse]);
+    return runSequentialPromisesOnSuccess([
+        () => uploadTeis({ ...options, teis: preTeis }),
+        () => uploadTeis({ ...options, teis: postTeis }),
+        () => postEvents(api, apiEvents),
+    ]);
+}
+
+async function runSequentialPromisesOnSuccess(
+    fns: Array<() => Promise<SynchronizationResult | undefined>>
+): Promise<SynchronizationResult[]> {
+    const output: SynchronizationResult[] = [];
+    for (const fn of fns) {
+        const res = await fn();
+        if (res) output.push(res);
+        if (res && res.status !== "SUCCESS") break;
+    }
+    return output;
 }
 
 // Private
@@ -215,7 +225,8 @@ async function getApiEvents(
     api: D2Api,
     teis: TrackedEntityInstance[],
     dataEntries: DataPackageData[],
-    metadata: Metadata
+    metadata: Metadata,
+    teiSeed: string
 ): Promise<Event[]> {
     const programByTei: Record<Id, Id> = _(teis)
         .map(tei => [tei.id, tei.program.id] as const)
@@ -240,7 +251,7 @@ async function getApiEvents(
                 return null;
             }
 
-            const teiId = getUid(data.trackedEntityInstance);
+            const teiId = getUid(data.trackedEntityInstance, teiSeed);
             const program = programByTei[teiId];
 
             if (!program) {
@@ -258,7 +269,7 @@ async function getApiEvents(
                     (dataValue): DataValueApi => {
                         // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
                         const valueType = valueTypeByDataElementId[dataValue.dataElement];
-                        let value: string | number | boolean;
+                        let value: string;
 
                         if (
                             valueType === "DATE" &&
@@ -267,9 +278,7 @@ async function getApiEvents(
                         ) {
                             value = parseDate(parseInt(dataValue.value)).toString();
                         } else {
-                            value = dataValue.optionId
-                                ? optionById[dataValue.optionId]?.code || dataValue.optionId
-                                : dataValue.value;
+                            value = getValue(dataValue, optionById);
                         }
                         return {
                             dataElement: dataValue.dataElement,
@@ -316,7 +325,7 @@ function getApiTeiToUpload(
         orgUnit: orgUnit.id,
         attributes: tei.attributeValues.map(av => ({
             attribute: av.attribute.id,
-            value: av.optionId ? optionById[av.optionId]?.code : av.value,
+            value: getValue(av, optionById),
         })),
         enrollments:
             enrollment && enrollment.enrollmentDate
@@ -411,15 +420,27 @@ function buildTei(
 }
 
 export function updateTeiIds(
-    trackedEntityInstances: TrackedEntityInstance[]
+    trackedEntityInstances: TrackedEntityInstance[],
+    teiSeed: string
 ): TrackedEntityInstance[] {
     return trackedEntityInstances.map(tei => ({
         ...tei,
-        id: getUid(tei.id),
+        id: getUid(tei.id, teiSeed),
         relationships: tei.relationships.map(rel => ({
             ...rel,
-            fromId: getUid(rel.fromId),
-            toId: getUid(rel.toId),
+            fromId: getUid(rel.fromId, teiSeed),
+            toId: getUid(rel.toId, teiSeed),
         })),
     }));
+}
+
+function getValue(
+    dataValue: { optionId?: string; value: DataValueApi["value"] },
+    optionById: Record<Id, { id: Id; code: string } | undefined>
+): string {
+    if (dataValue.optionId) {
+        return optionById[dataValue.optionId]?.code || dataValue.optionId;
+    } else {
+        return dataValue.value.toString();
+    }
 }

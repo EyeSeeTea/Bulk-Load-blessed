@@ -17,11 +17,11 @@ export function isValidUid(id: string): boolean {
     return !!id.match(uidRegExp);
 }
 
-/* Return UID from key */
-export function getUid(id: string): string {
+/* Return UID from key (empty seed by default). If key is a valid DHIS" UID, just return it  */
+export function getUid(id: string, seed = ""): string {
     if (isValidUid(id)) return id;
 
-    const md5hash = md5(id);
+    const md5hash = md5(id + seed);
     const nHashChars = Math.ceil(Math.log(maxHashValue) / Math.log(16));
     const hashInteger = parseInt(md5hash.slice(0, nHashChars), 16);
     const result = uidStructure.reduce(
