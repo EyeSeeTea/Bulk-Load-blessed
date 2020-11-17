@@ -56,7 +56,7 @@ export async function getTrackedEntityInstances(
 
     for (const orgUnits of orgUnitsList) {
         // Limit response size by requesting paginated TEIs
-        for (let page = 1; page++; ) {
+        for (let page = 1; ; page++) {
             const apiOptions = { api, program, orgUnits, page, pageSize };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
             apiTeis.push(...trackedEntityInstances);
