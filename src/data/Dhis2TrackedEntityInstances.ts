@@ -7,7 +7,6 @@ import {
     TrackedEntityInstance,
 } from "../domain/entities/TrackedEntityInstance";
 import { D2Api, Id, Ref } from "../types/d2-api";
-import { runPromises } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { postEvents } from "./Dhis2Events";
@@ -22,7 +21,12 @@ import {
     TrackedEntityInstanceApi,
     TrackedEntityInstancesRequest,
 } from "./TrackedEntityInstanceTypes";
-import { getApiRelationships, fromApiRelationships } from "./Dhis2RelationshipTypes";
+import {
+    getApiRelationships,
+    fromApiRelationships,
+    RelationshipMetadata,
+    getTrackerProgramMetadata,
+} from "./Dhis2RelationshipTypes";
 
 export interface GetOptions {
     api: D2Api;
@@ -40,33 +44,27 @@ export async function getTrackedEntityInstances(
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    // Get TEIs for first page on every org unit
-    const teisFirstPageData = await runPromises(
-        orgUnits.map(orgUnit => async () => {
-            const apiOptions = { api, program, orgUnit, page: 1, pageSize };
+    const metadata = await getTrackerProgramMetadata(program, api);
+
+    // Avoid 414-uri-too-large by spliting orgUnit in chunks
+    const orgUnitsList = _.chunk(orgUnits, 250);
+
+    // Get TEIs for the first page:
+    const apiTeis: TrackedEntityInstanceApi[] = [];
+
+    for (const orgUnits of orgUnitsList) {
+        // Limit response size by requesting paginated TEIs
+        let page = 1;
+        do {
+            const apiOptions = { api, program, orgUnits, page, pageSize };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
-            return { orgUnit, trackedEntityInstances, total: pager.total };
-        })
-    );
+            apiTeis.push(...trackedEntityInstances);
+            if (pager.pageCount <= page) break;
+            page++;
+        } while (true);
+    }
 
-    // Get TEIs in other pages using the pager information from the previous requests
-    const teisInOtherPages$ = _.flatMap(teisFirstPageData, ({ orgUnit, total }) => {
-        const lastPage = Math.ceil(total / pageSize);
-        const pages = _.range(2, lastPage + 1, 1);
-        return pages.map(page => async () => {
-            const res = await getTeisFromApi({ api, program, orgUnit, page, pageSize });
-            return res.trackedEntityInstances;
-        });
-    });
-
-    // Join all TEIs
-    const teisInFirstPages = _.flatMap(teisFirstPageData, data => data.trackedEntityInstances);
-    const teisInOtherPages = _.flatten(await runPromises(teisInOtherPages$));
-
-    return _(teisInFirstPages)
-        .concat(teisInOtherPages)
-        .map(tei => buildTei(program, tei))
-        .value();
+    return apiTeis.map(tei => buildTei(metadata, program, tei));
 }
 
 export async function getProgram(api: D2Api, id: Id): Promise<Program | undefined> {
@@ -339,11 +337,11 @@ function getApiTeiToUpload(
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;
-    orgUnit: Ref;
+    orgUnits: Ref[];
     page: number;
     pageSize: number;
 }): Promise<TrackedEntityInstancesResponse> {
-    const { api, program, orgUnit, page, pageSize } = options;
+    const { api, program, orgUnits, page, pageSize } = options;
     const fields: Array<keyof TrackedEntityInstanceApi> = [
         "trackedEntityInstance",
         "inactive",
@@ -353,7 +351,7 @@ async function getTeisFromApi(options: {
         "relationships",
     ];
     const query: TrackedEntityInstancesRequest = {
-        ou: orgUnit.id,
+        ou: orgUnits.map(ou => ou.id).join(";"),
         ouMode: "SELECTED",
         order: "created:asc",
         program: program.id,
@@ -367,7 +365,11 @@ async function getTeisFromApi(options: {
     return teiResponse as TrackedEntityInstancesResponse;
 }
 
-function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEntityInstance {
+function buildTei(
+    metadata: RelationshipMetadata,
+    program: Program,
+    teiApi: TrackedEntityInstanceApi
+): TrackedEntityInstance {
     const orgUnit = { id: teiApi.orgUnit };
     const attributesById = _.keyBy(program.attributes, attribute => attribute.id);
 
@@ -404,7 +406,7 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
         disabled: teiApi.inactive || false,
         enrollment,
         attributeValues,
-        relationships: fromApiRelationships(teiApi),
+        relationships: fromApiRelationships(metadata, teiApi),
     };
 }
 

@@ -1,14 +1,15 @@
 import { Id } from "../types/d2-api";
 
 export type TrackedEntityInstancesRequest = {
-    program: Id;
-    ou: Id;
     ouMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
+    ou?: Id;
+    program?: Id;
+    trackedEntityType?: Id;
     order?: string;
     pageSize?: number;
     page?: number;
     totalPages: true;
-    fields: string;
+    fields?: string;
 };
 
 export interface TrackedEntityInstancesResponse {
@@ -23,6 +24,7 @@ export interface TrackedEntityInstancesResponse {
 
 export interface TrackedEntityInstanceApi {
     trackedEntityInstance: Id;
+    trackedEntityType: Id;
     inactive: boolean;
     orgUnit: Id;
     attributes: AttributeApi[];

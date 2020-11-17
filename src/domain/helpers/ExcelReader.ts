@@ -174,10 +174,14 @@ export class ExcelReader {
         teis: TrackedEntityInstance[],
         relationships: Relationship[]
     ): TrackedEntityInstance[] {
-        const relationshipsByFromId = _.keyBy(relationships, relationship => relationship.fromId);
+        const relationshipsByFromId = _.groupBy(relationships, relationship => relationship.fromId);
+        const relationshipsByToId = _.groupBy(relationships, relationship => relationship.toId);
         return teis.map(tei => ({
             ...tei,
-            relationships: _.compact([relationshipsByFromId[tei.id]]),
+            relationships: _.concat(
+                relationshipsByFromId[tei.id] || [],
+                relationshipsByToId[tei.id] || []
+            ),
         }));
     }
 
@@ -272,22 +276,21 @@ export class ExcelReader {
         template: Template,
         dataSource: TrackerRelationship
     ): Promise<Relationship[]> {
-        const rowStart = 2;
+        const rowStart = dataSource.range.rowStart;
         const programId = await this.getFormulaCell(template, template.dataFormId);
         if (!programId) return [];
+        const typeName = await this.excelRepository.readCell(
+            template.id,
+            dataSource.relationshipType
+        );
+        const typeId = await this.getFormulaCell(template, dataSource.relationshipType);
 
         const getCell = this.getCellValue.bind(this);
-        const rowIndexes = await this.getRowIndexes(template, dataSource.typeName, rowStart);
+        const rowIndexes = await this.getRowIndexes(template, dataSource.from, rowStart);
 
         const relationships = await promiseMap<number, Relationship | undefined>(
             rowIndexes,
             async rowIdx => {
-                const typeId = removeCharacters(
-                    await getCell(template, dataSource.typeName, rowIdx, {
-                        formula: true,
-                    })
-                );
-                const typeName = await getCell(template, dataSource.typeName, rowIdx);
                 const fromTeiId = await getCell(template, dataSource.from, rowIdx);
                 const toTeiId = await getCell(template, dataSource.to, rowIdx);
                 if (!fromTeiId || !toTeiId || !typeId) return;

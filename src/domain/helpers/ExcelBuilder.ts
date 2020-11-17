@@ -25,6 +25,7 @@ import {
     BuilderMetadata,
     emptyBuilderMetadata,
 } from "../repositories/InstanceRepository";
+import { Relationship } from "../entities/Relationship";
 
 const dateFormatPattern = "yyyy-mm-dd";
 
@@ -228,18 +229,26 @@ export class ExcelBuilder {
     ) {
         if (payload.type !== "trackerPrograms") return;
 
-        const relationships = getRelationships(payload.trackedEntityInstances ?? []);
+        const relationships: Relationship[] = getRelationships(
+            payload.trackedEntityInstances ?? []
+        );
+        const typeId = removeCharacters(
+            await this.excelRepository.readCell(template.id, dataSource.relationshipType, {
+                formula: true,
+            })
+        );
 
         let { rowStart } = dataSource.range;
 
         for (const relationship of relationships) {
+            if (relationship.typeId !== typeId) continue;
+
             const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.range,
                 rowStart,
                 rowEnd: rowStart,
             });
 
-            await this.fillCell(template, cells[0], dataSource.typeName, relationship.typeName);
             await this.fillCell(template, cells[0], dataSource.from, relationship.fromId);
             await this.fillCell(template, cells[0], dataSource.to, relationship.toId);
 

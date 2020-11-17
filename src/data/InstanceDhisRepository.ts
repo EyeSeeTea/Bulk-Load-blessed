@@ -117,6 +117,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     },
                     access: true,
                     programType: true,
+                    trackedEntityType: true,
                 },
                 filter: {
                     id: ids ? { in: ids } : undefined,
