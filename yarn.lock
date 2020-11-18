@@ -1986,11 +1986,6 @@
     "@testing-library/dom" "^7.2.2"
     "@types/testing-library__react" "^10.0.1"
 
-"@types/argparse@^1.0.36":
-  version "1.0.38"
-  resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-1.0.38.tgz#a81fd8606d481f873a3800c6ebae4f1d768a56a9"
-  integrity sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==
-
 "@types/babel__core@^7.0.0":
   version "7.1.10"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
@@ -2917,6 +2912,11 @@ argparse@^1.0.10, argparse@^1.0.7:
   integrity sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==
   dependencies:
     sprintf-js "~1.0.2"
+
+argparse@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
+  integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
 aria-query@^3.0.0:
   version "3.0.0"
@@ -5138,18 +5138,17 @@ cypress@4.6.0:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@1.3.1-beta.3:
-  version "1.3.1-beta.3"
-  resolved "https://registry.npmjs.org/d2-api/-/d2-api-1.3.1-beta.3.tgz#87e7da267546fced24bc8ece7957a43f9340575a"
-  integrity sha512-ecRIhD9zCCivpU4jBDCDudC4a12pj9ipT1LeidcFV7XCDqzw7z2y96NdzWn9LalmDAhEj3a2+k0j/SqZNq/36w==
+d2-api@1.4.0-beta.1:
+  version "1.4.0-beta.1"
+  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-1.4.0-beta.1.tgz#f1014520f30c05a6468ed1b223f9135f5e304da8"
+  integrity sha512-QGV3xSHh8odohVMKiqbr17e60zBaDSjzjBDcLtUk/whyuhVYvDnY/XlES21Se9C7JAzzlXeXyxTZdkNTNNhsVQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
-    "@types/argparse" "^1.0.36"
     "@types/prettier" "^1.18.3"
     "@types/qs" "^6.5.3"
     abort-controller "3.0.0"
-    argparse "^1.0.10"
+    argparse "^2.0.1"
     axios "0.19.2"
     axios-debug-log "^0.6.2"
     axios-mock-adapter "1.18.2"
