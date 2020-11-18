@@ -29,6 +29,7 @@ import {
     RelationshipMetadata,
     getTrackerProgramMetadata,
 } from "./Dhis2RelationshipTypes";
+import i18n from "../locales";
 
 export interface GetOptions {
     api: D2Api;
@@ -135,8 +136,8 @@ export async function updateTrackedEntityInstances(
     const options = { api, program, metadata, existingTeis };
 
     return runSequentialPromisesOnSuccess([
-        () => uploadTeis({ ...options, teis: preTeis }),
-        () => uploadTeis({ ...options, teis: postTeis }),
+        () => uploadTeis({ ...options, teis: preTeis, title: i18n.t("Create/update") }),
+        () => uploadTeis({ ...options, teis: postTeis, title: i18n.t("Relationships") }),
         () => postEvents(api, apiEvents),
     ]);
 }
@@ -189,12 +190,14 @@ async function uploadTeis(options: {
     metadata: Metadata;
     teis: TrackedEntityInstance[];
     existingTeis: TrackedEntityInstance[];
+    title: string;
 }): Promise<SynchronizationResult | undefined> {
-    const { api, program, metadata, teis, existingTeis } = options;
+    const { api, program, metadata, teis, existingTeis, title } = options;
 
     if (_.isEmpty(teis)) return undefined;
 
     const apiTeis = teis.map(tei => getApiTeiToUpload(program, metadata, tei, existingTeis));
+    const model = i18n.t("Tracked Entity Instance");
 
     return postImport(
         () =>
@@ -206,8 +209,8 @@ async function uploadTeis(options: {
                 )
                 .getData(),
         {
-            title: "Tracked Entity Instances - Create/update",
-            model: "Tracked Entity Instance",
+            title: `${model} - ${title}`,
+            model: model,
             splitStatsList: false,
         }
     );
