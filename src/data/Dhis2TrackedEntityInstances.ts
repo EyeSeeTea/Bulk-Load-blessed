@@ -131,7 +131,7 @@ export async function updateTrackedEntityInstances(
     if (!program) throw new Error(`Program not found: ${programId}`);
 
     const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
-    const [preTeis, postTeis] = splitTeis(teis, existingTeis);
+    const [preTeis, postTeis] = await splitTeis(api, teis);
     const options = { api, program, metadata, existingTeis };
 
     return runSequentialPromisesOnSuccess([
@@ -159,10 +159,11 @@ async function runSequentialPromisesOnSuccess(
     yet (creation of TEIS is sequential). So let's split pre/post TEI's so they can be
     posted separatedly.
 */
-function splitTeis(
-    teis: TrackedEntityInstance[],
-    existingTeis: TrackedEntityInstance[]
-): [TrackedEntityInstance[], TrackedEntityInstance[]] {
+async function splitTeis(
+    api: D2Api,
+    teis: TrackedEntityInstance[]
+): Promise<[TrackedEntityInstance[], TrackedEntityInstance[]]> {
+    const existingTeis = await getExistingTeis(api);
     const existingTeiIds = new Set(existingTeis.map(tei => tei.id));
 
     const [validTeis, invalidTeis] = _(teis)
@@ -343,6 +344,22 @@ function getApiTeiToUpload(
     };
 }
 
+interface TeiIdsResponse {
+    trackedEntityInstances: Ref[];
+}
+
+async function getExistingTeis(api: D2Api): Promise<Ref[]> {
+    const query: TrackedEntityInstancesRequest = {
+        ouMode: "CAPTURE",
+        pageSize: 1e6,
+        totalPages: true,
+        fields: "trackedEntityInstance~rename(id)",
+    };
+
+    const teiResponse = await api.get("/trackedEntityInstances", query).getData();
+    const { trackedEntityInstances } = teiResponse as TeiIdsResponse;
+    return trackedEntityInstances;
+}
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;
