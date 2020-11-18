@@ -30,13 +30,18 @@ SheetBuilder.prototype.generate = function () {
         const { element, elementMetadata: metadata } = builder;
         this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
         this.programStageSheets = {};
+        this.relationshipsSheets = [];
 
         _.forEach(element.programStages, programStageT => {
             const programStage = metadata.get(programStageT.id);
             const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
             this.programStageSheets[programStageT.id] = sheet;
         });
-        this.relationshipsSheet = this.workbook.addWorksheet("Relationships");
+
+        _.forEach(builder.metadata.relationshipTypes, relationshipType => {
+            const sheet = this.workbook.addWorksheet(`Relationship - ${relationshipType.name}`);
+            this.relationshipsSheets.push([relationshipType, sheet]);
+        });
     } else {
         this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
     }
@@ -52,7 +57,7 @@ SheetBuilder.prototype.generate = function () {
     if (isTrackerProgram(element)) {
         this.fillInstancesSheet();
         this.fillProgramStageSheets();
-        this.fillRelationshipsSheet();
+        this.fillRelationshipSheets();
     } else {
         this.fillDataEntrySheet();
     }
@@ -60,16 +65,29 @@ SheetBuilder.prototype.generate = function () {
     return this.workbook;
 };
 
-SheetBuilder.prototype.fillRelationshipsSheet = function () {
-    const sheet = this.relationshipsSheet;
+SheetBuilder.prototype.fillRelationshipSheets = function () {
+    const { element: program } = this.builder;
 
-    this.createColumn(sheet, 1, 1, "Type", null, this.validations.get("relationshipTypes"));
-    this.createColumn(sheet, 1, 2, "From TEI", null, this.getTeiIdValidation());
-    this.createColumn(sheet, 1, 3, "To TEI", null, this.getTeiIdValidation());
+    _.forEach(this.relationshipsSheets, ([relationshipType, sheet]) => {
+        sheet.cell(1, 1).formula(`=_${relationshipType.id}`).style(baseStyle);
+
+        ["from", "to"].forEach((key, idx) => {
+            const { name, program: constraintProgram } = relationshipType.constraints[key];
+            const validation =
+                constraintProgram?.id === program.id
+                    ? this.getTeiIdValidation()
+                    : this.validations.get(getRelationshipTypeKey(relationshipType, key));
+            const columnName = `${_.startCase(key)} TEI (${name})`;
+            const columnId = idx + 1;
+            this.createColumn(sheet, 2, columnId, columnName, null, validation);
+            sheet.column(columnId).setWidth(columnName.length + 10);
+        });
+    });
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {
     const { elementMetadata: metadata, element: program } = this.builder;
+
     _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
         const programStage = metadata.get(programStageId);
@@ -84,10 +102,6 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         sheet.row(itemRow).setHeight(50);
 
         sheet.cell(sectionRow, 1).formula(`=_${programStageId}`).style(baseStyle);
-
-        for (let row = 1; row < sectionRow; row++) {
-            sheet.row(row).hide();
-        }
 
         // Add column titles
         let columnId = 1;
@@ -318,6 +332,24 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                 columnId
             )}$${rowId}`
         );
+
+        _.forEach(metadata.relationshipTypes, relationshipType => {
+            ["from", "to"].forEach(key => {
+                rowId = 2;
+                columnId++;
+                validationSheet
+                    .cell(rowId++, columnId)
+                    .string(`Relationship Type ${relationshipType.name} (${key})`);
+                relationshipType.constraints[key].teis.forEach(tei => {
+                    validationSheet.cell(rowId++, columnId).string(tei.id);
+
+                    const value = `=Validation!$${Excel.getExcelAlpha(
+                        columnId
+                    )}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`;
+                    this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
+                });
+            });
+        });
     }
 
     rowId = 2;
@@ -446,16 +478,20 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         rowId++;
     });
 
-    this.builder.metadata.relationshipTypes.forEach(relationshipType => {
-        metadataSheet.cell(rowId, 1).string(relationshipType.id);
-        metadataSheet.cell(rowId, 2).string("relationshipType");
-        metadataSheet.cell(rowId, 3).string(relationshipType.name);
-        this.workbook.definedNameCollection.addDefinedName({
-            refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
-            name: `_${relationshipType.id}`,
+    const { relationshipTypes } = this.builder.metadata;
+
+    if (relationshipTypes) {
+        relationshipTypes.forEach(relationshipType => {
+            metadataSheet.cell(rowId, 1).string(relationshipType.id);
+            metadataSheet.cell(rowId, 2).string("relationshipType");
+            metadataSheet.cell(rowId, 3).string(relationshipType.name);
+            this.workbook.definedNameCollection.addDefinedName({
+                refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
+                name: `_${relationshipType.id}`,
+            });
+            rowId++;
         });
-        rowId++;
-    });
+    }
 
     metadataSheet.cell(rowId, 1).string("true");
     metadataSheet.cell(rowId, 2).string("boolean");
@@ -957,4 +993,8 @@ export function getTemplateId(type, id) {
                     throw new Error("Unsupported type");
             }
     }
+}
+
+function getRelationshipTypeKey(relationshipType, key) {
+    return ["relationshipType", relationshipType.id, key].join("-");
 }

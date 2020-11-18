@@ -1,15 +1,14 @@
 import _ from "lodash";
+import { generateUid } from "d2/uid";
+
 import { DataPackageData } from "../domain/entities/DataPackage";
-import { Relationship } from "../domain/entities/Relationship";
 import {
     AttributeValue,
     Enrollment,
-    isRelationshipValid,
     Program,
     TrackedEntityInstance,
 } from "../domain/entities/TrackedEntityInstance";
 import { D2Api, Id, Ref } from "../types/d2-api";
-import { runPromises } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { postEvents } from "./Dhis2Events";
@@ -17,7 +16,19 @@ import { Event } from "../domain/entities/DhisDataPackage";
 import { parseDate } from "../domain/helpers/ExcelReader";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 import { ImportPostResponse, postImport } from "./Dhis2Import";
-import { generateUid } from "d2/uid";
+import {
+    DataValueApi,
+    TrackedEntityInstanceApiUpload,
+    TrackedEntityInstancesResponse,
+    TrackedEntityInstanceApi,
+    TrackedEntityInstancesRequest,
+} from "./TrackedEntityInstanceTypes";
+import {
+    getApiRelationships,
+    fromApiRelationships,
+    RelationshipMetadata,
+    getTrackerProgramMetadata,
+} from "./Dhis2RelationshipTypes";
 
 export interface GetOptions {
     api: D2Api;
@@ -35,33 +46,25 @@ export async function getTrackedEntityInstances(
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    // Get TEIs for first page on every org unit
-    const teisFirstPageData = await runPromises(
-        orgUnits.map(orgUnit => async () => {
-            const apiOptions = { api, program, orgUnit, page: 1, pageSize };
+    const metadata = await getTrackerProgramMetadata(program, api);
+
+    // Avoid 414-uri-too-large by spliting orgUnit in chunks
+    const orgUnitsList = _.chunk(orgUnits, 250);
+
+    // Get TEIs for the first page:
+    const apiTeis: TrackedEntityInstanceApi[] = [];
+
+    for (const orgUnits of orgUnitsList) {
+        // Limit response size by requesting paginated TEIs
+        for (let page = 1; ; page++) {
+            const apiOptions = { api, program, orgUnits, page, pageSize };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
-            return { orgUnit, trackedEntityInstances, total: pager.total };
-        })
-    );
+            apiTeis.push(...trackedEntityInstances);
+            if (pager.pageCount <= page) break;
+        }
+    }
 
-    // Get TEIs in other pages using the pager information from the previous requests
-    const teisInOtherPages$ = _.flatMap(teisFirstPageData, ({ orgUnit, total }) => {
-        const lastPage = Math.ceil(total / pageSize);
-        const pages = _.range(2, lastPage + 1);
-        return pages.map(page => async () => {
-            const res = await getTeisFromApi({ api, program, orgUnit, page, pageSize });
-            return res.trackedEntityInstances;
-        });
-    });
-
-    // Join all TEIs
-    const teisInFirstPages = _.flatMap(teisFirstPageData, data => data.trackedEntityInstances);
-    const teisInOtherPages = _.flatten(await runPromises(teisInOtherPages$));
-
-    return _(teisInFirstPages)
-        .concat(teisInOtherPages)
-        .map(tei => buildTei(program, tei))
-        .value();
+    return apiTeis.map(tei => buildTei(metadata, program, tei));
 }
 
 export async function getProgram(api: D2Api, id: Id): Promise<Program | undefined> {
@@ -215,11 +218,7 @@ interface Metadata {
 
 /* Get metadata required to map attribute values for option sets */
 async function getMetadata(api: D2Api): Promise<Metadata> {
-    return api.metadata
-        .get({
-            options: { fields: { id: true, code: true } },
-        })
-        .getData();
+    return api.metadata.get({ options: { fields: { id: true, code: true } } }).getData();
 }
 
 async function getApiEvents(
@@ -237,11 +236,7 @@ async function getApiEvents(
     const optionById = _.keyBy(metadata.options, option => option.id);
 
     const { dataElements } = await api.metadata
-        .get({
-            dataElements: {
-                fields: { id: true, valueType: true },
-            },
-        })
+        .get({ dataElements: { fields: { id: true, valueType: true } } })
         .getData();
 
     const valueTypeByDataElementId = _(dataElements)
@@ -250,7 +245,7 @@ async function getApiEvents(
         .value();
 
     return _(dataEntries)
-        .map(data => {
+        .map((data): Event | null => {
             if (!data.trackedEntityInstance) {
                 console.error(`Data without trackedEntityInstance: ${data}`);
                 return null;
@@ -293,7 +288,7 @@ async function getApiEvents(
                 )
                 .value();
 
-            const event: Event = {
+            return {
                 event: data.id,
                 trackedEntityInstance: teiId,
                 program: program,
@@ -304,8 +299,6 @@ async function getApiEvents(
                 programStage: data.programStage,
                 dataValues,
             };
-
-            return event;
         })
         .compact()
         .value();
@@ -318,38 +311,10 @@ function getApiTeiToUpload(
     existingTeis: TrackedEntityInstance[]
 ): TrackedEntityInstanceApiUpload {
     const { orgUnit, enrollment, relationships } = tei;
-
-    const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
     const optionById = _.keyBy(metadata.options, option => option.id);
 
-    const existingRelationships = existingTei?.relationships || [];
-
-    const apiRelationships = _(relationships)
-        .concat(existingRelationships)
-        .filter(isRelationshipValid)
-        .uniqBy(rel => [rel.typeId, rel.fromId, rel.toId].join("-"))
-        .map(rel => {
-            const relationshipId =
-                rel.id ||
-                existingRelationships.find(
-                    eRel =>
-                        eRel.typeId === rel.typeId &&
-                        eRel.fromId === rel.fromId &&
-                        eRel.toId === rel.toId
-                )?.id ||
-                getUid([rel.typeId, rel.fromId, rel.toId].join("-"));
-
-            const relApi: RelationshipApi = {
-                relationship: relationshipId,
-                relationshipType: rel.typeId,
-                relationshipName: rel.typeName,
-                from: { trackedEntityInstance: { trackedEntityInstance: rel.fromId } },
-                to: { trackedEntityInstance: { trackedEntityInstance: rel.toId } },
-            };
-            return relApi;
-        })
-        .compact()
-        .value();
+    const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
+    const apiRelationships = getApiRelationships(existingTei, relationships);
 
     const enrollmentId =
         existingTei?.enrollment?.id || getUid([tei.id, orgUnit.id, program.id].join("-"));
@@ -378,92 +343,14 @@ function getApiTeiToUpload(
     };
 }
 
-type TrackedEntityInstancesRequest = {
-    program: Id;
-    ou: Id;
-    ouMode?: "SELECTED" | "CHILDREN" | "DESCENDANTS" | "ACCESSIBLE" | "CAPTURE" | "ALL";
-    order?: string;
-    pageSize?: number;
-    page?: number;
-    totalPages: true;
-    fields: string;
-};
-
-interface TrackedEntityInstancesResponse {
-    pager: {
-        page: number;
-        total: number;
-        pageSize: number;
-        pageCount: number;
-    };
-    trackedEntityInstances: TrackedEntityInstanceApi[];
-}
-
-interface TrackedEntityInstanceApi {
-    trackedEntityInstance: Id;
-    inactive: boolean;
-    orgUnit: Id;
-    attributes: AttributeApi[];
-    enrollments: EnrollmentApi[];
-    relationships: RelationshipApi[];
-}
-
-interface TrackedEntityInstanceApiUpload {
-    trackedEntityInstance: Id;
-    trackedEntityType: Id;
-    orgUnit: Id;
-    attributes: AttributeApiUpload[];
-    enrollments: EnrollmentApi[];
-    relationships: RelationshipApi[];
-}
-
-interface AttributeApiUpload {
-    attribute: Id;
-    value: string;
-}
-
-interface RelationshipApi {
-    relationship: Id;
-    relationshipType: Id;
-    relationshipName: string;
-    from: RelationshipItemApi;
-    to: RelationshipItemApi;
-}
-
-interface RelationshipItemApi {
-    trackedEntityInstance?: {
-        trackedEntityInstance: Id;
-    };
-}
-
-interface AttributeApi {
-    attribute: Id;
-    valueType: string;
-    value: string;
-}
-
-interface EnrollmentApi {
-    enrollment: Id;
-    program: Id;
-    orgUnit: Id;
-    enrollmentDate: string;
-    incidentDate: string;
-    events?: Event[];
-}
-
-interface DataValueApi {
-    dataElement: Id;
-    value: string | number | boolean;
-}
-
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;
-    orgUnit: Ref;
+    orgUnits: Ref[];
     page: number;
     pageSize: number;
 }): Promise<TrackedEntityInstancesResponse> {
-    const { api, program, orgUnit, page, pageSize } = options;
+    const { api, program, orgUnits, page, pageSize } = options;
     const fields: Array<keyof TrackedEntityInstanceApi> = [
         "trackedEntityInstance",
         "inactive",
@@ -473,7 +360,7 @@ async function getTeisFromApi(options: {
         "relationships",
     ];
     const query: TrackedEntityInstancesRequest = {
-        ou: orgUnit.id,
+        ou: orgUnits.map(ou => ou.id).join(";"),
         ouMode: "SELECTED",
         order: "created:asc",
         program: program.id,
@@ -483,17 +370,15 @@ async function getTeisFromApi(options: {
         fields: fields.join(","),
     };
 
-    /*
-    console.debug(
-        "GET /trackedEntityInstances",
-        _.pick(query, ["program", "ou", "pageSize", "page"])
-    );
-    */
     const teiResponse = await api.get("/trackedEntityInstances", query).getData();
     return teiResponse as TrackedEntityInstancesResponse;
 }
 
-function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEntityInstance {
+function buildTei(
+    metadata: RelationshipMetadata,
+    program: Program,
+    teiApi: TrackedEntityInstanceApi
+): TrackedEntityInstance {
     const orgUnit = { id: teiApi.orgUnit };
     const attributesById = _.keyBy(program.attributes, attribute => attribute.id);
 
@@ -523,21 +408,6 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
         }
     );
 
-    const relationships: Relationship[] = _(teiApi.relationships)
-        .map(relApi =>
-            relApi.from.trackedEntityInstance && relApi.to.trackedEntityInstance
-                ? {
-                      id: relApi.relationship,
-                      typeId: relApi.relationshipType,
-                      typeName: relApi.relationshipName,
-                      fromId: relApi.from.trackedEntityInstance.trackedEntityInstance,
-                      toId: relApi.to.trackedEntityInstance.trackedEntityInstance,
-                  }
-                : null
-        )
-        .compact()
-        .value();
-
     return {
         program: { id: program.id },
         id: teiApi.trackedEntityInstance,
@@ -545,7 +415,7 @@ function buildTei(program: Program, teiApi: TrackedEntityInstanceApi): TrackedEn
         disabled: teiApi.inactive || false,
         enrollment,
         attributeValues,
-        relationships,
+        relationships: fromApiRelationships(metadata, teiApi),
     };
 }
 

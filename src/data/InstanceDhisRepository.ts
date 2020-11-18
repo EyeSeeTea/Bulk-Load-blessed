@@ -117,6 +117,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     },
                     access: true,
                     programType: true,
+                    trackedEntityType: true,
                 },
                 filter: {
                     id: ids ? { in: ids } : undefined,
@@ -558,7 +559,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
                 programEvents.push(...events);
 
-                await promiseMap(_.range(2, pager.pageCount + 1), async page => {
+                await promiseMap(_.range(2, pager.pageCount + 1, 1), async page => {
                     const { events } = await getEvents(orgUnit, categoryOptionId, page);
                     programEvents.push(...events);
                 });

@@ -108,7 +108,7 @@ export interface TrackerRelationship {
     type: "rowTeiRelationship";
     skipPopulate?: boolean;
     range: Range;
-    typeName: ColumnRef;
+    relationshipType: CellRef;
     from: ColumnRef;
     to: ColumnRef;
 }

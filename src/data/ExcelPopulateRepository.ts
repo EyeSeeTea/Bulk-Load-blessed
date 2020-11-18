@@ -168,7 +168,9 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
 
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
-        const endCell = workbook.sheet(range.sheet).usedRange()?.endCell();
+        const xlsxSheet = workbook.sheet(range.sheet);
+        if (!xlsxSheet) return [];
+        const endCell = xlsxSheet.usedRange()?.endCell();
         const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
         const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
 
