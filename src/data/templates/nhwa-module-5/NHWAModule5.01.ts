@@ -24,7 +24,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D9" },
         },
         {
@@ -32,7 +32,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E9" },
         },
         {
@@ -40,7 +40,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F9" },
         },
         {
@@ -48,7 +48,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G9" },
         },
         {
@@ -56,7 +56,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H9" },
         },
         {
@@ -64,7 +64,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I9" },
         },
         {
@@ -72,7 +72,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J9" },
         },
         {
@@ -80,7 +80,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K9" },
         },
         {
@@ -88,7 +88,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L9" },
         },
         {
@@ -96,7 +96,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D10" },
         },
         {
@@ -104,7 +104,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E10" },
         },
         {
@@ -112,7 +112,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F10" },
         },
         {
@@ -120,7 +120,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G10" },
         },
         {
@@ -128,7 +128,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H10" },
         },
         {
@@ -136,7 +136,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I10" },
         },
         {
@@ -144,7 +144,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J10" },
         },
         {
@@ -152,7 +152,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K10" },
         },
         {
@@ -160,7 +160,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L10" },
         },
         {
@@ -168,7 +168,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D11" },
         },
         {
@@ -176,7 +176,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E11" },
         },
         {
@@ -184,7 +184,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F11" },
         },
         {
@@ -192,7 +192,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G11" },
         },
         {
@@ -200,7 +200,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H11" },
         },
         {
@@ -208,7 +208,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I11" },
         },
         {
@@ -216,7 +216,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J11" },
         },
         {
@@ -224,7 +224,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K11" },
         },
         {
@@ -232,7 +232,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L11" },
         },
         {
@@ -240,7 +240,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D12" },
         },
         {
@@ -248,7 +248,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E12" },
         },
         {
@@ -256,7 +256,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F12" },
         },
         {
@@ -264,7 +264,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G12" },
         },
         {
@@ -272,7 +272,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H12" },
         },
         {
@@ -280,7 +280,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I12" },
         },
         {
@@ -288,7 +288,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J12" },
         },
         {
@@ -296,7 +296,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K12" },
         },
         {
@@ -304,7 +304,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L12" },
         },
         {
@@ -312,7 +312,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D13" },
         },
         {
@@ -320,7 +320,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E13" },
         },
         {
@@ -328,7 +328,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F13" },
         },
         {
@@ -336,7 +336,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G13" },
         },
         {
@@ -344,7 +344,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H13" },
         },
         {
@@ -352,7 +352,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I13" },
         },
         {
@@ -360,7 +360,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J13" },
         },
         {
@@ -368,7 +368,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K13" },
         },
         {
@@ -376,7 +376,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L13" },
         },
         {
@@ -384,7 +384,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D14" },
         },
         {
@@ -392,7 +392,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E14" },
         },
         {
@@ -400,7 +400,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F14" },
         },
         {
@@ -408,7 +408,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G14" },
         },
         {
@@ -416,7 +416,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H14" },
         },
         {
@@ -424,7 +424,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I14" },
         },
         {
@@ -432,7 +432,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J14" },
         },
         {
@@ -440,7 +440,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K14" },
         },
         {
@@ -448,7 +448,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L14" },
         },
         {
@@ -456,7 +456,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "P9FK7e2Ngsz" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "D15" },
         },
         {
@@ -464,7 +464,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qNRERx0Icjw" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "E15" },
         },
         {
@@ -472,7 +472,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "SSzpjcForGt" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "F15" },
         },
         {
@@ -480,7 +480,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "DwYaOZuilM8" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "G15" },
         },
         {
@@ -488,7 +488,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "gvkPV8aqP39" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "H15" },
         },
         {
@@ -496,7 +496,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sF1LtVEqk6Y" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "I15" },
         },
         {
@@ -504,7 +504,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "OI5vu4jG4Rf" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "J15" },
         },
         {
@@ -512,7 +512,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "h1S7GCkmvVn" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "K15" },
         },
         {
@@ -520,7 +520,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "ftfTDf31OnN" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Entry into Labour Market", ref: "L15" },
         },
         {
@@ -528,7 +528,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D9" },
         },
         {
@@ -536,7 +536,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E9" },
         },
         {
@@ -544,7 +544,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F9" },
         },
         {
@@ -552,7 +552,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G9" },
         },
         {
@@ -560,7 +560,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H9" },
         },
         {
@@ -568,7 +568,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I9" },
         },
         {
@@ -576,7 +576,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J9" },
         },
         {
@@ -584,7 +584,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K9" },
         },
         {
@@ -592,7 +592,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L9" },
         },
         {
@@ -600,7 +600,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M9" },
         },
         {
@@ -608,7 +608,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D10" },
         },
         {
@@ -616,7 +616,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E10" },
         },
         {
@@ -624,7 +624,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F10" },
         },
         {
@@ -632,7 +632,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G10" },
         },
         {
@@ -640,7 +640,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H10" },
         },
         {
@@ -648,7 +648,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I10" },
         },
         {
@@ -656,7 +656,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J10" },
         },
         {
@@ -664,7 +664,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K10" },
         },
         {
@@ -672,7 +672,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L10" },
         },
         {
@@ -680,7 +680,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M10" },
         },
         {
@@ -688,7 +688,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D11" },
         },
         {
@@ -696,7 +696,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E11" },
         },
         {
@@ -704,7 +704,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F11" },
         },
         {
@@ -712,7 +712,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G11" },
         },
         {
@@ -720,7 +720,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H11" },
         },
         {
@@ -728,7 +728,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I11" },
         },
         {
@@ -736,7 +736,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J11" },
         },
         {
@@ -744,7 +744,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K11" },
         },
         {
@@ -752,7 +752,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L11" },
         },
         {
@@ -760,7 +760,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M11" },
         },
         {
@@ -768,7 +768,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D12" },
         },
         {
@@ -776,7 +776,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E12" },
         },
         {
@@ -784,7 +784,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F12" },
         },
         {
@@ -792,7 +792,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G12" },
         },
         {
@@ -800,7 +800,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H12" },
         },
         {
@@ -808,7 +808,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I12" },
         },
         {
@@ -816,7 +816,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J12" },
         },
         {
@@ -824,7 +824,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K12" },
         },
         {
@@ -832,7 +832,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L12" },
         },
         {
@@ -840,7 +840,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M12" },
         },
         {
@@ -848,7 +848,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D13" },
         },
         {
@@ -856,7 +856,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E13" },
         },
         {
@@ -864,7 +864,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F13" },
         },
         {
@@ -872,7 +872,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G13" },
         },
         {
@@ -880,7 +880,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H13" },
         },
         {
@@ -888,7 +888,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I13" },
         },
         {
@@ -896,7 +896,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J13" },
         },
         {
@@ -904,7 +904,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K13" },
         },
         {
@@ -912,7 +912,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L13" },
         },
         {
@@ -920,7 +920,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M13" },
         },
         {
@@ -928,7 +928,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D14" },
         },
         {
@@ -936,7 +936,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E14" },
         },
         {
@@ -944,7 +944,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F14" },
         },
         {
@@ -952,7 +952,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G14" },
         },
         {
@@ -960,7 +960,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H14" },
         },
         {
@@ -968,7 +968,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I14" },
         },
         {
@@ -976,7 +976,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J14" },
         },
         {
@@ -984,7 +984,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K14" },
         },
         {
@@ -992,7 +992,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L14" },
         },
         {
@@ -1000,7 +1000,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M14" },
         },
         {
@@ -1008,7 +1008,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sdNHn8qmokO" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "D15" },
         },
         {
@@ -1016,7 +1016,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "Xr81a9iOAyC" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "E15" },
         },
         {
@@ -1024,7 +1024,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "kcoQHDRTi4E" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "F15" },
         },
         {
@@ -1032,7 +1032,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "aeGGK8bRvmr" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "G15" },
         },
         {
@@ -1040,7 +1040,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "BOPZbzxOfSA" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "H15" },
         },
         {
@@ -1048,7 +1048,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "qQBFc1FSZBd" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "I15" },
         },
         {
@@ -1056,7 +1056,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "sw0lh63wqsA" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "J15" },
         },
         {
@@ -1064,7 +1064,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "NNQYgAf2Cj8" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "K15" },
         },
         {
@@ -1072,7 +1072,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "AZqsANkZRnD" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "L15" },
         },
         {
@@ -1080,7 +1080,7 @@ export class NHWAModule501 implements CustomTemplate {
             orgUnit: { sheet: "Entry into Labour Market", type: "cell", ref: "C4" },
             period: { sheet: "Entry into Labour Market", type: "cell", ref: "K4" },
             dataElement: { type: "value", id: "yazrkuSMGHD" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Exit from Labour Market", ref: "M15" },
         },
     ];

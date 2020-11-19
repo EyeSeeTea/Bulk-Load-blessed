@@ -420,19 +420,23 @@ export class InstanceDhisRepository implements InstanceRepository {
     // TODO: Review when data validation comes in
     private async validateAggregateImportPackage(dataValues: AggregatedDataValue[]) {
         const dataElements = _.uniq(dataValues.map(({ dataElement }) => dataElement));
-        const metadata = await this.api.metadata
-            .get({
-                dataElements: {
-                    fields: { id: true, valueType: true },
-                    filter: { id: { in: dataElements } },
-                },
-            })
-            .getData();
+        const result = await promiseMap(_.chunk(dataElements, 300), dataElements =>
+            this.api.metadata
+                .get({
+                    dataElements: {
+                        fields: { id: true, valueType: true },
+                        filter: { id: { in: dataElements } },
+                    },
+                })
+                .getData()
+        );
+
+        const metadata = _.flatMap(result, ({ dataElements }) => dataElements);
 
         return _.compact(
             dataValues.map(dataValue => {
                 const { dataElement, value } = dataValue;
-                const item = metadata.dataElements.find(({ id }) => id === dataElement);
+                const item = metadata.find(({ id }) => id === dataElement);
                 if (item && item.valueType === "TRUE_ONLY" && value === "false") return undefined;
                 return dataValue;
             })

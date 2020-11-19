@@ -24,7 +24,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D13" },
         },
         {
@@ -32,7 +32,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E13" },
         },
         {
@@ -40,7 +40,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F13" },
         },
         {
@@ -48,7 +48,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G13" },
         },
         {
@@ -56,7 +56,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H13" },
         },
         {
@@ -64,7 +64,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "aBpbcEgtzgw" },
+            categoryOption: { type: "value", id: "woIm3nuS3mM" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I13" },
         },
         {
@@ -72,7 +72,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D14" },
         },
         {
@@ -80,7 +80,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E14" },
         },
         {
@@ -88,7 +88,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F14" },
         },
         {
@@ -96,7 +96,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G14" },
         },
         {
@@ -104,7 +104,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H14" },
         },
         {
@@ -112,7 +112,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "LHbCtHlZr3Y" },
+            categoryOption: { type: "value", id: "Eh8fZEewQLs" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I14" },
         },
         {
@@ -120,7 +120,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D15" },
         },
         {
@@ -128,7 +128,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E15" },
         },
         {
@@ -136,7 +136,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F15" },
         },
         {
@@ -144,7 +144,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G15" },
         },
         {
@@ -152,7 +152,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H15" },
         },
         {
@@ -160,7 +160,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "VtVkbvygJnm" },
+            categoryOption: { type: "value", id: "Rr4F4xljMoJ" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I15" },
         },
         {
@@ -168,7 +168,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D16" },
         },
         {
@@ -176,7 +176,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E16" },
         },
         {
@@ -184,7 +184,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F16" },
         },
         {
@@ -192,7 +192,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G16" },
         },
         {
@@ -200,7 +200,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H16" },
         },
         {
@@ -208,7 +208,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "fGOgbIqsxDn" },
+            categoryOption: { type: "value", id: "gT8LDQDh2wc" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I16" },
         },
         {
@@ -216,7 +216,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D17" },
         },
         {
@@ -224,7 +224,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E17" },
         },
         {
@@ -232,7 +232,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F17" },
         },
         {
@@ -240,7 +240,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G17" },
         },
         {
@@ -248,7 +248,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H17" },
         },
         {
@@ -256,7 +256,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "MPzyVWiSFF2" },
+            categoryOption: { type: "value", id: "GrzcLgIHx9h" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I17" },
         },
         {
@@ -264,7 +264,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D18" },
         },
         {
@@ -272,7 +272,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E18" },
         },
         {
@@ -280,7 +280,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F18" },
         },
         {
@@ -288,7 +288,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G18" },
         },
         {
@@ -296,7 +296,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H18" },
         },
         {
@@ -304,7 +304,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "ALBRKpJsddQ" },
+            categoryOption: { type: "value", id: "BUVRp4Q2zi7" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I18" },
         },
         {
@@ -312,7 +312,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "GeY6o2BMvp1" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "D19" },
         },
         {
@@ -320,7 +320,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "hBzWHe6kuvu" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "E19" },
         },
         {
@@ -328,7 +328,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "C8MvR5CNwpG" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "F19" },
         },
         {
@@ -336,7 +336,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "wsmvhizfctg" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "G19" },
         },
         {
@@ -344,7 +344,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "KlsBVkjtkkV" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "H19" },
         },
         {
@@ -352,7 +352,7 @@ export class NHWAModule601 implements CustomTemplate {
             orgUnit: { sheet: "Characteristics", type: "cell", ref: "C4" },
             period: { sheet: "Characteristics", type: "cell", ref: "I4" },
             dataElement: { type: "value", id: "N6VNhZ2PCG7" },
-            categoryOption: { type: "value", id: "iWRW6jXAzvP" },
+            categoryOption: { type: "value", id: "UbXO8Hq562j" },
             ref: { type: "cell", sheet: "Characteristics", ref: "I19" },
         },
         {

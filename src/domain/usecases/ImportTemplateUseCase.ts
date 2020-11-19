@@ -122,7 +122,7 @@ export class ImportTemplateUseCase implements UseCase {
     }
 
     private async readDataValues(
-        excelDataValues: DataPackage,
+        excelDataPackage: DataPackage,
         dataForm: DataForm,
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[],
@@ -131,17 +131,19 @@ export class ImportTemplateUseCase implements UseCase {
     ) {
         const { duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
-        const instanceDataValues = await this.getInstanceDataValues(dataForm, excelDataValues);
+        const instanceDataPackage = await this.getInstanceDataValues(dataForm, excelDataPackage);
         const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
             dataForm.type,
             dataForm.id
         );
 
         // Override org unit if needed
-        const dataValues = excelDataValues.dataEntries.map(({ orgUnit, ...rest }) => ({
-            ...rest,
-            orgUnit: useBuilderOrgUnits ? cleanOrgUnitPath(selectedOrgUnits[0]) : orgUnit,
-        }));
+        const dataValues = useBuilderOrgUnits
+            ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
+            : excelDataPackage.dataEntries;
+        const instanceDataValues = useBuilderOrgUnits
+            ? this.overrideOrgUnit(instanceDataPackage.dataEntries, selectedOrgUnits[0])
+            : instanceDataPackage.dataEntries;
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
@@ -153,7 +155,7 @@ export class ImportTemplateUseCase implements UseCase {
             duplicateStrategy === "IMPORT"
                 ? []
                 : _.remove(dataValues, base => {
-                      return instanceDataValues.dataEntries.find(dataPackage =>
+                      return instanceDataValues.find(dataPackage =>
                           compareDataPackages(
                               dataForm,
                               base,
@@ -166,7 +168,7 @@ export class ImportTemplateUseCase implements UseCase {
                   });
 
         const trackedEntityInstances = getTrackedEntityInstances(
-            excelDataValues,
+            excelDataPackage,
             useBuilderOrgUnits,
             selectedOrgUnits
         );
@@ -187,8 +189,22 @@ export class ImportTemplateUseCase implements UseCase {
                 dataEntries: existingDataValues,
                 trackedEntityInstances: [],
             },
-            instanceDataValues,
+            instanceDataValues: {
+                type: dataForm.type,
+                dataEntries: instanceDataValues,
+                trackedEntityInstances: [],
+            },
         };
+    }
+
+    private overrideOrgUnit(
+        dataValues: DataPackageData[],
+        replaceOrgUnit: string
+    ): DataPackageData[] {
+        return dataValues.map(dataValue => ({
+            ...dataValue,
+            orgUnit: cleanOrgUnitPath(replaceOrgUnit),
+        }));
     }
 
     private async getInstanceDataValues(dataForm: DataForm, excelDataValues: DataPackage) {
