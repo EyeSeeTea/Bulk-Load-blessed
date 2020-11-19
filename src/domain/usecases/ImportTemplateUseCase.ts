@@ -201,8 +201,8 @@ export class ImportTemplateUseCase implements UseCase {
         dataValues: DataPackageData[],
         replaceOrgUnit: string
     ): DataPackageData[] {
-        return dataValues.map(({ orgUnit, ...rest }) => ({
-            ...rest,
+        return dataValues.map(dataValue => ({
+            ...dataValue,
             orgUnit: cleanOrgUnitPath(replaceOrgUnit),
         }));
     }
