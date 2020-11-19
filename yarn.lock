@@ -15706,9 +15706,9 @@ ws@^7.2.3:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.3.0.tgz#4b2f7f219b3d3737bc1a2fbf145d825b94d38ffd"
   integrity sha512-iFtXzngZVXPGgpTlP1rBqsUK82p9tKqsWRPg5L56egiljujJT3vGAYnHANvFxBieXrTFavhzhxW52jnaWV+w2w==
 
-"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/shared-formulas":
+"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#development":
   version "1.21.0"
-  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#7931c98cc73a4e680ffdd16d76e01533f27de6c2"
+  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#e8bb95723cbcc64e5de720c5f72e13112e3c24d8"
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"
