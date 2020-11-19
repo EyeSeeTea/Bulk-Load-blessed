@@ -29,6 +29,7 @@ import {
     RelationshipMetadata,
     getTrackerProgramMetadata,
 } from "./Dhis2RelationshipTypes";
+import i18n from "../locales";
 
 export interface GetOptions {
     api: D2Api;
@@ -131,12 +132,12 @@ export async function updateTrackedEntityInstances(
     if (!program) throw new Error(`Program not found: ${programId}`);
 
     const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
-    const [preTeis, postTeis] = splitTeis(teis, existingTeis);
+    const [preTeis, postTeis] = await splitTeis(api, teis);
     const options = { api, program, metadata, existingTeis };
 
     return runSequentialPromisesOnSuccess([
-        () => uploadTeis({ ...options, teis: preTeis }),
-        () => uploadTeis({ ...options, teis: postTeis }),
+        () => uploadTeis({ ...options, teis: preTeis, title: i18n.t("Create/update") }),
+        () => uploadTeis({ ...options, teis: postTeis, title: i18n.t("Relationships") }),
         () => postEvents(api, apiEvents),
     ]);
 }
@@ -159,10 +160,11 @@ async function runSequentialPromisesOnSuccess(
     yet (creation of TEIS is sequential). So let's split pre/post TEI's so they can be
     posted separatedly.
 */
-function splitTeis(
-    teis: TrackedEntityInstance[],
-    existingTeis: TrackedEntityInstance[]
-): [TrackedEntityInstance[], TrackedEntityInstance[]] {
+async function splitTeis(
+    api: D2Api,
+    teis: TrackedEntityInstance[]
+): Promise<[TrackedEntityInstance[], TrackedEntityInstance[]]> {
+    const existingTeis = await getExistingTeis(api);
     const existingTeiIds = new Set(existingTeis.map(tei => tei.id));
 
     const [validTeis, invalidTeis] = _(teis)
@@ -188,12 +190,14 @@ async function uploadTeis(options: {
     metadata: Metadata;
     teis: TrackedEntityInstance[];
     existingTeis: TrackedEntityInstance[];
+    title: string;
 }): Promise<SynchronizationResult | undefined> {
-    const { api, program, metadata, teis, existingTeis } = options;
+    const { api, program, metadata, teis, existingTeis, title } = options;
 
     if (_.isEmpty(teis)) return undefined;
 
     const apiTeis = teis.map(tei => getApiTeiToUpload(program, metadata, tei, existingTeis));
+    const model = i18n.t("Tracked Entity Instance");
 
     return postImport(
         () =>
@@ -205,8 +209,8 @@ async function uploadTeis(options: {
                 )
                 .getData(),
         {
-            title: "Tracked Entity Instances - Create/update",
-            model: "Tracked Entity Instance",
+            title: `${model} - ${title}`,
+            model: model,
             splitStatsList: false,
         }
     );
@@ -343,6 +347,22 @@ function getApiTeiToUpload(
     };
 }
 
+interface TeiIdsResponse {
+    trackedEntityInstances: Ref[];
+}
+
+async function getExistingTeis(api: D2Api): Promise<Ref[]> {
+    const query: TrackedEntityInstancesRequest = {
+        ouMode: "CAPTURE",
+        pageSize: 1e6,
+        totalPages: true,
+        fields: "trackedEntityInstance~rename(id)",
+    };
+
+    const teiResponse = await api.get("/trackedEntityInstances", query).getData();
+    const { trackedEntityInstances } = teiResponse as TeiIdsResponse;
+    return trackedEntityInstances;
+}
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;

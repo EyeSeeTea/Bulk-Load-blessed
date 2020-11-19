@@ -183,7 +183,7 @@ async function getTeisForConstraint_(
         program: constraint.program?.id,
         // Program and tracked entity cannot be specified simultaneously
         trackedEntityType: constraint.program ? undefined : constraint.trackedEntityType.id,
-        pageSize: 1000,
+        pageSize: 1e6,
         totalPages: true,
         fields: "trackedEntityInstance~rename(id)",
     };
