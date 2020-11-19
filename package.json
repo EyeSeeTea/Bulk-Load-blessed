@@ -43,7 +43,7 @@
         "react-router-dom": "5.2.0",
         "react-scripts": "3.4.1",
         "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/shared-formulas"
+        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#development"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
