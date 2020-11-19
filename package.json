@@ -43,7 +43,7 @@
         "react-router-dom": "5.2.0",
         "react-scripts": "3.4.1",
         "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#development"
+        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#feature/shared-formulas"
     },
     "scripts": {
         "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
@@ -65,7 +65,8 @@
     },
     "husky": {
         "hooks": {
-            "pre-push": "yarn prettify && yarn lint && yarn extract-pot && yarn jest"
+            "pre-push": "yarn prettify && yarn lint && yarn update-po && yarn test",
+            "post-merge": "./.githooks/dep-check"
         }
     },
     "devDependencies": {
