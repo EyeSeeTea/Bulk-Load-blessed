@@ -431,7 +431,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 .getData()
         );
 
-        const metadata = _.flatMap(result,({ dataElements }) => dataElements);
+        const metadata = _.flatMap(result, ({ dataElements }) => dataElements);
 
         return _.compact(
             dataValues.map(dataValue => {
