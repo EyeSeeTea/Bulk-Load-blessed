@@ -15714,9 +15714,9 @@ ws@^7.2.3:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.3.0.tgz#4b2f7f219b3d3737bc1a2fbf145d825b94d38ffd"
   integrity sha512-iFtXzngZVXPGgpTlP1rBqsUK82p9tKqsWRPg5L56egiljujJT3vGAYnHANvFxBieXrTFavhzhxW52jnaWV+w2w==
 
-"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#development":
+"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#master":
   version "1.21.0"
-  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#e8bb95723cbcc64e5de720c5f72e13112e3c24d8"
+  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#46dc5bdc47c213e6aa2cf77ede5a8331b7a81ad3"
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"
