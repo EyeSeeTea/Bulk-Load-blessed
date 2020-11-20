@@ -117,6 +117,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     },
                     access: true,
                     programType: true,
+                    trackedEntityType: true,
                 },
                 filter: {
                     id: ids ? { in: ids } : undefined,
@@ -419,19 +420,23 @@ export class InstanceDhisRepository implements InstanceRepository {
     // TODO: Review when data validation comes in
     private async validateAggregateImportPackage(dataValues: AggregatedDataValue[]) {
         const dataElements = _.uniq(dataValues.map(({ dataElement }) => dataElement));
-        const metadata = await this.api.metadata
-            .get({
-                dataElements: {
-                    fields: { id: true, valueType: true },
-                    filter: { id: { in: dataElements } },
-                },
-            })
-            .getData();
+        const result = await promiseMap(_.chunk(dataElements, 300), dataElements =>
+            this.api.metadata
+                .get({
+                    dataElements: {
+                        fields: { id: true, valueType: true },
+                        filter: { id: { in: dataElements } },
+                    },
+                })
+                .getData()
+        );
+
+        const metadata = _.flatMap(result, ({ dataElements }) => dataElements);
 
         return _.compact(
             dataValues.map(dataValue => {
                 const { dataElement, value } = dataValue;
-                const item = metadata.dataElements.find(({ id }) => id === dataElement);
+                const item = metadata.find(({ id }) => id === dataElement);
                 if (item && item.valueType === "TRUE_ONLY" && value === "false") return undefined;
                 return dataValue;
             })
@@ -558,7 +563,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 const { events, pager } = await getEvents(orgUnit, categoryOptionId, 1);
                 programEvents.push(...events);
 
-                await promiseMap(_.range(2, pager.pageCount + 1), async page => {
+                await promiseMap(_.range(2, pager.pageCount + 1, 1), async page => {
                     const { events } = await getEvents(orgUnit, categoryOptionId, page);
                     programEvents.push(...events);
                 });

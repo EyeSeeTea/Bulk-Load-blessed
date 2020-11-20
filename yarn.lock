@@ -1986,11 +1986,6 @@
     "@testing-library/dom" "^7.2.2"
     "@types/testing-library__react" "^10.0.1"
 
-"@types/argparse@^1.0.36":
-  version "1.0.38"
-  resolved "https://registry.yarnpkg.com/@types/argparse/-/argparse-1.0.38.tgz#a81fd8606d481f873a3800c6ebae4f1d768a56a9"
-  integrity sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==
-
 "@types/babel__core@^7.0.0":
   version "7.1.10"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
@@ -2917,6 +2912,11 @@ argparse@^1.0.10, argparse@^1.0.7:
   integrity sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==
   dependencies:
     sprintf-js "~1.0.2"
+
+argparse@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
+  integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
 aria-query@^3.0.0:
   version "3.0.0"
@@ -5138,18 +5138,17 @@ cypress@4.6.0:
     url "0.11.0"
     yauzl "2.10.0"
 
-d2-api@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmjs.org/d2-api/-/d2-api-1.3.0.tgz#fd0f704315a3206e43530ff218adeb8494c176a8"
-  integrity sha512-Albu93nW9bjo08Nh9tXeCXkfvnyyvH8Mb1Z22O69/2JB8cDkYAfpEyRY26ztg1TQ/L7nhzT14k8lsxEDFAo/bA==
+d2-api@1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/d2-api/-/d2-api-1.4.1.tgz#7d12f676a5549a3c5ab2efa40cd9550924e3ec81"
+  integrity sha512-dxk0HzNn7kPHs2wsvtmbXVGxy5Sv9DKQjhk5VCFEHm/Kd/dddqj8lXHvhBCAxYvlFqq27G293FQqwTAl1TwB2Q==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
-    "@types/argparse" "^1.0.36"
     "@types/prettier" "^1.18.3"
     "@types/qs" "^6.5.3"
     abort-controller "3.0.0"
-    argparse "^1.0.10"
+    argparse "^2.0.1"
     axios "0.19.2"
     axios-debug-log "^0.6.2"
     axios-mock-adapter "1.18.2"
@@ -5159,6 +5158,7 @@ d2-api@1.3.0:
     d2 "^31.8.1"
     dotenv "^8.0.0"
     express "^4.17.1"
+    iconv-lite "0.6.2"
     isomorphic-fetch "3.0.0"
     lodash "^4.17.15"
     log4js "^4.5.1"
@@ -7643,6 +7643,13 @@ iconv-lite@0.4.24, iconv-lite@^0.4.24, iconv-lite@~0.4.13:
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
   dependencies:
     safer-buffer ">= 2.1.2 < 3"
+
+iconv-lite@0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.6.2.tgz#ce13d1875b0c3a674bd6a04b7f76b01b1b6ded01"
+  integrity sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==
+  dependencies:
+    safer-buffer ">= 2.1.2 < 3.0.0"
 
 icss-utils@^4.0.0, icss-utils@^4.1.1:
   version "4.1.1"
@@ -13383,7 +13390,7 @@ safe-regex@^1.1.0:
   dependencies:
     ret "~0.1.10"
 
-"safer-buffer@>= 2.1.2 < 3", safer-buffer@^2.0.2, safer-buffer@^2.1.0, safer-buffer@~2.1.0:
+"safer-buffer@>= 2.1.2 < 3", "safer-buffer@>= 2.1.2 < 3.0.0", safer-buffer@^2.0.2, safer-buffer@^2.1.0, safer-buffer@~2.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
@@ -15707,9 +15714,9 @@ ws@^7.2.3:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.3.0.tgz#4b2f7f219b3d3737bc1a2fbf145d825b94d38ffd"
   integrity sha512-iFtXzngZVXPGgpTlP1rBqsUK82p9tKqsWRPg5L56egiljujJT3vGAYnHANvFxBieXrTFavhzhxW52jnaWV+w2w==
 
-"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#development":
+"xlsx-populate@git+https://github.com/EyeSeeTea/xlsx-populate.git#master":
   version "1.21.0"
-  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#5bcbb8be40cd1b36fe6be8df33a95850a4c43116"
+  resolved "git+https://github.com/EyeSeeTea/xlsx-populate.git#46dc5bdc47c213e6aa2cf77ede5a8331b7a81ad3"
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"

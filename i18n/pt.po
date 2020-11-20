@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
+"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -15,6 +15,15 @@ msgstr "Crio/atualizar"
 #, fuzzy
 msgid "Event"
 msgstr "evento"
+
+msgid "Create/update"
+msgstr "Crio/atualizar"
+
+msgid "Relationships"
+msgstr ""
+
+msgid "Tracked Entity Instance"
+msgstr ""
 
 msgid "Template {{id}} not loaded"
 msgstr "Planilha {{id}} não carregada"
@@ -418,9 +427,6 @@ msgstr "Importação de dados em massa"
 
 msgid "Drag and drop file to import"
 msgstr "Arraste e solte o arquivo para importar"
-
-msgid "Create/update"
-msgstr "Crio/atualizar"
 
 msgid "Create"
 msgstr "Crio"

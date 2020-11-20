@@ -5,13 +5,22 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-10-26T07:37:10.345Z\n"
-"PO-Revision-Date: 2020-10-26T07:37:10.345Z\n"
+"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
+"PO-Revision-Date: 2020-11-18T09:57:39.069Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
 
 msgid "Event"
+msgstr ""
+
+msgid "Create/update"
+msgstr ""
+
+msgid "Relationships"
+msgstr ""
+
+msgid "Tracked Entity Instance"
 msgstr ""
 
 msgid "Template {{id}} not loaded"
@@ -388,9 +397,6 @@ msgid "Bulk data import"
 msgstr ""
 
 msgid "Drag and drop file to import"
-msgstr ""
-
-msgid "Create/update"
 msgstr ""
 
 msgid "Create"

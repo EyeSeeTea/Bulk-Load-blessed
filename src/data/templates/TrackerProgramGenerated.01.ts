@@ -44,29 +44,30 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
                 ref: 5,
             },
         },
-        {
-            type: "rowTeiRelationship",
-            range: {
-                sheet: "Relationships",
-                rowStart: 2,
-                columnStart: "A",
+        (sheet: string) =>
+            isRelationshipSheet(sheet) && {
+                type: "rowTeiRelationship",
+                range: {
+                    sheet,
+                    rowStart: 3,
+                    columnStart: "A",
+                },
+                relationshipType: {
+                    sheet,
+                    type: "cell",
+                    ref: "A1",
+                },
+                from: {
+                    sheet,
+                    type: "column",
+                    ref: "A",
+                },
+                to: {
+                    sheet,
+                    type: "column",
+                    ref: "B",
+                },
             },
-            typeName: {
-                sheet: "Relationships",
-                type: "column",
-                ref: "A",
-            },
-            from: {
-                sheet: "Relationships",
-                type: "column",
-                ref: "B",
-            },
-            to: {
-                sheet: "Relationships",
-                type: "column",
-                ref: "C",
-            },
-        },
         (sheet: string) =>
             isStageSheet(sheet) && {
                 type: "rowTrackedEvent",
@@ -139,4 +140,8 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
 
 function isStageSheet(name: string): boolean {
     return name.startsWith("Stage");
+}
+
+function isRelationshipSheet(name: string): boolean {
+    return name.startsWith("Relationship");
 }

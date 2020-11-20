@@ -65,6 +65,24 @@ export function memoize<Obj extends object | void, Args extends any[], U>(
     return result;
 }
 
+// Wrapper to memoize async functions
+export function memoizeAsync<This, Args extends any[], U>(fn: (...args: Args) => Promise<U>) {
+    const map = new Map<string, U>();
+
+    return async function (this: This, ...args: Args): Promise<U> {
+        const key = JSON.stringify(args);
+        const cachedValue = map.get(key);
+
+        if (cachedValue !== undefined) {
+            return cachedValue;
+        } else {
+            const result = await fn.apply(this, args);
+            map.set(key, result);
+            return result;
+        }
+    };
+}
+
 // Function to clear memoized storage
 export const clear = (fn: Function, instance?: Dictionary<any>) => {
     // Clear method entries

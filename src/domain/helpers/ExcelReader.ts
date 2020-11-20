@@ -21,6 +21,7 @@ import { removeCharacters } from "../../utils/string";
 import { Relationship } from "../entities/Relationship";
 import moment from "moment";
 import XlsxPopulate from "xlsx-populate";
+import { generateUid } from "d2/uid";
 
 const dateFormat = "YYYY-MM-DD";
 
@@ -159,7 +160,7 @@ export class ExcelReader {
         rowStart: number
     ): Promise<number[]> {
         const rowsCount = await this.excelRepository.getSheetRowsCount(template.id, ref.sheet);
-        return rowsCount ? _.range(rowStart, rowsCount + 1) : [];
+        return rowsCount ? _.range(rowStart, rowsCount + 1, 1) : [];
     }
 
     private async getFormulaValue(template: Template, columnRef: ColumnRef, rowIndex: number) {
@@ -174,10 +175,14 @@ export class ExcelReader {
         teis: TrackedEntityInstance[],
         relationships: Relationship[]
     ): TrackedEntityInstance[] {
-        const relationshipsByFromId = _.keyBy(relationships, relationship => relationship.fromId);
+        const relationshipsByFromId = _.groupBy(relationships, relationship => relationship.fromId);
+        const relationshipsByToId = _.groupBy(relationships, relationship => relationship.toId);
         return teis.map(tei => ({
             ...tei,
-            relationships: _.compact([relationshipsByFromId[tei.id]]),
+            relationships: _.concat(
+                relationshipsByFromId[tei.id] || [],
+                relationshipsByToId[tei.id] || []
+            ),
         }));
     }
 
@@ -272,22 +277,21 @@ export class ExcelReader {
         template: Template,
         dataSource: TrackerRelationship
     ): Promise<Relationship[]> {
-        const rowStart = 2;
+        const rowStart = dataSource.range.rowStart;
         const programId = await this.getFormulaCell(template, template.dataFormId);
         if (!programId) return [];
+        const typeName = await this.excelRepository.readCell(
+            template.id,
+            dataSource.relationshipType
+        );
+        const typeId = await this.getFormulaCell(template, dataSource.relationshipType);
 
         const getCell = this.getCellValue.bind(this);
-        const rowIndexes = await this.getRowIndexes(template, dataSource.typeName, rowStart);
+        const rowIndexes = await this.getRowIndexes(template, dataSource.from, rowStart);
 
         const relationships = await promiseMap<number, Relationship | undefined>(
             rowIndexes,
             async rowIdx => {
-                const typeId = removeCharacters(
-                    await getCell(template, dataSource.typeName, rowIdx, {
-                        formula: true,
-                    })
-                );
-                const typeName = await getCell(template, dataSource.typeName, rowIdx);
                 const fromTeiId = await getCell(template, dataSource.from, rowIdx);
                 const toTeiId = await getCell(template, dataSource.to, rowIdx);
                 if (!fromTeiId || !toTeiId || !typeId) return;
@@ -319,7 +323,8 @@ export class ExcelReader {
         const values = await promiseMap<number, TrackedEntityInstance | undefined>(
             rowIndexes,
             async rowIdx => {
-                const teiId = await getCell(template, dataSource.teiId, rowIdx);
+                // Generate random one UID for TEI if empty.
+                const teiId = (await getCell(template, dataSource.teiId, rowIdx)) || generateUid();
                 const orgUnitId = await this.getFormulaValue(template, dataSource.orgUnit, rowIdx);
                 const enrollmentDate = parseDate(
                     await getCell(template, dataSource.enrollmentDate, rowIdx)
