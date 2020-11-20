@@ -12,6 +12,9 @@ let defaultSheet = "Demographic";
 let orgUnitCell = "C4";
 let periodCell = "Q4";
 
+let sourceTypeRows = _.range(9, 68).filter(row => ![18, 24].includes(row)).map(row => ({ row, nrOfElements: 12 }));
+let sourceTypeTotalRows = [8, 18, 24].map(row => ({ row, nrOfElements: 12 }));
+
 let getDataElements = ({
     sheet,
     tabSelector,
@@ -40,6 +43,42 @@ let getDataElements = ({
             };
         }
     );
+};
+
+let getDataElementsCustomRows = ({
+    sheet,
+    tabSelector,
+    letters,
+    rows,
+    type = "input.entryfield",
+}) => {
+    let entryfields = Array.from(document.querySelector(tabSelector).querySelectorAll(type));
+    let elementCount = 0;
+    let allFields = rows.map((row, i) => {
+        let fields = [];
+        for (i = 0; i < row.nrOfElements; i++) {
+            let field = entryfields[elementCount + i];
+            let id = field.getAttribute("id");
+            let [dataElement, categoryOptionCombo] = id.split("-");
+
+            fields.push({
+                type: "cell",
+                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
+                dataElement: { type: "value", id: dataElement },
+                categoryOption: { type: "value", id: categoryOptionCombo },
+                skipPopulate: field.disabled,
+                ref: {
+                    type: "cell",
+                    sheet,
+                    ref: `${letters[i]}${row.row}`,
+                },
+            });
+        }
+        elementCount = elementCount + row.nrOfElements;
+        return fields;
+    });
+    return allFields.flat();
 };
 
 let dataSheet1 = [
@@ -94,15 +133,25 @@ let dataSheet3 = [
     }),
 ];
 
-let dataSheet4 = [
-    ...getDataElements({
+let dataSheet4Values = [
+    ...getDataElementsCustomRows({
         sheet: "Sourcetype",
         tabSelector: "#tab0",
         letters: ["D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"],
-        dataRowStart: 8,
-        type: "input.entrytrueonly",
+        rows: sourceTypeRows,
+        type: "input.entrytrueonly:not(:disabled)",
     }),
 ];
 
-let result = [...dataSheet1, ...dataSheet2, ...dataSheet3, ...dataSheet4];
+let dataSheet4Totals = [
+    ...getDataElementsCustomRows({
+        sheet: "Sourcetype",
+        tabSelector: "#tab0",
+        letters: ["Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB"],
+        rows: sourceTypeTotalRows,
+        type: "input.entrytrueonly:disabled",
+    }),
+];
+
+let result = [...dataSheet1, ...dataSheet2, ...dataSheet3, ...dataSheet4Values, ...dataSheet4Totals];
 console.log(result);
