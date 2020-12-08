@@ -1,141 +1,37 @@
 {
-    "name": "bulk-load",
-    "description": "Bulk importing made easy",
-    "version": "3.7.0",
-    "license": "GPL-3.0",
-    "author": "EyeSeeTea team",
-    "homepage": ".",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/eyeseetea/bulk-load.git"
-    },
-    "dependencies": {
-        "@dhis2/app-runtime": "2.1.1",
-        "@dhis2/d2-i18n": "1.0.6",
-        "@dhis2/d2-ui-core": "6.5.10",
-        "@dhis2/ui-core": "4.17.1",
-        "@dhis2/ui-widgets": "2.1.0",
-        "@material-ui/core": "4.11.0",
-        "@material-ui/icons": "4.9.1",
-        "@material-ui/styles": "4.9.10",
-        "async-promise-pool": "1.0.3",
-        "axios": "0.19.2",
-        "core-js": "3.6.5",
-        "cross-blob": "2.0.0",
-        "d2": "31.8.1",
-        "d2-api": "1.4.1",
-        "d2-ui-components": "1.4.2",
-        "dateformat": "3.0.3",
-        "excel4node": "1.7.2",
-        "exceljs": "3.8.2",
-        "file-saver": "2.0.2",
-        "jquery": "3.5.0",
-        "lodash": "4.17.15",
-        "lodash.product": "18.9.19",
-        "md5": "2.3.0",
-        "moment": "2.24.0",
-        "prop-types": "15.7.2",
-        "react": "16.13.1",
-        "react-color": "2.18.1",
-        "react-dom": "16.13.1",
-        "react-dropzone": "10.2.2",
-        "react-json-view": "1.19.1",
-        "react-router-dom": "5.2.0",
-        "react-scripts": "3.4.1",
-        "styled-jsx": "3.2.5",
-        "xlsx-populate": "git+https://github.com/EyeSeeTea/xlsx-populate.git#master"
-    },
-    "scripts": {
-        "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
-        "start": "react-scripts start",
-        "prebuild": "yarn localize && yarn test",
-        "build": "rm -rf build/ && d2-manifest package.json manifest.webapp && react-scripts build && yarn run manifest && cp -r i18n icon.png build",
-        "build-webapp": "yarn build && rm -f $npm_package_name.zip && cd build && zip -r ../$npm_package_name.zip *",
-        "test": "jest",
-        "lint": "eslint src cypress --ext .js,.jsx,.ts,.tsx",
-        "eject": "react-scripts eject",
-        "prettify": "prettier \"{src,config,cypress}/**/*.{js,jsx,ts,tsx,json,css}\" --write",
-        "extract-pot": "yarn d2-i18n-extract -p src/ -o i18n/",
-        "localize": "yarn update-po && d2-i18n-generate -n bulk-load -p ./i18n/ -o ./src/locales/",
-        "update-po": "yarn extract-pot && for pofile in i18n/*.po; do msgmerge --backup=off -U $pofile i18n/en.pot; done",
-        "manifest": "d2-manifest package.json build/manifest.webapp",
-        "cy:verify": "cypress verify",
-        "cy:e2e:open": "CYPRESS_E2E=true cypress open",
-        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome"
-    },
-    "husky": {
-        "hooks": {
-            "pre-push": "yarn prettify && yarn lint && yarn update-po && yarn test",
-            "post-merge": "./.githooks/dep-check"
-        }
-    },
-    "devDependencies": {
-        "@babel/core": "7.9.0",
-        "@babel/preset-typescript": "7.9.0",
-        "@dhis2/d2-i18n-extract": "1.0.8",
-        "@dhis2/d2-i18n-generate": "1.2.0",
-        "@testing-library/jest-dom": "5.8.0",
-        "@testing-library/react": "10.0.4",
-        "@types/dateformat": "3.0.1",
-        "@types/file-saver": "2.0.1",
-        "@types/jest": "25.2.3",
-        "@types/lodash": "4.14.153",
-        "@types/md5": "2.2.0",
-        "@types/node": "14.0.5",
-        "@types/react": "16.9.35",
-        "@types/react-color": "3.0.2",
-        "@types/react-dom": "16.9.8",
-        "@types/react-router-dom": "5.1.5",
-        "@types/webpack-env": "1.15.2",
-        "@types/xlsx-populate": "git+https://github.com/JanLoebel/types-xlsx-populate.git",
-        "@typescript-eslint/eslint-plugin": "2.28.0",
-        "@typescript-eslint/parser": "2.28.0",
-        "babel-core": "6.26.3",
-        "babel-eslint": "10.1.0",
-        "babel-jest": "26.5.2",
-        "babel-preset-react-app": "9.1.2",
-        "cypress": "4.6.0",
-        "cypress-xpath": "1.4.0",
-        "d2-manifest": "1.0.0",
-        "eslint": "7.0.0",
-        "eslint-config-prettier": "6.11.0",
-        "eslint-config-react": "1.1.7",
-        "eslint-config-react-app": "5.2.1",
-        "eslint-plugin-cypress": "2.10.3",
-        "eslint-plugin-flowtype": "5.1.0",
-        "eslint-plugin-import": "2.20.2",
-        "eslint-plugin-jsx-a11y": "6.2.3",
-        "eslint-plugin-prettier": "3.1.3",
-        "eslint-plugin-react": "7.20.0",
-        "eslint-plugin-react-hooks": "4.0.2",
-        "husky": "4.2.5",
-        "jest": "26.0.1",
-        "postcss-rtl": "1.7.3",
-        "prettier": "2.0.5",
-        "ts-node": "9.0.0",
-        "typescript": "3.9.3",
-        "wait-on": "5.0.0"
-    },
-    "manifest.webapp": {
-        "name": "Bulk Load",
-        "description": "DHIS2 Bulk Load App",
-        "icons": {
-            "48": "icon.png"
-        },
-        "developer": {
-            "url": "https://www.eyeseetea.com/",
-            "name": "EyeSeeTea team"
-        },
-        "activities": {
-            "dhis": {
-                "href": "*"
-            }
-        }
-    },
-    "browserslist": [
-        ">0.2%",
-        "not dead",
-        "not ie <= 11",
-        "not op_mini all"
-    ]
+  "name": "bulma-start",
+  "version": "0.0.4",
+  "description": "Start package for Bulma",
+  "keywords": [
+    "sass",
+    "bulma",
+    "css",
+    "start"
+  ],
+  "author": "Jeremy Thomas <bbxdesign@gmail.com> (http://jgthms.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgthms/bulma-start.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^9.7.6",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015-ie": "^6.7.0",
+    "bulma": "^0.9.0",
+    "node-sass": "^4.13.1",
+    "npm-run-all": "^4.1.5",
+    "postcss-cli": "^7.1.0"
+  },
+  "scripts": {
+    "css-deploy": "npm run css-build && npm run css-postcss",
+    "css-build": "node-sass _sass/main.scss css/main.css",
+    "css-postcss": "postcss --use autoprefixer --output css/main.css css/main.css",
+    "css-watch": "npm run css-build -- --watch",
+    "deploy": "npm run css-deploy && npm run js-build",
+    "js-build": "babel _javascript --out-dir lib",
+    "js-watch": "npm run js-build -- --watch",
+    "start": "npm-run-all --parallel css-watch js-watch"
+  }
 }
