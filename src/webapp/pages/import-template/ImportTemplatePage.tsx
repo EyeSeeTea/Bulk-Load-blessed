@@ -21,16 +21,18 @@ import {
     DataPackageData,
     DataPackageDataValue,
 } from "../../../domain/entities/DataPackage";
+import { AggregatedDataValue } from "../../../domain/entities/DhisDataPackage";
 import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
 import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
-import { DataValueSetsPostResponse } from "../../../types/d2-api";
+import { D2Api, DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/api-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
+import { promiseMap } from "../../utils/promises";
 import { RouteComponentProps } from "../root/RootPage";
 
 interface ImportState {
@@ -552,18 +554,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         loading.show(true, i18n.t("Importing data..."));
 
         try {
-            const deleteResponse =
-                importState.dataForm.type === "dataSets"
-                    ? await deleteDataValues(api, dataValues)
-                    : 0;
-            const importResponse = await dhisConnector.importData({
-                api,
-                element: importState.dataForm,
-                data: dataValues,
-            });
-
             if (importState.dataForm.type === "dataSets") {
-                const response = importResponse as DataValueSetsPostResponse;
+                const deleteResponse = await deleteDataValues(api, dataValues);
+                const response = await importAggregatedData(api, dataValues);
 
                 const deleteResult: SynchronizationResult | null = deleteResponse
                     ? {
@@ -593,14 +586,17 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
                 setSyncResults(_.compact([deleteResult, updateResult]));
             } else {
-                const response = importResponse as ImportPostResponse;
-                const result = processImportResponse({
-                    title: i18n.t("Data values - Create/update"),
-                    model: i18n.t("Event"),
-                    importResult: response,
-                    splitStatsList: true,
-                });
-                setSyncResults([result]);
+                const response = await importEventsData(api, dataValues);
+                const results = response.map((response: ImportPostResponse) =>
+                    processImportResponse({
+                        title: i18n.t("Data values - Create/update"),
+                        model: i18n.t("Event"),
+                        importResult: response,
+                        splitStatsList: true,
+                    })
+                );
+
+                setSyncResults(results);
             }
 
             setMessages(messages);
@@ -833,3 +829,36 @@ const useStyles = makeStyles({
         )`,
     },
 });
+
+// TODO: This should be migrated into clean code
+async function importEventsData(api: D2Api, data: Event[]): Promise<ImportPostResponse[]> {
+    const sendEvents = (events: Event[]) =>
+        api
+            .request<ImportPostResponse>({
+                method: "post",
+                url: "/events",
+                params: {},
+                data: { events },
+                validateStatus: () => true,
+            })
+            .getData();
+
+    const response = await sendEvents(data);
+
+    // See https://jira.dhis2.org/browse/DHIS2-9936
+    if (response.status === "ERROR" && response.message === "no transaction is in progress") {
+        return promiseMap(_.chunk(data, 99), events => sendEvents(events));
+    }
+
+    return [response];
+}
+
+// TODO: This should be migrated into clean code
+async function importAggregatedData(
+    api: D2Api,
+    data: AggregatedDataValue[]
+): Promise<DataValueSetsPostResponse> {
+    return api
+        .post<DataValueSetsPostResponse>("/dataValueSets", {}, { dataValues: data })
+        .getData();
+}
