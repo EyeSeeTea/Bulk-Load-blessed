@@ -55,14 +55,6 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }
 
-export async function importData({ element, api, data }) {
-    const isProgram = element.type === "programs" || element.type === "trackerPrograms";
-    const endpoint = isProgram ? "/events" : "/dataValueSets";
-    const object = isProgram ? { events: data } : { dataValues: data };
-    const response = await api.post(endpoint, {}, object).getData();
-    return response;
-}
-
 export function importOrgUnitByUID(api, uid) {
     return api.get("/organisationUnits/" + uid).getData();
 }

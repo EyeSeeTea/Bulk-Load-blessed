@@ -8,6 +8,7 @@ interface Constant {
     code: string;
     name: string;
     description: string;
+    value: number;
 }
 
 const defaultName = "Bulk Load Storage";
@@ -26,6 +27,7 @@ export class StorageConstantRepository extends StorageRepository {
             code: key,
             name: `${defaultName} - ${key}`,
             description: JSON.stringify(value, null, 2),
+            value: 1,
         };
     }
 
@@ -55,7 +57,7 @@ export class StorageConstantRepository extends StorageRepository {
         );
 
         const response = await this.api.models.constants
-            .put({ id, name, code: key, description: JSON.stringify(value, null, 4) })
+            .put({ id, name, code: key, description: JSON.stringify(value, null, 4), value: 1 })
             .getData();
 
         if (response.status !== "OK") {
