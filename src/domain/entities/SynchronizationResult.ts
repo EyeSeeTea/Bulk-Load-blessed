@@ -1,7 +1,5 @@
 export type SynchronizationStatus = "PENDING" | "SUCCESS" | "WARNING" | "ERROR" | "NETWORK ERROR";
 
-export type SynchronizationResults = SynchronizationResult[];
-
 export interface SynchronizationStats {
     type?: string;
     imported: number;
