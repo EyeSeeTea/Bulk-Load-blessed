@@ -31,7 +31,7 @@ const renderComponent = async () => {
     });
 };
 
-describe.skip("ImportTemplatePage", () => {
+describe("ImportTemplatePage", () => {
     beforeAll(async () => {
         CompositionRoot.initialize({
             appConfig: {
