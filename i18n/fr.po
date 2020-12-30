@@ -9,13 +9,11 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#, fuzzy
 msgid "Data values - Create/update"
-msgstr "Créer/mettre à jour"
+msgstr ""
 
-#, fuzzy
 msgid "Event"
-msgstr "événement"
+msgstr ""
 
 msgid "Create/update"
 msgstr "Créer/mettre à jour"
@@ -29,13 +27,11 @@ msgstr ""
 msgid "Template {{id}} not loaded"
 msgstr "Modèle {{id}} non téléchargé"
 
-#, fuzzy
 msgid "Data values - Delete"
-msgstr "valeurs de données"
+msgstr ""
 
-#, fuzzy
 msgid "Cannot read data form id"
-msgstr "Le fichier ne peut pas être lu"
+msgstr ""
 
 msgid "Program or DataSet not found in instance"
 msgstr "Programme ou DataSet pas trouvé dans l'instance"
@@ -185,9 +181,8 @@ msgstr "Sélectionnez le modèle à exporter ..."
 msgid "Data Model"
 msgstr "Modèle de données"
 
-#, fuzzy
 msgid "Period"
-msgstr "Période de fin"
+msgstr "Période"
 
 msgid "Start period"
 msgstr "Période de début"
@@ -198,10 +193,9 @@ msgstr "Période de fin"
 msgid "Organisation units"
 msgstr "Unités d'organisation"
 
-#, fuzzy
 msgid "Select organisation unit to populate data"
 msgstr ""
-"Sélectionnez au moins une unité d'organisation pour importer des données"
+""
 
 msgid "Select available organisation units to include in the template"
 msgstr "Sélectionnez les unités d'organisation à inclure dans le modèle"
@@ -428,15 +422,11 @@ msgstr "Annuler l'importation"
 msgid "Import only new records"
 msgstr "Importez quand même toutes les données"
 
-#, fuzzy
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
-"Il existe {{nombre}} valeurs de données avec une unité d'organisation non "
-"valide qui seront ignorées lors de l'importation.\n"
-"Vous pouvez toujours les télécharger et les envoyer à votre administrateur."
 
 msgid "Checking duplicates..."
 msgstr "Vérification des doublons en cours ..."
@@ -478,13 +468,3 @@ msgstr "Paramètres"
 
 msgid "Settings saved"
 msgstr "Paramètres sauvegardés"
-
-#~ msgid "Data elements filter"
-#~ msgstr "Filtre des éléments de données"
-
-#, fuzzy
-#~ msgid "Events - Create/update"
-#~ msgstr "Créer/mettre à jour"
-
-#~ msgid "Element not found"
-#~ msgstr "Élément pas trouvé"

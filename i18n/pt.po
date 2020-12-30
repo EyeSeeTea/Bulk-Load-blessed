@@ -8,13 +8,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#, fuzzy
 msgid "Data values - Create/update"
-msgstr "Crio/atualizar"
+msgstr ""
 
-#, fuzzy
 msgid "Event"
-msgstr "evento"
+msgstr ""
 
 msgid "Create/update"
 msgstr "Crio/atualizar"
@@ -28,13 +26,11 @@ msgstr ""
 msgid "Template {{id}} not loaded"
 msgstr "Planilha {{id}} não carregada"
 
-#, fuzzy
 msgid "Data values - Delete"
-msgstr "valores de dados"
+msgstr ""
 
-#, fuzzy
 msgid "Cannot read data form id"
-msgstr "Não é possível ler o arquivo"
+msgstr ""
 
 msgid "Program or DataSet not found in instance"
 msgstr "Programa ou DataSet não encontrado na instância"
@@ -182,9 +178,8 @@ msgstr "Selecione o planilha para exportar ..."
 msgid "Data Model"
 msgstr "Modelo de dados"
 
-#, fuzzy
 msgid "Period"
-msgstr "Período final"
+msgstr "Período"
 
 msgid "Start period"
 msgstr "Período inicial"
@@ -195,9 +190,8 @@ msgstr "Período final"
 msgid "Organisation units"
 msgstr "Unidades organizacionais"
 
-#, fuzzy
 msgid "Select organisation unit to populate data"
-msgstr "Selecione pelo menos uma unidade organizacional para importar dados"
+msgstr ""
 
 msgid "Select available organisation units to include in the template"
 msgstr "Selecione as unidades organizacionais para incluir na planilha"
@@ -415,15 +409,11 @@ msgstr "Cancelar importação"
 msgid "Import only new records"
 msgstr "Importar apenas novos registros"
 
-#, fuzzy
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
-"Existem {{number}} valores de dados com uma unidade organizacional inválida "
-"que serão ignorados durante a importação.\n"
-"Você debe baixá-los e enviá-los ao administrador do DHIS2"
 
 msgid "Checking duplicates..."
 msgstr "Verificando duplicados..."
@@ -465,13 +455,3 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
-
-#~ msgid "Data elements filter"
-#~ msgstr "Filtro de elementos de dados"
-
-#, fuzzy
-#~ msgid "Events - Create/update"
-#~ msgstr "Crio/atualizar"
-
-#~ msgid "Element not found"
-#~ msgstr "Elemento não encontrado"
