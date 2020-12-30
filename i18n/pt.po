@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
+"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -70,6 +70,12 @@ msgstr ""
 msgid "Select Organisation Units on template generation and import"
 msgstr "Selecione Unidades da organização na geração e importação de planilhas"
 
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
 msgid "Days"
 msgstr "Dias"
 
@@ -104,14 +110,14 @@ msgstr "Modelo de dados"
 msgid "Organisation Unit Visibility"
 msgstr "Visibilidade da unidade organizacional"
 
-msgid "Duplicate detection for events (programs)"
-msgstr "Detecção duplicada de eventos (programas)"
+msgid "Duplicate detection"
+msgstr "Detecção duplicada"
 
-msgid "Event date time difference"
-msgstr "Diferença de data e hora do evento"
+msgid "Event date time difference for events (programs)"
+msgstr "Diferença de data e hora do evento de eventos (programas)"
 
-msgid "Data elements filter"
-msgstr "Filtro de elementos de dados"
+msgid "Data elements filter for events (programs)"
+msgstr "Filtro de elementos de dados for events (programs)"
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de dados usados para identificação de duplicatas"
@@ -459,6 +465,9 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+
+#~ msgid "Data elements filter"
+#~ msgstr "Filtro de elementos de dados"
 
 #, fuzzy
 #~ msgid "Events - Create/update"

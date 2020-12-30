@@ -436,6 +436,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (!isProgram && !isDataSet) throw new Error("Invalid form type");
         if (!id) throw new Error("Invalid program or dataSet");
 
+        if (!settings.duplicateEnabled) {
+            return { newValues: isProgram ? events : dataValues, existingValues: [] };
+        }
+
         const periods = isProgram
             ? undefined
             : _.uniq(dataValues?.map(({ period }) => period.toString()));

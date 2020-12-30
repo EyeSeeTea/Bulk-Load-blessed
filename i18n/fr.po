@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
+"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -72,6 +72,12 @@ msgstr ""
 "Sélectionnez les unités d'organisation lors de la génération et de "
 "l'importation de modèles"
 
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
 msgid "Days"
 msgstr "Jours"
 
@@ -107,14 +113,14 @@ msgstr "Modèle de données"
 msgid "Organisation Unit Visibility"
 msgstr "Visibilité de l'unité d'organisation"
 
-msgid "Duplicate detection for events (programs)"
-msgstr "Détection des doublons pour les programmes des événements "
+msgid "Duplicate detection"
+msgstr "Détection des doublons"
 
-msgid "Event date time difference"
-msgstr "Décalage de la date de l'événement"
+msgid "Event date time difference for events (programs)"
+msgstr "Décalage de la date de l'événement pour les programmes des événements"
 
-msgid "Data elements filter"
-msgstr "Filtre des éléments de données"
+msgid "Data elements filter for events (programs)"
+msgstr "Filtre des éléments de données pour les programmes des événements"
 
 msgid "Data elements used for duplicates identification"
 msgstr "Éléments de données utilisés pour l'identification des doublons"
@@ -472,6 +478,9 @@ msgstr "Paramètres"
 
 msgid "Settings saved"
 msgstr "Paramètres sauvegardés"
+
+#~ msgid "Data elements filter"
+#~ msgstr "Filtre des éléments de données"
 
 #, fuzzy
 #~ msgid "Events - Create/update"

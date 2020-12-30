@@ -129,21 +129,31 @@ export class ImportTemplateUseCase implements UseCase {
         settings: Settings,
         duplicateStrategy: DuplicateImportStrategy
     ) {
-        const { duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
-
-        const instanceDataPackage = await this.getInstanceDataValues(dataForm, excelDataPackage);
-        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
-            dataForm.type,
-            dataForm.id
-        );
+        const {
+            duplicateEnabled,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
+        } = settings;
 
         // Override org unit if needed
         const dataValues = useBuilderOrgUnits
             ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
             : excelDataPackage.dataEntries;
-        const instanceDataValues = useBuilderOrgUnits
-            ? this.overrideOrgUnit(instanceDataPackage.dataEntries, selectedOrgUnits[0])
-            : instanceDataPackage.dataEntries;
+
+        const instanceDataValues = duplicateEnabled
+            ? await this.getExistingDataValues(
+                  excelDataPackage,
+                  dataForm,
+                  useBuilderOrgUnits,
+                  selectedOrgUnits
+              )
+            : [];
+
+        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
+            dataForm.type,
+            dataForm.id
+        );
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
@@ -195,6 +205,19 @@ export class ImportTemplateUseCase implements UseCase {
                 trackedEntityInstances: [],
             },
         };
+    }
+
+    private async getExistingDataValues(
+        excelDataPackage: DataPackage,
+        dataForm: DataForm,
+        useBuilderOrgUnits: boolean,
+        selectedOrgUnits: string[]
+    ) {
+        const instanceDataPackage = await this.getInstanceDataValues(dataForm, excelDataPackage);
+
+        return useBuilderOrgUnits
+            ? this.overrideOrgUnit(instanceDataPackage.dataEntries, selectedOrgUnits[0])
+            : instanceDataPackage.dataEntries;
     }
 
     private overrideOrgUnit(
