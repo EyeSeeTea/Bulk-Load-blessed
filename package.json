@@ -19,7 +19,7 @@
         "@material-ui/icons": "4.9.1",
         "@material-ui/styles": "4.9.10",
         "async-promise-pool": "1.0.3",
-        "axios": "0.19.2",
+        "axios": "0.21.1",
         "core-js": "3.6.5",
         "cross-blob": "2.0.0",
         "d2": "31.8.1",
