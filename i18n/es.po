@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
+"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9,13 +9,11 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#, fuzzy
 msgid "Data values - Create/update"
-msgstr "Crear/actualizar"
+msgstr ""
 
-#, fuzzy
 msgid "Event"
-msgstr "evento"
+msgstr ""
 
 msgid "Create/update"
 msgstr "Crear/actualizar"
@@ -29,13 +27,11 @@ msgstr ""
 msgid "Template {{id}} not loaded"
 msgstr "La plantilla {{id}} no se pudo cargar"
 
-#, fuzzy
 msgid "Data values - Delete"
-msgstr "valores de datos"
+msgstr ""
 
-#, fuzzy
 msgid "Cannot read data form id"
-msgstr "No se puede leer el archivo"
+msgstr ""
 
 msgid "Program or DataSet not found in instance"
 msgstr "No se encontraron el programa o el set de datos en la instancia"
@@ -72,6 +68,12 @@ msgstr ""
 "Mostrar unidades organizativas durante la generación de la plantilla y al "
 "importar datos"
 
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
 msgid "Days"
 msgstr "Días"
 
@@ -106,16 +108,16 @@ msgstr "Modelos de Datos"
 msgid "Organisation Unit Visibility"
 msgstr "Visibilidad de unidades organizativas"
 
-msgid "Duplicate detection for events (programs)"
-msgstr "Detección de duplicados para eventos (programas)"
+msgid "Duplicate detection"
+msgstr "Detección de duplicados"
 
-msgid "Event date time difference"
+msgid "Event date time difference for events (programs)"
 msgstr ""
 "Diferencia aceptada entre las fechas de los eventos para la identificación "
-"de duplicados"
+"de duplicados para eventos (programas)"
 
-msgid "Data elements filter"
-msgstr "Filtro de elementos de datos"
+msgid "Data elements filter for events (programs)"
+msgstr "Filtro de elementos de datos para eventos (programas)"
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de datos usados para identificar los duplicados"
@@ -180,9 +182,8 @@ msgstr "Seleccione plantilla para exportar..."
 msgid "Data Model"
 msgstr "Modelo de Datos"
 
-#, fuzzy
 msgid "Period"
-msgstr "Periodo final"
+msgstr "Periodo"
 
 msgid "Start period"
 msgstr "Periodo inicial"
@@ -193,9 +194,8 @@ msgstr "Periodo final"
 msgid "Organisation units"
 msgstr "Unidades Organizativas"
 
-#, fuzzy
 msgid "Select organisation unit to populate data"
-msgstr "Seleccione al menos una unidad organizativa a la que asignar los datos"
+msgstr ""
 
 msgid "Select available organisation units to include in the template"
 msgstr "Seleccione las unidades organizativas para añadir a la plantilla"
@@ -412,15 +412,11 @@ msgstr "Cancelar importación"
 msgid "Import only new records"
 msgstr "Importar solo los datos nuevos"
 
-#, fuzzy
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
-"Existen {{number}} valores asociados a unidades organziativas no válidas que "
-"seran ignorados durante la importación. Por favor, descarguese estos datos y "
-"envieselos a su administrador o gestor de DHIS2"
 
 msgid "Checking duplicates..."
 msgstr "Comprobando duplicados..."
@@ -462,10 +458,3 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#, fuzzy
-#~ msgid "Events - Create/update"
-#~ msgstr "Crear/actualizar"
-
-#~ msgid "Element not found"
-#~ msgstr "No se encontró el elemento"
