@@ -48,6 +48,13 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
         [settings, onChange]
     );
 
+    const setDuplicateEnabled = useCallback(
+        ({ value }: SelectOption) => {
+            onChange(settings.update({ duplicateEnabled: value === "true" }));
+        },
+        [settings, onChange]
+    );
+
     const setDuplicateTolerance = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
             const duplicateTolerance = parseInt(event.target.value);
@@ -82,6 +89,20 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
             {
                 value: "both",
                 label: i18n.t("Select Organisation Units on template generation and import"),
+            },
+        ],
+        []
+    );
+
+    const duplicateEnabledOptions: SelectOption[] = useMemo(
+        () => [
+            {
+                value: "true",
+                label: i18n.t("Yes"),
+            },
+            {
+                value: "false",
+                label: i18n.t("No"),
             },
         ],
         []
@@ -169,12 +190,22 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                 </div>
             </FormGroup>
 
-            <h3 className={classes.title}>{i18n.t("Duplicate detection for events (programs)")}</h3>
+            <h3 className={classes.title}>{i18n.t("Duplicate detection")}</h3>
+
+            <FormGroup className={classes.content} row={true}>
+                <div className={classes.fullWidth}>
+                    <Select
+                        onChange={setDuplicateEnabled}
+                        options={duplicateEnabledOptions}
+                        value={String(settings.duplicateEnabled)}
+                    />
+                </div>
+            </FormGroup>
 
             <div className={classes.content}>
                 <FormGroup className={classes.eventDateTime} row={true}>
                     <p className={classes.duplicateToleranceLabel}>
-                        {i18n.t("Event date time difference")}
+                        {i18n.t("Event date time difference for events (programs)")}
                     </p>
                     <TextField
                         className={classes.duplicateTolerance}
@@ -194,7 +225,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
                     <ListItemText
-                        primary={i18n.t("Data elements filter")}
+                        primary={i18n.t("Data elements filter for events (programs)")}
                         secondary={i18n.t("Data elements used for duplicates identification")}
                     />
                 </ListItem>

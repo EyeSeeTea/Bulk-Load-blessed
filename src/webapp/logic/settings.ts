@@ -22,6 +22,7 @@ const publicFields = [
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
+    "duplicateEnabled",
     "duplicateExclusion",
     "duplicateTolerance",
     "duplicateToleranceUnit",
@@ -55,6 +56,7 @@ export default class Settings {
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
+    public duplicateEnabled: boolean;
     public duplicateExclusion: DuplicateExclusion;
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
@@ -69,6 +71,7 @@ export default class Settings {
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
+        this.duplicateEnabled = options.duplicateEnabled;
         this.duplicateExclusion = options.duplicateExclusion;
         this.duplicateTolerance = options.duplicateTolerance;
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
@@ -130,6 +133,7 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
+            duplicateEnabled: data.duplicateEnabled ?? true,
             duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
             duplicateToleranceUnit:
@@ -152,6 +156,7 @@ export default class Settings {
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
+            duplicateEnabled,
             duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
@@ -174,6 +179,7 @@ export default class Settings {
             permissionsForGeneration,
             permissionsForSettings,
             orgUnitSelection,
+            duplicateEnabled,
             duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
@@ -212,6 +218,10 @@ export default class Settings {
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });
+    }
+
+    setDuplicateEnabled(duplicateEnabled: boolean): Settings {
+        return this.updateOptions({ duplicateEnabled });
     }
 
     setDuplicateExclusions(program: Id, exclusions: Id[]): Settings {

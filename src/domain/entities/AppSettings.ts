@@ -14,6 +14,7 @@ export interface AppSettings {
     permissionsForGeneration: string[];
     permissionsForSettings: string[];
     orgUnitSelection: OrgUnitSelectionSetting;
+    duplicateEnabled: boolean;
     duplicateExclusion: DuplicateExclusion;
     duplicateTolerance: number;
     duplicateToleranceUnit: DuplicateToleranceUnit;

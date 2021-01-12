@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-11-18T09:57:39.069Z\n"
-"PO-Revision-Date: 2020-11-18T09:57:39.069Z\n"
+"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
+"PO-Revision-Date: 2020-12-30T08:23:30.873Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -65,6 +65,12 @@ msgstr ""
 msgid "Select Organisation Units on template generation and import"
 msgstr ""
 
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
 msgid "Days"
 msgstr ""
 
@@ -98,13 +104,13 @@ msgstr ""
 msgid "Organisation Unit Visibility"
 msgstr ""
 
-msgid "Duplicate detection for events (programs)"
+msgid "Duplicate detection"
 msgstr ""
 
-msgid "Event date time difference"
+msgid "Event date time difference for events (programs)"
 msgstr ""
 
-msgid "Data elements filter"
+msgid "Data elements filter for events (programs)"
 msgstr ""
 
 msgid "Data elements used for duplicates identification"
