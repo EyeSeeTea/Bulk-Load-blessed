@@ -30,6 +30,7 @@ src/react-app.d.ts
 src/react-app-env.d.ts
 scripts/
 bak
+.eslintcache
 
 # cypress
 cypress/screenshots/
@@ -38,4 +39,3 @@ cypress/fixtures/
 
 # IntelliJ
 .idea/*
-

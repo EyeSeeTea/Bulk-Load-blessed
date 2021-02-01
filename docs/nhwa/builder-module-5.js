@@ -35,8 +35,9 @@ let getDataElements = ({
                 ref: {
                     type: "cell",
                     sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
+                    ref: `${letters[i % letters.length]}${
+                        parseInt(i / letters.length) + dataRowStart
+                    }`,
                 },
             };
         }

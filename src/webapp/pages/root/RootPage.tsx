@@ -1,7 +1,7 @@
 //@ts-ignore
 import { HeaderBar } from "@dhis2/ui-widgets";
 import { makeStyles, Paper } from "@material-ui/core";
-import { useSnackbar } from "d2-ui-components";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
 import { CompositionRoot } from "../../../CompositionRoot";

@@ -1,5 +1,5 @@
 import { Button, makeStyles } from "@material-ui/core";
-import { useLoading, useSnackbar } from "d2-ui-components";
+import { useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
 import React, { useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";

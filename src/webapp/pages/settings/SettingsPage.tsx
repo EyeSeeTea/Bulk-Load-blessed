@@ -1,4 +1,4 @@
-import { useSnackbar } from "d2-ui-components";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import React, { useCallback } from "react";
 import i18n from "../../../locales";
 import SettingsFields from "../../components/settings/SettingsFields";

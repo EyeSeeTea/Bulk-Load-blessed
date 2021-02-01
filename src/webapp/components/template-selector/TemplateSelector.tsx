@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
+import { DatePicker, OrgUnitsSelector } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";

@@ -8,7 +8,7 @@ import {
     TableState,
     useLoading,
     useSnackbar,
-} from "d2-ui-components";
+} from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
 import React, { ReactNode, useState } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";

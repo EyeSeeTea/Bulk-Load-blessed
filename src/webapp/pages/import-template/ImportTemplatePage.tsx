@@ -7,7 +7,7 @@ import {
     OrgUnitsSelector,
     useLoading,
     useSnackbar,
-} from "d2-ui-components";
+} from "@eyeseetea/d2-ui-components";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";

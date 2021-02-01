@@ -20,7 +20,7 @@ let customRowsTab2Comments = [
     { row: 9, nrOfElements: 1 },
     { row: 13, nrOfElements: 1 },
     { row: 14, nrOfElements: 1 },
-]
+];
 
 let customRowsTab3Comments = [
     { row: 9, nrOfElements: 1 },
@@ -75,8 +75,9 @@ let getDataElements = ({
                 ref: {
                     type: "cell",
                     sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
+                    ref: `${letters[i % letters.length]}${
+                        parseInt(i / letters.length) + dataRowStart
+                    }`,
                 },
             };
         }

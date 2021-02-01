@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core";
-import { ConfirmationDialog, MultiSelector } from "d2-ui-components";
+import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import React, { useEffect, useState, useCallback } from "react";
 import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm } from "../../../domain/entities/DataForm";

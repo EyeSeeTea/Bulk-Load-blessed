@@ -20,7 +20,7 @@ import { TrackedEntityInstance, AttributeValue } from "../entities/TrackedEntity
 import { removeCharacters } from "../../utils/string";
 import { Relationship } from "../entities/Relationship";
 import moment from "moment";
-import XlsxPopulate from "xlsx-populate";
+import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 
 const dateFormat = "YYYY-MM-DD";
@@ -49,16 +49,16 @@ export class ExcelReader {
         for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
                 case "cell":
-                    data.push(...(await this.readByCell(template, dataSource)));
+                    data.concat(await this.readByCell(template, dataSource));
                     break;
                 case "rowTei":
-                    teis.push(...(await this.readTeiRows(template, dataSource)));
+                    teis.concat(await this.readTeiRows(template, dataSource));
                     break;
                 case "rowTeiRelationship":
-                    relationships.push(...(await this.readTeiRelationships(template, dataSource)));
+                    relationships.concat(await this.readTeiRelationships(template, dataSource));
                     break;
                 case "rowTrackedEvent":
-                    data.push(...(await this.readTeiEvents(template, dataSource, teis)));
+                    data.concat(await this.readTeiEvents(template, dataSource, teis));
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
