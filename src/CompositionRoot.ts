@@ -13,7 +13,6 @@ import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
 import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
-import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
@@ -91,11 +90,6 @@ export class CompositionRoot {
                 this.instance,
                 this.templateManager,
                 this.excelReader
-            ),
-            downloadCustom: new DownloadCustomTemplateUseCase(
-                this.templateManager,
-                this.excelReader,
-                this.instance
             ),
             import: new ImportTemplateUseCase(
                 this.instance,
