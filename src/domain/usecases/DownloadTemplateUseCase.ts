@@ -82,6 +82,7 @@ export class DownloadTemplateUseCase implements UseCase {
             }
 
             const builder = new ExcelBuilder(this.excelRepository, this.instance);
+            await builder.templateCustomization(template);
 
             if (theme) await builder.applyTheme(template, theme);
 

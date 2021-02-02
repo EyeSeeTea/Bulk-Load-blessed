@@ -444,4 +444,10 @@ export class ExcelBuilder {
             if (source && file) this.excelRepository.addPicture(template.id, source, file);
         });
     }
+
+    public async templateCustomization(template: Template): Promise<void> {
+        if (template.type !== "custom") return;
+        if (template.customization)
+            template.customization(this.excelRepository, this.instanceRepository);
+    }
 }

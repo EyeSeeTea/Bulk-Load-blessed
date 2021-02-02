@@ -1,4 +1,6 @@
 import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
+import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
+import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 
 export class NHWAModule801 implements CustomTemplate {
     public readonly type = "custom";
@@ -21,4 +23,11 @@ export class NHWAModule801 implements CustomTemplate {
     public readonly dataSources: DataSource[] = [];
 
     public readonly styleSources: StyleSource[] = [];
+
+    public async customization(
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository
+    ): Promise<void> {
+        console.log(excelRepository, instanceRepository);
+    }
 }

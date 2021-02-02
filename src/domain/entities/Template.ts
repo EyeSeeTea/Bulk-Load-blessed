@@ -1,3 +1,5 @@
+import { ExcelRepository } from "../repositories/ExcelRepository";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
@@ -48,6 +50,10 @@ export interface CustomTemplate extends BaseTemplate {
     url: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
+    customization?: (
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository
+    ) => Promise<void>;
 }
 
 export interface GenericSheetRef {
