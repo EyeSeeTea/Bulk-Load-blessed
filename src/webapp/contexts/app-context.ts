@@ -1,9 +1,11 @@
 import React, { useContext } from "react";
+import { CompositionRoot } from "../../CompositionRoot";
 import { D2Api } from "../../types/d2-api";
 
 export interface AppContextI {
     api: D2Api;
     d2: object;
+    compositionRoot: CompositionRoot;
 }
 
 export const AppContext = React.createContext<AppContextI | null>(null);

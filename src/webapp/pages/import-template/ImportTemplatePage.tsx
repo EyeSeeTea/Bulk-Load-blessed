@@ -1,6 +1,3 @@
-import { Button, Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import CloudDoneIcon from "@material-ui/icons/CloudDone";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import {
     ConfirmationDialog,
     ConfirmationDialogProps,
@@ -8,12 +5,14 @@ import {
     useLoading,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
+import { Button, Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
+import CloudDoneIcon from "@material-ui/icons/CloudDone";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import {
@@ -28,7 +27,7 @@ import i18n from "../../../locales";
 import { D2Api, DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
@@ -46,10 +45,10 @@ interface ImportState {
 }
 
 export default function ImportTemplatePage({ settings }: RouteComponentProps) {
+    const { api, compositionRoot } = useAppContext();
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
-    const { api } = useAppContext();
 
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
@@ -60,8 +59,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
-    }, []);
+        compositionRoot.orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
+    }, [compositionRoot]);
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(_.takeRight(orgUnitPaths, 1));
@@ -81,11 +80,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
 
         try {
-            const {
-                dataForm,
-                dataValues,
-                orgUnits,
-            } = await CompositionRoot.attach().templates.analyze(file);
+            const { dataForm, dataValues, orgUnits } = await compositionRoot.templates.analyze(
+                file
+            );
 
             if (!dataForm.writeAccess) {
                 throw new Error(
@@ -134,7 +131,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 rowOffset,
                 colOffset,
                 orgUnits,
-            } = await CompositionRoot.attach().templates.analyze(file);
+            } = await compositionRoot.templates.analyze(file);
 
             // TODO: Remove if condition and use only new code to import templates
             if (custom || dataForm.type === "trackerPrograms") {
@@ -219,7 +216,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const startImport = async (params: ImportTemplateUseCaseParams) => {
         loading.show(true, i18n.t("Importing data..."));
 
-        const result = await CompositionRoot.attach().templates.import(params);
+        const result = await compositionRoot.templates.import(params);
 
         result.match({
             success: syncResults => {
@@ -348,7 +345,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const downloadInvalidOrganisations = (dataPackage: DataPackage) => {
-        const object = CompositionRoot.attach().form.convertDataPackage(dataPackage);
+        const object = compositionRoot.form.convertDataPackage(dataPackage);
         const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
@@ -447,7 +444,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
             : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
 
-        const result = await CompositionRoot.attach().form.getDataPackage({
+        const result = await compositionRoot.form.getDataPackage({
             id,
             periods,
             orgUnits,

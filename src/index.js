@@ -7,7 +7,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { D2ApiDefault } from "./types/d2-api";
 import App from "./webapp/components/app/App";
-import { AppContext } from "./webapp/contexts/api-context";
 
 async function getBaseUrl() {
     if (process.env.NODE_ENV === "development") {
@@ -37,16 +36,14 @@ async function main() {
     try {
         const d2 = await init({ baseUrl: baseUrl + "/api", schemas: [] });
         const api = new D2ApiDefault({ baseUrl });
-        Object.assign(window, { bulkLoad: { d2, api } });
+        Object.assign(window, { d2, api });
 
         const userSettings = await api.get("/userSettings").getData();
         configI18n(userSettings);
 
         ReactDOM.render(
             <Provider config={{ baseUrl, apiVersion: "30" }}>
-                <AppContext.Provider value={{ d2, api }}>
-                    <App />
-                </AppContext.Provider>
+                <App d2={d2} api={api} />
             </Provider>,
             document.getElementById("root")
         );
