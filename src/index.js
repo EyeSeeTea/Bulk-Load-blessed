@@ -42,9 +42,11 @@ async function main() {
         configI18n(userSettings);
 
         ReactDOM.render(
-            <Provider config={{ baseUrl, apiVersion: "30" }}>
-                <App d2={d2} api={api} />
-            </Provider>,
+            <React.StrictMode>
+                <Provider config={{ baseUrl, apiVersion: "30" }}>
+                    <App d2={d2} api={api} />
+                </Provider>
+            </React.StrictMode>,
             document.getElementById("root")
         );
     } catch (err) {
