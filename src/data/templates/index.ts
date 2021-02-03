@@ -17,3 +17,5 @@ export { NHWAModule501 } from "./nhwa-module-5/NHWAModule5.01";
 export { NHWAModule601 } from "./nhwa-module-6/NHWAModule6.01";
 export { NHWAModule701 } from "./nhwa-module-7/NHWAModule7.01";
 export { NHWAModule801 } from "./nhwa-module-8/NHWAModule8.01";
+
+export { SnakebiteAnnualReport } from "./snakebite-annual-report/SnakebiteAnnualReport.01";

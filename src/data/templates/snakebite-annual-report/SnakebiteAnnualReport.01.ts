@@ -2,7 +2,7 @@ import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entitie
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 
-export class NHWAModule801 implements CustomTemplate {
+export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly type = "custom";
     public readonly id = "SNAKEBITE_ANNUAL_REPORT_v1";
     public readonly name = "Snakebite Annual Report";

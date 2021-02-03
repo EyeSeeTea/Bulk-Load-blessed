@@ -90,7 +90,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const definedName = definedNames.find(
             name => removeCharacters(name) === removeCharacters(value)
         );
-        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
+
+        const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
+        if (!cell) return;
+
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
@@ -254,15 +257,15 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {
-        //@ts-ignore
-        return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
-            const rangeRef = key.includes(":") ? key : `${key}:${key}`;
-            const range = workbook.sheet(sheet).range(rangeRef);
-            const startCell = range.startCell();
-            const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
+        return workbook
+            .sheet(sheet)
+            ?.merged()
+            .map(range => {
+                const startCell = range.startCell();
+                const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 
-            return { range, startCell, hasCell };
-        });
+                return { range, startCell, hasCell };
+            });
     }
 
     private async getWorkbook(id: string) {
@@ -279,7 +282,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
     public async listDefinedNames(id: string): Promise<string[]> {
         const workbook = await this.getWorkbook(id);
         try {
-            //@ts-ignore Not typed, need extension
             return workbook.definedName();
         } catch (error) {
             return [];
