@@ -1,11 +1,11 @@
-import Blob from "cross-blob";
-import _ from "lodash";
 import XLSX, {
     Cell as ExcelCell,
     FormulaError,
     Workbook as ExcelWorkbook,
     Workbook,
 } from "@eyeseetea/xlsx-populate";
+import Blob from "cross-blob";
+import _ from "lodash";
 import { Sheet } from "../domain/entities/Sheet";
 import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
@@ -254,6 +254,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
             .last();
 
         return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
+    }
+
+    public async getOrCreateSheet(id: string, name: string): Promise<Sheet> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(name) ?? workbook.addSheet(name);
+        const index = _.findIndex(workbook.sheets(), sheet => sheet.name() === name);
+
+        return {
+            index,
+            name: sheet.name(),
+            active: sheet.active(),
+        };
     }
 
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {

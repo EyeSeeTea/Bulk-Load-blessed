@@ -51,4 +51,5 @@ export abstract class ExcelRepository {
         sheetId: string | number
     ): Promise<number | undefined>;
     public abstract listDefinedNames(id: string): Promise<string[]>;
+    public abstract getOrCreateSheet(id: string, name: string): Promise<Sheet>;
 }
