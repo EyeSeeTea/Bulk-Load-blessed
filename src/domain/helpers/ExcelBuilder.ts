@@ -446,8 +446,8 @@ export class ExcelBuilder {
     }
 
     public async templateCustomization(template: Template): Promise<void> {
-        if (template.type !== "custom") return;
-        if (template.customization)
-            template.customization(this.excelRepository, this.instanceRepository);
+        if (template.type === "custom" && template.downloadCustomization) {
+            await template.downloadCustomization(this.excelRepository, this.instanceRepository);
+        }
     }
 }

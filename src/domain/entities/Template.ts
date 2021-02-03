@@ -50,7 +50,7 @@ export interface CustomTemplate extends BaseTemplate {
     url: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
-    customization?: (
+    downloadCustomization?: (
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository
     ) => Promise<void>;

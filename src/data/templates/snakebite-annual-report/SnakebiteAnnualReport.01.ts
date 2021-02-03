@@ -12,19 +12,19 @@ export class NHWAModule801 implements CustomTemplate {
     public readonly fixedOrgUnit = {
         type: "cell" as const,
         sheet: "National",
-        ref: "B4",
+        ref: "B4", // Used for populate
     };
     public readonly fixedPeriod = {
         type: "cell" as const,
         sheet: "National",
-        ref: "B5",
+        ref: "B5", // Used for populate
     };
 
     public readonly dataSources: DataSource[] = [];
 
     public readonly styleSources: StyleSource[] = [];
 
-    public async customization(
+    public async downloadCustomization(
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository
     ): Promise<void> {
