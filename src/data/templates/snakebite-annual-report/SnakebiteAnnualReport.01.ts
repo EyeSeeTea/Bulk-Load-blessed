@@ -1,3 +1,5 @@
+import { array, Codec, GetType, oneOf, optional, record, string } from "purify-ts";
+import { Integer, IntegerFromString } from "purify-ts-extra-codec";
 import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
@@ -28,6 +30,50 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository
     ): Promise<void> {
-        console.log(excelRepository, instanceRepository);
+        const metadata = await this.getCustomMetadata(instanceRepository);
+        console.log({ metadata, excelRepository, instanceRepository });
+
+        // Add metadata sheet
+        await excelRepository.getOrCreateSheet(this.id, "Metadata");
+    }
+
+    private async getCustomMetadata(
+        instanceRepository: InstanceRepository
+    ): Promise<CustomMetadata | undefined> {
+        const dataStore = instanceRepository.getDataStore("snake-bite");
+
+        try {
+            const response = await dataStore.get("customMetadata").getData();
+            return CustomMetadataModel.unsafeDecode(response);
+        } catch (error) {
+            console.error(error);
+            return undefined;
+        }
     }
 }
+
+const CustomMetadataModel = Codec.interface({
+    dataElements: optional(
+        record(
+            string,
+            Codec.interface({
+                totalName: optional(string),
+                info: optional(string),
+            })
+        )
+    ),
+    optionCombos: optional(
+        record(
+            string,
+            Codec.interface({
+                name: optional(string),
+                info: optional(string),
+                order: optional(oneOf([Integer, IntegerFromString])),
+            })
+        )
+    ),
+    adminUserGroups: optional(array(string)),
+    subnationalDataSet: optional(string),
+});
+
+type CustomMetadata = GetType<typeof CustomMetadataModel>;

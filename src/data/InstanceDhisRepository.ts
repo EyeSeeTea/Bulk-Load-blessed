@@ -23,6 +23,7 @@ import i18n from "../locales";
 import {
     D2Api,
     D2ApiDefault,
+    DataStore,
     DataValueSetsGetResponse,
     DataValueSetsPostResponse,
     Id,
@@ -48,6 +49,10 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     constructor({ url }: DhisInstance, mockApi?: D2Api) {
         this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
+    }
+
+    public getDataStore(namespace: string): DataStore {
+        return this.api.dataStore(namespace);
     }
 
     public async getDataForms({
