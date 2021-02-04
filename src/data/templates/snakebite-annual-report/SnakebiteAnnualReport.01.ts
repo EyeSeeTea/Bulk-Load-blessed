@@ -15,18 +15,31 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly url = "templates/Snakebite_Annual_Report.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "XBgvNrxpcDC" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
-    public readonly fixedOrgUnit = {
-        type: "cell" as const,
-        sheet: "National",
-        ref: "B4", // Used for populate
-    };
-    public readonly fixedPeriod = {
-        type: "cell" as const,
-        sheet: "National",
-        ref: "B5", // Used for populate
-    };
+    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "B3" };
+    public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "E3" };
 
-    public readonly dataSources: DataSource[] = [];
+    public readonly dataSources: DataSource[] = [
+        (sheet: string) => {
+            switch (sheet) {
+                case "National":
+                    return _.range(20).map(offset => ({
+                        type: "row",
+                        orgUnit: { sheet: "National", type: "cell", ref: "B3" },
+                        period: { sheet: "National", type: "cell", ref: "E3" },
+                        range: {
+                            sheet: "National",
+                            rowStart: 8 + offset,
+                            rowEnd: 8 + offset,
+                            columnStart: "A",
+                        },
+                        dataElement: { sheet: "National", type: "row", ref: 6 + offset },
+                        categoryOption: { sheet: "National", type: "row", ref: 7 + offset },
+                    }));
+                default:
+                    return [];
+            }
+        },
+    ];
 
     public readonly styleSources: StyleSource[] = [];
 
