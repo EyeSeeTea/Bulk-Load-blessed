@@ -97,7 +97,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { startCell: destination = cell } =
             mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        if (!isNaN(Number(value))) {
+        if (!!value && !isNaN(Number(value))) {
             destination.value(Number(value));
         } else if (String(value).startsWith("=")) {
             destination.formula(String(value));
@@ -268,6 +268,20 @@ export class ExcelPopulateRepository extends ExcelRepository {
         };
     }
 
+    public columnNumberToName(column: number): string {
+        let dividend = column;
+        let name = "";
+        let modulo = 0;
+
+        while (dividend > 0) {
+            modulo = (dividend - 1) % 26;
+            name = String.fromCharCode("A".charCodeAt(0) + modulo) + name;
+            dividend = Math.floor((dividend - modulo) / 26);
+        }
+
+        return name;
+    }
+
     private async buildMergedCells(workbook: Workbook, sheet: string | number) {
         return workbook
             .sheet(sheet)
@@ -298,6 +312,12 @@ export class ExcelPopulateRepository extends ExcelRepository {
         } catch (error) {
             return [];
         }
+    }
+
+    public async defineName(id: string, name: string, cell: CellRef): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const location = workbook.sheet(cell.sheet).cell(cell.ref);
+        workbook.sheet(cell.sheet).definedName(name, location);
     }
 }
 

@@ -1,8 +1,12 @@
-import { array, Codec, GetType, oneOf, optional, record, string } from "purify-ts";
-import { Integer, IntegerFromString } from "purify-ts-extra-codec";
+import _ from "lodash";
+import { array, Codec, GetType, optional, record, string } from "purify-ts";
+import { DataForm } from "../../../domain/entities/DataForm";
 import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
+import { cache } from "../../../utils/cache";
+import { integer, optionalSafe } from "../../../utils/codec";
+import { promiseMap } from "../../../webapp/utils/promises";
 
 export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly type = "custom";
@@ -30,11 +34,69 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository
     ): Promise<void> {
+        const { national, subnational } = await this.getDataForms(instanceRepository);
         const metadata = await this.getCustomMetadata(instanceRepository);
-        console.log({ metadata, excelRepository, instanceRepository });
 
         // Add metadata sheet
         await excelRepository.getOrCreateSheet(this.id, "Metadata");
+        const labels = ["Type", "Identifier", "Name", "Info"];
+        await promiseMap(labels, (label, index) =>
+            excelRepository.writeCell(
+                this.id,
+                {
+                    type: "cell",
+                    sheet: "Metadata",
+                    ref: `${excelRepository.columnNumberToName(index + 1)}1`,
+                },
+                label
+            )
+        );
+
+        const items = _([national?.dataElements, subnational?.dataElements])
+            .compact()
+            .flatten()
+            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
+                { id, name, type: "dataElement" },
+                ...categoryOptionCombos.map(({ id, name }) => ({
+                    id,
+                    name,
+                    type: "categoryOptionCombo",
+                })),
+            ])
+            .value();
+
+        await promiseMap(items, async ({ id, name, type }, index) => {
+            const label =
+                metadata?.dataElements[id]?.totalName ?? metadata?.optionCombos[id]?.name ?? name;
+            const info = metadata?.optionCombos[id]?.info ?? "";
+
+            const buildRef = (column: string, row: number) => ({
+                type: "cell" as const,
+                sheet: "Metadata",
+                ref: `${column}${row}`,
+            });
+
+            await excelRepository.writeCell(this.id, buildRef("A", index + 2), type);
+            await excelRepository.writeCell(this.id, buildRef("B", index + 2), id);
+            await excelRepository.writeCell(this.id, buildRef("C", index + 2), label);
+            await excelRepository.writeCell(this.id, buildRef("D", index + 2), info);
+            await excelRepository.defineName(this.id, `_${id}`, buildRef("C", index + 2));
+        });
+    }
+
+    @cache()
+    private async getDataForms(
+        instanceRepository: InstanceRepository
+    ): Promise<{ national?: DataForm; subnational?: DataForm }> {
+        const dataForms = await instanceRepository.getDataForms({
+            ids: ["XBgvNrxpcDC", "SAV16xEdCZW"],
+            type: ["dataSets"],
+        });
+
+        return {
+            national: dataForms.find(({ id }) => id === "XBgvNrxpcDC"),
+            subnational: dataForms.find(({ id }) => id === "SAV16xEdCZW"),
+        };
     }
 
     private async getCustomMetadata(
@@ -53,26 +115,28 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 }
 
 const CustomMetadataModel = Codec.interface({
-    dataElements: optional(
+    dataElements: optionalSafe(
         record(
             string,
             Codec.interface({
                 totalName: optional(string),
                 info: optional(string),
             })
-        )
+        ),
+        {}
     ),
-    optionCombos: optional(
+    optionCombos: optionalSafe(
         record(
             string,
             Codec.interface({
                 name: optional(string),
                 info: optional(string),
-                order: optional(oneOf([Integer, IntegerFromString])),
+                order: optional(integer),
             })
-        )
+        ),
+        {}
     ),
-    adminUserGroups: optional(array(string)),
+    adminUserGroups: optionalSafe(array(string), []),
     subnationalDataSet: optional(string),
 });
 
