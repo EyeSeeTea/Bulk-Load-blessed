@@ -75,7 +75,14 @@ export class InstanceDhisRepository implements InstanceRepository {
                     displayName: true,
                     name: true,
                     attributeValues: { value: true, attribute: { code: true } },
-                    dataSetElements: { dataElement: { id: true, formName: true, name: true } },
+                    dataSetElements: {
+                        dataElement: {
+                            id: true,
+                            formName: true,
+                            name: true,
+                            categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+                        },
+                    },
                     periodType: true,
                     access: true,
                 },
@@ -97,9 +104,10 @@ export class InstanceDhisRepository implements InstanceRepository {
                 writeAccess: access.data?.write,
                 dataElements: dataSetElements
                     .map(({ dataElement }) => dataElement)
-                    .map(({ formName, name, ...rest }) => ({
+                    .map(({ formName, categoryCombo, name, ...rest }) => ({
                         ...rest,
                         name: formName ?? name,
+                        categoryOptionCombos: categoryCombo.categoryOptionCombos,
                     })),
             })
         );

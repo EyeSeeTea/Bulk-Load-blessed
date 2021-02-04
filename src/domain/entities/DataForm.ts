@@ -11,6 +11,10 @@ export interface DataForm {
     dataElements: {
         id: Id;
         name: string;
+        categoryOptionCombos?: {
+            id: Id;
+            name: string;
+        }[];
     }[];
     attributeValues: {
         attribute: { code: string };
