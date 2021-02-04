@@ -1,6 +1,6 @@
 import _ from "lodash";
 import moment from "moment";
-import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
+import { DataElement, DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
 import {
     AggregatedDataValue,
@@ -11,23 +11,26 @@ import {
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
+import { NamedRef } from "../domain/entities/ReferenceObject";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 import { Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
 import {
+    BuilderMetadata,
     GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
-    BuilderMetadata,
 } from "../domain/repositories/InstanceRepository";
 import i18n from "../locales";
 import {
     D2Api,
     D2ApiDefault,
+    D2DataElementSchema,
     DataStore,
     DataValueSetsGetResponse,
     DataValueSetsPostResponse,
     Id,
     Pager,
+    SelectedPick,
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
@@ -38,7 +41,6 @@ import {
     getTrackedEntityInstances,
     updateTrackedEntityInstances,
 } from "./Dhis2TrackedEntityInstances";
-import { NamedRef } from "../domain/entities/ReferenceObject";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -70,30 +72,24 @@ export class InstanceDhisRepository implements InstanceRepository {
         const { objects } = await this.api.models.dataSets
             .get({
                 paging: false,
-                fields: {
-                    id: true,
-                    displayName: true,
-                    name: true,
-                    attributeValues: { value: true, attribute: { code: true } },
-                    dataSetElements: {
-                        dataElement: {
-                            id: true,
-                            formName: true,
-                            name: true,
-                            categoryCombo: { categoryOptionCombos: { id: true, name: true } },
-                        },
-                    },
-                    periodType: true,
-                    access: true,
-                },
-                filter: {
-                    id: ids ? { in: ids } : undefined,
-                },
+                fields,
+                filter: { id: ids ? { in: ids } : undefined },
             })
             .getData();
 
+        const formatDataElement = ({
+            formName,
+            categoryCombo,
+            name,
+            ...dataElement
+        }: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
+            ...dataElement,
+            name: formName ?? name ?? "",
+            categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
+        });
+
         return objects.map(
-            ({ displayName, name, access, periodType, dataSetElements, ...rest }) => ({
+            ({ displayName, name, access, periodType, dataSetElements, sections, ...rest }) => ({
                 ...rest,
                 type: "dataSets",
                 name: displayName ?? name,
@@ -102,13 +98,14 @@ export class InstanceDhisRepository implements InstanceRepository {
                 readAccess: access.data?.read,
                 //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
                 writeAccess: access.data?.write,
-                dataElements: dataSetElements
-                    .map(({ dataElement }) => dataElement)
-                    .map(({ formName, categoryCombo, name, ...rest }) => ({
-                        ...rest,
-                        name: formName ?? name,
-                        categoryOptionCombos: categoryCombo.categoryOptionCombos,
-                    })),
+                dataElements: dataSetElements.map(({ dataElement }) =>
+                    formatDataElement(dataElement)
+                ),
+                sections: sections.map(({ id, name, dataElements }) => ({
+                    id,
+                    name,
+                    dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+                })),
             })
         );
     }
@@ -685,3 +682,21 @@ interface AsyncDataValueSetResponse {
     };
     status: string;
 }
+
+const dataElementFields = {
+    id: true,
+    formName: true,
+    name: true,
+    categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+} as const;
+
+const fields = {
+    id: true,
+    displayName: true,
+    name: true,
+    attributeValues: { value: true, attribute: { code: true } },
+    dataSetElements: { dataElement: dataElementFields },
+    sections: { id: true, name: true, dataElements: dataElementFields },
+    periodType: true,
+    access: true,
+} as const;

@@ -22,6 +22,7 @@ export interface GetDataPackageParams {
 export interface GetDataFormsParams {
     ids?: string[];
     type?: Array<"dataSets" | "programs">;
+    fields?: object;
 }
 
 export interface InstanceRepository {

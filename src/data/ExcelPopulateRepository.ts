@@ -317,7 +317,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
     public async defineName(id: string, name: string, cell: CellRef): Promise<void> {
         const workbook = await this.getWorkbook(id);
         const location = workbook.sheet(cell.sheet).cell(cell.ref);
-        workbook.sheet(cell.sheet).definedName(name, location);
+        workbook.definedName(name, location);
     }
 }
 
