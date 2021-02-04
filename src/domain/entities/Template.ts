@@ -18,7 +18,7 @@ export type DataSourceValue =
     | CellDataSource;
 
 // Use to reference data sources for dynamic sheets
-type DataSourceValueGetter = (sheet: string) => DataSourceValue | false;
+type DataSourceValueGetter = (sheet: string) => DataSourceValue | DataSourceValue[] | false;
 
 export type DataSource = DataSourceValue | DataSourceValueGetter;
 

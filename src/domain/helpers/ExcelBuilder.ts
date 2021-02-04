@@ -77,7 +77,7 @@ export class ExcelBuilder {
         return _.flatMap(dataSources, dataSource => {
             if (typeof dataSource === "function") {
                 return _(sheets)
-                    .map(sheet => dataSource(sheet.name))
+                    .flatMap(sheet => dataSource(sheet.name))
                     .compact()
                     .value();
             } else {
