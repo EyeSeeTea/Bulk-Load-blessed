@@ -49,7 +49,14 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
         }
 
         loading.show(true, i18n.t("Downloading template..."));
-        await compositionRoot.templates.download(api, template);
+
+        try {
+            await compositionRoot.templates.download(api, template);
+        } catch (error) {
+            console.error(error);
+            snackbar.error(i18n.t("Couldn't generate template"));
+        }
+
         loading.show(false);
     };
 
