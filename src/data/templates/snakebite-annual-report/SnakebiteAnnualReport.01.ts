@@ -1,7 +1,13 @@
+import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { array, boolean, Codec, GetType, optional, record, string } from "purify-ts";
 import { DataElement, DataForm } from "../../../domain/entities/DataForm";
-import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
+import {
+    CustomTemplate,
+    DataSource,
+    DownloadCustomizationOptions,
+    StyleSource,
+} from "../../../domain/entities/Template";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import { cache } from "../../../utils/cache";
@@ -45,19 +51,36 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
     public async downloadCustomization(
         excelRepository: ExcelRepository,
-        instanceRepository: InstanceRepository
+        instanceRepository: InstanceRepository,
+        options: DownloadCustomizationOptions
     ): Promise<void> {
+        const { populate } = options;
         const { national, subnational } = await this.getDataForms(instanceRepository);
-        const metadata = await this.getCustomMetadata(instanceRepository);
-        const antivenomEntries = await this.getAntivenomEntries(instanceRepository);
+        const { metadata, antivenomEntries, antivenomProducts } = await this.readDataStore(
+            instanceRepository
+        );
 
-        const write = (sheet: string, column: string, row: number, value: string) =>
+        const getName = (id: string) => {
+            return _([
+                metadata?.dataElements[id]?.totalName,
+                metadata?.optionCombos[id]?.name,
+                national?.dataElements.find(de => de.id === id)?.name,
+                _.flatMap(
+                    national?.dataElements,
+                    ({ categoryOptionCombos }) => categoryOptionCombos
+                ).find(coc => coc?.id === id)?.name,
+            ])
+                .compact()
+                .first();
+        };
+
+        const write = (sheet: string, column: string | number, row: number, value: string) =>
             excelRepository.writeCell(
                 this.id,
                 {
                     type: "cell" as const,
                     sheet: sheet,
-                    ref: `${column}${row}`,
+                    ref: `${excelRepository.buildColumnName(column)}${row}`,
                 },
                 value
             );
@@ -68,49 +91,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 sheet: sheet,
                 ref: `${column}${row}`,
             });
-
-        // Add metadata sheet
-        await excelRepository.getOrCreateSheet(this.id, "Metadata");
-
-        // Add metadata sheet columns
-        await promiseMap(["Type", "Identifier", "Name", "Info"], (label, index) =>
-            excelRepository.writeCell(
-                this.id,
-                {
-                    type: "cell",
-                    sheet: "Metadata",
-                    ref: `${excelRepository.columnNumberToName(index + 1)}1`,
-                },
-                label
-            )
-        );
-
-        // Add metadata sheet rows
-        const items = _([national?.dataElements, subnational?.dataElements])
-            .compact()
-            .flatten()
-            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
-                { id, name, type: "dataElement" },
-                ...categoryOptionCombos.map(({ id, name }) => ({
-                    id,
-                    name,
-                    type: "categoryOptionCombo",
-                })),
-            ])
-            .value();
-
-        const metadataStart = 2;
-        await promiseMap(items, async ({ id, name, type }, index) => {
-            const label =
-                metadata?.dataElements[id]?.totalName ?? metadata?.optionCombos[id]?.name ?? name;
-            const info = metadata?.optionCombos[id]?.info ?? "";
-
-            await write("Metadata", "A", index + metadataStart, type);
-            await write("Metadata", "B", index + metadataStart, id);
-            await write("Metadata", "C", index + metadataStart, label);
-            await write("Metadata", "D", index + metadataStart, info);
-            await defineName("Metadata", "C", index + metadataStart, id);
-        });
 
         // Add National sheet
         const dataElements: Array<
@@ -138,11 +118,58 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await promiseMap(dataElement.categoryOptionCombos ?? [], async (category, catIndex) => {
                 await write(
                     "National",
-                    excelRepository.columnNumberToName(catIndex + 1),
+                    catIndex + 1,
                     offset + nationalStart + 2,
                     `=_${category.id}`
                 );
             });
+        });
+
+        console.log({ populate, antivenomProducts });
+
+        // Add antivenom product sheets
+        await promiseMap(antivenomEntries.groups, async group => {
+            const sheetName = group.name ?? group.id;
+            await excelRepository.getOrCreateSheet(this.id, sheetName);
+
+            await promiseMap(group.dataElements, async (dataElement, index) => {
+                const name = getName(dataElement.id) ?? "";
+                await write(sheetName, index + 1, 1, name);
+            });
+        });
+
+        // Add metadata sheet
+        await excelRepository.getOrCreateSheet(this.id, "Metadata");
+
+        // Add metadata sheet columns
+        await promiseMap(["Type", "Identifier", "Name", "Info"], (label, index) =>
+            write("Metadata", index + 1, 1, label)
+        );
+
+        // Add metadata sheet rows
+        const items = _([national?.dataElements, subnational?.dataElements])
+            .compact()
+            .flatten()
+            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
+                { id, name, type: "dataElement" },
+                ...categoryOptionCombos.map(({ id, name }) => ({
+                    id,
+                    name,
+                    type: "categoryOptionCombo",
+                })),
+            ])
+            .value();
+
+        const metadataStart = 2;
+        await promiseMap(items, async ({ id, name, type }, index) => {
+            const label = getName(id) ?? name;
+            const info = metadata?.optionCombos[id]?.info ?? "";
+
+            await write("Metadata", "A", index + metadataStart, type);
+            await write("Metadata", "B", index + metadataStart, id);
+            await write("Metadata", "C", index + metadataStart, label);
+            await write("Metadata", "D", index + metadataStart, info);
+            await defineName("Metadata", "C", index + metadataStart, id);
         });
     }
 
@@ -161,30 +188,23 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         };
     }
 
-    private async getCustomMetadata(
+    private async readDataStore(
         instanceRepository: InstanceRepository
-    ): Promise<CustomMetadata | undefined> {
-        try {
-            const dataStore = instanceRepository.getDataStore("snake-bite");
-            const response = await dataStore.get("customMetadata").getData();
-            return CustomMetadataModel.unsafeDecode(response);
-        } catch (error) {
-            console.error(error);
-            return undefined;
-        }
-    }
+    ): Promise<{
+        metadata: CustomMetadata;
+        antivenomEntries: AntivenomEntries;
+        antivenomProducts: AntivenomProducts;
+    }> {
+        const dataStore = instanceRepository.getDataStore("snake-bite");
+        const customMetadataResponse = await dataStore.get("customMetadata").getData();
+        const antivenomEntriesResponse = await dataStore.get("antivenomEntries").getData();
+        const antivenomProductsResponse = await dataStore.get("antivenomProducts").getData();
 
-    private async getAntivenomEntries(
-        instanceRepository: InstanceRepository
-    ): Promise<AntivenomEntries | undefined> {
-        try {
-            const dataStore = instanceRepository.getDataStore("snake-bite");
-            const response = await dataStore.get("antivenomEntries").getData();
-            return AntivenomEntriesModel.unsafeDecode(response);
-        } catch (error) {
-            console.error(error);
-            return undefined;
-        }
+        const metadata = CustomMetadataModel.unsafeDecode(customMetadataResponse);
+        const antivenomEntries = AntivenomEntriesModel.unsafeDecode(antivenomEntriesResponse);
+        const antivenomProducts = AntivenomProductsModel.unsafeDecode(antivenomProductsResponse);
+
+        return { metadata, antivenomEntries, antivenomProducts };
     }
 }
 
@@ -193,8 +213,8 @@ const CustomMetadataModel = Codec.interface({
         record(
             string,
             Codec.interface({
-                totalName: optionalSafe(string, ""),
-                info: optionalSafe(string, ""),
+                totalName: optional(string),
+                info: optional(string),
             })
         ),
         {}
@@ -203,15 +223,15 @@ const CustomMetadataModel = Codec.interface({
         record(
             string,
             Codec.interface({
-                name: optionalSafe(string, ""),
-                info: optionalSafe(string, ""),
+                name: optional(string),
+                info: optional(string),
                 order: optionalSafe(integer, 0),
             })
         ),
         {}
     ),
     adminUserGroups: optionalSafe(array(string), []),
-    subnationalDataSet: optionalSafe(string, ""),
+    subnationalDataSet: optional(string),
 });
 
 const AntivenomEntriesModel = Codec.interface({
@@ -219,13 +239,14 @@ const AntivenomEntriesModel = Codec.interface({
     groups: optionalSafe(
         array(
             Codec.interface({
-                id: optionalSafe(string, ""),
-                title: optionalSafe(string, ""),
+                id: optionalSafe(string, generateUid),
+                name: optional(string),
+                title: optional(string),
                 addEntryButton: optional(string),
                 dataElements: optionalSafe(
                     array(
                         Codec.interface({
-                            id: optionalSafe(string, ""),
+                            id: optionalSafe(string, generateUid),
                             prop: optionalSafe(string, ""),
                             recommendedProductsSelector: optionalSafe(boolean, false),
                             disabled: optionalSafe(boolean, false),
@@ -239,5 +260,18 @@ const AntivenomEntriesModel = Codec.interface({
     ),
 });
 
+const AntivenomProductsModel = array(
+    Codec.interface({
+        monovalent: optionalSafe(boolean, false),
+        polyvalent: optionalSafe(boolean, false),
+        productName: optionalSafe(string, ""),
+        recommended: optionalSafe(boolean, false),
+        manufacturerName: optionalSafe(string, ""),
+        categoryOptionComboId: optionalSafe(string, ""),
+        deleted: optionalSafe(boolean, false),
+    })
+);
+
 type CustomMetadata = GetType<typeof CustomMetadataModel>;
 type AntivenomEntries = GetType<typeof AntivenomEntriesModel>;
+type AntivenomProducts = GetType<typeof AntivenomProductsModel>;
