@@ -1,27 +1,28 @@
+import XlsxPopulate from "@eyeseetea/xlsx-populate";
+import { generateUid } from "d2/uid";
 import _ from "lodash";
+import moment from "moment";
+import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../webapp/utils/promises";
 import { DataPackage, DataPackageData } from "../entities/DataPackage";
+import { Relationship } from "../entities/Relationship";
 import {
     CellDataSource,
     CellRef,
+    ColumnRef,
     DataSource,
     DataSourceValue,
-    SheetRef,
-    Template,
-    ValueRef,
-    TeiRowDataSource,
-    ColumnRef,
     GenericSheetRef,
-    TrackerRelationship,
+    RowDataSource,
+    SheetRef,
+    TeiRowDataSource,
+    Template,
     TrackerEventRowDataSource,
+    TrackerRelationship,
+    ValueRef,
 } from "../entities/Template";
+import { AttributeValue, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue, ReadCellOptions } from "../repositories/ExcelRepository";
-import { TrackedEntityInstance, AttributeValue } from "../entities/TrackedEntityInstance";
-import { removeCharacters } from "../../utils/string";
-import { Relationship } from "../entities/Relationship";
-import moment from "moment";
-import XlsxPopulate from "@eyeseetea/xlsx-populate";
-import { generateUid } from "d2/uid";
 
 const dateFormat = "YYYY-MM-DD";
 
@@ -46,19 +47,28 @@ export class ExcelReader {
         const teis: TrackedEntityInstance[] = [];
         const relationships: Relationship[] = [];
 
+        // This should be refactored but need to validate with @tokland about TEIs
         for (const dataSource of dataSourceValues) {
             switch (dataSource.type) {
                 case "cell":
-                    data.concat(await this.readByCell(template, dataSource));
+                    (await this.readByCell(template, dataSource)).map(item => data.push(item));
                     break;
+                case "row": {
+                    (await this.readByRow(template, dataSource)).map(item => data.push(item));
+                    break;
+                }
                 case "rowTei":
-                    teis.concat(await this.readTeiRows(template, dataSource));
+                    (await this.readTeiRows(template, dataSource)).map(item => teis.push(item));
                     break;
                 case "rowTeiRelationship":
-                    relationships.concat(await this.readTeiRelationships(template, dataSource));
+                    (await this.readTeiRelationships(template, dataSource)).map(item =>
+                        relationships.push(item)
+                    );
                     break;
                 case "rowTrackedEvent":
-                    data.concat(await this.readTeiEvents(template, dataSource, teis));
+                    (await this.readTeiEvents(template, dataSource, teis)).map(item =>
+                        data.push(item)
+                    );
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
@@ -104,11 +114,49 @@ export class ExcelReader {
 
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
-            console.log({ dataEntries, trackedEntityInstances });
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
         } else {
             return { type: dataFormType, dataEntries };
         }
+    }
+
+    private async readByRow(
+        template: Template,
+        dataSource: RowDataSource
+    ): Promise<DataPackageData[]> {
+        const cells = await this.excelRepository.getCellsInRange(template.id, dataSource.range);
+
+        const values = await promiseMap(cells, async cell => {
+            const value = cell ? await this.readCellValue(template, cell) : undefined;
+            const dataFormId = await this.readCellValue(template, template.dataFormId, cell);
+            const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
+            const period = await this.readCellValue(template, dataSource.period, cell);
+            const dataElement = await this.readCellValue(template, dataSource.dataElement, cell);
+            const category = await this.readCellValue(template, dataSource.categoryOption, cell);
+            const attribute = await this.readCellValue(template, dataSource.attribute, cell);
+            const eventId = await this.readCellValue(template, dataSource.eventId, cell);
+
+            if (!orgUnit || !period || !dataElement || !dataFormId || !value) {
+                return undefined;
+            }
+
+            return {
+                dataForm: String(dataFormId),
+                id: eventId ? String(eventId) : undefined,
+                orgUnit: String(orgUnit),
+                period: String(period),
+                attribute: attribute ? String(attribute) : undefined,
+                dataValues: [
+                    {
+                        dataElement: String(dataElement),
+                        category: String(category),
+                        value: this.formatValue(value),
+                    },
+                ],
+            };
+        });
+
+        return _.compact(values);
     }
 
     private async readByCell(
@@ -338,8 +386,6 @@ export class ExcelReader {
                     rowStart: rowIdx,
                     rowEnd: rowIdx,
                 });
-
-                console.log({ teiId, orgUnitId, enrollmentDate });
 
                 if (!teiId || !orgUnitId || !enrollmentDate) return;
 
