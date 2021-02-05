@@ -445,9 +445,11 @@ export class ExcelBuilder {
         });
     }
 
-    public async templateCustomization(template: Template): Promise<void> {
+    public async templateCustomization(template: Template, populate: boolean): Promise<void> {
         if (template.type === "custom" && template.downloadCustomization) {
-            await template.downloadCustomization(this.excelRepository, this.instanceRepository);
+            await template.downloadCustomization(this.excelRepository, this.instanceRepository, {
+                populate,
+            });
         }
     }
 }

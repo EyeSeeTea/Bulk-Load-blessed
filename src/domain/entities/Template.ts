@@ -45,6 +45,10 @@ export interface GeneratedTemplate extends BaseTemplate {
     colOffset: number;
 }
 
+export interface DownloadCustomizationOptions {
+    populate?: boolean;
+}
+
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
@@ -52,7 +56,8 @@ export interface CustomTemplate extends BaseTemplate {
     fixedPeriod?: CellRef;
     downloadCustomization?: (
         excelRepository: ExcelRepository,
-        instanceRepository: InstanceRepository
+        instanceRepository: InstanceRepository,
+        options: DownloadCustomizationOptions
     ) => Promise<void>;
 }
 
