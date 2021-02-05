@@ -69,6 +69,7 @@ const Root = () => {
                 icon: "cloud_upload",
                 path: "/import",
                 section: "main",
+                auth: (settings: Settings) => settings.isImportDataVisibleForCurrentUser(),
                 component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
             },
             {

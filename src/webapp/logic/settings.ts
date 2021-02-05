@@ -19,6 +19,8 @@ const publicFields = [
     "models",
     "userPermissionsForGeneration",
     "userGroupPermissionsForGeneration",
+    "userPermissionsForImport",
+    "userGroupPermissionsForImport",
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
     "orgUnitSelection",
@@ -33,7 +35,7 @@ const allFields = [...privateFields, ...publicFields];
 type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
 type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
-export type PermissionSetting = "generation" | "settings";
+export type PermissionSetting = "generation" | "settings" | "import";
 export type PermissionType = "user" | "userGroup";
 
 interface NamedObject {
@@ -53,6 +55,11 @@ export default class Settings {
     public models: Models;
     public userPermissionsForGeneration: NamedObject[];
     public userGroupPermissionsForGeneration: NamedObject[];
+    //++++++++++++++++++++++++++++++++++
+    public userPermissionsForImport: NamedObject[];
+    public userGroupPermissionsForImport: NamedObject[];
+
+    //++++++++++++++++++++++++++++++++++
     public userPermissionsForSettings: NamedObject[];
     public userGroupPermissionsForSettings: NamedObject[];
     public orgUnitSelection: OrgUnitSelectionSetting;
@@ -68,6 +75,10 @@ export default class Settings {
         this.models = options.models;
         this.userPermissionsForGeneration = options.userPermissionsForGeneration;
         this.userGroupPermissionsForGeneration = options.userGroupPermissionsForGeneration;
+        //++++++++++++++++++++++++++++++++++
+        this.userPermissionsForImport = options.userPermissionsForImport;
+        this.userGroupPermissionsForImport = options.userGroupPermissionsForImport;
+        //++++++++++++++++++++++++++++++++++
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
@@ -95,7 +106,8 @@ export default class Settings {
             defaultSettings
         );
 
-        const query = (prop: "permissionsForGeneration" | "permissionsForSettings") => {
+        const query = (prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport") => {
+            //++++++++++++++++++++++++++++++++++
             const storedValues = data[prop] ?? [];
             const defaultValues = defaultSettings[prop] ?? [];
 
@@ -105,6 +117,17 @@ export default class Settings {
             };
         };
 
+
+        //++++++++++++++++++++++++++++++++++
+        const {
+            users: userPermissionsForImport,
+            userGroups: userGroupPermissionsForImport,
+        } = await api.metadata
+            .get({
+                userGroups: query("permissionsForImport"),
+                users: query("permissionsForImport"),
+            }).getData();
+        //++++++++++++++++++++++++++++++++++
         const {
             users: userPermissionsForGeneration,
             userGroups: userGroupPermissionsForGeneration,
@@ -130,6 +153,10 @@ export default class Settings {
             models: data.models ?? defaultSettings.models,
             userPermissionsForGeneration,
             userGroupPermissionsForGeneration,
+            //++++++++++++++++++++++++++++++++++
+            userPermissionsForImport,
+            userGroupPermissionsForImport,
+            //++++++++++++++++++++++++++++++++++
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
@@ -153,6 +180,10 @@ export default class Settings {
             models,
             userPermissionsForGeneration,
             userGroupPermissionsForGeneration,
+            //++++++++++++++++++++++++++++++++++
+            userPermissionsForImport,
+            userGroupPermissionsForImport,
+            //++++++++++++++++++++++++++++++++++
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
             orgUnitSelection,
@@ -173,11 +204,20 @@ export default class Settings {
             ...userPermissionsForSettings,
             ...userGroupPermissionsForSettings,
         ].map(ug => ug.id);
+        //++++++++++++++++++++++++++++++++++
+        const permissionsForImport = [
+            ...userPermissionsForImport,
+            ...userGroupPermissionsForImport,
+        ].map(ug => ug.id);
+        //++++++++++++++++++++++++++++++++++
 
         const data: AppSettings = {
             models,
             permissionsForGeneration,
             permissionsForSettings,
+            //++++++++++++++++++++++++++++++++++
+            permissionsForImport,
+            //++++++++++++++++++++++++++++++++++
             orgUnitSelection,
             duplicateEnabled,
             duplicateExclusion,
@@ -264,6 +304,13 @@ export default class Settings {
         return isUserAdmin || hasGroupAccess || hasUserAccess;
     }
 
+    isImportDataVisibleForCurrentUser(): boolean{
+        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
+        const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport); 
+
+        return hasGroupAccess || hasUserAccess;
+    }
+
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
         return [
             { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
@@ -280,7 +327,11 @@ export default class Settings {
             return "userPermissionsForSettings";
         } else if (setting === "settings" && kind === "userGroup") {
             return "userGroupPermissionsForSettings";
-        } else {
+        } else if(setting === "import" && kind === "user"){
+            return "userPermissionsForImport";
+        }else if(setting === "import" && kind === "userGroup"){
+            return "userGroupPermissionsForImport";
+        }else {
             throw new Error("Unsupported field");
         }
     }
