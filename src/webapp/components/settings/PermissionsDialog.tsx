@@ -23,9 +23,16 @@ export default function PermissionsDialog({
     const buildMetaObject = useCallback(
         (setting: PermissionSetting) => {
             const displayName =
-                setting === "generation"
+                /*setting === "generation"
                     ? i18n.t("Access to Template Generation")
+                    : (settings === "import" ? i18n.t("Access to Settings and Themes"): "");
+                    // TODO:  Access to Data Import*/
+                    setting === "generation"
+                    ? i18n.t("Access to Template Generation")
+                    : setting === "import"
+                    ? i18n.t("Access to Import Data")
                     : i18n.t("Access to Settings and Themes");
+                    
 
             const buildSharings = (type: PermissionType) =>
                 settings.getPermissions(setting, type).map(sharing => ({ ...sharing, access: "" }));
