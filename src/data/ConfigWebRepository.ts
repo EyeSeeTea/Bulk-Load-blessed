@@ -27,6 +27,7 @@ export class ConfigWebRepository implements ConfigRepository {
             },
             permissionsForGeneration: [],
             permissionsForSettings: [],
+            permissionsForImport:[],
             orgUnitSelection: "both",
             duplicateEnabled: true,
             duplicateExclusion: {},
