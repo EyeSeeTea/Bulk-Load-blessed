@@ -268,7 +268,9 @@ export class ExcelPopulateRepository extends ExcelRepository {
         };
     }
 
-    public columnNumberToName(column: number): string {
+    public buildColumnName(column: number | string): string {
+        if (typeof column === "string") return column;
+
         let dividend = column;
         let name = "";
         let modulo = 0;
