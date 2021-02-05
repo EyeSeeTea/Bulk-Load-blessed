@@ -28,12 +28,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         period: { sheet: "National", type: "cell", ref: "E3" },
                         range: {
                             sheet: "National",
-                            rowStart: 8 + offset,
-                            rowEnd: 8 + offset,
+                            rowStart: 8 + offset * 5,
+                            rowEnd: 8 + offset * 5,
                             columnStart: "A",
                         },
-                        dataElement: { sheet: "National", type: "row", ref: 6 + offset },
-                        categoryOption: { sheet: "National", type: "row", ref: 7 + offset },
+                        dataElement: { sheet: "National", type: "row", ref: 6 + offset * 5 },
+                        categoryOption: { sheet: "National", type: "row", ref: 7 + offset * 5 },
                     }));
                 default:
                     return [];
