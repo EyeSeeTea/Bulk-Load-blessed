@@ -1,6 +1,5 @@
 import { generateUid } from "d2/uid";
 import _ from "lodash";
-import { array, boolean, Codec, GetType, optional, record, string } from "purify-ts";
 import { DataElement, DataForm } from "../../../domain/entities/DataForm";
 import {
     CustomTemplate,
@@ -11,7 +10,7 @@ import {
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import { cache } from "../../../utils/cache";
-import { integer, optionalSafe } from "../../../utils/codec";
+import { GetSchemaType, Schema } from "../../../utils/codec";
 import { promiseMap } from "../../../webapp/utils/promises";
 
 export class SnakebiteAnnualReport implements CustomTemplate {
@@ -208,48 +207,54 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     }
 }
 
-const CustomMetadataModel = Codec.interface({
-    dataElements: optionalSafe(
-        record(
-            string,
-            Codec.interface({
-                totalName: optional(string),
-                info: optional(string),
+const CustomMetadataModel = Schema.object({
+    dataElements: Schema.optionalSafe(
+        Schema.dictionary(
+            Schema.string,
+            Schema.object({
+                totalName: Schema.optional(Schema.string),
+                showName: Schema.optionalSafe(Schema.boolean, true),
+                showTotal: Schema.optionalSafe(Schema.boolean, true),
+                backgroundColor: Schema.optional(Schema.color),
+                color: Schema.optional(Schema.color),
+                info: Schema.optional(Schema.string),
             })
         ),
         {}
     ),
-    optionCombos: optionalSafe(
-        record(
-            string,
-            Codec.interface({
-                name: optional(string),
-                info: optional(string),
-                order: optionalSafe(integer, 0),
+    optionCombos: Schema.optionalSafe(
+        Schema.dictionary(
+            Schema.string,
+            Schema.object({
+                name: Schema.optional(Schema.string),
+                info: Schema.optional(Schema.string),
+                order: Schema.optionalSafe(Schema.integer, 0),
+                backgroundColor: Schema.optional(Schema.color),
+                color: Schema.optional(Schema.color),
             })
         ),
         {}
     ),
-    adminUserGroups: optionalSafe(array(string), []),
-    subnationalDataSet: optional(string),
+    adminUserGroups: Schema.optionalSafe(Schema.array(Schema.string), []),
+    subnationalDataSet: Schema.unknown,
 });
 
-const AntivenomEntriesModel = Codec.interface({
-    section: optionalSafe(integer, 0),
-    groups: optionalSafe(
-        array(
-            Codec.interface({
-                id: optionalSafe(string, generateUid),
-                name: optional(string),
-                title: optional(string),
-                addEntryButton: optional(string),
-                dataElements: optionalSafe(
-                    array(
-                        Codec.interface({
-                            id: optionalSafe(string, generateUid),
-                            prop: optionalSafe(string, ""),
-                            recommendedProductsSelector: optionalSafe(boolean, false),
-                            disabled: optionalSafe(boolean, false),
+const AntivenomEntriesModel = Schema.object({
+    section: Schema.optionalSafe(Schema.integer, 0),
+    groups: Schema.optionalSafe(
+        Schema.array(
+            Schema.object({
+                id: Schema.optionalSafe(Schema.string, generateUid),
+                name: Schema.optional(Schema.string),
+                title: Schema.optional(Schema.string),
+                addEntryButton: Schema.optional(Schema.string),
+                dataElements: Schema.optionalSafe(
+                    Schema.array(
+                        Schema.object({
+                            id: Schema.optionalSafe(Schema.string, generateUid),
+                            prop: Schema.optionalSafe(Schema.string, ""),
+                            recommendedProductsSelector: Schema.optionalSafe(Schema.boolean, false),
+                            disabled: Schema.optionalSafe(Schema.boolean, false),
                         })
                     ),
                     []
@@ -260,18 +265,18 @@ const AntivenomEntriesModel = Codec.interface({
     ),
 });
 
-const AntivenomProductsModel = array(
-    Codec.interface({
-        monovalent: optionalSafe(boolean, false),
-        polyvalent: optionalSafe(boolean, false),
-        productName: optionalSafe(string, ""),
-        recommended: optionalSafe(boolean, false),
-        manufacturerName: optionalSafe(string, ""),
-        categoryOptionComboId: optionalSafe(string, ""),
-        deleted: optionalSafe(boolean, false),
+const AntivenomProductsModel = Schema.array(
+    Schema.object({
+        monovalent: Schema.optionalSafe(Schema.boolean, false),
+        polyvalent: Schema.optionalSafe(Schema.boolean, false),
+        productName: Schema.optionalSafe(Schema.string, ""),
+        recommended: Schema.optionalSafe(Schema.boolean, false),
+        manufacturerName: Schema.optionalSafe(Schema.string, ""),
+        categoryOptionComboId: Schema.optionalSafe(Schema.string, ""),
+        deleted: Schema.optionalSafe(Schema.boolean, false),
     })
 );
 
-type CustomMetadata = GetType<typeof CustomMetadataModel>;
-type AntivenomEntries = GetType<typeof AntivenomEntriesModel>;
-type AntivenomProducts = GetType<typeof AntivenomProductsModel>;
+type CustomMetadata = GetSchemaType<typeof CustomMetadataModel>;
+type AntivenomEntries = GetSchemaType<typeof AntivenomEntriesModel>;
+type AntivenomProducts = GetSchemaType<typeof AntivenomProductsModel>;
