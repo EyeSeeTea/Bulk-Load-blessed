@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
+"POT-Creation-Date: 2021-02-06T10:24:43.299Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -195,7 +195,6 @@ msgstr "Unités d'organisation"
 
 msgid "Select organisation unit to populate data"
 msgstr ""
-""
 
 msgid "Select available organisation units to include in the template"
 msgstr "Sélectionnez les unités d'organisation à inclure dans le modèle"
@@ -337,6 +336,9 @@ msgstr ""
 
 msgid "Downloading template..."
 msgstr "Téléchargement du modèle ..."
+
+msgid "Couldn't generate template"
+msgstr ""
 
 msgid "Download template"
 msgstr "Modèle téléchargez"

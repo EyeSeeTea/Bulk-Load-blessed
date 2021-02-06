@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
-"PO-Revision-Date: 2020-12-30T08:23:30.873Z\n"
+"POT-Creation-Date: 2021-02-06T10:24:43.299Z\n"
+"PO-Revision-Date: 2021-02-06T10:24:43.299Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -319,6 +319,9 @@ msgid "You need to select start and end dates to populate template"
 msgstr ""
 
 msgid "Downloading template..."
+msgstr ""
+
+msgid "Couldn't generate template"
 msgstr ""
 
 msgid "Download template"
