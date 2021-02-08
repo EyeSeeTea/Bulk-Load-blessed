@@ -27,7 +27,7 @@ const dhis2Auth = _(dhis2AuthEnvValue)
     .value();
 
 Cypress.Cookies.defaults({
-    whitelist: "JSESSIONID",
+    preserve: "JSESSIONID",
 });
 
 Cypress.Commands.add("login", (username, _password = null) => {
