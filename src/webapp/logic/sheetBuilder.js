@@ -987,7 +987,6 @@ export function getTemplateId(type, id) {
         case "p5z7F51v1ag":
             return { type: "custom", id: "NHWA_MODULE_8_v1" };
         case "XBgvNrxpcDC":
-        case "SAV16xEdCZW":
             return { type: "custom", id: "SNAKEBITE_ANNUAL_REPORT_v1" };
         default:
             switch (type) {

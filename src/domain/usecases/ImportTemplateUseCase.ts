@@ -80,10 +80,11 @@ export class ImportTemplateUseCase implements UseCase {
 
         const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
         const excelDataValues = await reader.readTemplate(template);
-        const customDataValues = await reader.templateCustomization(template, excelDataValues);
         if (!excelDataValues) {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
+
+        const customDataValues = await reader.templateCustomization(template, excelDataValues);
 
         const {
             dataValues,
