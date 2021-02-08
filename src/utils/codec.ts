@@ -52,11 +52,8 @@ const optionalSafe = <T>(codec: Codec<T>, defaultValue: DefaultValue<T>): Codec<
 
 const booleanFromString = Codec.custom<boolean>({
     decode: value => {
-        const truthy = String(value).toLowerCase() === "true";
-        const falsy = String(value).toLowerCase() === "false";
-
-        if (truthy) return Right(true);
-        if (falsy) return Right(false);
+        if (String(value).toLowerCase() === "true") return Right(true);
+        if (String(value).toLowerCase() === "false") return Right(false);
         return Left(`${value} is not a parsable boolean`);
     },
     encode: value => `${value}`,

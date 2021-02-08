@@ -1,5 +1,6 @@
 import { generateUid } from "d2/uid";
 import _ from "lodash";
+import { Codec } from "purify-ts";
 import { DataElement, DataForm } from "../../../domain/entities/DataForm";
 import { DataPackage } from "../../../domain/entities/DataPackage";
 import {
@@ -199,60 +200,66 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     ): Promise<DataPackage | undefined> {
         const { dataPackage } = options;
         const dataSet = await this.getDataForms(instanceRepository);
-        const { antivenomEntries, antivenomProducts } = await this.readDataStore(
-            instanceRepository
-        );
-
-        const antivenomDataElements = _.flatMap(
-            antivenomEntries.groups,
-            ({ dataElements }) => dataElements
-        );
-
-        const antivenomDataElementIds = antivenomDataElements.map(({ id }) => id);
-
-        const productNameDataElements = antivenomDataElements
-            .filter(({ prop }) => prop === "productName")
-            .map(({ id }) => id);
-
-        const productByCategory = _(dataPackage.dataEntries)
-            .flatMap(({ dataValues }) => dataValues)
-            .groupBy("category")
-            .mapValues(values => {
-                const productItem = values.find(({ dataElement }) =>
-                    productNameDataElements.includes(dataElement)
-                );
-
-                const product = antivenomProducts.find(
-                    ({ productName }) => productName === productItem?.value
-                );
-
-                return product;
-            })
-            .value();
-
-        const freeCategories = _(productNameDataElements)
-            .map(id => dataSet?.dataElements.find(dataElement => dataElement.id === id))
-            .compact()
-            .groupBy("id")
-            .mapValues(dataElements =>
-                _.flatMap(
-                    dataElements,
-                    ({ categoryOptionCombos }) =>
-                        categoryOptionCombos
-                            ?.filter(
-                                ({ id }) =>
-                                    !antivenomProducts.find(
-                                        ({ categoryOptionComboId }) => categoryOptionComboId === id
-                                    )
-                            )
-                            .map(({ id }) => id) ?? []
-                )
-            )
-            .value();
 
         const dataEntries = await promiseMap(
             dataPackage.dataEntries,
             async ({ dataValues, ...dataPackage }) => {
+                const { antivenomEntries, antivenomProducts } = await this.readDataStore(
+                    instanceRepository
+                );
+
+                const antivenomDataElements = _.flatMap(
+                    antivenomEntries.groups,
+                    ({ dataElements }) => dataElements
+                );
+
+                const antivenomDataElementIds = antivenomDataElements.map(({ id }) => id);
+
+                const recommendedSelector = antivenomDataElements.find(
+                    ({ recommendedProductsSelector }) => recommendedProductsSelector === true
+                )?.id;
+
+                const getDataElementsByProp = (prop: string) =>
+                    antivenomDataElements
+                        .filter(dataElement => prop === dataElement.prop)
+                        .map(({ id }) => id);
+
+                const productByCategory = _(dataValues)
+                    .groupBy("category")
+                    .mapValues(values => {
+                        const productItem = values.find(({ dataElement }) =>
+                            getDataElementsByProp("productName").includes(dataElement)
+                        );
+
+                        const product = antivenomProducts.find(
+                            ({ productName }) => productName === productItem?.value
+                        );
+
+                        return product;
+                    })
+                    .value();
+
+                const freeCategories = _(getDataElementsByProp("productName"))
+                    .map(id => dataSet?.dataElements.find(dataElement => dataElement.id === id))
+                    .compact()
+                    .groupBy("id")
+                    .mapValues(dataElements =>
+                        _.flatMap(
+                            dataElements,
+                            ({ categoryOptionCombos }) =>
+                                categoryOptionCombos
+                                    ?.filter(
+                                        ({ id }) =>
+                                            !antivenomProducts.find(
+                                                ({ categoryOptionComboId }) =>
+                                                    categoryOptionComboId === id
+                                            )
+                                    )
+                                    .map(({ id }) => id) ?? []
+                        )
+                    )
+                    .value();
+
                 const nationalDataValues = dataValues.filter(
                     ({ dataElement }) => !antivenomDataElementIds.includes(dataElement)
                 );
@@ -267,6 +274,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     existingProducts.map(({ category = "", ...dataValue }) => {
                         const product = productByCategory[category];
                         // TODO: Filter data elements so that are not overwritten (manufacturer name, etc...)
+                        // Waiting for Jorge's implementation
 
                         return {
                             ...dataValue,
@@ -279,7 +287,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     .groupBy("category")
                     .mapValues(dataValues => {
                         const productNameDataElement = dataValues.find(({ dataElement }) =>
-                            productNameDataElements.includes(dataElement)
+                            getDataElementsByProp("productName").includes(dataElement)
                         )?.dataElement;
                         if (!productNameDataElement) return [];
 
@@ -298,7 +306,64 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     .flatten()
                     .value();
 
-                // TODO: Update data store with new products
+                const newAntivenomProducts = _(cleanNewProducts)
+                    .groupBy("category")
+                    .mapValues((dataValues, categoryOptionComboId) => {
+                        const getField = (field: string) => {
+                            const result = dataValues.find(({ dataElement }) =>
+                                getDataElementsByProp(field).includes(dataElement)
+                            )?.value;
+
+                            if (!result) {
+                                throw new Error(
+                                    i18n.t(
+                                        "It is not possible to create product. Please provide {{field}}.",
+                                        { field }
+                                    )
+                                );
+                            }
+
+                            return result;
+                        };
+
+                        const recommended =
+                            dataValues.find(
+                                ({ dataElement }) => recommendedSelector === dataElement
+                            ) !== undefined;
+
+                        return {
+                            categoryOptionComboId,
+                            recommended,
+                            deleted: false,
+                            monovalent: getField("monovalent"),
+                            polyvalent: getField("polyvalent"),
+                            productName: getField("productName"),
+                            manufacturerName: getField("manufacturerName"),
+                        };
+                    })
+                    .values()
+                    .value();
+
+                try {
+                    const products = AntivenomProductsModel.decode([
+                        ...antivenomProducts,
+                        ...newAntivenomProducts,
+                    ])
+                        .ifLeft(error => {
+                            console.error(error);
+                            throw new Error(error);
+                        })
+                        .orDefault([]);
+
+                    await this.saveAntivenomProducts(instanceRepository, products);
+                } catch (error) {
+                    console.error(error);
+                    throw new Error(
+                        i18n.t(
+                            "Could not import products. Invalid data received. Please review the excel file."
+                        )
+                    );
+                }
 
                 return {
                     ...dataPackage,
@@ -334,15 +399,41 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         antivenomProducts: AntivenomProducts;
     }> {
         const dataStore = instanceRepository.getDataStore("snake-bite");
-        const customMetadataResponse = await dataStore.get("customMetadata").getData();
-        const antivenomEntriesResponse = await dataStore.get("antivenomEntries").getData();
-        const antivenomProductsResponse = await dataStore.get("antivenomProducts").getData();
 
-        const metadata = CustomMetadataModel.unsafeDecode(customMetadataResponse);
-        const antivenomEntries = AntivenomEntriesModel.unsafeDecode(antivenomEntriesResponse);
-        const antivenomProducts = AntivenomProductsModel.unsafeDecode(antivenomProductsResponse);
+        const readDataStore = async <T>(key: string, model: Codec<T>): Promise<T> => {
+            const response = await dataStore.get(key).getData();
 
-        return { metadata, antivenomEntries, antivenomProducts };
+            const value = model
+                .decode(response)
+                .ifLeft(error => console.error(error))
+                .toMaybe()
+                .extract();
+
+            if (!value) {
+                throw new Error(
+                    i18n.t(
+                        "Snake bite data store {{type}} is corrupted. Please contact an administrator.",
+                        { type: key }
+                    )
+                );
+            }
+
+            return value as T;
+        };
+
+        return {
+            metadata: await readDataStore("customMetadata", CustomMetadataModel),
+            antivenomEntries: await readDataStore("antivenomEntries", AntivenomEntriesModel),
+            antivenomProducts: await readDataStore("antivenomProducts", AntivenomProductsModel),
+        };
+    }
+
+    private async saveAntivenomProducts(
+        instanceRepository: InstanceRepository,
+        products: AntivenomProducts
+    ): Promise<void> {
+        const dataStore = instanceRepository.getDataStore("snake-bite");
+        await dataStore.save("antivenomProducts", products).getData();
     }
 }
 
