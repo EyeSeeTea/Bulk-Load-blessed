@@ -31,19 +31,30 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 case "National":
                     return _.range(20).map(offset => ({
                         type: "row",
-                        orgUnit: { sheet: "National", type: "cell", ref: "B3" },
-                        period: { sheet: "National", type: "cell", ref: "E3" },
+                        orgUnit: { sheet, type: "cell", ref: "B3" },
+                        period: { sheet, type: "cell", ref: "E3" },
                         range: {
-                            sheet: "National",
+                            sheet,
                             rowStart: 8 + offset * 5,
                             rowEnd: 8 + offset * 5,
                             columnStart: "A",
                         },
-                        dataElement: { sheet: "National", type: "row", ref: 6 + offset * 5 },
-                        categoryOption: { sheet: "National", type: "row", ref: 7 + offset * 5 },
+                        dataElement: { sheet, type: "row", ref: 6 + offset * 5 },
+                        categoryOption: { sheet, type: "row", ref: 7 + offset * 5 },
                     }));
-                default:
+                case "Metadata":
                     return [];
+                default:
+                    return [
+                        {
+                            type: "row",
+                            orgUnit: { sheet: "National", type: "cell", ref: "B3" },
+                            period: { sheet: "National", type: "cell", ref: "E3" },
+                            range: { sheet, rowStart: 2, columnStart: "A" },
+                            dataElement: { sheet, type: "row", ref: 1 },
+                            categoryOption: { sheet, type: "row", ref: 1 },
+                        },
+                    ];
             }
         },
     ];
