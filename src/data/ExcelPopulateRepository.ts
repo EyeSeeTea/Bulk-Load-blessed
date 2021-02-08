@@ -173,9 +173,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
         const xlsxSheet = workbook.sheet(range.sheet);
         if (!xlsxSheet) return [];
+
         const endCell = xlsxSheet.usedRange()?.endCell();
         const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
         const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+        if (rangeRowEnd < rowStart) return [];
 
         const rangeCells = workbook
             .sheet(sheet)
