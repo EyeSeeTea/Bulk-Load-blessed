@@ -145,8 +145,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await excelRepository.getOrCreateSheet(this.id, sheetName);
 
             await promiseMap(group.dataElements, async (dataElement, index) => {
-                const name = getName(dataElement.id) ?? "";
-                await write(sheetName, index + 1, 1, name);
+                await write(sheetName, index + 1, 1, `=_${dataElement.id}`);
             });
         });
 
