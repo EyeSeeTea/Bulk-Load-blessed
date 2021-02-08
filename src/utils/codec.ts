@@ -1,13 +1,13 @@
 import { isFunction } from "lodash";
 import {
     array,
-    boolean,
     Codec,
     date,
     Either,
     enumeration,
     exactly,
     intersect,
+    Left,
     maybe,
     nonEmptyList,
     nullable,
@@ -16,6 +16,7 @@ import {
     oneOf,
     optional,
     record,
+    Right,
     string,
     unknown,
 } from "purify-ts";
@@ -49,6 +50,18 @@ const optionalSafe = <T>(codec: Codec<T>, defaultValue: DefaultValue<T>): Codec<
     return { ...codec, decode, _isOptional: true } as Codec<T>;
 };
 
+const booleanFromString = Codec.custom<boolean>({
+    decode: value => {
+        const truthy = String(value).toLowerCase() === "true";
+        const falsy = String(value).toLowerCase() === "false";
+
+        if (truthy) return Right(true);
+        if (falsy) return Right(false);
+        return Left(`${value} is not a parsable boolean`);
+    },
+    encode: value => `${value}`,
+});
+
 // Short and long HEX color format
 const colorRegExp = /^#[0-9a-f]{3,6}$/;
 
@@ -73,7 +86,7 @@ export const Schema = {
     integer: oneOf([Integer, IntegerFromString]),
     number: oneOf([number, NumberFromString]),
     numberBetween: NumberRangedIn,
-    boolean,
+    boolean: booleanFromString,
     null: nullType,
     unknown,
     date,
