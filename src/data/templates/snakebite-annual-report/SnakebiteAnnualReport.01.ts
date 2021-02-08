@@ -168,6 +168,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await write("Metadata", "B", index + metadataStart, id);
             await write("Metadata", "C", index + metadataStart, label);
             await write("Metadata", "D", index + metadataStart, info);
+        });
+
+        await promiseMap(items, async ({ id }, index) => {
             await defineName("Metadata", "C", index + metadataStart, id);
         });
     }
