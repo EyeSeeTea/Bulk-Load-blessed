@@ -359,48 +359,32 @@ export class ExcelBuilder {
                 rowEnd: rowStart,
             });
 
-            const orgUnitCell = await this.excelRepository.findRelativeCell(
-                template.id,
-                dataSource.orgUnit,
-                cells[0]
-            );
+            const orgUnitCell = await this.findRelative(template, dataSource.orgUnit, cells[0]);
             if (orgUnitCell && orgUnit) {
                 await this.excelRepository.writeCell(template.id, orgUnitCell, orgUnit);
             }
 
-            const eventIdCell = await this.excelRepository.findRelativeCell(
-                template.id,
-                dataSource.eventId,
-                cells[0]
-            );
+            const eventIdCell = await this.findRelative(template, dataSource.eventId, cells[0]);
             if (eventIdCell && id) {
                 await this.excelRepository.writeCell(template.id, eventIdCell, id);
             }
 
-            const periodCell = await this.excelRepository.findRelativeCell(
-                template.id,
-                dataSource.period,
-                cells[0]
-            );
+            const periodCell = await this.findRelative(template, dataSource.period, cells[0]);
             if (periodCell) await this.excelRepository.writeCell(template.id, periodCell, period);
 
-            const attributeCell = await this.excelRepository.findRelativeCell(
-                template.id,
-                dataSource.attribute,
-                cells[0]
-            );
+            const attributeCell = await this.findRelative(template, dataSource.attribute, cells[0]);
             if (attributeCell && attribute) {
                 await this.excelRepository.writeCell(template.id, attributeCell, attribute);
             }
 
             for (const cell of cells) {
-                const dataElementCell = await this.excelRepository.findRelativeCell(
-                    template.id,
+                const dataElementCell = await this.findRelative(
+                    template,
                     dataSource.dataElement,
                     cell
                 );
-                const categoryCell = await this.excelRepository.findRelativeCell(
-                    template.id,
+                const categoryCell = await this.findRelative(
+                    template,
                     dataSource.categoryOption,
                     cell
                 );
@@ -428,6 +412,11 @@ export class ExcelBuilder {
 
             rowStart += 1;
         }
+    }
+
+    private async findRelative(template: Template, ref?: SheetRef | ValueRef, relative?: CellRef) {
+        if (ref && ref.type === "value") return undefined;
+        return this.excelRepository.findRelativeCell(template.id, ref, relative);
     }
 
     public async applyTheme(template: Template, theme: Theme): Promise<void> {

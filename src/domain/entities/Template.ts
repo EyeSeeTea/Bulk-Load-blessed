@@ -51,7 +51,7 @@ export interface DownloadCustomizationOptions {
 }
 
 export interface ImportCustomizationOptions {
-    dataPackage?: DataPackage;
+    dataPackage: DataPackage;
 }
 
 export interface CustomTemplate extends BaseTemplate {
@@ -149,12 +149,12 @@ export interface TrackerEventRowDataSource {
 export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
-    orgUnit: ColumnRef | CellRef;
-    period: ColumnRef | CellRef;
-    dataElement: RowRef;
-    categoryOption?: RowRef;
-    attribute?: ColumnRef | CellRef;
-    eventId?: ColumnRef | CellRef;
+    orgUnit: ColumnRef | CellRef | ValueRef;
+    period: ColumnRef | CellRef | ValueRef;
+    dataElement: RowRef | ValueRef;
+    categoryOption?: RowRef | ValueRef;
+    attribute?: ColumnRef | CellRef | ValueRef;
+    eventId?: ColumnRef | CellRef | ValueRef;
 }
 
 export interface TeiRowDataSource {

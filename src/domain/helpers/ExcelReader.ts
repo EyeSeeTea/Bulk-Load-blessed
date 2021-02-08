@@ -515,7 +515,7 @@ export class ExcelReader {
 
     public async templateCustomization(
         template: Template,
-        dataPackage?: DataPackage
+        dataPackage: DataPackage
     ): Promise<DataPackage | undefined> {
         if (template.type === "custom" && template.importCustomization) {
             return template.importCustomization(this.excelRepository, this.instanceRepository, {
