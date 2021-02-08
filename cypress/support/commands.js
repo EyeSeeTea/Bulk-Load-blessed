@@ -1,5 +1,4 @@
 // <reference types="Cypress" />
-/* global Cypress, cy */
 
 import _ from "lodash";
 
