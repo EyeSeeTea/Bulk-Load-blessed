@@ -27,7 +27,7 @@ export interface DownloadTemplateProps {
 
 export class DownloadTemplateUseCase implements UseCase {
     constructor(
-        private instance: InstanceRepository,
+        private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository
     ) {}
@@ -80,13 +80,13 @@ export class DownloadTemplateUseCase implements UseCase {
             await this.excelRepository.loadTemplate({ type: "file", file });
         }
 
-        const builder = new ExcelBuilder(this.excelRepository, this.instance);
+        const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
         await builder.templateCustomization(template, populate);
 
         if (theme) await builder.applyTheme(template, theme);
 
         if (populate && populateStartDate && populateEndDate) {
-            const dataPackage = await this.instance.getDataPackage({
+            const dataPackage = await this.instanceRepository.getDataPackage({
                 type,
                 id,
                 orgUnits,

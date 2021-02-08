@@ -1,6 +1,7 @@
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
+import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
@@ -49,6 +50,10 @@ export interface DownloadCustomizationOptions {
     populate?: boolean;
 }
 
+export interface ImportCustomizationOptions {
+    dataPackage?: DataPackage;
+}
+
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
@@ -59,6 +64,11 @@ export interface CustomTemplate extends BaseTemplate {
         instanceRepository: InstanceRepository,
         options: DownloadCustomizationOptions
     ) => Promise<void>;
+    importCustomization?: (
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository,
+        options: ImportCustomizationOptions
+    ) => Promise<DataPackage | undefined>;
 }
 
 export interface GenericSheetRef {

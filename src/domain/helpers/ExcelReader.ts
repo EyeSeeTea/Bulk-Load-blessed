@@ -23,11 +23,15 @@ import {
 } from "../entities/Template";
 import { AttributeValue, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue, ReadCellOptions } from "../repositories/ExcelRepository";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 
 const dateFormat = "YYYY-MM-DD";
 
 export class ExcelReader {
-    constructor(private excelRepository: ExcelRepository) {}
+    constructor(
+        private excelRepository: ExcelRepository,
+        private instanceRepository: InstanceRepository
+    ) {}
 
     public async readTemplate(template: Template): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
@@ -507,6 +511,17 @@ export class ExcelReader {
                 return [dataSource];
             }
         });
+    }
+
+    public async templateCustomization(
+        template: Template,
+        dataPackage?: DataPackage
+    ): Promise<DataPackage | undefined> {
+        if (template.type === "custom" && template.importCustomization) {
+            return template.importCustomization(this.excelRepository, this.instanceRepository, {
+                dataPackage,
+            });
+        }
     }
 }
 

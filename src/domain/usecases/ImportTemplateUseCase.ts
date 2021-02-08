@@ -78,8 +78,9 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "DATA_FORM_NOT_FOUND" });
         }
 
-        const reader = new ExcelReader(this.excelRepository);
+        const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
         const excelDataValues = await reader.readTemplate(template);
+        const customDataValues = await reader.templateCustomization(template, excelDataValues);
         if (!excelDataValues) {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
@@ -90,7 +91,7 @@ export class ImportTemplateUseCase implements UseCase {
             existingDataValues,
             instanceDataValues,
         } = await this.readDataValues(
-            excelDataValues,
+            customDataValues ?? excelDataValues,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,

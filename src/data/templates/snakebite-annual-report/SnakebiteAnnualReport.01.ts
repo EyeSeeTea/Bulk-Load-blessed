@@ -1,10 +1,12 @@
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { DataElement, DataForm } from "../../../domain/entities/DataForm";
+import { DataPackage } from "../../../domain/entities/DataPackage";
 import {
     CustomTemplate,
     DataSource,
     DownloadCustomizationOptions,
+    ImportCustomizationOptions,
     StyleSource,
 } from "../../../domain/entities/Template";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
@@ -173,6 +175,15 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await promiseMap(items, async ({ id }, index) => {
             await defineName("Metadata", "C", index + metadataStart, id);
         });
+    }
+
+    public async importCustomization(
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository,
+        options: ImportCustomizationOptions
+    ): Promise<DataPackage | undefined> {
+        console.log(excelRepository, instanceRepository, options)
+        return undefined;
     }
 
     @cache()
