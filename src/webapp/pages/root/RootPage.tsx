@@ -133,7 +133,7 @@ const Root = () => {
                                 />
                             )}
 
-                            {userRoutes.map(({ key, path, component}) => (
+                            {userRoutes.map(({ key, path, component }) => (
                                 <Route key={key} path={path}>
                                     {component({
                                         settings,

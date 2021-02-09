@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-09T12:18:32.241Z\n"
-"PO-Revision-Date: 2021-02-09T12:18:32.241Z\n"
+"POT-Creation-Date: 2021-02-09T20:46:59.608Z\n"
+"PO-Revision-Date: 2021-02-09T20:46:59.608Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -120,6 +120,9 @@ msgid "Data elements used for duplicates identification"
 msgstr ""
 
 msgid "Permissions"
+msgstr ""
+
+msgid "Acces to Import Data"
 msgstr ""
 
 msgid "Type"
@@ -310,6 +313,9 @@ msgstr ""
 msgid ""
 "Cannot import: Versions do not match (database={{dbVersion}}, "
 "file={{sheetVersion}})"
+msgstr ""
+
+msgid "User with no permissions"
 msgstr ""
 
 msgid "You need to select at least one element to export"
