@@ -54,4 +54,5 @@ export abstract class ExcelRepository {
     public abstract getOrCreateSheet(id: string, name: string): Promise<Sheet>;
     public abstract buildColumnName(column: number | string): string;
     public abstract defineName(id: string, name: string, cell: CellRef): Promise<void>;
+    public abstract mergeCells(id: string, range: Range): Promise<void>;
 }

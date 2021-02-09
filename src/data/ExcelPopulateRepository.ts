@@ -85,7 +85,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         value: string | number | boolean
     ): Promise<void> {
         const workbook = await this.getWorkbook(id);
-        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
         const definedNames = await this.listDefinedNames(id);
         const definedName = definedNames.find(
             name => removeCharacters(name) === removeCharacters(value)
@@ -153,7 +153,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         cellRef: CellRef,
         formula = false
     ): Promise<ExcelValue | undefined> {
-        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
         const sheet = workbook.sheet(cellRef.sheet);
         const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } =
@@ -204,7 +204,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
 
         const { sheet } = source;
-        const { text, bold, italic, fontSize = 12, fontColor, fillColor } = style;
+        const { text, bold, italic, fontSize = 12, fontColor, fillColor, wrapText } = style;
         const range = this.buildRange(source, workbook);
         const textStyle = _.omitBy(
             {
@@ -227,7 +227,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
                     .sheet(sheet)
                     .range(range.address() ?? "")
                     .merged(true)
-                    .style({ verticalAlignment: "center" })
+                    .style({ verticalAlignment: "center", wrapText })
                     .value(richText);
 
                 const height = text.split("\n").length * fontSize * 2;
@@ -286,7 +286,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return name;
     }
 
-    private async buildMergedCells(workbook: Workbook, sheet: string | number) {
+    private async listMergedCells(workbook: Workbook, sheet: string | number) {
         return workbook
             .sheet(sheet)
             ?.merged()
@@ -322,6 +322,24 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
         const location = workbook.sheet(cell.sheet).cell(cell.ref);
         workbook.definedName(name, location);
+    }
+
+    public async mergeCells(id: string, range: Range): Promise<void> {
+        const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
+
+        const workbook = await this.getWorkbook(id);
+        const xlsxSheet = workbook.sheet(range.sheet);
+
+        const endCell = xlsxSheet.usedRange()?.endCell();
+        const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
+        const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+
+        if (rangeRowEnd >= rowStart) {
+            workbook
+                .sheet(sheet)
+                .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd)
+                .merged(true);
+        }
     }
 }
 
