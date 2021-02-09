@@ -189,7 +189,7 @@ export default class Settings {
             await compositionRoot.settings.write<AppSettings>(Settings.constantCode, data);
             return { status: true };
         } catch (error) {
-            return { status: false, error };
+            return { status: false, error: error.message || "Unknown" };
         }
     }
 
