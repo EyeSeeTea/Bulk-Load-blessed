@@ -385,6 +385,7 @@ export class ExcelBuilder {
                     dataSource.dataElement,
                     cell
                 );
+
                 const categoryCell = await this.findRelative(
                     template,
                     dataSource.categoryOption,
@@ -396,6 +397,7 @@ export class ExcelBuilder {
                           await this.excelRepository.readCell(template.id, dataElementCell)
                       )
                     : undefined;
+
                 const category = categoryCell
                     ? removeCharacters(
                           await this.excelRepository.readCell(template.id, categoryCell)

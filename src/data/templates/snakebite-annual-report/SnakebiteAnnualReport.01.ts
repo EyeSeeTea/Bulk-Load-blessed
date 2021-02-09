@@ -139,11 +139,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         const nationalStart = 5;
         await excelRepository.getOrCreateSheet(this.id, "National");
-        await promiseMap(dataElements, async (dataElement, index) => {
-            if (antivenomDataElementIds.includes(dataElement.id)) {
-                return;
-            }
 
+        const nationalDataElements = dataElements.filter(
+            ({ id }) => !antivenomDataElementIds.includes(id)
+        );
+
+        await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
             const { showTotal, totalName } = metadata.dataElements[dataElement.id] ?? {};
 
@@ -157,18 +158,20 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             await write("National", "A", sectionRow, dataElement.section?.name ?? "");
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
-            await merge("National", "A", dataElementRow, lastCategoryColumn, dataElementRow);
+            await merge("National", "A", dataElementRow, lastCategoryColumn - 1, dataElementRow);
 
             // Write totals
-            await write("National", "A", categoryRow, totalName ?? "Total");
-            await write(
-                "National",
-                "A",
-                categoryRow + 1,
-                `=SUM(B${categoryRow + 1}:${excelRepository.buildColumnName(lastCategoryColumn)}${
-                    categoryRow + 1
-                })`
-            );
+            if (showTotal) {
+                await write("National", "A", categoryRow, totalName ?? "Total");
+                await write(
+                    "National",
+                    "A",
+                    categoryRow + 1,
+                    `=SUM(B${categoryRow + 1}:${excelRepository.buildColumnName(
+                        lastCategoryColumn
+                    )}${categoryRow + 1})`
+                );
+            }
 
             // Write category option combos
             const sortedOptionCombos = _.sortBy(
