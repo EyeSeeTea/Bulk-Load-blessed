@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-06T10:24:43.299Z\n"
-"PO-Revision-Date: 2021-02-06T10:24:43.299Z\n"
+"POT-Creation-Date: 2021-02-09T06:54:05.244Z\n"
+"PO-Revision-Date: 2021-02-09T06:54:05.244Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -27,6 +27,24 @@ msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Data values - Delete"
+msgstr ""
+
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an "
+"administrator."
 msgstr ""
 
 msgid "Cannot read data form id"
