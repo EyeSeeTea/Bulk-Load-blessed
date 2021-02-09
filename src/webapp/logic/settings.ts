@@ -83,7 +83,7 @@ export default class Settings {
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
     }
 
-    static async build(api: D2Api): Promise<Settings> {
+    static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
         const d2CurrentUser = await api.currentUser
@@ -95,8 +95,8 @@ export default class Settings {
             authorities: new Set(authorities),
         };
 
-        const defaultSettings = CompositionRoot.attach().settings.getDefault();
-        const data = await CompositionRoot.attach().settings.read<Partial<AppSettings>>(
+        const defaultSettings = compositionRoot.settings.getDefault();
+        const data = await compositionRoot.settings.read<Partial<AppSettings>>(
             Settings.constantCode,
             defaultSettings
         );
@@ -168,7 +168,7 @@ export default class Settings {
             : { status: false, error: i18n.t("Select at least one model") };
     }
 
-    async save(): Promise<OkOrError> {
+    async save(compositionRoot: CompositionRoot): Promise<OkOrError> {
         const {
             models,
             userPermissionsForGeneration,
@@ -213,10 +213,10 @@ export default class Settings {
         };
 
         try {
-            await CompositionRoot.attach().settings.write<AppSettings>(Settings.constantCode, data);
+            await compositionRoot.settings.write<AppSettings>(Settings.constantCode, data);
             return { status: true };
         } catch (error) {
-            return { status: false, error };
+            return { status: false, error: error.message || "Unknown" };
         }
     }
 
