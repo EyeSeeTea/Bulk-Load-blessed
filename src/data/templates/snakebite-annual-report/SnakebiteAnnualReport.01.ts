@@ -25,8 +25,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly url = "templates/Snakebite_Annual_Report.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "XBgvNrxpcDC" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
-    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "B3" };
-    public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "E3" };
+    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "B4" };
+    public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "E4" };
 
     public readonly dataSources: DataSource[] = [
         (sheet: string) => {
@@ -289,9 +289,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await style("National", "A", valueRow, lastCategoryColumn - 1, valueRow, valueStyle);
         });
 
-        // TODO: Populate antivenom products
-        console.log({ populate, antivenomProducts });
-
         // Add antivenom product sheets
         await promiseMap(antivenomEntries.groups, async group => {
             const sheetName = group.name ?? group.id;
@@ -312,6 +309,34 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 border: true,
             });
         });
+
+        if (populate) {
+            const recommendedSelector = _.flatMap(
+                antivenomEntries.groups,
+                ({ dataElements }) => dataElements
+            ).find(({ recommendedProductsSelector }) => recommendedProductsSelector === true)?.id;
+
+            await promiseMap(antivenomEntries.groups, async group => {
+                const sheetName = group.name ?? group.id;
+
+                const isRecomended = !!group.dataElements.find(
+                    ({ id }) => id === recommendedSelector
+                );
+
+                const products = antivenomProducts.filter(
+                    ({ recommended }) => isRecomended === recommended
+                );
+
+                await promiseMap(products, async (product, rowIndex) => {
+                    await promiseMap(group.dataElements, async (dataElement, columnIndex) => {
+                        const value = String(
+                            product[dataElement.prop as keyof typeof product] ?? ""
+                        );
+                        await write(sheetName, columnIndex + 1, rowIndex + 2, value);
+                    });
+                });
+            });
+        }
 
         // Add metadata sheet
         await excelRepository.getOrCreateSheet(this.id, "Metadata");
