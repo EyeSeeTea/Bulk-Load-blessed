@@ -7,7 +7,7 @@ import XLSX, {
 import Blob from "cross-blob";
 import _ from "lodash";
 import { Sheet } from "../domain/entities/Sheet";
-import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
+import { CellRef, ColumnRef, Range, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import {
     ExcelRepository,
@@ -344,6 +344,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
                 .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd)
                 .merged(true);
         }
+    }
+
+    public async hide(id: string, ref: ColumnRef | RowRef): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(ref.sheet);
+        const item = ref.type === "row" ? sheet.row(ref.ref) : sheet.column(ref.ref);
+        item.hidden(true);
     }
 }
 

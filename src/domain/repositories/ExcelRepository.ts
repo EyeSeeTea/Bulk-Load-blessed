@@ -1,5 +1,5 @@
 import { Sheet } from "../entities/Sheet";
-import { CellRef, Range, SheetRef, ValueRef } from "../entities/Template";
+import { CellRef, ColumnRef, Range, RowRef, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
@@ -55,4 +55,5 @@ export abstract class ExcelRepository {
     public abstract buildColumnName(column: number | string): string;
     public abstract defineName(id: string, name: string, cell: CellRef): Promise<void>;
     public abstract mergeCells(id: string, range: Range): Promise<void>;
+    public abstract hide(id: string, ref: ColumnRef | RowRef): Promise<void>;
 }

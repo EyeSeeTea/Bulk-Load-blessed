@@ -124,6 +124,13 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 rowEnd: endRow,
             });
 
+        const hideRow = (sheet: string, row: number) =>
+            excelRepository.hide(this.id, {
+                type: "row",
+                sheet,
+                ref: row,
+            });
+
         // Add National sheet
         const dataElements: Array<
             DataElement & { section?: { id: string; name: string } }
@@ -137,30 +144,41 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             group.dataElements.map(de => de.id)
         );
 
-        const nationalStart = 5;
-        await excelRepository.getOrCreateSheet(this.id, "National");
-
         const nationalDataElements = dataElements.filter(
             ({ id }) => !antivenomDataElementIds.includes(id)
         );
 
+        const sectionTitles = _(nationalDataElements)
+            .groupBy(({ section }) => section?.name)
+            .mapValues(array => _.first(array)?.id)
+            .values()
+            .compact()
+            .value();
+
+        const nationalStart = 5;
+        await excelRepository.getOrCreateSheet(this.id, "National");
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
-            const { showTotal, totalName } = metadata.dataElements[dataElement.id] ?? {};
+            const { showTotal, totalName, showName } = metadata.dataElements[dataElement.id] ?? {};
 
             const offset = index * 5;
-            const sectionRow = offset + nationalStart;
-            const dataElementRow = offset + nationalStart + 1;
-            const categoryRow = offset + nationalStart + 2;
+            const sectionRow = nationalStart + offset;
+            const dataElementRow = nationalStart + offset + 1;
+            const categoryRow = nationalStart + offset + 2;
 
             const categoryStartColumn = showTotal ? 2 : 1;
             const lastCategoryColumn = categoryStartColumn + categoryOptionCombos.length;
 
+            // Add section name
             await write("National", "A", sectionRow, dataElement.section?.name ?? "");
+            if (!sectionTitles.includes(dataElement.id)) hideRow("National", sectionRow);
+
+            // Add data element row
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
             await merge("National", "A", dataElementRow, lastCategoryColumn - 1, dataElementRow);
+            if (!showName) hideRow("National", dataElementRow);
 
-            // Write totals
+            // Add totals
             if (showTotal) {
                 await write("National", "A", categoryRow, totalName ?? "Total");
                 await write(
@@ -173,7 +191,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 );
             }
 
-            // Write category option combos
+            // Add category option combos
             const sortedOptionCombos = _.sortBy(
                 categoryOptionCombos.map(optionCombo => {
                     const { order = 0 } = metadata.optionCombos[optionCombo.id] ?? {};
