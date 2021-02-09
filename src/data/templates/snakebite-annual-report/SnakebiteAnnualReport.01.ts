@@ -34,14 +34,14 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 case "National":
                     return _.range(30).map(offset => ({
                         type: "row",
-                        orgUnit: { sheet, type: "cell", ref: "B3" },
-                        period: { sheet, type: "cell", ref: "E3" },
-                        dataElement: { sheet, type: "row", ref: 6 + offset * 5 },
-                        categoryOption: { sheet, type: "row", ref: 7 + offset * 5 },
+                        orgUnit: { sheet, type: "cell", ref: "B4" },
+                        period: { sheet, type: "cell", ref: "E4" },
+                        dataElement: { sheet, type: "row", ref: 7 + offset * 5 },
+                        categoryOption: { sheet, type: "row", ref: 8 + offset * 5 },
                         range: {
                             sheet,
-                            rowStart: 8 + offset * 5,
-                            rowEnd: 8 + offset * 5,
+                            rowStart: 9 + offset * 5,
+                            rowEnd: 9 + offset * 5,
                             columnStart: "A",
                         },
                     }));
@@ -50,8 +50,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 default:
                     return _.range(50).map(offset => ({
                         type: "row",
-                        orgUnit: { sheet: "National", type: "cell", ref: "B3" },
-                        period: { sheet: "National", type: "cell", ref: "E3" },
+                        orgUnit: { sheet: "National", type: "cell", ref: "B4" },
+                        period: { sheet: "National", type: "cell", ref: "E4" },
                         dataElement: { sheet, type: "row", ref: 1 },
                         categoryOption: { type: "value", id: generateUid() },
                         range: {
@@ -161,14 +161,26 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             .compact()
             .value();
 
-        const nationalStart = 5;
+        const nationalStart = 6;
         await excelRepository.getOrCreateSheet(this.id, "National");
+
+        // Add section name
+        await write("National", "A", 2, "SNAKEBITE ENVENOMING ANNUAL REPORT");
+        await style("National", "A", 2, "H", 2, {
+            wrapText: true,
+            horizontalAlignment: "center",
+            rowSize: 50,
+            fontSize: 22,
+            bold: true,
+            merged: true,
+        });
+
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
             const {
-                showTotal,
+                showTotal = true,
                 totalName,
-                showName,
+                showName = true,
                 color = "#39547d",
                 backgroundColor = "#EEEEEE",
             } = metadata.dataElements[dataElement.id] ?? {};
@@ -187,6 +199,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 horizontalAlignment: "center",
                 rowSize: 45,
                 columnSize: 25,
+            };
+
+            const sectionStyle: ThemeStyle = {
+                ...baseStyle,
+                fontSize: 18,
+                bold: true,
                 merged: true,
             };
 
@@ -195,13 +213,13 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 fontColor: color,
                 fillColor: backgroundColor,
                 border: true,
+                merged: true,
             };
 
             const categoryStyle = (cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
                 ...baseStyle,
                 fontColor: cocColor ?? color,
                 fillColor: cocBackgroundColor ?? backgroundColor,
-                horizontalAlignment: "center",
                 border: true,
                 merged: false,
             });
@@ -214,7 +232,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             // Add section name
             await write("National", "A", sectionRow, dataElement.section?.name ?? "");
-            await style("National", "A", sectionRow, "H", sectionRow, baseStyle);
+            await style("National", "A", sectionRow, "H", sectionRow, sectionStyle);
             if (!sectionTitles.includes(dataElement.id)) hideRow("National", sectionRow);
 
             // Add data element row
@@ -281,6 +299,17 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             await promiseMap(group.dataElements, async (dataElement, index) => {
                 await write(sheetName, index + 1, 1, `=_${dataElement.id}`);
+            });
+
+            await style(sheetName, "A", 1, group.dataElements.length, 1, {
+                wrapText: true,
+                horizontalAlignment: "center",
+                rowSize: 45,
+                columnSize: 30,
+                fontColor: "#39547d",
+                fillColor: "#EEEEEE",
+                merged: false,
+                border: true,
             });
         });
 

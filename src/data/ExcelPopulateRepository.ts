@@ -245,8 +245,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
             _.isUndefined
         );
 
-        const getHeight = (value: string) => value.split("\n").length * fontSize * 2;
-
         const range =
             source.type === "range"
                 ? workbook.sheet(sheet).range(String(source.ref))
@@ -271,10 +269,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
                 const destination = cell.style(cellStyle).value(richText);
                 if (formula) destination.formula(formula);
 
-                cell.row()
-                    .hidden(false)
-                    .height(rowSize ?? getHeight(value));
-
+                if (rowSize) cell.row().hidden(false).height(rowSize);
                 if (columnSize) cell.column().hidden(false).width(columnSize);
             }
         } catch (error) {
