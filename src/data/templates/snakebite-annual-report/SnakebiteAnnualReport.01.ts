@@ -159,6 +159,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
             await merge("National", "A", dataElementRow, lastCategoryColumn, dataElementRow);
 
+            // Write totals
             await write("National", "A", categoryRow, totalName ?? "Total");
             await write(
                 "National",
@@ -169,7 +170,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 })`
             );
 
-            await promiseMap(categoryOptionCombos, async (category, catIndex) => {
+            // Write category option combos
+            const sortedOptionCombos = _.sortBy(
+                categoryOptionCombos.map(optionCombo => {
+                    const { order = 0 } = metadata.optionCombos[optionCombo.id] ?? {};
+                    return { ...optionCombo, order: order };
+                }),
+                ["order"]
+            );
+
+            await promiseMap(sortedOptionCombos, async (category, catIndex) => {
                 await write(
                     "National",
                     categoryStartColumn + catIndex,
