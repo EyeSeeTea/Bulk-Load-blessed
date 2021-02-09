@@ -54,7 +54,7 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             await compositionRoot.templates.download(api, template);
         } catch (error) {
             console.error(error);
-            snackbar.error(i18n.t("Couldn't generate template"));
+            snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
         }
 
         loading.show(false);
