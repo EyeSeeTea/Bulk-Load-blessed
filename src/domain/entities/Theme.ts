@@ -16,6 +16,7 @@ export interface ThemeStyle {
     fontSize?: number;
     fontColor?: Color;
     fillColor?: Color;
+    wrapText?: boolean;
 }
 
 export interface CellImage {

@@ -109,6 +109,21 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 ref: `${column}${row}`,
             });
 
+        const merge = (
+            sheet: string,
+            startColumn: string | number,
+            startRow: number,
+            endColumn: string | number,
+            endRow: number
+        ) =>
+            excelRepository.mergeCells(this.id, {
+                sheet,
+                columnStart: excelRepository.buildColumnName(startColumn),
+                columnEnd: excelRepository.buildColumnName(endColumn),
+                rowStart: startRow,
+                rowEnd: endRow,
+            });
+
         // Add National sheet
         const dataElements: Array<
             DataElement & { section?: { id: string; name: string } }
@@ -129,20 +144,42 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 return;
             }
 
+            const { categoryOptionCombos = [] } = dataElement;
+            const { showTotal, totalName } = metadata.dataElements[dataElement.id] ?? {};
+
             const offset = index * 5;
-            await write("National", "A", offset + nationalStart, dataElement.section?.name ?? "");
-            await write("National", "A", offset + nationalStart + 1, `=_${dataElement.id}`);
-            await promiseMap(dataElement.categoryOptionCombos ?? [], async (category, catIndex) => {
+            const sectionRow = offset + nationalStart;
+            const dataElementRow = offset + nationalStart + 1;
+            const categoryRow = offset + nationalStart + 2;
+
+            const categoryStartColumn = showTotal ? 2 : 1;
+            const lastCategoryColumn = categoryStartColumn + categoryOptionCombos.length;
+
+            await write("National", "A", sectionRow, dataElement.section?.name ?? "");
+            await write("National", "A", dataElementRow, `=_${dataElement.id}`);
+            await merge("National", "A", dataElementRow, lastCategoryColumn, dataElementRow);
+
+            await write("National", "A", categoryRow, totalName ?? "Total");
+            await write(
+                "National",
+                "A",
+                categoryRow + 1,
+                `=SUM(B${categoryRow + 1}:${excelRepository.buildColumnName(lastCategoryColumn)}${
+                    categoryRow + 1
+                })`
+            );
+
+            await promiseMap(categoryOptionCombos, async (category, catIndex) => {
                 await write(
                     "National",
-                    catIndex + 1,
-                    offset + nationalStart + 2,
+                    categoryStartColumn + catIndex,
+                    categoryRow,
                     `=_${category.id}`
                 );
             });
         });
 
-        // TODO: Populate
+        // TODO: Populate antivenom products
         console.log({ populate, antivenomProducts });
 
         // Add antivenom product sheets
