@@ -25,7 +25,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly url = "templates/Snakebite_Annual_Report.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "XBgvNrxpcDC" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
-    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "B4" };
+    public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "C4" };
     public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "E4" };
 
     public readonly dataSources: DataSource[] = [
@@ -34,14 +34,14 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 case "National":
                     return _.range(30).map(offset => ({
                         type: "row",
-                        orgUnit: { sheet, type: "cell", ref: "B4" },
+                        orgUnit: { sheet, type: "cell", ref: "C4" },
                         period: { sheet, type: "cell", ref: "E4" },
-                        dataElement: { sheet, type: "row", ref: 7 + offset * 5 },
-                        categoryOption: { sheet, type: "row", ref: 8 + offset * 5 },
+                        dataElement: { sheet, type: "row", ref: 7 + offset * 6 },
+                        categoryOption: { sheet, type: "row", ref: 8 + offset * 6 },
                         range: {
                             sheet,
-                            rowStart: 9 + offset * 5,
-                            rowEnd: 9 + offset * 5,
+                            rowStart: 9 + offset * 6,
+                            rowEnd: 9 + offset * 6,
                             columnStart: "A",
                         },
                     }));
@@ -50,7 +50,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 default:
                     return _.range(50).map(offset => ({
                         type: "row",
-                        orgUnit: { sheet: "National", type: "cell", ref: "B4" },
+                        orgUnit: { sheet: "National", type: "cell", ref: "C4" },
                         period: { sheet: "National", type: "cell", ref: "E4" },
                         dataElement: { sheet, type: "row", ref: 1 },
                         categoryOption: { type: "value", id: generateUid() },
@@ -185,12 +185,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 backgroundColor = "#EEEEEE",
             } = metadata.dataElements[dataElement.id] ?? {};
 
-            const offset = index * 5;
+            // A new reporting group appears each 6 rows starting from row number 6
+            // For each group row 2 is the data element, row 3 is the category and row 4 is the value
+            const offset = index * 6;
             const sectionRow = nationalStart + offset;
-            const dataElementRow = nationalStart + offset + 1;
-            const categoryRow = nationalStart + offset + 2;
-            const valueRow = nationalStart + offset + 3;
+            const dataElementRow = nationalStart + offset + 2;
+            const categoryRow = nationalStart + offset + 3;
+            const valueRow = nationalStart + offset + 4;
 
+            // Some data elements have totals included that move the categories one column to the right
+            // These totals are ignored during import as they're only formulas
             const categoryStartColumn = showTotal ? 2 : 1;
             const lastCategoryColumn = categoryStartColumn + categoryOptionCombos.length;
 
