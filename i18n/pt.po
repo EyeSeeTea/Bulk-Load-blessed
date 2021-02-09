@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-02-05T14:53:33.928Z\n"
+"POT-Creation-Date: 2021-02-09T12:18:32.241Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,6 +52,9 @@ msgstr "Programa"
 
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
+
+msgid "Access to Import Data"
+msgstr "Importar dados"
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"
@@ -120,10 +123,6 @@ msgstr "Elementos de dados usados para identificação de duplicatas"
 
 msgid "Permissions"
 msgstr "Permissões"
-
-#, fuzzy
-msgid "Acces to Import Data"
-msgstr "Importar dados"
 
 msgid "Type"
 msgstr ""
@@ -459,3 +458,4 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-05T14:53:33.928Z\n"
+"POT-Creation-Date: 2021-02-09T12:18:32.241Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -53,6 +53,9 @@ msgstr "Programa"
 
 msgid "Access to Template Generation"
 msgstr "Acceso a la generación de plantillas"
+
+msgid "Access to Import Data"
+msgstr "Importar datos"
 
 msgid "Access to Settings and Themes"
 msgstr "Acceso al área de configuración y a los temas"
@@ -124,10 +127,6 @@ msgstr "Elementos de datos usados para identificar los duplicados"
 
 msgid "Permissions"
 msgstr "Permisos"
-
-#, fuzzy
-msgid "Acces to Import Data"
-msgstr "Importar datos"
 
 msgid "Type"
 msgstr ""

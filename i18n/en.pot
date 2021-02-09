@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-05T14:53:33.928Z\n"
-"PO-Revision-Date: 2021-02-05T14:53:33.928Z\n"
+"POT-Creation-Date: 2021-02-09T12:18:32.241Z\n"
+"PO-Revision-Date: 2021-02-09T12:18:32.241Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -51,6 +51,9 @@ msgid "Program"
 msgstr ""
 
 msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Import Data"
 msgstr ""
 
 msgid "Access to Settings and Themes"
@@ -117,9 +120,6 @@ msgid "Data elements used for duplicates identification"
 msgstr ""
 
 msgid "Permissions"
-msgstr ""
-
-msgid "Acces to Import Data"
 msgstr ""
 
 msgid "Type"
