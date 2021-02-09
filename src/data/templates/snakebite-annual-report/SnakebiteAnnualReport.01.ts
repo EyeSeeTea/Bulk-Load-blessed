@@ -505,7 +505,6 @@ const CustomMetadataModel = Schema.object({
         {}
     ),
     adminUserGroups: Schema.optionalSafe(Schema.array(Schema.string), []),
-    subnationalDataSet: Schema.unknown,
 });
 
 const AntivenomEntriesModel = Schema.object({
