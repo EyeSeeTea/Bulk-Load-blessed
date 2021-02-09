@@ -328,7 +328,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         )?.dataElement;
                         if (!productNameDataElement) return [];
 
-                        const [category] = _.pullAt(freeCategories[productNameDataElement], [0]);
+                        const [category] = _.pullAt(freeCategories[productNameDataElement] ?? [], [
+                            0,
+                        ]);
                         if (!category) {
                             throw new Error(
                                 i18n.t(

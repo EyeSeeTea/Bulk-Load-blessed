@@ -99,7 +99,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 await this.excelRepository.writeCell(
                     template.id,
                     template.fixedOrgUnit,
-                    dataPackage.dataEntries[0]?.orgUnit
+                    dataPackage.dataEntries[0]?.orgUnit ?? ""
                 );
             }
 
@@ -107,7 +107,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 await this.excelRepository.writeCell(
                     template.id,
                     template.fixedPeriod,
-                    dataPackage.dataEntries[0]?.period
+                    dataPackage.dataEntries[0]?.period ?? ""
                 );
             }
 

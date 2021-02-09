@@ -139,9 +139,10 @@ export class ImportTemplateUseCase implements UseCase {
         } = settings;
 
         // Override org unit if needed
-        const dataValues = useBuilderOrgUnits
-            ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
-            : excelDataPackage.dataEntries;
+        const dataValues =
+            useBuilderOrgUnits && selectedOrgUnits[0]
+                ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
+                : excelDataPackage.dataEntries;
 
         const instanceDataValues = duplicateEnabled
             ? await this.getExistingDataValues(
@@ -217,7 +218,7 @@ export class ImportTemplateUseCase implements UseCase {
     ) {
         const instanceDataPackage = await this.getInstanceDataValues(dataForm, excelDataPackage);
 
-        return useBuilderOrgUnits
+        return useBuilderOrgUnits && selectedOrgUnits[0]
             ? this.overrideOrgUnit(instanceDataPackage.dataEntries, selectedOrgUnits[0])
             : instanceDataPackage.dataEntries;
     }

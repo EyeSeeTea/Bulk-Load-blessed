@@ -93,7 +93,7 @@ export class ExcelReader {
             )
             .map((items, key) => {
                 const [
-                    dataForm,
+                    dataForm = "",
                     id,
                     period,
                     orgUnit,
@@ -114,6 +114,7 @@ export class ExcelReader {
                     dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
                 };
             })
+            .compact()
             .value();
 
         if (dataFormType === "trackerPrograms") {

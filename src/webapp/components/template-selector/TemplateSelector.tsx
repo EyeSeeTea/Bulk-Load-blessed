@@ -81,9 +81,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             };
 
             setDataSource(dataSource);
-            if (models.length > 0) {
-                const model = models[0].value;
-                setTemplates(modelToSelectOption(dataSource[model]));
+            const model = models[0]?.value;
+            const dataSourceModel = dataSource[model ?? ""];
+
+            if (model && dataSourceModel) {
+                setTemplates(modelToSelectOption(dataSourceModel));
                 setSelectedModel(model);
             }
         });
@@ -122,7 +124,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
-        const options = modelToSelectOption(dataSource[value]);
+        const options = modelToSelectOption(dataSource[value] ?? []);
 
         setSelectedModel(value);
         setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
@@ -136,7 +138,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const onTemplateChange = ({ value }: SelectOption) => {
         if (dataSource) {
             const { periodType, type, readAccess = false } =
-                dataSource[selectedModel].find(({ id }) => id === value) ?? {};
+                dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {

@@ -138,7 +138,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     orgUnitCell,
-                    metadata.orgUnits[orgUnit.id]?.name
+                    metadata.orgUnits[orgUnit.id]?.name ?? ""
                 );
             }
 
@@ -249,8 +249,10 @@ export class ExcelBuilder {
                 rowEnd: rowStart,
             });
 
-            await this.fillCell(template, cells[0], dataSource.from, relationship.fromId);
-            await this.fillCell(template, cells[0], dataSource.to, relationship.toId);
+            if (cells[0]) {
+                await this.fillCell(template, cells[0], dataSource.from, relationship.fromId);
+                await this.fillCell(template, cells[0], dataSource.to, relationship.toId);
+            }
 
             rowStart += 1;
         }
@@ -325,7 +327,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     cocIdCell,
-                    metadata.categoryOptionCombos[cocId]?.name
+                    metadata.categoryOptionCombos[cocId]?.name ?? ""
                 );
             }
 

@@ -196,7 +196,7 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
 
                         <AccordionDetails>
                             <ReactJson
-                                src={rawResults.length === 1 ? rawResults[0] : rawResults}
+                                src={rawResults.length === 1 ? rawResults[0] ?? {} : rawResults}
                                 collapsed={2}
                                 enableClipboard={copyToClipboard}
                             />

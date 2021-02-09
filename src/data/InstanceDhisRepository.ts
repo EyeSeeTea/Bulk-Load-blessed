@@ -376,14 +376,14 @@ export class InstanceDhisRepository implements InstanceRepository {
             .getData()) as unknown) as AsyncDataValueSetResponse;
 
         const checkTask = async () => {
-            const [{ completed }] =
+            const response =
                 (await this.api
                     .get<{ message: string; completed: boolean }[]>(
                         `/system/tasks/${jobType}/${id}`
                     )
                     .getData()) ?? [];
 
-            return !completed;
+            return !response[0]?.completed;
         };
 
         do {
@@ -395,7 +395,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             .getData();
 
         if (!importSummary) {
-            const [{ message }] =
+            const response =
                 (await this.api
                     .get<{ message: string; completed: boolean }[]>(
                         `/system/tasks/${jobType}/${id}`
@@ -405,7 +405,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             return {
                 title,
                 status: "ERROR",
-                message: message,
+                message: response[0]?.message,
                 stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
                 errors: [],
                 rawResponse: {},
@@ -502,12 +502,15 @@ export class InstanceDhisRepository implements InstanceRepository {
                 )
                 .map((dataValues, key) => {
                     const [period, orgUnit, attribute] = key.split("-");
+                    if (!period || !orgUnit) return undefined;
+
                     return {
                         type: "aggregated" as const,
                         dataForm: id,
                         orgUnit,
                         period,
-                        attribute: defaultIds.includes(attribute) ? undefined : attribute,
+                        attribute:
+                            attribute && defaultIds.includes(attribute) ? undefined : attribute,
                         dataValues: dataValues.map(
                             ({ dataElement, categoryOptionCombo, value, comment }) => ({
                                 dataElement,
@@ -525,6 +528,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         ),
                     };
                 })
+                .compact()
                 .value(),
         };
     }

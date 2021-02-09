@@ -7,12 +7,15 @@ export const getColorPalette = (
     scale: string,
     classes: number
 ): string[] => {
-    return palettes[scale][classes];
+    const palette = palettes[scale] ?? {};
+    return palette[classes] ?? [];
 };
 
 // Returns color scale name for a palette
 export const getColorScale = (palettes: PaletteCollection, palette: string[]) => {
-    return _.keys(palettes).find(name => _.isEqual(palettes[name][palette.length], palette));
+    return _.keys(palettes).find(name =>
+        _.isEqual(getColorPalette(palettes, name, palette.length), palette)
+    );
 };
 
 export const generatorOriginalPalette = {

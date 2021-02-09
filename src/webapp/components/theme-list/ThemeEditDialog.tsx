@@ -70,6 +70,8 @@ export default function ThemeEditDialog({
 
     const changeColorOption = ({ value }: SelectOption) => {
         const fixedColor = theme.palette[0];
+        if (!fixedColor) return;
+
         const defaultPalette = generatorOriginalPalette["default"][9];
         const palette = theme.palette.length > 1 ? theme.palette : defaultPalette;
 

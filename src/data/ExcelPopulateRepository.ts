@@ -183,11 +183,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
             .sheet(sheet)
             .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
 
-        return rangeCells.cells()[0].map(cell => ({
-            type: "cell",
-            sheet,
-            ref: cell.address(),
-        }));
+        return (
+            rangeCells.cells()[0]?.map(cell => ({
+                type: "cell",
+                sheet,
+                ref: cell.address(),
+            })) ?? []
+        );
     }
 
     public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {
@@ -299,8 +301,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     private async getWorkbook(id: string) {
-        if (!this.workbooks[id]) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
-        return this.workbooks[id];
+        const workbook = this.workbooks[id];
+        if (!workbook) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
+
+        return workbook;
     }
 
     private buildRange({ type, ref, sheet }: SheetRef, workbook: ExcelWorkbook) {
@@ -410,7 +414,8 @@ function _getFormulaWithValidation(
     const validationSheet = sheetName
         ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
         : sheet;
-    if (!validationSheet) return defaultValue;
+
+    if (!validationSheet || !rangeAddress) return defaultValue;
     const validationRange = validationSheet.range(rangeAddress);
 
     const formulaByValue = _(validationRange.cells())

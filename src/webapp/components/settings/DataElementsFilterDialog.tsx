@@ -51,7 +51,7 @@ export default function DataElementsFilterDialog({
     const excluded = selectedProgram ? settings.duplicateExclusion[selectedProgram.id] : [];
     const selection = _.difference(
         selectedProgram?.dataElements.map(({ id }) => id),
-        excluded
+        excluded ?? []
     );
 
     return (

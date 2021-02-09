@@ -24,8 +24,8 @@ export const emptyImportSummary: SynchronizationResult = {
 export const mergeSummaries = (...array: Array<ImportSummary | undefined>): ImportSummary => {
     const summaries = _.compact(array);
 
-    const statusMessages = summaries.map(({ status }) => status);
-    const status = _.uniq(statusMessages).length === 1 ? statusMessages[0] : "ERROR";
+    const statusMessages = _.uniq(summaries.map(({ status }) => status));
+    const status = statusMessages.length === 1 ? statusMessages[0] : "ERROR";
     const description = summaries.map(({ description }) => description).join("\n");
     const errors = _.flatMap(summaries, ({ errors }) => errors);
 
@@ -36,5 +36,5 @@ export const mergeSummaries = (...array: Array<ImportSummary | undefined>): Impo
         ignored: _.sum(summaries.map(({ stats }) => stats.ignored)),
     };
 
-    return { status, stats, description, errors };
+    return { status: status ?? "ERROR", stats, description, errors };
 };
