@@ -38,15 +38,17 @@ export class AnalyzeTemplateUseCase implements UseCase {
 
         if (template.type === "custom" || dataForm.type === "trackerPrograms") {
             const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
-            // TODO: Review if we should read custom template here...
             const excelDataValues = await reader.readTemplate(template);
+            if (!excelDataValues) return { custom: true, dataForm, dataValues: [], orgUnits };
 
-            const dataValues =
-                excelDataValues?.dataEntries.map(({ id, dataValues, period }) => ({
-                    count: dataValues.length,
-                    id,
-                    period,
-                })) ?? [];
+            const customDataValues = await reader.templateCustomization(template, excelDataValues);
+            const dataEntries = customDataValues?.dataEntries ?? excelDataValues.dataEntries;
+
+            const dataValues = dataEntries.map(({ id, dataValues, period }) => ({
+                count: dataValues.length,
+                id,
+                period,
+            }));
 
             return { custom: true, dataForm, dataValues, orgUnits };
         } else {
