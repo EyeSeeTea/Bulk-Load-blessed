@@ -12,7 +12,9 @@ let defaultSheet = "Demographic";
 let orgUnitCell = "C4";
 let periodCell = "Q4";
 
-let sourceTypeRows = _.range(9, 68).filter(row => ![18, 24].includes(row)).map(row => ({ row, nrOfElements: 12 }));
+let sourceTypeRows = _.range(9, 68)
+    .filter(row => ![18, 24].includes(row))
+    .map(row => ({ row, nrOfElements: 12 }));
 let sourceTypeTotalRows = [8, 18, 24].map(row => ({ row, nrOfElements: 12 }));
 
 let getDataElements = ({
@@ -37,8 +39,9 @@ let getDataElements = ({
                 ref: {
                     type: "cell",
                     sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
+                    ref: `${letters[i % letters.length]}${
+                        parseInt(i / letters.length) + dataRowStart
+                    }`,
                 },
             };
         }
@@ -153,5 +156,11 @@ let dataSheet4Totals = [
     }),
 ];
 
-let result = [...dataSheet1, ...dataSheet2, ...dataSheet3, ...dataSheet4Values, ...dataSheet4Totals];
+let result = [
+    ...dataSheet1,
+    ...dataSheet2,
+    ...dataSheet3,
+    ...dataSheet4Values,
+    ...dataSheet4Totals,
+];
 console.log(result);

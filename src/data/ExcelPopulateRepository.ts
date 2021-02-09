@@ -5,7 +5,7 @@ import XLSX, {
     FormulaError,
     Workbook as ExcelWorkbook,
     Workbook,
-} from "xlsx-populate";
+} from "@eyeseetea/xlsx-populate";
 import { Sheet } from "../domain/entities/Sheet";
 import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";

@@ -1,14 +1,13 @@
+import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
-import { ConfirmationDialog, MultiSelector } from "d2-ui-components";
-import React, { useEffect, useState, useCallback } from "react";
-import { CompositionRoot } from "../../../CompositionRoot";
+import _ from "lodash";
+import React, { useCallback, useEffect, useState } from "react";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { NamedRef } from "../../../domain/entities/ReferenceObject";
 import i18n from "../../../locales";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import { Select, SelectOption } from "../select/Select";
 import { SettingsFieldsProps } from "./SettingsFields";
-import _ from "lodash";
 
 interface DataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
@@ -19,17 +18,15 @@ export default function DataElementsFilterDialog({
     settings,
     onChange,
 }: DataElementsFilterDialogProps) {
-    const { d2 } = useAppContext();
+    const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 
     const [programs, setPrograms] = useState<DataForm[]>([]);
     const [selectedProgram, selectProgram] = useState<DataForm>();
 
     useEffect(() => {
-        CompositionRoot.attach()
-            .templates.list()
-            .then(({ programs }) => setPrograms(programs));
-    }, []);
+        compositionRoot.templates.list().then(({ programs }) => setPrograms(programs));
+    }, [compositionRoot]);
 
     const onChangeSelect = useCallback(
         ({ value }: SelectOption) => {

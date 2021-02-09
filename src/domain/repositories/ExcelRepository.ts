@@ -27,28 +27,28 @@ export interface FileLoadOptions extends BaseLoadOptions {
 }
 
 export abstract class ExcelRepository {
-    public abstract async loadTemplate(options: LoadOptions): Promise<string>;
-    public abstract async toBlob(id: string): Promise<Blob>;
-    public abstract async toBuffer(id: string): Promise<Buffer>;
-    public abstract async findRelativeCell(
+    public abstract loadTemplate(options: LoadOptions): Promise<string>;
+    public abstract toBlob(id: string): Promise<Blob>;
+    public abstract toBuffer(id: string): Promise<Buffer>;
+    public abstract findRelativeCell(
         id: string,
         location?: SheetRef,
         cell?: CellRef
     ): Promise<CellRef | undefined>;
-    public abstract async writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
-    public abstract async readCell(
+    public abstract writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
+    public abstract readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
         options?: ReadCellOptions
     ): Promise<ExcelValue | undefined>;
-    public abstract async getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
-    public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;
-    public abstract async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
-    public abstract async getSheets(id: string): Promise<Sheet[]>;
-    public abstract async getConstants(id: string): Promise<Record<string, string>>;
-    public abstract async getSheetRowsCount(
+    public abstract getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
+    public abstract addPicture(id: string, location: SheetRef, file: File): Promise<void>;
+    public abstract styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
+    public abstract getSheets(id: string): Promise<Sheet[]>;
+    public abstract getConstants(id: string): Promise<Record<string, string>>;
+    public abstract getSheetRowsCount(
         id: string,
         sheetId: string | number
     ): Promise<number | undefined>;
-    public abstract async listDefinedNames(id: string): Promise<string[]>;
+    public abstract listDefinedNames(id: string): Promise<string[]>;
 }

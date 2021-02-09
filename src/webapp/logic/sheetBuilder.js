@@ -659,6 +659,11 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 _.forEach(programStageSection.dataElements, dataElementT => {
                     const dataElement = metadata.get(dataElementT.id);
+                    if (!dataElement) {
+                        console.error(`Data element not found ${dataElementT.id}`);
+                        return;
+                    }
+
                     const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet

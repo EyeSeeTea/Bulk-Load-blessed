@@ -1,14 +1,13 @@
 //@ts-ignore
 import { HeaderBar } from "@dhis2/ui-widgets";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles, Paper } from "@material-ui/core";
-import { useSnackbar } from "d2-ui-components";
 import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { AppDrawer, AppDrawerToggle } from "../../components/drawer/Drawer";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
 import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
 import ImportTemplatePage from "../import-template/ImportTemplatePage";
@@ -34,7 +33,7 @@ export interface AppRoute {
 }
 
 const Root = () => {
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const classes = useStyles();
 
@@ -43,14 +42,14 @@ const Root = () => {
     const [themes, setThemes] = useState<Theme[]>([]);
 
     useEffect(() => {
-        Settings.build(api)
+        Settings.build(api, compositionRoot)
             .then(setSettings)
             .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
-    }, [api, snackbar]);
+    }, [api, snackbar, compositionRoot]);
 
     useEffect(() => {
-        CompositionRoot.attach().themes.list().then(setThemes);
-    }, []);
+        compositionRoot.themes.list().then(setThemes);
+    }, [compositionRoot]);
 
     const routes: AppRoute[] = useMemo(
         () => [
