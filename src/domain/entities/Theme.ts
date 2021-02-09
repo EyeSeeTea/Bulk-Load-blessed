@@ -17,6 +17,13 @@ export interface ThemeStyle {
     fontColor?: Color;
     fillColor?: Color;
     wrapText?: boolean;
+    horizontalAlignment?: "left" | "center" | "right" | "fill" | "centerContinuous" | "distributed";
+    verticalAlignment?: "top" | "center" | "bottom" | "justify" | "distributed";
+    border?: boolean;
+    borderColor?: Color;
+    rowSize?: number;
+    columnSize?: number;
+    merged?: boolean;
 }
 
 export interface CellImage {

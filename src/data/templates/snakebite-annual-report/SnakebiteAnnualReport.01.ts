@@ -10,6 +10,7 @@ import {
     ImportCustomizationOptions,
     StyleSource,
 } from "../../../domain/entities/Template";
+import { ThemeStyle } from "../../../domain/entities/Theme";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import i18n from "../../../locales";
@@ -109,27 +110,32 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 ref: `${column}${row}`,
             });
 
-        const merge = (
-            sheet: string,
-            startColumn: string | number,
-            startRow: number,
-            endColumn: string | number,
-            endRow: number
-        ) =>
-            excelRepository.mergeCells(this.id, {
-                sheet,
-                columnStart: excelRepository.buildColumnName(startColumn),
-                columnEnd: excelRepository.buildColumnName(endColumn),
-                rowStart: startRow,
-                rowEnd: endRow,
-            });
-
         const hideRow = (sheet: string, row: number) =>
             excelRepository.hide(this.id, {
                 type: "row",
                 sheet,
                 ref: row,
             });
+
+        const style = (
+            sheet: string,
+            startColumn: string | number,
+            startRow: number,
+            endColumn: string | number,
+            endRow: number,
+            style: ThemeStyle
+        ) =>
+            excelRepository.styleCell(
+                this.id,
+                {
+                    type: "range",
+                    sheet,
+                    ref: `${excelRepository.buildColumnName(
+                        startColumn
+                    )}${startRow}:${excelRepository.buildColumnName(endColumn)}${endRow}`,
+                },
+                style
+            );
 
         // Add National sheet
         const dataElements: Array<
@@ -159,23 +165,68 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await excelRepository.getOrCreateSheet(this.id, "National");
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
-            const { showTotal, totalName, showName } = metadata.dataElements[dataElement.id] ?? {};
+            const {
+                showTotal,
+                totalName,
+                showName,
+                color = "#39547d",
+                backgroundColor = "#EEEEEE",
+            } = metadata.dataElements[dataElement.id] ?? {};
 
             const offset = index * 5;
             const sectionRow = nationalStart + offset;
             const dataElementRow = nationalStart + offset + 1;
             const categoryRow = nationalStart + offset + 2;
+            const valueRow = nationalStart + offset + 3;
 
             const categoryStartColumn = showTotal ? 2 : 1;
             const lastCategoryColumn = categoryStartColumn + categoryOptionCombos.length;
 
+            const baseStyle: ThemeStyle = {
+                wrapText: true,
+                horizontalAlignment: "center",
+                rowSize: 45,
+                columnSize: 25,
+                merged: true,
+            };
+
+            const dataElementStyle: ThemeStyle = {
+                ...baseStyle,
+                fontColor: color,
+                fillColor: backgroundColor,
+                border: true,
+            };
+
+            const categoryStyle = (cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
+                ...baseStyle,
+                fontColor: cocColor ?? color,
+                fillColor: cocBackgroundColor ?? backgroundColor,
+                horizontalAlignment: "center",
+                border: true,
+                merged: false,
+            });
+
+            const valueStyle: ThemeStyle = {
+                ...baseStyle,
+                border: true,
+                merged: false,
+            };
+
             // Add section name
             await write("National", "A", sectionRow, dataElement.section?.name ?? "");
+            await style("National", "A", sectionRow, "H", sectionRow, baseStyle);
             if (!sectionTitles.includes(dataElement.id)) hideRow("National", sectionRow);
 
             // Add data element row
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
-            await merge("National", "A", dataElementRow, lastCategoryColumn - 1, dataElementRow);
+            await style(
+                "National",
+                "A",
+                dataElementRow,
+                lastCategoryColumn - 1,
+                dataElementRow,
+                dataElementStyle
+            );
             if (!showName) hideRow("National", dataElementRow);
 
             // Add totals
@@ -184,10 +235,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 await write(
                     "National",
                     "A",
-                    categoryRow + 1,
-                    `=SUM(B${categoryRow + 1}:${excelRepository.buildColumnName(
+                    valueRow,
+                    `=SUM(B${valueRow}:${excelRepository.buildColumnName(
                         lastCategoryColumn
-                    )}${categoryRow + 1})`
+                    )}${valueRow})`
                 );
             }
 
@@ -208,6 +259,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     `=_${category.id}`
                 );
             });
+
+            await style(
+                "National",
+                "A",
+                categoryRow,
+                lastCategoryColumn - 1,
+                categoryRow,
+                categoryStyle()
+            );
+            await style("National", "A", valueRow, lastCategoryColumn - 1, valueRow, valueStyle);
         });
 
         // TODO: Populate antivenom products
@@ -518,6 +579,7 @@ const CustomMetadataModel = Schema.object({
                 backgroundColor: Schema.optional(Schema.color),
                 color: Schema.optional(Schema.color),
                 info: Schema.optional(Schema.string),
+                defaultCatOptionComboName: Schema.optional(Schema.string), // Not used in excel
             })
         ),
         {}

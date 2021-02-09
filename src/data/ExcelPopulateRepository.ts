@@ -206,34 +206,76 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
 
         const { sheet } = source;
-        const { text, bold, italic, fontSize = 12, fontColor, fillColor, wrapText } = style;
-        const range = this.buildRange(source, workbook);
+        const {
+            text,
+            bold,
+            italic,
+            fontSize = 12,
+            fontColor,
+            fillColor,
+            wrapText,
+            horizontalAlignment,
+            verticalAlignment = "center",
+            border,
+            borderColor,
+            rowSize,
+            columnSize,
+            merged = false,
+        } = style;
+
         const textStyle = _.omitBy(
             {
                 bold,
                 italic,
                 fontSize,
-                fontColor,
-                fill: fillColor,
+                fontColor: fontColor?.replace(/#/g, ""),
             },
             _.isUndefined
         );
 
+        const cellStyle = _.omitBy(
+            {
+                verticalAlignment,
+                horizontalAlignment,
+                wrapText,
+                fill: fillColor?.replace(/#/g, ""),
+                border,
+                borderColor: borderColor?.replace(/#/g, ""),
+            },
+            _.isUndefined
+        );
+
+        const getHeight = (value: string) => value.split("\n").length * fontSize * 2;
+
+        const range =
+            source.type === "range"
+                ? workbook.sheet(sheet).range(String(source.ref))
+                : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
+
+        const cells =
+            source.type === "cell"
+                ? [workbook.sheet(sheet).cell(source.ref)]
+                : _.flatten(range.cells());
+
+        if (source.type === "range") range.merged(merged);
+
         try {
-            if (text && range) {
+            for (const cell of cells) {
+                const value = String(text ?? cell.value() ?? "");
+                const formula = cell.formula();
+
                 //@ts-ignore Not properly typed
                 const richText = new XLSX.RichText();
-                richText.add(text, textStyle);
+                richText.add(value, textStyle);
 
-                workbook
-                    .sheet(sheet)
-                    .range(range.address() ?? "")
-                    .merged(true)
-                    .style({ verticalAlignment: "center", wrapText })
-                    .value(richText);
+                const destination = cell.style(cellStyle).value(richText);
+                if (formula) destination.formula(formula);
 
-                const height = text.split("\n").length * fontSize * 2;
-                range.cells().map(([cell]) => cell.row().hidden(false).height(height));
+                cell.row()
+                    .hidden(false)
+                    .height(rowSize ?? getHeight(value));
+
+                if (columnSize) cell.column().hidden(false).width(columnSize);
             }
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
@@ -305,12 +347,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         if (!workbook) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
 
         return workbook;
-    }
-
-    private buildRange({ type, ref, sheet }: SheetRef, workbook: ExcelWorkbook) {
-        return type === "range"
-            ? workbook.sheet(sheet).range(String(ref))
-            : workbook.sheet(sheet).range(`${ref}:${ref}`);
     }
 
     public async listDefinedNames(id: string): Promise<string[]> {
