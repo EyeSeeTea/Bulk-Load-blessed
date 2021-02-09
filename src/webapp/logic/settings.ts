@@ -101,7 +101,9 @@ export default class Settings {
             defaultSettings
         );
 
-        const query = (prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport") => {
+        const query = (
+            prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport"
+        ) => {
             const storedValues = data[prop] ?? [];
             const defaultValues = defaultSettings[prop] ?? [];
 
@@ -111,7 +113,6 @@ export default class Settings {
             };
         };
 
-
         const {
             users: userPermissionsForImport,
             userGroups: userGroupPermissionsForImport,
@@ -119,7 +120,8 @@ export default class Settings {
             .get({
                 userGroups: query("permissionsForImport"),
                 users: query("permissionsForImport"),
-            }).getData();
+            })
+            .getData();
 
         const {
             users: userPermissionsForGeneration,
@@ -240,6 +242,7 @@ export default class Settings {
         type: PermissionType,
         collection: NamedObject[]
     ): Settings {
+        console.log("COLLECTION: ", collection);
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });
@@ -273,6 +276,10 @@ export default class Settings {
         return this.models[key];
     }
 
+    isBlankPageVisibleForCurrentUser(){
+        return !this.isImportDataVisibleForCurrentUser() && !this.isTemplateGenerationVisible();
+    }
+
     isTemplateGenerationVisible() {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
@@ -289,9 +296,9 @@ export default class Settings {
         return isUserAdmin || hasGroupAccess || hasUserAccess;
     }
 
-    isImportDataVisibleForCurrentUser(): boolean{
+    isImportDataVisibleForCurrentUser(): boolean {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
-        const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport); 
+        const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport);
 
         return hasGroupAccess || hasUserAccess;
     }
@@ -303,20 +310,20 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup") {
+    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup"/* | "allUsers"*/) {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {
             return "userGroupPermissionsForGeneration";
-        } else if (setting === "settings" && kind === "user") {
+        }else if (setting === "settings" && kind === "user") {
             return "userPermissionsForSettings";
         } else if (setting === "settings" && kind === "userGroup") {
             return "userGroupPermissionsForSettings";
-        } else if(setting === "import" && kind === "user"){
+        } else if (setting === "import" && kind === "user") {
             return "userPermissionsForImport";
-        }else if(setting === "import" && kind === "userGroup"){
+        } else if (setting === "import" && kind === "userGroup") {
             return "userGroupPermissionsForImport";
-        }else {
+        } else {
             throw new Error("Unsupported field");
         }
     }

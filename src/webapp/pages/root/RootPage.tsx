@@ -14,6 +14,7 @@ import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
 import ImportTemplatePage from "../import-template/ImportTemplatePage";
 import SettingsPage from "../settings/SettingsPage";
 import ThemesPage from "../themes/ThemesPage";
+import BlankTemplatePage from "../blank-template/BlankTemplatePage";
 
 export interface RouteComponentProps {
     settings: Settings;
@@ -54,6 +55,15 @@ const Root = () => {
 
     const routes: AppRoute[] = useMemo(
         () => [
+            {
+                key: "home",
+                name: "home",
+                icon: "home",
+                path: "/home",
+                section: "main",
+                auth: (settings: Settings) => settings.isBlankPageVisibleForCurrentUser(),
+                component: (props: RouteComponentProps) => <BlankTemplatePage {...props} />,
+            },
             {
                 key: "download",
                 name: i18n.t("Download template"),
@@ -124,7 +134,7 @@ const Root = () => {
                                 />
                             )}
 
-                            {userRoutes.map(({ key, path, component }) => (
+                            {userRoutes.map(({ key, path, component}) => (
                                 <Route key={key} path={path}>
                                     {component({
                                         settings,
