@@ -60,7 +60,7 @@ const booleanFromString = Codec.custom<boolean>({
 });
 
 // Short and long HEX color format
-const colorRegExp = /^#[0-9a-f]{3,6}$/;
+const colorRegExp = /^#[0-9a-fA-F]{3,6}$/;
 
 // RFC2822 email format
 const emailRegExp = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
