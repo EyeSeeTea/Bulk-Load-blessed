@@ -144,8 +144,82 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 style
             );
 
+        // Add metadata sheet
+        await excelRepository.getOrCreateSheet(this.id, "Metadata");
+
+        // Add metadata sheet columns
+        await promiseMap(["Type", "Identifier", "Name", "Info"], (label, index) =>
+            write("Metadata", index + 1, 1, label)
+        );
+
+        // Add metadata sheet rows
+        const items = _(dataSet?.dataElements)
+            .compact()
+            .flatten()
+            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
+                { id, name, type: "dataElement" },
+                ...categoryOptionCombos.map(({ id, name }) => ({
+                    id,
+                    name,
+                    type: "categoryOptionCombo",
+                })),
+            ])
+            .union([
+                { id: "true", name: "Yes", type: "boolean" },
+                { id: "false", name: "No", type: "boolean" },
+            ])
+            .value();
+
+        const metadataStart = 2;
+        await promiseMap(items, async ({ id, name, type }, index) => {
+            const label = getName(id) ?? name;
+            const info = metadata?.optionCombos[id]?.info ?? "";
+
+            await write("Metadata", "A", index + metadataStart, type);
+            await write("Metadata", "B", index + metadataStart, id);
+            await write("Metadata", "C", index + metadataStart, label);
+            await write("Metadata", "D", index + metadataStart, info);
+        });
+
+        await promiseMap(items, async ({ id }, index) => {
+            await defineName("Metadata", "C", index + metadataStart, id);
+        });
+
+        // Add organisation units sheet
+        await excelRepository.getOrCreateSheet(this.id, "OrgUnits");
+
+        // Add organisation units sheet columns
+        await promiseMap(["Identifier", "Name", "Selector"], (label, index) =>
+            write("OrgUnits", index + 1, 1, label)
+        );
+
+        // Add organisation units sheet rows
+        const orgUnitStart = 2;
+        const availableOrgUnits = _.sortBy(dataSet?.organisationUnits ?? [], "name");
+
+        await promiseMap(availableOrgUnits, async (orgUnit, index) => {
+            await write("OrgUnits", 1, index + orgUnitStart, orgUnit.id);
+            await write("OrgUnits", 2, index + orgUnitStart, orgUnit.name);
+            await write("OrgUnits", 3, index + orgUnitStart, `=_${orgUnit.id}`);
+        });
+
+        await promiseMap(availableOrgUnits, async ({ id }, index) => {
+            await defineName("OrgUnits", "B", index + orgUnitStart, id);
+        });
+
         // Add Validation sheet
         await excelRepository.getOrCreateSheet(this.id, "Validation");
+
+        // Yes/No exists on Validation!$A$2:$A$3
+        await write("Validation", "A", 1, "Yes/No");
+        await write("Validation", "A", 2, "=_true");
+        await write("Validation", "A", 3, "=_false");
+        const validateYesNoFormula = "Validation!$A$2:$A$3";
+
+        // Hide sheets
+        await promiseMap(["Metadata", "OrgUnits", "Validation"], sheet =>
+            excelRepository.hideSheet(this.id, sheet)
+        );
 
         // Add National sheet
         const dataElements: Array<
@@ -210,12 +284,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
-            const {
-                showTotal = true,
-                totalName,
-                showName = true,
-                backgroundColor = "#EEEEEE",
-            } = metadata.dataElements[dataElement.id] ?? {};
+            const { showTotal = true, totalName, showName = true, backgroundColor = "#EEEEEE" } =
+                metadata.dataElements[dataElement.id] ?? {};
 
             // A new reporting group appears each 6 rows starting from row number 6
             // For each group row 2 is the data element, row 3 is the category and row 4 is the value
@@ -251,7 +321,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 merged: true,
             };
 
-            const categoryStyle = (_cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
+            const categoryStyle = (
+                _cocColor?: string,
+                cocBackgroundColor?: string
+            ): ThemeStyle => ({
                 ...baseStyle,
                 fillColor: cocBackgroundColor ?? backgroundColor,
                 border: true,
@@ -334,6 +407,15 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             await promiseMap(group.dataElements, async (dataElement, index) => {
                 await write(sheetName, index + 1, 1, `=_${dataElement.id}`);
+
+                if (dataElement.prop === "monovalent" || dataElement.prop === "polyvalent") {
+                    const column = excelRepository.buildColumnName(index + 1);
+                    await excelRepository.setDataValidation(
+                        this.id,
+                        { type: "range", ref: `${column}2:${column}2048`, sheet: sheetName },
+                        validateYesNoFormula
+                    );
+                }
             });
 
             await style(sheetName, "A", 1, group.dataElements.length, 1, {
@@ -383,70 +465,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 });
             });
         }
-
-        // Add metadata sheet
-        await excelRepository.getOrCreateSheet(this.id, "Metadata");
-
-        // Add metadata sheet columns
-        await promiseMap(["Type", "Identifier", "Name", "Info"], (label, index) =>
-            write("Metadata", index + 1, 1, label)
-        );
-
-        // Add metadata sheet rows
-        const items = _(dataSet?.dataElements)
-            .compact()
-            .flatten()
-            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
-                { id, name, type: "dataElement" },
-                ...categoryOptionCombos.map(({ id, name }) => ({
-                    id,
-                    name,
-                    type: "categoryOptionCombo",
-                })),
-            ])
-            .value();
-
-        const metadataStart = 2;
-        await promiseMap(items, async ({ id, name, type }, index) => {
-            const label = getName(id) ?? name;
-            const info = metadata?.optionCombos[id]?.info ?? "";
-
-            await write("Metadata", "A", index + metadataStart, type);
-            await write("Metadata", "B", index + metadataStart, id);
-            await write("Metadata", "C", index + metadataStart, label);
-            await write("Metadata", "D", index + metadataStart, info);
-        });
-
-        await promiseMap(items, async ({ id }, index) => {
-            await defineName("Metadata", "C", index + metadataStart, id);
-        });
-
-        // Add organisation units sheet
-        await excelRepository.getOrCreateSheet(this.id, "OrgUnits");
-
-        // Add organisation units sheet columns
-        await promiseMap(["Identifier", "Name", "Selector"], (label, index) =>
-            write("OrgUnits", index + 1, 1, label)
-        );
-
-        // Add organisation units sheet rows
-        const orgUnitStart = 2;
-        const availableOrgUnits = _.sortBy(dataSet?.organisationUnits ?? [], "name");
-
-        await promiseMap(availableOrgUnits, async (orgUnit, index) => {
-            await write("OrgUnits", 1, index + orgUnitStart, orgUnit.id);
-            await write("OrgUnits", 2, index + orgUnitStart, orgUnit.name);
-            await write("OrgUnits", 3, index + orgUnitStart, `=_${orgUnit.id}`);
-        });
-
-        await promiseMap(availableOrgUnits, async ({ id }, index) => {
-            await defineName("OrgUnits", "B", index + orgUnitStart, id);
-        });
-
-        // Hide sheets
-        await promiseMap(["Metadata", "OrgUnits", "Validation"], sheet =>
-            excelRepository.hideSheet(this.id, sheet)
-        );
     }
 
     public async importCustomization(
