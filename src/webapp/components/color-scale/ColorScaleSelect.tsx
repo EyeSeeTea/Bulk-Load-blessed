@@ -26,7 +26,9 @@ export const ColorScaleSelect = ({
     const classes = useStyles();
     const [anchor, setAnchor] = useState<Element | null>(null);
 
-    const availablePalettes = disableDefaultPalettes ? additionalPalettes : { ...additionalPalettes, ...palettes };
+    const availablePalettes = disableDefaultPalettes
+        ? additionalPalettes
+        : { ...additionalPalettes, ...palettes };
 
     const scale = getColorScale(availablePalettes, selected);
     const palette = scale ? availablePalettes[scale] : undefined;
@@ -63,7 +65,11 @@ export const ColorScaleSelect = ({
                         const colors = palette[selectedColors.length];
                         return colors ? (
                             <div key={index} className={classes.scaleItem}>
-                                <ColorScale colors={colors} onClick={() => onColorScaleSelect(scale)} width={width} />
+                                <ColorScale
+                                    colors={colors}
+                                    onClick={() => onColorScaleSelect(scale)}
+                                    width={width}
+                                />
                             </div>
                         ) : null;
                     })}

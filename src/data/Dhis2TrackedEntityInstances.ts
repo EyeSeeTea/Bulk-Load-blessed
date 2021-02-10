@@ -2,7 +2,12 @@ import _ from "lodash";
 import { generateUid } from "d2/uid";
 
 import { DataPackageData } from "../domain/entities/DataPackage";
-import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
+import {
+    AttributeValue,
+    Enrollment,
+    Program,
+    TrackedEntityInstance,
+} from "../domain/entities/TrackedEntityInstance";
 import { D2Api, Id, Ref } from "../types/d2-api";
 import { getUid } from "./dhis2-uid";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
@@ -33,7 +38,9 @@ export interface GetOptions {
     pageSize?: number;
 }
 
-export async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
+export async function getTrackedEntityInstances(
+    options: GetOptions
+): Promise<TrackedEntityInstance[]> {
     const { api, orgUnits, pageSize = 500 } = options;
     if (_.isEmpty(orgUnits)) return [];
 
@@ -162,7 +169,9 @@ async function splitTeis(
 
     const [validTeis, invalidTeis] = _(teis)
         .partition(tei =>
-            _(tei.relationships).every(rel => existingTeiIds.has(rel.fromId) && existingTeiIds.has(rel.toId))
+            _(tei.relationships).every(
+                rel => existingTeiIds.has(rel.fromId) && existingTeiIds.has(rel.toId)
+            )
         )
         .value();
 
@@ -311,7 +320,8 @@ function getApiTeiToUpload(
     const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
     const apiRelationships = getApiRelationships(existingTei, relationships);
 
-    const enrollmentId = existingTei?.enrollment?.id || getUid([tei.id, orgUnit.id, program.id].join("-"));
+    const enrollmentId =
+        existingTei?.enrollment?.id || getUid([tei.id, orgUnit.id, program.id].join("-"));
 
     return {
         trackedEntityInstance: tei.id,
@@ -404,7 +414,8 @@ function buildTei(
     const attributeValues: AttributeValue[] = teiApi.attributes.map(
         (attrApi): AttributeValue => {
             const optionSet = attributesById[attrApi.attribute]?.optionSet;
-            const option = optionSet && optionSet.options.find(option => option.code === attrApi.value);
+            const option =
+                optionSet && optionSet.options.find(option => option.code === attrApi.value);
 
             return {
                 attribute: {

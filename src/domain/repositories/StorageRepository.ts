@@ -11,7 +11,10 @@ export abstract class StorageRepository {
         return await this.getObject<T[]>(key, []);
     }
 
-    public async getObjectInCollection<T extends Ref>(key: string, id: string): Promise<T | undefined> {
+    public async getObjectInCollection<T extends Ref>(
+        key: string,
+        id: string
+    ): Promise<T | undefined> {
         const rawData = await this.getObject<T[]>(key, []);
         return _.find(rawData, element => element.id === id);
     }

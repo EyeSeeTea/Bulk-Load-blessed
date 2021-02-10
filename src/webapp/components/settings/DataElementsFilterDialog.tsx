@@ -13,7 +13,11 @@ interface DataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
 }
 
-export default function DataElementsFilterDialog({ onClose, settings, onChange }: DataElementsFilterDialogProps) {
+export default function DataElementsFilterDialog({
+    onClose,
+    settings,
+    onChange,
+}: DataElementsFilterDialogProps) {
     const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 

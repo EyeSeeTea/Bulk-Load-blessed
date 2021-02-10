@@ -46,7 +46,9 @@ export const cache = (options: CacheOptions = {}): any =>
     };
 
 // Wrapper to memoize functions
-export function memoize<Obj extends object | void, Args extends any[], U>(fn: (...args: Args) => U) {
+export function memoize<Obj extends object | void, Args extends any[], U>(
+    fn: (...args: Args) => U
+) {
     const map: ArgumentsCache = new Map();
 
     const result = function (this: Obj, ...args: Args) {

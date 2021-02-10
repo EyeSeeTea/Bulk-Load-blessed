@@ -14,7 +14,15 @@ let defaultSheet = "M08 - Skill mix composition";
 let orgUnitCell = "C4";
 let periodCell = "I4";
 
-let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "input.entryfield", offset = 0, limit }) => {
+let getDataElements = ({
+    sheet,
+    tabSelector,
+    letters,
+    dataRowStart,
+    type = "input.entryfield",
+    offset = 0,
+    limit,
+}) => {
     return _.compact(
         Array.from(document.querySelector(tabSelector).querySelectorAll(type))
             .slice(offset)
@@ -33,7 +41,9 @@ let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "inpu
                     ref: {
                         type: "cell",
                         sheet,
-                        ref: `${letters[pos % letters.length]}${parseInt(pos / letters.length) + dataRowStart}`,
+                        ref: `${letters[pos % letters.length]}${
+                            parseInt(pos / letters.length) + dataRowStart
+                        }`,
                     },
                 };
             })

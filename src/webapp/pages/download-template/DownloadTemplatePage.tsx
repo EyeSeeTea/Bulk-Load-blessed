@@ -2,7 +2,10 @@ import { useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Button, makeStyles } from "@material-ui/core";
 import React, { useState } from "react";
 import i18n from "../../../locales";
-import { TemplateSelector, TemplateSelectorState } from "../../components/template-selector/TemplateSelector";
+import {
+    TemplateSelector,
+    TemplateSelectorState,
+} from "../../components/template-selector/TemplateSelector";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../root/RootPage";
 

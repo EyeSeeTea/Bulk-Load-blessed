@@ -2,7 +2,12 @@ import _ from "lodash";
 import moment from "moment";
 import { DataElement, DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
-import { AggregatedDataValue, AggregatedPackage, Event, EventsPackage } from "../domain/entities/DhisDataPackage";
+import {
+    AggregatedDataValue,
+    AggregatedPackage,
+    Event,
+    EventsPackage,
+} from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
@@ -31,7 +36,11 @@ import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
 import { postEvents } from "./Dhis2Events";
-import { getProgram, getTrackedEntityInstances, updateTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
+import {
+    getProgram,
+    getTrackedEntityInstances,
+    updateTrackedEntityInstances,
+} from "./Dhis2TrackedEntityInstances";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -48,7 +57,10 @@ export class InstanceDhisRepository implements InstanceRepository {
         return this.api.dataStore(namespace);
     }
 
-    public async getDataForms({ type = ["dataSets", "programs"], ids }: GetDataFormsParams = {}): Promise<DataForm[]> {
+    public async getDataForms({
+        type = ["dataSets", "programs"],
+        ids,
+    }: GetDataFormsParams = {}): Promise<DataForm[]> {
         const dataSets = type.includes("dataSets") ? await this.getDataSets(ids) : [];
         const programs = type.includes("programs") ? await this.getPrograms(ids) : [];
 
@@ -76,22 +88,26 @@ export class InstanceDhisRepository implements InstanceRepository {
             categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
         });
 
-        return objects.map(({ displayName, name, access, periodType, dataSetElements, sections, ...rest }) => ({
-            ...rest,
-            type: "dataSets",
-            name: displayName ?? name,
-            periodType: periodType as DataFormPeriod,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: dataSetElements.map(({ dataElement }) => formatDataElement(dataElement)),
-            sections: sections.map(({ id, name, dataElements }) => ({
-                id,
-                name,
-                dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
-            })),
-        }));
+        return objects.map(
+            ({ displayName, name, access, periodType, dataSetElements, sections, ...rest }) => ({
+                ...rest,
+                type: "dataSets",
+                name: displayName ?? name,
+                periodType: periodType as DataFormPeriod,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: dataSetElements.map(({ dataElement }) =>
+                    formatDataElement(dataElement)
+                ),
+                sections: sections.map(({ id, name, dataElements }) => ({
+                    id,
+                    name,
+                    dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+                })),
+            })
+        );
     }
 
     @cache()
@@ -106,22 +122,24 @@ export class InstanceDhisRepository implements InstanceRepository {
             })
             .getData();
 
-        return objects.map(({ displayName, name, access, programStages, programType, ...rest }) => ({
-            ...rest,
-            type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
-            name: displayName ?? name,
-            organisationUnits: [], // Disabled for now in programs
-            periodType: "Daily",
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: programStages
-                .flatMap(({ programStageDataElements }) =>
-                    programStageDataElements.map(({ dataElement }) => dataElement)
-                )
-                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
-        }));
+        return objects.map(
+            ({ displayName, name, access, programStages, programType, ...rest }) => ({
+                ...rest,
+                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                name: displayName ?? name,
+                organisationUnits: [], // Disabled for now in programs
+                periodType: "Daily",
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: programStages
+                    .flatMap(({ programStageDataElements }) =>
+                        programStageDataElements.map(({ dataElement }) => dataElement)
+                    )
+                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+            })
+        );
     }
 
     @cache()
@@ -313,25 +331,31 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     private buildEventsPayload(dataPackage: DataPackage): Event[] {
-        return dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
-            event: id,
-            program: dataForm,
-            status: "COMPLETED",
-            orgUnit,
-            eventDate: period,
-            attributeOptionCombo: attribute,
-            dataValues: dataValues,
-        }));
+        return dataPackage.dataEntries.map(
+            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+                event: id,
+                program: dataForm,
+                status: "COMPLETED",
+                orgUnit,
+                eventDate: period,
+                attributeOptionCombo: attribute,
+                dataValues: dataValues,
+            })
+        );
     }
 
     private async importAggregatedData(
         importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
         dataPackage: DataPackage
     ): Promise<SynchronizationResult> {
-        const dataValues = await this.validateAggregateImportPackage(this.buildAggregatedPayload(dataPackage));
+        const dataValues = await this.validateAggregateImportPackage(
+            this.buildAggregatedPayload(dataPackage)
+        );
 
         const title =
-            importStrategy === "DELETE" ? i18n.t("Data values - Delete") : i18n.t("Data values - Create/update");
+            importStrategy === "DELETE"
+                ? i18n.t("Data values - Delete")
+                : i18n.t("Data values - Create/update");
 
         const {
             response: { id, jobType },
@@ -342,7 +366,9 @@ export class InstanceDhisRepository implements InstanceRepository {
         const checkTask = async () => {
             const response =
                 (await this.api
-                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
                     .getData()) ?? [];
 
             return !response[0]?.completed;
@@ -359,7 +385,9 @@ export class InstanceDhisRepository implements InstanceRepository {
         if (!importSummary) {
             const response =
                 (await this.api
-                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
+                    .get<{ message: string; completed: boolean }[]>(
+                        `/system/tasks/${jobType}/${id}`
+                    )
                     .getData()) ?? [];
 
             return {
@@ -374,7 +402,8 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const { status, description, conflicts, importCount } = importSummary;
         const { imported, deleted, updated, ignored } = importCount;
-        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
+        const errors =
+            conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
 
         return {
             title,
@@ -417,7 +446,9 @@ export class InstanceDhisRepository implements InstanceRepository {
         return postEvents(this.api, events);
     }
 
-    private async importTrackerProgramData(dataPackage: TrackerProgramPackage): Promise<SynchronizationResult[]> {
+    private async importTrackerProgramData(
+        dataPackage: TrackerProgramPackage
+    ): Promise<SynchronizationResult[]> {
         const { trackedEntityInstances, dataEntries } = dataPackage;
         return updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
     }
@@ -444,7 +475,9 @@ export class InstanceDhisRepository implements InstanceRepository {
                     })
                     .getData();
 
-            return periods.length > 0 ? await promiseMap(_.chunk(periods, 200), query) : [await query()];
+            return periods.length > 0
+                ? await promiseMap(_.chunk(periods, 200), query)
+                : [await query()];
         });
 
         return {
@@ -464,13 +497,23 @@ export class InstanceDhisRepository implements InstanceRepository {
                         dataForm: id,
                         orgUnit,
                         period,
-                        attribute: attribute && defaultIds.includes(attribute) ? undefined : attribute,
-                        dataValues: dataValues.map(({ dataElement, categoryOptionCombo, value, comment }) => ({
-                            dataElement,
-                            category: defaultIds.includes(categoryOptionCombo) ? undefined : categoryOptionCombo,
-                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                            comment,
-                        })),
+                        attribute:
+                            attribute && defaultIds.includes(attribute) ? undefined : attribute,
+                        dataValues: dataValues.map(
+                            ({ dataElement, categoryOptionCombo, value, comment }) => ({
+                                dataElement,
+                                category: defaultIds.includes(categoryOptionCombo)
+                                    ? undefined
+                                    : categoryOptionCombo,
+                                value: this.formatDataValue(
+                                    dataElement,
+                                    value,
+                                    metadata,
+                                    translateCodes
+                                ),
+                                comment,
+                            })
+                        ),
                     };
                 })
                 .compact()
@@ -492,7 +535,11 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        const getEvents = (orgUnit: Id, categoryOptionId: Id, page: number): Promise<PagedEventsApiResponse> => {
+        const getEvents = (
+            orgUnit: Id,
+            categoryOptionId: Id,
+            page: number
+        ): Promise<PagedEventsApiResponse> => {
             // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
             return this.api
                 .get<PagedEventsApiResponse>("/events", {
@@ -549,7 +596,12 @@ export class InstanceDhisRepository implements InstanceRepository {
                         programStage,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
-                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                            value: this.formatDataValue(
+                                dataElement,
+                                value,
+                                metadata,
+                                translateCodes
+                            ),
                         })),
                     })
                 )
@@ -574,18 +626,25 @@ export class InstanceDhisRepository implements InstanceRepository {
         return optionValue?.id ?? value;
     }
 
-    private buildProgramAttributeOptions(metadata: MetadataPackage, categoryComboId?: string): string[] {
+    private buildProgramAttributeOptions(
+        metadata: MetadataPackage,
+        categoryComboId?: string
+    ): string[] {
         if (!categoryComboId) return [];
 
         // Get all the categories assigned to the categoryCombo of the program
         const categoryCombo = _.find(metadata?.categoryCombos, { id: categoryComboId });
-        const categoryIds: string[] = _.compact(categoryCombo?.categories?.map(({ id }: MetadataItem) => id));
+        const categoryIds: string[] = _.compact(
+            categoryCombo?.categories?.map(({ id }: MetadataItem) => id)
+        );
 
         // Get all the category options for each category on the categoryCombo
         const categories = _.compact(categoryIds.map(id => _.find(metadata?.categories, { id })));
         const categoryOptions: MetadataItem[] = _(categories)
             .map(({ categoryOptions }: MetadataItem) =>
-                categoryOptions.map(({ id }: MetadataItem) => _.find(metadata?.categoryOptions, { id }))
+                categoryOptions.map(({ id }: MetadataItem) =>
+                    _.find(metadata?.categoryOptions, { id })
+                )
             )
             .flatten()
             .value();

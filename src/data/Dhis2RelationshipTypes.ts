@@ -1,5 +1,8 @@
 import _ from "lodash";
-import { TrackedEntityInstance, isRelationshipValid } from "../domain/entities/TrackedEntityInstance";
+import {
+    TrackedEntityInstance,
+    isRelationshipValid,
+} from "../domain/entities/TrackedEntityInstance";
 import { Relationship } from "../domain/entities/Relationship";
 import { getUid } from "./dhis2-uid";
 import {
@@ -28,7 +31,10 @@ export function getApiRelationships(
             const relationshipId =
                 rel.id ||
                 existingRelationships.find(
-                    eRel => eRel.typeId === rel.typeId && eRel.fromId === rel.fromId && eRel.toId === rel.toId
+                    eRel =>
+                        eRel.typeId === rel.typeId &&
+                        eRel.fromId === rel.fromId &&
+                        eRel.toId === rel.toId
                 )?.id ||
                 getUid([rel.typeId, rel.fromId, rel.toId].join("-"));
 
@@ -46,11 +52,16 @@ export function getApiRelationships(
     return apiRelationships;
 }
 
-export function fromApiRelationships(metadata: RelationshipMetadata, teiApi: TrackedEntityInstanceApi): Relationship[] {
+export function fromApiRelationships(
+    metadata: RelationshipMetadata,
+    teiApi: TrackedEntityInstanceApi
+): Relationship[] {
     return _(teiApi.relationships)
         .map((relApi): Relationship | null => {
             if (!relApi.from.trackedEntityInstance || !relApi.to.trackedEntityInstance) return null;
-            const relationshipType = metadata.relationshipTypes.find(rtype => rtype.id === relApi.relationshipType);
+            const relationshipType = metadata.relationshipTypes.find(
+                rtype => rtype.id === relApi.relationshipType
+            );
             if (!relationshipType) {
                 console.error(`No relationship found for relationship ${relApi.relationship}`);
                 return null;
@@ -105,7 +116,10 @@ export interface RelationshipMetadata {
 
 const teiType = "TRACKED_ENTITY_INSTANCE" as const;
 
-export async function getTrackerProgramMetadata(program: Program, api: D2Api): Promise<RelationshipMetadata> {
+export async function getTrackerProgramMetadata(
+    program: Program,
+    api: D2Api
+): Promise<RelationshipMetadata> {
     const { trackedEntityTypes, relationshipTypes: allRelationshipTypes } = await api.metadata
         .get({
             trackedEntityTypes: { fields: { id: true, name: true } },
@@ -123,7 +137,8 @@ export async function getTrackerProgramMetadata(program: Program, api: D2Api): P
     const relationshipTypes = allRelationshipTypes.filter(relType => {
         const { fromConstraint, toConstraint } = relType;
         const relationshipHasTeiConstraints =
-            fromConstraint.relationshipEntity === teiType && toConstraint.relationshipEntity === teiType;
+            fromConstraint.relationshipEntity === teiType &&
+            toConstraint.relationshipEntity === teiType;
 
         const isProgramAssociatedWithSomeConstraint =
             isProgramAssociatedWithTeiConstraint(program, fromConstraint) ||
@@ -134,7 +149,11 @@ export async function getTrackerProgramMetadata(program: Program, api: D2Api): P
 
     const relationshipTypesWithTeis = await promiseMap(relationshipTypes, async relType => {
         const { fromConstraint, toConstraint } = relType;
-        if (fromConstraint.relationshipEntity !== teiType || toConstraint.relationshipEntity !== teiType) return null;
+        if (
+            fromConstraint.relationshipEntity !== teiType ||
+            toConstraint.relationshipEntity !== teiType
+        )
+            return null;
 
         const constraints: RelationshipType["constraints"] = {
             from: await getTeisForConstraint(api, trackedEntityTypes, fromConstraint),
@@ -169,7 +188,9 @@ async function getTeisForConstraint_(
         fields: "trackedEntityInstance~rename(id)",
     };
 
-    const { trackedEntityInstances } = (await api.get("/trackedEntityInstances", query).getData()) as TeiIdsResponse;
+    const { trackedEntityInstances } = (await api
+        .get("/trackedEntityInstances", query)
+        .getData()) as TeiIdsResponse;
 
     const teis = _.sortBy(trackedEntityInstances, tei => tei.id.toLowerCase());
     const name = trackedEntityTypesById[constraint.trackedEntityType.id]?.name || "Unknown";
@@ -179,7 +200,10 @@ async function getTeisForConstraint_(
 
 const getTeisForConstraint = memoizeAsync(getTeisForConstraint_);
 
-function isProgramAssociatedWithTeiConstraint(program: Program, constraint: D2RelationshipConstraint): boolean {
+function isProgramAssociatedWithTeiConstraint(
+    program: Program,
+    constraint: D2RelationshipConstraint
+): boolean {
     return (
         constraint.relationshipEntity === teiType &&
         constraint.trackedEntityType.id === program.trackedEntityType.id &&

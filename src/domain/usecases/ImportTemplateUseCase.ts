@@ -16,7 +16,11 @@ import { SynchronizationResult } from "../entities/SynchronizationResult";
 
 export type ImportTemplateError =
     | {
-          type: "INVALID_DATA_FORM_ID" | "DATA_FORM_NOT_FOUND" | "INVALID_OVERRIDE_ORG_UNIT" | "MALFORMED_TEMPLATE";
+          type:
+              | "INVALID_DATA_FORM_ID"
+              | "DATA_FORM_NOT_FOUND"
+              | "INVALID_OVERRIDE_ORG_UNIT"
+              | "MALFORMED_TEMPLATE";
       }
     | { type: "INVALID_ORG_UNITS"; dataValues: DataPackage; invalidDataValues: DataPackage }
     | {
@@ -82,7 +86,12 @@ export class ImportTemplateUseCase implements UseCase {
 
         const customDataValues = await reader.templateCustomization(template, excelDataValues);
 
-        const { dataValues, invalidDataValues, existingDataValues, instanceDataValues } = await this.readDataValues(
+        const {
+            dataValues,
+            invalidDataValues,
+            existingDataValues,
+            instanceDataValues,
+        } = await this.readDataValues(
             customDataValues ?? excelDataValues,
             dataForm,
             useBuilderOrgUnits,
@@ -122,7 +131,12 @@ export class ImportTemplateUseCase implements UseCase {
         settings: Settings,
         duplicateStrategy: DuplicateImportStrategy
     ) {
-        const { duplicateEnabled, duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
+        const {
+            duplicateEnabled,
+            duplicateExclusion,
+            duplicateTolerance,
+            duplicateToleranceUnit,
+        } = settings;
 
         // Override org unit if needed
         const dataValues =
@@ -131,10 +145,18 @@ export class ImportTemplateUseCase implements UseCase {
                 : excelDataPackage.dataEntries;
 
         const instanceDataValues = duplicateEnabled
-            ? await this.getExistingDataValues(excelDataPackage, dataForm, useBuilderOrgUnits, selectedOrgUnits)
+            ? await this.getExistingDataValues(
+                  excelDataPackage,
+                  dataForm,
+                  useBuilderOrgUnits,
+                  selectedOrgUnits
+              )
             : [];
 
-        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
+        const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(
+            dataForm.type,
+            dataForm.id
+        );
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
@@ -201,7 +223,10 @@ export class ImportTemplateUseCase implements UseCase {
             : instanceDataPackage.dataEntries;
     }
 
-    private overrideOrgUnit(dataValues: DataPackageData[], replaceOrgUnit: string): DataPackageData[] {
+    private overrideOrgUnit(
+        dataValues: DataPackageData[],
+        replaceOrgUnit: string
+    ): DataPackageData[] {
         return dataValues.map(dataValue => ({
             ...dataValue,
             orgUnit: cleanOrgUnitPath(replaceOrgUnit),
@@ -228,7 +253,8 @@ function getTrackedEntityInstances(
     selectedOrgUnitPaths: string[]
 ) {
     const orgUnitOverridePath = useBuilderOrgUnits ? selectedOrgUnitPaths[0] : null;
-    const teis = excelDataValues.type === "trackerPrograms" ? excelDataValues.trackedEntityInstances : [];
+    const teis =
+        excelDataValues.type === "trackerPrograms" ? excelDataValues.trackedEntityInstances : [];
 
     return orgUnitOverridePath
         ? teis.map(tei => ({ ...tei, orgUnit: { id: cleanOrgUnitPath(orgUnitOverridePath) } }))
@@ -243,7 +269,11 @@ const compareDataPackages = (
     duplicateTolerance: number,
     duplicateToleranceUnit: DuplicateToleranceUnit
 ): boolean => {
-    const properties = _.compact([dataForm.type === "dataSets" ? "period" : undefined, "orgUnit", "attribute"]);
+    const properties = _.compact([
+        dataForm.type === "dataSets" ? "period" : undefined,
+        "orgUnit",
+        "attribute",
+    ]);
 
     for (const property of properties) {
         const baseValue = _.get(base, property);
@@ -274,7 +304,8 @@ const compareDataPackages = (
                 filter(base.dataValues),
                 filter(compare.dataValues),
                 (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
-                    const values = ({ dataElement, value }: DataPackageDataValue) => `${dataElement}-${value}`;
+                    const values = ({ dataElement, value }: DataPackageDataValue) =>
+                        `${dataElement}-${value}`;
                     const intersection = _.intersectionBy(base, compare, values);
                     return base.length === compare.length && intersection.length === base.length;
                 }

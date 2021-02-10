@@ -11,7 +11,12 @@ interface PermissionsDialogProps extends SettingsFieldsProps {
     permissionsType: PermissionSetting;
 }
 
-export default function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
+export default function PermissionsDialog({
+    onClose,
+    permissionsType,
+    settings,
+    onChange,
+}: PermissionsDialogProps) {
     const { api } = useAppContext();
     const search = useCallback((query: string) => searchUsers(api, query), [api]);
 
@@ -49,7 +54,8 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
-                    rule?.map(({ id, displayName }) => ({ id, displayName })) ?? settings.getPermissions(setting, type);
+                    rule?.map(({ id, displayName }) => ({ id, displayName })) ??
+                    settings.getPermissions(setting, type);
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
                     .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
@@ -60,7 +66,12 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
     );
 
     return (
-        <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>
+        <ConfirmationDialog
+            isOpen={true}
+            fullWidth={true}
+            onCancel={onClose}
+            cancelText={i18n.t("Close")}
+        >
             <Sharing
                 meta={buildMetaObject(permissionsType)}
                 showOptions={{

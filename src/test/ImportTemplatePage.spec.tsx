@@ -27,7 +27,12 @@ const renderComponent = async () => {
             <AppContext.Provider value={{ api, d2: {}, compositionRoot }}>
                 <LoadingProvider>
                     <SnackbarProvider>
-                        <ImportTemplatePage settings={settings} themes={[]} setSettings={_.noop} setThemes={_.noop} />
+                        <ImportTemplatePage
+                            settings={settings}
+                            themes={[]}
+                            setSettings={_.noop}
+                            setThemes={_.noop}
+                        />
                     </SnackbarProvider>
                 </LoadingProvider>
             </AppContext.Provider>
