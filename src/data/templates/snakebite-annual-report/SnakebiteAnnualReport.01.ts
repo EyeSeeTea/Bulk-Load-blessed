@@ -214,7 +214,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 showTotal = true,
                 totalName,
                 showName = true,
-                color,
                 backgroundColor = "#EEEEEE",
             } = metadata.dataElements[dataElement.id] ?? {};
 
@@ -247,15 +246,13 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             const dataElementStyle: ThemeStyle = {
                 ...baseStyle,
-                fontColor: color,
                 fillColor: backgroundColor,
                 border: true,
                 merged: true,
             };
 
-            const categoryStyle = (cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
+            const categoryStyle = (_cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
                 ...baseStyle,
-                fontColor: cocColor ?? color,
                 fillColor: cocBackgroundColor ?? backgroundColor,
                 border: true,
                 merged: false,
@@ -344,7 +341,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 horizontalAlignment: "center",
                 rowSize: 45,
                 columnSize: 30,
-                fontColor: "#39547d",
                 fillColor: "#EEEEEE",
                 merged: false,
                 border: true,
