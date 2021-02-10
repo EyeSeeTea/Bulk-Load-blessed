@@ -202,6 +202,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
             rowSize,
             columnSize,
             merged = false,
+            locked,
         } = style;
 
         const textStyle = _.omitBy(
@@ -222,6 +223,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
                 fill: fillColor?.replace(/#/g, ""),
                 border,
                 borderColor: borderColor?.replace(/#/g, ""),
+                locked,
             },
             _.isUndefined
         );
@@ -372,6 +374,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
     public async hideSheet(id: string, sheet: string | number, hidden = true): Promise<void> {
         const workbook = await this.getWorkbook(id);
         workbook.sheet(sheet).hidden(hidden);
+    }
+
+    public async protectSheet(id: string, sheet: string | number, password: string): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(sheet).protected(password, {
+            selectLockedCells: true,
+        });
+    }
+
+    public async setActiveCell(id: string, cell: CellRef): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(cell.sheet).activeCell(cell.ref);
     }
 
     public async setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void> {

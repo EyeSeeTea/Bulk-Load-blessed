@@ -18,6 +18,9 @@ import { cache } from "../../../utils/cache";
 import { GetSchemaType, Schema } from "../../../utils/codec";
 import { promiseMap } from "../../../webapp/utils/promises";
 
+const MAX_DATA_ELEMENTS = 30;
+const MAX_PRODUCTS = 50;
+
 export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly type = "custom";
     public readonly id = "SNAKEBITE_ANNUAL_REPORT_v1";
@@ -32,7 +35,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         (sheet: string) => {
             switch (sheet) {
                 case "National":
-                    return _.range(30).map(offset => ({
+                    return _.range(MAX_DATA_ELEMENTS).map(offset => ({
                         type: "row",
                         orgUnit: { sheet, type: "cell", ref: "C4" },
                         period: { sheet, type: "cell", ref: "F4" },
@@ -50,7 +53,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 case "Validation":
                     return [];
                 default:
-                    return _.range(50).map(offset => ({
+                    return _.range(MAX_PRODUCTS).map(offset => ({
                         type: "row",
                         orgUnit: { sheet: "National", type: "cell", ref: "C4" },
                         period: { sheet: "National", type: "cell", ref: "F4" },
@@ -248,14 +251,22 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             merged: true,
         });
 
-        // Add org unit field
-        await write("National", "B", 4, "Organisation Unit");
-        await style("National", "B", 4, "C", 4, {
+        // Generic fields style
+        const genericFieldStyle: ThemeStyle = {
             wrapText: true,
             horizontalAlignment: "center",
             merged: false,
             border: true,
-        });
+            locked: true,
+        };
+
+        const genericFieldValueStyle: ThemeStyle = { ...genericFieldStyle, locked: false };
+
+        // Add org unit field
+        await write("National", "B", 4, "Organisation Unit");
+        await style("National", "B", 4, "B", 4, genericFieldStyle);
+        await style("National", "C", 4, "C", 4, genericFieldValueStyle);
+        await excelRepository.setActiveCell(this.id, { type: "cell", ref: "C4", sheet: "National" });
         await excelRepository.setDataValidation(
             this.id,
             { type: "cell", ref: "C4", sheet: "National" },
@@ -264,12 +275,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         // Add period field
         await write("National", "E", 4, "Period");
-        await style("National", "E", 4, "F", 4, {
-            wrapText: true,
-            horizontalAlignment: "center",
-            merged: false,
-            border: true,
-        });
+        await style("National", "E", 4, "E", 4, genericFieldStyle);
+        await style("National", "F", 4, "F", 4, genericFieldValueStyle);
 
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
@@ -294,6 +301,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 horizontalAlignment: "center",
                 rowSize: 45,
                 columnSize: 25,
+                locked: true,
             };
 
             const sectionStyle: ThemeStyle = {
@@ -321,6 +329,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 ...baseStyle,
                 border: true,
                 merged: false,
+                locked: false,
             };
 
             // Add section name
@@ -332,17 +341,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
             await style("National", "A", dataElementRow, lastCategoryColumn - 1, dataElementRow, dataElementStyle);
             if (!showName) hideRow("National", dataElementRow);
-
-            // Add totals
-            if (showTotal) {
-                await write("National", "A", categoryRow, totalName ?? "Total");
-                await write(
-                    "National",
-                    "A",
-                    valueRow,
-                    `=SUM(B${valueRow}:${excelRepository.buildColumnName(lastCategoryColumn)}${valueRow})`
-                );
-            }
 
             // Add category option combos
             const sortedOptionCombos = _.sortBy(
@@ -370,6 +368,18 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             // Style value rows
             await style("National", "A", valueRow, lastCategoryColumn - 1, valueRow, valueStyle);
+
+            // Add totals
+            if (showTotal) {
+                await write("National", "A", categoryRow, totalName ?? "Total");
+                await write(
+                    "National",
+                    "A",
+                    valueRow,
+                    `=SUM(B${valueRow}:${excelRepository.buildColumnName(lastCategoryColumn)}${valueRow})`
+                );
+                await style("National", "A", valueRow, "A", valueRow, { ...valueStyle, locked: true });
+            }
         });
 
         // Add antivenom product sheets
@@ -398,7 +408,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 fillColor: "#EEEEEE",
                 merged: false,
                 border: true,
+                locked: true,
             });
+
+            await style(sheetName, "A", 2, group.dataElements.length, MAX_PRODUCTS, { locked: false });
         });
 
         if (populate) {
@@ -425,10 +438,17 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         );
 
                         await write(sheetName, columnIndex + 1, rowIndex + 2, value);
+                        await style(sheetName, columnIndex + 1, rowIndex + 2, columnIndex + 1, rowIndex + 2, {
+                            locked: !!dataElement.prop,
+                        });
                     });
                 });
             });
         }
+
+        // Protect sheets
+        const allSheets = await excelRepository.getSheets(this.id);
+        await promiseMap(allSheets, sheet => excelRepository.protectSheet(this.id, sheet.name, "Snakebite"));
     }
 
     public async importCustomization(

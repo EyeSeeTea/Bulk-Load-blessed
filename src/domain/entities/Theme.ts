@@ -24,6 +24,7 @@ export interface ThemeStyle {
     rowSize?: number;
     columnSize?: number;
     merged?: boolean;
+    locked?: boolean;
 }
 
 export interface CellImage {
