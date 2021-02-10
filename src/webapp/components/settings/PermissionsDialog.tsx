@@ -72,7 +72,6 @@ export default function PermissionsDialog({
             onCancel={onClose}
             cancelText={i18n.t("Close")}
         >
-            {!!true && (
                 <Sharing
                     meta={buildMetaObject(permissionsType)}
                     showOptions={{
@@ -84,7 +83,7 @@ export default function PermissionsDialog({
                     onSearch={search}
                     onChange={onUpdateSharingOptions(permissionsType)}
                 />
-            )}
+            
         </ConfirmationDialog>
     );
 }

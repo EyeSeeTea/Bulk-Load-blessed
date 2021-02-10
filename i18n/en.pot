@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-10T13:04:58.745Z\n"
-"PO-Revision-Date: 2021-02-10T13:04:58.745Z\n"
+"POT-Creation-Date: 2021-02-10T14:31:19.087Z\n"
+"PO-Revision-Date: 2021-02-10T14:31:19.087Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -313,6 +313,12 @@ msgid ""
 msgstr ""
 
 msgid "User with no permissions"
+msgstr ""
+
+msgid "It seems this user account does not have any permission. "
+msgstr ""
+
+msgid "Please get in touch with the admin if you need access to these sections."
 msgstr ""
 
 msgid "You need to select at least one element to export"
