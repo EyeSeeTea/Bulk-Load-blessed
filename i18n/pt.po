@@ -125,9 +125,6 @@ msgstr "Elementos de dados usados para identificação de duplicatas"
 msgid "Permissions"
 msgstr "Permissões"
 
-msgid "Access to Import Data"
-msgstr "Importar dados"
-
 msgid "Type"
 msgstr ""
 

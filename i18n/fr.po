@@ -128,9 +128,6 @@ msgstr "Éléments de données utilisés pour l'identification des doublons"
 msgid "Permissions"
 msgstr "Autorisations"
 
-msgid "Access to Import Data"
-msgstr "Importer des données"
-
 msgid "Type"
 msgstr ""
 
