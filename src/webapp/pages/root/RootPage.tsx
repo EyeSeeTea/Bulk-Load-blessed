@@ -57,12 +57,12 @@ const Root = () => {
         () => [
             {
                 key: "home",
-                name: "home",
+                name:  i18n.t("home"),
                 icon: "home",
                 path: "/home",
                 section: "main",
                 auth: (settings: Settings) => settings.isBlankPageVisibleForCurrentUser(),
-                component: (props: RouteComponentProps) => <BlankTemplatePage {...props} />,
+                component: () => <BlankTemplatePage />,
             },
             {
                 key: "download",
@@ -134,7 +134,7 @@ const Root = () => {
                                 />
                             )}
 
-                            {userRoutes.map(({ key, path, component}) => (
+                            {userRoutes.map(({ key, path, component }) => (
                                 <Route key={key} path={path}>
                                     {component({
                                         settings,

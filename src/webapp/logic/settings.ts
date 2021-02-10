@@ -242,7 +242,6 @@ export default class Settings {
         type: PermissionType,
         collection: NamedObject[]
     ): Settings {
-        console.log("COLLECTION: ", collection);
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });
@@ -276,7 +275,7 @@ export default class Settings {
         return this.models[key];
     }
 
-    isBlankPageVisibleForCurrentUser(){
+    isBlankPageVisibleForCurrentUser() {
         return !this.isImportDataVisibleForCurrentUser() && !this.isTemplateGenerationVisible();
     }
 
@@ -310,12 +309,15 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup"/* | "allUsers"*/) {
+    private getPermissionField(
+        setting: PermissionSetting,
+        kind: "user" | "userGroup"
+    ) {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {
             return "userGroupPermissionsForGeneration";
-        }else if (setting === "settings" && kind === "user") {
+        } else if (setting === "settings" && kind === "user") {
             return "userPermissionsForSettings";
         } else if (setting === "settings" && kind === "userGroup") {
             return "userGroupPermissionsForSettings";
