@@ -15,6 +15,7 @@ export function initializeMockServer() {
         models: { dataSet: true, program: true },
         permissionsForGeneration: ["BwyMfDBLih9"],
         permissionsForSettings: ["BwyMfDBLih9"],
+        permissionsForImport: ["BwyMfDBLih9"],
         orgUnitSelection: "both",
     });
 

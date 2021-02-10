@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-09T06:54:05.244Z\n"
+"POT-Creation-Date: 2021-02-10T19:41:28.113Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -69,6 +69,10 @@ msgid "Program"
 msgstr "Programme"
 
 msgid "Access to Template Generation"
+msgstr "Accès à la génération de modèles"
+
+#, fuzzy
+msgid "Access to Import Data"
 msgstr "Accès à la génération de modèles"
 
 msgid "Access to Settings and Themes"
@@ -338,6 +342,16 @@ msgstr ""
 "Impossible d'importer: les versions ne correspondent pas (base de données = "
 "{{dbVersion}}, fichier = {{sheetVersion}})"
 
+msgid "User with no permissions"
+msgstr ""
+
+msgid "It seems this user account does not have any permission. "
+msgstr ""
+
+msgid ""
+"Please get in touch with the admin if you need access to these sections."
+msgstr ""
+
 msgid "You need to select at least one element to export"
 msgstr "Vous devez sélectionner au moins un élément à exporter"
 
@@ -478,6 +492,9 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importer des données"
+
+msgid "Home"
+msgstr ""
 
 msgid "Themes"
 msgstr "Thèmes"

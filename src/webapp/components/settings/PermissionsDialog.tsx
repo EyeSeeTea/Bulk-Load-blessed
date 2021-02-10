@@ -20,6 +20,8 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             const displayName =
                 setting === "generation"
                     ? i18n.t("Access to Template Generation")
+                    : setting === "import"
+                    ? i18n.t("Access to Import Data")
                     : i18n.t("Access to Settings and Themes");
 
             const buildSharings = (type: PermissionType) =>
@@ -48,11 +50,9 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
                     rule?.map(({ id, displayName }) => ({ id, displayName })) ?? settings.getPermissions(setting, type);
-
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
                     .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
-
                 await onChange(newSettings);
             };
         },
