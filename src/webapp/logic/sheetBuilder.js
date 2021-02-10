@@ -110,26 +110,13 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
 
         const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
-        const optionsTitle =
-            attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
+        const optionsTitle = attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
 
-        this.createColumn(
-            sheet,
-            itemRow,
-            columnId++,
-            optionsTitle,
-            null,
-            this.validations.get("options")
-        );
+        this.createColumn(sheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
 
         this.createColumn(sheet, itemRow, columnId++, "Event id");
 
-        this.createColumn(
-            sheet,
-            itemRow,
-            columnId++,
-            `${programStage.executionDateLabel ?? "Date"} *`
-        );
+        this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
         if (programStage.programStageSections.length === 0) {
             programStage.programStageSections.push({
@@ -148,9 +135,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
                 const dataElement = metadata.get(dataElementT.id);
                 const { name, description } = this.translate(dataElement);
 
-                const validation = dataElement.optionSet
-                    ? dataElement.optionSet.id
-                    : dataElement.valueType;
+                const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
                 this.createColumn(
                     sheet,
                     itemRow,
@@ -274,15 +259,7 @@ SheetBuilder.prototype.fillLegendSheet = function () {
 };
 
 SheetBuilder.prototype.fillValidationSheet = function () {
-    const {
-        organisationUnits,
-        element,
-        metadata,
-        rawMetadata,
-        elementMetadata,
-        startDate,
-        endDate,
-    } = this.builder;
+    const { organisationUnits, element, metadata, rawMetadata, elementMetadata, startDate, endDate } = this.builder;
     const validationSheet = this.validationSheet;
 
     // Freeze and format column titles
@@ -313,9 +290,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         });
         this.validations.set(
             "periods",
-            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                columnId
-            )}$${rowId}`
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
         );
     }
 
@@ -328,24 +303,20 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         });
         this.validations.set(
             "relationshipTypes",
-            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                columnId
-            )}$${rowId}`
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
         );
 
         _.forEach(metadata.relationshipTypes, relationshipType => {
             ["from", "to"].forEach(key => {
                 rowId = 2;
                 columnId++;
-                validationSheet
-                    .cell(rowId++, columnId)
-                    .string(`Relationship Type ${relationshipType.name} (${key})`);
+                validationSheet.cell(rowId++, columnId).string(`Relationship Type ${relationshipType.name} (${key})`);
                 relationshipType.constraints[key].teis.forEach(tei => {
                     validationSheet.cell(rowId++, columnId).string(tei.id);
 
-                    const value = `=Validation!$${Excel.getExcelAlpha(
+                    const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
                         columnId
-                    )}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`;
+                    )}$${rowId}`;
                     this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
                 });
             });
@@ -384,9 +355,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
         });
         this.validations.set(
             optionSet.id,
-            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                columnId
-            )}$${rowId}`
+            `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`
         );
     });
 
@@ -442,9 +411,8 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             .join(", ");
 
         const { compulsory } =
-            this.builder.rawMetadata.programStageDataElements?.find(
-                ({ dataElement }) => dataElement.id === item.id
-            ) ?? {};
+            this.builder.rawMetadata.programStageDataElements?.find(({ dataElement }) => dataElement.id === item.id) ??
+            {};
 
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
@@ -558,27 +526,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
         this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
     } else if (element.type === "dataSets") {
-        this.createColumn(
-            dataEntrySheet,
-            itemRow,
-            columnId++,
-            "Period",
-            null,
-            this.validations.get("periods")
-        );
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Period", null, this.validations.get("periods"));
     }
 
     const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
     const optionsTitle = attributeCode !== "default" ? `_${element.categoryCombo.id}` : "Options";
 
-    this.createColumn(
-        dataEntrySheet,
-        itemRow,
-        columnId++,
-        optionsTitle,
-        null,
-        this.validations.get("options")
-    );
+    this.createColumn(dataEntrySheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
 
     // Add dataSet or program title
     dataEntrySheet
@@ -594,9 +548,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             const firstColumnId = columnId;
 
             _.forEach(categoryOptionCombos, categoryOptionCombo => {
-                const validation = dataElement.optionSet
-                    ? dataElement.optionSet.id
-                    : dataElement.valueType;
+                const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
                 this.createColumn(
                     dataEntrySheet,
                     itemRow,
@@ -621,12 +573,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 .style(this.groupStyle(groupId));
 
             if (description !== undefined) {
-                dataEntrySheet
-                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                    .comment(description, {
-                        height: "100pt",
-                        width: "160pt",
-                    });
+                dataEntrySheet.cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true).comment(description, {
+                    height: "100pt",
+                    width: "160pt",
+                });
             }
 
             groupId++;
@@ -637,12 +587,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
             this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
 
-            this.createColumn(
-                dataEntrySheet,
-                itemRow,
-                columnId++,
-                `${programStage.executionDateLabel ?? "Date"} *`
-            );
+            this.createColumn(dataEntrySheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
             if (programStage.programStageSections.length === 0) {
                 programStage.programStageSections.push({
@@ -666,9 +611,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                     const { name, description } = this.translate(dataElement);
 
-                    const validation = dataElement.optionSet
-                        ? dataElement.optionSet.id
-                        : dataElement.valueType;
+                    const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
                     this.createColumn(
                         dataEntrySheet,
                         itemRow,
@@ -719,8 +662,7 @@ SheetBuilder.prototype.translate = function (item) {
 
     const { value: formName } = translations.find(({ property }) => property === "FORM_NAME") ?? {};
     const { value: regularName } = translations.find(({ property }) => property === "NAME") ?? {};
-    const { value: shortName } =
-        translations.find(({ property }) => property === "SHORT_NAME") ?? {};
+    const { value: shortName } = translations.find(({ property }) => property === "SHORT_NAME") ?? {};
 
     const defaultName = item?.displayName ?? item?.formName ?? item?.name;
     const name = formName ?? regularName ?? shortName ?? defaultName;
@@ -756,18 +698,14 @@ SheetBuilder.prototype.createColumn = function (
 
     if (!defaultLabel) cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle);
     else {
-        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle).style(
-            this.transparentFontStyle(groupId)
-        );
+        cell.style(groupId !== null ? this.groupStyle(groupId) : baseStyle).style(this.transparentFontStyle(groupId));
     }
 
     if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
 
     if (validation !== null) {
-        const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(
-            columnId
-        )}${maxRow}`;
+        const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(columnId)}${maxRow}`;
         sheet.addDataValidation({
             type: "list",
             allowBlank: true,
@@ -781,9 +719,9 @@ SheetBuilder.prototype.createColumn = function (
         sheet.addConditionalFormattingRule(ref, {
             type: "expression", // the conditional formatting type
             priority: 1, // rule priority order (required)
-            formula: `ISERROR(MATCH(${Excel.getExcelAlpha(columnId)}${
-                rowId + 1
-            },${validation.toString().substr(1)},0))`, // formula that returns nonzero or 0
+            formula: `ISERROR(MATCH(${Excel.getExcelAlpha(columnId)}${rowId + 1},${validation
+                .toString()
+                .substr(1)},0))`, // formula that returns nonzero or 0
             style: this.workbook.createStyle({
                 font: {
                     bold: true,
@@ -826,9 +764,7 @@ function getCategoryComboIdByDataElementId(dataSet, metadata) {
     return _(dataSet.dataSetElements)
         .map(dse => {
             const dataElement = metadata.get(dse.dataElement.id);
-            const disaggregationId = dse.categoryCombo
-                ? dse.categoryCombo.id
-                : dataElement.categoryCombo.id;
+            const disaggregationId = dse.categoryCombo ? dse.categoryCombo.id : dataElement.categoryCombo.id;
             return [dataElement.id, disaggregationId];
         })
         .fromPairs()

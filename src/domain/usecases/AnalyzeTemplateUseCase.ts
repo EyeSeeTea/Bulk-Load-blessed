@@ -31,10 +31,7 @@ export class AnalyzeTemplateUseCase implements UseCase {
 
         if (!dataForm) throw new Error(i18n.t("Program or DataSet not found in instance"));
 
-        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(
-            dataForm.type,
-            dataForm.id
-        );
+        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
 
         if (template.type === "custom" || dataForm.type === "trackerPrograms") {
             const reader = new ExcelReader(this.excelRepository, this.instanceRepository);

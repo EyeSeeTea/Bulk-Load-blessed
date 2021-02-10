@@ -81,19 +81,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             .value();
 
         const dataSet = await this.getDataForms(instanceRepository);
-        const { metadata, antivenomEntries, antivenomProducts } = await this.readDataStore(
-            instanceRepository
-        );
+        const { metadata, antivenomEntries, antivenomProducts } = await this.readDataStore(instanceRepository);
 
         const getName = (id: string) => {
             return _([
                 metadata?.dataElements[id]?.totalName,
                 metadata?.optionCombos[id]?.name,
                 dataSet?.dataElements.find(de => de.id === id)?.name,
-                _.flatMap(
-                    dataSet?.dataElements,
-                    ({ categoryOptionCombos }) => categoryOptionCombos
-                ).find(coc => coc?.id === id)?.name,
+                _.flatMap(dataSet?.dataElements, ({ categoryOptionCombos }) => categoryOptionCombos).find(
+                    coc => coc?.id === id
+                )?.name,
             ])
                 .compact()
                 .first();
@@ -137,9 +134,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 {
                     type: "range",
                     sheet,
-                    ref: `${excelRepository.buildColumnName(
-                        startColumn
-                    )}${startRow}:${excelRepository.buildColumnName(endColumn)}${endRow}`,
+                    ref: `${excelRepository.buildColumnName(startColumn)}${startRow}:${excelRepository.buildColumnName(
+                        endColumn
+                    )}${endRow}`,
                 },
                 style
             );
@@ -189,9 +186,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await excelRepository.getOrCreateSheet(this.id, "OrgUnits");
 
         // Add organisation units sheet columns
-        await promiseMap(["Identifier", "Name", "Selector"], (label, index) =>
-            write("OrgUnits", index + 1, 1, label)
-        );
+        await promiseMap(["Identifier", "Name", "Selector"], (label, index) => write("OrgUnits", index + 1, 1, label));
 
         // Add organisation units sheet rows
         const orgUnitStart = 2;
@@ -217,14 +212,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         const validateYesNoFormula = "Validation!$A$2:$A$3";
 
         // Hide sheets
-        await promiseMap(["Metadata", "OrgUnits", "Validation"], sheet =>
-            excelRepository.hideSheet(this.id, sheet)
-        );
+        await promiseMap(["Metadata", "OrgUnits", "Validation"], sheet => excelRepository.hideSheet(this.id, sheet));
 
         // Add National sheet
-        const dataElements: Array<
-            DataElement & { section?: { id: string; name: string } }
-        > = dataSet?.sections
+        const dataElements: Array<DataElement & { section?: { id: string; name: string } }> = dataSet?.sections
             ? _.flatMap(dataSet.sections, ({ id, name, dataElements }) =>
                   dataElements.map(dataElement => ({ ...dataElement, section: { id, name } }))
               )
@@ -234,9 +225,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             group.dataElements.map(de => de.id)
         );
 
-        const nationalDataElements = dataElements.filter(
-            ({ id }) => !antivenomDataElementIds.includes(id)
-        );
+        const nationalDataElements = dataElements.filter(({ id }) => !antivenomDataElementIds.includes(id));
 
         const sectionTitles = _(nationalDataElements)
             .groupBy(({ section }) => section?.name)
@@ -321,10 +310,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 merged: true,
             };
 
-            const categoryStyle = (
-                _cocColor?: string,
-                cocBackgroundColor?: string
-            ): ThemeStyle => ({
+            const categoryStyle = (_cocColor?: string, cocBackgroundColor?: string): ThemeStyle => ({
                 ...baseStyle,
                 fillColor: cocBackgroundColor ?? backgroundColor,
                 border: true,
@@ -344,14 +330,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             // Add data element row
             await write("National", "A", dataElementRow, `=_${dataElement.id}`);
-            await style(
-                "National",
-                "A",
-                dataElementRow,
-                lastCategoryColumn - 1,
-                dataElementRow,
-                dataElementStyle
-            );
+            await style("National", "A", dataElementRow, lastCategoryColumn - 1, dataElementRow, dataElementStyle);
             if (!showName) hideRow("National", dataElementRow);
 
             // Add totals
@@ -361,9 +340,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     "National",
                     "A",
                     valueRow,
-                    `=SUM(B${valueRow}:${excelRepository.buildColumnName(
-                        lastCategoryColumn
-                    )}${valueRow})`
+                    `=SUM(B${valueRow}:${excelRepository.buildColumnName(lastCategoryColumn)}${valueRow})`
                 );
             }
 
@@ -379,12 +356,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await promiseMap(sortedOptionCombos, async (category, catIndex) => {
                 const { color, backgroundColor } = metadata.optionCombos[category.id] ?? {};
 
-                await write(
-                    "National",
-                    categoryStartColumn + catIndex,
-                    categoryRow,
-                    `=_${category.id}`
-                );
+                await write("National", categoryStartColumn + catIndex, categoryRow, `=_${category.id}`);
 
                 await style(
                     "National",
@@ -430,34 +402,26 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         });
 
         if (populate) {
-            const recommendedSelector = _.flatMap(
-                antivenomEntries.groups,
-                ({ dataElements }) => dataElements
-            ).find(({ recommendedProductsSelector }) => recommendedProductsSelector === true)?.id;
+            const recommendedSelector = _.flatMap(antivenomEntries.groups, ({ dataElements }) => dataElements).find(
+                ({ recommendedProductsSelector }) => recommendedProductsSelector === true
+            )?.id;
 
             await promiseMap(antivenomEntries.groups, async group => {
                 const sheetName = group.name ?? group.id;
 
-                const isRecomended = !!group.dataElements.find(
-                    ({ id }) => id === recommendedSelector
-                );
+                const isRecomended = !!group.dataElements.find(({ id }) => id === recommendedSelector);
 
-                const products = antivenomProducts.filter(
-                    ({ recommended }) => isRecomended === recommended
-                );
+                const products = antivenomProducts.filter(({ recommended }) => isRecomended === recommended);
 
                 await promiseMap(products, async (product, rowIndex) => {
                     await promiseMap(group.dataElements, async (dataElement, columnIndex) => {
                         const dataValue = dataValues.find(
                             entry =>
-                                entry.dataElement === dataElement.id &&
-                                entry.category === product.categoryOptionComboId
+                                entry.dataElement === dataElement.id && entry.category === product.categoryOptionComboId
                         );
 
                         const value = String(
-                            dataValue?.value ??
-                                product[dataElement.prop as keyof typeof product] ??
-                                ""
+                            dataValue?.value ?? product[dataElement.prop as keyof typeof product] ?? ""
                         );
 
                         await write(sheetName, columnIndex + 1, rowIndex + 2, value);
@@ -475,190 +439,159 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         const { dataPackage } = options;
         const dataSet = await this.getDataForms(instanceRepository);
 
-        const dataEntries = await promiseMap(
-            dataPackage.dataEntries,
-            async ({ dataValues, ...dataPackage }) => {
-                const { antivenomEntries, antivenomProducts } = await this.readDataStore(
-                    instanceRepository
-                );
+        const dataEntries = await promiseMap(dataPackage.dataEntries, async ({ dataValues, ...dataPackage }) => {
+            const { antivenomEntries, antivenomProducts } = await this.readDataStore(instanceRepository);
 
-                const antivenomDataElements = _.flatMap(
-                    antivenomEntries.groups,
-                    ({ dataElements }) => dataElements
-                );
+            const antivenomDataElements = _.flatMap(antivenomEntries.groups, ({ dataElements }) => dataElements);
 
-                const antivenomDataElementIds = antivenomDataElements.map(({ id }) => id);
+            const antivenomDataElementIds = antivenomDataElements.map(({ id }) => id);
 
-                const recommendedSelector = antivenomDataElements.find(
-                    ({ recommendedProductsSelector }) => recommendedProductsSelector === true
-                )?.id;
+            const recommendedSelector = antivenomDataElements.find(
+                ({ recommendedProductsSelector }) => recommendedProductsSelector === true
+            )?.id;
 
-                const getDataElementsByProp = (prop: string) =>
-                    antivenomDataElements
-                        .filter(dataElement => prop === dataElement.prop)
-                        .map(({ id }) => id);
+            const getDataElementsByProp = (prop: string) =>
+                antivenomDataElements.filter(dataElement => prop === dataElement.prop).map(({ id }) => id);
 
-                const productByCategory = _(dataValues)
-                    .groupBy("category")
-                    .mapValues(values => {
-                        const productItem = values.find(({ dataElement }) =>
-                            getDataElementsByProp("productName").includes(dataElement)
-                        );
+            const productByCategory = _(dataValues)
+                .groupBy("category")
+                .mapValues(values => {
+                    const productItem = values.find(({ dataElement }) =>
+                        getDataElementsByProp("productName").includes(dataElement)
+                    );
 
-                        const product = antivenomProducts.find(
-                            ({ productName }) => productName === productItem?.value
-                        );
+                    const product = antivenomProducts.find(({ productName }) => productName === productItem?.value);
 
-                        return product;
-                    })
-                    .value();
+                    return product;
+                })
+                .value();
 
-                const freeCategories = _(getDataElementsByProp("productName"))
-                    .map(id => dataSet?.dataElements.find(dataElement => dataElement.id === id))
-                    .compact()
-                    .groupBy("id")
-                    .mapValues(dataElements =>
-                        _.flatMap(
-                            dataElements,
-                            ({ categoryOptionCombos }) =>
-                                categoryOptionCombos
-                                    ?.filter(
-                                        ({ id }) =>
-                                            !antivenomProducts.find(
-                                                ({ categoryOptionComboId }) =>
-                                                    categoryOptionComboId === id
-                                            )
-                                    )
-                                    .map(({ id }) => id) ?? []
-                        )
-                    )
-                    .value();
-
-                const nationalDataValues = dataValues.filter(
-                    ({ dataElement }) => !antivenomDataElementIds.includes(dataElement)
-                );
-
-                const [existingProducts, newProducts] = _.partition(dataValues, dataValue => {
-                    const isProduct = antivenomDataElementIds.includes(dataValue.dataElement);
-                    const exists = !!dataValue.category && !!productByCategory[dataValue.category];
-                    return isProduct && exists;
-                });
-
-                const cleanExistingProducts = _.compact(
-                    existingProducts.map(({ category = "", ...dataValue }) => {
-                        const product = productByCategory[category];
-                        // TODO: Filter data elements so that are not overwritten (manufacturer name, etc...)
-                        // Waiting for Jorge's implementation
-
-                        return {
-                            ...dataValue,
-                            category: product?.categoryOptionComboId ?? category,
-                        };
-                    })
-                );
-
-                const cleanNewProducts = _(newProducts)
-                    .groupBy("category")
-                    .mapValues(dataValues => {
-                        const productNameDataElement = dataValues.find(({ dataElement }) =>
-                            getDataElementsByProp("productName").includes(dataElement)
-                        )?.dataElement;
-                        if (!productNameDataElement) return [];
-
-                        const [category] = _.pullAt(freeCategories[productNameDataElement] ?? [], [
-                            0,
-                        ]);
-                        if (!category) {
-                            throw new Error(
-                                i18n.t(
-                                    "It is not possible to create products. The maximum number of products has been reached. Please contact your administrator."
+            const freeCategories = _(getDataElementsByProp("productName"))
+                .map(id => dataSet?.dataElements.find(dataElement => dataElement.id === id))
+                .compact()
+                .groupBy("id")
+                .mapValues(dataElements =>
+                    _.flatMap(
+                        dataElements,
+                        ({ categoryOptionCombos }) =>
+                            categoryOptionCombos
+                                ?.filter(
+                                    ({ id }) =>
+                                        !antivenomProducts.find(
+                                            ({ categoryOptionComboId }) => categoryOptionComboId === id
+                                        )
                                 )
+                                .map(({ id }) => id) ?? []
+                    )
+                )
+                .value();
+
+            const nationalDataValues = dataValues.filter(
+                ({ dataElement }) => !antivenomDataElementIds.includes(dataElement)
+            );
+
+            const [existingProducts, newProducts] = _.partition(dataValues, dataValue => {
+                const isProduct = antivenomDataElementIds.includes(dataValue.dataElement);
+                const exists = !!dataValue.category && !!productByCategory[dataValue.category];
+                return isProduct && exists;
+            });
+
+            const cleanExistingProducts = _.compact(
+                existingProducts.map(({ category = "", ...dataValue }) => {
+                    const product = productByCategory[category];
+                    // TODO: Filter data elements so that are not overwritten (manufacturer name, etc...)
+                    // Waiting for Jorge's implementation
+
+                    return {
+                        ...dataValue,
+                        category: product?.categoryOptionComboId ?? category,
+                    };
+                })
+            );
+
+            const cleanNewProducts = _(newProducts)
+                .groupBy("category")
+                .mapValues(dataValues => {
+                    const productNameDataElement = dataValues.find(({ dataElement }) =>
+                        getDataElementsByProp("productName").includes(dataElement)
+                    )?.dataElement;
+                    if (!productNameDataElement) return [];
+
+                    const [category] = _.pullAt(freeCategories[productNameDataElement] ?? [], [0]);
+                    if (!category) {
+                        throw new Error(
+                            i18n.t(
+                                "It is not possible to create products. The maximum number of products has been reached. Please contact your administrator."
+                            )
+                        );
+                    }
+
+                    return dataValues.map(dataValue => ({ ...dataValue, category }));
+                })
+                .values()
+                .flatten()
+                .value();
+
+            const newAntivenomProducts = _(cleanNewProducts)
+                .groupBy("category")
+                .mapValues((dataValues, categoryOptionComboId) => {
+                    const getField = (field: string) => {
+                        const result = dataValues.find(({ dataElement }) =>
+                            getDataElementsByProp(field).includes(dataElement)
+                        )?.value;
+
+                        if (!result) {
+                            throw new Error(
+                                i18n.t("It is not possible to create product. Please provide {{field}}.", { field })
                             );
                         }
 
-                        return dataValues.map(dataValue => ({ ...dataValue, category }));
+                        return result;
+                    };
+
+                    const recommended =
+                        dataValues.find(({ dataElement }) => recommendedSelector === dataElement) !== undefined;
+
+                    return {
+                        categoryOptionComboId,
+                        recommended,
+                        deleted: false,
+                        monovalent: getField("monovalent"),
+                        polyvalent: getField("polyvalent"),
+                        productName: getField("productName"),
+                        manufacturerName: getField("manufacturerName"),
+                    };
+                })
+                .values()
+                .value();
+
+            try {
+                const products = AntivenomProductsModel.decode([...antivenomProducts, ...newAntivenomProducts])
+                    .ifLeft(error => {
+                        console.error(error);
+                        throw new Error(error);
                     })
-                    .values()
-                    .flatten()
-                    .value();
+                    .orDefault([]);
 
-                const newAntivenomProducts = _(cleanNewProducts)
-                    .groupBy("category")
-                    .mapValues((dataValues, categoryOptionComboId) => {
-                        const getField = (field: string) => {
-                            const result = dataValues.find(({ dataElement }) =>
-                                getDataElementsByProp(field).includes(dataElement)
-                            )?.value;
-
-                            if (!result) {
-                                throw new Error(
-                                    i18n.t(
-                                        "It is not possible to create product. Please provide {{field}}.",
-                                        { field }
-                                    )
-                                );
-                            }
-
-                            return result;
-                        };
-
-                        const recommended =
-                            dataValues.find(
-                                ({ dataElement }) => recommendedSelector === dataElement
-                            ) !== undefined;
-
-                        return {
-                            categoryOptionComboId,
-                            recommended,
-                            deleted: false,
-                            monovalent: getField("monovalent"),
-                            polyvalent: getField("polyvalent"),
-                            productName: getField("productName"),
-                            manufacturerName: getField("manufacturerName"),
-                        };
-                    })
-                    .values()
-                    .value();
-
-                try {
-                    const products = AntivenomProductsModel.decode([
-                        ...antivenomProducts,
-                        ...newAntivenomProducts,
-                    ])
-                        .ifLeft(error => {
-                            console.error(error);
-                            throw new Error(error);
-                        })
-                        .orDefault([]);
-
-                    await this.saveAntivenomProducts(instanceRepository, products);
-                } catch (error) {
-                    console.error(error);
-                    throw new Error(
-                        i18n.t(
-                            "Could not import products. Invalid data received. Please review the excel file."
-                        )
-                    );
-                }
-
-                return {
-                    ...dataPackage,
-                    dataValues: [
-                        ...nationalDataValues,
-                        ...cleanExistingProducts,
-                        ...cleanNewProducts,
-                    ],
-                };
+                await this.saveAntivenomProducts(instanceRepository, products);
+            } catch (error) {
+                console.error(error);
+                throw new Error(
+                    i18n.t("Could not import products. Invalid data received. Please review the excel file.")
+                );
             }
-        );
+
+            return {
+                ...dataPackage,
+                dataValues: [...nationalDataValues, ...cleanExistingProducts, ...cleanNewProducts],
+            };
+        });
 
         return { type: "dataSets", dataEntries };
     }
 
     @cache()
-    private async getDataForms(
-        instanceRepository: InstanceRepository
-    ): Promise<DataForm | undefined> {
+    private async getDataForms(instanceRepository: InstanceRepository): Promise<DataForm | undefined> {
         const dataForms = await instanceRepository.getDataForms({
             ids: ["XBgvNrxpcDC"],
             type: ["dataSets"],
@@ -687,10 +620,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             if (!value) {
                 throw new Error(
-                    i18n.t(
-                        "Snake bite data store {{type}} is corrupted. Please contact an administrator.",
-                        { type: key }
-                    )
+                    i18n.t("Snake bite data store {{type}} is corrupted. Please contact an administrator.", {
+                        type: key,
+                    })
                 );
             }
 
