@@ -309,10 +309,7 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(
-        setting: PermissionSetting,
-        kind: "user" | "userGroup"
-    ) {
+    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup") {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {

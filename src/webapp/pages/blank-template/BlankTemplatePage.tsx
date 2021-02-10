@@ -2,7 +2,7 @@ import i18n from "../../../locales";
 import { DialogContentText } from "@material-ui/core";
 import React from "react";
 
-export default function BlankTemplatePage():React.ReactElement {
+export default function BlankTemplatePage(): React.ReactElement {
     return (
         <React.Fragment>
             <h2>{i18n.t("User with no permissions")} </h2>
@@ -15,4 +15,3 @@ export default function BlankTemplatePage():React.ReactElement {
         </React.Fragment>
     );
 }
-
