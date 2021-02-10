@@ -53,14 +53,12 @@ export default function PermissionsDialog({
     const onUpdateSharingOptions = useCallback(
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
-                console.log("USERS: ", users);
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
                     rule?.map(({ id, displayName }) => ({ id, displayName })) ??
                     settings.getPermissions(setting, type);
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
                     .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
-                console.log("USERGROUPS2 : ", users);
                 await onChange(newSettings);
             };
         },
