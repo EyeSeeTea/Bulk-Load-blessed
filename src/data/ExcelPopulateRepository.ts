@@ -7,7 +7,15 @@ import XLSX, {
 import Blob from "cross-blob";
 import _ from "lodash";
 import { Sheet } from "../domain/entities/Sheet";
-import { CellRef, ColumnRef, Range, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
+import {
+    CellRef,
+    ColumnRef,
+    Range,
+    RangeRef,
+    RowRef,
+    SheetRef,
+    ValueRef,
+} from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
 import {
     ExcelRepository,
@@ -383,6 +391,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const item = ref.type === "row" ? sheet.row(ref.ref) : sheet.column(ref.ref);
         item.hidden(true);
     }
+
+    public async setDataValidation(
+        id: string,
+        ref: CellRef | RangeRef,
+        formula: string | null
+    ): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(ref.sheet);
+        const item = ref.type === "range" ? sheet.range(ref.ref) : sheet.cell(ref.ref);
+        // @ts-ignore Not properly typed (https://app.clickup.com/t/e14mnv)
+        item.dataValidation(formula);
+    }
 }
 
 function isCell(element: any): element is ExcelCell {
@@ -394,7 +414,7 @@ interface SheetWithValidations extends XLSX.Sheet {
     dataValidation(address: string): false | { type: string; formula1: string };
 }
 
-/* Get formula of associated cell (though data valudation). Basic implementation. No caching */
+/* Get formula of associated cell (through data valudation). Basic implementation. No caching */
 function getFormulaWithValidation(
     workbook: XLSX.Workbook,
     sheet: SheetWithValidations,

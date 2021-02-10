@@ -46,6 +46,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         },
                     }));
                 case "Metadata":
+                case "OrgUnits":
                     return [];
                 default:
                     return _.range(50).map(offset => ({
@@ -188,6 +189,11 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             merged: false,
             border: true,
         });
+        await excelRepository.setDataValidation(
+            this.id,
+            { type: "cell", ref: "C4", sheet: "National" },
+            "OrgUnits!C2:C2048"
+        );
 
         // Add period field
         await write("National", "E", 4, "Period");
@@ -419,7 +425,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await excelRepository.getOrCreateSheet(this.id, "OrgUnits");
 
         // Add organisation units sheet columns
-        await promiseMap(["Identifier", "Name", "Path"], (label, index) =>
+        await promiseMap(["Identifier", "Name", "Selector"], (label, index) =>
             write("OrgUnits", index + 1, 1, label)
         );
 
@@ -429,7 +435,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await promiseMap(dataSet?.organisationUnits ?? [], async (orgUnit, index) => {
             await write("OrgUnits", 1, index + orgUnitStart, orgUnit.id);
             await write("OrgUnits", 2, index + orgUnitStart, orgUnit.name);
-            await write("OrgUnits", 3, index + orgUnitStart, orgUnit.path);
+            await write("OrgUnits", 3, index + orgUnitStart, `=_${orgUnit.id}`);
         });
 
         await promiseMap(dataSet?.organisationUnits ?? [], async ({ id }, index) => {

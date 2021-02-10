@@ -32,8 +32,8 @@ export interface DataElement {
     }[];
 }
 
-export interface OrganisationUnit{
-    id: Id,
+export interface OrganisationUnit {
+    id: Id;
     name: string;
     path: string;
 }
