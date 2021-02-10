@@ -446,9 +446,10 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             ({ dataElement, compulsory }) => dataElement.id === item.id && compulsory
         );
 
+        const isProgram = element.type === "programs" || isTrackerProgram(element);
+
         const isCompulsory =
-            isProgramStageDataElementCompulsory ||
-            (element.type === "programs" && item.type === "categoryCombos");
+            isProgramStageDataElementCompulsory || (isProgram && item.type === "categoryCombos");
 
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
