@@ -5,7 +5,7 @@ import React from "react";
 export default function BlankTemplatePage(): React.ReactElement {
     return (
         <React.Fragment>
-            <h2>{i18n.t("User with no permissions")} </h2>
+            <h3>{i18n.t("User with no permissions")} </h3>
             <DialogContentText>
                 {i18n.t(
                     "It seems this user account does not have any permission." +
