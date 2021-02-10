@@ -8,8 +8,9 @@ module.exports = {
         "plugin:cypress/recommended",
         "plugin:@typescript-eslint/recommended",
     ],
+    parser: "@typescript-eslint/parser",
     rules: {
-        "no-console": "off",
+        "no-console": ["warn", { allow: ["debug", "warn", "error"] }],
         "@typescript-eslint/camelcase": "off",
         "@typescript-eslint/explicit-function-return-type": ["off"],
         "@typescript-eslint/no-unused-vars": [
