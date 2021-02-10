@@ -2,7 +2,7 @@ import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "@eyeseete
 import React, { useCallback } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import { PermissionSetting, PermissionType } from "../../logic/settings";
 import { SettingsFieldsProps } from "./SettingsFields";
 

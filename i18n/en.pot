@@ -5,8 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2021-02-10T09:47:48.118Z\n"
 "PO-Revision-Date: 2021-02-10T09:47:48.118Z\n"
+=======
+"POT-Creation-Date: 2021-02-09T20:46:59.608Z\n"
+"PO-Revision-Date: 2021-02-09T20:46:59.608Z\n"
+>>>>>>> 7c7aaeed63737a967cf7de715228e7463869d567
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -120,6 +125,9 @@ msgid "Data elements used for duplicates identification"
 msgstr ""
 
 msgid "Permissions"
+msgstr ""
+
+msgid "Access to Import Data"
 msgstr ""
 
 msgid "Type"
