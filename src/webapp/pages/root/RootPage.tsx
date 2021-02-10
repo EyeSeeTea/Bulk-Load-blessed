@@ -56,7 +56,7 @@ const Root = () => {
         () => [
             {
                 key: "home",
-                name: i18n.t("home"),
+                name: i18n.t("Home"),
                 icon: "home",
                 path: "/home",
                 section: "main",
