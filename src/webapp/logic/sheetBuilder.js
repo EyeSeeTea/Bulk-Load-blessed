@@ -414,7 +414,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
-    const { elementMetadata: metadata, organisationUnits } = this.builder;
+    const { elementMetadata: metadata, organisationUnits, element } = this.builder;
     const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
@@ -441,14 +441,18 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             .map(option => this.translate(option).name)
             .join(", ");
 
-        const { compulsory } =
-            this.builder.rawMetadata.programStageDataElements?.find(
-                ({ dataElement }) => dataElement.id === item.id
-            ) ?? {};
+        const isProgramStageDataElementCompulsory = _.some(
+            this.builder.rawMetadata.programStageDataElements,
+            ({ dataElement, compulsory }) => dataElement.id === item.id && compulsory
+        );
+
+        const isCompulsory =
+            isProgramStageDataElementCompulsory ||
+            (element.type === "programs" && item.type === "categoryCombos");
 
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
-        metadataSheet.cell(rowId, 3).string(name?.concat(compulsory ? " *" : "") ?? "");
+        metadataSheet.cell(rowId, 3).string(name?.concat(isCompulsory ? " *" : "") ?? "");
         metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
         metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
         metadataSheet.cell(rowId, 6).string(options ?? "");
