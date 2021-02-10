@@ -13,10 +13,7 @@ module.exports = {
         "no-console": ["warn", { allow: ["debug", "warn", "error"] }],
         "@typescript-eslint/camelcase": "off",
         "@typescript-eslint/explicit-function-return-type": ["off"],
-        "@typescript-eslint/no-unused-vars": [
-            "error",
-            { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-        ],
+        "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
         "react/prop-types": "off",
         "react/display-name": "off",
         "no-unused-expressions": "off",

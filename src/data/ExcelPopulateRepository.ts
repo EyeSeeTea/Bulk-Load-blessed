@@ -8,22 +8,9 @@ import XLSX, {
 import Blob from "cross-blob";
 import _ from "lodash";
 import { Sheet } from "../domain/entities/Sheet";
-import {
-    CellRef,
-    ColumnRef,
-    Range,
-    RangeRef,
-    RowRef,
-    SheetRef,
-    ValueRef,
-} from "../domain/entities/Template";
+import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import {
-    ExcelRepository,
-    ExcelValue,
-    LoadOptions,
-    ReadCellOptions,
-} from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, ExcelValue, LoadOptions, ReadCellOptions } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { removeCharacters } from "../utils/string";
 
@@ -68,11 +55,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return (workbook.outputAsync() as unknown) as Buffer;
     }
 
-    public async findRelativeCell(
-        id: string,
-        location?: SheetRef,
-        cellRef?: CellRef
-    ): Promise<CellRef | undefined> {
+    public async findRelativeCell(id: string, location?: SheetRef, cellRef?: CellRef): Promise<CellRef | undefined> {
         const workbook = await this.getWorkbook(id);
 
         if (location?.type === "cell") {
@@ -88,23 +71,16 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async writeCell(
-        id: string,
-        cellRef: CellRef,
-        value: string | number | boolean
-    ): Promise<void> {
+    public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
         const workbook = await this.getWorkbook(id);
         const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
         const definedNames = await this.listDefinedNames(id);
-        const definedName = definedNames.find(
-            name => removeCharacters(name) === removeCharacters(value)
-        );
+        const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
 
         const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
         if (!cell) return;
 
-        const { startCell: destination = cell } =
-            mergedCells.find(range => range.hasCell(cell)) ?? {};
+        const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
 
         if (!!value && !isNaN(Number(value))) {
             destination.value(Number(value));
@@ -165,11 +141,9 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
         const sheet = workbook.sheet(cellRef.sheet);
         const cell = sheet.cell(cellRef.ref);
-        const { startCell: destination = cell } =
-            mergedCells.find(range => range.hasCell(cell)) ?? {};
+        const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const formulaValue = () =>
-            getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
+        const formulaValue = () => getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
 
         const value = formula ? formulaValue() : destination.value() ?? formulaValue();
         if (value instanceof FormulaError) return "";
@@ -188,9 +162,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
         if (rangeRowEnd < rowStart) return [];
 
-        const rangeCells = workbook
-            .sheet(sheet)
-            .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
+        const rangeCells = workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
 
         return (
             rangeCells.cells()[0]?.map(cell => ({
@@ -261,10 +233,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
                 ? workbook.sheet(sheet).range(String(source.ref))
                 : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
 
-        const cells =
-            source.type === "cell"
-                ? [workbook.sheet(sheet).cell(source.ref)]
-                : _.flatten(range.cells());
+        const cells = source.type === "cell" ? [workbook.sheet(sheet).cell(source.ref)] : _.flatten(range.cells());
 
         if (source.type === "range") range.merged(merged);
 
@@ -301,10 +270,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return value ?? "";
     }
 
-    public async getSheetRowsCount(
-        id: string,
-        sheetId: string | number
-    ): Promise<number | undefined> {
+    public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(sheetId);
         if (!sheet) return;
@@ -394,10 +360,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
 
         if (rangeRowEnd >= rowStart) {
-            workbook
-                .sheet(sheet)
-                .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd)
-                .merged(true);
+            workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
         }
     }
 
@@ -425,11 +388,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         workbook.sheet(cell.sheet).activeCell(cell.ref);
     }
 
-    public async setDataValidation(
-        id: string,
-        ref: CellRef | RangeRef,
-        formula: string | null
-    ): Promise<void> {
+    public async setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(ref.sheet);
         const item = ref.type === "range" ? sheet.range(ref.ref) : sheet.cell(ref.ref);
@@ -448,11 +407,7 @@ interface SheetWithValidations extends XLSX.Sheet {
 }
 
 /* Get formula of associated cell (through data valudation). Basic implementation. No caching */
-function getFormulaWithValidation(
-    workbook: XLSX.Workbook,
-    sheet: SheetWithValidations,
-    cell: XLSX.Cell
-) {
+function getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
     try {
         return _getFormulaWithValidation(workbook, sheet, cell);
     } catch (err) {
@@ -461,11 +416,7 @@ function getFormulaWithValidation(
     }
 }
 
-function _getFormulaWithValidation(
-    workbook: XLSX.Workbook,
-    sheet: SheetWithValidations,
-    cell: XLSX.Cell
-) {
+function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
     const defaultValue = cell.formula();
     const value = cell.value();
     if (defaultValue || !value) return defaultValue;
@@ -502,9 +453,7 @@ function _getFormulaWithValidation(
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
     const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
-    const validationSheet = sheetName
-        ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
-        : sheet;
+    const validationSheet = sheetName ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, "")) : sheet;
 
     if (!validationSheet || !rangeAddress) return defaultValue;
     const validationRange = validationSheet.range(rangeAddress);

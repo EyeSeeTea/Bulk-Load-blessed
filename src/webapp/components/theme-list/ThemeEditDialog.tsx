@@ -17,12 +17,7 @@ interface ThemeEditDialogProps {
     onCancel: () => void;
 }
 
-export default function ThemeEditDialog({
-    type,
-    theme: editTheme,
-    onSave,
-    onCancel,
-}: ThemeEditDialogProps) {
+export default function ThemeEditDialog({ type, theme: editTheme, onSave, onCancel }: ThemeEditDialogProps) {
     const classes = useStyles();
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
 
@@ -60,9 +55,7 @@ export default function ThemeEditDialog({
             const fontSize = field === "title" ? 22 : 12;
             const italic = field === "subtitle";
 
-            updateTheme(theme =>
-                theme.updateSection(field, text ? { text, fontSize, italic } : undefined)
-            );
+            updateTheme(theme => theme.updateSection(field, text ? { text, fontSize, italic } : undefined));
         };
     };
 

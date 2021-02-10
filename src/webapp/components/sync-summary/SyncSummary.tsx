@@ -79,9 +79,7 @@ const buildSummaryTable = (stats: SynchronizationStats[]) => {
                         <TableCell>{updated}</TableCell>
                         <TableCell>{deleted}</TableCell>
                         <TableCell>{ignored}</TableCell>
-                        <TableCell>
-                            {total || _.sum([imported, deleted, ignored, updated])}
-                        </TableCell>
+                        <TableCell>{total || _.sum([imported, deleted, ignored, updated])}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>
@@ -141,11 +139,7 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
         >
             <DialogContent>
                 {results.map(({ title, status, stats = [], message, errors }, idx) => (
-                    <Accordion
-                        defaultExpanded={results.length === 1}
-                        className={classes.accordion}
-                        key={`row-${idx}`}
-                    >
+                    <Accordion defaultExpanded={results.length === 1} className={classes.accordion} key={`row-${idx}`}>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography className={classes.accordionHeading1}>
                                 {title}
@@ -189,9 +183,7 @@ const SyncSummary = ({ results, onClose }: SyncSummaryProps) => {
                 {!_.isEmpty(rawResults) && (
                     <Accordion>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography className={classes.accordionHeading1}>
-                                {i18n.t("JSON Response")}
-                            </Typography>
+                            <Typography className={classes.accordionHeading1}>{i18n.t("JSON Response")}</Typography>
                         </AccordionSummary>
 
                         <AccordionDetails>

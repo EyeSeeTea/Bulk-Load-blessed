@@ -118,19 +118,11 @@ const Root = () => {
                 <AppDrawer isOpen={isOpen} routes={userRoutes} />
                 <AppDrawerToggle isOpen={isOpen} setOpen={setOpen} />
 
-                <div
-                    className={`${classes.content} ${
-                        isOpen ? classes.contentOpen : classes.contentCollapsed
-                    }`}
-                >
+                <div className={`${classes.content} ${isOpen ? classes.contentOpen : classes.contentCollapsed}`}>
                     <Paper className={classes.paper}>
                         <Switch>
                             {defaultRoute && (
-                                <Route
-                                    exact={true}
-                                    path={"/"}
-                                    render={() => <Redirect to={defaultRoute.path} />}
-                                />
+                                <Route exact={true} path={"/"} render={() => <Redirect to={defaultRoute.path} />} />
                             )}
 
                             {userRoutes.map(({ key, path, component }) => (

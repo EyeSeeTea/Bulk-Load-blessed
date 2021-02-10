@@ -174,9 +174,7 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
         name,
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
-        logo: pictures?.logo?.src ? (
-            <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
-        ) : null,
+        logo: pictures?.logo?.src ? <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" /> : null,
         palette,
     }));
 }

@@ -1,13 +1,5 @@
 import { Sheet } from "../entities/Sheet";
-import {
-    CellRef,
-    ColumnRef,
-    Range,
-    RangeRef,
-    RowRef,
-    SheetRef,
-    ValueRef,
-} from "../entities/Template";
+import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
@@ -38,11 +30,7 @@ export abstract class ExcelRepository {
     public abstract loadTemplate(options: LoadOptions): Promise<string>;
     public abstract toBlob(id: string): Promise<Blob>;
     public abstract toBuffer(id: string): Promise<Buffer>;
-    public abstract findRelativeCell(
-        id: string,
-        location?: SheetRef,
-        cell?: CellRef
-    ): Promise<CellRef | undefined>;
+    public abstract findRelativeCell(id: string, location?: SheetRef, cell?: CellRef): Promise<CellRef | undefined>;
     public abstract writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
     public abstract readCell(
         id: string,
@@ -54,10 +42,7 @@ export abstract class ExcelRepository {
     public abstract styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
     public abstract getSheets(id: string): Promise<Sheet[]>;
     public abstract getConstants(id: string): Promise<Record<string, string>>;
-    public abstract getSheetRowsCount(
-        id: string,
-        sheetId: string | number
-    ): Promise<number | undefined>;
+    public abstract getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined>;
     public abstract listDefinedNames(id: string): Promise<string[]>;
     public abstract getOrCreateSheet(id: string, name: string): Promise<Sheet>;
     public abstract buildColumnName(column: number | string): string;
@@ -65,15 +50,7 @@ export abstract class ExcelRepository {
     public abstract mergeCells(id: string, range: Range): Promise<void>;
     public abstract hideCells(id: string, ref: ColumnRef | RowRef, hidden?: boolean): Promise<void>;
     public abstract hideSheet(id: string, sheet: string | number, hidden?: boolean): Promise<void>;
-    public abstract protectSheet(
-        id: string,
-        sheet: string | number,
-        password: string
-    ): Promise<void>;
+    public abstract protectSheet(id: string, sheet: string | number, password: string): Promise<void>;
     public abstract setActiveCell(id: string, cell: CellRef): Promise<void>;
-    public abstract setDataValidation(
-        id: string,
-        ref: CellRef | RangeRef,
-        formula: string | null
-    ): Promise<void>;
+    public abstract setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void>;
 }
