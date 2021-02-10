@@ -117,7 +117,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             });
 
         const hideRow = (sheet: string, row: number) =>
-            excelRepository.hide(this.id, {
+            excelRepository.hideCells(this.id, {
                 type: "row",
                 sheet,
                 ref: row,
@@ -142,6 +142,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 },
                 style
             );
+
+        // Add Validation sheet
+        await excelRepository.getOrCreateSheet(this.id, "Validation");
 
         // Add National sheet
         const dataElements: Array<
@@ -441,6 +444,11 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await promiseMap(dataSet?.organisationUnits ?? [], async ({ id }, index) => {
             await defineName("OrgUnits", "B", index + orgUnitStart, id);
         });
+
+        // Hide sheets
+        await promiseMap(["Metadata", "OrgUnits", "Validation"], sheet =>
+            excelRepository.hideSheet(this.id, sheet)
+        );
     }
 
     public async importCustomization(

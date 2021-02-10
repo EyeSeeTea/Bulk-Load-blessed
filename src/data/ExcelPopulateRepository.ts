@@ -385,11 +385,16 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async hide(id: string, ref: ColumnRef | RowRef): Promise<void> {
+    public async hideCells(id: string, ref: ColumnRef | RowRef, hidden = true): Promise<void> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(ref.sheet);
         const item = ref.type === "row" ? sheet.row(ref.ref) : sheet.column(ref.ref);
-        item.hidden(true);
+        item.hidden(hidden);
+    }
+
+    public async hideSheet(id: string, sheet: string | number, hidden = true): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(sheet).hidden(hidden);
     }
 
     public async setDataValidation(

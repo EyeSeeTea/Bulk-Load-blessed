@@ -63,7 +63,8 @@ export abstract class ExcelRepository {
     public abstract buildColumnName(column: number | string): string;
     public abstract defineName(id: string, name: string, cell: CellRef): Promise<void>;
     public abstract mergeCells(id: string, range: Range): Promise<void>;
-    public abstract hide(id: string, ref: ColumnRef | RowRef): Promise<void>;
+    public abstract hideCells(id: string, ref: ColumnRef | RowRef, hidden?: boolean): Promise<void>;
+    public abstract hideSheet(id: string, sheet: string | number, hidden?: boolean): Promise<void>;
     public abstract setDataValidation(
         id: string,
         ref: CellRef | RangeRef,
