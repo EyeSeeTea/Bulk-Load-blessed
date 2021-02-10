@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
+"POT-Creation-Date: 2021-02-10T14:31:19.087Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -52,6 +52,9 @@ msgstr "Programa"
 
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
+
+msgid "Access to Import Data"
+msgstr "Importar dados"
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"
@@ -315,6 +318,16 @@ msgstr ""
 "Não é possível importar: as versões não correspondem (banco de dados = "
 "{{dbVersion}}, arquivo = {{sheetVersion}})"
 
+msgid "User with no permissions"
+msgstr ""
+
+msgid "It seems this user account does not have any permission. "
+msgstr ""
+
+msgid ""
+"Please get in touch with the admin if you need access to these sections."
+msgstr ""
+
 msgid "You need to select at least one element to export"
 msgstr "Você precisa selecionar pelo menos um elemento para exportar"
 
@@ -446,6 +459,9 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar dados"
+
+msgid "Home"
+msgstr ""
 
 msgid "Themes"
 msgstr "Temas"

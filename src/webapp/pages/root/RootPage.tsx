@@ -13,6 +13,7 @@ import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
 import ImportTemplatePage from "../import-template/ImportTemplatePage";
 import SettingsPage from "../settings/SettingsPage";
 import ThemesPage from "../themes/ThemesPage";
+import BlankTemplatePage from "../blank-template/BlankTemplatePage";
 
 export interface RouteComponentProps {
     settings: Settings;
@@ -54,6 +55,15 @@ const Root = () => {
     const routes: AppRoute[] = useMemo(
         () => [
             {
+                key: "home",
+                name: i18n.t("Home"),
+                icon: "home",
+                path: "/home",
+                section: "main",
+                auth: (settings: Settings) => settings.isBlankPageVisibleForCurrentUser(),
+                component: () => <BlankTemplatePage />,
+            },
+            {
                 key: "download",
                 name: i18n.t("Download template"),
                 icon: "cloud_download",
@@ -68,6 +78,7 @@ const Root = () => {
                 icon: "cloud_upload",
                 path: "/import",
                 section: "main",
+                auth: (settings: Settings) => settings.isImportDataVisibleForCurrentUser(),
                 component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
             },
             {

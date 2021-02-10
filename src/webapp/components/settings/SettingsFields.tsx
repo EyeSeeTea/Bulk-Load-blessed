@@ -243,6 +243,15 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                         secondary={buildSharingDescription("generation")}
                     />
                 </ListItem>
+                <ListItem button onClick={() => setPermissionsType("import")}>
+                    <ListItemIcon>
+                        <Icon>cloud_upload</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={i18n.t("Access to Import Data")}
+                        secondary={buildSharingDescription("import")}
+                    />
+                </ListItem>
                 <ListItem button onClick={() => setPermissionsType("settings")}>
                     <ListItemIcon>
                         <Icon>settings</Icon>
