@@ -123,9 +123,6 @@ msgstr ""
 msgid "Permissions"
 msgstr ""
 
-msgid "Access to Import Data"
-msgstr ""
-
 msgid "Type"
 msgstr ""
 
