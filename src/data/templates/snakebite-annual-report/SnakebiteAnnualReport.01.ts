@@ -72,7 +72,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         instanceRepository: InstanceRepository,
         options: DownloadCustomizationOptions
     ): Promise<void> {
-        const { populate } = options;
+        const { populate, dataPackage, orgUnits } = options;
+        const dataValues = _(dataPackage?.dataEntries)
+            .filter(({ orgUnit }) => orgUnits[0] === orgUnit)
+            .flatMap(({ dataValues }) => dataValues)
+            .value();
+
         const dataSet = await this.getDataForms(instanceRepository);
         const { metadata, antivenomEntries, antivenomProducts } = await this.readDataStore(
             instanceRepository
@@ -333,9 +338,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
                 await promiseMap(products, async (product, rowIndex) => {
                     await promiseMap(group.dataElements, async (dataElement, columnIndex) => {
-                        const value = String(
-                            product[dataElement.prop as keyof typeof product] ?? ""
+                        const dataValue = dataValues.find(
+                            entry =>
+                                entry.dataElement === dataElement.id &&
+                                entry.category === product.categoryOptionComboId
                         );
+
+                        const value = String(
+                            dataValue?.value ?? product[dataElement.prop as keyof typeof product] ?? ""
+                        );
+
                         await write(sheetName, columnIndex + 1, rowIndex + 2, value);
                     });
                 });

@@ -47,7 +47,9 @@ export interface GeneratedTemplate extends BaseTemplate {
 }
 
 export interface DownloadCustomizationOptions {
-    populate?: boolean;
+    populate: boolean;
+    dataPackage?: DataPackage;
+    orgUnits: string[];
 }
 
 export interface ImportCustomizationOptions {

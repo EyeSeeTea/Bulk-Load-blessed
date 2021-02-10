@@ -80,21 +80,25 @@ export class DownloadTemplateUseCase implements UseCase {
             await this.excelRepository.loadTemplate({ type: "file", file });
         }
 
+        const enablePopulate = populate && populateStartDate && populateEndDate;
+
+        const dataPackage = enablePopulate
+            ? await this.instanceRepository.getDataPackage({
+                  type,
+                  id,
+                  orgUnits,
+                  startDate: populateStartDate,
+                  endDate: populateEndDate,
+                  translateCodes: template.type !== "custom",
+              })
+            : undefined;
+
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
-        await builder.templateCustomization(template, populate);
+        await builder.templateCustomization(template, { populate, dataPackage, orgUnits });
 
         if (theme) await builder.applyTheme(template, theme);
 
-        if (populate && populateStartDate && populateEndDate) {
-            const dataPackage = await this.instanceRepository.getDataPackage({
-                type,
-                id,
-                orgUnits,
-                startDate: populateStartDate,
-                endDate: populateEndDate,
-                translateCodes: template.type !== "custom",
-            });
-
+        if (enablePopulate && dataPackage) {
             if (template.type === "custom" && template.fixedOrgUnit) {
                 await this.excelRepository.writeCell(
                     template.id,

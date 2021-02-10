@@ -9,6 +9,7 @@ import {
     CellRef,
     DataSource,
     DataSourceValue,
+    DownloadCustomizationOptions,
     RowDataSource,
     SheetRef,
     TeiRowDataSource,
@@ -438,11 +439,16 @@ export class ExcelBuilder {
         });
     }
 
-    public async templateCustomization(template: Template, populate: boolean): Promise<void> {
+    public async templateCustomization(
+        template: Template,
+        options: DownloadCustomizationOptions
+    ): Promise<void> {
         if (template.type === "custom" && template.downloadCustomization) {
-            await template.downloadCustomization(this.excelRepository, this.instanceRepository, {
-                populate,
-            });
+            await template.downloadCustomization(
+                this.excelRepository,
+                this.instanceRepository,
+                options
+            );
         }
     }
 }
