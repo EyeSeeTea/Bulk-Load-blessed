@@ -1,4 +1,5 @@
 import XLSX, {
+    Cell,
     Cell as ExcelCell,
     FormulaError,
     Workbook as ExcelWorkbook,
@@ -267,7 +268,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         try {
             for (const cell of cells) {
-                const value = String(text ?? cell.value() ?? "");
+                const value = text ?? this.getValue(cell);
                 const formula = cell.formula();
 
                 //@ts-ignore Not properly typed
@@ -283,6 +284,19 @@ export class ExcelPopulateRepository extends ExcelRepository {
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
+    }
+
+    private getValue(cell: Cell): ExcelValue {
+        const value = cell.value();
+
+        if (typeof value === "object" && value.constructor.name === "RichText") {
+            // @ts-ignore This should be improved on xlsx-populate
+            return value.text();
+        } else if (typeof value === "object") {
+            return JSON.stringify(value);
+        }
+
+        return value ?? "";
     }
 
     public async getSheetRowsCount(

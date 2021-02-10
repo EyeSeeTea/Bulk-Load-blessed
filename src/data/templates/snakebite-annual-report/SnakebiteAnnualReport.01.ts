@@ -47,6 +47,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     }));
                 case "Metadata":
                 case "OrgUnits":
+                case "Validation":
                     return [];
                 default:
                     return _.range(50).map(offset => ({
