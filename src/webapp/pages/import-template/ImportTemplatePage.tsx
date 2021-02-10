@@ -846,7 +846,7 @@ async function importEventsData(api: D2Api, data: Event[]): Promise<ImportPostRe
 
     const response = await sendEvents(data);
 
-    // See https://jira.dhis2.org/browse/DHIS2-9936
+    // Fixed on versions 2.33.8+ and 2.34.3+ (https://jira.dhis2.org/browse/DHIS2-9936)
     if (response.status === "ERROR") {
         return promiseMap(_.chunk(data, 99), events => sendEvents(events));
     }
