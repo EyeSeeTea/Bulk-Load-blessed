@@ -72,18 +72,17 @@ export default function PermissionsDialog({
             onCancel={onClose}
             cancelText={i18n.t("Close")}
         >
-                <Sharing
-                    meta={buildMetaObject(permissionsType)}
-                    showOptions={{
-                        dataSharing: false,
-                        publicSharing: false,
-                        externalSharing: false,
-                        permissionPicker: false,
-                    }}
-                    onSearch={search}
-                    onChange={onUpdateSharingOptions(permissionsType)}
-                />
-            
+            <Sharing
+                meta={buildMetaObject(permissionsType)}
+                showOptions={{
+                    dataSharing: false,
+                    publicSharing: false,
+                    externalSharing: false,
+                    permissionPicker: false,
+                }}
+                onSearch={search}
+                onChange={onUpdateSharingOptions(permissionsType)}
+            />
         </ConfirmationDialog>
     );
 }
