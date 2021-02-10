@@ -204,7 +204,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 showTotal = true,
                 totalName,
                 showName = true,
-                color = "#39547d",
+                color,
                 backgroundColor = "#EEEEEE",
             } = metadata.dataElements[dataElement.id] ?? {};
 
@@ -297,22 +297,26 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             );
 
             await promiseMap(sortedOptionCombos, async (category, catIndex) => {
+                const { color, backgroundColor } = metadata.optionCombos[category.id] ?? {};
+
                 await write(
                     "National",
                     categoryStartColumn + catIndex,
                     categoryRow,
                     `=_${category.id}`
                 );
+
+                await style(
+                    "National",
+                    "A",
+                    categoryRow,
+                    lastCategoryColumn - 1,
+                    categoryRow,
+                    categoryStyle(color, backgroundColor)
+                );
             });
 
-            await style(
-                "National",
-                "A",
-                categoryRow,
-                lastCategoryColumn - 1,
-                categoryRow,
-                categoryStyle()
-            );
+            // Style value rows
             await style("National", "A", valueRow, lastCategoryColumn - 1, valueRow, valueStyle);
         });
 
