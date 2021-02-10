@@ -26,7 +26,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly dataFormId = { type: "value" as const, id: "XBgvNrxpcDC" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
     public readonly fixedOrgUnit = { type: "cell" as const, sheet: "National", ref: "C4" };
-    public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "E4" };
+    public readonly fixedPeriod = { type: "cell" as const, sheet: "National", ref: "F4" };
 
     public readonly dataSources: DataSource[] = [
         (sheet: string) => {
@@ -35,7 +35,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     return _.range(30).map(offset => ({
                         type: "row",
                         orgUnit: { sheet, type: "cell", ref: "C4" },
-                        period: { sheet, type: "cell", ref: "E4" },
+                        period: { sheet, type: "cell", ref: "F4" },
                         dataElement: { sheet, type: "row", ref: 7 + offset * 6 },
                         categoryOption: { sheet, type: "row", ref: 8 + offset * 6 },
                         range: {
@@ -51,7 +51,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     return _.range(50).map(offset => ({
                         type: "row",
                         orgUnit: { sheet: "National", type: "cell", ref: "C4" },
-                        period: { sheet: "National", type: "cell", ref: "E4" },
+                        period: { sheet: "National", type: "cell", ref: "F4" },
                         dataElement: { sheet, type: "row", ref: 1 },
                         categoryOption: { type: "value", id: generateUid() },
                         range: {
@@ -178,6 +178,24 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             fontSize: 22,
             bold: true,
             merged: true,
+        });
+
+        // Add org unit field
+        await write("National", "B", 4, "Organisation Unit");
+        await style("National", "B", 4, "C", 4, {
+            wrapText: true,
+            horizontalAlignment: "center",
+            merged: false,
+            border: true,
+        });
+
+        // Add period field
+        await write("National", "E", 4, "Period");
+        await style("National", "E", 4, "F", 4, {
+            wrapText: true,
+            horizontalAlignment: "center",
+            merged: false,
+            border: true,
         });
 
         await promiseMap(nationalDataElements, async (dataElement, index) => {
@@ -345,7 +363,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         );
 
                         const value = String(
-                            dataValue?.value ?? product[dataElement.prop as keyof typeof product] ?? ""
+                            dataValue?.value ??
+                                product[dataElement.prop as keyof typeof product] ??
+                                ""
                         );
 
                         await write(sheetName, columnIndex + 1, rowIndex + 2, value);
@@ -389,6 +409,27 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         await promiseMap(items, async ({ id }, index) => {
             await defineName("Metadata", "C", index + metadataStart, id);
+        });
+
+        // Add organisation units sheet
+        await excelRepository.getOrCreateSheet(this.id, "OrgUnits");
+
+        // Add organisation units sheet columns
+        await promiseMap(["Identifier", "Name", "Path"], (label, index) =>
+            write("OrgUnits", index + 1, 1, label)
+        );
+
+        // Add organisation units sheet rows
+        const orgUnitStart = 2;
+
+        await promiseMap(dataSet?.organisationUnits ?? [], async (orgUnit, index) => {
+            await write("OrgUnits", 1, index + orgUnitStart, orgUnit.id);
+            await write("OrgUnits", 2, index + orgUnitStart, orgUnit.name);
+            await write("OrgUnits", 3, index + orgUnitStart, orgUnit.path);
+        });
+
+        await promiseMap(dataSet?.organisationUnits ?? [], async ({ id }, index) => {
+            await defineName("OrgUnits", "B", index + orgUnitStart, id);
         });
     }
 

@@ -9,6 +9,7 @@ export interface DataForm {
     name: string;
     periodType?: DataFormPeriod;
     dataElements: DataElement[];
+    organisationUnits: OrganisationUnit[];
     sections?: {
         id: Id;
         name: string;
@@ -29,4 +30,10 @@ export interface DataElement {
         id: Id;
         name: string;
     }[];
+}
+
+export interface OrganisationUnit{
+    id: Id,
+    name: string;
+    path: string;
 }

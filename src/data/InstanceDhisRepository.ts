@@ -72,7 +72,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         const { objects } = await this.api.models.dataSets
             .get({
                 paging: false,
-                fields,
+                fields: dataSetFields,
                 filter: { id: ids ? { in: ids } : undefined },
             })
             .getData();
@@ -115,20 +115,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         const { objects } = await this.api.models.programs
             .get({
                 paging: false,
-                fields: {
-                    id: true,
-                    displayName: true,
-                    name: true,
-                    attributeValues: { value: true, attribute: { code: true } },
-                    programStages: {
-                        programStageDataElements: {
-                            dataElement: { id: true, formName: true, name: true },
-                        },
-                    },
-                    access: true,
-                    programType: true,
-                    trackedEntityType: true,
-                },
+                fields: programFields,
                 filter: {
                     id: ids ? { in: ids } : undefined,
                 },
@@ -694,13 +681,30 @@ const dataElementFields = {
     categoryCombo: { categoryOptionCombos: { id: true, name: true } },
 } as const;
 
-const fields = {
+const dataSetFields = {
     id: true,
     displayName: true,
     name: true,
     attributeValues: { value: true, attribute: { code: true } },
     dataSetElements: { dataElement: dataElementFields },
     sections: { id: true, name: true, dataElements: dataElementFields },
+    organisationUnits: { id: true, name: true, path: true },
     periodType: true,
     access: true,
+} as const;
+
+const programFields = {
+    id: true,
+    displayName: true,
+    name: true,
+    attributeValues: { value: true, attribute: { code: true } },
+    programStages: {
+        programStageDataElements: {
+            dataElement: { id: true, formName: true, name: true },
+        },
+    },
+    organisationUnits: { id: true, name: true, path: true },
+    access: true,
+    programType: true,
+    trackedEntityType: true,
 } as const;
