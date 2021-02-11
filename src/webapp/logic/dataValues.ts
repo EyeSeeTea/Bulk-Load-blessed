@@ -27,9 +27,7 @@ export async function deleteDataValues(
 ): Promise<DataValueSetsPostResponse | undefined> {
     if (_.isEmpty(dataValues)) return undefined;
 
-    const response = await api.dataValues
-        .postSet({ importStrategy: "DELETE" }, { dataValues })
-        .getData();
+    const response = await api.dataValues.postSet({ importStrategy: "DELETE" }, { dataValues }).getData();
 
     if (response.status === "ERROR") {
         const details = JSON.stringify(response.conflicts, null, 2);

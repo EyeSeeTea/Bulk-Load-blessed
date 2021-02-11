@@ -1,20 +1,16 @@
+import { useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Button, makeStyles } from "@material-ui/core";
-import { useLoading, useSnackbar } from "d2-ui-components";
 import React, { useState } from "react";
-import { CompositionRoot } from "../../../CompositionRoot";
 import i18n from "../../../locales";
-import {
-    TemplateSelector,
-    TemplateSelectorState,
-} from "../../components/template-selector/TemplateSelector";
-import { useAppContext } from "../../contexts/api-context";
+import { TemplateSelector, TemplateSelectorState } from "../../components/template-selector/TemplateSelector";
+import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../root/RootPage";
 
 export default function DownloadTemplatePage({ settings, themes }: RouteComponentProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
 
     const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
 
@@ -50,7 +46,14 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
         }
 
         loading.show(true, i18n.t("Downloading template..."));
-        await CompositionRoot.attach().templates.download(api, template);
+
+        try {
+            await compositionRoot.templates.download(api, template);
+        } catch (error) {
+            console.error(error);
+            snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
+        }
+
         loading.show(false);
     };
 

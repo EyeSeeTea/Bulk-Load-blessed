@@ -1,8 +1,8 @@
-import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "d2-ui-components";
+import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "@eyeseetea/d2-ui-components";
 import React, { useCallback } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import { PermissionSetting, PermissionType } from "../../logic/settings";
 import { SettingsFieldsProps } from "./SettingsFields";
 
@@ -11,12 +11,7 @@ interface PermissionsDialogProps extends SettingsFieldsProps {
     permissionsType: PermissionSetting;
 }
 
-export default function PermissionsDialog({
-    onClose,
-    permissionsType,
-    settings,
-    onChange,
-}: PermissionsDialogProps) {
+export default function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
     const { api } = useAppContext();
     const search = useCallback((query: string) => searchUsers(api, query), [api]);
 
@@ -25,6 +20,8 @@ export default function PermissionsDialog({
             const displayName =
                 setting === "generation"
                     ? i18n.t("Access to Template Generation")
+                    : setting === "import"
+                    ? i18n.t("Access to Import Data")
                     : i18n.t("Access to Settings and Themes");
 
             const buildSharings = (type: PermissionType) =>
@@ -52,13 +49,10 @@ export default function PermissionsDialog({
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
-                    rule?.map(({ id, displayName }) => ({ id, displayName })) ??
-                    settings.getPermissions(setting, type);
-
+                    rule?.map(({ id, displayName }) => ({ id, displayName })) ?? settings.getPermissions(setting, type);
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
                     .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
-
                 await onChange(newSettings);
             };
         },
@@ -66,12 +60,7 @@ export default function PermissionsDialog({
     );
 
     return (
-        <ConfirmationDialog
-            isOpen={true}
-            fullWidth={true}
-            onCancel={onClose}
-            cancelText={i18n.t("Close")}
-        >
+        <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>
             <Sharing
                 meta={buildMetaObject(permissionsType)}
                 showOptions={{

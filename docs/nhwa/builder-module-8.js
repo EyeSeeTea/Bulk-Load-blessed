@@ -14,37 +14,30 @@ let defaultSheet = "M08 - Skill mix composition";
 let orgUnitCell = "C4";
 let periodCell = "I4";
 
-let getDataElements = ({
-    sheet,
-    tabSelector,
-    letters,
-    dataRowStart,
-    type = "input.entryfield",
-    offset = 0,
-    limit,
-}) => {
-    return _.compact(Array.from(document.querySelector(tabSelector).querySelectorAll(type)).slice(offset).map(
-        (input, pos) => {
-            if (limit !== undefined && pos >= limit) return undefined;
+let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "input.entryfield", offset = 0, limit }) => {
+    return _.compact(
+        Array.from(document.querySelector(tabSelector).querySelectorAll(type))
+            .slice(offset)
+            .map((input, pos) => {
+                if (limit !== undefined && pos >= limit) return undefined;
 
-            let id = input.getAttribute("id");
-            let [dataElement, categoryOptionCombo] = id.split("-");
+                let id = input.getAttribute("id");
+                let [dataElement, categoryOptionCombo] = id.split("-");
 
-            return {
-                type: "cell",
-                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
-                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
-                dataElement: { type: "value", id: dataElement },
-                categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: {
+                return {
                     type: "cell",
-                    sheet,
-                    ref: `${letters[pos % letters.length]}${parseInt(pos / letters.length) +
-                        dataRowStart}`,
-                },
-            };
-        }
-    ));
+                    orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+                    period: { sheet: defaultSheet, type: "cell", ref: periodCell },
+                    dataElement: { type: "value", id: dataElement },
+                    categoryOption: { type: "value", id: categoryOptionCombo },
+                    ref: {
+                        type: "cell",
+                        sheet,
+                        ref: `${letters[pos % letters.length]}${parseInt(pos / letters.length) + dataRowStart}`,
+                    },
+                };
+            })
+    );
 };
 
 let dataSheet1 = [

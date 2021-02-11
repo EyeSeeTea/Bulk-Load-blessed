@@ -34,12 +34,7 @@ function checkCoordinates(coord, vs) {
 }
 */
 
-export async function getUsedOrgUnits({
-    file,
-    useBuilderOrgUnits,
-    organisationUnits,
-    rowOffset = 0,
-}) {
+export async function getUsedOrgUnits({ file, useBuilderOrgUnits, organisationUnits, rowOffset = 0 }) {
     const workbook = await getWorkbook(file);
     const dataEntrySheet = workbook.getWorksheet("Data Entry");
     const metadataSheet = workbook.getWorksheet("Metadata");
@@ -55,10 +50,7 @@ export async function getUsedOrgUnits({
                 result.orgUnit = organisationUnits[0].id;
             } else {
                 if (row.values[1] !== undefined) {
-                    result.orgUnit = parseMetadataId(
-                        metadataSheet,
-                        row.values[1].result ?? row.values[1]
-                    );
+                    result.orgUnit = parseMetadataId(metadataSheet, row.values[1].result ?? row.values[1]);
                 } else {
                     result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
                 }
@@ -189,10 +181,7 @@ export async function readSheet({
                 result.orgUnit = organisationUnits[0].id;
             } else {
                 if (row.values[1] !== undefined) {
-                    result.orgUnit = parseMetadataId(
-                        metadataSheet,
-                        row.values[1].result ?? row.values[1]
-                    );
+                    result.orgUnit = parseMetadataId(metadataSheet, row.values[1].result ?? row.values[1]);
                 } else {
                     result.orgUnit = validationSheet.getCell("A3").formula.substr(1);
                 }
@@ -241,17 +230,9 @@ export async function readSheet({
             // Read attribute option combo
             if (isProgram && colOffset > 0 && row.values[4] !== undefined) {
                 // NOTICE: Some old versions of 2.30 appeared to have a bug and required attributeCategoryOptions
-                result.attributeOptionCombo = parseMetadataId(
-                    metadataSheet,
-                    row.values[4],
-                    "categoryOptionCombos"
-                );
+                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[4], "categoryOptionCombos");
             } else if (!isProgram && row.values[3] !== undefined) {
-                result.attributeOptionCombo = parseMetadataId(
-                    metadataSheet,
-                    row.values[3],
-                    "categoryOptionCombos"
-                );
+                result.attributeOptionCombo = parseMetadataId(metadataSheet, row.values[3], "categoryOptionCombos");
             }
 
             // Read event id
@@ -372,10 +353,11 @@ export async function checkVersion(file, dbObject, type) {
     if (!dbVersion || sheetVersion === dbVersion) {
         return true;
     } else {
-        const msg = i18n.t(
-            "Cannot import: Versions do not match (database={{dbVersion}}, file={{sheetVersion}})",
-            { dbVersion, sheetVersion, nsSeparator: false }
-        );
+        const msg = i18n.t("Cannot import: Versions do not match (database={{dbVersion}}, file={{sheetVersion}})", {
+            dbVersion,
+            sheetVersion,
+            nsSeparator: false,
+        });
         throw new Error(msg);
     }
 }

@@ -7,9 +7,7 @@ export function initializeMockServer() {
     mock.onGet("/me").reply(200, { userGroups: [{ id: "BwyMfDBLih9" }] });
     mock.onGet("/me/authorization").reply(200, ["USER_GROUP_TEST"]);
     mock.onGet("/metadata", { params: { "userGroups:fields": "displayName,id,name" } }).reply(200, {
-        userGroups: [
-            { name: "USER_GROUP_TEST", id: "BwyMfDBLih9", displayName: "USER_GROUP_TEST" },
-        ],
+        userGroups: [{ name: "USER_GROUP_TEST", id: "BwyMfDBLih9", displayName: "USER_GROUP_TEST" }],
     });
 
     // App Storage
@@ -17,6 +15,7 @@ export function initializeMockServer() {
         models: { dataSet: true, program: true },
         permissionsForGeneration: ["BwyMfDBLih9"],
         permissionsForSettings: ["BwyMfDBLih9"],
+        permissionsForImport: ["BwyMfDBLih9"],
         orgUnitSelection: "both",
     });
 
@@ -48,9 +47,7 @@ export function initializeMockServer() {
     mock.onGet("/organisationUnits", {
         params: { userOnly: true, fields: "displayName,id,level,path" },
     }).reply(200, {
-        organisationUnits: [
-            { level: 1, id: "H8RixfF8ugH", path: "/H8RixfF8ugH", displayName: "Global" },
-        ],
+        organisationUnits: [{ level: 1, id: "H8RixfF8ugH", path: "/H8RixfF8ugH", displayName: "Global" }],
     });
 
     // Organisation unit Global
@@ -81,7 +78,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[formName,id,name]],displayName,id,name,periodType",
+                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name]],displayName,id,name,organisationUnits[id,name,path],periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name],id,name]",
             filter: [],
         },
     }).reply(200, {
@@ -105,6 +102,8 @@ export function initializeMockServer() {
                 },
                 attributeValues: [],
                 dataSetElements: [],
+                organisationUnits: [],
+                sections: [],
             },
         ],
     });

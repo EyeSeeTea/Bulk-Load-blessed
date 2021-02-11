@@ -1,5 +1,4 @@
 // <reference types="Cypress" />
-/* global Cypress, cy */
 
 import _ from "lodash";
 
@@ -28,7 +27,7 @@ const dhis2Auth = _(dhis2AuthEnvValue)
     .value();
 
 Cypress.Cookies.defaults({
-    whitelist: "JSESSIONID",
+    preserve: "JSESSIONID",
 });
 
 Cypress.Commands.add("login", (username, _password = null) => {
@@ -57,7 +56,6 @@ Cypress.on("uncaught:exception", (err, runnable) => {
 
 Cypress.Commands.add("waitForStep", stepName => {
     cy.contains(stepName).should($el => {
-        console.log($el);
         expect($el.attr("class")).to.contain("current-step", `Current step should be ${stepName}`);
     });
 });

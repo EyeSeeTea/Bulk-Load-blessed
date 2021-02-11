@@ -48,26 +48,15 @@ export const Select: React.FC<SelectProps> = ({
     return (
         <div>
             <FormControl className={classes.formControl}>
-                {!!placeholder && (
-                    <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>
-                )}
-                <MuiSelect
-                    onChange={handleChange}
-                    value={value ?? stateValue}
-                    autoWidth={true}
-                    {...rest}
-                >
+                {!!placeholder && <InputLabel id="demo-simple-select-label">{placeholder}</InputLabel>}
+                <MuiSelect onChange={handleChange} value={value ?? stateValue} autoWidth={true} {...rest}>
                     {!!defaultLabel && (
                         <MenuItem value="" disabled={!allowEmpty} className={classes.menuItem}>
                             {defaultLabel}
                         </MenuItem>
                     )}
                     {options.map(option => (
-                        <MenuItem
-                            key={option.value}
-                            value={option.value}
-                            className={classes.menuItem}
-                        >
+                        <MenuItem key={option.value} value={option.value} className={classes.menuItem}>
                             {option.label}
                         </MenuItem>
                     ))}

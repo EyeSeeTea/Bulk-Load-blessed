@@ -1,26 +1,21 @@
-import { Button, Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import CloudDoneIcon from "@material-ui/icons/CloudDone";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import {
     ConfirmationDialog,
     ConfirmationDialogProps,
     OrgUnitsSelector,
     useLoading,
     useSnackbar,
-} from "d2-ui-components";
+} from "@eyeseetea/d2-ui-components";
+import { Button, Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
+import CloudDoneIcon from "@material-ui/icons/CloudDone";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import { saveAs } from "file-saver";
 import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import {
-    DataPackage,
-    DataPackageData,
-    DataPackageDataValue,
-} from "../../../domain/entities/DataPackage";
+import { DataPackage, DataPackageData, DataPackageDataValue } from "../../../domain/entities/DataPackage";
 import { AggregatedDataValue } from "../../../domain/entities/DhisDataPackage";
 import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
 import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
@@ -28,7 +23,7 @@ import i18n from "../../../locales";
 import { D2Api, DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
@@ -46,10 +41,10 @@ interface ImportState {
 }
 
 export default function ImportTemplatePage({ settings }: RouteComponentProps) {
+    const { api, compositionRoot } = useAppContext();
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
-    const { api } = useAppContext();
 
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
@@ -60,8 +55,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
-    }, []);
+        compositionRoot.orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
+    }, [compositionRoot]);
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(_.takeRight(orgUnitPaths, 1));
@@ -81,16 +76,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
 
         try {
-            const {
-                dataForm,
-                dataValues,
-                orgUnits,
-            } = await CompositionRoot.attach().templates.analyze(file);
+            const { dataForm, dataValues, orgUnits } = await compositionRoot.templates.analyze(file);
 
             if (!dataForm.writeAccess) {
-                throw new Error(
-                    i18n.t("You don't have write permissions for {{type}} {{name}}", dataForm)
-                );
+                throw new Error(i18n.t("You don't have write permissions for {{type}} {{name}}", dataForm));
             }
 
             setOrgUnitTreeFilter(orgUnits.map(({ id }) => id));
@@ -115,8 +104,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         try {
             const { dataForm, file } = importState;
 
-            const useBuilderOrgUnits =
-                settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
+            const useBuilderOrgUnits = settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
 
             loading.show(true, i18n.t("Reading data..."));
             const result = await dhisConnector.getElementMetadata({
@@ -129,12 +117,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
-            const {
-                custom,
-                rowOffset,
-                colOffset,
-                orgUnits,
-            } = await CompositionRoot.attach().templates.analyze(file);
+            const { custom, rowOffset, colOffset, orgUnits } = await compositionRoot.templates.analyze(file);
 
             // TODO: Remove if condition and use only new code to import templates
             if (custom || dataForm.type === "trackerPrograms") {
@@ -171,9 +154,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     colOffset,
                 });
 
-                const filterOrgUnits = useBuilderOrgUnits
-                    ? cleanOrgUnitPaths(selectedOrgUnits)
-                    : _.map(orgUnits, "id");
+                const filterOrgUnits = useBuilderOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : _.map(orgUnits, "id");
 
                 const removedDataValues = _.remove(
                     //@ts-ignore FIXME Create typings for sheet import code
@@ -202,9 +183,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         },
                         cancelText: i18n.t("Cancel"),
                         saveText: i18n.t("Proceed"),
-                        infoActionText: i18n.t(
-                            "Download data values with invalid organisation units"
-                        ),
+                        infoActionText: i18n.t("Download data values with invalid organisation units"),
                     });
                 }
             }
@@ -219,7 +198,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     const startImport = async (params: ImportTemplateUseCaseParams) => {
         loading.show(true, i18n.t("Importing data..."));
 
-        const result = await CompositionRoot.attach().templates.import(params);
+        const result = await compositionRoot.templates.import(params);
 
         result.match({
             success: syncResults => {
@@ -251,12 +230,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             };
 
                             const programConfig = {
-                                title: i18n.t(
-                                    "Warning: Your upload may result in the generation of duplicates",
-                                    {
-                                        nsSeparator: "-",
-                                    }
-                                ),
+                                title: i18n.t("Warning: Your upload may result in the generation of duplicates", {
+                                    nsSeparator: "-",
+                                }),
                                 message: i18n.t(
                                     "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
                                     { totalExisting: existingDataValues.dataEntries.length }
@@ -324,9 +300,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 },
                                 cancelText: i18n.t("Cancel"),
                                 saveText: i18n.t("Proceed"),
-                                infoActionText: i18n.t(
-                                    "Download data values with invalid organisation units"
-                                ),
+                                infoActionText: i18n.t("Download data values with invalid organisation units"),
                             });
                         }
                         break;
@@ -348,7 +322,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
     };
 
     const downloadInvalidOrganisations = (dataPackage: DataPackage) => {
-        const object = CompositionRoot.attach().form.convertDataPackage(dataPackage);
+        const object = compositionRoot.form.convertDataPackage(dataPackage);
         const json = JSON.stringify(object, null, 4);
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
@@ -395,8 +369,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 info: i18n.t("Import only new records"),
             };
 
-            const { title, message, save, cancel, info } =
-                type === "dataSets" ? dataSetConfig : programConfig;
+            const { title, message, save, cancel, info } = type === "dataSets" ? dataSetConfig : programConfig;
 
             updateDialog({
                 title,
@@ -440,14 +413,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return { newValues: isProgram ? events : dataValues, existingValues: [] };
         }
 
-        const periods = isProgram
-            ? undefined
-            : _.uniq(dataValues?.map(({ period }) => period.toString()));
+        const periods = isProgram ? undefined : _.uniq(dataValues?.map(({ period }) => period.toString()));
         const orgUnits = isProgram
             ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
             : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
 
-        const result = await CompositionRoot.attach().form.getDataPackage({
+        const result = await compositionRoot.form.getDataPackage({
             id,
             periods,
             orgUnits,
@@ -482,11 +453,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 dataValues ?? [],
                 ({ period, orgUnit, attributeOptionCombo: attribute }) => {
                     return result.dataEntries.find(dataPackage =>
-                        compareDataPackages(
-                            id,
-                            { period: String(period), orgUnit, attribute },
-                            dataPackage
-                        )
+                        compareDataPackages(id, { period: String(period), orgUnit, attribute }, dataPackage)
                     );
                 }
             );
@@ -502,11 +469,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         compare: Partial<DataPackageData>,
         periodDays = 0
     ): boolean => {
-        const properties = _.compact([
-            periodDays === 0 ? "period" : undefined,
-            "orgUnit",
-            "attribute",
-        ]);
+        const properties = _.compact([periodDays === 0 ? "period" : undefined, "orgUnit", "attribute"]);
 
         for (const property of properties) {
             const baseValue = _.get(base, property);
@@ -525,8 +488,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return false;
         }
 
-        // Ignore data packages with event id set
-        if (base.id && compare.id) return false;
+        if (base.id && base.id === compare.id) return false;
 
         const exclusions = settings.duplicateExclusion[id] ?? [];
         const filter = (values: DataPackageDataValue[]) =>
@@ -539,8 +501,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 filter(base.dataValues),
                 filter(compare.dataValues),
                 (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
-                    const values = ({ dataElement, value }: DataPackageDataValue) =>
-                        `${dataElement}-${value}`;
+                    const values = ({ dataElement, value }: DataPackageDataValue) => `${dataElement}-${value}`;
                     const intersection = _.intersectionBy(base, compare, values);
                     return base.length === compare.length && intersection.length === base.length;
                 }
@@ -650,32 +611,20 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             {...getRootProps({
                                 className: isDragActive
                                     ? `${classes.stripes} ${
-                                          isDragAccept
-                                              ? classes.acceptStripes
-                                              : classes.rejectStripes
+                                          isDragAccept ? classes.acceptStripes : classes.rejectStripes
                                       }`
                                     : classes.dropzone,
                             })}
                         >
                             <input {...getInputProps()} />
-                            <div
-                                className={classes.dropzoneTextStyle}
-                                hidden={importState?.file !== undefined}
-                            >
-                                <p className={classes.dropzoneParagraph}>
-                                    {i18n.t("Drag and drop file to import")}
-                                </p>
+                            <div className={classes.dropzoneTextStyle} hidden={importState?.file !== undefined}>
+                                <p className={classes.dropzoneParagraph}>{i18n.t("Drag and drop file to import")}</p>
                                 <br />
                                 <CloudUploadIcon className={classes.uploadIconSize} />
                             </div>
-                            <div
-                                className={classes.dropzoneTextStyle}
-                                hidden={importState?.file === undefined}
-                            >
+                            <div className={classes.dropzoneTextStyle} hidden={importState?.file === undefined}>
                                 {importState?.file !== undefined && (
-                                    <p className={classes.dropzoneParagraph}>
-                                        {importState?.file.name}
-                                    </p>
+                                    <p className={classes.dropzoneParagraph}>{importState?.file.name}</p>
                                 )}
                                 <br />
                                 <CloudDoneIcon className={classes.uploadIconSize} />
@@ -694,8 +643,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                         fontSize: "1.2em",
                     }}
                 >
-                    {getNameForModel(importState.dataForm.type)}: {importState.dataForm.name} (
-                    {importState.dataForm.id})
+                    {getNameForModel(importState.dataForm.type)}: {importState.dataForm.name} ({importState.dataForm.id}
+                    )
                     {importState.summary.map((group, idx) => (
                         <li key={idx} style={{ marginLeft: 10, fontSize: "1em" }}>
                             {importState.dataForm.type === "trackerPrograms" ? (
@@ -721,12 +670,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 <div>
                     <FormControlLabel
                         style={{ marginTop: "1em" }}
-                        control={
-                            <Checkbox
-                                checked={overwriteOrgUnits}
-                                onChange={onOverwriteOrgUnitsChange}
-                            />
-                        }
+                        control={<Checkbox checked={overwriteOrgUnits} onChange={onOverwriteOrgUnitsChange} />}
                         label={i18n.t("Select import Organisation Unit")}
                     />
                 </div>
@@ -849,7 +793,7 @@ async function importEventsData(api: D2Api, data: Event[]): Promise<ImportPostRe
 
     const response = await sendEvents(data);
 
-    // See https://jira.dhis2.org/browse/DHIS2-9936
+    // Fixed on versions 2.33.8+ and 2.34.3+ (https://jira.dhis2.org/browse/DHIS2-9936)
     if (response.status === "ERROR") {
         return promiseMap(_.chunk(data, 99), events => sendEvents(events));
     }
@@ -858,11 +802,6 @@ async function importEventsData(api: D2Api, data: Event[]): Promise<ImportPostRe
 }
 
 // TODO: This should be migrated into clean code
-async function importAggregatedData(
-    api: D2Api,
-    data: AggregatedDataValue[]
-): Promise<DataValueSetsPostResponse> {
-    return api
-        .post<DataValueSetsPostResponse>("/dataValueSets", {}, { dataValues: data })
-        .getData();
+async function importAggregatedData(api: D2Api, data: AggregatedDataValue[]): Promise<DataValueSetsPostResponse> {
+    return api.post<DataValueSetsPostResponse>("/dataValueSets", {}, { dataValues: data }).getData();
 }

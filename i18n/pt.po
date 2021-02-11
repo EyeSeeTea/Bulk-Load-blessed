@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
+"POT-Creation-Date: 2021-02-11T10:42:48.164Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,6 +29,28 @@ msgstr "Planilha {{id}} não carregada"
 msgid "Data values - Delete"
 msgstr ""
 
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an administrator."
+msgstr ""
+
 msgid "Cannot read data form id"
 msgstr ""
 
@@ -51,6 +73,10 @@ msgid "Program"
 msgstr "Programa"
 
 msgid "Access to Template Generation"
+msgstr "Acesso à geração de planilhas"
+
+#, fuzzy
+msgid "Access to Import Data"
 msgstr "Acesso à geração de planilhas"
 
 msgid "Access to Settings and Themes"
@@ -315,6 +341,16 @@ msgstr ""
 "Não é possível importar: as versões não correspondem (banco de dados = "
 "{{dbVersion}}, arquivo = {{sheetVersion}})"
 
+msgid "User with no permissions"
+msgstr ""
+
+msgid "It seems this user account does not have any permission. "
+msgstr ""
+
+msgid ""
+"Please get in touch with the admin if you need access to these sections."
+msgstr ""
+
 msgid "You need to select at least one element to export"
 msgstr "Você precisa selecionar pelo menos um elemento para exportar"
 
@@ -329,6 +365,9 @@ msgstr ""
 
 msgid "Downloading template..."
 msgstr "Descarregando a planilha..."
+
+msgid "Couldn't generate template"
+msgstr ""
 
 msgid "Download template"
 msgstr "Descarregar a planilha"
@@ -446,6 +485,9 @@ msgstr ""
 
 msgid "Import data"
 msgstr "Importar dados"
+
+msgid "Home"
+msgstr ""
 
 msgid "Themes"
 msgstr "Temas"

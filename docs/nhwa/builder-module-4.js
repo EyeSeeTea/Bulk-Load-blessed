@@ -14,33 +14,24 @@ let defaultSheet = "Finance";
 let orgUnitCell = "C4";
 let periodCell = "I4";
 
-let getDataElements = ({
-    sheet,
-    tabSelector,
-    letters,
-    dataRowStart,
-    type = "input.entryfield",
-}) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
-        (input, i) => {
-            let id = input.getAttribute("id");
-            let [dataElement, categoryOptionCombo] = id.split("-");
+let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "input.entryfield" }) => {
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map((input, i) => {
+        let id = input.getAttribute("id");
+        let [dataElement, categoryOptionCombo] = id.split("-");
 
-            return {
+        return {
+            type: "cell",
+            orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+            period: { sheet: defaultSheet, type: "cell", ref: periodCell },
+            dataElement: { type: "value", id: dataElement },
+            categoryOption: { type: "value", id: categoryOptionCombo },
+            ref: {
                 type: "cell",
-                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
-                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
-                dataElement: { type: "value", id: dataElement },
-                categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: {
-                    type: "cell",
-                    sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
-                },
-            };
-        }
-    );
+                sheet,
+                ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}`,
+            },
+        };
+    });
 };
 
 let dataSheet1 = [

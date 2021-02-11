@@ -1,4 +1,3 @@
-import { Button, Icon } from "@material-ui/core";
 import {
     ConfirmationDialog,
     ObjectsTable,
@@ -8,12 +7,13 @@ import {
     TableState,
     useLoading,
     useSnackbar,
-} from "d2-ui-components";
+} from "@eyeseetea/d2-ui-components";
+import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { ReactNode, useState } from "react";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
+import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/root/RootPage";
 import { promiseMap } from "../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
@@ -37,6 +37,7 @@ export interface ThemeDetail {
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
 
 export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
@@ -57,7 +58,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const saveTheme = async (theme: Theme) => {
         try {
             loading.show();
-            const errors = await CompositionRoot.attach().themes.save(theme);
+            const errors = await compositionRoot.themes.save(theme);
             if (errors.length === 0) {
                 closeThemeEdit();
                 setThemes(_.uniqBy([theme, ...themes], "id"));
@@ -83,7 +84,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             action: async () => {
                 loading.show();
                 await promiseMap(ids, id => {
-                    return CompositionRoot.attach().themes.delete(id);
+                    return compositionRoot.themes.delete(id);
                 });
                 setSelection([]);
                 setThemes(_.reject(themes, ({ id }) => ids.includes(id)));
@@ -173,9 +174,7 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
         name,
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
-        logo: pictures?.logo?.src ? (
-            <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" />
-        ) : null,
+        logo: pictures?.logo?.src ? <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" /> : null,
         palette,
     }));
 }

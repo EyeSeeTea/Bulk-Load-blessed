@@ -1,20 +1,16 @@
-import Blob from "cross-blob";
-import _ from "lodash";
 import XLSX, {
+    Cell,
     Cell as ExcelCell,
     FormulaError,
     Workbook as ExcelWorkbook,
     Workbook,
-} from "xlsx-populate";
+} from "@eyeseetea/xlsx-populate";
+import Blob from "cross-blob";
+import _ from "lodash";
 import { Sheet } from "../domain/entities/Sheet";
-import { CellRef, Range, SheetRef, ValueRef } from "../domain/entities/Template";
+import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
-import {
-    ExcelRepository,
-    ExcelValue,
-    LoadOptions,
-    ReadCellOptions,
-} from "../domain/repositories/ExcelRepository";
+import { ExcelRepository, ExcelValue, LoadOptions, ReadCellOptions } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { removeCharacters } from "../utils/string";
 
@@ -23,7 +19,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     public async loadTemplate(options: LoadOptions): Promise<string> {
         const workbook = await this.parseFile(options);
-        const id = await this.readCellValue(workbook, { type: "cell", sheet: 0, ref: "A1" });
+        const id = workbook.sheet(0).cell("A1").value();
+
         if (!id || typeof id !== "string") throw new Error("Invalid id");
         const cleanId = id.replace(/^.*?:/, "").trim();
 
@@ -59,11 +56,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return (workbook.outputAsync() as unknown) as Buffer;
     }
 
-    public async findRelativeCell(
-        id: string,
-        location?: SheetRef,
-        cellRef?: CellRef
-    ): Promise<CellRef | undefined> {
+    public async findRelativeCell(id: string, location?: SheetRef, cellRef?: CellRef): Promise<CellRef | undefined> {
         const workbook = await this.getWorkbook(id);
 
         if (location?.type === "cell") {
@@ -79,22 +72,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
-    public async writeCell(
-        id: string,
-        cellRef: CellRef,
-        value: string | number | boolean
-    ): Promise<void> {
+    public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
         const workbook = await this.getWorkbook(id);
-        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
         const definedNames = await this.listDefinedNames(id);
-        const definedName = definedNames.find(
-            name => removeCharacters(name) === removeCharacters(value)
-        );
-        const cell = workbook.sheet(cellRef.sheet).cell(cellRef.ref);
-        const { startCell: destination = cell } =
-            mergedCells.find(range => range.hasCell(cell)) ?? {};
+        const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
 
-        if (!isNaN(Number(value))) {
+        const cell = workbook.sheet(cellRef.sheet)?.cell(cellRef.ref);
+        if (!cell) return;
+
+        const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
+
+        if (!!value && !isNaN(Number(value))) {
             destination.value(Number(value));
         } else if (String(value).startsWith("=")) {
             destination.formula(String(value));
@@ -150,16 +139,17 @@ export class ExcelPopulateRepository extends ExcelRepository {
         cellRef: CellRef,
         formula = false
     ): Promise<ExcelValue | undefined> {
-        const mergedCells = await this.buildMergedCells(workbook, cellRef.sheet);
+        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
         const sheet = workbook.sheet(cellRef.sheet);
         const cell = sheet.cell(cellRef.ref);
-        const { startCell: destination = cell } =
-            mergedCells.find(range => range.hasCell(cell)) ?? {};
+        const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const formulaValue = () =>
-            getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
+        const getFormulaValue = () => getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
 
-        const value = formula ? formulaValue() : destination.value() ?? formulaValue();
+        const formulaValue = getFormulaValue();
+        const textValue = getValue(destination);
+        const value = formula ? formulaValue : textValue ?? formulaValue;
+
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -170,19 +160,21 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
         const xlsxSheet = workbook.sheet(range.sheet);
         if (!xlsxSheet) return [];
+
         const endCell = xlsxSheet.usedRange()?.endCell();
         const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
         const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+        if (rangeRowEnd < rowStart) return [];
 
-        const rangeCells = workbook
-            .sheet(sheet)
-            .range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
+        const rangeCells = workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
 
-        return rangeCells.cells()[0].map(cell => ({
-            type: "cell",
-            sheet,
-            ref: cell.address(),
-        }));
+        return (
+            rangeCells.cells()[0]?.map(cell => ({
+                type: "cell",
+                sheet,
+                ref: cell.address(),
+            })) ?? []
+        );
     }
 
     public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {
@@ -199,44 +191,77 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
 
         const { sheet } = source;
-        const { text, bold, italic, fontSize = 12, fontColor, fillColor } = style;
-        const range = this.buildRange(source, workbook);
+        const {
+            text,
+            bold,
+            italic,
+            fontSize = 12,
+            fontColor,
+            fillColor,
+            wrapText,
+            horizontalAlignment,
+            verticalAlignment = "center",
+            border,
+            borderColor,
+            rowSize,
+            columnSize,
+            merged = false,
+            locked,
+        } = style;
+
         const textStyle = _.omitBy(
             {
                 bold,
                 italic,
                 fontSize,
-                fontColor,
-                fill: fillColor,
+                fontColor: fontColor?.replace(/#/g, ""),
             },
             _.isUndefined
         );
 
+        const cellStyle = _.omitBy(
+            {
+                verticalAlignment,
+                horizontalAlignment,
+                wrapText,
+                fill: fillColor?.replace(/#/g, ""),
+                border,
+                borderColor: borderColor?.replace(/#/g, ""),
+                locked,
+            },
+            _.isUndefined
+        );
+
+        const range =
+            source.type === "range"
+                ? workbook.sheet(sheet).range(String(source.ref))
+                : workbook.sheet(sheet).range(`${source.ref}:${source.ref}`);
+
+        const cells = source.type === "cell" ? [workbook.sheet(sheet).cell(source.ref)] : _.flatten(range.cells());
+
+        if (source.type === "range") range.merged(merged);
+
         try {
-            if (text && range) {
+            for (const cell of cells) {
+                const value = text ?? String(getValue(cell) ?? "");
+                const formula = cell.formula();
+
                 //@ts-ignore Not properly typed
                 const richText = new XLSX.RichText();
-                richText.add(text, textStyle);
+                richText.add(value, textStyle);
 
-                workbook
-                    .sheet(sheet)
-                    .range(range.address() ?? "")
-                    .merged(true)
-                    .style({ verticalAlignment: "center" })
-                    .value(richText);
+                const destination = cell.style(cellStyle).value(richText);
+                if (formula) destination.formula(formula);
 
-                const height = text.split("\n").length * fontSize * 2;
-                range.cells().map(([cell]) => cell.row().hidden(false).height(height));
+                if (rowSize) cell.row().hidden(false).height(rowSize);
+                if (columnSize) cell.column().hidden(false).width(columnSize);
             }
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
     }
 
-    public async getSheetRowsCount(
-        id: string,
-        sheetId: string | number
-    ): Promise<number | undefined> {
+    public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(sheetId);
         if (!sheet) return;
@@ -253,37 +278,113 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
     }
 
-    private async buildMergedCells(workbook: Workbook, sheet: string | number) {
-        //@ts-ignore
-        return Object.keys(workbook.sheet(sheet)._mergeCells).map(key => {
-            const rangeRef = key.includes(":") ? key : `${key}:${key}`;
-            const range = workbook.sheet(sheet).range(rangeRef);
-            const startCell = range.startCell();
-            const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
+    public async getOrCreateSheet(id: string, name: string): Promise<Sheet> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(name) ?? workbook.addSheet(name);
+        const index = _.findIndex(workbook.sheets(), sheet => sheet.name() === name);
 
-            return { range, startCell, hasCell };
-        });
+        return {
+            index,
+            name: sheet.name(),
+            active: sheet.active(),
+        };
+    }
+
+    public buildColumnName(column: number | string): string {
+        if (typeof column === "string") return column;
+
+        let dividend = column;
+        let name = "";
+        let modulo = 0;
+
+        while (dividend > 0) {
+            modulo = (dividend - 1) % 26;
+            name = String.fromCharCode("A".charCodeAt(0) + modulo) + name;
+            dividend = Math.floor((dividend - modulo) / 26);
+        }
+
+        return name;
+    }
+
+    private listMergedCells(workbook: Workbook, sheet: string | number): MergedCell[] {
+        return workbook
+            .sheet(sheet)
+            ?.merged()
+            .map(range => {
+                const startCell = range.startCell();
+                const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
+
+                return { range, startCell, hasCell };
+            });
     }
 
     private async getWorkbook(id: string) {
-        if (!this.workbooks[id]) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
-        return this.workbooks[id];
-    }
+        const workbook = this.workbooks[id];
+        if (!workbook) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
 
-    private buildRange({ type, ref, sheet }: SheetRef, workbook: ExcelWorkbook) {
-        return type === "range"
-            ? workbook.sheet(sheet).range(String(ref))
-            : workbook.sheet(sheet).range(`${ref}:${ref}`);
+        return workbook;
     }
 
     public async listDefinedNames(id: string): Promise<string[]> {
         const workbook = await this.getWorkbook(id);
         try {
-            //@ts-ignore Not typed, need extension
             return workbook.definedName();
         } catch (error) {
             return [];
         }
+    }
+
+    public async defineName(id: string, name: string, cell: CellRef): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const location = workbook.sheet(cell.sheet).cell(cell.ref);
+        workbook.definedName(name, location);
+    }
+
+    public async mergeCells(id: string, range: Range): Promise<void> {
+        const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
+
+        const workbook = await this.getWorkbook(id);
+        const xlsxSheet = workbook.sheet(range.sheet);
+
+        const endCell = xlsxSheet.usedRange()?.endCell();
+        const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
+        const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+
+        if (rangeRowEnd >= rowStart) {
+            workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
+        }
+    }
+
+    public async hideCells(id: string, ref: ColumnRef | RowRef, hidden = true): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(ref.sheet);
+        const item = ref.type === "row" ? sheet.row(ref.ref) : sheet.column(ref.ref);
+        item.hidden(hidden);
+    }
+
+    public async hideSheet(id: string, sheet: string | number, hidden = true): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(sheet).hidden(hidden);
+    }
+
+    public async protectSheet(id: string, sheet: string | number, password: string): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(sheet).protected(password, {
+            selectLockedCells: true,
+        });
+    }
+
+    public async setActiveCell(id: string, cell: CellRef): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        workbook.sheet(cell.sheet).activeCell(cell.ref);
+    }
+
+    public async setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(ref.sheet);
+        const item = ref.type === "range" ? sheet.range(ref.ref) : sheet.cell(ref.ref);
+        // @ts-ignore Not properly typed (https://app.clickup.com/t/e14mnv)
+        item.dataValidation(formula);
     }
 }
 
@@ -296,12 +397,8 @@ interface SheetWithValidations extends XLSX.Sheet {
     dataValidation(address: string): false | { type: string; formula1: string };
 }
 
-/* Get formula of associated cell (though data valudation). Basic implementation. No caching */
-function getFormulaWithValidation(
-    workbook: XLSX.Workbook,
-    sheet: SheetWithValidations,
-    cell: XLSX.Cell
-) {
+/* Get formula of associated cell (through data valudation). Basic implementation. No caching */
+function getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
     try {
         return _getFormulaWithValidation(workbook, sheet, cell);
     } catch (err) {
@@ -310,13 +407,9 @@ function getFormulaWithValidation(
     }
 }
 
-function _getFormulaWithValidation(
-    workbook: XLSX.Workbook,
-    sheet: SheetWithValidations,
-    cell: XLSX.Cell
-) {
+function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
     const defaultValue = cell.formula();
-    const value = cell.value();
+    const value = getValue(cell);
     if (defaultValue || !value) return defaultValue;
 
     // Support only for data validations over ranges
@@ -351,19 +444,39 @@ function _getFormulaWithValidation(
     if (!validation || validation.type !== "list" || !validation.formula1) return defaultValue;
 
     const [sheetName, rangeAddress] = validation.formula1.replace(/^=/, "").split("!", 2);
-    const validationSheet = sheetName
-        ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, ""))
-        : sheet;
-    if (!validationSheet) return defaultValue;
+    const validationSheet = sheetName ? workbook.sheet(sheetName.replace(/^'/, "").replace(/'$/, "")) : sheet;
+
+    if (!validationSheet || !rangeAddress) return defaultValue;
     const validationRange = validationSheet.range(rangeAddress);
 
     const formulaByValue = _(validationRange.cells())
         .map(cells => cells[0])
-        .map(cell => [cell.value(), cell.formula()])
+        .map(cell => [getValue(cell), cell.formula()])
         .fromPairs()
         .value();
 
     return formulaByValue[String(value)] || defaultValue;
 }
 
+function getValue(cell: Cell): ExcelValue | undefined {
+    const value = cell.value();
+
+    if (typeof value === "object" && value.constructor.name === "RichText") {
+        // @ts-ignore This should be improved on xlsx-populate
+        const result = value.text();
+
+        // FIXME: There's an error with RichText.text()
+        if (result === "undefined") return undefined;
+        return result;
+    }
+
+    return value;
+}
+
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
+
+type MergedCell = {
+    range: XLSX.Range;
+    startCell: XLSX.Cell;
+    hasCell: (cell: ExcelCell) => boolean | undefined;
+};

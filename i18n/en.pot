@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2020-12-30T08:23:30.873Z\n"
-"PO-Revision-Date: 2020-12-30T08:23:30.873Z\n"
+"POT-Creation-Date: 2021-02-11T10:42:48.164Z\n"
+"PO-Revision-Date: 2021-02-11T10:42:48.164Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -27,6 +27,29 @@ msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Data values - Delete"
+msgstr ""
+
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an "
+"administrator."
 msgstr ""
 
 msgid "Cannot read data form id"
@@ -51,6 +74,9 @@ msgid "Program"
 msgstr ""
 
 msgid "Access to Template Generation"
+msgstr ""
+
+msgid "Access to Import Data"
 msgstr ""
 
 msgid "Access to Settings and Themes"
@@ -309,6 +335,15 @@ msgid ""
 "file={{sheetVersion}})"
 msgstr ""
 
+msgid "User with no permissions"
+msgstr ""
+
+msgid "It seems this user account does not have any permission. "
+msgstr ""
+
+msgid "Please get in touch with the admin if you need access to these sections."
+msgstr ""
+
 msgid "You need to select at least one element to export"
 msgstr ""
 
@@ -319,6 +354,9 @@ msgid "You need to select start and end dates to populate template"
 msgstr ""
 
 msgid "Downloading template..."
+msgstr ""
+
+msgid "Couldn't generate template"
 msgstr ""
 
 msgid "Download template"
@@ -424,6 +462,9 @@ msgid "No capture org unit match element org units"
 msgstr ""
 
 msgid "Import data"
+msgstr ""
+
+msgid "Home"
 msgstr ""
 
 msgid "Themes"

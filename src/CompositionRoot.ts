@@ -13,7 +13,6 @@ import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
 import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
-import { DownloadCustomTemplateUseCase } from "./domain/usecases/DownloadCustomTemplateUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
@@ -34,100 +33,48 @@ export interface CompositionRootOptions {
     mockApi?: D2Api;
 }
 
-export class CompositionRoot {
-    private static compositionRoot: CompositionRoot;
-    private readonly instance: InstanceRepository;
-    private readonly config: ConfigRepository;
-    private readonly storage: StorageRepository;
-    private readonly templateManager: TemplateRepository;
-    private readonly excelReader: ExcelRepository;
+export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+    const instance: InstanceRepository = new InstanceDhisRepository(dhisInstance, mockApi);
+    const config: ConfigRepository = new ConfigWebRepository(appConfig);
+    const storage: StorageRepository =
+        config.getAppStorage() === "dataStore"
+            ? new StorageDataStoreRepository(dhisInstance, mockApi)
+            : new StorageConstantRepository(dhisInstance, mockApi);
+    const templateManager: TemplateRepository = new TemplateWebRepository(storage);
+    const excelReader: ExcelRepository = new ExcelPopulateRepository();
 
-    constructor({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
-        this.instance = new InstanceDhisRepository(dhisInstance, mockApi);
-        this.config = new ConfigWebRepository(appConfig);
-        this.storage =
-            this.config.getAppStorage() === "dataStore"
-                ? new StorageDataStoreRepository(dhisInstance, mockApi)
-                : new StorageConstantRepository(dhisInstance, mockApi);
-        this.templateManager = new TemplateWebRepository(this.storage);
-        this.excelReader = new ExcelPopulateRepository();
-    }
-
-    public static initialize(options: CompositionRootOptions) {
-        if (!CompositionRoot.compositionRoot) {
-            CompositionRoot.compositionRoot = new CompositionRoot(options);
-        }
-    }
-
-    public static attach(): CompositionRoot {
-        if (!CompositionRoot.compositionRoot) {
-            throw new Error("Composition root has not been initialized");
-        }
-        return CompositionRoot.compositionRoot;
-    }
-
-    public get orgUnits() {
-        return getExecute({
-            getUserRoots: new GetOrgUnitRootsUseCase(this.instance),
-            getRootsByForm: new GetFormOrgUnitRootsUseCase(this.instance),
-        });
-    }
-
-    public get form() {
-        return getExecute({
-            getDataPackage: new GetFormDataPackageUseCase(this.instance),
-            convertDataPackage: new ConvertDataPackageUseCase(this.instance),
-        });
-    }
-
-    public get templates() {
-        return getExecute({
-            analyze: new AnalyzeTemplateUseCase(
-                this.instance,
-                this.templateManager,
-                this.excelReader
-            ),
-            download: new DownloadTemplateUseCase(
-                this.instance,
-                this.templateManager,
-                this.excelReader
-            ),
-            downloadCustom: new DownloadCustomTemplateUseCase(
-                this.templateManager,
-                this.excelReader,
-                this.instance
-            ),
-            import: new ImportTemplateUseCase(
-                this.instance,
-                this.templateManager,
-                this.excelReader
-            ),
-            list: new ListDataFormsUseCase(this.instance),
-        });
-    }
-
-    public get themes() {
-        return getExecute({
-            list: new ListThemesUseCase(this.templateManager),
-            save: new SaveThemeUseCase(this.templateManager),
-            delete: new DeleteThemeUseCase(this.templateManager),
-        });
-    }
-
-    public get settings() {
-        return getExecute({
-            getDefault: new GetDefaultSettingsUseCase(this.config),
-            read: new ReadSettingsUseCase(this.storage),
-            write: new WriteSettingsUseCase(this.storage),
-        });
-    }
-
-    public get languages() {
-        return getExecute({
-            list: new ListLanguagesUseCase(this.instance),
-        });
-    }
+    return {
+        orgUnits: getExecute({
+            getUserRoots: new GetOrgUnitRootsUseCase(instance),
+            getRootsByForm: new GetFormOrgUnitRootsUseCase(instance),
+        }),
+        form: getExecute({
+            getDataPackage: new GetFormDataPackageUseCase(instance),
+            convertDataPackage: new ConvertDataPackageUseCase(instance),
+        }),
+        templates: getExecute({
+            analyze: new AnalyzeTemplateUseCase(instance, templateManager, excelReader),
+            download: new DownloadTemplateUseCase(instance, templateManager, excelReader),
+            import: new ImportTemplateUseCase(instance, templateManager, excelReader),
+            list: new ListDataFormsUseCase(instance),
+        }),
+        themes: getExecute({
+            list: new ListThemesUseCase(templateManager),
+            save: new SaveThemeUseCase(templateManager),
+            delete: new DeleteThemeUseCase(templateManager),
+        }),
+        settings: getExecute({
+            getDefault: new GetDefaultSettingsUseCase(config),
+            read: new ReadSettingsUseCase(storage),
+            write: new WriteSettingsUseCase(storage),
+        }),
+        languages: getExecute({
+            list: new ListLanguagesUseCase(instance),
+        }),
+    };
 }
+
+export type CompositionRoot = ReturnType<typeof getCompositionRoot>;
 
 function getExecute<UseCases extends Record<Key, UseCase>, Key extends keyof UseCases>(
     useCases: UseCases

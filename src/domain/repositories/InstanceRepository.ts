@@ -1,12 +1,13 @@
 import { Moment } from "moment";
+import { DataStore } from "../../types/d2-api";
 import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
 import { AggregatedPackage, EventsPackage } from "../entities/DhisDataPackage";
 import { Locale } from "../entities/Locale";
 import { OrgUnit } from "../entities/OrgUnit";
 import { Id, NamedRef } from "../entities/ReferenceObject";
-import { Program, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { SynchronizationResult } from "../entities/SynchronizationResult";
+import { Program, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 
 export interface GetDataPackageParams {
     type: DataFormType;
@@ -21,9 +22,11 @@ export interface GetDataPackageParams {
 export interface GetDataFormsParams {
     ids?: string[];
     type?: Array<"dataSets" | "programs">;
+    fields?: object;
 }
 
 export interface InstanceRepository {
+    getDataStore(namespace: string): DataStore;
     getUserOrgUnits(): Promise<OrgUnit[]>;
     getDataForms(options?: GetDataFormsParams): Promise<DataForm[]>;
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;

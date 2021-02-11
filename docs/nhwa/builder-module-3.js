@@ -14,33 +14,24 @@ let defaultSheet = "Regulation";
 let orgUnitCell = "C4";
 let periodCell = "I4";
 
-let getDataElements = ({
-    sheet,
-    tabSelector,
-    letters,
-    dataRowStart,
-    type = "input.entryfield",
-}) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
-        (input, i) => {
-            let id = input.getAttribute("id");
-            let [dataElement, categoryOptionCombo] = id.split("-");
+let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "input.entryfield" }) => {
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map((input, i) => {
+        let id = input.getAttribute("id");
+        let [dataElement, categoryOptionCombo] = id.split("-");
 
-            return {
+        return {
+            type: "cell",
+            orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+            period: { sheet: defaultSheet, type: "cell", ref: periodCell },
+            dataElement: { type: "value", id: dataElement },
+            categoryOption: { type: "value", id: categoryOptionCombo },
+            ref: {
                 type: "cell",
-                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
-                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
-                dataElement: { type: "value", id: dataElement },
-                categoryOption: { type: "value", id: categoryOptionCombo },
-                ref: {
-                    type: "cell",
-                    sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
-                },
-            };
-        }
-    );
+                sheet,
+                ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}`,
+            },
+        };
+    });
 };
 
 let dataSheet1 = [
@@ -64,26 +55,7 @@ let dataSheet2 = [
     ...getDataElements({
         sheet: "Acreditation",
         tabSelector: "#tab1",
-        letters: [
-            "D",
-            "E",
-            "F",
-            "H",
-            "I",
-            "J",
-            "L",
-            "M",
-            "N",
-            "P",
-            "Q",
-            "R",
-            "T",
-            "U",
-            "V",
-            "X",
-            "Y",
-            "Z",
-        ],
+        letters: ["D", "E", "F", "H", "I", "J", "L", "M", "N", "P", "Q", "R", "T", "U", "V", "X", "Y", "Z"],
         dataRowStart: 8,
         type: "input.entrytrueonly",
     }),

@@ -1,9 +1,8 @@
+import { DatePicker, OrgUnitsSelector } from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
-import { DatePicker, OrgUnitsSelector } from "d2-ui-components";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
@@ -11,7 +10,7 @@ import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplate
 import i18n from "../../../locales";
 import { PartialBy } from "../../../types/utils";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
 import { getTemplateId } from "../../logic/sheetBuilder";
 import { Select, SelectOption } from "../select/Select";
@@ -37,7 +36,7 @@ export interface TemplateSelectorProps {
 
 export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
     const classes = useStyles();
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
 
     const [dataSource, setDataSource] = useState<DataSource>();
     const [templates, setTemplates] = useState<{ value: string; label: string }[]>([]);
@@ -74,38 +73,38 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     }, [settings]);
 
     useEffect(() => {
-        CompositionRoot.attach()
-            .templates.list()
-            .then(({ dataSets, programs }) => {
-                const dataSource: DataSource = {
-                    dataSets,
-                    programs,
-                    all: _.sortBy([...dataSets, ...programs], ["name"]),
-                };
+        compositionRoot.templates.list().then(({ dataSets, programs }) => {
+            const dataSource: DataSource = {
+                dataSets,
+                programs,
+                all: _.sortBy([...dataSets, ...programs], ["name"]),
+            };
 
-                setDataSource(dataSource);
-                if (models.length > 0) {
-                    const model = models[0].value;
-                    setTemplates(modelToSelectOption(dataSource[model]));
-                    setSelectedModel(model);
-                }
-            });
-    }, [models]);
+            setDataSource(dataSource);
+            const model = models[0]?.value;
+            const dataSourceModel = dataSource[model ?? ""];
+
+            if (model && dataSourceModel) {
+                setTemplates(modelToSelectOption(dataSourceModel));
+                setSelectedModel(model);
+            }
+        });
+    }, [models, compositionRoot]);
 
     useEffect(() => {
         const { type, id } = state;
         if (type && id) {
-            CompositionRoot.attach().orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
+            compositionRoot.orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
         }
-    }, [state]);
+    }, [state, compositionRoot]);
 
     useEffect(() => {
-        CompositionRoot.attach().orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
-    }, []);
+        compositionRoot.orgUnits.getUserRoots().then(setOrgUnitTreeRootIds);
+    }, [compositionRoot]);
 
     useEffect(() => {
-        CompositionRoot.attach().languages.list().then(setAvailableLanguages);
-    }, []);
+        compositionRoot.languages.list().then(setAvailableLanguages);
+    }, [compositionRoot]);
 
     useEffect(() => {
         const { type, id, ...rest } = state;
@@ -125,7 +124,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
-        const options = modelToSelectOption(dataSource[value]);
+        const options = modelToSelectOption(dataSource[value] ?? []);
 
         setSelectedModel(value);
         setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
@@ -139,7 +138,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const onTemplateChange = ({ value }: SelectOption) => {
         if (dataSource) {
             const { periodType, type, readAccess = false } =
-                dataSource[selectedModel].find(({ id }) => id === value) ?? {};
+                dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {
@@ -278,18 +277,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
                     <div>
                         <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={filterOrgUnits}
-                                    onChange={onFilterOrgUnitsChange}
-                                />
-                            }
+                            control={<Checkbox checked={filterOrgUnits} onChange={onFilterOrgUnitsChange} />}
                             label={
                                 state.templateType === "custom"
                                     ? i18n.t("Select organisation unit to populate data")
-                                    : i18n.t(
-                                          "Select available organisation units to include in the template"
-                                      )
+                                    : i18n.t("Select available organisation units to include in the template")
                             }
                         />
                     </div>
@@ -312,9 +304,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     }}
                                     withElevation={false}
                                     singleSelection={state.templateType === "custom"}
-                                    typeInput={
-                                        state.templateType === "custom" ? "radio" : undefined
-                                    }
+                                    typeInput={state.templateType === "custom" ? "radio" : undefined}
                                 />
                             </div>
                         ) : (
@@ -378,10 +368,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     : undefined
                             }
                             maxDate={moment.min(
-                                _.compact([
-                                    state.type === "dataSets" && state.endDate,
-                                    state.populateEndDate,
-                                ])
+                                _.compact([state.type === "dataSets" && state.endDate, state.populateEndDate])
                             )}
                             views={datePickerFormat?.views}
                             format={datePickerFormat?.format ?? "DD/MM/YYYY"}
@@ -395,10 +382,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             value={state.populateEndDate ?? null}
                             onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
                             minDate={moment.max(
-                                _.compact([
-                                    state.type === "dataSets" && state.startDate,
-                                    state.populateStartDate,
-                                ])
+                                _.compact([state.type === "dataSets" && state.startDate, state.populateStartDate])
                             )}
                             maxDate={
                                 state.type === "dataSets"

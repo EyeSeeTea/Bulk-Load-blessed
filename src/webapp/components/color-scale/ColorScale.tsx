@@ -16,11 +16,7 @@ export const ColorScale = ({ width, colors, onClick = () => {} }: ColorScaleProp
     return (
         <ul className={classes.scale} onClick={onClick} style={{ ...(width && { width }) }}>
             {colors.map((color, index) => (
-                <li
-                    key={index}
-                    className={classes.item}
-                    style={{ backgroundColor: color, width: itemWidth }}
-                />
+                <li key={index} className={classes.item} style={{ backgroundColor: color, width: itemWidth }} />
             ))}
         </ul>
     );

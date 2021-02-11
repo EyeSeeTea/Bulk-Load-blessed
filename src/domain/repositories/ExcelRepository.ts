@@ -1,5 +1,5 @@
 import { Sheet } from "../entities/Sheet";
-import { CellRef, Range, SheetRef, ValueRef } from "../entities/Template";
+import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
 export type LoadOptions = WebLoadOptions | FileLoadOptions;
@@ -27,28 +27,30 @@ export interface FileLoadOptions extends BaseLoadOptions {
 }
 
 export abstract class ExcelRepository {
-    public abstract async loadTemplate(options: LoadOptions): Promise<string>;
-    public abstract async toBlob(id: string): Promise<Blob>;
-    public abstract async toBuffer(id: string): Promise<Buffer>;
-    public abstract async findRelativeCell(
-        id: string,
-        location?: SheetRef,
-        cell?: CellRef
-    ): Promise<CellRef | undefined>;
-    public abstract async writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
-    public abstract async readCell(
+    public abstract loadTemplate(options: LoadOptions): Promise<string>;
+    public abstract toBlob(id: string): Promise<Blob>;
+    public abstract toBuffer(id: string): Promise<Buffer>;
+    public abstract findRelativeCell(id: string, location?: SheetRef, cell?: CellRef): Promise<CellRef | undefined>;
+    public abstract writeCell(id: string, cellRef: CellRef, value: ExcelValue): Promise<void>;
+    public abstract readCell(
         id: string,
         cellRef?: CellRef | ValueRef,
         options?: ReadCellOptions
     ): Promise<ExcelValue | undefined>;
-    public abstract async getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
-    public abstract async addPicture(id: string, location: SheetRef, file: File): Promise<void>;
-    public abstract async styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
-    public abstract async getSheets(id: string): Promise<Sheet[]>;
-    public abstract async getConstants(id: string): Promise<Record<string, string>>;
-    public abstract async getSheetRowsCount(
-        id: string,
-        sheetId: string | number
-    ): Promise<number | undefined>;
-    public abstract async listDefinedNames(id: string): Promise<string[]>;
+    public abstract getCellsInRange(id: string, range: Range): Promise<CellRef[]>;
+    public abstract addPicture(id: string, location: SheetRef, file: File): Promise<void>;
+    public abstract styleCell(id: string, source: SheetRef, style: ThemeStyle): Promise<void>;
+    public abstract getSheets(id: string): Promise<Sheet[]>;
+    public abstract getConstants(id: string): Promise<Record<string, string>>;
+    public abstract getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined>;
+    public abstract listDefinedNames(id: string): Promise<string[]>;
+    public abstract getOrCreateSheet(id: string, name: string): Promise<Sheet>;
+    public abstract buildColumnName(column: number | string): string;
+    public abstract defineName(id: string, name: string, cell: CellRef): Promise<void>;
+    public abstract mergeCells(id: string, range: Range): Promise<void>;
+    public abstract hideCells(id: string, ref: ColumnRef | RowRef, hidden?: boolean): Promise<void>;
+    public abstract hideSheet(id: string, sheet: string | number, hidden?: boolean): Promise<void>;
+    public abstract protectSheet(id: string, sheet: string | number, password: string): Promise<void>;
+    public abstract setActiveCell(id: string, cell: CellRef): Promise<void>;
+    public abstract setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void>;
 }

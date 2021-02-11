@@ -12,46 +12,33 @@ let defaultSheet = "Demographic";
 let orgUnitCell = "C4";
 let periodCell = "Q4";
 
-let sourceTypeRows = _.range(9, 68).filter(row => ![18, 24].includes(row)).map(row => ({ row, nrOfElements: 12 }));
+let sourceTypeRows = _.range(9, 68)
+    .filter(row => ![18, 24].includes(row))
+    .map(row => ({ row, nrOfElements: 12 }));
 let sourceTypeTotalRows = [8, 18, 24].map(row => ({ row, nrOfElements: 12 }));
 
-let getDataElements = ({
-    sheet,
-    tabSelector,
-    letters,
-    dataRowStart,
-    type = "input.entryfield",
-}) => {
-    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map(
-        (input, i) => {
-            let id = input.getAttribute("id");
-            let [dataElement, categoryOptionCombo] = id.split("-");
+let getDataElements = ({ sheet, tabSelector, letters, dataRowStart, type = "input.entryfield" }) => {
+    return Array.from(document.querySelector(tabSelector).querySelectorAll(type)).map((input, i) => {
+        let id = input.getAttribute("id");
+        let [dataElement, categoryOptionCombo] = id.split("-");
 
-            return {
+        return {
+            type: "cell",
+            orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
+            period: { sheet: defaultSheet, type: "cell", ref: periodCell },
+            dataElement: { type: "value", id: dataElement },
+            categoryOption: { type: "value", id: categoryOptionCombo },
+            skipPopulate: input.disabled,
+            ref: {
                 type: "cell",
-                orgUnit: { sheet: defaultSheet, type: "cell", ref: orgUnitCell },
-                period: { sheet: defaultSheet, type: "cell", ref: periodCell },
-                dataElement: { type: "value", id: dataElement },
-                categoryOption: { type: "value", id: categoryOptionCombo },
-                skipPopulate: input.disabled,
-                ref: {
-                    type: "cell",
-                    sheet,
-                    ref: `${letters[i % letters.length]}${parseInt(i / letters.length) +
-                        dataRowStart}`,
-                },
-            };
-        }
-    );
+                sheet,
+                ref: `${letters[i % letters.length]}${parseInt(i / letters.length) + dataRowStart}`,
+            },
+        };
+    });
 };
 
-let getDataElementsCustomRows = ({
-    sheet,
-    tabSelector,
-    letters,
-    rows,
-    type = "input.entryfield",
-}) => {
+let getDataElementsCustomRows = ({ sheet, tabSelector, letters, rows, type = "input.entryfield" }) => {
     let entryfields = Array.from(document.querySelector(tabSelector).querySelectorAll(type));
     let elementCount = 0;
     let allFields = rows.map((row, i) => {

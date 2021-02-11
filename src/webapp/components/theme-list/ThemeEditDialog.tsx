@@ -1,5 +1,5 @@
 import { makeStyles, TextField, Typography } from "@material-ui/core";
-import { ConfirmationDialog } from "d2-ui-components";
+import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
@@ -17,12 +17,7 @@ interface ThemeEditDialogProps {
     onCancel: () => void;
 }
 
-export default function ThemeEditDialog({
-    type,
-    theme: editTheme,
-    onSave,
-    onCancel,
-}: ThemeEditDialogProps) {
+export default function ThemeEditDialog({ type, theme: editTheme, onSave, onCancel }: ThemeEditDialogProps) {
     const classes = useStyles();
     const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
 
@@ -60,9 +55,7 @@ export default function ThemeEditDialog({
             const fontSize = field === "title" ? 22 : 12;
             const italic = field === "subtitle";
 
-            updateTheme(theme =>
-                theme.updateSection(field, text ? { text, fontSize, italic } : undefined)
-            );
+            updateTheme(theme => theme.updateSection(field, text ? { text, fontSize, italic } : undefined));
         };
     };
 
@@ -70,6 +63,8 @@ export default function ThemeEditDialog({
 
     const changeColorOption = ({ value }: SelectOption) => {
         const fixedColor = theme.palette[0];
+        if (!fixedColor) return;
+
         const defaultPalette = generatorOriginalPalette["default"][9];
         const palette = theme.palette.length > 1 ? theme.palette : defaultPalette;
 

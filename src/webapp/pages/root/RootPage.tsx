@@ -1,19 +1,19 @@
 //@ts-ignore
 import { HeaderBar } from "@dhis2/ui-widgets";
+import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles, Paper } from "@material-ui/core";
-import { useSnackbar } from "d2-ui-components";
 import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
-import { CompositionRoot } from "../../../CompositionRoot";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { AppDrawer, AppDrawerToggle } from "../../components/drawer/Drawer";
-import { useAppContext } from "../../contexts/api-context";
+import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
 import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
 import ImportTemplatePage from "../import-template/ImportTemplatePage";
 import SettingsPage from "../settings/SettingsPage";
 import ThemesPage from "../themes/ThemesPage";
+import BlankTemplatePage from "../blank-template/BlankTemplatePage";
 
 export interface RouteComponentProps {
     settings: Settings;
@@ -34,7 +34,7 @@ export interface AppRoute {
 }
 
 const Root = () => {
-    const { api } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const classes = useStyles();
 
@@ -43,17 +43,26 @@ const Root = () => {
     const [themes, setThemes] = useState<Theme[]>([]);
 
     useEffect(() => {
-        Settings.build(api)
+        Settings.build(api, compositionRoot)
             .then(setSettings)
             .catch(err => snackbar.error(`Cannot load settings: ${err.message || err.toString()}`));
-    }, [api, snackbar]);
+    }, [api, snackbar, compositionRoot]);
 
     useEffect(() => {
-        CompositionRoot.attach().themes.list().then(setThemes);
-    }, []);
+        compositionRoot.themes.list().then(setThemes);
+    }, [compositionRoot]);
 
     const routes: AppRoute[] = useMemo(
         () => [
+            {
+                key: "home",
+                name: i18n.t("Home"),
+                icon: "home",
+                path: "/home",
+                section: "main",
+                auth: (settings: Settings) => settings.isBlankPageVisibleForCurrentUser(),
+                component: () => <BlankTemplatePage />,
+            },
             {
                 key: "download",
                 name: i18n.t("Download template"),
@@ -69,6 +78,7 @@ const Root = () => {
                 icon: "cloud_upload",
                 path: "/import",
                 section: "main",
+                auth: (settings: Settings) => settings.isImportDataVisibleForCurrentUser(),
                 component: (props: RouteComponentProps) => <ImportTemplatePage {...props} />,
             },
             {
@@ -108,19 +118,11 @@ const Root = () => {
                 <AppDrawer isOpen={isOpen} routes={userRoutes} />
                 <AppDrawerToggle isOpen={isOpen} setOpen={setOpen} />
 
-                <div
-                    className={`${classes.content} ${
-                        isOpen ? classes.contentOpen : classes.contentCollapsed
-                    }`}
-                >
+                <div className={`${classes.content} ${isOpen ? classes.contentOpen : classes.contentCollapsed}`}>
                     <Paper className={classes.paper}>
                         <Switch>
                             {defaultRoute && (
-                                <Route
-                                    exact={true}
-                                    path={"/"}
-                                    render={() => <Redirect to={defaultRoute.path} />}
-                                />
+                                <Route exact={true} path={"/"} render={() => <Redirect to={defaultRoute.path} />} />
                             )}
 
                             {userRoutes.map(({ key, path, component }) => (

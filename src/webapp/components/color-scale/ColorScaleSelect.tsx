@@ -26,12 +26,11 @@ export const ColorScaleSelect = ({
     const classes = useStyles();
     const [anchor, setAnchor] = useState<Element | null>(null);
 
-    const availablePalettes = disableDefaultPalettes
-        ? additionalPalettes
-        : { ...additionalPalettes, ...palettes };
+    const availablePalettes = disableDefaultPalettes ? additionalPalettes : { ...additionalPalettes, ...palettes };
 
     const scale = getColorScale(availablePalettes, selected);
-    const selectedColors = scale ? availablePalettes[scale][selected.length] : selected;
+    const palette = scale ? availablePalettes[scale] : undefined;
+    const selectedColors = palette ? palette[selected.length] ?? selected : selected;
 
     // Show/hide popover with allowed color scales
     const showColorScales = (event: React.MouseEvent) => setAnchor(event.currentTarget);
@@ -58,14 +57,13 @@ export const ColorScaleSelect = ({
                     onClose={hideColorScales}
                 >
                     {_.keys(availablePalettes).map((scale, index) => {
-                        const colors = availablePalettes[scale][selectedColors.length];
+                        const palette = availablePalettes[scale];
+                        if (!palette) return null;
+
+                        const colors = palette[selectedColors.length];
                         return colors ? (
                             <div key={index} className={classes.scaleItem}>
-                                <ColorScale
-                                    colors={colors}
-                                    onClick={() => onColorScaleSelect(scale)}
-                                    width={width}
-                                />
+                                <ColorScale colors={colors} onClick={() => onColorScaleSelect(scale)} width={width} />
                             </div>
                         ) : null;
                     })}

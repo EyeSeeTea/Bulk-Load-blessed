@@ -1,43 +1,37 @@
 import _ from "lodash";
 import moment from "moment";
-import { DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
+import { DataElement, DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
-import {
-    AggregatedDataValue,
-    AggregatedPackage,
-    Event,
-    EventsPackage,
-} from "../domain/entities/DhisDataPackage";
+import { AggregatedDataValue, AggregatedPackage, Event, EventsPackage } from "../domain/entities/DhisDataPackage";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { Locale } from "../domain/entities/Locale";
 import { OrgUnit } from "../domain/entities/OrgUnit";
+import { NamedRef } from "../domain/entities/ReferenceObject";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
 import { Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
 import {
+    BuilderMetadata,
     GetDataFormsParams,
     GetDataPackageParams,
     InstanceRepository,
-    BuilderMetadata,
 } from "../domain/repositories/InstanceRepository";
 import i18n from "../locales";
 import {
     D2Api,
     D2ApiDefault,
+    D2DataElementSchema,
+    DataStore,
     DataValueSetsGetResponse,
     DataValueSetsPostResponse,
     Id,
     Pager,
+    SelectedPick,
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
 import { promiseMap } from "../webapp/utils/promises";
 import { postEvents } from "./Dhis2Events";
-import {
-    getProgram,
-    getTrackedEntityInstances,
-    updateTrackedEntityInstances,
-} from "./Dhis2TrackedEntityInstances";
-import { NamedRef } from "../domain/entities/ReferenceObject";
+import { getProgram, getTrackedEntityInstances, updateTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
 
 interface PagedEventsApiResponse extends EventsPackage {
     pager: Pager;
@@ -50,10 +44,11 @@ export class InstanceDhisRepository implements InstanceRepository {
         this.api = mockApi ?? new D2ApiDefault({ baseUrl: url });
     }
 
-    public async getDataForms({
-        type = ["dataSets", "programs"],
-        ids,
-    }: GetDataFormsParams = {}): Promise<DataForm[]> {
+    public getDataStore(namespace: string): DataStore {
+        return this.api.dataStore(namespace);
+    }
+
+    public async getDataForms({ type = ["dataSets", "programs"], ids }: GetDataFormsParams = {}): Promise<DataForm[]> {
         const dataSets = type.includes("dataSets") ? await this.getDataSets(ids) : [];
         const programs = type.includes("programs") ? await this.getPrograms(ids) : [];
 
@@ -65,39 +60,38 @@ export class InstanceDhisRepository implements InstanceRepository {
         const { objects } = await this.api.models.dataSets
             .get({
                 paging: false,
-                fields: {
-                    id: true,
-                    displayName: true,
-                    name: true,
-                    attributeValues: { value: true, attribute: { code: true } },
-                    dataSetElements: { dataElement: { id: true, formName: true, name: true } },
-                    periodType: true,
-                    access: true,
-                },
-                filter: {
-                    id: ids ? { in: ids } : undefined,
-                },
+                fields: dataSetFields,
+                filter: { id: ids ? { in: ids } : undefined },
             })
             .getData();
 
-        return objects.map(
-            ({ displayName, name, access, periodType, dataSetElements, ...rest }) => ({
-                ...rest,
-                type: "dataSets",
-                name: displayName ?? name,
-                periodType: periodType as DataFormPeriod,
-                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-                readAccess: access.data?.read,
-                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-                writeAccess: access.data?.write,
-                dataElements: dataSetElements
-                    .map(({ dataElement }) => dataElement)
-                    .map(({ formName, name, ...rest }) => ({
-                        ...rest,
-                        name: formName ?? name,
-                    })),
-            })
-        );
+        const formatDataElement = ({
+            formName,
+            categoryCombo,
+            name,
+            ...dataElement
+        }: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
+            ...dataElement,
+            name: formName ?? name ?? "",
+            categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
+        });
+
+        return objects.map(({ displayName, name, access, periodType, dataSetElements, sections, ...rest }) => ({
+            ...rest,
+            type: "dataSets",
+            name: displayName ?? name,
+            periodType: periodType as DataFormPeriod,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            readAccess: access.data?.read,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            writeAccess: access.data?.write,
+            dataElements: dataSetElements.map(({ dataElement }) => formatDataElement(dataElement)),
+            sections: sections.map(({ id, name, dataElements }) => ({
+                id,
+                name,
+                dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+            })),
+        }));
     }
 
     @cache()
@@ -105,43 +99,29 @@ export class InstanceDhisRepository implements InstanceRepository {
         const { objects } = await this.api.models.programs
             .get({
                 paging: false,
-                fields: {
-                    id: true,
-                    displayName: true,
-                    name: true,
-                    attributeValues: { value: true, attribute: { code: true } },
-                    programStages: {
-                        programStageDataElements: {
-                            dataElement: { id: true, formName: true, name: true },
-                        },
-                    },
-                    access: true,
-                    programType: true,
-                    trackedEntityType: true,
-                },
+                fields: programFields,
                 filter: {
                     id: ids ? { in: ids } : undefined,
                 },
             })
             .getData();
 
-        return objects.map(
-            ({ displayName, name, access, programStages, programType, ...rest }) => ({
-                ...rest,
-                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
-                name: displayName ?? name,
-                periodType: "Daily",
-                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-                readAccess: access.data?.read,
-                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-                writeAccess: access.data?.write,
-                dataElements: programStages
-                    .flatMap(({ programStageDataElements }) =>
-                        programStageDataElements.map(({ dataElement }) => dataElement)
-                    )
-                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
-            })
-        );
+        return objects.map(({ displayName, name, access, programStages, programType, ...rest }) => ({
+            ...rest,
+            type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+            name: displayName ?? name,
+            organisationUnits: [], // Disabled for now in programs
+            periodType: "Daily",
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            readAccess: access.data?.read,
+            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+            writeAccess: access.data?.write,
+            dataElements: programStages
+                .flatMap(({ programStageDataElements }) =>
+                    programStageDataElements.map(({ dataElement }) => dataElement)
+                )
+                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+        }));
     }
 
     @cache()
@@ -333,31 +313,25 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     private buildEventsPayload(dataPackage: DataPackage): Event[] {
-        return dataPackage.dataEntries.map(
-            ({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
-                event: id,
-                program: dataForm,
-                status: "COMPLETED",
-                orgUnit,
-                eventDate: period,
-                attributeOptionCombo: attribute,
-                dataValues: dataValues,
-            })
-        );
+        return dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+            event: id,
+            program: dataForm,
+            status: "COMPLETED",
+            orgUnit,
+            eventDate: period,
+            attributeOptionCombo: attribute,
+            dataValues: dataValues,
+        }));
     }
 
     private async importAggregatedData(
         importStrategy: "CREATE" | "UPDATE" | "CREATE_AND_UPDATE" | "DELETE",
         dataPackage: DataPackage
     ): Promise<SynchronizationResult> {
-        const dataValues = await this.validateAggregateImportPackage(
-            this.buildAggregatedPayload(dataPackage)
-        );
+        const dataValues = await this.validateAggregateImportPackage(this.buildAggregatedPayload(dataPackage));
 
         const title =
-            importStrategy === "DELETE"
-                ? i18n.t("Data values - Delete")
-                : i18n.t("Data values - Create/update");
+            importStrategy === "DELETE" ? i18n.t("Data values - Delete") : i18n.t("Data values - Create/update");
 
         const {
             response: { id, jobType },
@@ -366,14 +340,12 @@ export class InstanceDhisRepository implements InstanceRepository {
             .getData()) as unknown) as AsyncDataValueSetResponse;
 
         const checkTask = async () => {
-            const [{ completed }] =
+            const response =
                 (await this.api
-                    .get<{ message: string; completed: boolean }[]>(
-                        `/system/tasks/${jobType}/${id}`
-                    )
+                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
                     .getData()) ?? [];
 
-            return !completed;
+            return !response[0]?.completed;
         };
 
         do {
@@ -385,17 +357,15 @@ export class InstanceDhisRepository implements InstanceRepository {
             .getData();
 
         if (!importSummary) {
-            const [{ message }] =
+            const response =
                 (await this.api
-                    .get<{ message: string; completed: boolean }[]>(
-                        `/system/tasks/${jobType}/${id}`
-                    )
+                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
                     .getData()) ?? [];
 
             return {
                 title,
                 status: "ERROR",
-                message: message,
+                message: response[0]?.message,
                 stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
                 errors: [],
                 rawResponse: {},
@@ -404,8 +374,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const { status, description, conflicts, importCount } = importSummary;
         const { imported, deleted, updated, ignored } = importCount;
-        const errors =
-            conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
+        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
 
         return {
             title,
@@ -448,9 +417,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         return postEvents(this.api, events);
     }
 
-    private async importTrackerProgramData(
-        dataPackage: TrackerProgramPackage
-    ): Promise<SynchronizationResult[]> {
+    private async importTrackerProgramData(dataPackage: TrackerProgramPackage): Promise<SynchronizationResult[]> {
         const { trackedEntityInstances, dataEntries } = dataPackage;
         return updateTrackedEntityInstances(this.api, trackedEntityInstances, dataEntries);
     }
@@ -477,9 +444,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     })
                     .getData();
 
-            return periods.length > 0
-                ? await promiseMap(_.chunk(periods, 200), query)
-                : [await query()];
+            return periods.length > 0 ? await promiseMap(_.chunk(periods, 200), query) : [await query()];
         });
 
         return {
@@ -492,29 +457,23 @@ export class InstanceDhisRepository implements InstanceRepository {
                 )
                 .map((dataValues, key) => {
                     const [period, orgUnit, attribute] = key.split("-");
+                    if (!period || !orgUnit) return undefined;
+
                     return {
                         type: "aggregated" as const,
                         dataForm: id,
                         orgUnit,
                         period,
-                        attribute: defaultIds.includes(attribute) ? undefined : attribute,
-                        dataValues: dataValues.map(
-                            ({ dataElement, categoryOptionCombo, value, comment }) => ({
-                                dataElement,
-                                category: defaultIds.includes(categoryOptionCombo)
-                                    ? undefined
-                                    : categoryOptionCombo,
-                                value: this.formatDataValue(
-                                    dataElement,
-                                    value,
-                                    metadata,
-                                    translateCodes
-                                ),
-                                comment,
-                            })
-                        ),
+                        attribute: attribute && defaultIds.includes(attribute) ? undefined : attribute,
+                        dataValues: dataValues.map(({ dataElement, categoryOptionCombo, value, comment }) => ({
+                            dataElement,
+                            category: defaultIds.includes(categoryOptionCombo) ? undefined : categoryOptionCombo,
+                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                            comment,
+                        })),
                     };
                 })
+                .compact()
                 .value(),
         };
     }
@@ -533,11 +492,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             throw new Error(`Could not find category options for the program ${id}`);
         }
 
-        const getEvents = (
-            orgUnit: Id,
-            categoryOptionId: Id,
-            page: number
-        ): Promise<PagedEventsApiResponse> => {
+        const getEvents = (orgUnit: Id, categoryOptionId: Id, page: number): Promise<PagedEventsApiResponse> => {
             // DHIS2 bug if we do not provide CC and COs, endpoint only works with ALL authority
             return this.api
                 .get<PagedEventsApiResponse>("/events", {
@@ -594,12 +549,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                         programStage,
                         dataValues: dataValues.map(({ dataElement, value }) => ({
                             dataElement,
-                            value: this.formatDataValue(
-                                dataElement,
-                                value,
-                                metadata,
-                                translateCodes
-                            ),
+                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
                         })),
                     })
                 )
@@ -624,25 +574,18 @@ export class InstanceDhisRepository implements InstanceRepository {
         return optionValue?.id ?? value;
     }
 
-    private buildProgramAttributeOptions(
-        metadata: MetadataPackage,
-        categoryComboId?: string
-    ): string[] {
+    private buildProgramAttributeOptions(metadata: MetadataPackage, categoryComboId?: string): string[] {
         if (!categoryComboId) return [];
 
         // Get all the categories assigned to the categoryCombo of the program
         const categoryCombo = _.find(metadata?.categoryCombos, { id: categoryComboId });
-        const categoryIds: string[] = _.compact(
-            categoryCombo?.categories?.map(({ id }: MetadataItem) => id)
-        );
+        const categoryIds: string[] = _.compact(categoryCombo?.categories?.map(({ id }: MetadataItem) => id));
 
         // Get all the category options for each category on the categoryCombo
         const categories = _.compact(categoryIds.map(id => _.find(metadata?.categories, { id })));
         const categoryOptions: MetadataItem[] = _(categories)
             .map(({ categoryOptions }: MetadataItem) =>
-                categoryOptions.map(({ id }: MetadataItem) =>
-                    _.find(metadata?.categoryOptions, { id })
-                )
+                categoryOptions.map(({ id }: MetadataItem) => _.find(metadata?.categoryOptions, { id }))
             )
             .flatten()
             .value();
@@ -672,3 +615,37 @@ interface AsyncDataValueSetResponse {
     };
     status: string;
 }
+
+const dataElementFields = {
+    id: true,
+    formName: true,
+    name: true,
+    categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+} as const;
+
+const dataSetFields = {
+    id: true,
+    displayName: true,
+    name: true,
+    attributeValues: { value: true, attribute: { code: true } },
+    dataSetElements: { dataElement: dataElementFields },
+    sections: { id: true, name: true, dataElements: dataElementFields },
+    organisationUnits: { id: true, name: true, path: true },
+    periodType: true,
+    access: true,
+} as const;
+
+const programFields = {
+    id: true,
+    displayName: true,
+    name: true,
+    attributeValues: { value: true, attribute: { code: true } },
+    programStages: {
+        programStageDataElements: {
+            dataElement: { id: true, formName: true, name: true },
+        },
+    },
+    access: true,
+    programType: true,
+    trackedEntityType: true,
+} as const;
