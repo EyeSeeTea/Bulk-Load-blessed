@@ -27,12 +27,7 @@ const renderComponent = async () => {
             <AppContext.Provider value={{ api, d2: {}, compositionRoot }}>
                 <LoadingProvider>
                     <SnackbarProvider>
-                        <ThemesPage
-                            settings={settings}
-                            themes={[]}
-                            setSettings={_.noop}
-                            setThemes={_.noop}
-                        />
+                        <ThemesPage settings={settings} themes={[]} setSettings={_.noop} setThemes={_.noop} />
                     </SnackbarProvider>
                 </LoadingProvider>
             </AppContext.Provider>

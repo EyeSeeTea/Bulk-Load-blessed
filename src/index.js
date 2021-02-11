@@ -11,7 +11,6 @@ import App from "./webapp/components/app/App";
 async function getBaseUrl() {
     if (process.env.NODE_ENV === "development") {
         const baseUrl = process.env.REACT_APP_DHIS2_BASE_URL || "http://localhost:8080";
-        console.info(`[DEV] DHIS2 instance: ${baseUrl}`);
         return baseUrl.replace(/\/*$/, "");
     } else {
         const { data: manifest } = await axios.get("manifest.webapp");
@@ -42,9 +41,11 @@ async function main() {
         configI18n(userSettings);
 
         ReactDOM.render(
-            <Provider config={{ baseUrl, apiVersion: "30" }}>
-                <App d2={d2} api={api} />
-            </Provider>,
+            <React.StrictMode>
+                <Provider config={{ baseUrl, apiVersion: "30" }}>
+                    <App d2={d2} api={api} />
+                </Provider>
+            </React.StrictMode>,
             document.getElementById("root")
         );
     } catch (err) {

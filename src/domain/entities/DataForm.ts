@@ -8,9 +8,12 @@ export interface DataForm {
     id: Id;
     name: string;
     periodType?: DataFormPeriod;
-    dataElements: {
+    dataElements: DataElement[];
+    organisationUnits: OrganisationUnit[];
+    sections?: {
         id: Id;
         name: string;
+        dataElements: DataElement[];
     }[];
     attributeValues: {
         attribute: { code: string };
@@ -18,4 +21,19 @@ export interface DataForm {
     }[];
     readAccess: boolean;
     writeAccess: boolean;
+}
+
+export interface DataElement {
+    id: Id;
+    name: string;
+    categoryOptionCombos?: {
+        id: Id;
+        name: string;
+    }[];
+}
+
+export interface OrganisationUnit {
+    id: Id;
+    name: string;
+    path: string;
 }

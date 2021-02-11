@@ -50,9 +50,7 @@ export const ColorPicker = ({
                 }}
                 disableTouchRipple={true}
             >
-                {!disableArrow && (
-                    <ArrowDropDownIcon htmlColor={arrowColor} className={classes.icon} />
-                )}
+                {!disableArrow && <ArrowDropDownIcon htmlColor={arrowColor} className={classes.icon} />}
             </IconButton>
             <Popover open={!!anchor} onClose={handleClose} anchorEl={anchor}>
                 <ChromePicker color={color} onChange={handleChange} disableAlpha={true} />

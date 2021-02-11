@@ -24,11 +24,7 @@ export function buildAllPossiblePeriods(periodType, startDate, endDate) {
     }
 
     const dates = [];
-    for (
-        const current = moment(startDate);
-        current.isSameOrBefore(moment(endDate));
-        current.add(1, unit)
-    ) {
+    for (const current = moment(startDate); current.isSameOrBefore(moment(endDate)); current.add(1, unit)) {
         dates.push(current.format(format));
     }
 

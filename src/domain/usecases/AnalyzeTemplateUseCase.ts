@@ -31,21 +31,21 @@ export class AnalyzeTemplateUseCase implements UseCase {
 
         if (!dataForm) throw new Error(i18n.t("Program or DataSet not found in instance"));
 
-        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(
-            dataForm.type,
-            dataForm.id
-        );
+        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
 
         if (template.type === "custom" || dataForm.type === "trackerPrograms") {
-            const reader = new ExcelReader(this.excelRepository);
+            const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
             const excelDataValues = await reader.readTemplate(template);
+            if (!excelDataValues) return { custom: true, dataForm, dataValues: [], orgUnits };
 
-            const dataValues =
-                excelDataValues?.dataEntries.map(({ id, dataValues, period }) => ({
-                    count: dataValues.length,
-                    id,
-                    period,
-                })) ?? [];
+            const customDataValues = await reader.templateCustomization(template, excelDataValues);
+            const dataEntries = customDataValues?.dataEntries ?? excelDataValues.dataEntries;
+
+            const dataValues = dataEntries.map(({ id, dataValues, period }) => ({
+                count: dataValues.length,
+                id,
+                period,
+            }));
 
             return { custom: true, dataForm, dataValues, orgUnits };
         } else {

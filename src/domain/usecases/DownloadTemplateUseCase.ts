@@ -27,7 +27,7 @@ export interface DownloadTemplateProps {
 
 export class DownloadTemplateUseCase implements UseCase {
     constructor(
-        private instance: InstanceRepository,
+        private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository
     ) {}
@@ -48,84 +48,84 @@ export class DownloadTemplateUseCase implements UseCase {
             writeFile,
         }: DownloadTemplateProps
     ): Promise<void> {
-        try {
-            const { id: templateId } = getTemplateId(type, id);
-            const template = this.templateRepository.getTemplate(templateId);
-            const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
+        const { id: templateId } = getTemplateId(type, id);
+        const template = this.templateRepository.getTemplate(templateId);
+        const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
-            const element = await dhisConnector.getElement(api, type, id);
-            const name = element.displayName ?? element.name;
+        const element = await dhisConnector.getElement(api, type, id);
+        const name = element.displayName ?? element.name;
 
-            if (template.type === "custom") {
-                await this.excelRepository.loadTemplate({ type: "url", url: template.url });
-            } else {
-                const result = await dhisConnector.getElementMetadata({
-                    api,
-                    element,
-                    orgUnitIds: orgUnits,
-                });
+        if (template.type === "custom") {
+            await this.excelRepository.loadTemplate({ type: "url", url: template.url });
+        } else {
+            const result = await dhisConnector.getElementMetadata({
+                api,
+                element,
+                orgUnitIds: orgUnits,
+            });
 
-                // FIXME: Legacy code, sheet generator
-                const sheetBuilder = new SheetBuilder({
-                    ...result,
-                    startDate,
-                    endDate,
-                    language,
-                    theme,
-                    template,
-                });
-                const workbook = await sheetBuilder.generate();
+            // FIXME: Legacy code, sheet generator
+            const sheetBuilder = new SheetBuilder({
+                ...result,
+                startDate,
+                endDate,
+                language,
+                theme,
+                template,
+            });
+            const workbook = await sheetBuilder.generate();
 
-                const file = await workbook.writeToBuffer();
+            const file = await workbook.writeToBuffer();
 
-                await this.excelRepository.loadTemplate({ type: "file", file });
+            await this.excelRepository.loadTemplate({ type: "file", file });
+        }
+
+        const enablePopulate = populate && !!populateStartDate && !!populateEndDate;
+
+        const dataPackage = enablePopulate
+            ? await this.instanceRepository.getDataPackage({
+                  type,
+                  id,
+                  orgUnits,
+                  startDate: populateStartDate,
+                  endDate: populateEndDate,
+                  translateCodes: template.type !== "custom",
+              })
+            : undefined;
+
+        const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
+        await builder.templateCustomization(template, { populate, dataPackage, orgUnits });
+
+        if (theme) await builder.applyTheme(template, theme);
+
+        if (enablePopulate && dataPackage) {
+            if (template.type === "custom" && template.fixedOrgUnit) {
+                await this.excelRepository.writeCell(
+                    template.id,
+                    template.fixedOrgUnit,
+                    dataPackage.dataEntries[0]?.orgUnit ?? ""
+                );
             }
 
-            const builder = new ExcelBuilder(this.excelRepository, this.instance);
-
-            if (theme) await builder.applyTheme(template, theme);
-
-            if (populate && populateStartDate && populateEndDate) {
-                const dataPackage = await this.instance.getDataPackage({
-                    type,
-                    id,
-                    orgUnits,
-                    startDate: populateStartDate,
-                    endDate: populateEndDate,
-                    translateCodes: template.type !== "custom",
-                });
-
-                if (template.type === "custom" && template.fixedOrgUnit) {
-                    await this.excelRepository.writeCell(
-                        template.id,
-                        template.fixedOrgUnit,
-                        dataPackage.dataEntries[0]?.orgUnit
-                    );
-                }
-
-                if (template.type === "custom" && template.fixedPeriod) {
-                    await this.excelRepository.writeCell(
-                        template.id,
-                        template.fixedPeriod,
-                        dataPackage.dataEntries[0]?.period
-                    );
-                }
-
-                await builder.populateTemplate(template, dataPackage);
+            if (template.type === "custom" && template.fixedPeriod) {
+                await this.excelRepository.writeCell(
+                    template.id,
+                    template.fixedPeriod,
+                    dataPackage.dataEntries[0]?.period ?? ""
+                );
             }
 
-            const filename = `${name}.xlsx`;
+            await builder.populateTemplate(template, dataPackage);
+        }
 
-            if (writeFile) {
-                const buffer = await this.excelRepository.toBuffer(templateId);
-                fs.writeFileSync(writeFile, buffer);
-            } else {
-                const data = await this.excelRepository.toBlob(templateId);
-                saveAs(data, filename);
-            }
-        } catch (error) {
-            console.log("Failed building/downloading template");
-            throw error;
+        const filename = `${name}.xlsx`;
+
+        if (writeFile) {
+            const buffer = await this.excelRepository.toBuffer(templateId);
+            fs.writeFileSync(writeFile, buffer);
+        } else {
+            const data = await this.excelRepository.toBlob(templateId);
+            saveAs(data, filename);
         }
     }
 }
