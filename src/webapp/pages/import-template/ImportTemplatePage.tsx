@@ -488,7 +488,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             return false;
         }
 
-        if (base.id === compare.id) return false;
+        if (base.id && base.id === compare.id) return false;
 
         const exclusions = settings.duplicateExclusion[id] ?? [];
         const filter = (values: DataPackageDataValue[]) =>
