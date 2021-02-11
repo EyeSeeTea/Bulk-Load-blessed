@@ -97,7 +97,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         const getName = (id: string) => {
             return _([
-                metadata?.dataElements[id]?.totalName,
                 metadata?.optionCombos[id]?.name,
                 dataSet?.dataElements.find(de => de.id === id)?.name,
                 _.flatMap(dataSet?.dataElements, ({ categoryOptionCombos }) => categoryOptionCombos).find(
