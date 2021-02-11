@@ -287,8 +287,7 @@ const compareDataPackages = (
                 .as(duplicateToleranceUnit) > duplicateTolerance;
         if (isWithToleranceRange) return false;
 
-        // Ignore data packages with event id set
-        if (base.id && compare.id) return false;
+        if (base.id === compare.id) return false;
 
         const exclusions = duplicateExclusion[dataForm.id] ?? [];
         const filter = (values: DataPackageDataValue[]) => {
