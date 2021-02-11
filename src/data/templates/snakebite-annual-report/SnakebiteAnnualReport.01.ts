@@ -20,6 +20,13 @@ import { promiseMap } from "../../../webapp/utils/promises";
 
 const MAX_DATA_ELEMENTS = 30;
 const MAX_PRODUCTS = 50;
+const NATIONAL_SHEET_START = 6;
+const NATIONAL_SHEET_OFFSET = 6;
+const NATIONAL_SHEET_DATAELEMENT_LOCATION = NATIONAL_SHEET_START + 2;
+const NATIONAL_SHEET_CATEGORY_LOCATION = NATIONAL_SHEET_START + 3;
+const NATIONAL_SHEET_VALUE_LOCATION = NATIONAL_SHEET_START + 4;
+const METADATA_SHEET_START = 2;
+const ORGUNIT_SHEET_START = 2;
 
 export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly type = "custom";
@@ -34,26 +41,26 @@ export class SnakebiteAnnualReport implements CustomTemplate {
     public readonly dataSources: DataSource[] = [
         (sheet: string) => {
             switch (sheet) {
-                case "National":
-                    return _.range(MAX_DATA_ELEMENTS).map(offset => ({
-                        type: "row",
-                        orgUnit: { sheet, type: "cell", ref: "C4" },
-                        period: { sheet, type: "cell", ref: "F4" },
-                        dataElement: { sheet, type: "row", ref: 7 + offset * 6 },
-                        categoryOption: { sheet, type: "row", ref: 8 + offset * 6 },
-                        range: {
-                            sheet,
-                            rowStart: 9 + offset * 6,
-                            rowEnd: 9 + offset * 6,
-                            columnStart: "A",
-                        },
-                    }));
                 case "Metadata":
                 case "OrgUnits":
                 case "Validation":
                     return [];
+                case "National":
+                    return _.range(MAX_DATA_ELEMENTS).map(index => ({
+                        type: "row",
+                        orgUnit: { sheet: "National", type: "cell", ref: "C4" },
+                        period: { sheet: "National", type: "cell", ref: "F4" },
+                        dataElement: { sheet, type: "row", ref: NATIONAL_SHEET_DATAELEMENT_LOCATION + index * 6 },
+                        categoryOption: { sheet, type: "row", ref: NATIONAL_SHEET_CATEGORY_LOCATION + index * 6 },
+                        range: {
+                            sheet,
+                            rowStart: NATIONAL_SHEET_VALUE_LOCATION + index * 6,
+                            rowEnd: NATIONAL_SHEET_VALUE_LOCATION + index * 6,
+                            columnStart: "A",
+                        },
+                    }));
                 default:
-                    return _.range(MAX_PRODUCTS).map(offset => ({
+                    return _.range(MAX_PRODUCTS).map(index => ({
                         type: "row",
                         orgUnit: { sheet: "National", type: "cell", ref: "C4" },
                         period: { sheet: "National", type: "cell", ref: "F4" },
@@ -61,8 +68,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         categoryOption: { type: "value", id: generateUid() },
                         range: {
                             sheet,
-                            rowStart: 2 + offset,
-                            rowEnd: 2 + offset,
+                            rowStart: METADATA_SHEET_START + index,
+                            rowEnd: METADATA_SHEET_START + index,
                             columnStart: "A",
                         },
                     }));
@@ -170,19 +177,18 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             ])
             .value();
 
-        const metadataStart = 2;
         await promiseMap(items, async ({ id, name, type }, index) => {
             const label = getName(id) ?? name;
             const info = metadata?.optionCombos[id]?.info ?? "";
 
-            await write("Metadata", "A", index + metadataStart, type);
-            await write("Metadata", "B", index + metadataStart, id);
-            await write("Metadata", "C", index + metadataStart, label);
-            await write("Metadata", "D", index + metadataStart, info);
+            await write("Metadata", "A", index + METADATA_SHEET_START, type);
+            await write("Metadata", "B", index + METADATA_SHEET_START, id);
+            await write("Metadata", "C", index + METADATA_SHEET_START, label);
+            await write("Metadata", "D", index + METADATA_SHEET_START, info);
         });
 
         await promiseMap(items, async ({ id }, index) => {
-            await defineName("Metadata", "C", index + metadataStart, id);
+            await defineName("Metadata", "C", index + METADATA_SHEET_START, id);
         });
 
         // Add organisation units sheet
@@ -192,17 +198,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await promiseMap(["Identifier", "Name", "Selector"], (label, index) => write("OrgUnits", index + 1, 1, label));
 
         // Add organisation units sheet rows
-        const orgUnitStart = 2;
         const availableOrgUnits = _.sortBy(dataSet?.organisationUnits ?? [], "name");
 
         await promiseMap(availableOrgUnits, async (orgUnit, index) => {
-            await write("OrgUnits", 1, index + orgUnitStart, orgUnit.id);
-            await write("OrgUnits", 2, index + orgUnitStart, orgUnit.name);
-            await write("OrgUnits", 3, index + orgUnitStart, `=_${orgUnit.id}`);
+            await write("OrgUnits", 1, index + ORGUNIT_SHEET_START, orgUnit.id);
+            await write("OrgUnits", 2, index + ORGUNIT_SHEET_START, orgUnit.name);
+            await write("OrgUnits", 3, index + ORGUNIT_SHEET_START, `=_${orgUnit.id}`);
         });
 
         await promiseMap(availableOrgUnits, async ({ id }, index) => {
-            await defineName("OrgUnits", "B", index + orgUnitStart, id);
+            await defineName("OrgUnits", "B", index + ORGUNIT_SHEET_START, id);
         });
 
         // Add Validation sheet
@@ -237,7 +242,6 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             .compact()
             .value();
 
-        const nationalStart = 6;
         await excelRepository.getOrCreateSheet(this.id, "National");
 
         // Add section name
@@ -289,11 +293,11 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
             // A new reporting group appears each 6 rows starting from row number 6
             // For each group row 2 is the data element, row 3 is the category and row 4 is the value
-            const offset = index * 6;
-            const sectionRow = nationalStart + offset;
-            const dataElementRow = nationalStart + offset + 2;
-            const categoryRow = nationalStart + offset + 3;
-            const valueRow = nationalStart + offset + 4;
+            const offset = index * NATIONAL_SHEET_OFFSET;
+            const sectionRow = NATIONAL_SHEET_START + offset;
+            const dataElementRow = NATIONAL_SHEET_DATAELEMENT_LOCATION + offset;
+            const categoryRow = NATIONAL_SHEET_CATEGORY_LOCATION + offset;
+            const valueRow = NATIONAL_SHEET_VALUE_LOCATION + offset;
 
             // Some data elements have totals included that move the categories one column to the right
             // These totals are ignored during import as they're only formulas
