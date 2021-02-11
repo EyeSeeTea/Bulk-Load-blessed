@@ -17,6 +17,7 @@ import i18n from "../../../locales";
 import { cache } from "../../../utils/cache";
 import { GetSchemaType, Schema } from "../../../utils/codec";
 import { promiseMap } from "../../../webapp/utils/promises";
+import { isValidUid } from "../../dhis2-uid";
 
 const MAX_DATA_ELEMENTS = 30;
 const MAX_PRODUCTS = 50;
@@ -496,6 +497,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             const getDataElementsByProp = (prop: string) =>
                 antivenomDataElements.filter(dataElement => prop === dataElement.prop).map(({ id }) => id);
 
+            const productValueDataElements = antivenomDataElements
+                .filter(dataElement => !dataElement.prop)
+                .map(({ id }) => id);
+
             const productByCategory = _(dataValues)
                 .groupBy("category")
                 .mapValues(values => {
@@ -534,26 +539,41 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 .map(({ category, ...rest }) => ({
                     ...rest,
                     category: _.last(category?.split(".")),
-                }));
+                }))
+                .filter(({ category }) => !category || isValidUid(category));
 
-            const [existingProducts, newProducts] = _.partition(dataValues, dataValue => {
-                const isProduct = antivenomDataElementIds.includes(dataValue.dataElement);
-                const exists = !!dataValue.category && !!productByCategory[dataValue.category];
-                return isProduct && exists;
+            const antivenomDataValues = dataValues.filter(({ dataElement }) =>
+                antivenomDataElementIds.includes(dataElement)
+            );
+
+            const [existingProducts, newProducts] = _.partition(antivenomDataValues, dataValue => {
+                return !!dataValue.category && !!productByCategory[dataValue.category];
             });
 
-            const cleanExistingProducts = _.compact(
-                existingProducts.map(({ category = "", ...dataValue }) => {
-                    const product = productByCategory[category];
-                    // TODO: Filter data elements so that are not overwritten (manufacturer name, etc...)
-                    // Waiting for Jorge's implementation
+            const cleanExistingProducts = _(existingProducts)
+                .map(({ category = "", ...dataValue }) => {
+                    const { prop = "" } = antivenomDataElements.find(({ id }) => id === dataValue.dataElement) ?? {};
+                    if (["monovalent", "polyvalent", "manufacturerName"].includes(prop)) return undefined;
 
                     return {
                         ...dataValue,
-                        category: product?.categoryOptionComboId ?? category,
+                        category: productByCategory[category]?.categoryOptionComboId ?? category,
                     };
                 })
-            );
+                .compact()
+                .groupBy("category")
+                .mapValues(dataValues => {
+                    const values = dataValues.filter(({ dataElement }) =>
+                        productValueDataElements.includes(dataElement)
+                    );
+
+                    // Do not import values that are empty
+                    return _.some(values, ({ value }) => !!value) ? dataValues : undefined;
+                })
+                .values()
+                .compact()
+                .flatten()
+                .value();
 
             const cleanNewProducts = _(newProducts)
                 .groupBy("category")
