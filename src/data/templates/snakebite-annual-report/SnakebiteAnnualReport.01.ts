@@ -19,8 +19,8 @@ import { GetSchemaType, Schema } from "../../../utils/codec";
 import { promiseMap } from "../../../webapp/utils/promises";
 import { isValidUid } from "../../dhis2-uid";
 
-const MAX_DATA_ELEMENTS = 30;
-const MAX_PRODUCTS = 50;
+const MAX_DATA_ELEMENTS = 60;
+const MAX_PRODUCTS = 300;
 const NATIONAL_SHEET_START = 6;
 const NATIONAL_SHEET_OFFSET = 6;
 const NATIONAL_SHEET_DATAELEMENT_LOCATION = NATIONAL_SHEET_START + 2;
