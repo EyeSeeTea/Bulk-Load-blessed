@@ -239,7 +239,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         try {
             for (const cell of cells) {
-                const value = text ?? this.getValue(cell);
+                const value = text ?? String(this.getValue(cell));
                 const formula = cell.formula();
 
                 //@ts-ignore Not properly typed
