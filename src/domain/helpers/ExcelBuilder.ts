@@ -359,7 +359,16 @@ export class ExcelBuilder {
         _.forOwn(theme.sections, (style: ThemeStyle, section: string) => {
             const styleSource = template.styleSources.find(source => source.section === section);
             const { source } = styleSource ?? {};
-            if (source) this.excelRepository.styleCell(template.id, source, style);
+
+            if (source) {
+                const height = (style.text?.split("\n")?.length ?? 1) * (style.fontSize ?? 12) * 2;
+                this.excelRepository.styleCell(template.id, source, {
+                    ...style,
+                    merged: true,
+                    rowSize: height,
+                    verticalAlignment: "center",
+                });
+            }
         });
 
         await promiseMap(_.toPairs(theme.pictures), async ([section, image]) => {
