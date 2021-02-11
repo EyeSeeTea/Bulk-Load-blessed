@@ -16,12 +16,11 @@ import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
-    // Memoized value to improve performance
-    private _mergedCells: MergedCell[] | undefined;
 
     public async loadTemplate(options: LoadOptions): Promise<string> {
         const workbook = await this.parseFile(options);
-        const id = await this.readCellValue(workbook, { type: "cell", sheet: 0, ref: "A1" });
+        const id = workbook.sheet(0).cell("A1").value();
+
         if (!id || typeof id !== "string") throw new Error("Invalid id");
         const cleanId = id.replace(/^.*?:/, "").trim();
 
@@ -240,10 +239,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         const cells = source.type === "cell" ? [workbook.sheet(sheet).cell(source.ref)] : _.flatten(range.cells());
 
-        if (source.type === "range") {
-            range.merged(merged);
-            this._mergedCells = undefined;
-        }
+        if (source.type === "range") range.merged(merged);
 
         try {
             for (const cell of cells) {
@@ -310,22 +306,16 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return name;
     }
 
-    private listMergedCells(workbook: Workbook, sheet: string | number) {
-        if (!this._mergedCells) {
-            this._mergedCells =
-                this._mergedCells ??
-                workbook
-                    .sheet(sheet)
-                    ?.merged()
-                    .map(range => {
-                        const startCell = range.startCell();
-                        const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
+    private listMergedCells(workbook: Workbook, sheet: string | number): MergedCell[] {
+        return workbook
+            .sheet(sheet)
+            ?.merged()
+            .map(range => {
+                const startCell = range.startCell();
+                const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 
-                        return { range, startCell, hasCell };
-                    });
-        }
-
-        return this._mergedCells;
+                return { range, startCell, hasCell };
+            });
     }
 
     private async getWorkbook(id: string) {
@@ -362,7 +352,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         if (rangeRowEnd >= rowStart) {
             workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
-            this._mergedCells = undefined;
         }
     }
 
