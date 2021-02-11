@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-10T19:41:28.113Z\n"
-"PO-Revision-Date: 2021-02-10T19:41:28.114Z\n"
+"POT-Creation-Date: 2021-02-11T10:42:48.164Z\n"
+"PO-Revision-Date: 2021-02-11T10:42:48.164Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -35,6 +35,11 @@ msgid ""
 msgstr ""
 
 msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
 msgstr ""
 
 msgid ""

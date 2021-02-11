@@ -551,10 +551,16 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             });
 
             const cleanExistingProducts = _(existingProducts)
-                .map(({ category = "", ...dataValue }) => ({
-                    ...dataValue,
-                    category: productByCategory[category]?.categoryOptionComboId ?? category,
-                }))
+                .map(dataValue => {
+                    // Extract category combo id
+                    const { categoryOptionComboId, ...product } = productByCategory[dataValue.category ?? ""] ?? {};
+                    const category = categoryOptionComboId ?? dataValue.category ?? "";
+                    // Use value from data store on existing products
+                    const { prop = "" } = antivenomDataElements.find(({ id }) => id === dataValue.dataElement) ?? {};
+                    const value = product[prop as keyof typeof product] ?? dataValue.value;
+
+                    return { ...dataValue, category, value };
+                })
                 .groupBy("category")
                 .mapValues(dataValues => {
                     const values = dataValues.filter(({ dataElement }) =>

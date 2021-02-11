@@ -103,7 +103,7 @@ export function initializeMockServer() {
                 attributeValues: [],
                 dataSetElements: [],
                 organisationUnits: [],
-                sections:[],
+                sections: [],
             },
         ],
     });
