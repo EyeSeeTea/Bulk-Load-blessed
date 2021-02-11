@@ -143,9 +143,12 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
 
-        const formulaValue = () => getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
+        const getFormulaValue = () => getFormulaWithValidation(workbook, sheet as SheetWithValidations, destination);
 
-        const value = formula ? formulaValue() : destination.value() ?? formulaValue();
+        const formulaValue = getFormulaValue();
+        const textValue = getValue(destination);
+        const value = formula ? formulaValue : textValue ?? formulaValue;
+
         if (value instanceof FormulaError) return "";
         return value;
     }
@@ -239,7 +242,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         try {
             for (const cell of cells) {
-                const value = text ?? String(this.getValue(cell));
+                const value = text ?? String(getValue(cell) ?? "");
                 const formula = cell.formula();
 
                 //@ts-ignore Not properly typed
@@ -255,19 +258,6 @@ export class ExcelPopulateRepository extends ExcelRepository {
         } catch (error) {
             console.error("Could not apply style", { source, style, error });
         }
-    }
-
-    private getValue(cell: Cell): ExcelValue {
-        const value = cell.value();
-
-        if (typeof value === "object" && value.constructor.name === "RichText") {
-            // @ts-ignore This should be improved on xlsx-populate
-            return value.text();
-        } else if (typeof value === "object") {
-            return JSON.stringify(value);
-        }
-
-        return value ?? "";
     }
 
     public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
@@ -418,7 +408,7 @@ function getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValid
 
 function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
     const defaultValue = cell.formula();
-    const value = cell.value();
+    const value = getValue(cell);
     if (defaultValue || !value) return defaultValue;
 
     // Support only for data validations over ranges
@@ -460,11 +450,26 @@ function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithVali
 
     const formulaByValue = _(validationRange.cells())
         .map(cells => cells[0])
-        .map(cell => [cell.value(), cell.formula()])
+        .map(cell => [getValue(cell), cell.formula()])
         .fromPairs()
         .value();
 
     return formulaByValue[String(value)] || defaultValue;
+}
+
+function getValue(cell: Cell): ExcelValue | undefined {
+    const value = cell.value();
+
+    if (typeof value === "object" && value.constructor.name === "RichText") {
+        // @ts-ignore This should be improved on xlsx-populate
+        const result = value.text();
+
+        // FIXME: There's an error with RichText.text()
+        if (result === "undefined") return undefined;
+        return result;
+    }
+
+    return value;
 }
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };

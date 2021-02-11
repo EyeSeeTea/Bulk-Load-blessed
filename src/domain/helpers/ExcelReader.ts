@@ -395,6 +395,7 @@ export class ExcelReader {
     private async readCellValue(template: Template, ref?: SheetRef | ValueRef, relative?: CellRef) {
         if (!ref) return undefined;
         if (ref.type === "value") return ref.id;
+
         const cell = await this.excelRepository.findRelativeCell(template.id, ref, relative);
         if (cell) {
             const value = await this.excelRepository.readCell(template.id, cell);
@@ -413,7 +414,7 @@ export class ExcelReader {
 
     private formatValue(value: ExcelValue | undefined): string {
         if (value instanceof Date) return value.toISOString();
-        return value !== undefined ? String(value) : "";
+        return String(value ?? "");
     }
 
     private async getDataSourceValues(template: Template, dataSources: DataSource[]): Promise<DataSourceValue[]> {
