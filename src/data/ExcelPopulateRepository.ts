@@ -16,6 +16,8 @@ import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
     private workbooks: Record<string, ExcelWorkbook> = {};
+    // Memoized value to improve performance
+    private _mergedCells: MergedCell[] | undefined;
 
     public async loadTemplate(options: LoadOptions): Promise<string> {
         const workbook = await this.parseFile(options);
@@ -73,7 +75,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     public async writeCell(id: string, cellRef: CellRef, value: string | number | boolean): Promise<void> {
         const workbook = await this.getWorkbook(id);
-        const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
+        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
         const definedNames = await this.listDefinedNames(id);
         const definedName = definedNames.find(name => removeCharacters(name) === removeCharacters(value));
 
@@ -138,7 +140,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         cellRef: CellRef,
         formula = false
     ): Promise<ExcelValue | undefined> {
-        const mergedCells = await this.listMergedCells(workbook, cellRef.sheet);
+        const mergedCells = this.listMergedCells(workbook, cellRef.sheet);
         const sheet = workbook.sheet(cellRef.sheet);
         const cell = sheet.cell(cellRef.ref);
         const { startCell: destination = cell } = mergedCells.find(range => range.hasCell(cell)) ?? {};
@@ -238,7 +240,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         const cells = source.type === "cell" ? [workbook.sheet(sheet).cell(source.ref)] : _.flatten(range.cells());
 
-        if (source.type === "range") range.merged(merged);
+        if (source.type === "range") {
+            range.merged(merged);
+            this._mergedCells = undefined;
+        }
 
         try {
             for (const cell of cells) {
@@ -305,16 +310,22 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return name;
     }
 
-    private async listMergedCells(workbook: Workbook, sheet: string | number) {
-        return workbook
-            .sheet(sheet)
-            ?.merged()
-            .map(range => {
-                const startCell = range.startCell();
-                const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
+    private listMergedCells(workbook: Workbook, sheet: string | number) {
+        if (!this._mergedCells) {
+            this._mergedCells =
+                this._mergedCells ??
+                workbook
+                    .sheet(sheet)
+                    ?.merged()
+                    .map(range => {
+                        const startCell = range.startCell();
+                        const hasCell = (cell: ExcelCell) => range.cells()[0]?.includes(cell);
 
-                return { range, startCell, hasCell };
-            });
+                        return { range, startCell, hasCell };
+                    });
+        }
+
+        return this._mergedCells;
     }
 
     private async getWorkbook(id: string) {
@@ -351,6 +362,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         if (rangeRowEnd >= rowStart) {
             workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
+            this._mergedCells = undefined;
         }
     }
 
@@ -473,3 +485,9 @@ function getValue(cell: Cell): ExcelValue | undefined {
 }
 
 type RowWithCells = XLSX.Row & { _cells: XLSX.Cell[] };
+
+type MergedCell = {
+    range: XLSX.Range;
+    startCell: XLSX.Cell;
+    hasCell: (cell: ExcelCell) => boolean | undefined;
+};
