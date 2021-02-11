@@ -82,7 +82,7 @@ export function memoizeAsync<This, Args extends any[], U>(fn: (...args: Args) =>
 }
 
 // Function to clear memoized storage
-export const clear = (fn: Function, instance?: Dictionary<any>) => {
+export const clearCache = (fn: Function, instance?: Dictionary<any>) => {
     // Clear method entries
     const methodEntries = methodCache.get(fn);
     if (methodEntries) methodEntries?.get(instance)?.clear();

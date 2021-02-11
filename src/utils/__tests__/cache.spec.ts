@@ -1,4 +1,4 @@
-import { cache, clear, memoize } from "../cache";
+import { cache, clearCache, memoize } from "../cache";
 
 class TestClass {
     constructor(private multiplier = 1) {}
@@ -43,27 +43,27 @@ class TestClass {
     }
 
     public resetBasic(): void {
-        clear(this.getBasic, this);
+        clearCache(this.getBasic, this);
     }
 
     public resetComplex(): void {
-        clear(this.getComplex, this);
+        clearCache(this.getComplex, this);
     }
 
     public resetComplexAsync(): void {
-        clear(this.getComplexAsync, this);
+        clearCache(this.getComplexAsync, this);
     }
 
     public resetMultiple(): void {
-        clear(this.getMultiple, this);
+        clearCache(this.getMultiple, this);
     }
 
     public resetMemoize(): void {
-        clear(this.memoized, this);
+        clearCache(this.memoized, this);
     }
 
     public static resetStatic(): void {
-        clear(TestClass.getMultipleStatic, TestClass);
+        clearCache(TestClass.getMultipleStatic, TestClass);
     }
 }
 
@@ -149,7 +149,7 @@ describe("Cache decorator with clearing", () => {
     it("function - should be a new number", () => {
         const memoizedFunction = memoize(baseFunction);
         const number = memoizedFunction(10);
-        clear(memoizedFunction);
+        clearCache(memoizedFunction);
         expect(memoizedFunction(10)).not.toEqual(number);
     });
 
