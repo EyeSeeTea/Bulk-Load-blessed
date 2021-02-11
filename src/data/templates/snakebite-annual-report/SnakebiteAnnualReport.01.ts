@@ -376,9 +376,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
                 await style(
                     "National",
-                    "A",
+                    categoryStartColumn + catIndex,
                     categoryRow,
-                    lastCategoryColumn - 1,
+                    categoryStartColumn + catIndex,
                     categoryRow,
                     categoryStyle(color, backgroundColor)
                 );
@@ -396,6 +396,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                     valueRow,
                     `=SUM(B${valueRow}:${excelRepository.buildColumnName(lastCategoryColumn)}${valueRow})`
                 );
+                await style("National", "A", categoryRow, "A", categoryRow, categoryStyle());
                 await style("National", "A", valueRow, "A", valueRow, {
                     ...valueStyle,
                     locked: true,
