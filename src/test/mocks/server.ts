@@ -78,7 +78,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[formName,id,name]],displayName,id,name,periodType",
+                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name]],displayName,id,name,organisationUnits[id,name,path],periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name],id,name]",
             filter: [],
         },
     }).reply(200, {
@@ -102,6 +102,8 @@ export function initializeMockServer() {
                 },
                 attributeValues: [],
                 dataSetElements: [],
+                organisationUnits: [],
+                sections:[],
             },
         ],
     });
