@@ -609,6 +609,19 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         return result;
                     };
 
+                    const productName = getField("productName");
+                    const monovalent = getField("monovalent");
+                    const polyvalent = getField("polyvalent");
+
+                    if (monovalent === polyvalent) {
+                        throw new Error(
+                            i18n.t(
+                                "It is not possible to create product. Monovalent and Polyvalent should be exclusive for product {{product}}.",
+                                { product: productName }
+                            )
+                        );
+                    }
+
                     const recommended =
                         dataValues.find(({ dataElement }) => recommendedSelector === dataElement) !== undefined;
 
@@ -616,9 +629,9 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                         categoryOptionComboId,
                         recommended,
                         deleted: false,
-                        monovalent: getField("monovalent"),
-                        polyvalent: getField("polyvalent"),
-                        productName: getField("productName"),
+                        monovalent,
+                        polyvalent,
+                        productName,
                         manufacturerName: getField("manufacturerName"),
                     };
                 })
