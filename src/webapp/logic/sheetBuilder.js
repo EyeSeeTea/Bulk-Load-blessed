@@ -203,7 +203,7 @@ SheetBuilder.prototype.fillInstancesSheet = function () {
 
     this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
 
-    this.createColumn(sheet, itemRow, 4, (program.incidentDateLabel || "Incident Date") + " *");
+    this.createColumn(sheet, itemRow, 4, program.incidentDateLabel || "Incident Date");
 
     const programAttributes = program.programTrackedEntityAttributes || [];
     this.instancesSheetValuesRow = itemRow + 1;
