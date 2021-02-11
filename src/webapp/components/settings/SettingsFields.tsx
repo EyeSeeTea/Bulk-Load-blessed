@@ -10,11 +10,7 @@ import {
     TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
-import {
-    DuplicateToleranceUnit,
-    Model,
-    OrgUnitSelectionSetting,
-} from "../../../domain/entities/AppSettings";
+import { DuplicateToleranceUnit, Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import Settings, { PermissionSetting } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
@@ -166,13 +162,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                 {modelsInfo.map(({ key, name, value }) => (
                     <FormControlLabel
                         key={key}
-                        control={
-                            <Checkbox
-                                className={classes.checkbox}
-                                checked={value}
-                                onChange={setModel(key)}
-                            />
-                        }
+                        control={<Checkbox className={classes.checkbox} checked={value} onChange={setModel(key)} />}
                         label={name}
                     />
                 ))}

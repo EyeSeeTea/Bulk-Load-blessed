@@ -86,9 +86,7 @@ export default class Settings {
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
-        const d2CurrentUser = await api.currentUser
-            .get({ fields: { id: true, userGroups: { id: true } } })
-            .getData();
+        const d2CurrentUser = await api.currentUser.get({ fields: { id: true, userGroups: { id: true } } }).getData();
 
         const currentUser: CurrentUser = {
             ...d2CurrentUser,
@@ -96,14 +94,9 @@ export default class Settings {
         };
 
         const defaultSettings = compositionRoot.settings.getDefault();
-        const data = await compositionRoot.settings.read<Partial<AppSettings>>(
-            Settings.constantCode,
-            defaultSettings
-        );
+        const data = await compositionRoot.settings.read<Partial<AppSettings>>(Settings.constantCode, defaultSettings);
 
-        const query = (
-            prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport"
-        ) => {
+        const query = (prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport") => {
             const storedValues = data[prop] ?? [];
             const defaultValues = defaultSettings[prop] ?? [];
 
@@ -113,10 +106,7 @@ export default class Settings {
             };
         };
 
-        const {
-            users: userPermissionsForImport,
-            userGroups: userGroupPermissionsForImport,
-        } = await api.metadata
+        const { users: userPermissionsForImport, userGroups: userGroupPermissionsForImport } = await api.metadata
             .get({
                 userGroups: query("permissionsForImport"),
                 users: query("permissionsForImport"),
@@ -133,10 +123,7 @@ export default class Settings {
             })
             .getData();
 
-        const {
-            users: userPermissionsForSettings,
-            userGroups: userGroupPermissionsForSettings,
-        } = await api.metadata
+        const { users: userPermissionsForSettings, userGroups: userGroupPermissionsForSettings } = await api.metadata
             .get({
                 userGroups: query("permissionsForSettings"),
                 users: query("permissionsForSettings"),
@@ -156,16 +143,13 @@ export default class Settings {
             duplicateEnabled: data.duplicateEnabled ?? true,
             duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
-            duplicateToleranceUnit:
-                data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
+            duplicateToleranceUnit: data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
         });
     }
 
     validate(): OkOrError {
         const isSomeModelEnabled = _(this.models).values().some();
-        return isSomeModelEnabled
-            ? { status: true }
-            : { status: false, error: i18n.t("Select at least one model") };
+        return isSomeModelEnabled ? { status: true } : { status: false, error: i18n.t("Select at least one model") };
     }
 
     async save(compositionRoot: CompositionRoot): Promise<OkOrError> {
@@ -186,19 +170,14 @@ export default class Settings {
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const permissionsForGeneration = [
-            ...userPermissionsForGeneration,
-            ...userGroupPermissionsForGeneration,
-        ].map(ug => ug.id);
+        const permissionsForGeneration = [...userPermissionsForGeneration, ...userGroupPermissionsForGeneration].map(
+            ug => ug.id
+        );
 
-        const permissionsForSettings = [
-            ...userPermissionsForSettings,
-            ...userGroupPermissionsForSettings,
-        ].map(ug => ug.id);
-        const permissionsForImport = [
-            ...userPermissionsForImport,
-            ...userGroupPermissionsForImport,
-        ].map(ug => ug.id);
+        const permissionsForSettings = [...userPermissionsForSettings, ...userGroupPermissionsForSettings].map(
+            ug => ug.id
+        );
+        const permissionsForImport = [...userPermissionsForImport, ...userGroupPermissionsForImport].map(ug => ug.id);
 
         const data: AppSettings = {
             models,
@@ -237,11 +216,7 @@ export default class Settings {
         return this[this.getPermissionField(setting, type)];
     }
 
-    setPermissions(
-        setting: PermissionSetting,
-        type: PermissionType,
-        collection: NamedObject[]
-    ): Settings {
+    setPermissions(setting: PermissionSetting, type: PermissionType, collection: NamedObject[]): Settings {
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });

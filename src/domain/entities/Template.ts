@@ -1,4 +1,7 @@
+import { ExcelRepository } from "../repositories/ExcelRepository";
+import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
+import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 
@@ -16,7 +19,7 @@ export type DataSourceValue =
     | CellDataSource;
 
 // Use to reference data sources for dynamic sheets
-type DataSourceValueGetter = (sheet: string) => DataSourceValue | false;
+type DataSourceValueGetter = (sheet: string) => DataSourceValue | DataSourceValue[] | false;
 
 export type DataSource = DataSourceValue | DataSourceValueGetter;
 
@@ -43,11 +46,31 @@ export interface GeneratedTemplate extends BaseTemplate {
     colOffset: number;
 }
 
+export interface DownloadCustomizationOptions {
+    populate: boolean;
+    dataPackage?: DataPackage;
+    orgUnits: string[];
+}
+
+export interface ImportCustomizationOptions {
+    dataPackage: DataPackage;
+}
+
 export interface CustomTemplate extends BaseTemplate {
     type: "custom";
     url: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
+    downloadCustomization?: (
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository,
+        options: DownloadCustomizationOptions
+    ) => Promise<void>;
+    importCustomization?: (
+        excelRepository: ExcelRepository,
+        instanceRepository: InstanceRepository,
+        options: ImportCustomizationOptions
+    ) => Promise<DataPackage | undefined>;
 }
 
 export interface GenericSheetRef {
@@ -128,12 +151,12 @@ export interface TrackerEventRowDataSource {
 export interface RowDataSource extends BaseDataSource {
     type: "row";
     range: Range;
-    orgUnit: ColumnRef | CellRef;
-    period: ColumnRef | CellRef;
-    dataElement: RowRef;
-    categoryOption?: RowRef;
-    attribute?: ColumnRef | CellRef;
-    eventId?: ColumnRef | CellRef;
+    orgUnit: ColumnRef | CellRef | ValueRef;
+    period: ColumnRef | CellRef | ValueRef;
+    dataElement: RowRef | ValueRef;
+    categoryOption?: RowRef | ValueRef;
+    attribute?: ColumnRef | CellRef | ValueRef;
+    eventId?: ColumnRef | CellRef | ValueRef;
 }
 
 export interface TeiRowDataSource {

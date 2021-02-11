@@ -13,11 +13,7 @@ interface DataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
 }
 
-export default function DataElementsFilterDialog({
-    onClose,
-    settings,
-    onChange,
-}: DataElementsFilterDialogProps) {
+export default function DataElementsFilterDialog({ onClose, settings, onChange }: DataElementsFilterDialogProps) {
     const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 
@@ -51,7 +47,7 @@ export default function DataElementsFilterDialog({
     const excluded = selectedProgram ? settings.duplicateExclusion[selectedProgram.id] : [];
     const selection = _.difference(
         selectedProgram?.dataElements.map(({ id }) => id),
-        excluded
+        excluded ?? []
     );
 
     return (

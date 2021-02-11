@@ -40,11 +40,7 @@ interface AppConfig {
 
 interface AppWindow extends Window {
     $: {
-        feedbackDhis2: (
-            d2: unknown,
-            appKey: string,
-            appConfig: AppConfig["feedback"]["feedbackOptions"]
-        ) => void;
+        feedbackDhis2: (d2: unknown, appKey: string, appConfig: AppConfig["feedback"]["feedbackOptions"]) => void;
     };
 }
 

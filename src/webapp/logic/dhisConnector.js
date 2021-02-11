@@ -47,8 +47,7 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
             .getData()
     );
 
-    const metadata =
-        element.type === "trackerPrograms" ? await getTrackerProgramMetadata(element, api) : {};
+    const metadata = element.type === "trackerPrograms" ? await getTrackerProgramMetadata(element, api) : {};
 
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
 
