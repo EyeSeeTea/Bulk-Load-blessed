@@ -193,12 +193,14 @@ export class ImportTemplateUseCase implements UseCase {
         dataForm: DataForm,
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[]
-    ) {
-        const instanceDataPackage = await this.getInstanceDataValues(dataForm, excelDataPackage);
+    ): Promise<DataPackageData[]> {
+        const originalDataValues =
+            useBuilderOrgUnits && selectedOrgUnits[0]
+                ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
+                : excelDataPackage.dataEntries;
 
-        return useBuilderOrgUnits && selectedOrgUnits[0]
-            ? this.overrideOrgUnit(instanceDataPackage.dataEntries, selectedOrgUnits[0])
-            : instanceDataPackage.dataEntries;
+        const { dataEntries } = await this.getInstanceDataValues(dataForm, originalDataValues);
+        return dataEntries;
     }
 
     private overrideOrgUnit(dataValues: DataPackageData[], replaceOrgUnit: string): DataPackageData[] {
@@ -208,9 +210,9 @@ export class ImportTemplateUseCase implements UseCase {
         }));
     }
 
-    private async getInstanceDataValues(dataForm: DataForm, excelDataValues: DataPackage) {
-        const periods = _.uniq(excelDataValues.dataEntries.map(({ period }) => period.toString()));
-        const orgUnits = _.uniq(excelDataValues.dataEntries.map(({ orgUnit }) => orgUnit));
+    private async getInstanceDataValues(dataForm: DataForm, dataValues: DataPackageData[]) {
+        const periods = _.uniq(dataValues.map(({ period }) => period.toString()));
+        const orgUnits = _.uniq(dataValues.map(({ orgUnit }) => orgUnit));
 
         return this.instanceRepository.getDataPackage({
             id: dataForm.id,
