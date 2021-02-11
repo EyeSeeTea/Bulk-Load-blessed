@@ -80,7 +80,7 @@ export class DownloadTemplateUseCase implements UseCase {
             await this.excelRepository.loadTemplate({ type: "file", file });
         }
 
-        const enablePopulate = populate && populateStartDate && populateEndDate;
+        const enablePopulate = populate && !!populateStartDate && !!populateEndDate;
 
         const dataPackage = enablePopulate
             ? await this.instanceRepository.getDataPackage({

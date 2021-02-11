@@ -92,6 +92,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         const dataSet = await this.getDataForms(instanceRepository);
         const { metadata, antivenomEntries, antivenomProducts } = await this.readDataStore(instanceRepository);
+        const defaults = await instanceRepository.getDefaultIds();
 
         const getName = (id: string) => {
             return _([
@@ -163,14 +164,22 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         const items = _(dataSet?.dataElements)
             .compact()
             .flatten()
-            .flatMap(({ id, name, categoryOptionCombos = [] }) => [
-                { id, name, type: "dataElement" },
-                ...categoryOptionCombos.map(({ id, name }) => ({
-                    id,
-                    name,
-                    type: "categoryOptionCombo",
-                })),
-            ])
+            .flatMap(({ id, name, categoryOptionCombos = [] }) => {
+                const { defaultCatOptionComboName } = metadata.dataElements[id] ?? {};
+                return [
+                    { id, name, type: "dataElement" },
+                    ...categoryOptionCombos.map(({ id, name }) => ({
+                        id,
+                        name,
+                        type: "categoryOptionCombo",
+                    })),
+                    ...defaults.map(defaultId => ({
+                        id: `${id}.${defaultId}`,
+                        name: defaultCatOptionComboName ?? "Total",
+                        type: "specialCategoryOptionCombo",
+                    })),
+                ];
+            })
             .union([
                 { id: "true", name: "Yes", type: "boolean" },
                 { id: "false", name: "No", type: "boolean" },
@@ -362,7 +371,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             await promiseMap(sortedOptionCombos, async (category, catIndex) => {
                 const { color, backgroundColor } = metadata.optionCombos[category.id] ?? {};
 
-                await write("National", categoryStartColumn + catIndex, categoryRow, `=_${category.id}`);
+                const id = defaults.includes(category.id) ? `${dataElement.id}.${category.id}` : category.id;
+                await write("National", categoryStartColumn + catIndex, categoryRow, `=_${id}`);
 
                 await style(
                     "National",
@@ -519,9 +529,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
                 )
                 .value();
 
-            const nationalDataValues = dataValues.filter(
-                ({ dataElement }) => !antivenomDataElementIds.includes(dataElement)
-            );
+            const nationalDataValues = dataValues
+                .filter(({ dataElement }) => !antivenomDataElementIds.includes(dataElement))
+                .map(({ category, ...rest }) => ({
+                    ...rest,
+                    category: _.last(category?.split(".")),
+                }));
 
             const [existingProducts, newProducts] = _.partition(dataValues, dataValue => {
                 const isProduct = antivenomDataElementIds.includes(dataValue.dataElement);
