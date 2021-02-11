@@ -551,16 +551,10 @@ export class SnakebiteAnnualReport implements CustomTemplate {
             });
 
             const cleanExistingProducts = _(existingProducts)
-                .map(({ category = "", ...dataValue }) => {
-                    const { prop = "" } = antivenomDataElements.find(({ id }) => id === dataValue.dataElement) ?? {};
-                    if (["monovalent", "polyvalent", "manufacturerName"].includes(prop)) return undefined;
-
-                    return {
-                        ...dataValue,
-                        category: productByCategory[category]?.categoryOptionComboId ?? category,
-                    };
-                })
-                .compact()
+                .map(({ category = "", ...dataValue }) => ({
+                    ...dataValue,
+                    category: productByCategory[category]?.categoryOptionComboId ?? category,
+                }))
                 .groupBy("category")
                 .mapValues(dataValues => {
                     const values = dataValues.filter(({ dataElement }) =>
