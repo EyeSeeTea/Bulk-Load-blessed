@@ -18,6 +18,11 @@ class TestClass {
     }
 
     @cache()
+    public async getComplexAsync(int: number): Promise<number> {
+        return Math.random() * this.multiplier * int;
+    }
+
+    @cache()
     public getMultiple(int1: number, int2: number): number {
         return Math.random() * this.multiplier * int1 * int2;
     }
@@ -43,6 +48,10 @@ class TestClass {
 
     public resetComplex(): void {
         clear(this.getComplex, this);
+    }
+
+    public resetComplexAsync(): void {
+        clear(this.getComplexAsync, this);
     }
 
     public resetMultiple(): void {
@@ -80,6 +89,10 @@ describe("Cache decorator with clearing", () => {
         expect(test.getComplex(10)).toEqual(test.getComplex(10));
     });
 
+    it("complex async - should be the same number", async () => {
+        expect(await test.getComplexAsync(10)).toEqual(await test.getComplexAsync(10));
+    });
+
     it("multiple - should be the same number", () => {
         expect(test.getMultiple(10, 20)).toEqual(test.getMultiple(10, 20));
     });
@@ -106,6 +119,12 @@ describe("Cache decorator with clearing", () => {
     it("complex - should be a new number", () => {
         const number = test.getComplex(10);
         test.resetComplex();
+        expect(test.getComplex(10)).not.toEqual(number);
+    });
+
+    it("complex async - should be a new number", async () => {
+        const number = await test.getComplexAsync(10);
+        test.resetComplexAsync();
         expect(test.getComplex(10)).not.toEqual(number);
     });
 
@@ -136,6 +155,10 @@ describe("Cache decorator with clearing", () => {
 
     it("complex - should be a different number", () => {
         expect(test.getComplex(20)).not.toEqual(test.getComplex(10));
+    });
+
+    it("complex async - should be a different number", async () => {
+        expect(await test.getComplexAsync(20)).not.toEqual(await test.getComplexAsync(10));
     });
 
     it("multiple - should be a different number", () => {
