@@ -326,8 +326,9 @@ export default class Settings {
     isTemplateGenerationVisible() {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
+        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForGeneration);
 
-        return hasGroupAccess || hasUserAccess;
+        return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
 
     areSettingsVisibleForCurrentUser(): boolean {
@@ -335,15 +336,17 @@ export default class Settings {
         const isUserAdmin = authorities.has("ALL");
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForSettings);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForSettings);
+        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForSettings);
 
-        return isUserAdmin || hasGroupAccess || hasUserAccess;
+        return isUserAdmin || hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
 
     isImportDataVisibleForCurrentUser(): boolean {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport);
+        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForImport);
 
-        return hasGroupAccess || hasUserAccess;
+        return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -382,5 +385,9 @@ export default class Settings {
         return !_([this.currentUser, ...this.currentUser.userGroups])
             .intersectionBy(collection, userGroup => userGroup.id)
             .isEmpty();
+    }
+
+    private areAllUsersAllowed(collection: NamedObject[]): boolean{
+        return collection.some(item => item.id === "ALL");
     }
 }

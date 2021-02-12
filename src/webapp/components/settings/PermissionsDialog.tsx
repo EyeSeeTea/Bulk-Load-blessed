@@ -87,7 +87,8 @@ export default function PermissionsDialog({
         (setting: PermissionSetting) => {
             const userPermissions = settings.getPermissions(setting, "allUsers");
             if(userPermissions.length > 0 ){
-                const isAllUserAllowed = (userPermissions[0].id === "ALL");
+                //const isAllUserAllowed = (userPermissions[0].id === "ALL");
+                const isAllUserAllowed = userPermissions.some(item => item.id === "ALL");
                 return isAllUserAllowed;
             }
             // Not all user are allowed
