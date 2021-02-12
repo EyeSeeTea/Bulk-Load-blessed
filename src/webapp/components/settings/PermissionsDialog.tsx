@@ -1,6 +1,6 @@
 import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
 import { useAppContext } from "../../contexts/app-context";
@@ -32,7 +32,7 @@ export default function PermissionsDialog({
 
             const buildSharings = (type: PermissionType) =>
                 settings.getPermissions(setting, type).map(sharing => ({ ...sharing, access: "" }));
-
+           
             return {
                 meta: {
                     allowPublicAccess: false,
@@ -67,13 +67,31 @@ export default function PermissionsDialog({
         },
         [onChange, settings]
     );
-    const [isAccessModalVisible, showAccessModal] = useState<boolean>(true);
+    //const [isAccessModalVisible, showAccessModal] = useState<boolean>(true);
 
 
     const onChangeAllUsers = useCallback(
-        (setting: PermissionSetting) =>{
-            const newSettings = settings.setPermissions(setting, "user",  [{id: "ALL" ,displayName:""}]);
+        (setting: PermissionSetting, checked: boolean) =>{
+            console.log("clicked");
+            let allUser : SharingRule[] = [];
+            if(checked){
+                allUser = [{id: "ALL" ,displayName:"", access: ""}];
+            }
+            const newSettings = settings.setPermissions(setting, "allUsers", allUser );
             return onChange(newSettings);
+        },
+        [onChange, settings]
+    );
+    
+    const allUserChecked = useCallback(
+        (setting: PermissionSetting) => {
+            const userPermissions = settings.getPermissions(setting, "allUsers");
+            if(userPermissions.length > 0 ){
+                const isAllUserAllowed = (userPermissions[0].id === "ALL");
+                return isAllUserAllowed;
+            }
+            // Not all user are allowed
+            return false;
         },
         [onChange, settings]
     );
@@ -86,7 +104,7 @@ export default function PermissionsDialog({
             cancelText={i18n.t("Close")}
         >
             
-            {!! isAccessModalVisible && (<Sharing
+            {! allUserChecked(permissionsType) && (<Sharing
                 meta={buildMetaObject(permissionsType)}
                 showOptions={{
                     dataSharing: false,
@@ -101,11 +119,12 @@ export default function PermissionsDialog({
             <FormControlLabel
                 control={
                     <Checkbox
+                        checked={allUserChecked(permissionsType)}
                         onChange = {(ev: any) => {
-                            showAccessModal(!ev.target.checked);
-                            if(ev.target.checked){
-                                onChangeAllUsers(permissionsType)
-                            }
+                            const checked = ev.target.checked;
+                            //showAccessModal(!checked);
+                            onChangeAllUsers(permissionsType, checked)
+                            
                         }}
                     />
                 }

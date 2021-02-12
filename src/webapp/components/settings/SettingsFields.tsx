@@ -120,6 +120,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const buildSharingDescription = useCallback(
         (setting: PermissionSetting) => {
+            //console.log("GETTING: ", settings.getPermissions(setting, "user"));
             const users = settings.getPermissions(setting, "user").length;
             const userGroups = settings.getPermissions(setting, "userGroup").length;
 
