@@ -19,7 +19,7 @@ const publicFields = [
     "models",
     "userPermissionsForGeneration",
     "userGroupPermissionsForGeneration",
-    "allUserPermissionsForGeneration", 
+    "allUserPermissionsForGeneration",
     "userPermissionsForImport",
     "userGroupPermissionsForImport",
     "allUserPermissionsForImport",
@@ -45,7 +45,6 @@ interface NamedObject {
     id: string;
     displayName: string;
 }
-
 
 interface CurrentUser extends Ref {
     userGroups: Ref[];
@@ -85,7 +84,7 @@ export default class Settings {
         this.allUserPermissionsForImport = options.allUserPermissionsForImport;
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
-        this.allUserPermissionsForSettings = options.allUserPermissionsForSettings; // WATCH OUT
+        this.allUserPermissionsForSettings = options.allUserPermissionsForSettings;
         this.orgUnitSelection = options.orgUnitSelection;
         this.duplicateEnabled = options.duplicateEnabled;
         this.duplicateExclusion = options.duplicateExclusion;
@@ -114,7 +113,6 @@ export default class Settings {
         const query = (
             prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport"
         ) => {
-            //debugger;
             const storedValues = data[prop] ?? [];
             const defaultValues = defaultSettings[prop] ?? [];
 
@@ -124,11 +122,12 @@ export default class Settings {
             };
         };
 
-
-        const allUserPermissionsForImport: NamedObject[] = [{
-            id: data["permissionsForImport"]?.find(element => element === "ALL") ?? "",
-            displayName: "",
-        }];
+        const allUserPermissionsForImport: NamedObject[] = [
+            {
+                id: data["permissionsForImport"]?.find(element => element === "ALL") ?? "",
+                displayName: "",
+            },
+        ];
 
         const {
             users: userPermissionsForImport,
@@ -139,7 +138,7 @@ export default class Settings {
                 users: query("permissionsForImport"),
             })
             .getData();
-        
+
         const {
             users: userPermissionsForGeneration,
             userGroups: userGroupPermissionsForGeneration,
@@ -150,11 +149,13 @@ export default class Settings {
             })
             .getData();
 
-        const allUserPermissionsForGeneration: NamedObject[] = [{
-            id: data["permissionsForGeneration"]?.find(element => element === "ALL") ?? "",
-            displayName: "",
-        }];
-        
+        const allUserPermissionsForGeneration: NamedObject[] = [
+            {
+                id: data["permissionsForGeneration"]?.find(element => element === "ALL") ?? "",
+                displayName: "",
+            },
+        ];
+
         const {
             users: userPermissionsForSettings,
             userGroups: userGroupPermissionsForSettings,
@@ -164,11 +165,13 @@ export default class Settings {
                 users: query("permissionsForSettings"),
             })
             .getData();
-        
-        const allUserPermissionsForSettings: NamedObject[] = [{
-            id: data["permissionsForSettings"]?.find(element => element === "ALL") ?? "",
-            displayName: "",
-        }];
+
+        const allUserPermissionsForSettings: NamedObject[] = [
+            {
+                id: data["permissionsForSettings"]?.find(element => element === "ALL") ?? "",
+                displayName: "",
+            },
+        ];
 
         return new Settings({
             currentUser,
@@ -219,7 +222,6 @@ export default class Settings {
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        
         const permissionsForGeneration = [
             ...userPermissionsForGeneration,
             ...userGroupPermissionsForGeneration,
@@ -349,29 +351,31 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup" | "allUsers") {
+    private getPermissionField(
+        setting: PermissionSetting,
+        kind: "user" | "userGroup" | "allUsers"
+    ) {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {
             return "userGroupPermissionsForGeneration";
-        } else if(setting === "generation" && kind === "allUsers"){
+        } else if (setting === "generation" && kind === "allUsers") {
             return "allUserPermissionsForGeneration";
-        }else if (setting === "settings" && kind === "user") {
+        } else if (setting === "settings" && kind === "user") {
             return "userPermissionsForSettings";
         } else if (setting === "settings" && kind === "userGroup") {
             return "userGroupPermissionsForSettings";
-        }else if(setting === "settings" && kind === "allUsers"){
-            return "allUserPermissionsForSettings"
+        } else if (setting === "settings" && kind === "allUsers") {
+            return "allUserPermissionsForSettings";
         } else if (setting === "import" && kind === "user") {
             return "userPermissionsForImport";
         } else if (setting === "import" && kind === "userGroup") {
             return "userGroupPermissionsForImport";
-        } else if(setting === "import" && kind === "allUsers"){
+        } else if (setting === "import" && kind === "allUsers") {
             return "allUserPermissionsForImport";
-        }else {
+        } else {
             throw new Error("Unsupported field");
         }
-        
     }
 
     private findCurrentUser(collection: NamedObject[]): boolean {
@@ -380,7 +384,7 @@ export default class Settings {
             .isEmpty();
     }
 
-    private areAllUsersAllowed(collection: NamedObject[]): boolean{
+    private areAllUsersAllowed(collection: NamedObject[]): boolean {
         return collection.some(item => item.id === "ALL");
     }
 }

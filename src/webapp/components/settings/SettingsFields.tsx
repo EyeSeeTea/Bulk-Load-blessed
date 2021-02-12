@@ -120,11 +120,10 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const buildSharingDescription = useCallback(
         (setting: PermissionSetting) => {
-            console.log("GETTING: ", settings);
             const users = settings.getPermissions(setting, "user").length;
             const userGroups = settings.getPermissions(setting, "userGroup").length;
             const allUsers = settings.getPermissions(setting, "allUsers");
-            if(allUsers.length > 0  && allUsers.some(e => e.id === "ALL")){
+            if (allUsers.length > 0 && allUsers.some(e => e.id === "ALL")) {
                 return i18n.t("Accessible to all users");
             } else if (users > 0 && userGroups > 0) {
                 return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {

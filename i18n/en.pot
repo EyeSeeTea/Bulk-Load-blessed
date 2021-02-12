@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-10T14:31:19.087Z\n"
-"PO-Revision-Date: 2021-02-10T14:31:19.087Z\n"
+"POT-Creation-Date: 2021-02-12T18:12:10.016Z\n"
+"PO-Revision-Date: 2021-02-12T18:12:10.016Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -84,6 +84,9 @@ msgid "Months"
 msgstr ""
 
 msgid "Years"
+msgstr ""
+
+msgid "Accessible to all users"
 msgstr ""
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"

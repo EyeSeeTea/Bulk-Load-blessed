@@ -32,7 +32,7 @@ export default function PermissionsDialog({
 
             const buildSharings = (type: PermissionType) =>
                 settings.getPermissions(setting, type).map(sharing => ({ ...sharing, access: "" }));
-           
+
             return {
                 meta: {
                     allowPublicAccess: false,
@@ -54,11 +54,10 @@ export default function PermissionsDialog({
     const onUpdateSharingOptions = useCallback(
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
-                console.log("onUpdateSharingOptions", settings);
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
-                    rule?.map(({ id, displayName}) => ({ id, displayName })) ??
+                    rule?.map(({ id, displayName }) => ({ id, displayName })) ??
                     settings.getPermissions(setting, type);
-                
+
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
                     .setPermissions(setting, "userGroup", buildPermission("userGroup", userGroups));
@@ -67,36 +66,31 @@ export default function PermissionsDialog({
         },
         [onChange, settings]
     );
-    //const [isAccessModalVisible, showAccessModal] = useState<boolean>(true);
-
 
     const onChangeAllUsers = useCallback(
-        (setting: PermissionSetting, checked: boolean) =>{
-            console.log("clicked");
-            let allUser : SharingRule[] = [];
-            if(checked){
-                allUser = [{id: "ALL" ,displayName:"", access: ""}];
+        (setting: PermissionSetting, checked: boolean) => {
+            let allUser: SharingRule[] = [];
+            if (checked) {
+                allUser = [{ id: "ALL", displayName: "", access: "" }];
             }
-            const newSettings = settings.setPermissions(setting, "allUsers", allUser );
+            const newSettings = settings.setPermissions(setting, "allUsers", allUser);
             return onChange(newSettings);
         },
         [onChange, settings]
     );
-    
+
     const allUserChecked = useCallback(
         (setting: PermissionSetting) => {
             const userPermissions = settings.getPermissions(setting, "allUsers");
-            if(userPermissions.length > 0 ){
-                //const isAllUserAllowed = (userPermissions[0].id === "ALL");
+            if (userPermissions.length > 0) {
                 const isAllUserAllowed = userPermissions.some(item => item.id === "ALL");
                 return isAllUserAllowed;
             }
-            // Not all user are allowed
             return false;
         },
         [settings]
     );
-        
+
     return (
         <ConfirmationDialog
             isOpen={true}
@@ -104,32 +98,30 @@ export default function PermissionsDialog({
             onCancel={onClose}
             cancelText={i18n.t("Close")}
         >
-            
-            {! allUserChecked(permissionsType) && (<Sharing
-                meta={buildMetaObject(permissionsType)}
-                showOptions={{
-                    dataSharing: false,
-                    publicSharing: false,
-                    externalSharing: false,
-                    permissionPicker: false,
-                }}
-                
-                onSearch={search}
-                onChange={onUpdateSharingOptions(permissionsType)}
-            />)}
+            {!allUserChecked(permissionsType) && (
+                <Sharing
+                    meta={buildMetaObject(permissionsType)}
+                    showOptions={{
+                        dataSharing: false,
+                        publicSharing: false,
+                        externalSharing: false,
+                        permissionPicker: false,
+                    }}
+                    onSearch={search}
+                    onChange={onUpdateSharingOptions(permissionsType)}
+                />
+            )}
             <FormControlLabel
                 control={
                     <Checkbox
                         checked={allUserChecked(permissionsType)}
-                        onChange = {(ev: any) => {
+                        onChange={(ev: any) => {
                             const checked = ev.target.checked;
-                            //showAccessModal(!checked);
-                            onChangeAllUsers(permissionsType, checked)
-                            
+                            onChangeAllUsers(permissionsType, checked);
                         }}
                     />
                 }
-                label = {"All users allowed"}
+                label={"All users allowed"}
             />
         </ConfirmationDialog>
     );
