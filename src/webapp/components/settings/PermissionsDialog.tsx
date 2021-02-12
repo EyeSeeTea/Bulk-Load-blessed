@@ -86,9 +86,8 @@ export default function PermissionsDialog({
     const allUserChecked = useCallback(
         (setting: PermissionSetting) => {
             const userPermissions = settings.getPermissions(setting, "allUsers");
-            console.log(settings);
             if(userPermissions.length > 0 ){
-                const isAllUserAllowed = (userPermissions.some(item => item.id === "ALL"));
+                const isAllUserAllowed = (userPermissions[0].id === "ALL");
                 return isAllUserAllowed;
             }
             // Not all user are allowed

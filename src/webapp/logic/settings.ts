@@ -326,9 +326,8 @@ export default class Settings {
     isTemplateGenerationVisible() {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
-        const HaveAllUserAccess = this.areAllUsersAlowed(this.allUserPermissionsForGeneration);
 
-        return hasGroupAccess || hasUserAccess || HaveAllUserAccess;
+        return hasGroupAccess || hasUserAccess;
     }
 
     areSettingsVisibleForCurrentUser(): boolean {
@@ -336,17 +335,15 @@ export default class Settings {
         const isUserAdmin = authorities.has("ALL");
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForSettings);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForSettings);
-        const HaveAllUserAccess = this.areAllUsersAlowed(this.allUserPermissionsForSettings);
 
-        return isUserAdmin || hasGroupAccess || hasUserAccess || HaveAllUserAccess;
+        return isUserAdmin || hasGroupAccess || hasUserAccess;
     }
 
     isImportDataVisibleForCurrentUser(): boolean {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport);
-        const HaveAllUserAccess = this.areAllUsersAlowed(this.allUserPermissionsForImport);
 
-        return hasGroupAccess || hasUserAccess || HaveAllUserAccess;
+        return hasGroupAccess || hasUserAccess;
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -385,9 +382,5 @@ export default class Settings {
         return !_([this.currentUser, ...this.currentUser.userGroups])
             .intersectionBy(collection, userGroup => userGroup.id)
             .isEmpty();
-    }
-
-    private areAllUsersAlowed(collection: NamedObject[]): boolean{
-        return collection.some(item => item.id === "ALL");
     }
 }
