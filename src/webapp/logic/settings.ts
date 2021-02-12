@@ -85,7 +85,7 @@ export default class Settings {
         this.allUserPermissionsForImport = options.allUserPermissionsForImport;
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
-        this.allUserPermissionsForSettings = options.allUserPermissionsForSettings;
+        this.allUserPermissionsForSettings = options.allUserPermissionsForSettings; // WATCH OUT
         this.orgUnitSelection = options.orgUnitSelection;
         this.duplicateEnabled = options.duplicateEnabled;
         this.duplicateExclusion = options.duplicateExclusion;
@@ -114,6 +114,7 @@ export default class Settings {
         const query = (
             prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport"
         ) => {
+            //debugger;
             const storedValues = data[prop] ?? [];
             const defaultValues = defaultSettings[prop] ?? [];
 
@@ -123,14 +124,12 @@ export default class Settings {
             };
         };
 
-        const {
-            users: allUserPermissionsForImport,
-        } = await api.metadata.get({
-            users: query("permissionsForImport"),
 
-        })
-        .getData();
-       
+        const allUserPermissionsForImport: NamedObject[] = [{
+            id: data["permissionsForImport"]?.find(element => element === "ALL") ?? "",
+            displayName: "",
+        }];
+
         const {
             users: userPermissionsForImport,
             userGroups: userGroupPermissionsForImport,
@@ -141,14 +140,6 @@ export default class Settings {
             })
             .getData();
         
-            
-        const {
-            users: allUserPermissionsForGeneration,
-        }  = await api.metadata.get({
-            users:query("permissionsForGeneration"),
-        })
-        .getData();
-
         const {
             users: userPermissionsForGeneration,
             userGroups: userGroupPermissionsForGeneration,
@@ -158,15 +149,12 @@ export default class Settings {
                 users: query("permissionsForGeneration"),
             })
             .getData();
-        //============================================================
-        const {
-            users: allUserPermissionsForSettings,
-        } = await api.metadata
-        .get({
-            users: query("permissionsForSettings"),
-        })
-        .getData();
-         //============================================================
+
+        const allUserPermissionsForGeneration: NamedObject[] = [{
+            id: data["permissionsForGeneration"]?.find(element => element === "ALL") ?? "",
+            displayName: "",
+        }];
+        
         const {
             users: userPermissionsForSettings,
             userGroups: userGroupPermissionsForSettings,
@@ -176,6 +164,11 @@ export default class Settings {
                 users: query("permissionsForSettings"),
             })
             .getData();
+        
+        const allUserPermissionsForSettings: NamedObject[] = [{
+            id: data["permissionsForSettings"]?.find(element => element === "ALL") ?? "",
+            displayName: "",
+        }];
 
         return new Settings({
             currentUser,
