@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-12T18:12:10.016Z\n"
-"PO-Revision-Date: 2021-02-12T18:12:10.016Z\n"
+"POT-Creation-Date: 2021-02-15T14:26:02.777Z\n"
+"PO-Revision-Date: 2021-02-15T14:26:02.777Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -80,6 +80,15 @@ msgid "Access to Import Data"
 msgstr ""
 
 msgid "Access to Settings and Themes"
+msgstr ""
+
+msgid "Access Permissions confirmation"
+msgstr ""
+
+msgid ""
+"This option provides access permissions to all users and therefore, will "
+"not be possible to get back to the previous state of this section. Are you "
+"sure you want sustain this action?"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"

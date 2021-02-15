@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-02-12T18:12:10.016Z\n"
+"POT-Creation-Date: 2021-02-15T14:26:02.777Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -75,12 +75,20 @@ msgstr "Programa"
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
 
-#, fuzzy
 msgid "Access to Import Data"
 msgstr "Acesso à geração de planilhas"
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"
+
+msgid "Access Permissions confirmation"
+msgstr ""
+
+msgid ""
+"This option provides access permissions to all users and therefore, will not "
+"be possible to get back to the previous state of this section. Are you sure "
+"you want sustain this action?"
+msgstr ""
 
 msgid "Select Organisation Units on template generation"
 msgstr "Selecione unidades organizacionais na geração de planilhas"
@@ -110,7 +118,6 @@ msgstr "Meses"
 msgid "Years"
 msgstr "Anos"
 
-#, fuzzy
 msgid "Accessible to all users"
 msgstr "Acessível aos usuários {{users}}"
 

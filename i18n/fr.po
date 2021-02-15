@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-12T18:12:10.016Z\n"
+"POT-Creation-Date: 2021-02-15T14:26:02.777Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -76,12 +76,20 @@ msgstr "Programme"
 msgid "Access to Template Generation"
 msgstr "Accès à la génération de modèles"
 
-#, fuzzy
 msgid "Access to Import Data"
 msgstr "Accès à la génération de modèles"
 
 msgid "Access to Settings and Themes"
 msgstr "Accès aux Paramètres et aux Thèmes"
+
+msgid "Access Permissions confirmation"
+msgstr ""
+
+msgid ""
+"This option provides access permissions to all users and therefore, will not "
+"be possible to get back to the previous state of this section. Are you sure "
+"you want sustain this action?"
+msgstr ""
 
 msgid "Select Organisation Units on template generation"
 msgstr "Sélectionnez les unités d'organisation lors de la génération du modèle"
@@ -112,7 +120,6 @@ msgstr "Mois"
 msgid "Years"
 msgstr "Années"
 
-#, fuzzy
 msgid "Accessible to all users"
 msgstr "Accessible aux utilisateurs {{users}}"
 

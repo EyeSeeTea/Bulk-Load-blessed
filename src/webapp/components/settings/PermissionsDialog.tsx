@@ -66,13 +66,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         [onChange, settings]
     );
 
-     // Action when accept giving permission to all users
      const acceptAllUsersPermissions = useCallback(
-        // TODO:
-        // git all permisions: allUsers
-        // Remove previous users
-        // Remove user groups
-
         (setting: PermissionSetting) => {
             let allUser: SharingRule[] = [];
             allUser = [{ id: "ALL", displayName: "", access: "" }];
@@ -88,13 +82,13 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
 
     const onChangeAllUsers = useCallback(
         (setting: PermissionSetting, checked: boolean) => {
-            //let allUser: SharingRule[] = [];
             if (checked) {
-                //allUser = [{ id: "ALL", displayName: "", access: "" }];
-                // TODO:
                 updateDialog({
                     title: i18n.t("Access Permissions confirmation"),
-                    description: i18n.t("This option provides access permissions to all users and therefore, will not be possible to get back to the previous state of this section. Are you sure you want sustain this action?"),
+                    description: 
+                    i18n.t("This option provides access permissions to all users and therefore, will ") + 
+                    i18n.t("not be possible to get back to the previous state of this section. Are you ") +
+                    i18n.t("sure you want to sustain this action?"),
                     saveText :"Accept",
                     cancelText :"Cancel" ,
                     onCancel: () => {updateDialog(null); },
