@@ -1,6 +1,10 @@
-import { ConfirmationDialog, ShareUpdate, Sharing, SharingRule } from "@eyeseetea/d2-ui-components";
+import {
+    ShareUpdate, Sharing, 
+    SharingRule, 
+    ConfirmationDialog,
+    ConfirmationDialogProps, } from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
 import { useAppContext } from "../../contexts/app-context";
@@ -15,6 +19,7 @@ interface PermissionsDialogProps extends SettingsFieldsProps {
 export default function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
     const { api } = useAppContext();
     const search = useCallback((query: string) => searchUsers(api, query), [api]);
+    const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     const buildMetaObject = useCallback(
         (setting: PermissionSetting) => {
@@ -66,6 +71,19 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             let allUser: SharingRule[] = [];
             if (checked) {
                 allUser = [{ id: "ALL", displayName: "", access: "" }];
+                // TODO:
+                // Rise pop up
+                updateDialog({
+                    title: i18n.t("Access Permissions confirmation"),
+                    description: i18n.t("This option provides access permissions to all users and therefore, will not be possible to get back to the previous state of this section. Are you sure you want sustain this action?"),
+                    saveText :"Accept",
+                    cancelText :"Cancel" ,
+                    onCancel: () => {updateDialog(null); },
+                    onSave: async () => {updateDialog(null); },
+                });
+                // Remove previous users
+                // Remove previous user groups
+
             }
             const newSettings = settings.setPermissions(setting, "allUsers", allUser);
             return onChange(newSettings);
@@ -100,6 +118,13 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     onChange={onUpdateSharingOptions(permissionsType)}
                 />
             )}
+            {dialogProps && <ConfirmationDialog 
+            isOpen={true} 
+            maxWidth={"xl"}
+            {...dialogProps}
+
+            />}
+
             <FormControlLabel
                 control={
                     <Checkbox
