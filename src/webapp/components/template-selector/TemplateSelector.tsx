@@ -81,9 +81,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             };
 
             setDataSource(dataSource);
-            if (models.length > 0) {
-                const model = models[0].value;
-                setTemplates(modelToSelectOption(dataSource[model]));
+            const model = models[0]?.value;
+            const dataSourceModel = dataSource[model ?? ""];
+
+            if (model && dataSourceModel) {
+                setTemplates(modelToSelectOption(dataSourceModel));
                 setSelectedModel(model);
             }
         });
@@ -122,7 +124,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
-        const options = modelToSelectOption(dataSource[value]);
+        const options = modelToSelectOption(dataSource[value] ?? []);
 
         setSelectedModel(value);
         setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
@@ -136,7 +138,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const onTemplateChange = ({ value }: SelectOption) => {
         if (dataSource) {
             const { periodType, type, readAccess = false } =
-                dataSource[selectedModel].find(({ id }) => id === value) ?? {};
+                dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {
@@ -275,18 +277,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
                     <div>
                         <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={filterOrgUnits}
-                                    onChange={onFilterOrgUnitsChange}
-                                />
-                            }
+                            control={<Checkbox checked={filterOrgUnits} onChange={onFilterOrgUnitsChange} />}
                             label={
                                 state.templateType === "custom"
                                     ? i18n.t("Select organisation unit to populate data")
-                                    : i18n.t(
-                                          "Select available organisation units to include in the template"
-                                      )
+                                    : i18n.t("Select available organisation units to include in the template")
                             }
                         />
                     </div>
@@ -309,9 +304,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     }}
                                     withElevation={false}
                                     singleSelection={state.templateType === "custom"}
-                                    typeInput={
-                                        state.templateType === "custom" ? "radio" : undefined
-                                    }
+                                    typeInput={state.templateType === "custom" ? "radio" : undefined}
                                 />
                             </div>
                         ) : (
@@ -375,10 +368,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     : undefined
                             }
                             maxDate={moment.min(
-                                _.compact([
-                                    state.type === "dataSets" && state.endDate,
-                                    state.populateEndDate,
-                                ])
+                                _.compact([state.type === "dataSets" && state.endDate, state.populateEndDate])
                             )}
                             views={datePickerFormat?.views}
                             format={datePickerFormat?.format ?? "DD/MM/YYYY"}
@@ -392,10 +382,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             value={state.populateEndDate ?? null}
                             onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
                             minDate={moment.max(
-                                _.compact([
-                                    state.type === "dataSets" && state.startDate,
-                                    state.populateStartDate,
-                                ])
+                                _.compact([state.type === "dataSets" && state.startDate, state.populateStartDate])
                             )}
                             maxDate={
                                 state.type === "dataSets"

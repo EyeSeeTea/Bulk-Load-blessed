@@ -30,6 +30,28 @@ msgstr "Modèle {{id}} non téléchargé"
 msgid "Data values - Delete"
 msgstr ""
 
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an administrator."
+msgstr ""
+
 msgid "Cannot read data form id"
 msgstr ""
 
@@ -54,8 +76,9 @@ msgstr "Programme"
 msgid "Access to Template Generation"
 msgstr "Accès à la génération de modèles"
 
+#, fuzzy
 msgid "Access to Import Data"
-msgstr "Accès à l'importation de données"
+msgstr "Accès à la génération de modèles"
 
 msgid "Access to Settings and Themes"
 msgstr "Accès aux Paramètres et aux Thèmes"
@@ -329,10 +352,10 @@ msgstr ""
 "{{dbVersion}}, fichier = {{sheetVersion}})"
 
 msgid "User with no permissions"
-msgstr "Utilisateur sans autorisation"
+msgstr ""
 
 msgid "It seems this user account does not have any permission. "
-msgstr "Apparemment cet utilisateur n'a pas d'autorisations "
+msgstr ""
 
 msgid ""
 "Please get in touch with the admin if you need access to these sections."
@@ -353,6 +376,9 @@ msgstr ""
 
 msgid "Downloading template..."
 msgstr "Téléchargement du modèle ..."
+
+msgid "Couldn't generate template"
+msgstr ""
 
 msgid "Download template"
 msgstr "Modèle téléchargez"

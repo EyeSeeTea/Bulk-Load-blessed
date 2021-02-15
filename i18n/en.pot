@@ -29,6 +29,29 @@ msgstr ""
 msgid "Data values - Delete"
 msgstr ""
 
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an "
+"administrator."
+msgstr ""
+
 msgid "Cannot read data form id"
 msgstr ""
 
@@ -334,6 +357,9 @@ msgid "You need to select start and end dates to populate template"
 msgstr ""
 
 msgid "Downloading template..."
+msgstr ""
+
+msgid "Couldn't generate template"
 msgstr ""
 
 msgid "Download template"

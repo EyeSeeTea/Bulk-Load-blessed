@@ -27,12 +27,7 @@ const renderComponent = async () => {
             <AppContext.Provider value={{ api, d2: {}, compositionRoot }}>
                 <LoadingProvider>
                     <SnackbarProvider>
-                        <DownloadTemplatePage
-                            settings={settings}
-                            themes={[]}
-                            setSettings={_.noop}
-                            setThemes={_.noop}
-                        />
+                        <DownloadTemplatePage settings={settings} themes={[]} setSettings={_.noop} setThemes={_.noop} />
                     </SnackbarProvider>
                 </LoadingProvider>
             </AppContext.Provider>
@@ -49,9 +44,7 @@ describe("ImportTemplatePage", () => {
         await renderComponent();
 
         expect(screen.getByRole("heading", { name: "Template" })).toBeInTheDocument();
-        expect(
-            screen.getByRole("heading", { name: "Advanced template properties" })
-        ).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Advanced template properties" })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Download template" })).toBeInTheDocument();
     });
 });

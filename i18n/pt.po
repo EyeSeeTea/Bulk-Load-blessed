@@ -29,6 +29,28 @@ msgstr "Planilha {{id}} não carregada"
 msgid "Data values - Delete"
 msgstr ""
 
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr ""
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an administrator."
+msgstr ""
+
 msgid "Cannot read data form id"
 msgstr ""
 
@@ -53,8 +75,9 @@ msgstr "Programa"
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
 
+#, fuzzy
 msgid "Access to Import Data"
-msgstr "Importar dados"
+msgstr "Acesso à geração de planilhas"
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"
@@ -346,6 +369,9 @@ msgstr ""
 
 msgid "Downloading template..."
 msgstr "Descarregando a planilha..."
+
+msgid "Couldn't generate template"
+msgstr ""
 
 msgid "Download template"
 msgstr "Descarregar a planilha"

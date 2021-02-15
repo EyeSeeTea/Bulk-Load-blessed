@@ -2,17 +2,14 @@ import _ from "lodash";
 import { PaletteCollection } from "../../domain/entities/Palette";
 
 // Returns a color brewer scale for a number of classes
-export const getColorPalette = (
-    palettes: PaletteCollection,
-    scale: string,
-    classes: number
-): string[] => {
-    return palettes[scale][classes];
+export const getColorPalette = (palettes: PaletteCollection, scale: string, classes: number): string[] => {
+    const palette = palettes[scale] ?? {};
+    return palette[classes] ?? [];
 };
 
 // Returns color scale name for a palette
 export const getColorScale = (palettes: PaletteCollection, palette: string[]) => {
-    return _.keys(palettes).find(name => _.isEqual(palettes[name][palette.length], palette));
+    return _.keys(palettes).find(name => _.isEqual(getColorPalette(palettes, name, palette.length), palette));
 };
 
 export const generatorOriginalPalette = {
@@ -23,17 +20,7 @@ export const generatorOriginalPalette = {
         6: ["#ffee58", "#ffca28", "#ffa726", "#ff7043", "#e57373", "#f06292"],
         7: ["#ffee58", "#ffca28", "#ffa726", "#ff7043", "#e57373", "#f06292", "#ba68c8"],
         8: ["#ffee58", "#ffca28", "#ffa726", "#ff7043", "#e57373", "#f06292", "#ba68c8", "#9575cd"],
-        9: [
-            "#ffee58",
-            "#ffca28",
-            "#ffa726",
-            "#ff7043",
-            "#e57373",
-            "#f06292",
-            "#ba68c8",
-            "#9575cd",
-            "#9fa8da",
-        ],
+        9: ["#ffee58", "#ffca28", "#ffa726", "#ff7043", "#e57373", "#f06292", "#ba68c8", "#9575cd", "#9fa8da"],
         10: [
             "#ffee58",
             "#ffca28",
