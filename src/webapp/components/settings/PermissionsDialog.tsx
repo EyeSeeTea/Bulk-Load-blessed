@@ -66,30 +66,53 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         [onChange, settings]
     );
 
+     // Action when accept giving permission to all users
+     const acceptAllUsersPermissions = useCallback(
+        // TODO:
+        // git all permisions: allUsers
+        // Remove previous users
+        // Remove user groups
+
+        (setting: PermissionSetting) => {
+            let allUser: SharingRule[] = [];
+            allUser = [{ id: "ALL", displayName: "", access: "" }];
+            const newSettings = settings
+            .setPermissions(setting, "allUsers", allUser)
+            .setPermissions(setting, "user", [])
+            .setPermissions(setting, "userGroup", []);
+
+            return onChange(newSettings);
+        },
+        [settings, onChange]
+    );
+
     const onChangeAllUsers = useCallback(
         (setting: PermissionSetting, checked: boolean) => {
-            let allUser: SharingRule[] = [];
+            //let allUser: SharingRule[] = [];
             if (checked) {
-                allUser = [{ id: "ALL", displayName: "", access: "" }];
+                //allUser = [{ id: "ALL", displayName: "", access: "" }];
                 // TODO:
-                // Rise pop up
                 updateDialog({
                     title: i18n.t("Access Permissions confirmation"),
                     description: i18n.t("This option provides access permissions to all users and therefore, will not be possible to get back to the previous state of this section. Are you sure you want sustain this action?"),
                     saveText :"Accept",
                     cancelText :"Cancel" ,
                     onCancel: () => {updateDialog(null); },
-                    onSave: async () => {updateDialog(null); },
+                    onSave: async () => {
+                        updateDialog(null); 
+                        acceptAllUsersPermissions(setting);
+                    },
                 });
-                // Remove previous users
-                // Remove previous user groups
+
+            }else{
+                const newSettings = settings.setPermissions(setting, "allUsers", []);
+                return onChange(newSettings);
 
             }
-            const newSettings = settings.setPermissions(setting, "allUsers", allUser);
-            return onChange(newSettings);
         },
-        [onChange, settings]
+        [settings, onChange, acceptAllUsersPermissions]
     );
+
 
     const allUserChecked = useCallback(
         (setting: PermissionSetting) => {
