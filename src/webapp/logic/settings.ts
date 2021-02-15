@@ -122,10 +122,7 @@ export default class Settings {
             },
         ];
 
-        const {
-            users: userPermissionsForImport,
-            userGroups: userGroupPermissionsForImport,
-        } = await api.metadata
+        const { users: userPermissionsForImport, userGroups: userGroupPermissionsForImport } = await api.metadata
             .get({
                 userGroups: query("permissionsForImport"),
                 users: query("permissionsForImport"),
@@ -149,10 +146,7 @@ export default class Settings {
             },
         ];
 
-        const {
-            users: userPermissionsForSettings,
-            userGroups: userGroupPermissionsForSettings,
-        } = await api.metadata
+        const { users: userPermissionsForSettings, userGroups: userGroupPermissionsForSettings } = await api.metadata
             .get({
                 userGroups: query("permissionsForSettings"),
                 users: query("permissionsForSettings"),
@@ -337,10 +331,7 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(
-        setting: PermissionSetting,
-        kind: "user" | "userGroup" | "allUsers"
-    ) {
+    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup" | "allUsers") {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {

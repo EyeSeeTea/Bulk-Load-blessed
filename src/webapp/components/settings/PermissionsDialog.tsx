@@ -50,8 +50,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
-                    rule?.map(({ id, displayName }) => ({ id, displayName })) ??
-                    settings.getPermissions(setting, type);
+                    rule?.map(({ id, displayName }) => ({ id, displayName })) ?? settings.getPermissions(setting, type);
 
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
@@ -87,12 +86,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
     );
 
     return (
-        <ConfirmationDialog
-            isOpen={true}
-            fullWidth={true}
-            onCancel={onClose}
-            cancelText={i18n.t("Close")}
-        >
+        <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>
             {!allUserChecked(permissionsType) && (
                 <Sharing
                     meta={buildMetaObject(permissionsType)}
