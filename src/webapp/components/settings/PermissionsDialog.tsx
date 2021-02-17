@@ -5,6 +5,7 @@ import {
     ConfirmationDialog,
     ConfirmationDialogProps,
 } from "@eyeseetea/d2-ui-components";
+import _ from "lodash";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 import React, { useCallback, useState } from "react";
 import i18n from "../../../locales";
@@ -70,8 +71,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
 
     const acceptAllUsersPermissions = useCallback(
         (setting: PermissionSetting) => {
-            let allUser: SharingRule[] = [];
-            allUser = [{ id: "ALL", displayName: "", access: "" }];
+            const allUser: SharingRule[] = [{ id: "ALL", displayName: "", access: "" }];
             const newSettings = settings
                 .setPermissions(setting, "allUsers", allUser)
                 .setPermissions(setting, "user", [])
@@ -90,12 +90,12 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     description: i18n.t(
                         "This option gives access to all users. The current list of allowed users and user groups will be deleted. Do you want to proceed?"
                     ),
-                    saveText: "Accept",
-                    cancelText: "Cancel",
+                    saveText: i18n.t("Accept"),
+                    cancelText: i18n.t("Cancel"),
                     onCancel: () => {
                         updateDialog(null);
                     },
-                    onSave: async () => {
+                    onSave: () => {
                         updateDialog(null);
                         acceptAllUsersPermissions(setting);
                     },
@@ -111,11 +111,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
     const allUserChecked = useCallback(
         (setting: PermissionSetting) => {
             const userPermissions = settings.getPermissions(setting, "allUsers");
-            if (userPermissions.length > 0) {
-                const isAllUserAllowed = userPermissions.some(item => item.id === "ALL");
-                return isAllUserAllowed;
-            }
-            return false;
+            return _(userPermissions).some(item => item.id === "ALL");
         },
         [settings]
     );
@@ -135,19 +131,16 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     onChange={onUpdateSharingOptions(permissionsType)}
                 />
             )}
-            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
+            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth="xl" {...dialogProps} />}
 
             <FormControlLabel
                 control={
                     <Checkbox
                         checked={allUserChecked(permissionsType)}
-                        onChange={(ev: any) => {
-                            const checked = ev.target.checked;
-                            onChangeAllUsers(permissionsType, checked);
-                        }}
+                        onChange={ev => onChangeAllUsers(permissionsType, ev.target.checked)}
                     />
                 }
-                label={"All users allowed"}
+                label={i18n.t("All users allowed")}
             />
         </ConfirmationDialog>
     );

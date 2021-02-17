@@ -362,6 +362,6 @@ export default class Settings {
     }
 
     private areAllUsersAllowed(collection: NamedObject[]): boolean {
-        return collection.some(item => item.id === "ALL");
+        return _(collection).some(item => item.id === "ALL");
     }
 }

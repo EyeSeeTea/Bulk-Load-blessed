@@ -10,6 +10,7 @@ import {
     TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
+import _ from "lodash";
 import { DuplicateToleranceUnit, Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import Settings, { PermissionSetting } from "../../logic/settings";
@@ -116,20 +117,23 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const buildSharingDescription = useCallback(
         (setting: PermissionSetting) => {
-            const users = settings.getPermissions(setting, "user").length;
-            const userGroups = settings.getPermissions(setting, "userGroup").length;
+            const usersCount = settings.getPermissions(setting, "user").length;
+            const userGroupsCount = settings.getPermissions(setting, "userGroup").length;
             const allUsers = settings.getPermissions(setting, "allUsers");
-            if (allUsers.length > 0 && allUsers.some(e => e.id === "ALL")) {
+
+            if (_(allUsers).some(e => e.id === "ALL")) {
                 return i18n.t("Accessible to all users");
-            } else if (users > 0 && userGroups > 0) {
+            } else if (usersCount > 0 && userGroupsCount > 0) {
                 return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {
-                    users,
-                    userGroups,
+                    users: usersCount,
+                    userGroups: userGroupsCount,
                 });
-            } else if (users > 0) {
-                return i18n.t("Accessible to {{users}} users", { users });
-            } else if (userGroups > 0) {
-                return i18n.t("Accessible to {{userGroups}} user groups", { userGroups });
+            } else if (usersCount > 0) {
+                return i18n.t("Accessible to {{users}} users", { users: usersCount });
+            } else if (userGroupsCount > 0) {
+                return i18n.t("Accessible to {{userGroups}} user groups", {
+                    userGroups: userGroupsCount,
+                });
             } else if (setting === "settings") {
                 return i18n.t("Only accessible to system administrators");
             } else {
