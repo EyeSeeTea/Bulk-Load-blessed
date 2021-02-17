@@ -1,8 +1,10 @@
 import {
-    ShareUpdate, Sharing, 
-    SharingRule, 
+    ShareUpdate,
+    Sharing,
+    SharingRule,
     ConfirmationDialog,
-    ConfirmationDialogProps, } from "@eyeseetea/d2-ui-components";
+    ConfirmationDialogProps,
+} from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 import React, { useCallback, useState } from "react";
 import i18n from "../../../locales";
@@ -66,14 +68,14 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         [onChange, settings]
     );
 
-     const acceptAllUsersPermissions = useCallback(
+    const acceptAllUsersPermissions = useCallback(
         (setting: PermissionSetting) => {
             let allUser: SharingRule[] = [];
             allUser = [{ id: "ALL", displayName: "", access: "" }];
             const newSettings = settings
-            .setPermissions(setting, "allUsers", allUser)
-            .setPermissions(setting, "user", [])
-            .setPermissions(setting, "userGroup", []);
+                .setPermissions(setting, "allUsers", allUser)
+                .setPermissions(setting, "user", [])
+                .setPermissions(setting, "userGroup", []);
 
             return onChange(newSettings);
         },
@@ -85,28 +87,27 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             if (checked) {
                 updateDialog({
                     title: i18n.t("Access Permissions confirmation"),
-                    description: 
-                    i18n.t("This option provides access permissions to all users and therefore, will ") + 
-                    i18n.t("not be possible to get back to the previous state of this section. Are you ") +
-                    i18n.t("sure you want to sustain this action?"),
-                    saveText :"Accept",
-                    cancelText :"Cancel" ,
-                    onCancel: () => {updateDialog(null); },
+                    description:
+                        i18n.t("This option provides access permissions to all users and therefore, will ") +
+                        i18n.t("not be possible to get back to the previous state of this section. Are you ") +
+                        i18n.t("sure you want to sustain this action?"),
+                    saveText: "Accept",
+                    cancelText: "Cancel",
+                    onCancel: () => {
+                        updateDialog(null);
+                    },
                     onSave: async () => {
-                        updateDialog(null); 
+                        updateDialog(null);
                         acceptAllUsersPermissions(setting);
                     },
                 });
-
-            }else{
+            } else {
                 const newSettings = settings.setPermissions(setting, "allUsers", []);
                 return onChange(newSettings);
-
             }
         },
         [settings, onChange, acceptAllUsersPermissions]
     );
-
 
     const allUserChecked = useCallback(
         (setting: PermissionSetting) => {
@@ -135,12 +136,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     onChange={onUpdateSharingOptions(permissionsType)}
                 />
             )}
-            {dialogProps && <ConfirmationDialog 
-            isOpen={true} 
-            maxWidth={"xl"}
-            {...dialogProps}
-
-            />}
+            {dialogProps && <ConfirmationDialog isOpen={true} maxWidth={"xl"} {...dialogProps} />}
 
             <FormControlLabel
                 control={
