@@ -76,7 +76,7 @@ msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
 
 msgid "Access to Import Data"
-msgstr "Acesso à geração de planilhas"
+msgstr ""
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"

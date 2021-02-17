@@ -77,7 +77,7 @@ msgid "Access to Template Generation"
 msgstr "Accès à la génération de modèles"
 
 msgid "Access to Import Data"
-msgstr "Accès à la génération de modèles"
+msgstr "Accès à l'import de données"
 
 msgid "Access to Settings and Themes"
 msgstr "Accès aux Paramètres et aux Thèmes"
@@ -388,7 +388,7 @@ msgid "Couldn't generate template"
 msgstr ""
 
 msgid "Download template"
-msgstr "Modèle téléchargez"
+msgstr "Télécharger modèle"
 
 msgid "Reading file..."
 msgstr "Lecture du fichier en cours ..."

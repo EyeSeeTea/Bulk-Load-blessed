@@ -77,7 +77,7 @@ msgid "Access to Template Generation"
 msgstr "Acceso a la generación de plantillas"
 
 msgid "Access to Import Data"
-msgstr "Acceso a la generación de plantillas"
+msgstr "Acceso a la importación de datos"
 
 msgid "Access to Settings and Themes"
 msgstr "Acceso al área de configuración y a los temas"
