@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-17T08:55:51.694Z\n"
-"PO-Revision-Date: 2021-02-17T08:55:51.694Z\n"
+"POT-Creation-Date: 2021-02-17T09:12:24.059Z\n"
+"PO-Revision-Date: 2021-02-17T09:12:24.059Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -85,13 +85,9 @@ msgstr ""
 msgid "Access Permissions confirmation"
 msgstr ""
 
-msgid "This option provides access permissions to all users and therefore, will "
-msgstr ""
-
-msgid "not be possible to get back to the previous state of this section. Are you "
-msgstr ""
-
-msgid "sure you want to sustain this action?"
+msgid ""
+"This option gives access to all users. The current list of allowed users "
+"and user groups will be deleted. Do you want to proceed?"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"

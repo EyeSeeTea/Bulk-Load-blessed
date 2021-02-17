@@ -87,10 +87,9 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             if (checked) {
                 updateDialog({
                     title: i18n.t("Access Permissions confirmation"),
-                    description:
-                        i18n.t("This option provides access permissions to all users and therefore, will ") +
-                        i18n.t("not be possible to get back to the previous state of this section. Are you ") +
-                        i18n.t("sure you want to sustain this action?"),
+                    description: i18n.t(
+                        "This option gives access to all users. The current list of allowed users and user groups will be deleted. Do you want to proceed?"
+                    ),
                     saveText: "Accept",
                     cancelText: "Cancel",
                     onCancel: () => {
