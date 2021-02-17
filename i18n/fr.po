@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-17T09:12:24.059Z\n"
+"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -88,6 +88,15 @@ msgstr ""
 msgid ""
 "This option gives access to all users. The current list of allowed users and "
 "user groups will be deleted. Do you want to proceed?"
+msgstr ""
+
+msgid "Accept"
+msgstr ""
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "All users allowed"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -417,9 +426,6 @@ msgstr ""
 "Il existe {{nombre}} valeurs de données avec une unité d'organisation non "
 "valide qui seront ignorées lors de l'importation.\n"
 "Vous pouvez toujours les télécharger et les envoyer à votre administrateur."
-
-msgid "Cancel"
-msgstr "Annuler"
 
 msgid "Proceed"
 msgstr "Procéder"

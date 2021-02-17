@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-17T09:12:24.059Z\n"
+"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -83,12 +83,23 @@ msgid "Access to Settings and Themes"
 msgstr "Acceso al área de configuración y a los temas"
 
 msgid "Access Permissions confirmation"
-msgstr ""
+msgstr "Confirme los permisos de accesso"
 
 msgid ""
 "This option gives access to all users. The current list of allowed users and "
 "user groups will be deleted. Do you want to proceed?"
 msgstr ""
+"Esta opción da acceso a todos los usuarios. La lista actual de usuarios y "
+"grupos de usuario con acceso se borrará. ¿Quiere continuar?"
+
+msgid "Accept"
+msgstr "Aceptar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "All users allowed"
+msgstr "Permitir todos los usuarios"
 
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas durante la generación de la plantilla"
@@ -120,7 +131,7 @@ msgid "Years"
 msgstr "Años"
 
 msgid "Accessible to all users"
-msgstr "Accesible a los usuarios {{users}}"
+msgstr "Accesible a todos los usuarios"
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
 msgstr ""
@@ -413,9 +424,6 @@ msgstr ""
 "Existen {{number}} valores asociados a unidades organziativas no válidas que "
 "seran ignorados durante la importación. Por favor, descarguese estos datos y "
 "envieselos a su administrador o gestor de DHIS2"
-
-msgid "Cancel"
-msgstr "Cancelar"
 
 msgid "Proceed"
 msgstr "Continuar"
