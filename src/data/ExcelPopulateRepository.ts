@@ -461,7 +461,8 @@ function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithVali
 function getValue(cell: Cell): ExcelValue | undefined {
     const value = cell.value();
 
-    if (typeof value === "object" && value.constructor.name === "RichText") {
+    //@ts-ignore This should be improved on xlsx-populate
+    if (typeof value === "object" && _.isFunction(value.text)) {
         // @ts-ignore This should be improved on xlsx-populate
         const result = value.text();
 
