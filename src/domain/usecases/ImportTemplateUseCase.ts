@@ -262,7 +262,7 @@ const compareDataPackages = (
                 .as(duplicateToleranceUnit) > duplicateTolerance;
         if (isWithToleranceRange) return false;
 
-        if (base.id === compare.id) return false;
+        if (base.id && base.id === compare.id) return false;
 
         const exclusions = duplicateExclusion[dataForm.id] ?? [];
         const filter = (values: DataPackageDataValue[]) => {
