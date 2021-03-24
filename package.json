@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.10.0",
+    "version": "3.10.1",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -62,12 +62,13 @@
         "update-po": "yarn extract-pot && for pofile in i18n/*.po; do msgmerge --backup=off -U $pofile i18n/en.pot; done",
         "manifest": "d2-manifest package.json build/manifest.webapp",
         "cy:verify": "cypress verify",
+        "check-uncommited": "test -z \"$(git status -uno --porcelain)\"",
         "cy:e2e:open": "CYPRESS_E2E=true cypress open",
         "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome"
     },
     "husky": {
         "hooks": {
-            "pre-push": "yarn prettify && yarn lint && yarn update-po && yarn test",
+            "pre-push": "yarn update-po && yarn check-uncommited && yarn prettify && yarn check-uncommited && yarn lint && yarn test",
             "post-merge": "./.githooks/dep-check"
         }
     },

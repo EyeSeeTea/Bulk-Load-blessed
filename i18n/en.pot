@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-11T10:42:48.164Z\n"
-"PO-Revision-Date: 2021-02-11T10:42:48.164Z\n"
+"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
+"PO-Revision-Date: 2021-02-17T09:48:30.489Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -82,6 +82,23 @@ msgstr ""
 msgid "Access to Settings and Themes"
 msgstr ""
 
+msgid "Access Permissions confirmation"
+msgstr ""
+
+msgid ""
+"This option gives access to all users. The current list of allowed users "
+"and user groups will be deleted. Do you want to proceed?"
+msgstr ""
+
+msgid "Accept"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "All users allowed"
+msgstr ""
+
 msgid "Select Organisation Units on template generation"
 msgstr ""
 
@@ -107,6 +124,9 @@ msgid "Months"
 msgstr ""
 
 msgid "Years"
+msgstr ""
+
+msgid "Accessible to all users"
 msgstr ""
 
 msgid "Accessible to {{users}} users and {{userGroups}} user groups"
@@ -384,9 +404,6 @@ msgid ""
 "There are {{number}} data values with an invalid organisation unit that "
 "will be ignored during import.\n"
 "You can still download them and send them to your administrator."
-msgstr ""
-
-msgid "Cancel"
 msgstr ""
 
 msgid "Proceed"
