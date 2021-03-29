@@ -779,22 +779,28 @@ function getCategoryComboIdByDataElementId(dataSet, metadata) {
 function getDataElementsForSectionDataSet(dataSet, metadata, cocsByCatComboId) {
     const categoryComboIdByDataElementId = getCategoryComboIdByDataElementId(dataSet, metadata);
 
-    return _(dataSet.sections)
+    const dataElementsInSections = _(dataSet.sections)
         .sortBy(section => section.sortOrder)
-        .flatMap(section => {
-            return _(section.dataElements)
-                .map(({ id }) => metadata.get(id))
-                .compact()
-                .groupBy(dataElement => categoryComboIdByDataElementId[dataElement.id])
-                .toPairs()
-                .flatMap(([categoryComboId, dataElements]) => {
-                    // Keep order for data elements in section from the response API
-                    return dataElements.map(dataElement => ({
-                        dataElement,
-                        categoryOptionCombos: cocsByCatComboId[categoryComboId] || [],
-                    }));
-                })
-                .value();
+        .flatMap(section => section.dataElements)
+        .value();
+
+    const dataElementsOutsideSections = _(dataSet.dataSetElements)
+        .map(dse => dse.dataElement)
+        .differenceBy(dataElementsInSections, "id")
+        .value();
+
+    const allDataElements = _.concat(dataElementsInSections, dataElementsOutsideSections);
+
+    return _(allDataElements)
+        .map(dataElement => metadata.get(dataElement.id))
+        .compact()
+        .groupBy(dataElement => categoryComboIdByDataElementId[dataElement.id])
+        .toPairs()
+        .flatMap(([categoryComboId, dataElements]) => {
+            return dataElements.map(dataElement => ({
+                dataElement,
+                categoryOptionCombos: cocsByCatComboId[categoryComboId] || [],
+            }));
         })
         .value();
 }
@@ -805,10 +811,10 @@ function getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCatComboId) {
     return (
         _(cocsByCatComboId)
             .toPairs()
-            // Mimic loadForm.action, sort category combos by cocs length
+            // Mimic loadForm.action: sort category combos by cocs length.
             .sortBy(([_ccId, categoryOptionCombos]) => categoryOptionCombos.length)
             .flatMap(([categoryComboId, categoryOptionCombos]) => {
-                // Mimic loadForm.action, sort data elements (in a category combo) by name
+                // Mimic loadForm.action: sort data elements (within a category combo) by name.
                 return _(dataSet.dataSetElements)
                     .map(dse => metadata.get(dse.dataElement.id))
                     .compact()
@@ -867,13 +873,13 @@ function getCocsByCategoryComboId(metadata) {
 
 function getDataElements(dataSet, metadata) {
     const cocsByCategoryComboId = getCocsByCategoryComboId(metadata);
+    const useDataSetSections = dataSet.formType === "SECTION" || !_(dataSet.sections).isEmpty();
 
-    switch (dataSet.formType) {
-        case "SECTION":
-            return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCategoryComboId);
-        default:
-            // "DEFAULT" | "CUSTOM" | "SECTION_MULTIORG"
-            return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCategoryComboId);
+    if (useDataSetSections) {
+        return getDataElementsForSectionDataSet(dataSet, metadata, cocsByCategoryComboId);
+    } else {
+        // "DEFAULT" | "CUSTOM" | "SECTION_MULTIORG"
+        return getDataElementsForDefaultDataSet(dataSet, metadata, cocsByCategoryComboId);
     }
 }
 
