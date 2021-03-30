@@ -13,7 +13,6 @@ type DataSet = DataForm;
 export interface DataElementItem {
     id: string;
     name: string;
-    hasDefaultDisaggregation: boolean;
     categoryOptionCombo?: NamedRef;
 }
 
@@ -27,15 +26,13 @@ export function getDataElementItems(dataSet: DataSet | undefined): DataElementIt
 
     return _.flatMap(dataElements, dataElement => {
         const categoryOptionCombos = dataElement.categoryOptionCombos || [];
-        const hasDefaultDisaggregation =
-            categoryOptionCombos.length === 1 && categoryOptionCombos[0]?.name === "default";
-        const mainDataElement: DataElementItem = { ...dataElement, hasDefaultDisaggregation };
+        const mainDataElement: DataElementItem = dataElement;
         const disaggregatedDataElements: DataElementItem[] = _(categoryOptionCombos)
-            .map(coc => ({ ...dataElement, categoryOptionCombo: coc, hasDefaultDisaggregation }))
+            .map(coc => ({ ...dataElement, categoryOptionCombo: coc }))
             .sortBy(de => de.categoryOptionCombo.name)
             .value();
 
-        return [mainDataElement, ...(hasDefaultDisaggregation ? [] : disaggregatedDataElements)];
+        return _.compact([disaggregatedDataElements.length > 1 ? mainDataElement : null, ...disaggregatedDataElements]);
     });
 }
 
@@ -48,9 +45,10 @@ export function getMultiSelectorDataElementOptions(dataElements: DataElementItem
     const options = dataElements.map(
         (item): DataElementOption => {
             const dataElementDis = getDataElementDisaggregatedFromItem(item);
-            const text = !item.categoryOptionCombo
-                ? item.name + (item.hasDefaultDisaggregation ? "" : ` (${i18n.t("All")})`)
-                : `${item.name} (${item.categoryOptionCombo.name})`;
+            const coc = item.categoryOptionCombo;
+            const text = coc
+                ? item.name + (coc.name === "default" ? "" : ` (${coc.name})`)
+                : item.name + ` (${i18n.t("All")})`;
 
             return { value: getDataElementDisaggregatedId(dataElementDis), text };
         }
