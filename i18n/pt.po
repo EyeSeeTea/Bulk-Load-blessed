@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
+"POT-Creation-Date: 2021-03-30T11:42:25.413Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,6 +63,9 @@ msgstr "O campo {{field}} não pode ficar em branco"
 msgid "You need to select at least one {{element}}"
 msgstr "Você precisa selecionar pelo menos um {{element}}"
 
+msgid "All"
+msgstr "Tudo"
+
 msgid "Data elements used for duplication assessment"
 msgstr "Elementos de dados usados para avaliação de duplicação"
 
@@ -71,6 +74,9 @@ msgstr "Fechar"
 
 msgid "Program"
 msgstr "Programa"
+
+msgid "Data set"
+msgstr "Data Set"
 
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
@@ -145,11 +151,22 @@ msgstr "Acessível apenas para administradores de sistema"
 msgid "Not accessible"
 msgstr "Não acessível"
 
+#, fuzzy
+msgid "Data elements filter for data sets"
+msgstr "Filtro de elementos de dados for events (programs)"
+
 msgid "Data model"
 msgstr "Modelo de dados"
 
 msgid "Organisation Unit Visibility"
 msgstr "Visibilidade da unidade organizacional"
+
+msgid "Columns layout"
+msgstr ""
+
+msgid ""
+"Data elements (with optional disaggregation) to include/exclude for data sets"
+msgstr ""
 
 msgid "Duplicate detection"
 msgstr "Detecção duplicada"
@@ -207,9 +224,6 @@ msgstr ""
 
 msgid "JSON Response"
 msgstr ""
-
-msgid "All"
-msgstr "Tudo"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -335,9 +349,6 @@ msgstr "Erro ao excluir valores de dados"
 
 msgid "Select at least one model"
 msgstr "Selecione pelo menos uma planilha"
-
-msgid "Data set"
-msgstr "Data Set"
 
 msgid "Cannot get data entry sheet"
 msgstr "Não é possível obter a folha de registro de dados"

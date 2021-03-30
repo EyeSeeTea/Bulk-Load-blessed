@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
+"POT-Creation-Date: 2021-03-30T11:42:25.413Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -64,6 +64,9 @@ msgstr "El campo {{field}} no se puede dejar vacio"
 msgid "You need to select at least one {{element}}"
 msgstr "Seleccione al menos un {{element}}"
 
+msgid "All"
+msgstr "Todos"
+
 msgid "Data elements used for duplication assessment"
 msgstr "Elementos de datos usados para determinar los duplicados"
 
@@ -72,6 +75,9 @@ msgstr "Cerrar"
 
 msgid "Program"
 msgstr "Programa"
+
+msgid "Data set"
+msgstr "Set de datos"
 
 msgid "Access to Template Generation"
 msgstr "Acceso a la generación de plantillas"
@@ -149,11 +155,22 @@ msgstr "Solo accesible a los administradores del sistema"
 msgid "Not accessible"
 msgstr "No accesible"
 
+#, fuzzy
+msgid "Data elements filter for data sets"
+msgstr "Filtro de elementos de datos para eventos (programas)"
+
 msgid "Data model"
 msgstr "Modelos de Datos"
 
 msgid "Organisation Unit Visibility"
 msgstr "Visibilidad de unidades organizativas"
+
+msgid "Columns layout"
+msgstr ""
+
+msgid ""
+"Data elements (with optional disaggregation) to include/exclude for data sets"
+msgstr ""
 
 msgid "Duplicate detection"
 msgstr "Detección de duplicados"
@@ -213,9 +230,6 @@ msgstr ""
 
 msgid "JSON Response"
 msgstr ""
-
-msgid "All"
-msgstr "Todos"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -341,9 +355,6 @@ msgstr "Se ha producido un error borrando valores de datos"
 
 msgid "Select at least one model"
 msgstr "Seleccione al menos una plantilla"
-
-msgid "Data set"
-msgstr "Set de datos"
 
 msgid "Cannot get data entry sheet"
 msgstr "No se puede leer la hoja de entrada de datos"

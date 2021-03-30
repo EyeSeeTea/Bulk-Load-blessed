@@ -33,6 +33,7 @@ export class ConfigWebRepository implements ConfigRepository {
             duplicateExclusion: {},
             duplicateTolerance: 1,
             duplicateToleranceUnit: "day",
+            dataSetDataElementsFilter: {},
             ...defaultSettings,
         };
     }
