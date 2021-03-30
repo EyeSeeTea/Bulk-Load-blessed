@@ -53,6 +53,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         endDate: moment().add("-1", "year").endOf("year"),
         populate: false,
         language: "en",
+        settings,
     });
 
     const models = useMemo(() => {

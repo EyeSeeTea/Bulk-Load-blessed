@@ -492,7 +492,7 @@ SheetBuilder.prototype.getVersion = function () {
 };
 
 SheetBuilder.prototype.fillDataEntrySheet = function () {
-    const { element, elementMetadata: metadata } = this.builder;
+    const { element, elementMetadata: metadata, settings } = this.builder;
     const { rowOffset = 0 } = this.builder.template;
     const dataEntrySheet = this.dataEntrySheet;
 
@@ -546,13 +546,25 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
         .style({ ...baseStyle, font: { size: 16, bold: true } });
 
     if (element.type === "dataSets") {
-        const dataElements = getDataElements(element, metadata);
+        const dataSet = element;
+        const dataElements = getDataSetDataElements(dataSet, metadata);
+        const dataElementsExclusion = settings.dataSetDataElementsFilter;
 
         _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
             const { name, description } = this.translate(dataElement);
             const firstColumnId = columnId;
 
             _.forEach(categoryOptionCombos, categoryOptionCombo => {
+                const isColumnExcluded = _(dataElementsExclusion)
+                    .get(dataSet.id, [])
+                    .some(dataElementExcluded =>
+                        _.isEqual(dataElementExcluded, {
+                            id: dataElement.id,
+                            categoryOptionComboId: categoryOptionCombo.id,
+                        })
+                    );
+                if (isColumnExcluded) return;
+
                 const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
                 this.createColumn(
                     dataEntrySheet,
@@ -567,6 +579,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                 columnId++;
             });
+
+            const noColumnAdded = columnId === firstColumnId;
+            if (noColumnAdded) return;
 
             if (columnId - 1 === firstColumnId) {
                 dataEntrySheet.column(firstColumnId).setWidth(name.length / 2.5 + 15);
@@ -871,7 +886,7 @@ function getCocsByCategoryComboId(metadata) {
     return _.fromPairs(cocsByCategoryPairs);
 }
 
-function getDataElements(dataSet, metadata) {
+function getDataSetDataElements(dataSet, metadata) {
     const cocsByCategoryComboId = getCocsByCategoryComboId(metadata);
     const useDataSetSections = dataSet.formType === "SECTION" || !_(dataSet.sections).isEmpty();
 
