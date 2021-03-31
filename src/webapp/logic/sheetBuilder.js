@@ -555,14 +555,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             const firstColumnId = columnId;
 
             _.forEach(categoryOptionCombos, categoryOptionCombo => {
-                const isColumnExcluded = _(dataElementsExclusion)
-                    .get(dataSet.id, [])
-                    .some(dataElementExcluded =>
-                        _.isEqual(dataElementExcluded, {
-                            id: dataElement.id,
-                            categoryOptionComboId: categoryOptionCombo.id,
-                        })
-                    );
+                const dataElementsExcluded = _.get(dataElementsExclusion, dataSet.id, []);
+                const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                    _.isEqual(dataElementExcluded, {
+                        id: dataElement.id,
+                        categoryOptionComboId: categoryOptionCombo.id,
+                    })
+                );
                 if (isColumnExcluded) return;
 
                 const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
