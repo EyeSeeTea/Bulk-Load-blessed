@@ -35,13 +35,13 @@ SheetBuilder.prototype.generate = function () {
         // ProgramStage sheets
         const programStages = element.programStages.map(programStageT => metadata.get(programStageT.id));
 
-        withSheetNames(programStages, "Stage").forEach(programStage => {
+        withSheetNames(programStages).forEach(programStage => {
             const sheet = this.workbook.addWorksheet(programStage.sheetName);
             this.programStageSheets[programStage.id] = sheet;
         });
 
         // RelationshipType sheets
-        withSheetNames(builder.metadata.relationshipTypes, "Relationship").forEach(relationshipType => {
+        withSheetNames(builder.metadata.relationshipTypes, { prefix: "Relationship" }).forEach(relationshipType => {
             const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
             this.relationshipsSheets.push([relationshipType, sheet]);
         });
@@ -957,11 +957,17 @@ function getValidSheetName(name: string, maxLength = 31): string {
 }
 
 /* Add prop 'sheetName' with a valid sheet name to an array of objects having a string property 'name' */
-function withSheetNames(objs, prefix) {
+function withSheetNames(objs, options = {}) {
+    const { prefix } = options;
+
     return objs.filter(Boolean).map((obj, idx) => {
+        const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
+            .compact()
+            .join(" - ");
+
         return {
             ...obj,
-            sheetName: getValidSheetName(`${prefix} - ${idx + 1}-${obj.name}`),
+            sheetName: getValidSheetName(baseSheetName),
         };
     });
 }
