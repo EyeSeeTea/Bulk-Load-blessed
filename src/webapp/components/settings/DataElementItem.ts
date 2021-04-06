@@ -42,7 +42,11 @@ export function getDataElementDisaggregatedFromItem(de: DataElementItem): DataEl
 }
 
 export function getMultiSelectorDataElementOptions(dataElements: DataElementItem[]): DataElementOption[] {
-    const options = dataElements.map(
+    const sortedDataElements = _(dataElements)
+        .orderBy([item => item.name, item => (item.categoryOptionCombo ? 1 : 0)], ["asc", "asc"])
+        .value();
+
+    return sortedDataElements.map(
         (item): DataElementOption => {
             const dataElementDis = getDataElementDisaggregatedFromItem(item);
             const coc = item.categoryOptionCombo;
@@ -53,6 +57,4 @@ export function getMultiSelectorDataElementOptions(dataElements: DataElementItem
             return { value: getDataElementDisaggregatedId(dataElementDis), text };
         }
     );
-
-    return _.sortBy(options, option => option.text);
 }
