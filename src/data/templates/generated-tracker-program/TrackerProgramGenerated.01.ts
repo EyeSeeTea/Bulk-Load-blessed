@@ -139,9 +139,9 @@ export class TrackerProgramGenerated01 implements GeneratedTemplate {
 }
 
 function isStageSheet(name: string): boolean {
-    return name.startsWith("(");
+    return name.startsWith("Stage") || name.startsWith("(");
 }
 
 function isRelationshipSheet(name: string): boolean {
-    return name.startsWith("Relationship");
+    return name.startsWith("Rel");
 }

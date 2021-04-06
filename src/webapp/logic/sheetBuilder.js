@@ -41,7 +41,7 @@ SheetBuilder.prototype.generate = function () {
         });
 
         // RelationshipType sheets
-        withSheetNames(builder.metadata.relationshipTypes, { prefix: "Relationship" }).forEach(relationshipType => {
+        withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(relationshipType => {
             const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
             this.relationshipsSheets.push([relationshipType, sheet]);
         });
@@ -963,7 +963,7 @@ function withSheetNames(objs, options = {}) {
     return objs.filter(Boolean).map((obj, idx) => {
         const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
             .compact()
-            .join(" - ");
+            .join(" ");
 
         return {
             ...obj,
