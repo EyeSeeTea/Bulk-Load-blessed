@@ -32,14 +32,17 @@ SheetBuilder.prototype.generate = function () {
         this.programStageSheets = {};
         this.relationshipsSheets = [];
 
-        _.forEach(element.programStages, programStageT => {
-            const programStage = metadata.get(programStageT.id);
-            const sheet = this.workbook.addWorksheet(`Stage - ${programStage.name}`);
-            this.programStageSheets[programStageT.id] = sheet;
+        // ProgramStage sheets
+        const programStages = element.programStages.map(programStageT => metadata.get(programStageT.id));
+
+        withSheetNames(programStages).forEach(programStage => {
+            const sheet = this.workbook.addWorksheet(programStage.sheetName);
+            this.programStageSheets[programStage.id] = sheet;
         });
 
-        _.forEach(builder.metadata.relationshipTypes, relationshipType => {
-            const sheet = this.workbook.addWorksheet(`Relationship - ${relationshipType.name}`);
+        // RelationshipType sheets
+        withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(relationshipType => {
+            const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
             this.relationshipsSheets.push([relationshipType, sheet]);
         });
     } else {
@@ -945,4 +948,26 @@ export function getTemplateId(type, id) {
 
 function getRelationshipTypeKey(relationshipType, key) {
     return ["relationshipType", relationshipType.id, key].join("-");
+}
+
+function getValidSheetName(name: string, maxLength = 31): string {
+    // Invalid chars: \ / * ? : [ ]
+    // Maximum length: 31
+    return name.replace(/[\\/*?:[\]]/g, "").slice(0, maxLength);
+}
+
+/* Add prop 'sheetName' with a valid sheet name to an array of objects having a string property 'name' */
+function withSheetNames(objs, options = {}) {
+    const { prefix } = options;
+
+    return objs.filter(Boolean).map((obj, idx) => {
+        const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
+            .compact()
+            .join(" ");
+
+        return {
+            ...obj,
+            sheetName: getValidSheetName(baseSheetName),
+        };
+    });
 }
