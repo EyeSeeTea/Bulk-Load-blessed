@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-03-30T11:42:25.413Z\n"
+"POT-Creation-Date: 2021-04-06T09:08:39.336Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -78,6 +78,9 @@ msgstr "Programa"
 msgid "Data set"
 msgstr "Data Set"
 
+msgid "Search data elements"
+msgstr ""
+
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
 
@@ -151,9 +154,8 @@ msgstr "Acessível apenas para administradores de sistema"
 msgid "Not accessible"
 msgstr "Não acessível"
 
-#, fuzzy
 msgid "Data elements filter for data sets"
-msgstr "Filtro de elementos de dados for events (programs)"
+msgstr "Filtro de elementos de dados (fichas)"
 
 msgid "Data model"
 msgstr "Modelo de dados"

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-03-30T11:42:25.413Z\n"
+"POT-Creation-Date: 2021-04-06T09:08:39.336Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,6 +79,9 @@ msgstr "Programa"
 msgid "Data set"
 msgstr "Set de datos"
 
+msgid "Search data elements"
+msgstr "Buscar elementos de datos"
+
 msgid "Access to Template Generation"
 msgstr "Acceso a la generación de plantillas"
 
@@ -155,9 +158,8 @@ msgstr "Solo accesible a los administradores del sistema"
 msgid "Not accessible"
 msgstr "No accesible"
 
-#, fuzzy
 msgid "Data elements filter for data sets"
-msgstr "Filtro de elementos de datos para eventos (programas)"
+msgstr "Filtro de elementos de datos (set de datos)"
 
 msgid "Data model"
 msgstr "Modelos de Datos"
