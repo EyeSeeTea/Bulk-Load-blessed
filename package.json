@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.10.1",
+    "version": "3.11",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -15,7 +15,7 @@
         "@dhis2/d2-ui-core": "7.1.3",
         "@dhis2/ui-core": "4.17.1",
         "@dhis2/ui-widgets": "2.1.0",
-        "@eyeseetea/d2-ui-components": "2.5.2",
+        "@eyeseetea/d2-ui-components": "2.6.3",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.11.3",
         "@material-ui/icons": "4.11.2",

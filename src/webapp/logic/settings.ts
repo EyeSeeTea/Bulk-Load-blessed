@@ -2,12 +2,20 @@ import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
     AppSettings,
+    DataSetDataElementsFilter,
     DuplicateExclusion,
     DuplicateToleranceUnit,
     Model,
     Models,
     OrgUnitSelectionSetting,
 } from "../../domain/entities/AppSettings";
+import {
+    DataElementDisaggregated,
+    DataElementDisaggregatedId,
+    getDataElementDisaggregatedById,
+    getDataElementDisaggregatedId,
+} from "../../domain/entities/DataElementDisaggregated";
+import { DataForm } from "../../domain/entities/DataForm";
 import { Id } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
@@ -31,6 +39,7 @@ const publicFields = [
     "duplicateExclusion",
     "duplicateTolerance",
     "duplicateToleranceUnit",
+    "dataSetDataElementsFilter",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -70,6 +79,7 @@ export default class Settings {
     public duplicateExclusion: DuplicateExclusion;
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
+    public dataSetDataElementsFilter: DataSetDataElementsFilter;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -90,6 +100,7 @@ export default class Settings {
         this.duplicateExclusion = options.duplicateExclusion;
         this.duplicateTolerance = options.duplicateTolerance;
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
+        this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -177,6 +188,7 @@ export default class Settings {
             duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
             duplicateToleranceUnit: data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
+            dataSetDataElementsFilter: data.dataSetDataElementsFilter ?? defaultSettings.dataSetDataElementsFilter,
         });
     }
 
@@ -202,6 +214,7 @@ export default class Settings {
             duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
+            dataSetDataElementsFilter,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -233,6 +246,7 @@ export default class Settings {
             duplicateExclusion,
             duplicateTolerance,
             duplicateToleranceUnit,
+            dataSetDataElementsFilter,
         };
 
         try {
@@ -284,6 +298,49 @@ export default class Settings {
         );
 
         return this.updateOptions({ duplicateExclusion });
+    }
+
+    setDataSetDataElementsFilter(dataSetDataElementsFilter: DataSetDataElementsFilter): Settings {
+        return this.updateOptions({ dataSetDataElementsFilter });
+    }
+
+    setDataSetDataElementsFilterFromSelection(options: {
+        dataSet: DataForm | undefined;
+        dataElementsDisaggregated: DataElementDisaggregated[];
+        prevSelectedIds: DataElementDisaggregatedId[];
+        newSelectedIds: DataElementDisaggregatedId[];
+    }): Settings {
+        const { dataSet, dataElementsDisaggregated, prevSelectedIds, newSelectedIds } = options;
+        if (!dataSet) return this;
+
+        const newSelected = newSelectedIds.map(getDataElementDisaggregatedById);
+        const prevSelected = prevSelectedIds.map(getDataElementDisaggregatedById);
+        const disaggregatedById = _.groupBy(dataElementsDisaggregated, de => de.id);
+        const added = _.differenceBy(newSelected, prevSelected, getDataElementDisaggregatedId);
+        const removed = _.differenceBy(prevSelected, newSelected, getDataElementDisaggregatedId);
+
+        const relatedDisaggregatedToAddForMainElements = _.flatMap(added, de =>
+            de.categoryOptionComboId ? [] : _(disaggregatedById).get(de.id, [])
+        );
+        const relatedDisagregatedToRemove = _.flatMap(removed, de =>
+            de.categoryOptionComboId
+                ? (disaggregatedById[de.id] || []).filter(de => !de.categoryOptionComboId)
+                : _.get(disaggregatedById, de.id, [])
+        );
+
+        const newSelectedWithAutomaticLogic = _(newSelected)
+            .concat(relatedDisaggregatedToAddForMainElements)
+            .differenceBy(relatedDisagregatedToRemove, getDataElementDisaggregatedId)
+            .value();
+
+        const newFilterValue = _(dataElementsDisaggregated)
+            .differenceBy(newSelectedWithAutomaticLogic, getDataElementDisaggregatedId)
+            .uniqBy(getDataElementDisaggregatedId)
+            .value();
+
+        const newFilter = { ...this.dataSetDataElementsFilter, [dataSet.id]: newFilterValue };
+
+        return this.setDataSetDataElementsFilter(newFilter);
     }
 
     allModelsEnabled() {
