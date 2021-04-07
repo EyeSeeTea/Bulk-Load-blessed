@@ -3,6 +3,7 @@ import fs from "fs";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
 import * as dhisConnector from "../../webapp/logic/dhisConnector";
+import Settings from "../../webapp/logic/settings";
 import { getTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
@@ -23,6 +24,7 @@ export interface DownloadTemplateProps {
     populateStartDate?: Moment;
     populateEndDate?: Moment;
     writeFile?: string;
+    settings: Settings;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -46,6 +48,7 @@ export class DownloadTemplateUseCase implements UseCase {
             populateStartDate,
             populateEndDate,
             writeFile,
+            settings,
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
@@ -72,6 +75,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 language,
                 theme,
                 template,
+                settings,
             });
             const workbook = await sheetBuilder.generate();
 

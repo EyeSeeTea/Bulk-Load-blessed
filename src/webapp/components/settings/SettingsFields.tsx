@@ -17,6 +17,7 @@ import Settings, { PermissionSetting } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 import DataElementsFilterDialog from "./DataElementsFilterDialog";
 import PermissionsDialog from "./PermissionsDialog";
+import { DataSetDataElementsFilterDialog } from "./DataSetDataElementsFilterDialog";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -28,6 +29,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const [permissionsType, setPermissionsType] = useState<PermissionSetting | null>(null);
     const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
+    const [isDataSetDataElementsDialogVisible, showDataSetDataElementsDialog] = useState<boolean>(false);
 
     const setModel = useCallback(
         (model: Model) => {
@@ -145,6 +147,14 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     return (
         <React.Fragment>
+            {isDataSetDataElementsDialogVisible && (
+                <DataSetDataElementsFilterDialog
+                    title={i18n.t("Data elements filter for data sets")}
+                    onClose={() => showDataSetDataElementsDialog(false)}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
             {!!isExclusionDialogVisible && (
                 <DataElementsFilterDialog
                     onClose={() => showExclusionDialog(false)}
@@ -185,6 +195,23 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                     />
                 </div>
             </FormGroup>
+
+            <h3 className={classes.title}>{i18n.t("Columns layout")}</h3>
+
+            <div className={classes.content}>
+                <ListItem button onClick={() => showDataSetDataElementsDialog(true)}>
+                    <ListItemIcon>
+                        <Icon>filter_list</Icon>
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={i18n.t("Data elements filter for data sets")}
+                        secondary={i18n.t(
+                            "Data elements (with optional disaggregation) to include/exclude for data sets"
+                        )}
+                    />
+                </ListItem>
+            </div>
 
             <h3 className={classes.title}>{i18n.t("Duplicate detection")}</h3>
 

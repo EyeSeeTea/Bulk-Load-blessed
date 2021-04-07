@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-02-17T09:48:30.489Z\n"
-"PO-Revision-Date: 2021-02-17T09:48:30.489Z\n"
+"POT-Creation-Date: 2021-04-06T09:08:39.336Z\n"
+"PO-Revision-Date: 2021-04-06T09:08:39.336Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -64,6 +64,9 @@ msgstr ""
 msgid "You need to select at least one {{element}}"
 msgstr ""
 
+msgid "All"
+msgstr ""
+
 msgid "Data elements used for duplication assessment"
 msgstr ""
 
@@ -71,6 +74,12 @@ msgid "Close"
 msgstr ""
 
 msgid "Program"
+msgstr ""
+
+msgid "Data set"
+msgstr ""
+
+msgid "Search data elements"
 msgstr ""
 
 msgid "Access to Template Generation"
@@ -144,10 +153,21 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
+msgid "Data elements filter for data sets"
+msgstr ""
+
 msgid "Data model"
 msgstr ""
 
 msgid "Organisation Unit Visibility"
+msgstr ""
+
+msgid "Columns layout"
+msgstr ""
+
+msgid ""
+"Data elements (with optional disaggregation) to include/exclude for data "
+"sets"
 msgstr ""
 
 msgid "Duplicate detection"
@@ -205,9 +225,6 @@ msgid "Messages"
 msgstr ""
 
 msgid "JSON Response"
-msgstr ""
-
-msgid "All"
 msgstr ""
 
 msgid "Data Set"
@@ -333,9 +350,6 @@ msgid "Error deleting data values"
 msgstr ""
 
 msgid "Select at least one model"
-msgstr ""
-
-msgid "Data set"
 msgstr ""
 
 msgid "Cannot get data entry sheet"
