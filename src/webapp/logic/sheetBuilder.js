@@ -386,7 +386,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
-    const { elementMetadata: metadata, organisationUnits, element } = this.builder;
+    const { elementMetadata: metadata, organisationUnits } = this.builder;
     const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
@@ -412,15 +412,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             ?.map(({ id }) => metadata.get(id))
             .map(option => this.translate(option).name)
             .join(", ");
-
-        const isProgramStageDataElementCompulsory = _.some(
-            this.builder.rawMetadata.programStageDataElements,
-            ({ dataElement, compulsory }) => dataElement.id === item.id && compulsory
-        );
-
-        const isProgram = element.type === "programs" || isTrackerProgram(element);
-
-        const isCompulsory = isProgramStageDataElementCompulsory || (isProgram && item.type === "categoryCombos");
+        const isCompulsory = this.isMetadataItemCompulsory(item);
 
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
@@ -486,6 +478,25 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         name: "_false",
     });
     rowId++;
+};
+
+SheetBuilder.prototype.isMetadataItemCompulsory = function (item) {
+    const { rawMetadata, element } = this.builder;
+
+    const isProgramStageDataElementCompulsory = _.some(
+        rawMetadata.programStageDataElements,
+        ({ dataElement, compulsory }) => dataElement?.id === item.id && compulsory
+    );
+
+    const isTeiAttributeCompulsory = _.some(
+        rawMetadata.programTrackedEntityAttributes,
+        ({ trackedEntityAttribute, mandatory }) => trackedEntityAttribute?.id === item.id && mandatory
+    );
+
+    const isProgram = element.type === "programs" || isTrackerProgram(element);
+    const isCategoryComboForProgram = isProgram && item.type === "categoryCombos";
+
+    return isProgramStageDataElementCompulsory || isTeiAttributeCompulsory || isCategoryComboForProgram;
 };
 
 SheetBuilder.prototype.getVersion = function () {
