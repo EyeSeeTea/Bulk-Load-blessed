@@ -149,6 +149,10 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
                 );
                 sheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
+                if (dataElement.url !== undefined) {
+                    sheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
+                }
+
                 if (description !== undefined) {
                     sheet.cell(itemRow, columnId).comment(description, {
                         height: "100pt",
@@ -605,6 +609,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 .formula(`_${dataElement.id}`)
                 .style(this.groupStyle(groupId));
 
+            if (dataElement.url !== undefined) {
+                dataEntrySheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .link(dataElement.url)
+                    .formula(`=_${dataElement.id}`);
+            }
+
             if (description !== undefined) {
                 dataEntrySheet.cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true).comment(description, {
                     height: "100pt",
@@ -654,6 +665,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         this.validations.get(validation)
                     );
                     dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                    if (dataElement.url !== undefined) {
+                        dataEntrySheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
+                    }
 
                     if (description !== undefined) {
                         dataEntrySheet.cell(itemRow, columnId).comment(description, {
@@ -990,7 +1005,7 @@ function getRelationshipTypeKey(relationshipType, key) {
     return ["relationshipType", relationshipType.id, key].join("-");
 }
 
-function getValidSheetName(name: string, maxLength = 31): string {
+function getValidSheetName(name, maxLength = 31) {
     // Invalid chars: \ / * ? : [ ]
     // Maximum length: 31
     return name.replace(/[\\/*?:[\]]/g, "").slice(0, maxLength);
