@@ -14,7 +14,7 @@ export async function getElement(api, type, id) {
         "formType",
         "sections[id,sortOrder,dataElements[id]]",
         "periodType",
-        "programStages",
+        "programStages[id,access]",
         "programType",
         "enrollmentDateLabel",
         "incidentDateLabel",

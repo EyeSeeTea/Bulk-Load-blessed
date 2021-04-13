@@ -27,13 +27,13 @@ SheetBuilder.prototype.generate = function () {
     const { element } = builder;
 
     if (isTrackerProgram(element)) {
-        const { element, elementMetadata: metadata } = builder;
+        const { elementMetadata: metadata } = builder;
         this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
         this.programStageSheets = {};
         this.relationshipsSheets = [];
 
         // ProgramStage sheets
-        const programStages = element.programStages.map(programStageT => metadata.get(programStageT.id));
+        const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
 
         withSheetNames(programStages).forEach(programStage => {
             const sheet = this.workbook.addWorksheet(programStage.sheetName);
@@ -615,7 +615,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             groupId++;
         });
     } else {
-        _.forEach(element.programStages, programStageT => {
+        _.forEach(this.getProgramStages(), programStageT => {
             const programStage = metadata.get(programStageT.id);
 
             this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
@@ -675,6 +675,15 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             });
         });
     }
+};
+
+// Return only program stages for which the current user has permissions to export/import data.
+SheetBuilder.prototype.getProgramStages = function () {
+    const { element } = this.builder;
+
+    return _(element.programStages)
+        .filter(({ access }) => access?.read && access?.data?.read && access?.data?.write)
+        .value();
 };
 
 SheetBuilder.prototype.toBlob = async function () {
