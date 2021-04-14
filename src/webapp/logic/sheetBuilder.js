@@ -27,13 +27,13 @@ SheetBuilder.prototype.generate = function () {
     const { element } = builder;
 
     if (isTrackerProgram(element)) {
-        const { element, elementMetadata: metadata } = builder;
+        const { elementMetadata: metadata } = builder;
         this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
         this.programStageSheets = {};
         this.relationshipsSheets = [];
 
         // ProgramStage sheets
-        const programStages = element.programStages.map(programStageT => metadata.get(programStageT.id));
+        const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
 
         withSheetNames(programStages).forEach(programStage => {
             const sheet = this.workbook.addWorksheet(programStage.sheetName);
@@ -148,6 +148,10 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
                     this.validations.get(validation)
                 );
                 sheet.column(columnId).setWidth(name.length / 2.5 + 10);
+
+                if (dataElement.url !== undefined) {
+                    sheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
+                }
 
                 if (description !== undefined) {
                     sheet.cell(itemRow, columnId).comment(description, {
@@ -386,7 +390,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
 };
 
 SheetBuilder.prototype.fillMetadataSheet = function () {
-    const { elementMetadata: metadata, organisationUnits, element } = this.builder;
+    const { elementMetadata: metadata, organisationUnits } = this.builder;
     const metadataSheet = this.metadataSheet;
 
     // Freeze and format column titles
@@ -412,15 +416,7 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
             ?.map(({ id }) => metadata.get(id))
             .map(option => this.translate(option).name)
             .join(", ");
-
-        const isProgramStageDataElementCompulsory = _.some(
-            this.builder.rawMetadata.programStageDataElements,
-            ({ dataElement, compulsory }) => dataElement.id === item.id && compulsory
-        );
-
-        const isProgram = element.type === "programs" || isTrackerProgram(element);
-
-        const isCompulsory = isProgramStageDataElementCompulsory || (isProgram && item.type === "categoryCombos");
+        const isCompulsory = this.isMetadataItemCompulsory(item);
 
         metadataSheet.cell(rowId, 1).string(item.id ?? "");
         metadataSheet.cell(rowId, 2).string(item.type ?? "");
@@ -486,6 +482,25 @@ SheetBuilder.prototype.fillMetadataSheet = function () {
         name: "_false",
     });
     rowId++;
+};
+
+SheetBuilder.prototype.isMetadataItemCompulsory = function (item) {
+    const { rawMetadata, element } = this.builder;
+
+    const isProgramStageDataElementCompulsory = _.some(
+        rawMetadata.programStageDataElements,
+        ({ dataElement, compulsory }) => dataElement?.id === item.id && compulsory
+    );
+
+    const isTeiAttributeCompulsory = _.some(
+        rawMetadata.programTrackedEntityAttributes,
+        ({ trackedEntityAttribute, mandatory }) => trackedEntityAttribute?.id === item.id && mandatory
+    );
+
+    const isProgram = element.type === "programs" || isTrackerProgram(element);
+    const isCategoryComboForProgram = isProgram && item.type === "categoryCombos";
+
+    return isProgramStageDataElementCompulsory || isTeiAttributeCompulsory || isCategoryComboForProgram;
 };
 
 SheetBuilder.prototype.getVersion = function () {
@@ -594,6 +609,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                 .formula(`_${dataElement.id}`)
                 .style(this.groupStyle(groupId));
 
+            if (dataElement.url !== undefined) {
+                dataEntrySheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .link(dataElement.url)
+                    .formula(`=_${dataElement.id}`);
+            }
+
             if (description !== undefined) {
                 dataEntrySheet.cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true).comment(description, {
                     height: "100pt",
@@ -604,7 +626,7 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             groupId++;
         });
     } else {
-        _.forEach(element.programStages, programStageT => {
+        _.forEach(this.getProgramStages(), programStageT => {
             const programStage = metadata.get(programStageT.id);
 
             this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
@@ -644,6 +666,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                     );
                     dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
+                    if (dataElement.url !== undefined) {
+                        dataEntrySheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
+                    }
+
                     if (description !== undefined) {
                         dataEntrySheet.cell(itemRow, columnId).comment(description, {
                             height: "100pt",
@@ -664,6 +690,15 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
             });
         });
     }
+};
+
+// Return only program stages for which the current user has permissions to export/import data.
+SheetBuilder.prototype.getProgramStages = function () {
+    const { element } = this.builder;
+
+    return _(element.programStages)
+        .filter(({ access }) => access?.read && access?.data?.read && access?.data?.write)
+        .value();
 };
 
 SheetBuilder.prototype.toBlob = async function () {
@@ -970,7 +1005,7 @@ function getRelationshipTypeKey(relationshipType, key) {
     return ["relationshipType", relationshipType.id, key].join("-");
 }
 
-function getValidSheetName(name: string, maxLength = 31): string {
+function getValidSheetName(name, maxLength = 31) {
     // Invalid chars: \ / * ? : [ ]
     // Maximum length: 31
     return name.replace(/[\\/*?:[\]]/g, "").slice(0, maxLength);
