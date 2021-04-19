@@ -16,7 +16,7 @@ import {
     getDataElementDisaggregatedId,
 } from "../../domain/entities/DataElementDisaggregated";
 import { DataForm } from "../../domain/entities/DataForm";
-import { Id } from "../../domain/entities/ReferenceObject";
+import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
 import { GetArrayInnerType } from "../../types/utils";
@@ -27,13 +27,13 @@ const publicFields = [
     "models",
     "userPermissionsForGeneration",
     "userGroupPermissionsForGeneration",
-    "allUserPermissionsForGeneration",
     "userPermissionsForImport",
     "userGroupPermissionsForImport",
-    "allUserPermissionsForImport",
     "userPermissionsForSettings",
     "userGroupPermissionsForSettings",
-    "allUserPermissionsForSettings",
+    "allPermissionsForSettings",
+    "allPermissionsForGeneration",
+    "allPermissionsForImport",
     "orgUnitSelection",
     "duplicateEnabled",
     "duplicateExclusion",
@@ -48,12 +48,7 @@ type Options = Pick<Settings, GetArrayInnerType<typeof allFields>>;
 type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
 export type PermissionSetting = "generation" | "settings" | "import";
-export type PermissionType = "user" | "userGroup" | "allUsers";
-
-interface NamedObject {
-    id: string;
-    displayName: string;
-}
+export type PermissionType = "user" | "userGroup";
 
 interface CurrentUser extends Ref {
     userGroups: Ref[];
@@ -65,15 +60,15 @@ type OkOrError = { status: true } | { status: false; error: string };
 export default class Settings {
     public currentUser: CurrentUser;
     public models: Models;
-    public userPermissionsForGeneration: NamedObject[];
-    public userGroupPermissionsForGeneration: NamedObject[];
-    public allUserPermissionsForGeneration: NamedObject[];
-    public userPermissionsForImport: NamedObject[];
-    public userGroupPermissionsForImport: NamedObject[];
-    public allUserPermissionsForImport: NamedObject[];
-    public userPermissionsForSettings: NamedObject[];
-    public userGroupPermissionsForSettings: NamedObject[];
-    public allUserPermissionsForSettings: NamedObject[];
+    public userPermissionsForGeneration: NamedRef[];
+    public userGroupPermissionsForGeneration: NamedRef[];
+    public userPermissionsForImport: NamedRef[];
+    public userGroupPermissionsForImport: NamedRef[];
+    public userPermissionsForSettings: NamedRef[];
+    public userGroupPermissionsForSettings: NamedRef[];
+    public allPermissionsForSettings: boolean;
+    public allPermissionsForGeneration: boolean;
+    public allPermissionsForImport: boolean;
     public orgUnitSelection: OrgUnitSelectionSetting;
     public duplicateEnabled: boolean;
     public duplicateExclusion: DuplicateExclusion;
@@ -88,13 +83,13 @@ export default class Settings {
         this.models = options.models;
         this.userPermissionsForGeneration = options.userPermissionsForGeneration;
         this.userGroupPermissionsForGeneration = options.userGroupPermissionsForGeneration;
-        this.allUserPermissionsForGeneration = options.allUserPermissionsForGeneration;
         this.userPermissionsForImport = options.userPermissionsForImport;
         this.userGroupPermissionsForImport = options.userGroupPermissionsForImport;
-        this.allUserPermissionsForImport = options.allUserPermissionsForImport;
         this.userPermissionsForSettings = options.userPermissionsForSettings;
         this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
-        this.allUserPermissionsForSettings = options.allUserPermissionsForSettings;
+        this.allPermissionsForSettings = options.allPermissionsForSettings;
+        this.allPermissionsForGeneration = options.allPermissionsForGeneration;
+        this.allPermissionsForImport = options.allPermissionsForImport;
         this.orgUnitSelection = options.orgUnitSelection;
         this.duplicateEnabled = options.duplicateEnabled;
         this.duplicateExclusion = options.duplicateExclusion;
@@ -121,17 +116,10 @@ export default class Settings {
             const defaultValues = defaultSettings[prop] ?? [];
 
             return {
-                fields: { id: true, displayName: true },
-                filter: { id: { in: [...storedValues, ...defaultValues] } },
+                fields: { id: true, name: true },
+                filter: { id: { in: [...storedValues, ...defaultValues].map(({ id }) => id) } },
             };
         };
-
-        const allUserPermissionsForImport: NamedObject[] = [
-            {
-                id: data["permissionsForImport"]?.find(element => element === "ALL") ?? "",
-                displayName: "",
-            },
-        ];
 
         const { users: userPermissionsForImport, userGroups: userGroupPermissionsForImport } = await api.metadata
             .get({
@@ -150,13 +138,6 @@ export default class Settings {
             })
             .getData();
 
-        const allUserPermissionsForGeneration: NamedObject[] = [
-            {
-                id: data["permissionsForGeneration"]?.find(element => element === "ALL") ?? "",
-                displayName: "",
-            },
-        ];
-
         const { users: userPermissionsForSettings, userGroups: userGroupPermissionsForSettings } = await api.metadata
             .get({
                 userGroups: query("permissionsForSettings"),
@@ -164,25 +145,18 @@ export default class Settings {
             })
             .getData();
 
-        const allUserPermissionsForSettings: NamedObject[] = [
-            {
-                id: data["permissionsForSettings"]?.find(element => element === "ALL") ?? "",
-                displayName: "",
-            },
-        ];
-
         return new Settings({
             currentUser,
             models: data.models ?? defaultSettings.models,
             userPermissionsForGeneration,
             userGroupPermissionsForGeneration,
-            allUserPermissionsForGeneration,
             userPermissionsForImport,
             userGroupPermissionsForImport,
-            allUserPermissionsForImport,
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
-            allUserPermissionsForSettings,
+            allPermissionsForSettings: data.allPermissionsForSettings ?? false,
+            allPermissionsForGeneration: data.allPermissionsForGeneration ?? false,
+            allPermissionsForImport: data.allPermissionsForImport ?? false,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
             duplicateEnabled: data.duplicateEnabled ?? true,
             duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
@@ -202,13 +176,13 @@ export default class Settings {
             models,
             userPermissionsForGeneration,
             userGroupPermissionsForGeneration,
-            allUserPermissionsForGeneration,
             userPermissionsForImport,
             userGroupPermissionsForImport,
-            allUserPermissionsForImport,
             userPermissionsForSettings,
             userGroupPermissionsForSettings,
-            allUserPermissionsForSettings,
+            allPermissionsForSettings,
+            allPermissionsForGeneration,
+            allPermissionsForImport,
             orgUnitSelection,
             duplicateEnabled,
             duplicateExclusion,
@@ -219,28 +193,18 @@ export default class Settings {
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const permissionsForGeneration = [
-            ...userPermissionsForGeneration,
-            ...userGroupPermissionsForGeneration,
-            ...allUserPermissionsForGeneration,
-        ].map(ug => ug.id);
-
-        const permissionsForSettings = [
-            ...userPermissionsForSettings,
-            ...userGroupPermissionsForSettings,
-            ...allUserPermissionsForSettings,
-        ].map(ug => ug.id);
-        const permissionsForImport = [
-            ...userPermissionsForImport,
-            ...userGroupPermissionsForImport,
-            ...allUserPermissionsForImport,
-        ].map(ug => ug.id);
+        const permissionsForGeneration = [...userPermissionsForGeneration, ...userGroupPermissionsForGeneration];
+        const permissionsForSettings = [...userPermissionsForSettings, ...userGroupPermissionsForSettings];
+        const permissionsForImport = [...userPermissionsForImport, ...userGroupPermissionsForImport];
 
         const data: AppSettings = {
             models,
             permissionsForGeneration,
             permissionsForSettings,
             permissionsForImport,
+            allPermissionsForSettings,
+            allPermissionsForGeneration,
+            allPermissionsForImport,
             orgUnitSelection,
             duplicateEnabled,
             duplicateExclusion,
@@ -270,14 +234,40 @@ export default class Settings {
         return this.updateOptions({ models: { ...this.models, [model]: value } });
     }
 
-    getPermissions(setting: PermissionSetting, type: PermissionType): NamedObject[] {
+    getPermissions(setting: PermissionSetting, type: PermissionType): NamedRef[] {
         return this[this.getPermissionField(setting, type)];
     }
 
-    setPermissions(setting: PermissionSetting, type: PermissionType, collection: NamedObject[]): Settings {
+    setPermissions(setting: PermissionSetting, type: PermissionType, collection: NamedRef[]): Settings {
         return this.updateOptions({
             [this.getPermissionField(setting, type)]: collection,
         });
+    }
+
+    hasAllPermission(setting: PermissionSetting): boolean {
+        switch (setting) {
+            case "generation":
+                return this.allPermissionsForGeneration;
+            case "import":
+                return this.allPermissionsForImport;
+            case "settings":
+                return this.allPermissionsForSettings;
+            default:
+                return false;
+        }
+    }
+
+    setAllPermission(setting: PermissionSetting, value: boolean): Settings {
+        switch (setting) {
+            case "generation":
+                return this.updateOptions({ allPermissionsForGeneration: value });
+            case "import":
+                return this.updateOptions({ allPermissionsForImport: value });
+            case "settings":
+                return this.updateOptions({ allPermissionsForSettings: value });
+            default:
+                return this;
+        }
     }
 
     setDuplicateEnabled(duplicateEnabled: boolean): Settings {
@@ -358,7 +348,7 @@ export default class Settings {
     isTemplateGenerationVisible() {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
-        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForGeneration);
+        const haveAllUsersAccess = this.allPermissionsForGeneration;
 
         return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
@@ -368,7 +358,7 @@ export default class Settings {
         const isUserAdmin = authorities.has("ALL");
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForSettings);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForSettings);
-        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForSettings);
+        const haveAllUsersAccess = this.allPermissionsForSettings;
 
         return isUserAdmin || hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
@@ -376,7 +366,7 @@ export default class Settings {
     isImportDataVisibleForCurrentUser(): boolean {
         const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
         const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport);
-        const haveAllUsersAccess = this.areAllUsersAllowed(this.allUserPermissionsForImport);
+        const haveAllUsersAccess = this.allPermissionsForImport;
 
         return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
     }
@@ -388,37 +378,27 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup" | "allUsers") {
+    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup") {
         if (setting === "generation" && kind === "user") {
             return "userPermissionsForGeneration";
         } else if (setting === "generation" && kind === "userGroup") {
             return "userGroupPermissionsForGeneration";
-        } else if (setting === "generation" && kind === "allUsers") {
-            return "allUserPermissionsForGeneration";
         } else if (setting === "settings" && kind === "user") {
             return "userPermissionsForSettings";
         } else if (setting === "settings" && kind === "userGroup") {
             return "userGroupPermissionsForSettings";
-        } else if (setting === "settings" && kind === "allUsers") {
-            return "allUserPermissionsForSettings";
         } else if (setting === "import" && kind === "user") {
             return "userPermissionsForImport";
         } else if (setting === "import" && kind === "userGroup") {
             return "userGroupPermissionsForImport";
-        } else if (setting === "import" && kind === "allUsers") {
-            return "allUserPermissionsForImport";
         } else {
             throw new Error("Unsupported field");
         }
     }
 
-    private findCurrentUser(collection: NamedObject[]): boolean {
+    private findCurrentUser(collection: NamedRef[]): boolean {
         return !_([this.currentUser, ...this.currentUser.userGroups])
             .intersectionBy(collection, userGroup => userGroup.id)
             .isEmpty();
-    }
-
-    private areAllUsersAllowed(collection: NamedObject[]): boolean {
-        return _(collection).some(item => item.id === "ALL");
     }
 }

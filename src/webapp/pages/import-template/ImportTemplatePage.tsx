@@ -27,7 +27,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
-import { promiseMap } from "../../utils/promises";
+import { promiseMap } from "../../../utils/promises";
 import { RouteComponentProps } from "../root/RootPage";
 
 interface ImportState {

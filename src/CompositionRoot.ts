@@ -1,6 +1,7 @@
 import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
+import { MigrationsAppRepository } from "./data/MigrationsAppRepository";
 import { StorageConstantRepository } from "./data/StorageConstantRepository";
 import { StorageDataStoreRepository } from "./data/StorageDataStoreRepository";
 import { TemplateWebRepository } from "./data/TemplateWebRepository";
@@ -8,6 +9,7 @@ import { DhisInstance } from "./domain/entities/DhisInstance";
 import { ConfigRepository } from "./domain/repositories/ConfigRepository";
 import { ExcelRepository } from "./domain/repositories/ExcelRepository";
 import { InstanceRepository } from "./domain/repositories/InstanceRepository";
+import { MigrationsRepository } from "./domain/repositories/MigrationsRepository";
 import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
@@ -17,12 +19,15 @@ import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCa
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
+import { GetMigrationVersionsUseCase } from "./domain/usecases/GetMigrationVersionsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
+import { HasPendingMigrationsUseCase } from "./domain/usecases/HasPendingMigrationsUseCase";
 import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
+import { RunMigrationsUseCase } from "./domain/usecases/RunMigrationsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api } from "./types/d2-api";
@@ -42,6 +47,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             : new StorageConstantRepository(dhisInstance, mockApi);
     const templateManager: TemplateRepository = new TemplateWebRepository(storage);
     const excelReader: ExcelRepository = new ExcelPopulateRepository();
+    const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
 
     return {
         orgUnits: getExecute({
@@ -70,6 +76,11 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
         }),
         languages: getExecute({
             list: new ListLanguagesUseCase(instance),
+        }),
+        migrations: getExecute({
+            run: new RunMigrationsUseCase(migrations, dhisInstance),
+            getVersions: new GetMigrationVersionsUseCase(migrations),
+            hasPending: new HasPendingMigrationsUseCase(migrations),
         }),
     };
 }

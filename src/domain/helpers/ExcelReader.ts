@@ -3,7 +3,7 @@ import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
 import { removeCharacters } from "../../utils/string";
-import { promiseMap } from "../../webapp/utils/promises";
+import { promiseMap } from "../../utils/promises";
 import { DataPackage, DataPackageData } from "../entities/DataPackage";
 import { Relationship } from "../entities/Relationship";
 import {

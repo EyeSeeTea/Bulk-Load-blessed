@@ -17,7 +17,7 @@ const compositionRoot = getCompositionRoot({
         appKey: "bulk-load",
         storage: "dataStore",
     },
-    dhisInstance: { url: api.baseUrl },
+    dhisInstance: { type: "local", url: api.baseUrl },
     mockApi: api,
 });
 

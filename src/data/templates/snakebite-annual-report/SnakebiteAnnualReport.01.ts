@@ -16,7 +16,7 @@ import { InstanceRepository } from "../../../domain/repositories/InstanceReposit
 import i18n from "../../../locales";
 import { cache } from "../../../utils/cache";
 import { GetSchemaType, Schema } from "../../../utils/codec";
-import { promiseMap } from "../../../webapp/utils/promises";
+import { promiseMap } from "../../../utils/promises";
 import { isValidUid } from "../../dhis2-uid";
 
 const MAX_DATA_ELEMENTS = 60;

@@ -15,7 +15,7 @@ import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/root/RootPage";
-import { promiseMap } from "../../utils/promises";
+import { promiseMap } from "../../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 

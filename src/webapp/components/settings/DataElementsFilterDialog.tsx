@@ -70,7 +70,7 @@ export default function DataElementsFilterDialog({ onClose, settings, onChange }
 
             <div className={classes.row}>
                 <MultiSelector
-                    d2={d2}
+                    d2={d2 as object}
                     height={300}
                     onChange={onChangeExclude}
                     options={modelToSelectOption(selectedProgram?.dataElements)}

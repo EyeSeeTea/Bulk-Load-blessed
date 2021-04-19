@@ -51,6 +51,23 @@ export class StorageConstantRepository extends StorageRepository {
         return description ? JSON.parse(description) : defaultValue;
     }
 
+    public async getObjectIfExists<T extends object>(key: string): Promise<T | undefined> {
+        const { description } = await this.getConstant(key);
+        return description ? JSON.parse(description) : undefined;
+    }
+
+    public async listKeys(): Promise<string[]> {
+        const { objects: constants } = await this.api.models.constants
+            .get({
+                paging: false,
+                fields: { id: true, code: true, name: true },
+                filter: { name: { $like: defaultName } },
+            })
+            .getData();
+
+        return constants.map(({ code }) => code);
+    }
+
     public async saveObject<T extends object>(key: string, value: T): Promise<void> {
         const { id = generateUid(), name = `${defaultName} - ${key}` } = await this.getConstant(key);
 
