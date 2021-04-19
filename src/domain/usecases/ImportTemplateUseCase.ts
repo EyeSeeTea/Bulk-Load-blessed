@@ -125,10 +125,7 @@ export class ImportTemplateUseCase implements UseCase {
         const { duplicateEnabled, duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
         // Override org unit if needed
-        const dataValues =
-            useBuilderOrgUnits && selectedOrgUnits[0]
-                ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
-                : excelDataPackage.dataEntries;
+        const excelFile = this.parseExcelFile(excelDataPackage, useBuilderOrgUnits, selectedOrgUnits);
 
         const instanceDataValues = duplicateEnabled
             ? await this.getExistingDataValues(excelDataPackage, dataForm, useBuilderOrgUnits, selectedOrgUnits)
@@ -138,14 +135,14 @@ export class ImportTemplateUseCase implements UseCase {
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
-            dataValues,
+            excelFile,
             ({ orgUnit }) => !dataFormOrgUnits.find(({ id }) => id === orgUnit)
         );
 
         const existingDataValues =
             duplicateStrategy === "IMPORT"
                 ? []
-                : _.remove(dataValues, base => {
+                : _.remove(excelFile, base => {
                       return instanceDataValues.find(dataPackage =>
                           compareDataPackages(
                               dataForm,
@@ -167,7 +164,7 @@ export class ImportTemplateUseCase implements UseCase {
         return {
             dataValues: {
                 type: dataForm.type,
-                dataEntries: dataValues,
+                dataEntries: excelFile,
                 trackedEntityInstances,
             },
             invalidDataValues: {
@@ -186,6 +183,19 @@ export class ImportTemplateUseCase implements UseCase {
                 trackedEntityInstances: [],
             },
         };
+    }
+
+    private parseExcelFile(dataPackage: DataPackage, useBuilderOrgUnits: boolean, selectedOrgUnits: string[]) {
+        const dataEntries =
+            dataPackage.type === "dataSets"
+                ? _.flatMap(dataPackage.dataEntries, entry =>
+                      entry.dataValues.map(value => ({ ...entry, dataValues: [value] }))
+                  )
+                : dataPackage.dataEntries;
+
+        return useBuilderOrgUnits && selectedOrgUnits[0]
+            ? this.overrideOrgUnit(dataEntries, selectedOrgUnits[0])
+            : dataEntries;
     }
 
     private async getExistingDataValues(
@@ -283,6 +293,13 @@ const compareDataPackages = (
         ) {
             return false;
         }
+    }
+
+    if (dataForm.type === "dataSets") {
+        // Compare dataElements of dataValues from base to compare
+        return _.some(base.dataValues, ({ dataElement, category }) =>
+            compare.dataValues.find(value => value.dataElement === dataElement && value.category === category)
+        );
     }
 
     return true;
