@@ -85,12 +85,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     onSave: () => {
                         updateDialog(null);
 
-                        onChange(
-                            settings
-                                .setAllPermission(setting, true)
-                                .setPermissions(setting, "user", [])
-                                .setPermissions(setting, "userGroup", [])
-                        );
+                        onChange(settings.setAllPermission(setting, true));
                     },
                 });
             } else {
