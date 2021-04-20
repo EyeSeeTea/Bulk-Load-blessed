@@ -25,15 +25,7 @@ const privateFields = ["currentUser"] as const;
 
 const publicFields = [
     "models",
-    "userPermissionsForGeneration",
-    "userGroupPermissionsForGeneration",
-    "userPermissionsForImport",
-    "userGroupPermissionsForImport",
-    "userPermissionsForSettings",
-    "userGroupPermissionsForSettings",
-    "allPermissionsForSettings",
-    "allPermissionsForGeneration",
-    "allPermissionsForImport",
+    "permissions",
     "orgUnitSelection",
     "duplicateEnabled",
     "duplicateExclusion",
@@ -57,18 +49,23 @@ interface CurrentUser extends Ref {
 
 type OkOrError = { status: true } | { status: false; error: string };
 
+type PermissionValue =
+    | { type: "all" }
+    | {
+          type: "sharing";
+          users: NamedRef[];
+          groups: NamedRef[];
+          unknown: NamedRef[];
+      };
+
+type Permissions = {
+    [setting in PermissionSetting]: PermissionValue;
+};
+
 export default class Settings {
     public currentUser: CurrentUser;
+    public permissions: Permissions;
     public models: Models;
-    public userPermissionsForGeneration: NamedRef[];
-    public userGroupPermissionsForGeneration: NamedRef[];
-    public userPermissionsForImport: NamedRef[];
-    public userGroupPermissionsForImport: NamedRef[];
-    public userPermissionsForSettings: NamedRef[];
-    public userGroupPermissionsForSettings: NamedRef[];
-    public allPermissionsForSettings: boolean;
-    public allPermissionsForGeneration: boolean;
-    public allPermissionsForImport: boolean;
     public orgUnitSelection: OrgUnitSelectionSetting;
     public duplicateEnabled: boolean;
     public duplicateExclusion: DuplicateExclusion;
@@ -80,16 +77,8 @@ export default class Settings {
 
     constructor(options: Options) {
         this.currentUser = options.currentUser;
+        this.permissions = options.permissions;
         this.models = options.models;
-        this.userPermissionsForGeneration = options.userPermissionsForGeneration;
-        this.userGroupPermissionsForGeneration = options.userGroupPermissionsForGeneration;
-        this.userPermissionsForImport = options.userPermissionsForImport;
-        this.userGroupPermissionsForImport = options.userGroupPermissionsForImport;
-        this.userPermissionsForSettings = options.userPermissionsForSettings;
-        this.userGroupPermissionsForSettings = options.userGroupPermissionsForSettings;
-        this.allPermissionsForSettings = options.allPermissionsForSettings;
-        this.allPermissionsForGeneration = options.allPermissionsForGeneration;
-        this.allPermissionsForImport = options.allPermissionsForImport;
         this.orgUnitSelection = options.orgUnitSelection;
         this.duplicateEnabled = options.duplicateEnabled;
         this.duplicateExclusion = options.duplicateExclusion;
@@ -102,61 +91,45 @@ export default class Settings {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
         const d2CurrentUser = await api.currentUser.get({ fields: { id: true, userGroups: { id: true } } }).getData();
-
-        const currentUser: CurrentUser = {
-            ...d2CurrentUser,
-            authorities: new Set(authorities),
-        };
+        const currentUser: CurrentUser = { ...d2CurrentUser, authorities: new Set(authorities) };
+        const isUserAdmin = currentUser.authorities.has("ALL");
 
         const defaultSettings = compositionRoot.settings.getDefault();
         const data = await compositionRoot.settings.read<Partial<AppSettings>>(Settings.constantCode, defaultSettings);
 
-        const query = (prop: "permissionsForGeneration" | "permissionsForSettings" | "permissionsForImport") => {
-            const storedValues = data[prop] ?? [];
-            const defaultValues = defaultSettings[prop] ?? [];
+        const buildPermission = async (prop: PermissionSetting): Promise<PermissionValue> => {
+            const permissionKey = mapPermissionSettingToConfig(prop);
+            const allKey = mapPermissionSettingToAllConfig(prop);
 
-            return {
+            const isAllEnabled = data[allKey] ?? defaultSettings[allKey];
+            if (isAllEnabled) return { type: "all" };
+
+            const storedValues = data[permissionKey] ?? [];
+            const defaultValues = defaultSettings[permissionKey] ?? [];
+            const allValues = [...storedValues, ...defaultValues];
+
+            const query = {
                 fields: { id: true, name: true },
-                filter: { id: { in: [...storedValues, ...defaultValues].map(({ id }) => id) } },
+                filter: { id: { in: allValues.map(({ id }) => id) } },
             };
+
+            const { users, userGroups: groups } = await api.metadata.get({ userGroups: query, users: query }).getData();
+
+            const unknown = isUserAdmin ? [] : _.differenceBy(allValues, users, groups, "id");
+
+            return { type: "sharing", users, groups, unknown };
         };
 
-        const { users: userPermissionsForImport, userGroups: userGroupPermissionsForImport } = await api.metadata
-            .get({
-                userGroups: query("permissionsForImport"),
-                users: query("permissionsForImport"),
-            })
-            .getData();
-
-        const {
-            users: userPermissionsForGeneration,
-            userGroups: userGroupPermissionsForGeneration,
-        } = await api.metadata
-            .get({
-                userGroups: query("permissionsForGeneration"),
-                users: query("permissionsForGeneration"),
-            })
-            .getData();
-
-        const { users: userPermissionsForSettings, userGroups: userGroupPermissionsForSettings } = await api.metadata
-            .get({
-                userGroups: query("permissionsForSettings"),
-                users: query("permissionsForSettings"),
-            })
-            .getData();
+        const permissions = {
+            generation: await buildPermission("generation"),
+            import: await buildPermission("import"),
+            settings: await buildPermission("settings"),
+        };
 
         return new Settings({
             currentUser,
+            permissions,
             models: data.models ?? defaultSettings.models,
-            userPermissionsForGeneration,
-            userGroupPermissionsForGeneration,
-            userPermissionsForImport,
-            userGroupPermissionsForImport,
-            userPermissionsForSettings,
-            userGroupPermissionsForSettings,
-            allPermissionsForSettings: data.allPermissionsForSettings ?? false,
-            allPermissionsForGeneration: data.allPermissionsForGeneration ?? false,
-            allPermissionsForImport: data.allPermissionsForImport ?? false,
             orgUnitSelection: data.orgUnitSelection ?? defaultSettings.orgUnitSelection,
             duplicateEnabled: data.duplicateEnabled ?? true,
             duplicateExclusion: data.duplicateExclusion ?? defaultSettings.duplicateExclusion,
@@ -174,15 +147,7 @@ export default class Settings {
     async save(compositionRoot: CompositionRoot): Promise<OkOrError> {
         const {
             models,
-            userPermissionsForGeneration,
-            userGroupPermissionsForGeneration,
-            userPermissionsForImport,
-            userGroupPermissionsForImport,
-            userPermissionsForSettings,
-            userGroupPermissionsForSettings,
-            allPermissionsForSettings,
-            allPermissionsForGeneration,
-            allPermissionsForImport,
+            permissions,
             orgUnitSelection,
             duplicateEnabled,
             duplicateExclusion,
@@ -193,18 +158,21 @@ export default class Settings {
         const validation = this.validate();
         if (!validation.status) return validation;
 
-        const permissionsForGeneration = [...userPermissionsForGeneration, ...userGroupPermissionsForGeneration];
-        const permissionsForSettings = [...userPermissionsForSettings, ...userGroupPermissionsForSettings];
-        const permissionsForImport = [...userPermissionsForImport, ...userGroupPermissionsForImport];
+        const buildPermissions = (setting: PermissionSetting): NamedRef[] => {
+            const permission = permissions[setting];
+            if (!permission || permission.type !== "sharing") return [];
+
+            return [...permission.users, ...permission.groups, ...permission.unknown];
+        };
 
         const data: AppSettings = {
             models,
-            permissionsForGeneration,
-            permissionsForSettings,
-            permissionsForImport,
-            allPermissionsForSettings,
-            allPermissionsForGeneration,
-            allPermissionsForImport,
+            permissionsForGeneration: buildPermissions("generation"),
+            permissionsForSettings: buildPermissions("settings"),
+            permissionsForImport: buildPermissions("import"),
+            allPermissionsForSettings: permissions.settings.type === "all",
+            allPermissionsForGeneration: permissions.generation.type === "all",
+            allPermissionsForImport: permissions.import.type === "all",
             orgUnitSelection,
             duplicateEnabled,
             duplicateExclusion,
@@ -235,39 +203,38 @@ export default class Settings {
     }
 
     getPermissions(setting: PermissionSetting, type: PermissionType): NamedRef[] {
-        return this[this.getPermissionField(setting, type)];
+        const permission = this.permissions[setting];
+        if (!permission || permission.type !== "sharing") return [];
+
+        return permission[getPermissionField(type)];
     }
 
     setPermissions(setting: PermissionSetting, type: PermissionType, collection: NamedRef[]): Settings {
+        const permission = this.permissions[setting];
+        const field = getPermissionField(type);
+        const existing: PermissionValue =
+            !permission || permission.type !== "sharing"
+                ? { type: "sharing", users: [], groups: [], unknown: [] }
+                : permission;
+
         return this.updateOptions({
-            [this.getPermissionField(setting, type)]: collection,
+            permissions: {
+                ...this.permissions,
+                [setting]: {
+                    ...existing,
+                    [field]: collection,
+                },
+            },
         });
     }
 
     hasAllPermission(setting: PermissionSetting): boolean {
-        switch (setting) {
-            case "generation":
-                return this.allPermissionsForGeneration;
-            case "import":
-                return this.allPermissionsForImport;
-            case "settings":
-                return this.allPermissionsForSettings;
-            default:
-                return false;
-        }
+        return this.permissions[setting].type === "all";
     }
 
     setAllPermission(setting: PermissionSetting, value: boolean): Settings {
-        switch (setting) {
-            case "generation":
-                return this.updateOptions({ allPermissionsForGeneration: value });
-            case "import":
-                return this.updateOptions({ allPermissionsForImport: value });
-            case "settings":
-                return this.updateOptions({ allPermissionsForSettings: value });
-            default:
-                return this;
-        }
+        const permission = value ? { type: "all" } : { type: "sharing", users: [], groups: [], unknown: [] };
+        return this.updateOptions({ permissions: { ...this.permissions, [setting]: permission } });
     }
 
     setDuplicateEnabled(duplicateEnabled: boolean): Settings {
@@ -346,29 +313,33 @@ export default class Settings {
     }
 
     isTemplateGenerationVisible() {
-        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForGeneration);
-        const hasUserAccess = this.findCurrentUser(this.userPermissionsForGeneration);
-        const haveAllUsersAccess = this.allPermissionsForGeneration;
+        const permission = this.permissions.generation;
+        if (permission.type === "all") return true;
 
-        return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
+        const hasGroupAccess = this.findCurrentUser(permission.groups);
+        const hasUserAccess = this.findCurrentUser(permission.users);
+        return hasGroupAccess || hasUserAccess;
     }
 
     areSettingsVisibleForCurrentUser(): boolean {
+        const permission = this.permissions.settings;
+        if (permission.type === "all") return true;
+
         const { authorities } = this.currentUser;
         const isUserAdmin = authorities.has("ALL");
-        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForSettings);
-        const hasUserAccess = this.findCurrentUser(this.userPermissionsForSettings);
-        const haveAllUsersAccess = this.allPermissionsForSettings;
 
-        return isUserAdmin || hasGroupAccess || hasUserAccess || haveAllUsersAccess;
+        const hasGroupAccess = this.findCurrentUser(permission.groups);
+        const hasUserAccess = this.findCurrentUser(permission.users);
+        return isUserAdmin || hasGroupAccess || hasUserAccess;
     }
 
     isImportDataVisibleForCurrentUser(): boolean {
-        const hasGroupAccess = this.findCurrentUser(this.userGroupPermissionsForImport);
-        const hasUserAccess = this.findCurrentUser(this.userPermissionsForImport);
-        const haveAllUsersAccess = this.allPermissionsForImport;
+        const permission = this.permissions.import;
+        if (permission.type === "all") return true;
 
-        return hasGroupAccess || hasUserAccess || haveAllUsersAccess;
+        const hasGroupAccess = this.findCurrentUser(permission.groups);
+        const hasUserAccess = this.findCurrentUser(permission.users);
+        return hasGroupAccess || hasUserAccess;
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -378,27 +349,45 @@ export default class Settings {
         ];
     }
 
-    private getPermissionField(setting: PermissionSetting, kind: "user" | "userGroup") {
-        if (setting === "generation" && kind === "user") {
-            return "userPermissionsForGeneration";
-        } else if (setting === "generation" && kind === "userGroup") {
-            return "userGroupPermissionsForGeneration";
-        } else if (setting === "settings" && kind === "user") {
-            return "userPermissionsForSettings";
-        } else if (setting === "settings" && kind === "userGroup") {
-            return "userGroupPermissionsForSettings";
-        } else if (setting === "import" && kind === "user") {
-            return "userPermissionsForImport";
-        } else if (setting === "import" && kind === "userGroup") {
-            return "userGroupPermissionsForImport";
-        } else {
-            throw new Error("Unsupported field");
-        }
-    }
-
     private findCurrentUser(collection: NamedRef[]): boolean {
         return !_([this.currentUser, ...this.currentUser.userGroups])
-            .intersectionBy(collection, userGroup => userGroup.id)
+            .intersectionBy(collection, "id")
             .isEmpty();
+    }
+}
+
+function getPermissionField(kind: "user" | "userGroup"): "users" | "groups" {
+    if (kind === "user") {
+        return "users";
+    } else if (kind === "userGroup") {
+        return "groups";
+    } else {
+        throw new Error("Unsupported field");
+    }
+}
+
+function mapPermissionSettingToConfig(prop: PermissionSetting) {
+    switch (prop) {
+        case "generation":
+            return "permissionsForGeneration";
+        case "import":
+            return "permissionsForImport";
+        case "settings":
+            return "permissionsForSettings";
+        default:
+            throw new Error(`Unknown type ${prop} to map as permission setting`);
+    }
+}
+
+function mapPermissionSettingToAllConfig(prop: PermissionSetting) {
+    switch (prop) {
+        case "generation":
+            return "allPermissionsForGeneration";
+        case "import":
+            return "allPermissionsForImport";
+        case "settings":
+            return "allPermissionsForSettings";
+        default:
+            throw new Error(`Unknown type ${prop} to map as all permission setting`);
     }
 }
