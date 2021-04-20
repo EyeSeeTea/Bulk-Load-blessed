@@ -72,16 +72,14 @@ msgstr ""
 msgid "There are pending migrations"
 msgstr ""
 
-#, fuzzy
 msgid "Ignore"
-msgstr "Ignoré"
+msgstr ""
 
 msgid "Migrations finished successfully, you may now continue to the app"
 msgstr ""
 
-#, fuzzy
 msgid "Checking migrations"
-msgstr "Vérification des doublons en cours ..."
+msgstr ""
 
 msgid "Migrate instance"
 msgstr ""
