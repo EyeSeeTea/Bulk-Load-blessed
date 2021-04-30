@@ -29,8 +29,13 @@ export class MigrationsRunner<T> {
     }
 
     static async init<T>(options: RunnerOptions<T>): Promise<MigrationsRunner<T>> {
-        const { storage, storageKey = "config" } = options;
-        const config = await storage.getOrCreate<Config>(storageKey, { version: 0 });
+        const { migrations, storage, storageKey = "config" } = options;
+
+        const storageKeys = await storage.listKeys();
+        const freshInstall = storageKeys.length === 0;
+
+        const version = freshInstall ? getMaxMigrationVersion(migrations) : 0;
+        const config = await storage.getOrCreate<Config>(storageKey, { version });
 
         return new MigrationsRunner(config, options);
     }
