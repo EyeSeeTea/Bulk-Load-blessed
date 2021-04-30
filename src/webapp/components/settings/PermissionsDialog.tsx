@@ -84,7 +84,6 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     },
                     onSave: () => {
                         updateDialog(null);
-
                         onChange(settings.setAllPermission(setting, true));
                     },
                 });
