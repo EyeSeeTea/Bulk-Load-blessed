@@ -29,7 +29,7 @@ import {
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
 import { timeout } from "../utils/promises";
-import { promiseMap } from "../webapp/utils/promises";
+import { promiseMap } from "../utils/promises";
 import { postEvents } from "./Dhis2Events";
 import { getProgram, getTrackedEntityInstances, updateTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
 

@@ -5,7 +5,7 @@ import { init } from "d2";
 import _ from "lodash";
 import React from "react";
 import ReactDOM from "react-dom";
-import { D2ApiDefault } from "./types/d2-api";
+import { getD2APiFromInstance } from "./utils/d2-api";
 import App from "./webapp/components/app/App";
 
 async function getBaseUrl() {
@@ -18,15 +18,15 @@ async function getBaseUrl() {
     }
 }
 
-const isLangRTL = code => {
+const isLangRTL = (code: string) => {
     const langs = ["ar", "fa", "ur"];
     const prefixed = langs.map(c => `${c}-`);
     return _(langs).includes(code) || prefixed.filter(c => code && code.startsWith(c)).length > 0;
 };
 
-const configI18n = ({ keyUiLocale: uiLocale }) => {
-    i18n.changeLanguage(uiLocale);
-    document.documentElement.setAttribute("dir", isLangRTL(uiLocale) ? "rtl" : "ltr");
+const configI18n = ({ keyUiLocale }: { keyUiLocale: string }) => {
+    i18n.changeLanguage(keyUiLocale);
+    document.documentElement.setAttribute("dir", isLangRTL(keyUiLocale) ? "rtl" : "ltr");
 };
 
 async function main() {
@@ -34,15 +34,15 @@ async function main() {
 
     try {
         const d2 = await init({ baseUrl: baseUrl + "/api", schemas: [] });
-        const api = new D2ApiDefault({ baseUrl });
+        const api = getD2APiFromInstance({ type: "local", url: baseUrl });
         Object.assign(window, { d2, api });
 
-        const userSettings = await api.get("/userSettings").getData();
+        const userSettings = await api.get<{ keyUiLocale: string }>("/userSettings").getData();
         configI18n(userSettings);
 
         ReactDOM.render(
             <React.StrictMode>
-                <Provider config={{ baseUrl, apiVersion: "30" }}>
+                <Provider config={{ baseUrl, apiVersion: 30 }}>
                     <App d2={d2} api={api} />
                 </Provider>
             </React.StrictMode>,

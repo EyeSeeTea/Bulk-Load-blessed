@@ -1,11 +1,10 @@
 import {
+    ConfirmationDialog,
+    ConfirmationDialogProps,
     ShareUpdate,
     Sharing,
     SharingRule,
-    ConfirmationDialog,
-    ConfirmationDialogProps,
 } from "@eyeseetea/d2-ui-components";
-import _ from "lodash";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 import React, { useCallback, useState } from "react";
 import i18n from "../../../locales";
@@ -34,7 +33,7 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     : i18n.t("Access to Settings and Themes");
 
             const buildSharings = (type: PermissionType) =>
-                settings.getPermissions(setting, type).map(sharing => ({ ...sharing, access: "" }));
+                settings.getPermissions(setting, type).map(({ id, name }) => ({ id, displayName: name, access: "" }));
 
             return {
                 meta: {
@@ -58,7 +57,8 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
         (setting: PermissionSetting) => {
             return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
                 const buildPermission = (type: PermissionType, rule?: SharingRule[]) =>
-                    rule?.map(({ id, displayName }) => ({ id, displayName })) ?? settings.getPermissions(setting, type);
+                    rule?.map(({ id, displayName }) => ({ id, name: displayName })) ??
+                    settings.getPermissions(setting, type);
 
                 const newSettings = settings
                     .setPermissions(setting, "user", buildPermission("user", users))
@@ -67,19 +67,6 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
             };
         },
         [onChange, settings]
-    );
-
-    const acceptAllUsersPermissions = useCallback(
-        (setting: PermissionSetting) => {
-            const allUser: SharingRule[] = [{ id: "ALL", displayName: "", access: "" }];
-            const newSettings = settings
-                .setPermissions(setting, "allUsers", allUser)
-                .setPermissions(setting, "user", [])
-                .setPermissions(setting, "userGroup", []);
-
-            return onChange(newSettings);
-        },
-        [settings, onChange]
     );
 
     const onChangeAllUsers = useCallback(
@@ -97,24 +84,17 @@ export default function PermissionsDialog({ onClose, permissionsType, settings, 
                     },
                     onSave: () => {
                         updateDialog(null);
-                        acceptAllUsersPermissions(setting);
+                        onChange(settings.setAllPermission(setting, true));
                     },
                 });
             } else {
-                const newSettings = settings.setPermissions(setting, "allUsers", []);
-                return onChange(newSettings);
+                onChange(settings.setAllPermission(setting, false));
             }
         },
-        [settings, onChange, acceptAllUsersPermissions]
+        [settings, onChange]
     );
 
-    const allUserChecked = useCallback(
-        (setting: PermissionSetting) => {
-            const userPermissions = settings.getPermissions(setting, "allUsers");
-            return _(userPermissions).some(item => item.id === "ALL");
-        },
-        [settings]
-    );
+    const allUserChecked = useCallback((setting: PermissionSetting) => settings.hasAllPermission(setting), [settings]);
 
     return (
         <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>

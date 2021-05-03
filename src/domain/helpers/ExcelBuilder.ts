@@ -2,7 +2,7 @@ import dateFormat from "dateformat";
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { removeCharacters } from "../../utils/string";
-import { promiseMap } from "../../webapp/utils/promises";
+import { promiseMap } from "../../utils/promises";
 import { DataPackage } from "../entities/DataPackage";
 import {
     CellDataSource,
