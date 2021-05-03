@@ -4,8 +4,10 @@ import { Ref } from "../entities/ReferenceObject";
 export abstract class StorageRepository {
     // Object operations
     public abstract getObject<T extends object>(key: string, defaultValue: T): Promise<T>;
+    public abstract getObjectIfExists<T extends object>(key: string): Promise<T | undefined>;
     public abstract saveObject<T extends object>(key: string, value: T): Promise<void>;
     public abstract removeObject(key: string): Promise<void>;
+    public abstract listKeys(): Promise<string[]>;
 
     public async listObjectsInCollection<T extends Ref>(key: string): Promise<T[]> {
         return await this.getObject<T[]>(key, []);

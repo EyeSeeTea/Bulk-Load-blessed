@@ -85,7 +85,7 @@ export function DataSetDataElementsFilterDialog(props: DataSetDataElementsFilter
 
             <div className={classes.row}>
                 <MultiSelector
-                    d2={d2}
+                    d2={d2 as object}
                     searchFilterLabel={i18n.t("Search data elements")}
                     height={300}
                     onChange={updateSelection}

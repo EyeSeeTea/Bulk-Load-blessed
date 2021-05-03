@@ -9,7 +9,7 @@ import {
     RelationshipItemApi,
 } from "./TrackedEntityInstanceTypes";
 import { D2Api, Ref, Id, D2RelationshipConstraint } from "../types/d2-api";
-import { promiseMap } from "../webapp/utils/promises";
+import { promiseMap } from "../utils/promises";
 import { NamedRef } from "../domain/entities/ReferenceObject";
 import { RelationshipType, RelationshipConstraint } from "../domain/entities/RelationshipType";
 import { memoizeAsync } from "../utils/cache";

@@ -121,9 +121,9 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
         (setting: PermissionSetting) => {
             const usersCount = settings.getPermissions(setting, "user").length;
             const userGroupsCount = settings.getPermissions(setting, "userGroup").length;
-            const allUsers = settings.getPermissions(setting, "allUsers");
+            const allUsers = settings.hasAllPermission(setting);
 
-            if (_(allUsers).some(e => e.id === "ALL")) {
+            if (allUsers) {
                 return i18n.t("Accessible to all users");
             } else if (usersCount > 0 && userGroupsCount > 0) {
                 return i18n.t("Accessible to {{users}} users and {{userGroups}} user groups", {

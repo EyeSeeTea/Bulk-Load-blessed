@@ -1,6 +1,6 @@
 import { GetArrayInnerType } from "../../types/utils";
 import { DataElementDisaggregated } from "./DataElementDisaggregated";
-import { Id } from "./ReferenceObject";
+import { Id, NamedRef } from "./ReferenceObject";
 
 const models = ["dataSet", "program"] as const;
 export type Model = GetArrayInnerType<typeof models>;
@@ -14,9 +14,12 @@ export type DataSetDataElementsFilter = Record<DataSetId, DataElementDisaggregat
 
 export interface AppSettings {
     models: Record<Model, boolean>;
-    permissionsForGeneration: string[];
-    permissionsForSettings: string[];
-    permissionsForImport: string[];
+    permissionsForGeneration: NamedRef[];
+    permissionsForSettings: NamedRef[];
+    permissionsForImport: NamedRef[];
+    allPermissionsForGeneration: boolean;
+    allPermissionsForSettings: boolean;
+    allPermissionsForImport: boolean;
     orgUnitSelection: OrgUnitSelectionSetting;
     duplicateEnabled: boolean;
     duplicateExclusion: DuplicateExclusion;

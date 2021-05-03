@@ -1,12 +1,10 @@
-interface BaseInstance {
+interface LocalInstance {
+    type: "local";
     url: string;
 }
 
-interface LocalInstance extends BaseInstance {
-    url: string;
-}
-
-interface ExternalInstance extends BaseInstance {
+interface ExternalInstance {
+    type: "external";
     url: string;
     username: string;
     password: string;
