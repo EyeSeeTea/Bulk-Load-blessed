@@ -2,7 +2,7 @@ import dateFormat from "dateformat";
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { removeCharacters } from "../../utils/string";
-import { promiseMap } from "../../webapp/utils/promises";
+import { promiseMap } from "../../utils/promises";
 import { DataPackage } from "../entities/DataPackage";
 import {
     CellDataSource,
@@ -248,9 +248,15 @@ export class ExcelBuilder {
 
         const dataElementIdsSet = new Set(dataElementIds);
 
-        for (const { id, period, dataValues, trackedEntityInstance, attribute: cocId } of payload.dataEntries) {
+        for (const dataEntry of payload.dataEntries) {
+            const { id, period, dataValues, trackedEntityInstance, attribute: cocId, programStage } = dataEntry;
             const someDataElementPresentInSheet = _(dataValues).some(dv => dataElementIdsSet.has(dv.dataElement));
             if (!someDataElementPresentInSheet) continue;
+
+            const dataSourceProgramStageId = await this.readCellValue(template, dataSource.programStage);
+            const eventBelongsToCurrentProgramStage =
+                dataSourceProgramStageId && dataSourceProgramStageId === programStage;
+            if (!eventBelongsToCurrentProgramStage) continue;
 
             const cells = await this.excelRepository.getCellsInRange(template.id, {
                 ...dataSource.dataValues,

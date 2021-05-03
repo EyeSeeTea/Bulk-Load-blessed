@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { promiseMap } from "../utils/promises";
+import { promiseMap } from "../../utils/promises";
 import { getTrackerProgramMetadata } from "../../data/Dhis2RelationshipTypes";
 
 export async function getElement(api, type, id) {
@@ -14,7 +14,7 @@ export async function getElement(api, type, id) {
         "formType",
         "sections[id,sortOrder,dataElements[id]]",
         "periodType",
-        "programStages",
+        "programStages[id,access]",
         "programType",
         "enrollmentDateLabel",
         "incidentDateLabel",

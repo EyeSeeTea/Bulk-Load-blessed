@@ -20,6 +20,14 @@ export class StorageDataStoreRepository extends StorageRepository {
         return value ?? defaultValue;
     }
 
+    public async getObjectIfExists<T extends object>(key: string): Promise<T | undefined> {
+        return this.dataStore.get<T>(key).getData();
+    }
+
+    public async listKeys(): Promise<string[]> {
+        return this.dataStore.getKeys().getData();
+    }
+
     public async saveObject<T extends object>(key: string, value: T): Promise<void> {
         await this.dataStore.save(key, value).getData();
     }

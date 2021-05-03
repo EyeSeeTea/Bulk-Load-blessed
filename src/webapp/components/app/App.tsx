@@ -7,10 +7,12 @@ import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
-import { CompositionRoot, getCompositionRoot } from "../../../CompositionRoot";
+import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
-import { AppContext } from "../../contexts/app-context";
+import { AppContext, AppContextI } from "../../contexts/app-context";
 import Root from "../../pages/root/RootPage";
+import { useMigrations } from "../migrations/hooks";
+import Migrations from "../migrations/Migrations";
 import Share from "../share/Share";
 import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
@@ -56,30 +58,31 @@ function initFeedbackTool(d2: unknown, appConfig: AppConfig): void {
     }
 }
 
-const App = (props: { d2: object; api: D2Api }) => {
+const App = (props: { d2: unknown; api: D2Api }) => {
     const { d2, api } = props;
     const { baseUrl } = useConfig();
 
     const [showShareButton, setShowShareButton] = useState(false);
-    const [compositionRoot, setCompositionRoot] = useState<CompositionRoot>();
+    const [appContext, setAppContext] = useState<AppContextI | null>(null);
+    const migrations = useMigrations(appContext);
 
     useEffect(() => {
         const run = async () => {
             const appConfig = await fetch("app-config.json").then(res => res.json());
             const compositionRoot = getCompositionRoot({
                 appConfig,
-                dhisInstance: { url: baseUrl },
+                dhisInstance: { type: "local", url: baseUrl },
             });
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
             initFeedbackTool(d2, appConfig);
-            setCompositionRoot(compositionRoot);
+            setAppContext({ d2: d2 as object, api, compositionRoot });
         };
 
         run();
-    }, [d2, baseUrl]);
+    }, [d2, api, baseUrl]);
 
-    if (!compositionRoot) {
+    if (!appContext) {
         return (
             <div style={{ margin: 20 }}>
                 <h3>Connecting to {baseUrl}...</h3>
@@ -88,22 +91,34 @@ const App = (props: { d2: object; api: D2Api }) => {
         );
     }
 
-    return (
-        <AppContext.Provider value={{ d2, api, compositionRoot }}>
-            <MuiThemeProvider theme={muiTheme}>
-                <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
-                    <LoadingProvider>
-                        <SnackbarProvider>
-                            <div id="app">
-                                <Root />
-                            </div>
-                            <Share visible={showShareButton} />
-                        </SnackbarProvider>
-                    </LoadingProvider>
-                </OldMuiThemeProvider>
-            </MuiThemeProvider>
-        </AppContext.Provider>
-    );
+    if (migrations.state.type === "pending") {
+        return (
+            <AppContext.Provider value={appContext}>
+                <Migrations migrations={migrations} />
+            </AppContext.Provider>
+        );
+    }
+
+    if (migrations.state.type === "checked") {
+        return (
+            <AppContext.Provider value={appContext}>
+                <MuiThemeProvider theme={muiTheme}>
+                    <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
+                        <LoadingProvider>
+                            <SnackbarProvider>
+                                <div id="app">
+                                    <Root />
+                                </div>
+                                <Share visible={showShareButton} />
+                            </SnackbarProvider>
+                        </LoadingProvider>
+                    </OldMuiThemeProvider>
+                </MuiThemeProvider>
+            </AppContext.Provider>
+        );
+    }
+
+    return null;
 };
 
 export default App;

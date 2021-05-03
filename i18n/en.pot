@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-04-06T09:08:39.336Z\n"
-"PO-Revision-Date: 2021-04-06T09:08:39.336Z\n"
+"POT-Creation-Date: 2021-04-19T16:03:11.727Z\n"
+"PO-Revision-Date: 2021-04-19T16:03:11.727Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -62,6 +62,50 @@ msgid "Field {{field}} cannot be blank"
 msgstr ""
 
 msgid "You need to select at least one {{element}}"
+msgstr ""
+
+msgid ""
+"There has been an error. You can either retry or contact your administrator "
+"if you think there has been an un recoverable error"
+msgstr ""
+
+msgid "There are pending migrations"
+msgstr ""
+
+msgid "Ignore"
+msgstr ""
+
+msgid "Migrations finished successfully, you may now continue to the app"
+msgstr ""
+
+msgid "Checking migrations"
+msgstr ""
+
+msgid "Migrate instance"
+msgstr ""
+
+msgid "Migrating..."
+msgstr ""
+
+msgid "Continue to the App"
+msgstr ""
+
+msgid ""
+"The app needs to run pending migrations (from version {{instanceVersion}} "
+"to version {{appVersion}}) in order to continue. This may take a long time, "
+"make sure the process is not interrupted."
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Continue to the app anyway"
+msgstr ""
+
+msgid ""
+"The database version ({{instanceVersion}}) is greater than the app version "
+"({{appVersion}}), cannot continue. Please contact the administrator to "
+"update the app."
 msgstr ""
 
 msgid "All"

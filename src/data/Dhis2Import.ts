@@ -18,10 +18,10 @@ export interface ImportPostResponse {
         deleted: number;
         ignored: number;
         total: number;
-        importSummaries?: {
+        importSummaries?: Array<{
             responseType: "ImportSummary";
             description?: string;
-            status: Status;
+            status: SynchronizationStatus;
             href: string;
             importCount: {
                 imported: number;
@@ -34,7 +34,9 @@ export interface ImportPostResponse {
                 object: string;
                 value: string;
             }[];
-        }[];
+            // Only for TEI import
+            enrollments?: ImportPostResponse["response"];
+        }>;
     };
 }
 
@@ -50,8 +52,19 @@ export function processImportResponse(options: {
 
     if (!response) return { title, status, message, rawResponse: importResult };
 
+    // Add inner import summaries
+    const importSummaries = _(response.importSummaries)
+        .flatMap(importSummary => [importSummary, ...(importSummary.enrollments?.importSummaries || [])])
+        .value();
+
+    const aggregatedStatus =
+        _(importSummaries)
+            .map(summary => summary.status)
+            .find(status => status !== "SUCCESS") || status;
+
     const errors =
-        response.importSummaries?.flatMap(
+        _.flatMap(
+            importSummaries,
             ({ reference, description, conflicts }) =>
                 conflicts?.map(({ object, value }) => ({
                     id: reference,
@@ -75,7 +88,7 @@ export function processImportResponse(options: {
         ? _.compact([eventStatsList.length === 1 ? null : totalStats, ...eventStatsList])
         : [totalStats];
 
-    return { title, status, message, errors, stats, rawResponse: importResult };
+    return { title, status: aggregatedStatus, message, errors, stats, rawResponse: importResult };
 }
 
 export async function postImport(
