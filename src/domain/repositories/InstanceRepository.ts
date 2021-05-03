@@ -32,7 +32,7 @@ export interface InstanceRepository {
     getDataFormOrgUnits(type: DataFormType, id: string): Promise<OrgUnit[]>;
     getDataPackage(params: GetDataPackageParams): Promise<DataPackage>;
     getLocales(): Promise<Locale[]>;
-    getDefaultIds(): Promise<string[]>;
+    getDefaultIds(filter?: string): Promise<string[]>;
     deleteAggregatedData(dataPackage: DataPackage): Promise<SynchronizationResult>;
     importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]>;
     getProgram(programId: Id): Promise<Program | undefined>;

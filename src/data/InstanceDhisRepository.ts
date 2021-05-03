@@ -164,17 +164,17 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     @cache()
-    public async getDefaultIds(): Promise<string[]> {
-        const response = (await this.api
-            .get("/metadata", {
-                filter: "code:eq:default",
+    public async getDefaultIds(filter?: string): Promise<string[]> {
+        const response = await this.api
+            .get<Record<string, { id: string }[]>>("/metadata", {
+                filter: "identifiable:eq:default",
                 fields: "id",
             })
-            .getData()) as {
-            [key: string]: { id: string }[];
-        };
+            .getData();
 
-        return _(response)
+        const metadata = _.pickBy(response, (_value, type) => !filter || type === filter);
+
+        return _(metadata)
             .omit(["system"])
             .values()
             .flatten()
