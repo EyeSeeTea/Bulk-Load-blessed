@@ -110,7 +110,6 @@ export class InstanceDhisRepository implements InstanceRepository {
             ...rest,
             type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
             name: displayName ?? name,
-            organisationUnits: [], // Disabled for now in programs
             periodType: "Daily",
             //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
             readAccess: access.data?.read,
@@ -630,7 +629,6 @@ const dataSetFields = {
     attributeValues: { value: true, attribute: { code: true } },
     dataSetElements: { dataElement: dataElementFields },
     sections: { id: true, name: true, dataElements: dataElementFields },
-    organisationUnits: { id: true, name: true, path: true },
     periodType: true,
     access: true,
 } as const;

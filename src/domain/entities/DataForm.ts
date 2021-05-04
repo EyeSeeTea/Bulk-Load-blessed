@@ -9,7 +9,6 @@ export interface DataForm {
     name: string;
     periodType?: DataFormPeriod;
     dataElements: DataElement[];
-    organisationUnits: OrganisationUnit[];
     sections?: {
         id: Id;
         name: string;
