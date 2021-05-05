@@ -212,7 +212,6 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     case "DUPLICATE_VALUES":
                         {
                             const { existingDataValues, dataValues, instanceDataValues } = error;
-                            console.log({ existingDataValues, dataValues, instanceDataValues });
 
                             const totalExisting = _.flatMap(
                                 instanceDataValues.dataEntries,
@@ -427,12 +426,22 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             translateCodes: false,
         });
 
+        // Adding legacy code here, this should be removed when using the already existing use-case
+        const { categoryOptionCombos = [] } = await api
+            .get<Record<string, { id: string }[]>>("/metadata", {
+                filter: "identifiable:eq:default",
+                fields: "id",
+            })
+            .getData();
+        const defaultCategory = categoryOptionCombos[0]?.id;
+
         if (isProgram) {
             const existingEvents = _.remove(
                 events ?? [],
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
+                            "program",
                             id,
                             {
                                 id: event,
@@ -442,7 +451,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 dataValues,
                             },
                             dataPackage,
-                            1
+                            defaultCategory
                         )
                     );
                 }
@@ -452,9 +461,27 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         } else {
             const existingDataValues = _.remove(
                 dataValues ?? [],
-                ({ period, orgUnit, attributeOptionCombo: attribute }) => {
+                ({
+                    period,
+                    orgUnit,
+                    attributeOptionCombo: attribute,
+                    dataElement,
+                    categoryOptionCombo: category,
+                    value,
+                }) => {
                     return result.dataEntries.find(dataPackage =>
-                        compareDataPackages(id, { period: String(period), orgUnit, attribute }, dataPackage)
+                        compareDataPackages(
+                            "dataSet",
+                            id,
+                            {
+                                period: String(period),
+                                orgUnit,
+                                attribute,
+                                dataValues: [{ dataElement, category, value }],
+                            },
+                            dataPackage,
+                            defaultCategory
+                        )
                     );
                 }
             );
@@ -465,12 +492,13 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
     // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
     const compareDataPackages = (
+        type: "dataSet" | "program",
         id: string,
         base: Partial<DataPackageData>,
         compare: Partial<DataPackageData>,
-        periodDays = 0
+        defaultCategory?: string
     ): boolean => {
-        const properties = _.compact([periodDays === 0 ? "period" : undefined, "orgUnit", "attribute"]);
+        const properties = _.compact([type === "dataSet" ? "period" : undefined, "orgUnit", "attribute"]);
 
         for (const property of properties) {
             const baseValue = _.get(base, property);
@@ -480,7 +508,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         }
 
         if (
-            periodDays > 0 &&
+            type === "program" &&
             moment
                 .duration(moment(base.period).diff(moment(compare.period)))
                 .abs()
@@ -496,6 +524,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             values.filter(({ dataElement }) => !exclusions.includes(dataElement));
 
         if (
+            type === "program" &&
             base.dataValues &&
             compare.dataValues &&
             !_.isEqualWith(
@@ -509,6 +538,17 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             )
         ) {
             return false;
+        }
+
+        if (type === "dataSet") {
+            return _.some(
+                base.dataValues,
+                ({ dataElement: baseDataElement, category: baseCategory = defaultCategory }) =>
+                    compare.dataValues?.find(
+                        ({ dataElement, category = defaultCategory }) =>
+                            dataElement === baseDataElement && category === baseCategory
+                    )
+            );
         }
 
         return true;

@@ -132,6 +132,7 @@ export class ImportTemplateUseCase implements UseCase {
             : [];
 
         const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
+        const [defaultCategory] = await this.instanceRepository.getDefaultIds("categoryOptionCombos");
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
@@ -150,7 +151,8 @@ export class ImportTemplateUseCase implements UseCase {
                               dataPackage,
                               duplicateExclusion,
                               duplicateTolerance,
-                              duplicateToleranceUnit
+                              duplicateToleranceUnit,
+                              defaultCategory
                           )
                       );
                   });
@@ -247,13 +249,14 @@ function getTrackedEntityInstances(
         : teis;
 }
 
-const compareDataPackages = (
-    dataForm: DataForm,
+export const compareDataPackages = (
+    dataForm: Pick<DataForm, "type" | "id">,
     base: Partial<DataPackageData>,
     compare: DataPackageData,
     duplicateExclusion: DuplicateExclusion,
     duplicateTolerance: number,
-    duplicateToleranceUnit: DuplicateToleranceUnit
+    duplicateToleranceUnit: DuplicateToleranceUnit,
+    defaultCategory?: string
 ): boolean => {
     const properties = _.compact([dataForm.type === "dataSets" ? "period" : undefined, "orgUnit", "attribute"]);
 
@@ -296,9 +299,11 @@ const compareDataPackages = (
     }
 
     if (dataForm.type === "dataSets") {
-        // Compare dataElements of dataValues from base to compare
-        return _.some(base.dataValues, ({ dataElement, category }) =>
-            compare.dataValues.find(value => value.dataElement === dataElement && value.category === category)
+        return _.some(base.dataValues, ({ dataElement: baseDataElement, category: baseCategory = defaultCategory }) =>
+            compare.dataValues.find(
+                ({ dataElement, category = defaultCategory }) =>
+                    dataElement === baseDataElement && category === baseCategory
+            )
         );
     }
 
