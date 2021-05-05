@@ -2,6 +2,7 @@ import dateFormat from "dateformat";
 import ExcelJS from "exceljs/dist/es5/exceljs.browser";
 import _ from "lodash";
 import moment from "moment";
+import { isTimeFormat } from "../../data/ExcelPopulateRepository";
 import i18n from "../../locales";
 import { stringEquals } from "../utils/strings";
 import { getObjectVersion } from "./utils";
@@ -304,8 +305,12 @@ export async function readSheet({
 }
 
 function getCellValue(cell) {
-    if (cell.value instanceof Date) {
-        return moment.utc(cell.value).format("YYYY-MM-DD[T]HH:mm");
+    if (cell.value instanceof Date && isTimeFormat(cell.numFmt)) {
+        const date = moment.utc(cell.value)
+        if (date.isValid()) return date.format("HH:mm");
+    } else if (cell.value instanceof Date) {
+        const date = moment.utc(cell.value)
+        if (date.isValid()) return date.format("YYYY-MM-DD[T]HH:mm");
     }
 
     return (
