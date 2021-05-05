@@ -151,6 +151,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const value = formula ? formulaValue : textValue ?? formulaValue;
 
         if (value instanceof FormulaError) return "";
+
+        if (isDateFormat(destination.style("numberFormat"))) {
+            return XLSX.numberToDate(value);
+        }
+
         return value;
     }
 
@@ -481,3 +486,13 @@ type MergedCell = {
     startCell: XLSX.Cell;
     hasCell: (cell: ExcelCell) => boolean | undefined;
 };
+
+// Util extracted from ExcelJS
+function isDateFormat(format: string) {
+    return (
+        format
+            .replace(/\[[^\]]*]/g, "")
+            .replace(/"[^"]*"/g, "")
+            .match(/[ymdhMsb]+/) !== null
+    );
+}
