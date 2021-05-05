@@ -15,19 +15,19 @@ import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
-import { DataPackage, DataPackageData, DataPackageDataValue } from "../../../domain/entities/DataPackage";
+import { DataPackage } from "../../../domain/entities/DataPackage";
 import { AggregatedDataValue } from "../../../domain/entities/DhisDataPackage";
 import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
-import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
+import { compareDataPackages, ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
 import { D2Api, DataValueSetsPostResponse } from "../../../types/d2-api";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
+import { promiseMap } from "../../../utils/promises";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/app-context";
 import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
 import * as dhisConnector from "../../logic/dhisConnector";
 import * as sheetImport from "../../logic/sheetImport";
-import { promiseMap } from "../../../utils/promises";
 import { RouteComponentProps } from "../root/RootPage";
 
 interface ImportState {
@@ -441,8 +441,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
                     return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
-                            "program",
-                            id,
+                            { type: "programs", id },
                             {
                                 id: event,
                                 period: String(eventDate),
@@ -451,6 +450,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 dataValues,
                             },
                             dataPackage,
+                            settings.duplicateExclusion,
+                            settings.duplicateTolerance,
+                            settings.duplicateToleranceUnit,
                             defaultCategory
                         )
                     );
@@ -471,8 +473,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 }) => {
                     return result.dataEntries.find(dataPackage =>
                         compareDataPackages(
-                            "dataSet",
-                            id,
+                            { type: "dataSets", id },
                             {
                                 period: String(period),
                                 orgUnit,
@@ -480,6 +481,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 dataValues: [{ dataElement, category, value }],
                             },
                             dataPackage,
+                            settings.duplicateExclusion,
+                            settings.duplicateTolerance,
+                            settings.duplicateToleranceUnit,
                             defaultCategory
                         )
                     );
@@ -488,70 +492,6 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
             return { newValues: dataValues, existingValues: existingDataValues };
         }
-    };
-
-    // TODO: This should be simplified and moved into a use-case but we need to migrate the old code first
-    const compareDataPackages = (
-        type: "dataSet" | "program",
-        id: string,
-        base: Partial<DataPackageData>,
-        compare: Partial<DataPackageData>,
-        defaultCategory?: string
-    ): boolean => {
-        const properties = _.compact([type === "dataSet" ? "period" : undefined, "orgUnit", "attribute"]);
-
-        for (const property of properties) {
-            const baseValue = _.get(base, property);
-            const compareValue = _.get(compare, property);
-            const areEqual = _.isEqual(baseValue, compareValue);
-            if (baseValue && compareValue && !areEqual) return false;
-        }
-
-        if (
-            type === "program" &&
-            moment
-                .duration(moment(base.period).diff(moment(compare.period)))
-                .abs()
-                .as(settings.duplicateToleranceUnit) > settings.duplicateTolerance
-        ) {
-            return false;
-        }
-
-        if (base.id && base.id === compare.id) return false;
-
-        const exclusions = settings.duplicateExclusion[id] ?? [];
-        const filter = (values: DataPackageDataValue[]) =>
-            values.filter(({ dataElement }) => !exclusions.includes(dataElement));
-
-        if (
-            type === "program" &&
-            base.dataValues &&
-            compare.dataValues &&
-            !_.isEqualWith(
-                filter(base.dataValues),
-                filter(compare.dataValues),
-                (base: DataPackageDataValue[], compare: DataPackageDataValue[]) => {
-                    const values = ({ dataElement, value }: DataPackageDataValue) => `${dataElement}-${value}`;
-                    const intersection = _.intersectionBy(base, compare, values);
-                    return base.length === compare.length && intersection.length === base.length;
-                }
-            )
-        ) {
-            return false;
-        }
-
-        if (type === "dataSet") {
-            return _.some(
-                base.dataValues,
-                ({ dataElement: baseDataElement, category: baseCategory = defaultCategory }) =>
-                    compare.dataValues?.find(
-                        ({ dataElement, category = defaultCategory }) =>
-                            dataElement === baseDataElement && category === baseCategory
-                    )
-            );
-        }
-
-        return true;
     };
 
     const performImport = async (dataValues: any[]) => {

@@ -249,7 +249,8 @@ function getTrackedEntityInstances(
         : teis;
 }
 
-const compareDataPackages = (
+// This method should not be exposed, remove as soon as not used in legacy code
+export const compareDataPackages = (
     dataForm: Pick<DataForm, "type" | "id">,
     base: Partial<DataPackageData>,
     compare: DataPackageData,
