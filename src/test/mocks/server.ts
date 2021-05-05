@@ -78,7 +78,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name]],displayName,id,name,organisationUnits[id,name,path],periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name],id,name]",
+                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name]],displayName,id,name,periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name],id,name]",
             filter: [],
         },
     }).reply(200, {
