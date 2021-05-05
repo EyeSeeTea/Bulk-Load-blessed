@@ -334,9 +334,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const {
             response: { id, jobType },
-        } = ((await this.api.dataValues
-            .postSet({ importStrategy, async: true }, { dataValues })
-            .getData()) as unknown) as AsyncDataValueSetResponse;
+        } = await this.api.dataValues.postSetAsync({ importStrategy }, { dataValues }).getData();
 
         const checkTask = async () => {
             const response =
@@ -600,20 +598,6 @@ interface MetadataItem {
 }
 
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
-
-interface AsyncDataValueSetResponse {
-    httStatus: string;
-    httpStatusCode: number;
-    message: string;
-    response: {
-        created: string;
-        id: string;
-        jobType: string;
-        name: string;
-        relativeNotifierEndpoint: string;
-    };
-    status: string;
-}
 
 const dataElementFields = {
     id: true,
