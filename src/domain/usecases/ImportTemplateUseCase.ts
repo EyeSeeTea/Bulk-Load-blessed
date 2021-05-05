@@ -249,7 +249,7 @@ function getTrackedEntityInstances(
         : teis;
 }
 
-export const compareDataPackages = (
+const compareDataPackages = (
     dataForm: Pick<DataForm, "type" | "id">,
     base: Partial<DataPackageData>,
     compare: DataPackageData,
