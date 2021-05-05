@@ -6,7 +6,7 @@ import {
     SharingRule,
 } from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
 import { useAppContext } from "../../contexts/app-context";

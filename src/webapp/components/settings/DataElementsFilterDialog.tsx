@@ -1,7 +1,7 @@
 import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 import _ from "lodash";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { NamedRef } from "../../../domain/entities/ReferenceObject";
 import i18n from "../../../locales";
