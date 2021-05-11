@@ -75,15 +75,31 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
         sheet.cell(1, 1).formula(`=_${relationshipType.id}`).style(baseStyle);
 
         ["from", "to"].forEach((key, idx) => {
-            const { name, program: constraintProgram } = relationshipType.constraints[key];
-            const validation =
-                constraintProgram?.id === program.id
-                    ? this.getTeiIdValidation()
-                    : this.validations.get(getRelationshipTypeKey(relationshipType, key));
-            const columnName = `${_.startCase(key)} TEI (${name})`;
+            const constraint = relationshipType.constraints[key];
             const columnId = idx + 1;
-            this.createColumn(sheet, 2, columnId, columnName, null, validation);
-            sheet.column(columnId).setWidth(columnName.length + 10);
+
+            switch (constraint.type) {
+                case "tei": {
+                    const validation =
+                        constraint.program?.id === program.id
+                            ? this.getTeiIdValidation()
+                            : this.validations.get(getRelationshipTypeKey(relationshipType, key));
+                    const columnName = `${_.startCase(key)} TEI (${constraint.name})`;
+                    this.createColumn(sheet, 2, columnId, columnName, null, validation);
+                    sheet.column(columnId).setWidth(columnName.length + 10);
+                    break;
+                }
+                case "eventInProgram": {
+                    const columnName =
+                        `${_.startCase(key)} event in program ${constraint.program.name}` +
+                        (constraint.programStage ? ` (${constraint.programStage.name})` : "");
+                    this.createColumn(sheet, 2, columnId, columnName, null);
+                    sheet.column(columnId).setWidth(columnName.length + 10);
+                    break;
+                }
+                default:
+                    throw new Error(`Unsupported constraint: ${constraint.type}`);
+            }
         });
     });
 };
@@ -318,14 +334,25 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                 rowId = 2;
                 columnId++;
                 validationSheet.cell(rowId++, columnId).string(`Relationship Type ${relationshipType.name} (${key})`);
-                relationshipType.constraints[key].teis.forEach(tei => {
-                    validationSheet.cell(rowId++, columnId).string(tei.id);
+                const constraint = relationshipType.constraints[key];
 
-                    const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                        columnId
-                    )}$${rowId}`;
-                    this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
-                });
+                switch (constraint.type) {
+                    case "tei":
+                        constraint.teis.forEach(tei => {
+                            validationSheet.cell(rowId++, columnId).string(tei.id);
+
+                            const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                                columnId
+                            )}$${rowId}`;
+                            this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
+                        });
+                        break;
+                    case "eventInProgram":
+                        // TODO: Set selectable events from validation sheet or separate sheet
+                        break;
+                    default:
+                        throw new Error(`Unsupported constraint: ${constraint.type}`);
+                }
             });
         });
     }

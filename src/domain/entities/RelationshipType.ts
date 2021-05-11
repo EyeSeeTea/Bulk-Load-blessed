@@ -1,4 +1,4 @@
-import { Id, Ref } from "./ReferenceObject";
+import { Id, NamedRef, Ref } from "./ReferenceObject";
 
 export interface RelationshipType {
     id: Id;
@@ -9,8 +9,17 @@ export interface RelationshipType {
     };
 }
 
-export interface RelationshipConstraint {
+export type RelationshipConstraint = RelationshipConstraintTei | RelationshipConstraintEventInProgram;
+
+export interface RelationshipConstraintTei {
+    type: "tei";
     name: string;
     program?: Ref;
-    teis: Ref[];
+    teis: Ref[]; // Selectable TEIs for this constraint
+}
+
+export interface RelationshipConstraintEventInProgram {
+    type: "eventInProgram";
+    program: NamedRef;
+    programStage?: NamedRef;
 }

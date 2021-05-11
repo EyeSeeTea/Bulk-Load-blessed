@@ -3,7 +3,7 @@ import { generateUid } from "d2/uid";
 
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
-import { D2Api, Id, Ref } from "../types/d2-api";
+import { D2Api, D2RelationshipType, Id, Ref } from "../types/d2-api";
 import { getUid } from "./dhis2-uid";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { postEvents } from "./Dhis2Events";
@@ -25,6 +25,7 @@ import {
     getTrackerProgramMetadata,
 } from "./Dhis2RelationshipTypes";
 import i18n from "../locales";
+import { Relationship } from "../domain/entities/Relationship";
 
 export interface GetOptions {
     api: D2Api;
@@ -125,7 +126,7 @@ export async function updateTrackedEntityInstances(
     if (!program) throw new Error(`Program not found: ${programId}`);
 
     const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
-    const [preTeis, postTeis] = await splitTeis(api, teis);
+    const [preTeis, postTeis] = await splitTeis(api, teis, metadata);
     const options = { api, program, metadata, existingTeis };
 
     return runSequentialPromisesOnSuccess([
@@ -155,14 +156,28 @@ async function runSequentialPromisesOnSuccess(
 */
 async function splitTeis(
     api: D2Api,
-    teis: TrackedEntityInstance[]
+    teis: TrackedEntityInstance[],
+    metadata: Metadata
 ): Promise<[TrackedEntityInstance[], TrackedEntityInstance[]]> {
     const existingTeis = await getExistingTeis(api);
     const existingTeiIds = new Set(existingTeis.map(tei => tei.id));
 
+    function canPostRelationship(relationship: Relationship, constraintKey: "from" | "to"): boolean {
+        const relType = metadata.relationshipTypesById[relationship.typeId];
+        if (!relType) return false;
+
+        const [constraint, id] =
+            constraintKey === "from"
+                ? [relType.fromConstraint, relationship.fromId]
+                : [relType.toConstraint, relationship.toId];
+
+        // TEIs constraints can be posted if they exist. All others (events) can be always posted.
+        return constraint.relationshipEntity === "TRACKED_ENTITY_INSTANCE" ? existingTeiIds.has(id) : true;
+    }
+
     const [validTeis, invalidTeis] = _(teis)
         .partition(tei =>
-            _(tei.relationships).every(rel => existingTeiIds.has(rel.fromId) && existingTeiIds.has(rel.toId))
+            _(tei.relationships).every(rel => canPostRelationship(rel, "from") && canPostRelationship(rel, "to"))
         )
         .value();
 
@@ -209,11 +224,21 @@ async function uploadTeis(options: {
 
 interface Metadata {
     options: Array<{ id: Id; code: string }>;
+    relationshipTypesById: Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
 }
 
 /* Get metadata required to map attribute values for option sets */
 async function getMetadata(api: D2Api): Promise<Metadata> {
-    return api.metadata.get({ options: { fields: { id: true, code: true } } }).getData();
+    const { options, relationshipTypes } = await api.metadata
+        .get({
+            options: { fields: { id: true, code: true } },
+            relationshipTypes: { fields: { id: true, toConstraint: true, fromConstraint: true } },
+        })
+        .getData();
+
+    const relationshipTypesById = _.keyBy(relationshipTypes, rt => rt.id);
+
+    return { options, relationshipTypesById };
 }
 
 async function getApiEvents(
@@ -309,7 +334,7 @@ function getApiTeiToUpload(
     const optionById = _.keyBy(metadata.options, option => option.id);
 
     const existingTei = existingTeis.find(tei_ => tei_.id === tei.id);
-    const apiRelationships = getApiRelationships(existingTei, relationships);
+    const apiRelationships = getApiRelationships(existingTei, relationships, metadata.relationshipTypesById);
 
     const enrollmentId = existingTei?.enrollment?.id || getUid([tei.id, orgUnit.id, program.id].join("-"));
 
