@@ -9,11 +9,15 @@ import { useAppContext } from "../../contexts/app-context";
 import { Select, SelectOption } from "../select/Select";
 import { SettingsFieldsProps } from "./SettingsFields";
 
-interface DataElementsFilterDialogProps extends SettingsFieldsProps {
+interface DuplicateDataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
 }
 
-export default function DataElementsFilterDialog({ onClose, settings, onChange }: DataElementsFilterDialogProps) {
+export function DuplicateDataElementsFilterDialog({
+    onClose,
+    settings,
+    onChange,
+}: DuplicateDataElementsFilterDialogProps) {
     const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 

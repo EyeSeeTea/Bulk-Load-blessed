@@ -10,14 +10,14 @@ import {
     TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
-import _ from "lodash";
 import { DuplicateToleranceUnit, Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import Settings, { PermissionSetting } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
-import DataElementsFilterDialog from "./DataElementsFilterDialog";
-import PermissionsDialog from "./PermissionsDialog";
 import { DataSetDataElementsFilterDialog } from "./DataSetDataElementsFilterDialog";
+import { DuplicateDataElementsFilterDialog } from "./DuplicateDataElementsFilterDialog";
+import { PermissionsDialog } from "./PermissionsDialog";
+import { ProgramStageFilterDialog } from "./ProgramStageFilterDialog";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -29,7 +29,8 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const [permissionsType, setPermissionsType] = useState<PermissionSetting | null>(null);
     const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
-    const [isDataSetDataElementsDialogVisible, showDataSetDataElementsDialog] = useState<boolean>(false);
+    const [isDataSetDataElementsFilterDialogVisible, showDataSetDataElementsFilterDialog] = useState<boolean>(false);
+    const [isProgramStageFilterDialogVisible, showProgramStageFilterDialog] = useState<boolean>(false);
 
     const setModel = useCallback(
         (model: Model) => {
@@ -147,16 +148,26 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     return (
         <React.Fragment>
-            {isDataSetDataElementsDialogVisible && (
+            {isDataSetDataElementsFilterDialogVisible && (
                 <DataSetDataElementsFilterDialog
                     title={i18n.t("Data elements filter for data sets")}
-                    onClose={() => showDataSetDataElementsDialog(false)}
+                    onClose={() => showDataSetDataElementsFilterDialog(false)}
                     settings={settings}
                     onChange={onChange}
                 />
             )}
+
+            {isProgramStageFilterDialogVisible && (
+                <ProgramStageFilterDialog
+                    title={i18n.t("Data elements and attributes filter for programs")}
+                    onClose={() => showProgramStageFilterDialog(false)}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
+
             {!!isExclusionDialogVisible && (
-                <DataElementsFilterDialog
+                <DuplicateDataElementsFilterDialog
                     onClose={() => showExclusionDialog(false)}
                     settings={settings}
                     onChange={onChange}
@@ -199,7 +210,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
             <h3 className={classes.title}>{i18n.t("Columns layout")}</h3>
 
             <div className={classes.content}>
-                <ListItem button onClick={() => showDataSetDataElementsDialog(true)}>
+                <ListItem button onClick={() => showDataSetDataElementsFilterDialog(true)}>
                     <ListItemIcon>
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
@@ -212,7 +223,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                     />
                 </ListItem>
 
-                <ListItem button onClick={() => {}}>
+                <ListItem button onClick={() => showProgramStageFilterDialog(true)}>
                     <ListItemIcon>
                         <Icon>filter_list</Icon>
                     </ListItemIcon>

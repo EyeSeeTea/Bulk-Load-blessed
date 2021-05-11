@@ -73,7 +73,11 @@ export default class Settings {
     public duplicateExclusion: DuplicateExclusion;
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
+
+    // Data elements to be removed on Data Set View
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
+
+    // Data elements to be removed and Attributes to be included on Program View
     public programStageFilter: ProgramStageFilter;
 
     static constantCode = "BULK_LOAD_SETTINGS";

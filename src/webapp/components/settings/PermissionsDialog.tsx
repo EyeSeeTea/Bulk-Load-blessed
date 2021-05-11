@@ -18,7 +18,7 @@ interface PermissionsDialogProps extends SettingsFieldsProps {
     permissionsType: PermissionSetting;
 }
 
-export default function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
+export function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
     const { api } = useAppContext();
     const search = useCallback((query: string) => searchUsers(api, query), [api]);
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
