@@ -31,7 +31,7 @@
         "exceljs": "3.8.2",
         "file-saver": "2.0.5",
         "jquery": "3.5.1",
-        "lodash": "4.17.20",
+        "lodash": "4.17.21",
         "lodash.product": "18.9.19",
         "md5": "2.3.0",
         "moment": "2.29.1",
