@@ -1,16 +1,19 @@
 import { GetArrayInnerType } from "../../types/utils";
 import { DataElementDisaggregated } from "./DataElementDisaggregated";
-import { Id, NamedRef } from "./ReferenceObject";
+import { Id, NamedRef, Ref } from "./ReferenceObject";
 
 const models = ["dataSet", "program"] as const;
 export type Model = GetArrayInnerType<typeof models>;
 export type Models = Record<Model, boolean>;
-type DataSetId = Id;
 
 export type OrgUnitSelectionSetting = "generation" | "import" | "both";
 export type DuplicateToleranceUnit = "day" | "week" | "month" | "year";
 export type DuplicateExclusion = Record<Id, Id[]>;
+
+type DataSetId = Id;
+type ProgramStageId = Id;
 export type DataSetDataElementsFilter = Record<DataSetId, DataElementDisaggregated[]>;
+export type ProgramStageFilter = Record<ProgramStageId, Ref[]>;
 
 export interface AppSettings {
     models: Record<Model, boolean>;
@@ -26,4 +29,5 @@ export interface AppSettings {
     duplicateTolerance: number;
     duplicateToleranceUnit: DuplicateToleranceUnit;
     dataSetDataElementsFilter: DataSetDataElementsFilter;
+    programStageFilter: ProgramStageFilter;
 }

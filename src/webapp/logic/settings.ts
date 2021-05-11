@@ -8,6 +8,7 @@ import {
     Model,
     Models,
     OrgUnitSelectionSetting,
+    ProgramStageFilter,
 } from "../../domain/entities/AppSettings";
 import {
     DataElementDisaggregated,
@@ -32,6 +33,7 @@ const publicFields = [
     "duplicateTolerance",
     "duplicateToleranceUnit",
     "dataSetDataElementsFilter",
+    "programStageFilter",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -72,6 +74,7 @@ export default class Settings {
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
+    public programStageFilter: ProgramStageFilter;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -85,6 +88,7 @@ export default class Settings {
         this.duplicateTolerance = options.duplicateTolerance;
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
         this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
+        this.programStageFilter = options.programStageFilter;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -136,6 +140,7 @@ export default class Settings {
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
             duplicateToleranceUnit: data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
             dataSetDataElementsFilter: data.dataSetDataElementsFilter ?? defaultSettings.dataSetDataElementsFilter,
+            programStageFilter: data.programStageFilter ?? defaultSettings.programStageFilter,
         });
     }
 
@@ -154,6 +159,7 @@ export default class Settings {
             duplicateTolerance,
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
+            programStageFilter,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -179,6 +185,7 @@ export default class Settings {
             duplicateTolerance,
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
+            programStageFilter,
         };
 
         try {
@@ -259,6 +266,10 @@ export default class Settings {
 
     setDataSetDataElementsFilter(dataSetDataElementsFilter: DataSetDataElementsFilter): Settings {
         return this.updateOptions({ dataSetDataElementsFilter });
+    }
+
+    setProgramStageFilter(programStageFilter: ProgramStageFilter): Settings {
+        return this.updateOptions({ programStageFilter });
     }
 
     setDataSetDataElementsFilterFromSelection(options: {
