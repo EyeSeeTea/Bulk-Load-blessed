@@ -1,7 +1,7 @@
 import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 import _ from "lodash";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { NamedRef } from "../../../domain/entities/ReferenceObject";
 import i18n from "../../../locales";
@@ -9,11 +9,15 @@ import { useAppContext } from "../../contexts/app-context";
 import { Select, SelectOption } from "../select/Select";
 import { SettingsFieldsProps } from "./SettingsFields";
 
-interface DataElementsFilterDialogProps extends SettingsFieldsProps {
+interface DuplicateDataElementsFilterDialogProps extends SettingsFieldsProps {
     onClose: () => void;
 }
 
-export default function DataElementsFilterDialog({ onClose, settings, onChange }: DataElementsFilterDialogProps) {
+export function DuplicateDataElementsFilterDialog({
+    onClose,
+    settings,
+    onChange,
+}: DuplicateDataElementsFilterDialogProps) {
     const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 

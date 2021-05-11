@@ -207,7 +207,8 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         await promiseMap(["Identifier", "Name", "Selector"], (label, index) => write("OrgUnits", index + 1, 1, label));
 
         // Add organisation units sheet rows
-        const availableOrgUnits = _.sortBy(dataSet?.organisationUnits ?? [], "name");
+        const formOrgUnits = await instanceRepository.getDataFormOrgUnits("dataSets", this.dataFormId.id);
+        const availableOrgUnits = _.sortBy(formOrgUnits, "name");
 
         await promiseMap(availableOrgUnits, async (orgUnit, index) => {
             await write("OrgUnits", 1, index + ORGUNIT_SHEET_START, orgUnit.id);

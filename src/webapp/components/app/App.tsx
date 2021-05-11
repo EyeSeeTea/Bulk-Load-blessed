@@ -6,7 +6,7 @@ import { MuiThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
 import { AppContext, AppContextI } from "../../contexts/app-context";
