@@ -202,10 +202,10 @@ async function getConstraint_(
     const programsById = _.keyBy(programs, program => program.id);
     const programsDataByProgramStageId = _(programs)
         .flatMap(program =>
-            program.programStages.map(
-                programStage =>
-                    [programStage.id, { program, programStage }] as [Id, { program: NamedRef; programStage: NamedRef }]
-            )
+            program.programStages.map(programStage => {
+                const programsData = { program, programStage };
+                return [programStage.id, programsData] as [Id, typeof programsData];
+            })
         )
         .fromPairs()
         .value();
