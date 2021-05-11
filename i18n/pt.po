@@ -201,13 +201,11 @@ msgstr "Acessível apenas para administradores de sistema"
 msgid "Not accessible"
 msgstr "Não acessível"
 
-#, fuzzy
 msgid "Data element filter for data sets"
-msgstr "Filtro de elementos de dados (fichas)"
+msgstr ""
 
-#, fuzzy
 msgid "Data element and attribute filter for programs"
-msgstr "Filtro de elementos de dados for events (programs)"
+msgstr ""
 
 msgid "Data model"
 msgstr "Modelo de dados"
@@ -218,9 +216,8 @@ msgstr "Visibilidade da unidade organizacional"
 msgid "Columns layout"
 msgstr ""
 
-#, fuzzy
 msgid "Filter columns for data sets"
-msgstr "Filtro de elementos de dados (fichas)"
+msgstr ""
 
 msgid ""
 "Data elements (with optional disaggregation) to include/exclude for data sets"
@@ -229,9 +226,8 @@ msgstr ""
 msgid "Filter columns for programs"
 msgstr ""
 
-#, fuzzy
 msgid "Data elements and attributes to include/exclude for programs"
-msgstr "Filtro de elementos de dados for events (programs)"
+msgstr ""
 
 msgid "Duplicate detection"
 msgstr "Detecção duplicada"
@@ -239,9 +235,8 @@ msgstr "Detecção duplicada"
 msgid "Event date time difference for events (programs)"
 msgstr "Diferença de data e hora do evento de eventos (programas)"
 
-#, fuzzy
 msgid "Duplicate detection filter for events (programs)"
-msgstr "Filtro de elementos de dados for events (programs)"
+msgstr ""
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de dados usados para identificação de duplicatas"
@@ -590,7 +585,3 @@ msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
-
-#, fuzzy
-#~ msgid "Attribute filter for tracker programs"
-#~ msgstr "Filtro de elementos de dados for events (programs)"

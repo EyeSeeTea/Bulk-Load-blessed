@@ -154,9 +154,8 @@ msgstr "Cancelar"
 msgid "All users allowed"
 msgstr "Permitir todos los usuarios"
 
-#, fuzzy
 msgid "Search data elements or attributes"
-msgstr "Buscar elementos de datos"
+msgstr ""
 
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas durante la generación de la plantilla"
@@ -206,13 +205,11 @@ msgstr "Solo accesible a los administradores del sistema"
 msgid "Not accessible"
 msgstr "No accesible"
 
-#, fuzzy
 msgid "Data element filter for data sets"
-msgstr "Filtro de elementos de datos (set de datos)"
+msgstr ""
 
-#, fuzzy
 msgid "Data element and attribute filter for programs"
-msgstr "Filtro de elementos de datos para eventos (programas)"
+msgstr ""
 
 msgid "Data model"
 msgstr "Modelos de Datos"
@@ -223,9 +220,8 @@ msgstr "Visibilidad de unidades organizativas"
 msgid "Columns layout"
 msgstr ""
 
-#, fuzzy
 msgid "Filter columns for data sets"
-msgstr "Filtro de elementos de datos (set de datos)"
+msgstr ""
 
 msgid ""
 "Data elements (with optional disaggregation) to include/exclude for data sets"
@@ -234,9 +230,8 @@ msgstr ""
 msgid "Filter columns for programs"
 msgstr ""
 
-#, fuzzy
 msgid "Data elements and attributes to include/exclude for programs"
-msgstr "Filtro de elementos de datos para eventos (programas)"
+msgstr ""
 
 msgid "Duplicate detection"
 msgstr "Detección de duplicados"
@@ -246,9 +241,8 @@ msgstr ""
 "Diferencia aceptada entre las fechas de los eventos para la identificación "
 "de duplicados para eventos (programas)"
 
-#, fuzzy
 msgid "Duplicate detection filter for events (programs)"
-msgstr "Filtro de elementos de datos para eventos (programas)"
+msgstr ""
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de datos usados para identificar los duplicados"
@@ -598,7 +592,3 @@ msgstr "Configuración"
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#, fuzzy
-#~ msgid "Attribute filter for tracker programs"
-#~ msgstr "Filtro de elementos de datos para eventos (programas)"
