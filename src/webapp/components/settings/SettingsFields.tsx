@@ -205,10 +205,21 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                     </ListItemIcon>
 
                     <ListItemText
-                        primary={i18n.t("Data elements filter for data sets")}
+                        primary={i18n.t("Filter columns for data sets")}
                         secondary={i18n.t(
                             "Data elements (with optional disaggregation) to include/exclude for data sets"
                         )}
+                    />
+                </ListItem>
+
+                <ListItem button onClick={() => {}}>
+                    <ListItemIcon>
+                        <Icon>filter_list</Icon>
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={i18n.t("Filter columns for programs")}
+                        secondary={i18n.t("Data elements and attributes to include/exclude for programs")}
                     />
                 </ListItem>
             </div>
@@ -248,7 +259,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
                     <ListItemText
-                        primary={i18n.t("Data elements filter for events (programs)")}
+                        primary={i18n.t("Duplicate detection filter for events (programs)")}
                         secondary={i18n.t("Data elements used for duplicates identification")}
                     />
                 </ListItem>
