@@ -157,11 +157,6 @@ export interface RelationshipMetadata {
     relationshipTypes: RelationshipType[];
 }
 
-const knownTypes: Array<D2RelationshipConstraint["relationshipEntity"]> = [
-    "TRACKED_ENTITY_INSTANCE",
-    "PROGRAM_STAGE_INSTANCE",
-];
-
 export async function getTrackerProgramMetadata(program: Program, api: D2Api): Promise<RelationshipMetadata> {
     const { trackedEntityTypes, relationshipTypes: allRelationshipTypes, programs } = await api.metadata
         .get({
@@ -178,20 +173,13 @@ export async function getTrackerProgramMetadata(program: Program, api: D2Api): P
         })
         .getData();
 
-    const relationshipTypes = allRelationshipTypes.filter(relType => {
-        const { fromConstraint, toConstraint } = relType;
-        const relationshipHasKnownConstraintTypes =
-            knownTypes.includes(fromConstraint.relationshipEntity) &&
-            knownTypes.includes(toConstraint.relationshipEntity);
-
+    const relationshipTypesWithTeis = await promiseMap(allRelationshipTypes, async relType => {
         const isProgramAssociatedWithSomeConstraint =
-            isProgramAssociatedWithTeiConstraint(program, fromConstraint) ||
-            isProgramAssociatedWithTeiConstraint(program, toConstraint);
+            isProgramAssociatedWithTeiConstraint(program, relType.fromConstraint) ||
+            isProgramAssociatedWithTeiConstraint(program, relType.toConstraint);
 
-        return relationshipHasKnownConstraintTypes && isProgramAssociatedWithSomeConstraint;
-    });
+        if (!isProgramAssociatedWithSomeConstraint) return;
 
-    const relationshipTypesWithTeis = await promiseMap(relationshipTypes, async relType => {
         const fromConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.fromConstraint);
         const toConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.toConstraint);
 
