@@ -13,7 +13,7 @@ export type DuplicateExclusion = Record<Id, Id[]>;
 type DataSetId = Id;
 type ProgramStageId = Id;
 export type DataSetDataElementsFilter = Record<DataSetId, DataElementDisaggregated[]>;
-export type ProgramStageFilter = Record<ProgramStageId, Ref[]>;
+export type ProgramStageFilter = Record<ProgramStageId, { dataElementsExcluded: Ref[]; attributesIncluded: Ref[] }>;
 
 export interface AppSettings {
     models: Record<Model, boolean>;

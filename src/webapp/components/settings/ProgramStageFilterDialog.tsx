@@ -44,7 +44,7 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
     const dataElementsOptions = useMemo(() => getMultiSelectorOptionsFromNamedRefs(dataElementItems), [
         dataElementItems,
     ]);
-    const selectedIds = getSelectedIds(settings, programStage, dataElementsOptions);
+    const selectedIds = getSelectedIds(settings, programStage);
 
     const updateSelection = useCallback(
         (newSelectedIds: DataElementDisaggregatedId[]) => {
@@ -107,20 +107,20 @@ function getProgramStages(programs: DataForm[]): ProgramStage[] {
     );
 }
 
-function getSelectedIds(
-    settings: Settings,
-    programStage: ProgramStage | undefined,
-    dataElementsOptions: Array<{ value: string }>
-) {
+function getSelectedIds(settings: Settings, programStage: ProgramStage | undefined) {
     if (!programStage) return [];
 
-    const allOptionIds = dataElementsOptions.map(option => option.value);
-    const excludedIds = settings.programStageFilter[programStage.id] ?? programStage.attributes;
+    const programStageFilter = settings.programStageFilter[programStage.id];
+    const includedAttributes = programStageFilter?.attributesIncluded ?? [];
+    const excludedDataElements = programStageFilter?.dataElementsExcluded ?? [];
 
-    return _.difference(
-        allOptionIds,
-        excludedIds.map(({ id }) => id)
+    const selectedAttributes = includedAttributes.map(({ id }) => id);
+    const selectedDataElements = _.difference(
+        programStage.dataElements.map(({ id }) => id),
+        excludedDataElements.map(({ id }) => id)
     );
+
+    return [...selectedDataElements, ...selectedAttributes];
 }
 
 function getDataElementItems(stage: ProgramStage | undefined): NamedRef[] {
