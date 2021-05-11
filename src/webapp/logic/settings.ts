@@ -16,7 +16,6 @@ import {
     getDataElementDisaggregatedById,
     getDataElementDisaggregatedId,
 } from "../../domain/entities/DataElementDisaggregated";
-import { DataForm } from "../../domain/entities/DataForm";
 import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
@@ -264,22 +263,13 @@ export default class Settings {
         return this.updateOptions({ duplicateExclusion });
     }
 
-    setDataSetDataElementsFilter(dataSetDataElementsFilter: DataSetDataElementsFilter): Settings {
-        return this.updateOptions({ dataSetDataElementsFilter });
-    }
-
-    setProgramStageFilter(programStageFilter: ProgramStageFilter): Settings {
-        return this.updateOptions({ programStageFilter });
-    }
-
     setDataSetDataElementsFilterFromSelection(options: {
-        dataSet: DataForm | undefined;
+        dataSet: string;
         dataElementsDisaggregated: DataElementDisaggregated[];
         prevSelectedIds: DataElementDisaggregatedId[];
         newSelectedIds: DataElementDisaggregatedId[];
     }): Settings {
         const { dataSet, dataElementsDisaggregated, prevSelectedIds, newSelectedIds } = options;
-        if (!dataSet) return this;
 
         const newSelected = newSelectedIds.map(getDataElementDisaggregatedById);
         const prevSelected = prevSelectedIds.map(getDataElementDisaggregatedById);
@@ -306,9 +296,27 @@ export default class Settings {
             .uniqBy(getDataElementDisaggregatedId)
             .value();
 
-        const newFilter = { ...this.dataSetDataElementsFilter, [dataSet.id]: newFilterValue };
+        return this.updateOptions({
+            dataSetDataElementsFilter: {
+                ...this.dataSetDataElementsFilter,
+                [dataSet]: newFilterValue,
+            },
+        });
+    }
 
-        return this.setDataSetDataElementsFilter(newFilter);
+    setProgramStageFilterFromSelection(options: {
+        programStage: string;
+        dataElementsExcluded: Ref[];
+        attributesIncluded: Ref[];
+    }): Settings {
+        const { programStage, dataElementsExcluded, attributesIncluded } = options;
+
+        return this.updateOptions({
+            programStageFilter: {
+                ...this.programStageFilter,
+                [programStage]: { dataElementsExcluded, attributesIncluded },
+            },
+        });
     }
 
     allModelsEnabled() {

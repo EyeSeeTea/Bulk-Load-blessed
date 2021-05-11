@@ -49,13 +49,16 @@ export function DataSetDataElementsFilterDialog(props: DataSetDataElementsFilter
 
     const updateSelection = React.useCallback(
         (newSelectedIds: DataElementDisaggregatedId[]) => {
-            const newSettings = settings.setDataSetDataElementsFilterFromSelection({
-                dataSet,
-                dataElementsDisaggregated: dataElementItems.map(getDataElementDisaggregatedFromItem),
-                prevSelectedIds: selectedIds,
-                newSelectedIds,
-            });
-            onChange(newSettings);
+            if (!dataSet) return;
+
+            onChange(
+                settings.setDataSetDataElementsFilterFromSelection({
+                    dataSet: dataSet.id,
+                    dataElementsDisaggregated: dataElementItems.map(getDataElementDisaggregatedFromItem),
+                    prevSelectedIds: selectedIds,
+                    newSelectedIds,
+                })
+            );
         },
         [selectedIds, dataSet, settings, dataElementItems, onChange]
     );

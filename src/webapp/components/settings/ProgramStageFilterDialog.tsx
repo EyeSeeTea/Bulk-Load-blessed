@@ -2,7 +2,6 @@ import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { DataElementDisaggregatedId } from "../../../domain/entities/DataElementDisaggregated";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { NamedRef } from "../../../domain/entities/ReferenceObject";
 import i18n from "../../../locales";
@@ -47,10 +46,27 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
     const selectedIds = getSelectedIds(settings, programStage);
 
     const updateSelection = useCallback(
-        (newSelectedIds: DataElementDisaggregatedId[]) => {
-            console.log("todo", newSelectedIds);
+        (newSelectedIds: string[]) => {
+            if (!programStage) return;
+
+            const dataElementsExcluded = _.difference(
+                programStage.dataElements.map(({ id }) => id),
+                newSelectedIds
+            ).map(id => ({ id }));
+
+            const attributesIncluded = newSelectedIds
+                .filter(id => programStage.attributes.find(e => e.id === id))
+                .map(id => ({ id }));
+
+            onChange(
+                settings.setProgramStageFilterFromSelection({
+                    programStage: programStage.id,
+                    dataElementsExcluded,
+                    attributesIncluded,
+                })
+            );
         },
-        [selectedIds, programStage, settings, dataElementItems, onChange]
+        [programStage, settings, onChange]
     );
 
     return (
