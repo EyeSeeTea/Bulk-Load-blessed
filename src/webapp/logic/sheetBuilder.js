@@ -89,7 +89,7 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {
-    const { elementMetadata: metadata, element: program } = this.builder;
+    const { elementMetadata: metadata, element: program, settings } = this.builder;
 
     _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
@@ -121,6 +121,8 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
         this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
+        // TODO: Include Attributes
+
         if (programStage.programStageSections.length === 0) {
             programStage.programStageSections.push({
                 dataElements: programStage.programStageDataElements.map(e => e.dataElement),
@@ -136,6 +138,18 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
             _.forEach(programStageSection.dataElements, dataElementT => {
                 const dataElement = metadata.get(dataElementT.id);
+                if (!dataElement) {
+                    console.error(`Data element not found ${dataElementT.id}`);
+                    return;
+                }
+
+                const filter = settings.programStageFilter[programStage.id];
+                const dataElementsExcluded = filter?.dataElementsExcluded ?? [];
+                const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                    _.isEqual(dataElementExcluded, { id: dataElement.id })
+                );
+                if (isColumnExcluded) return;
+
                 const { name, description } = this.translate(dataElement);
 
                 const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
@@ -162,6 +176,9 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
                 columnId++;
             });
+
+            const noColumnAdded = columnId === firstColumnId;
+            if (noColumnAdded) return;
 
             if (firstColumnId < columnId)
                 sheet
@@ -653,6 +670,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         return;
                     }
 
+                    const filter = settings.programStageFilter[programStage.id];
+                    const dataElementsExcluded = filter?.dataElementsExcluded ?? [];
+                    const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                        _.isEqual(dataElementExcluded, { id: dataElement.id })
+                    );
+                    if (isColumnExcluded) return;
+
                     const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
@@ -679,6 +703,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                     columnId++;
                 });
+
+                const noColumnAdded = columnId === firstColumnId;
+                if (noColumnAdded) return;
 
                 if (firstColumnId < columnId)
                     dataEntrySheet
