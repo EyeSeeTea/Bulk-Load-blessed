@@ -136,6 +136,7 @@ export function initializeMockServer() {
                 },
                 attributeValues: [],
                 programStages: [],
+                programTrackedEntityAttributes: [],
             },
         ],
     });
