@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-05-11T07:48:34.663Z\n"
-"PO-Revision-Date: 2021-05-11T07:48:34.663Z\n"
+"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
+"PO-Revision-Date: 2021-05-11T07:56:11.788Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -200,10 +200,10 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
-msgid "Data elements filter for data sets"
+msgid "Data element filter for data sets"
 msgstr ""
 
-msgid "Data elements and attributes filter for programs"
+msgid "Data element and attribute filter for programs"
 msgstr ""
 
 msgid "Data model"

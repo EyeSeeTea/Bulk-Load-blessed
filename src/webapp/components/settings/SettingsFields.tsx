@@ -150,7 +150,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
         <React.Fragment>
             {isDataSetDataElementsFilterDialogVisible && (
                 <DataSetDataElementsFilterDialog
-                    title={i18n.t("Data elements filter for data sets")}
+                    title={i18n.t("Data element filter for data sets")}
                     onClose={() => showDataSetDataElementsFilterDialog(false)}
                     settings={settings}
                     onChange={onChange}
@@ -159,7 +159,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
             {isProgramStageFilterDialogVisible && (
                 <ProgramStageFilterDialog
-                    title={i18n.t("Data elements and attributes filter for programs")}
+                    title={i18n.t("Data element and attribute filter for programs")}
                     onClose={() => showProgramStageFilterDialog(false)}
                     settings={settings}
                     onChange={onChange}
