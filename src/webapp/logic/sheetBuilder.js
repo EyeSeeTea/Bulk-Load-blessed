@@ -16,6 +16,9 @@ const orgNonExistingMessage =
 
 const maxRow = 1048576;
 
+// Excel shows all empty rows, limit the maximum number of TEIs
+const maxTeiRows = 1024;
+
 export const SheetBuilder = function (builder) {
     this.workbook = new Excel.Workbook();
     this.builder = builder;
@@ -105,11 +108,12 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
 };
 
 SheetBuilder.prototype.fillProgramStageSheets = function () {
-    const { elementMetadata: metadata, element: program } = this.builder;
+    const { elementMetadata: metadata, element: program, settings } = this.builder;
 
     _.forEach(this.programStageSheets, (sheet, programStageId) => {
         const programStageT = { id: programStageId };
         const programStage = metadata.get(programStageId);
+        const settingsFilter = settings.programStageFilter[programStage.id];
 
         const rowOffset = 0;
         const sectionRow = rowOffset + 1;
@@ -137,6 +141,23 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
         this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
+        // Include attribute look-up from TEI Instances sheet
+        _.forEach(settingsFilter?.attributesIncluded, ({ id: attributeId }) => {
+            const attribute = metadata.get(attributeId);
+            if (!attribute) return;
+
+            this.createColumn(sheet, itemRow, columnId, `_${attribute.id}`);
+
+            const colName = Excel.getExcelAlpha(columnId);
+            const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("A" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
+
+            sheet
+                .cell(itemRow + 1, columnId, maxTeiRows, columnId)
+                .formula(lookupFormula);
+
+            columnId++;
+        });
+
         if (programStage.programStageSections.length === 0) {
             programStage.programStageSections.push({
                 dataElements: programStage.programStageDataElements.map(e => e.dataElement),
@@ -152,6 +173,17 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
             _.forEach(programStageSection.dataElements, dataElementT => {
                 const dataElement = metadata.get(dataElementT.id);
+                if (!dataElement) {
+                    console.error(`Data element not found ${dataElementT.id}`);
+                    return;
+                }
+
+                const dataElementsExcluded = settingsFilter?.dataElementsExcluded ?? [];
+                const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                    _.isEqual(dataElementExcluded, { id: dataElement.id })
+                );
+                if (isColumnExcluded) return;
+
                 const { name, description } = this.translate(dataElement);
 
                 const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
@@ -178,6 +210,9 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
                 columnId++;
             });
+
+            const noColumnAdded = columnId === firstColumnId;
+            if (noColumnAdded) return;
 
             if (firstColumnId < columnId)
                 sheet
@@ -680,6 +715,13 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
                         return;
                     }
 
+                    const filter = settings.programStageFilter[programStage.id];
+                    const dataElementsExcluded = filter?.dataElementsExcluded ?? [];
+                    const isColumnExcluded = _.some(dataElementsExcluded, dataElementExcluded =>
+                        _.isEqual(dataElementExcluded, { id: dataElement.id })
+                    );
+                    if (isColumnExcluded) return;
+
                     const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
@@ -706,6 +748,9 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
 
                     columnId++;
                 });
+
+                const noColumnAdded = columnId === firstColumnId;
+                if (noColumnAdded) return;
 
                 if (firstColumnId < columnId)
                     dataEntrySheet
@@ -839,8 +884,6 @@ SheetBuilder.prototype.groupStyle = function (groupId) {
 };
 
 SheetBuilder.prototype.getTeiIdValidation = function () {
-    // Excel shows all empty rows, limit the maximum number of TEIs
-    const maxTeiRows = 1000;
     return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
 };
 
