@@ -210,16 +210,18 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
-        let result: SynchronizationResult;
         switch (dataPackage.type) {
-            case "dataSets":
-                result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+            case "dataSets": {
+                const result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
                 return [result];
-            case "programs":
-                result = await this.importEventsData(dataPackage);
+            }
+            case "programs": {
+                const result = await this.importEventsData(dataPackage);
                 return [result];
-            case "trackerPrograms":
+            }
+            case "trackerPrograms": {
                 return this.importTrackerProgramData(dataPackage);
+            }
             default:
                 throw new Error(`Unsupported type for data package`);
         }

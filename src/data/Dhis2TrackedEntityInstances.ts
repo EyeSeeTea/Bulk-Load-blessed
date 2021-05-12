@@ -374,8 +374,7 @@ async function getExistingTeis(api: D2Api): Promise<Ref[]> {
         fields: "trackedEntityInstance~rename(id)",
     };
 
-    const teiResponse = await api.get("/trackedEntityInstances", query).getData();
-    const { trackedEntityInstances } = teiResponse as TeiIdsResponse;
+    const { trackedEntityInstances } = await api.get<TeiIdsResponse>("/trackedEntityInstances", query).getData();
     return trackedEntityInstances;
 }
 async function getTeisFromApi(options: {
@@ -394,6 +393,7 @@ async function getTeisFromApi(options: {
         "enrollments",
         "relationships",
     ];
+
     const query: TrackedEntityInstancesRequest = {
         ou: orgUnits.map(ou => ou.id).join(";"),
         ouMode: "SELECTED",
@@ -405,8 +405,7 @@ async function getTeisFromApi(options: {
         fields: fields.join(","),
     };
 
-    const teiResponse = await api.get("/trackedEntityInstances", query).getData();
-    return teiResponse as TrackedEntityInstancesResponse;
+    return api.get<TrackedEntityInstancesResponse>("/trackedEntityInstances", query).getData();
 }
 
 function buildTei(
