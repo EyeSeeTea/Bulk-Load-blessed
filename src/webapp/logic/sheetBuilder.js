@@ -93,10 +93,11 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
                     break;
                 }
                 case "eventInProgram": {
+                    const validation = this.validations.get(getRelationshipTypeKey(relationshipType, key));
                     const columnName =
                         `${_.startCase(key)} event in program ${constraint.program.name}` +
                         (constraint.programStage ? ` (${constraint.programStage.name})` : "");
-                    this.createColumn(sheet, 2, columnId, columnName, null);
+                    this.createColumn(sheet, 2, columnId, columnName, null, validation);
                     sheet.column(columnId).setWidth(columnName.length + 10);
                     break;
                 }
@@ -370,7 +371,7 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                 const constraint = relationshipType.constraints[key];
 
                 switch (constraint.type) {
-                    case "tei":
+                    case "tei":{
                         constraint.teis.forEach(tei => {
                             validationSheet.cell(rowId++, columnId).string(tei.id);
 
@@ -380,10 +381,16 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                             this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
                         });
                         break;
-                    case "eventInProgram":
-                        // TODO: Set selectable events from validation sheet or separate sheet
+                    }case "eventInProgram":{
+                        constraint.events.forEach(event => {
+                            validationSheet.cell(rowId++, columnId).string(event.id);
+                        });
+
+                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`;
+                        this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
+                        console.log("set", getRelationshipTypeKey(relationshipType, key))
                         break;
-                    default:
+                    }default:
                         throw new Error(`Unsupported constraint: ${constraint.type}`);
                 }
             });

@@ -216,10 +216,10 @@ async function getConstraint_(
         case "PROGRAM_STAGE_INSTANCE": {
             if ("program" in constraint) {
                 const program = programsById[constraint.program.id];
-                return program ? { type: "eventInProgram", program } : undefined;
+                return getConstraintForTypeProgram(api, program);
             } else {
-                const programsData = programsDataByProgramStageId[constraint.programStage.id];
-                return programsData ? { type: "eventInProgram", ...programsData } : undefined;
+                const data = programsDataByProgramStageId[constraint.programStage.id];
+                return getConstraintForTypeProgram(api, data?.program, data?.programStage);
             }
         }
     }
@@ -249,12 +249,24 @@ async function getConstraintForTypeTei(
         fields: "trackedEntityInstance~rename(id)",
     };
 
-    const { trackedEntityInstances } = (await api.get("/trackedEntityInstances", query).getData()) as TeiIdsResponse;
+    const { trackedEntityInstances } = await api.get<TeiIdsResponse>("/trackedEntityInstances", query).getData();
 
     const teis = _.sortBy(trackedEntityInstances, tei => tei.id.toLowerCase());
-    const name = trackedEntityTypesById[constraint.trackedEntityType.id]?.name || "Unknown";
+    const name = trackedEntityTypesById[constraint.trackedEntityType.id]?.name ?? "Unknown";
 
     return { type: "tei", name, program: constraint.program, teis };
+}
+
+async function getConstraintForTypeProgram(
+    api: D2Api,
+    program?: ProgramInfo,
+    programStage?: NamedRef
+): Promise<RelationshipConstraint | undefined> {
+    if (!program) return undefined;
+
+    const { events } = await api.events.getAll({ program: program.id, programStage: programStage?.id }).getData();
+    
+    return { type: "eventInProgram", program, programStage, events: events.map(({ event }) => ({ id: event })) };
 }
 
 function isProgramAssociatedWithTeiConstraint(program: Program, constraint: D2RelationshipConstraint): boolean {

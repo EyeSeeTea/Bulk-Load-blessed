@@ -22,4 +22,5 @@ export interface RelationshipConstraintEventInProgram {
     type: "eventInProgram";
     program: NamedRef;
     programStage?: NamedRef;
+    events: Ref[];
 }
