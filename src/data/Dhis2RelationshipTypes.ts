@@ -57,7 +57,7 @@ export function getApiRelationships(
             const fromConstraint = getRelationshipConstraint(rel, relationshipTypesById, "from");
             const toConstraint = getRelationshipConstraint(rel, relationshipTypesById, "to");
 
-            if (!fromConstraint || !toConstraint) return;
+            if (!fromConstraint || !toConstraint) return undefined;
 
             const relApi: RelationshipApi = {
                 relationship: relationshipId,
