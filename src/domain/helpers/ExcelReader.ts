@@ -263,7 +263,7 @@ export class ExcelReader {
                         id: eventId ? String(eventId) : undefined,
                         dataForm: String(programId),
                         orgUnit: tei.orgUnit.id,
-                        period: String(date),
+                        period: this.formatValue(date),
                         attribute: cocId,
                         trackedEntityInstance: String(teiId),
                         programStage: String(programStageId),
