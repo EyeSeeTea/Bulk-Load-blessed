@@ -135,9 +135,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
             const colName = Excel.getExcelAlpha(columnId);
             const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("A" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
 
-            sheet
-                .cell(itemRow + 1, columnId, maxTeiRows, columnId)
-                .formula(lookupFormula);
+            sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
 
             columnId++;
         });
