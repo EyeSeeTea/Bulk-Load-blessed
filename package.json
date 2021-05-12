@@ -64,7 +64,8 @@
         "cy:verify": "cypress verify",
         "check-uncommited": "test -z \"$(git status -uno --porcelain)\"",
         "cy:e2e:open": "CYPRESS_E2E=true cypress open",
-        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome"
+        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome",
+        "prepare": "husky install"
     },
     "devDependencies": {
         "@babel/core": "7.14.0",
