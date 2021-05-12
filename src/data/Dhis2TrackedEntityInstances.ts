@@ -126,7 +126,7 @@ export async function updateTrackedEntityInstances(
     if (!program) throw new Error(`Program not found: ${programId}`);
 
     const apiEvents = await getApiEvents(api, teis, dataEntries, metadata, teiSeed);
-    const [preTeis, postTeis] = await splitTeis(api, teis, metadata);
+    const { preTeis, postTeis } = await splitTeis(api, teis, metadata);
     const options = { api, program, metadata, existingTeis };
 
     return runSequentialPromisesOnSuccess([
@@ -158,7 +158,7 @@ async function splitTeis(
     api: D2Api,
     teis: TrackedEntityInstance[],
     metadata: Metadata
-): Promise<[TrackedEntityInstance[], TrackedEntityInstance[]]> {
+): Promise<{ preTeis: TrackedEntityInstance[]; postTeis: TrackedEntityInstance[] }> {
     const existingTeis = await getExistingTeis(api);
     const existingTeiIds = new Set(existingTeis.map(tei => tei.id));
 
@@ -187,7 +187,7 @@ async function splitTeis(
     );
     const postTeis = invalidTeis;
 
-    return [preTeis, postTeis];
+    return { preTeis, postTeis };
 }
 
 async function uploadTeis(options: {

@@ -371,26 +371,29 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                 const constraint = relationshipType.constraints[key];
 
                 switch (constraint.type) {
-                    case "tei":{
+                    case "tei": {
                         constraint.teis.forEach(tei => {
                             validationSheet.cell(rowId++, columnId).string(tei.id);
-
-                            const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                                columnId
-                            )}$${rowId}`;
-                            this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
                         });
+
+                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                            columnId
+                        )}$${rowId}`;
+                        this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
                         break;
-                    }case "eventInProgram":{
+                    }
+                    case "eventInProgram": {
                         constraint.events.forEach(event => {
                             validationSheet.cell(rowId++, columnId).string(event.id);
                         });
 
-                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(columnId)}$${rowId}`;
+                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                            columnId
+                        )}$${rowId}`;
                         this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
-                        console.log("set", getRelationshipTypeKey(relationshipType, key))
                         break;
-                    }default:
+                    }
+                    default:
                         throw new Error(`Unsupported constraint: ${constraint.type}`);
                 }
             });
