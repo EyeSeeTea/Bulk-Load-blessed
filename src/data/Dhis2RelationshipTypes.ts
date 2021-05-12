@@ -8,30 +8,11 @@ import {
     TrackedEntityInstancesRequest,
     RelationshipItemApi,
 } from "./TrackedEntityInstanceTypes";
-import { D2Api, Ref, Id, D2RelationshipType } from "../types/d2-api";
+import { D2Api, Ref, Id, D2RelationshipType, D2RelationshipConstraint } from "../types/d2-api";
 import { promiseMap } from "../utils/promises";
 import { NamedRef } from "../domain/entities/ReferenceObject";
 import { RelationshipType, RelationshipConstraint } from "../domain/entities/RelationshipType";
 import { memoizeAsync } from "../utils/cache";
-
-type D2RelationshipConstraint =
-    | {
-          relationshipEntity: "TRACKED_ENTITY_INSTANCE";
-          trackedEntityType: Ref;
-          program?: Ref;
-      }
-    | {
-          relationshipEntity: "PROGRAM_INSTANCE";
-          program: Ref;
-      }
-    | {
-          relationshipEntity: "PROGRAM_STAGE_INSTANCE";
-          program: Ref;
-      }
-    | {
-          relationshipEntity: "PROGRAM_STAGE_INSTANCE";
-          programStage: Ref;
-      };
 
 type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
 
