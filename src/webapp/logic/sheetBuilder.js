@@ -804,6 +804,13 @@ SheetBuilder.prototype.createColumn = function (
     if (label.startsWith("_")) cell.formula(label);
     else cell.string(label);
 
+    sheet.addDataValidation({
+        type: "custom",
+        error: "This cell cannot be changed",
+        sqref: `${Excel.getExcelAlpha(columnId)}${rowId}`,
+        formulas: [`${Excel.getExcelAlpha(columnId)}${rowId} <> ${label}`],
+    });
+
     if (validation !== null) {
         const ref = `${Excel.getExcelAlpha(columnId)}${rowId + 1}:${Excel.getExcelAlpha(columnId)}${maxRow}`;
         sheet.addDataValidation({
