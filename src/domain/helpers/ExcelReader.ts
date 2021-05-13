@@ -2,8 +2,9 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
-import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../utils/promises";
+import { removeCharacters } from "../../utils/string";
+import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData } from "../entities/DataPackage";
 import { Relationship } from "../entities/Relationship";
 import {
@@ -30,7 +31,7 @@ const dateFormat = "YYYY-MM-DD";
 export class ExcelReader {
     constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceRepository) {}
 
-    public async readTemplate(template: Template): Promise<DataPackage | undefined> {
+    public async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
 
         const dataFormType = await this.readCellValue(template, template.dataFormType);
@@ -61,7 +62,7 @@ export class ExcelReader {
                     (await this.readTeiRelationships(template, dataSource)).map(item => relationships.push(item));
                     break;
                 case "rowTrackedEvent":
-                    (await this.readTeiEvents(template, dataSource, teis)).map(item => data.push(item));
+                    (await this.readTeiEvents(template, dataSource, teis, dataForm)).map(item => data.push(item));
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
@@ -208,7 +209,8 @@ export class ExcelReader {
     private async readTeiEvents(
         template: Template,
         dataSource: TrackerEventRowDataSource,
-        teis: TrackedEntityInstance[]
+        teis: TrackedEntityInstance[],
+        dataForm: DataForm
     ): Promise<DataPackageData[]> {
         const rowStart = 3;
         const getCell = this.getCellValue.bind(this);
@@ -256,6 +258,9 @@ export class ExcelReader {
                 const dataList = _.zip(dataItems, dataElementIds).map(([item, deIdFormula]) => {
                     const dataElementId = deIdFormula ? removeCharacters(deIdFormula) : null;
                     if (!item || !programStageId || !dataElementId || !programStageId) return null;
+
+                    // If column id does not exist on program, exclude values => Attributes
+                    if (!dataForm.dataElements.find(({ id }) => id === dataElementId)) return null;
 
                     const { value, optionId } = item;
 
