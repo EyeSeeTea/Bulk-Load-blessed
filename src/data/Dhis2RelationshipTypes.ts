@@ -136,7 +136,7 @@ interface Program {
 }
 
 interface ProgramFilters {
-    organisationUnits?: string[];
+    organisationUnits?: Ref[];
     startDate?: Date;
     endDate?: Date;
 }
@@ -264,7 +264,7 @@ async function getConstraintForTypeProgram(
             .getAll({
                 program: program.id,
                 programStage: programStage?.id,
-                orgUnit,
+                orgUnit: orgUnit.id,
                 startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : undefined,
                 endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : undefined,
             })
