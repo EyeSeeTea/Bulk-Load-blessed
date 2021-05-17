@@ -263,7 +263,7 @@ export class ExcelReader {
                         id: eventId ? String(eventId) : undefined,
                         dataForm: String(programId),
                         orgUnit: tei.orgUnit.id,
-                        period: String(date),
+                        period: this.formatValue(date),
                         attribute: cocId,
                         trackedEntityInstance: String(teiId),
                         programStage: String(programStageId),
@@ -424,7 +424,10 @@ export class ExcelReader {
     }
 
     private formatValue(value: ExcelValue | undefined): string {
-        if (value instanceof Date) return value.toISOString();
+        if (value instanceof Date) {
+            return moment(value).format("YYYY-MM-DD[T]HH:mm");
+        }
+
         return String(value ?? "");
     }
 
