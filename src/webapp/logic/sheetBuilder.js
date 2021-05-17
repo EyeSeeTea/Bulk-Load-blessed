@@ -81,10 +81,13 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
             const constraint = relationshipType.constraints[key];
             const columnId = idx + 1;
 
+            const oppositeConstraint = relationshipType.constraints[key === "from" ? "to" : "from"];
+            const isFromEvent = oppositeConstraint.type === "eventInProgram";
+
             switch (constraint.type) {
                 case "tei": {
                     const validation =
-                        constraint.program?.id === program.id
+                        isFromEvent || constraint.program?.id === program.id
                             ? this.getTeiIdValidation()
                             : this.validations.get(getRelationshipTypeKey(relationshipType, key));
                     const columnName = `${_.startCase(key)} TEI (${constraint.name})`;
