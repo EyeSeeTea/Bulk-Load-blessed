@@ -7,7 +7,7 @@ import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
-export const programId = "PROGRAM_GENERATED_v4";
+export const programId = "PROGRAM_GENERATED_v3";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
@@ -605,10 +605,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     let columnId = 1;
     let groupId = 0;
 
-    if (element.type === "programs") {
-        this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
-    }
-
     this.createColumn(
         dataEntrySheet,
         itemRow,
@@ -702,6 +698,8 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     } else {
         _.forEach(this.getProgramStages(), programStageT => {
             const programStage = metadata.get(programStageT.id);
+
+            this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
 
             this.createColumn(dataEntrySheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
