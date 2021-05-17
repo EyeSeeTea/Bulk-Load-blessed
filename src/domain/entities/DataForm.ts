@@ -1,4 +1,4 @@
-import { Id, NamedRef } from "./ReferenceObject";
+import { Id, NamedRef, Ref } from "./ReferenceObject";
 
 export type DataFormType = "dataSets" | "programs" | "trackerPrograms";
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
@@ -19,6 +19,7 @@ export interface DataForm {
         value: string;
     }[]; // Only used for versioning, is really being used by any client?
     teiAttributes?: NamedRef[];
+    trackedEntityType?: Ref;
     readAccess: boolean;
     writeAccess: boolean;
 }

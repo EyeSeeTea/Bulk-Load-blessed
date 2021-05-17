@@ -119,6 +119,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 programType,
                 attributeValues,
                 programTrackedEntityAttributes,
+                trackedEntityType,
             }) => ({
                 type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
                 id,
@@ -143,6 +144,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
                 })),
+                trackedEntityType,
             })
         );
     }
@@ -656,5 +658,5 @@ const programFields = {
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
-    trackedEntityType: true,
+                trackedEntityType: { id: true },
 } as const;
