@@ -425,7 +425,7 @@ export class ExcelReader {
 
     private formatValue(value: ExcelValue | undefined): string {
         if (value instanceof Date) {
-            return moment.utc(value).format("YYYY-MM-DD[T]HH:mm");
+            return moment(value).format("YYYY-MM-DD[T]HH:mm");
         }
 
         return String(value ?? "");
