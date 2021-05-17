@@ -113,7 +113,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[formName,id,name]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType",
+                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[formName,id,name]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
             filter: [],
         },
     }).reply(200, {

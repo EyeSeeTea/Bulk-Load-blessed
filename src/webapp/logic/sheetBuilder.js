@@ -154,6 +154,14 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
 
             sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
 
+            sheet.addDataValidation({
+                type: "textLength",
+                error: "This cell cannot be changed",
+                sqref: `${colName}${itemRow + 1}:${colName}${maxRow}`,
+                operator: "equal",
+                formulas: [`${lookupFormula.length}`],
+            });
+
             columnId++;
         });
 
