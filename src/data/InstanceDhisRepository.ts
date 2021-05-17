@@ -110,7 +110,6 @@ export class InstanceDhisRepository implements InstanceRepository {
             ...rest,
             type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
             name: displayName ?? name,
-            organisationUnits: [], // Disabled for now in programs
             periodType: "Daily",
             //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
             readAccess: access.data?.read,
@@ -164,17 +163,17 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     @cache()
-    public async getDefaultIds(): Promise<string[]> {
-        const response = (await this.api
-            .get("/metadata", {
-                filter: "code:eq:default",
+    public async getDefaultIds(filter?: string): Promise<string[]> {
+        const response = await this.api
+            .get<Record<string, { id: string }[]>>("/metadata", {
+                filter: "identifiable:eq:default",
                 fields: "id",
             })
-            .getData()) as {
-            [key: string]: { id: string }[];
-        };
+            .getData();
 
-        return _(response)
+        const metadata = _.pickBy(response, (_value, type) => !filter || type === filter);
+
+        return _(metadata)
             .omit(["system"])
             .values()
             .flatten()
@@ -630,7 +629,6 @@ const dataSetFields = {
     attributeValues: { value: true, attribute: { code: true } },
     dataSetElements: { dataElement: dataElementFields },
     sections: { id: true, name: true, dataElements: dataElementFields },
-    organisationUnits: { id: true, name: true, path: true },
     periodType: true,
     access: true,
 } as const;

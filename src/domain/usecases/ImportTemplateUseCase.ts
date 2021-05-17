@@ -125,27 +125,25 @@ export class ImportTemplateUseCase implements UseCase {
         const { duplicateEnabled, duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
         // Override org unit if needed
-        const dataValues =
-            useBuilderOrgUnits && selectedOrgUnits[0]
-                ? this.overrideOrgUnit(excelDataPackage.dataEntries, selectedOrgUnits[0])
-                : excelDataPackage.dataEntries;
+        const excelFile = this.parseExcelFile(excelDataPackage, useBuilderOrgUnits, selectedOrgUnits);
 
         const instanceDataValues = duplicateEnabled
             ? await this.getExistingDataValues(excelDataPackage, dataForm, useBuilderOrgUnits, selectedOrgUnits)
             : [];
 
         const dataFormOrgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
+        const [defaultCategory] = await this.instanceRepository.getDefaultIds("categoryOptionCombos");
 
         // Remove data values assigned to invalid org unit
         const invalidDataValues = _.remove(
-            dataValues,
+            excelFile,
             ({ orgUnit }) => !dataFormOrgUnits.find(({ id }) => id === orgUnit)
         );
 
         const existingDataValues =
             duplicateStrategy === "IMPORT"
                 ? []
-                : _.remove(dataValues, base => {
+                : _.remove(excelFile, base => {
                       return instanceDataValues.find(dataPackage =>
                           compareDataPackages(
                               dataForm,
@@ -153,7 +151,8 @@ export class ImportTemplateUseCase implements UseCase {
                               dataPackage,
                               duplicateExclusion,
                               duplicateTolerance,
-                              duplicateToleranceUnit
+                              duplicateToleranceUnit,
+                              defaultCategory
                           )
                       );
                   });
@@ -167,7 +166,7 @@ export class ImportTemplateUseCase implements UseCase {
         return {
             dataValues: {
                 type: dataForm.type,
-                dataEntries: dataValues,
+                dataEntries: excelFile,
                 trackedEntityInstances,
             },
             invalidDataValues: {
@@ -186,6 +185,19 @@ export class ImportTemplateUseCase implements UseCase {
                 trackedEntityInstances: [],
             },
         };
+    }
+
+    private parseExcelFile(dataPackage: DataPackage, useBuilderOrgUnits: boolean, selectedOrgUnits: string[]) {
+        const dataEntries =
+            dataPackage.type === "dataSets"
+                ? _.flatMap(dataPackage.dataEntries, entry =>
+                      entry.dataValues.map(value => ({ ...entry, dataValues: [value] }))
+                  )
+                : dataPackage.dataEntries;
+
+        return useBuilderOrgUnits && selectedOrgUnits[0]
+            ? this.overrideOrgUnit(dataEntries, selectedOrgUnits[0])
+            : dataEntries;
     }
 
     private async getExistingDataValues(
@@ -237,13 +249,15 @@ function getTrackedEntityInstances(
         : teis;
 }
 
-const compareDataPackages = (
-    dataForm: DataForm,
+// This method should not be exposed, remove as soon as not used in legacy code
+export const compareDataPackages = (
+    dataForm: Pick<DataForm, "type" | "id">,
     base: Partial<DataPackageData>,
     compare: DataPackageData,
     duplicateExclusion: DuplicateExclusion,
     duplicateTolerance: number,
-    duplicateToleranceUnit: DuplicateToleranceUnit
+    duplicateToleranceUnit: DuplicateToleranceUnit,
+    defaultCategory?: string
 ): boolean => {
     const properties = _.compact([dataForm.type === "dataSets" ? "period" : undefined, "orgUnit", "attribute"]);
 
@@ -283,6 +297,15 @@ const compareDataPackages = (
         ) {
             return false;
         }
+    }
+
+    if (dataForm.type === "dataSets") {
+        return _.some(base.dataValues, ({ dataElement: baseDataElement, category: baseCategory = defaultCategory }) =>
+            compare.dataValues.find(
+                ({ dataElement, category = defaultCategory }) =>
+                    dataElement === baseDataElement && category === baseCategory
+            )
+        );
     }
 
     return true;
