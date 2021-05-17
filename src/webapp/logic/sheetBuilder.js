@@ -153,7 +153,7 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
             this.createColumn(sheet, itemRow, columnId, `_${attribute.id}`);
 
             const colName = Excel.getExcelAlpha(columnId);
-            const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("A" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
+            const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
 
             sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
 
