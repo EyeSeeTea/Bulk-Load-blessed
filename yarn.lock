@@ -2448,10 +2448,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@eyeseetea/d2-api@1.8.4-beta.1":
-  version "1.8.4-beta.1"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.8.4-beta.1.tgz#513d5c97f7d2a65b1ac48ed1cc7094202001a0a6"
-  integrity sha512-95lxYgIGcwSZY2BkcyyOuZR8VALflojskhG98UuEmfRBpWPwcAOMPeaFS07CD8lFRdu3AWQkZAqIPfeqJ2HzLQ==
+"@eyeseetea/d2-api@1.8.4":
+  version "1.8.4"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.8.4.tgz#778e343daf3f8ccdb9639f8e7c518c42c4260fe8"
+  integrity sha512-lWCeo74DstZ2OaY9wso3GaHYMNi+KMTMeT9HKhBDWKYH5TDEITg5XehVcwRhuu5joEmzR0px8tvATq7yVL3NxQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
