@@ -658,5 +658,5 @@ const programFields = {
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
-                trackedEntityType: { id: true },
+    trackedEntityType: { id: true },
 } as const;

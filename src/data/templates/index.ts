@@ -8,6 +8,7 @@ export { ProgramGenerated02 } from "./generated-program/ProgramGenerated.02";
 export { ProgramGenerated03 } from "./generated-program/ProgramGenerated.03";
 
 export { TrackerProgramGenerated01 } from "./generated-tracker-program/TrackerProgramGenerated.01";
+export { TrackerProgramGenerated02 } from "./generated-tracker-program/TrackerProgramGenerated.02";
 
 export { NHWAModule101 } from "./nhwa-module-1/NHWAModule1.01";
 export { NHWAModule201 } from "./nhwa-module-2/NHWAModule2.01";
