@@ -1,18 +1,19 @@
 import _ from "lodash";
-import { TrackedEntityInstance, isRelationshipValid } from "../domain/entities/TrackedEntityInstance";
+import moment from "moment";
+import { NamedRef } from "../domain/entities/ReferenceObject";
 import { Relationship } from "../domain/entities/Relationship";
+import { RelationshipConstraint, RelationshipType } from "../domain/entities/RelationshipType";
+import { isRelationshipValid, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
+import { D2Api, D2RelationshipConstraint, D2RelationshipType, Id, Ref } from "../types/d2-api";
+import { memoizeAsync } from "../utils/cache";
+import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import {
     RelationshipApi,
+    RelationshipItemApi,
     TrackedEntityInstanceApi,
     TrackedEntityInstancesRequest,
-    RelationshipItemApi,
 } from "./TrackedEntityInstanceTypes";
-import { D2Api, Ref, Id, D2RelationshipType, D2RelationshipConstraint } from "../types/d2-api";
-import { promiseMap } from "../utils/promises";
-import { NamedRef } from "../domain/entities/ReferenceObject";
-import { RelationshipType, RelationshipConstraint } from "../domain/entities/RelationshipType";
-import { memoizeAsync } from "../utils/cache";
 
 type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
 
@@ -134,11 +135,21 @@ interface Program {
     trackedEntityType: Ref;
 }
 
+interface ProgramFilters {
+    organisationUnits?: string[];
+    startDate?: Date;
+    endDate?: Date;
+}
+
 export interface RelationshipMetadata {
     relationshipTypes: RelationshipType[];
 }
 
-export async function getTrackerProgramMetadata(program: Program, api: D2Api): Promise<RelationshipMetadata> {
+export async function getTrackerProgramMetadata(
+    program: Program,
+    api: D2Api,
+    filters?: ProgramFilters
+): Promise<RelationshipMetadata> {
     const { trackedEntityTypes, relationshipTypes: allRelationshipTypes, programs } = await api.metadata
         .get({
             trackedEntityTypes: { fields: { id: true, name: true } },
@@ -161,8 +172,8 @@ export async function getTrackerProgramMetadata(program: Program, api: D2Api): P
 
         if (!isProgramAssociatedWithSomeConstraint) return;
 
-        const fromConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.fromConstraint);
-        const toConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.toConstraint);
+        const fromConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.fromConstraint, filters);
+        const toConstraint = await getConstraint(api, trackedEntityTypes, programs, relType.toConstraint, filters);
 
         return fromConstraint && toConstraint
             ? { id: relType.id, name: relType.name, constraints: { from: fromConstraint, to: toConstraint } }
@@ -179,7 +190,8 @@ const getConstraint = memoizeAsync(
         api: D2Api,
         trackedEntityTypes: NamedRef[],
         programs: ProgramInfo[],
-        constraint: D2RelationshipConstraint
+        constraint: D2RelationshipConstraint,
+        filters?: ProgramFilters
     ): Promise<RelationshipConstraint | undefined> => {
         const programsById = _.keyBy(programs, program => program.id);
         const programsDataByProgramStageId = _(programs)
@@ -198,10 +210,10 @@ const getConstraint = memoizeAsync(
             case "PROGRAM_STAGE_INSTANCE": {
                 if ("program" in constraint) {
                     const program = programsById[constraint.program.id];
-                    return getConstraintForTypeProgram(api, program);
+                    return getConstraintForTypeProgram(api, filters, program);
                 } else {
                     const data = programsDataByProgramStageId[constraint.programStage.id];
-                    return getConstraintForTypeProgram(api, data?.program, data?.programStage);
+                    return getConstraintForTypeProgram(api, filters, data?.program, data?.programStage);
                 }
             }
         }
@@ -240,14 +252,33 @@ async function getConstraintForTypeTei(
 
 async function getConstraintForTypeProgram(
     api: D2Api,
+    filters?: ProgramFilters,
     program?: ProgramInfo,
     programStage?: NamedRef
 ): Promise<RelationshipConstraint | undefined> {
     if (!program) return undefined;
+    const { organisationUnits = [], startDate, endDate } = filters ?? {};
 
-    const { events } = await api.events.getAll({ program: program.id, programStage: programStage?.id }).getData();
+    const events = await promiseMap(organisationUnits, async orgUnit => {
+        const { events } = await api.events
+            .getAll({
+                program: program.id,
+                programStage: programStage?.id,
+                orgUnit,
+                startDate: startDate ? moment(startDate).format("YYYY-MM-DD") : undefined,
+                endDate: endDate ? moment(endDate).format("YYYY-MM-DD") : undefined,
+            })
+            .getData();
 
-    return { type: "eventInProgram", program, programStage, events: events.map(({ event }) => ({ id: event })) };
+        return events;
+    });
+
+    return {
+        type: "eventInProgram",
+        program,
+        programStage,
+        events: _.flatten(events).map(({ event }) => ({ id: event })),
+    };
 }
 
 function isProgramAssociatedWithTeiConstraint(program: Program, constraint: D2RelationshipConstraint): boolean {

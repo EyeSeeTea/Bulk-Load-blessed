@@ -65,6 +65,8 @@ export class DownloadTemplateUseCase implements UseCase {
                 api,
                 element,
                 orgUnitIds: orgUnits,
+                startDate: startDate?.toDate() ?? populateStartDate?.toDate(),
+                endDate: endDate?.toDate() ?? populateEndDate?.toDate(),
             });
 
             // FIXME: Legacy code, sheet generator
