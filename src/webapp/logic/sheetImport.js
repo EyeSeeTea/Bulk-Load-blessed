@@ -306,10 +306,10 @@ export async function readSheet({
 
 function getCellValue(cell) {
     if (cell.value instanceof Date && isTimeFormat(cell.numFmt)) {
-        const date = moment.utc(cell.value)
+        const date = moment.utc(cell.value);
         if (date.isValid()) return date.format("HH:mm");
     } else if (cell.value instanceof Date) {
-        const date = moment.utc(cell.value)
+        const date = moment.utc(cell.value);
         if (date.isValid()) return date.format("YYYY-MM-DD[T]HH:mm");
     }
 

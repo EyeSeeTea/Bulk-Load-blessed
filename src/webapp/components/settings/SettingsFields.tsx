@@ -10,14 +10,14 @@ import {
     TextField,
 } from "@material-ui/core";
 import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
-import _ from "lodash";
 import { DuplicateToleranceUnit, Model, OrgUnitSelectionSetting } from "../../../domain/entities/AppSettings";
 import i18n from "../../../locales";
 import Settings, { PermissionSetting } from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
-import DataElementsFilterDialog from "./DataElementsFilterDialog";
-import PermissionsDialog from "./PermissionsDialog";
 import { DataSetDataElementsFilterDialog } from "./DataSetDataElementsFilterDialog";
+import { DuplicateDataElementsFilterDialog } from "./DuplicateDataElementsFilterDialog";
+import { PermissionsDialog } from "./PermissionsDialog";
+import { ProgramStageFilterDialog } from "./ProgramStageFilterDialog";
 
 export interface SettingsFieldsProps {
     settings: Settings;
@@ -29,7 +29,8 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     const [permissionsType, setPermissionsType] = useState<PermissionSetting | null>(null);
     const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
-    const [isDataSetDataElementsDialogVisible, showDataSetDataElementsDialog] = useState<boolean>(false);
+    const [isDataSetDataElementsFilterDialogVisible, showDataSetDataElementsFilterDialog] = useState<boolean>(false);
+    const [isProgramStageFilterDialogVisible, showProgramStageFilterDialog] = useState<boolean>(false);
 
     const setModel = useCallback(
         (model: Model) => {
@@ -147,16 +148,26 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
 
     return (
         <React.Fragment>
-            {isDataSetDataElementsDialogVisible && (
+            {isDataSetDataElementsFilterDialogVisible && (
                 <DataSetDataElementsFilterDialog
-                    title={i18n.t("Data elements filter for data sets")}
-                    onClose={() => showDataSetDataElementsDialog(false)}
+                    title={i18n.t("Data element filter for data sets")}
+                    onClose={() => showDataSetDataElementsFilterDialog(false)}
                     settings={settings}
                     onChange={onChange}
                 />
             )}
+
+            {isProgramStageFilterDialogVisible && (
+                <ProgramStageFilterDialog
+                    title={i18n.t("Data element and attribute filter for programs")}
+                    onClose={() => showProgramStageFilterDialog(false)}
+                    settings={settings}
+                    onChange={onChange}
+                />
+            )}
+
             {!!isExclusionDialogVisible && (
-                <DataElementsFilterDialog
+                <DuplicateDataElementsFilterDialog
                     onClose={() => showExclusionDialog(false)}
                     settings={settings}
                     onChange={onChange}
@@ -199,16 +210,27 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
             <h3 className={classes.title}>{i18n.t("Columns layout")}</h3>
 
             <div className={classes.content}>
-                <ListItem button onClick={() => showDataSetDataElementsDialog(true)}>
+                <ListItem button onClick={() => showDataSetDataElementsFilterDialog(true)}>
                     <ListItemIcon>
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
 
                     <ListItemText
-                        primary={i18n.t("Data elements filter for data sets")}
+                        primary={i18n.t("Filter columns for data sets")}
                         secondary={i18n.t(
                             "Data elements (with optional disaggregation) to include/exclude for data sets"
                         )}
+                    />
+                </ListItem>
+
+                <ListItem button onClick={() => showProgramStageFilterDialog(true)}>
+                    <ListItemIcon>
+                        <Icon>filter_list</Icon>
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={i18n.t("Filter columns for programs")}
+                        secondary={i18n.t("Data elements and attributes to include/exclude for programs")}
                     />
                 </ListItem>
             </div>
@@ -248,7 +270,7 @@ export default function SettingsFields({ settings, onChange }: SettingsFieldsPro
                         <Icon>filter_list</Icon>
                     </ListItemIcon>
                     <ListItemText
-                        primary={i18n.t("Data elements filter for events (programs)")}
+                        primary={i18n.t("Duplicate detection filter for events (programs)")}
                         secondary={i18n.t("Data elements used for duplicates identification")}
                     />
                 </ListItem>

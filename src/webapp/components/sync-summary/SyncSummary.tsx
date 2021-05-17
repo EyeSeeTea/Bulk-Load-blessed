@@ -14,7 +14,7 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
 import _ from "lodash";
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import ReactJson from "react-json-view";
 import {
     ErrorMessage,

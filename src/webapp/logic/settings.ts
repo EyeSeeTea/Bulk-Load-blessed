@@ -8,6 +8,7 @@ import {
     Model,
     Models,
     OrgUnitSelectionSetting,
+    ProgramStageFilter,
 } from "../../domain/entities/AppSettings";
 import {
     DataElementDisaggregated,
@@ -15,7 +16,6 @@ import {
     getDataElementDisaggregatedById,
     getDataElementDisaggregatedId,
 } from "../../domain/entities/DataElementDisaggregated";
-import { DataForm } from "../../domain/entities/DataForm";
 import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
@@ -32,6 +32,7 @@ const publicFields = [
     "duplicateTolerance",
     "duplicateToleranceUnit",
     "dataSetDataElementsFilter",
+    "programStageFilter",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -72,6 +73,7 @@ export default class Settings {
     public duplicateTolerance: number;
     public duplicateToleranceUnit: DuplicateToleranceUnit;
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
+    public programStageFilter: ProgramStageFilter;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -85,6 +87,7 @@ export default class Settings {
         this.duplicateTolerance = options.duplicateTolerance;
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
         this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
+        this.programStageFilter = options.programStageFilter;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -136,6 +139,7 @@ export default class Settings {
             duplicateTolerance: data.duplicateTolerance ?? defaultSettings.duplicateTolerance,
             duplicateToleranceUnit: data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
             dataSetDataElementsFilter: data.dataSetDataElementsFilter ?? defaultSettings.dataSetDataElementsFilter,
+            programStageFilter: data.programStageFilter ?? defaultSettings.programStageFilter,
         });
     }
 
@@ -154,6 +158,7 @@ export default class Settings {
             duplicateTolerance,
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
+            programStageFilter,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -179,6 +184,7 @@ export default class Settings {
             duplicateTolerance,
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
+            programStageFilter,
         };
 
         try {
@@ -257,18 +263,13 @@ export default class Settings {
         return this.updateOptions({ duplicateExclusion });
     }
 
-    setDataSetDataElementsFilter(dataSetDataElementsFilter: DataSetDataElementsFilter): Settings {
-        return this.updateOptions({ dataSetDataElementsFilter });
-    }
-
     setDataSetDataElementsFilterFromSelection(options: {
-        dataSet: DataForm | undefined;
+        dataSet: string;
         dataElementsDisaggregated: DataElementDisaggregated[];
         prevSelectedIds: DataElementDisaggregatedId[];
         newSelectedIds: DataElementDisaggregatedId[];
     }): Settings {
         const { dataSet, dataElementsDisaggregated, prevSelectedIds, newSelectedIds } = options;
-        if (!dataSet) return this;
 
         const newSelected = newSelectedIds.map(getDataElementDisaggregatedById);
         const prevSelected = prevSelectedIds.map(getDataElementDisaggregatedById);
@@ -295,9 +296,27 @@ export default class Settings {
             .uniqBy(getDataElementDisaggregatedId)
             .value();
 
-        const newFilter = { ...this.dataSetDataElementsFilter, [dataSet.id]: newFilterValue };
+        return this.updateOptions({
+            dataSetDataElementsFilter: {
+                ...this.dataSetDataElementsFilter,
+                [dataSet]: newFilterValue,
+            },
+        });
+    }
 
-        return this.setDataSetDataElementsFilter(newFilter);
+    setProgramStageFilterFromSelection(options: {
+        programStage: string;
+        dataElementsExcluded: Ref[];
+        attributesIncluded: Ref[];
+    }): Settings {
+        const { programStage, dataElementsExcluded, attributesIncluded } = options;
+
+        return this.updateOptions({
+            programStageFilter: {
+                ...this.programStageFilter,
+                [programStage]: { dataElementsExcluded, attributesIncluded },
+            },
+        });
     }
 
     allModelsEnabled() {

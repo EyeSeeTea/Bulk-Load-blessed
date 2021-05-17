@@ -2,7 +2,6 @@ import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import "@testing-library/jest-dom/extend-expect";
 import { act, render, screen } from "@testing-library/react";
 import _ from "lodash";
-import React from "react";
 import { getCompositionRoot } from "../CompositionRoot";
 import { AppContext } from "../webapp/contexts/app-context";
 import Settings from "../webapp/logic/settings";
