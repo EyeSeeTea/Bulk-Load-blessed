@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.12.0",
+    "version": "3.13.0",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -15,7 +15,7 @@
         "@dhis2/d2-ui-core": "7.2.0",
         "@dhis2/ui-core": "4.17.1",
         "@dhis2/ui-widgets": "2.1.0",
-        "@eyeseetea/d2-api": "1.8.2",
+        "@eyeseetea/d2-api": "1.8.4",
         "@eyeseetea/d2-ui-components": "2.6.6",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.11.4",
@@ -64,13 +64,8 @@
         "cy:verify": "cypress verify",
         "check-uncommited": "test -z \"$(git status -uno --porcelain)\"",
         "cy:e2e:open": "CYPRESS_E2E=true cypress open",
-        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome"
-    },
-    "husky": {
-        "hooks": {
-            "pre-push": "yarn update-po && yarn check-uncommited && yarn prettify && yarn check-uncommited && yarn lint && yarn test",
-            "post-merge": "./.githooks/dep-check"
-        }
+        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome",
+        "prepare": "husky install"
     },
     "devDependencies": {
         "@babel/core": "7.14.0",

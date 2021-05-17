@@ -119,6 +119,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 programType,
                 attributeValues,
                 programTrackedEntityAttributes,
+                trackedEntityType,
             }) => ({
                 type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
                 id,
@@ -143,6 +144,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
                 })),
+                trackedEntityType,
             })
         );
     }
@@ -210,16 +212,18 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
-        let result: SynchronizationResult;
         switch (dataPackage.type) {
-            case "dataSets":
-                result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+            case "dataSets": {
+                const result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
                 return [result];
-            case "programs":
-                result = await this.importEventsData(dataPackage);
+            }
+            case "programs": {
+                const result = await this.importEventsData(dataPackage);
                 return [result];
-            case "trackerPrograms":
+            }
+            case "trackerPrograms": {
                 return this.importTrackerProgramData(dataPackage);
+            }
             default:
                 throw new Error(`Unsupported type for data package`);
         }
@@ -654,5 +658,5 @@ const programFields = {
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
-    trackedEntityType: true,
+    trackedEntityType: { id: true },
 } as const;

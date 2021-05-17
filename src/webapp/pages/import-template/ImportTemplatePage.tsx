@@ -111,6 +111,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 api,
                 element: dataForm,
                 orgUnitIds: cleanOrgUnitPaths(selectedOrgUnits),
+                startDate: undefined,
+                endDate: undefined,
             });
 
             if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {

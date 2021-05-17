@@ -8,7 +8,7 @@ import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v3";
-export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
 const orgNonExistingMessage =
@@ -78,15 +78,35 @@ SheetBuilder.prototype.fillRelationshipSheets = function () {
         sheet.cell(1, 1).formula(`=_${relationshipType.id}`).style(baseStyle);
 
         ["from", "to"].forEach((key, idx) => {
-            const { name, program: constraintProgram } = relationshipType.constraints[key];
-            const validation =
-                constraintProgram?.id === program.id
-                    ? this.getTeiIdValidation()
-                    : this.validations.get(getRelationshipTypeKey(relationshipType, key));
-            const columnName = `${_.startCase(key)} TEI (${name})`;
+            const constraint = relationshipType.constraints[key];
             const columnId = idx + 1;
-            this.createColumn(sheet, 2, columnId, columnName, null, validation);
-            sheet.column(columnId).setWidth(columnName.length + 10);
+
+            const oppositeConstraint = relationshipType.constraints[key === "from" ? "to" : "from"];
+            const isFromEvent = oppositeConstraint.type === "eventInProgram";
+
+            switch (constraint.type) {
+                case "tei": {
+                    const validation =
+                        isFromEvent || constraint.program?.id === program.id
+                            ? this.getTeiIdValidation()
+                            : this.validations.get(getRelationshipTypeKey(relationshipType, key));
+                    const columnName = `${_.startCase(key)} TEI (${constraint.name})`;
+                    this.createColumn(sheet, 2, columnId, columnName, null, validation);
+                    sheet.column(columnId).setWidth(columnName.length + 10);
+                    break;
+                }
+                case "eventInProgram": {
+                    const validation = this.validations.get(getRelationshipTypeKey(relationshipType, key));
+                    const columnName =
+                        `${_.startCase(key)} event in program ${constraint.program.name}` +
+                        (constraint.programStage ? ` (${constraint.programStage.name})` : "");
+                    this.createColumn(sheet, 2, columnId, columnName, null, validation);
+                    sheet.column(columnId).setWidth(columnName.length + 10);
+                    break;
+                }
+                default:
+                    throw new Error(`Unsupported constraint: ${constraint.type}`);
+            }
         });
     });
 };
@@ -114,14 +134,14 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         let columnId = 1;
         let groupId = 0;
 
+        this.createColumn(sheet, itemRow, columnId++, "Event id");
+
         this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
 
         const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
         const optionsTitle = attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
 
         this.createColumn(sheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
-
-        this.createColumn(sheet, itemRow, columnId++, "Event id");
 
         this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
@@ -133,9 +153,17 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
             this.createColumn(sheet, itemRow, columnId, `_${attribute.id}`);
 
             const colName = Excel.getExcelAlpha(columnId);
-            const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("A" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
+            const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
 
             sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
+
+            sheet.addDataValidation({
+                type: "textLength",
+                error: "This cell cannot be changed",
+                sqref: `${colName}${itemRow + 1}:${colName}${maxRow}`,
+                operator: "equal",
+                formulas: [`${lookupFormula.length}`],
+            });
 
             columnId++;
         });
@@ -351,14 +379,34 @@ SheetBuilder.prototype.fillValidationSheet = function () {
                 rowId = 2;
                 columnId++;
                 validationSheet.cell(rowId++, columnId).string(`Relationship Type ${relationshipType.name} (${key})`);
-                relationshipType.constraints[key].teis.forEach(tei => {
-                    validationSheet.cell(rowId++, columnId).string(tei.id);
+                const constraint = relationshipType.constraints[key];
 
-                    const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
-                        columnId
-                    )}$${rowId}`;
-                    this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
-                });
+                switch (constraint.type) {
+                    case "tei": {
+                        constraint.teis.forEach(tei => {
+                            validationSheet.cell(rowId++, columnId).string(tei.id);
+                        });
+
+                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                            columnId
+                        )}$${rowId}`;
+                        this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
+                        break;
+                    }
+                    case "eventInProgram": {
+                        constraint.events.forEach(event => {
+                            validationSheet.cell(rowId++, columnId).string(event.id);
+                        });
+
+                        const value = `=Validation!$${Excel.getExcelAlpha(columnId)}$3:$${Excel.getExcelAlpha(
+                            columnId
+                        )}$${rowId}`;
+                        this.validations.set(getRelationshipTypeKey(relationshipType, key), value);
+                        break;
+                    }
+                    default:
+                        throw new Error(`Unsupported constraint: ${constraint.type}`);
+                }
             });
         });
     }

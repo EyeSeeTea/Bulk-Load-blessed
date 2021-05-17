@@ -200,6 +200,7 @@ export class ExcelReader {
     private addTeiRelationships(teis: TrackedEntityInstance[], relationships: Relationship[]): TrackedEntityInstance[] {
         const relationshipsByFromId = _.groupBy(relationships, relationship => relationship.fromId);
         const relationshipsByToId = _.groupBy(relationships, relationship => relationship.toId);
+
         return teis.map(tei => ({
             ...tei,
             relationships: _.concat(relationshipsByFromId[tei.id] || [], relationshipsByToId[tei.id] || []),
@@ -301,15 +302,15 @@ export class ExcelReader {
         const rowIndexes = await this.getRowIndexes(template, dataSource.from, rowStart);
 
         const relationships = await promiseMap<number, Relationship | undefined>(rowIndexes, async rowIdx => {
-            const fromTeiId = await getCell(template, dataSource.from, rowIdx);
-            const toTeiId = await getCell(template, dataSource.to, rowIdx);
-            if (!fromTeiId || !toTeiId || !typeId) return;
+            const fromId = await getCell(template, dataSource.from, rowIdx);
+            const toId = await getCell(template, dataSource.to, rowIdx);
+            if (!fromId || !toId || !typeId) return;
 
             const relationship: Relationship = {
                 typeId: String(typeId),
                 typeName: String(typeName),
-                fromId: String(fromTeiId),
-                toId: String(toTeiId),
+                fromId: String(fromId),
+                toId: String(toId),
             };
             return relationship;
         });

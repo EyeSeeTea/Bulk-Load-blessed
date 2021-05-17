@@ -58,6 +58,7 @@ export interface RelationshipItemApi {
     trackedEntityInstance?: {
         trackedEntityInstance: Id;
     };
+    event?: { event: Id };
 }
 
 export interface AttributeApi {
