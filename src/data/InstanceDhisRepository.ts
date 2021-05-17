@@ -76,22 +76,25 @@ export class InstanceDhisRepository implements InstanceRepository {
             categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
         });
 
-        return objects.map(({ displayName, name, access, periodType, dataSetElements, sections, ...rest }) => ({
-            ...rest,
-            type: "dataSets",
-            name: displayName ?? name,
-            periodType: periodType as DataFormPeriod,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: dataSetElements.map(({ dataElement }) => formatDataElement(dataElement)),
-            sections: sections.map(({ id, name, dataElements }) => ({
+        return objects.map(
+            ({ id, displayName, name, access, periodType, dataSetElements, sections, attributeValues }) => ({
+                type: "dataSets",
                 id,
-                name,
-                dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
-            })),
-        }));
+                attributeValues,
+                name: displayName ?? name,
+                periodType: periodType as DataFormPeriod,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: dataSetElements.map(({ dataElement }) => formatDataElement(dataElement)),
+                sections: sections.map(({ id, name, dataElements }) => ({
+                    id,
+                    name,
+                    dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+                })),
+            })
+        );
     }
 
     @cache()
@@ -106,22 +109,44 @@ export class InstanceDhisRepository implements InstanceRepository {
             })
             .getData();
 
-        return objects.map(({ displayName, name, access, programStages, programType, ...rest }) => ({
-            ...rest,
-            type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
-            name: displayName ?? name,
-            organisationUnits: [], // Disabled for now in programs
-            periodType: "Daily",
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            readAccess: access.data?.read,
-            //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
-            writeAccess: access.data?.write,
-            dataElements: programStages
-                .flatMap(({ programStageDataElements }) =>
-                    programStageDataElements.map(({ dataElement }) => dataElement)
-                )
-                .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
-        }));
+        return objects.map(
+            ({
+                id,
+                displayName,
+                name,
+                access,
+                programStages,
+                programType,
+                attributeValues,
+                programTrackedEntityAttributes,
+                trackedEntityType,
+            }) => ({
+                type: programType === "WITH_REGISTRATION" ? "trackerPrograms" : "programs",
+                id,
+                attributeValues,
+                name: displayName ?? name,
+                periodType: "Daily",
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                readAccess: access.data?.read,
+                //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
+                writeAccess: access.data?.write,
+                dataElements: programStages
+                    .flatMap(({ programStageDataElements }) =>
+                        programStageDataElements.map(({ dataElement }) => dataElement)
+                    )
+                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+                sections: programStages.map(({ id, name, programStageDataElements }) => ({
+                    id,
+                    name,
+                    dataElements: programStageDataElements.map(({ dataElement }) => dataElement),
+                })),
+                teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
+                    id: trackedEntityAttribute.id,
+                    name: trackedEntityAttribute.name,
+                })),
+                trackedEntityType,
+            })
+        );
     }
 
     @cache()
@@ -164,17 +189,17 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     @cache()
-    public async getDefaultIds(): Promise<string[]> {
-        const response = (await this.api
-            .get("/metadata", {
-                filter: "code:eq:default",
+    public async getDefaultIds(filter?: string): Promise<string[]> {
+        const response = await this.api
+            .get<Record<string, { id: string }[]>>("/metadata", {
+                filter: "identifiable:eq:default",
                 fields: "id",
             })
-            .getData()) as {
-            [key: string]: { id: string }[];
-        };
+            .getData();
 
-        return _(response)
+        const metadata = _.pickBy(response, (_value, type) => !filter || type === filter);
+
+        return _(metadata)
             .omit(["system"])
             .values()
             .flatten()
@@ -187,16 +212,18 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async importDataPackage(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
-        let result: SynchronizationResult;
         switch (dataPackage.type) {
-            case "dataSets":
-                result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
+            case "dataSets": {
+                const result = await this.importAggregatedData("CREATE_AND_UPDATE", dataPackage);
                 return [result];
-            case "programs":
-                result = await this.importEventsData(dataPackage);
+            }
+            case "programs": {
+                const result = await this.importEventsData(dataPackage);
                 return [result];
-            case "trackerPrograms":
+            }
+            case "trackerPrograms": {
                 return this.importTrackerProgramData(dataPackage);
+            }
             default:
                 throw new Error(`Unsupported type for data package`);
         }
@@ -335,9 +362,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const {
             response: { id, jobType },
-        } = ((await this.api.dataValues
-            .postSet({ importStrategy, async: true }, { dataValues })
-            .getData()) as unknown) as AsyncDataValueSetResponse;
+        } = await this.api.dataValues.postSetAsync({ importStrategy }, { dataValues }).getData();
 
         const checkTask = async () => {
             const response =
@@ -602,20 +627,6 @@ interface MetadataItem {
 
 type MetadataPackage = Record<string, MetadataItem[] | undefined>;
 
-interface AsyncDataValueSetResponse {
-    httStatus: string;
-    httpStatusCode: number;
-    message: string;
-    response: {
-        created: string;
-        id: string;
-        jobType: string;
-        name: string;
-        relativeNotifierEndpoint: string;
-    };
-    status: string;
-}
-
 const dataElementFields = {
     id: true,
     formName: true,
@@ -630,7 +641,6 @@ const dataSetFields = {
     attributeValues: { value: true, attribute: { code: true } },
     dataSetElements: { dataElement: dataElementFields },
     sections: { id: true, name: true, dataElements: dataElementFields },
-    organisationUnits: { id: true, name: true, path: true },
     periodType: true,
     access: true,
 } as const;
@@ -641,11 +651,12 @@ const programFields = {
     name: true,
     attributeValues: { value: true, attribute: { code: true } },
     programStages: {
-        programStageDataElements: {
-            dataElement: { id: true, formName: true, name: true },
-        },
+        id: true,
+        name: true,
+        programStageDataElements: { dataElement: { id: true, formName: true, name: true } },
     },
+    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
-    trackedEntityType: true,
+    trackedEntityType: { id: true },
 } as const;

@@ -7,6 +7,7 @@ import XLSX, {
 } from "@eyeseetea/xlsx-populate";
 import Blob from "cross-blob";
 import _ from "lodash";
+import moment from "moment";
 import { Sheet } from "../domain/entities/Sheet";
 import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
@@ -151,6 +152,15 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const value = formula ? formulaValue : textValue ?? formulaValue;
 
         if (value instanceof FormulaError) return "";
+
+        if (isTimeFormat(destination.style("numberFormat"))) {
+            const date = moment(XLSX.numberToDate(value));
+            if (date.isValid()) return date.format("HH:mm");
+        } else if (isDateFormat(destination.style("numberFormat"))) {
+            const date = moment(XLSX.numberToDate(value));
+            if (date.isValid()) return XLSX.numberToDate(value);
+        }
+
         return value;
     }
 
@@ -481,3 +491,25 @@ type MergedCell = {
     startCell: XLSX.Cell;
     hasCell: (cell: ExcelCell) => boolean | undefined;
 };
+
+export function isDateFormat(format: string) {
+    return (
+        format
+            .replace(/\[[^\]]*]/g, "")
+            .replace(/"[^"]*"/g, "")
+            .match(/[ymdhMsb]+/) !== null
+    );
+}
+
+export function isTimeFormat(format: string) {
+    const cleanFormat = format
+        .replace(/\[[^\]]*]/g, "")
+        .replace(/"[^"]*"/g, "")
+        .replace(/[AM]|[PM]/g, "")
+        .replace(/\\|\/|\s/g, "");
+
+    const isDate = cleanFormat.match(/[ymdhMsb]+/) !== null;
+    const isTime = _.every(cleanFormat, token => ["h", "m", "s", ":"].includes(token));
+
+    return isDate && isTime;
+}

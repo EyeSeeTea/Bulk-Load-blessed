@@ -7,8 +7,3 @@ export interface Relationship {
     fromId: Id;
     toId: Id;
 }
-
-export interface RelationshipType {
-    id: Id;
-    name: string;
-}

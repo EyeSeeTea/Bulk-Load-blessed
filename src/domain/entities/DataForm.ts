@@ -1,4 +1,4 @@
-import { Id } from "./ReferenceObject";
+import { Id, NamedRef, Ref } from "./ReferenceObject";
 
 export type DataFormType = "dataSets" | "programs" | "trackerPrograms";
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
@@ -9,8 +9,7 @@ export interface DataForm {
     name: string;
     periodType?: DataFormPeriod;
     dataElements: DataElement[];
-    organisationUnits: OrganisationUnit[];
-    sections?: {
+    sections: {
         id: Id;
         name: string;
         dataElements: DataElement[];
@@ -18,7 +17,9 @@ export interface DataForm {
     attributeValues: {
         attribute: { code: string };
         value: string;
-    }[];
+    }[]; // Only used for versioning, is really being used by any client?
+    teiAttributes?: NamedRef[];
+    trackedEntityType?: Ref;
     readAccess: boolean;
     writeAccess: boolean;
 }

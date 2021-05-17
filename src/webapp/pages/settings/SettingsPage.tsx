@@ -1,5 +1,5 @@
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import i18n from "../../../locales";
 import SettingsFields, { SettingsFieldsProps } from "../../components/settings/SettingsFields";
 import { useAppContext } from "../../contexts/app-context";

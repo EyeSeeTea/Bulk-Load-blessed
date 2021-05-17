@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-04-19T16:03:11.727Z\n"
+"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -107,23 +107,23 @@ msgid ""
 "update the app."
 msgstr ""
 
-msgid "All"
-msgstr "Tudo"
-
-msgid "Data elements used for duplication assessment"
-msgstr "Elementos de dados usados para avaliação de duplicação"
-
 msgid "Close"
 msgstr "Fechar"
-
-msgid "Program"
-msgstr "Programa"
 
 msgid "Data set"
 msgstr "Data Set"
 
 msgid "Search data elements"
 msgstr ""
+
+msgid "All"
+msgstr "Tudo"
+
+msgid "Data elements used for duplication assessment"
+msgstr "Elementos de dados usados para avaliação de duplicação"
+
+msgid "Program"
+msgstr "Programa"
 
 msgid "Access to Template Generation"
 msgstr "Acesso à geração de planilhas"
@@ -149,6 +149,9 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 msgid "All users allowed"
+msgstr ""
+
+msgid "Search data elements or attributes"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -198,8 +201,11 @@ msgstr "Acessível apenas para administradores de sistema"
 msgid "Not accessible"
 msgstr "Não acessível"
 
-msgid "Data elements filter for data sets"
-msgstr "Filtro de elementos de dados (fichas)"
+msgid "Data element filter for data sets"
+msgstr ""
+
+msgid "Data element and attribute filter for programs"
+msgstr ""
 
 msgid "Data model"
 msgstr "Modelo de dados"
@@ -210,8 +216,17 @@ msgstr "Visibilidade da unidade organizacional"
 msgid "Columns layout"
 msgstr ""
 
+msgid "Filter columns for data sets"
+msgstr ""
+
 msgid ""
 "Data elements (with optional disaggregation) to include/exclude for data sets"
+msgstr ""
+
+msgid "Filter columns for programs"
+msgstr ""
+
+msgid "Data elements and attributes to include/exclude for programs"
 msgstr ""
 
 msgid "Duplicate detection"
@@ -220,8 +235,8 @@ msgstr "Detecção duplicada"
 msgid "Event date time difference for events (programs)"
 msgstr "Diferença de data e hora do evento de eventos (programas)"
 
-msgid "Data elements filter for events (programs)"
-msgstr "Filtro de elementos de dados for events (programs)"
+msgid "Duplicate detection filter for events (programs)"
+msgstr ""
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de dados usados para identificação de duplicatas"

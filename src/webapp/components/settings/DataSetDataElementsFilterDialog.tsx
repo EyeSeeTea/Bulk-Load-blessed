@@ -1,25 +1,20 @@
-import React from "react";
-import _ from "lodash";
 import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
-
-import i18n from "../../../locales";
-import { Select, SelectOption } from "../select/Select";
-import { SettingsFieldsProps } from "./SettingsFields";
-import { useAppContext } from "../../contexts/app-context";
-import { DataForm } from "../../../domain/entities/DataForm";
-import { NamedRef } from "../../../domain/entities/ReferenceObject";
+import _ from "lodash";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+    DataElementDisaggregated,
     DataElementDisaggregatedId,
     getDataElementDisaggregatedId,
 } from "../../../domain/entities/DataElementDisaggregated";
-import {
-    getMultiSelectorDataElementOptions as getDataElementOptions,
-    getDataElementItems,
-    DataElementOption,
-    getDataElementDisaggregatedFromItem,
-} from "./DataElementItem";
+import { DataForm } from "../../../domain/entities/DataForm";
+import { NamedRef } from "../../../domain/entities/ReferenceObject";
+import i18n from "../../../locales";
+import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
+import { getSelectOptionsFromNamedRefs } from "../../utils/refs";
+import { Select, SelectOption } from "../select/Select";
+import { SettingsFieldsProps } from "./SettingsFields";
 
 export interface DataSetDataElementsFilterDialogProps extends SettingsFieldsProps {
     title: string;
@@ -31,36 +26,39 @@ export function DataSetDataElementsFilterDialog(props: DataSetDataElementsFilter
     const { d2, compositionRoot } = useAppContext();
     const classes = useStyles();
 
-    const [dataSets, setDataSets] = React.useState<DataForm[]>([]);
-    const [dataSet, setDataSet] = React.useState<DataForm>();
+    const [dataSets, setDataSets] = useState<DataForm[]>([]);
+    const [dataSet, setDataSet] = useState<DataForm>();
 
-    React.useEffect(() => {
+    useEffect(() => {
         compositionRoot.templates.list().then(({ dataSets }) => {
             setDataSets(dataSets);
         });
     }, [compositionRoot]);
 
-    const selectDataSet = React.useCallback(
+    const selectDataSet = useCallback(
         ({ value }: SelectOption) => {
             setDataSet(dataSets.find(dataSet => dataSet.id === value));
         },
         [dataSets]
     );
 
-    const dataSetsOptions = React.useMemo(() => getSelectOptionsFromNamedRefs(dataSets), [dataSets]);
-    const dataElementItems = React.useMemo(() => getDataElementItems(dataSet), [dataSet]);
-    const dataElementsOptions = React.useMemo(() => getDataElementOptions(dataElementItems), [dataElementItems]);
+    const dataSetsOptions = useMemo(() => getSelectOptionsFromNamedRefs(dataSets), [dataSets]);
+    const dataElementItems = useMemo(() => getDataElementItems(dataSet), [dataSet]);
+    const dataElementsOptions = useMemo(() => getMultiSelectorDataElementOptions(dataElementItems), [dataElementItems]);
     const selectedIds = getSelectedIds(settings, dataSet, dataElementsOptions);
 
     const updateSelection = React.useCallback(
         (newSelectedIds: DataElementDisaggregatedId[]) => {
-            const newSettings = settings.setDataSetDataElementsFilterFromSelection({
-                dataSet,
-                dataElementsDisaggregated: dataElementItems.map(getDataElementDisaggregatedFromItem),
-                prevSelectedIds: selectedIds,
-                newSelectedIds,
-            });
-            onChange(newSettings);
+            if (!dataSet) return;
+
+            onChange(
+                settings.setDataSetDataElementsFilterFromSelection({
+                    dataSet: dataSet.id,
+                    dataElementsDisaggregated: dataElementItems.map(getDataElementDisaggregatedFromItem),
+                    prevSelectedIds: selectedIds,
+                    newSelectedIds,
+                })
+            );
         },
         [selectedIds, dataSet, settings, dataElementItems, onChange]
     );
@@ -101,10 +99,6 @@ const useStyles = makeStyles({
     row: { width: "100%", marginBottom: "2em" },
 });
 
-function getSelectOptionsFromNamedRefs<Model extends NamedRef>(models: Model[]): SelectOption[] {
-    return models.map(({ id, name }) => ({ value: id, label: name }));
-}
-
 function getSelectedIds(settings: Settings, dataSet: DataForm | undefined, dataElementsOptions: DataElementOption[]) {
     if (!dataSet) return [];
 
@@ -115,4 +109,53 @@ function getSelectedIds(settings: Settings, dataSet: DataForm | undefined, dataE
         : [];
 
     return _.difference(allOptionIds, excludedIds);
+}
+
+interface DataElementItem {
+    id: string;
+    name: string;
+    categoryOptionCombo?: NamedRef;
+}
+
+interface DataElementOption {
+    value: DataElementDisaggregatedId;
+    text: string;
+}
+
+function getDataElementItems(dataSet: DataForm | undefined): DataElementItem[] {
+    const dataElements = dataSet ? dataSet.dataElements : [];
+
+    return _.flatMap(dataElements, dataElement => {
+        const categoryOptionCombos = dataElement.categoryOptionCombos || [];
+        const mainDataElement: DataElementItem = dataElement;
+        const disaggregatedDataElements: DataElementItem[] = _(categoryOptionCombos)
+            .map(coc => ({ ...dataElement, categoryOptionCombo: coc }))
+            .sortBy(de => de.categoryOptionCombo.name)
+            .value();
+
+        return _.compact([disaggregatedDataElements.length > 1 ? mainDataElement : null, ...disaggregatedDataElements]);
+    });
+}
+
+function getDataElementDisaggregatedFromItem(de: DataElementItem): DataElementDisaggregated {
+    const categoryOptionCombo = de.categoryOptionCombo;
+    return categoryOptionCombo ? { id: de.id, categoryOptionComboId: categoryOptionCombo.id } : { id: de.id };
+}
+
+function getMultiSelectorDataElementOptions(dataElements: DataElementItem[]): DataElementOption[] {
+    const sortedDataElements = _(dataElements)
+        .orderBy([item => item.name, item => (item.categoryOptionCombo ? 1 : 0)], ["asc", "asc"])
+        .value();
+
+    return sortedDataElements.map(
+        (item): DataElementOption => {
+            const dataElementDis = getDataElementDisaggregatedFromItem(item);
+            const coc = item.categoryOptionCombo;
+            const text = coc
+                ? item.name + (coc.name === "default" ? "" : ` (${coc.name})`)
+                : item.name + ` (${i18n.t("All")})`;
+
+            return { value: getDataElementDisaggregatedId(dataElementDis), text };
+        }
+    );
 }

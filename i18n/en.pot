@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-04-19T16:03:11.727Z\n"
-"PO-Revision-Date: 2021-04-19T16:03:11.727Z\n"
+"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
+"PO-Revision-Date: 2021-05-11T07:56:11.788Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -108,22 +108,22 @@ msgid ""
 "update the app."
 msgstr ""
 
-msgid "All"
-msgstr ""
-
-msgid "Data elements used for duplication assessment"
-msgstr ""
-
 msgid "Close"
-msgstr ""
-
-msgid "Program"
 msgstr ""
 
 msgid "Data set"
 msgstr ""
 
 msgid "Search data elements"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Data elements used for duplication assessment"
+msgstr ""
+
+msgid "Program"
 msgstr ""
 
 msgid "Access to Template Generation"
@@ -150,6 +150,9 @@ msgid "Cancel"
 msgstr ""
 
 msgid "All users allowed"
+msgstr ""
+
+msgid "Search data elements or attributes"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -197,7 +200,10 @@ msgstr ""
 msgid "Not accessible"
 msgstr ""
 
-msgid "Data elements filter for data sets"
+msgid "Data element filter for data sets"
+msgstr ""
+
+msgid "Data element and attribute filter for programs"
 msgstr ""
 
 msgid "Data model"
@@ -209,9 +215,18 @@ msgstr ""
 msgid "Columns layout"
 msgstr ""
 
+msgid "Filter columns for data sets"
+msgstr ""
+
 msgid ""
 "Data elements (with optional disaggregation) to include/exclude for data "
 "sets"
+msgstr ""
+
+msgid "Filter columns for programs"
+msgstr ""
+
+msgid "Data elements and attributes to include/exclude for programs"
 msgstr ""
 
 msgid "Duplicate detection"
@@ -220,7 +235,7 @@ msgstr ""
 msgid "Event date time difference for events (programs)"
 msgstr ""
 
-msgid "Data elements filter for events (programs)"
+msgid "Duplicate detection filter for events (programs)"
 msgstr ""
 
 msgid "Data elements used for duplicates identification"

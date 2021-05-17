@@ -2,8 +2,9 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
-import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../utils/promises";
+import { removeCharacters } from "../../utils/string";
+import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData } from "../entities/DataPackage";
 import { Relationship } from "../entities/Relationship";
 import {
@@ -30,7 +31,7 @@ const dateFormat = "YYYY-MM-DD";
 export class ExcelReader {
     constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceRepository) {}
 
-    public async readTemplate(template: Template): Promise<DataPackage | undefined> {
+    public async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
         const { dataSources = [] } = template;
 
         const dataFormType = await this.readCellValue(template, template.dataFormType);
@@ -61,7 +62,7 @@ export class ExcelReader {
                     (await this.readTeiRelationships(template, dataSource)).map(item => relationships.push(item));
                     break;
                 case "rowTrackedEvent":
-                    (await this.readTeiEvents(template, dataSource, teis)).map(item => data.push(item));
+                    (await this.readTeiEvents(template, dataSource, teis, dataForm)).map(item => data.push(item));
                     break;
                 default:
                     throw new Error(`Type ${dataSource.type} not supported`);
@@ -199,6 +200,7 @@ export class ExcelReader {
     private addTeiRelationships(teis: TrackedEntityInstance[], relationships: Relationship[]): TrackedEntityInstance[] {
         const relationshipsByFromId = _.groupBy(relationships, relationship => relationship.fromId);
         const relationshipsByToId = _.groupBy(relationships, relationship => relationship.toId);
+
         return teis.map(tei => ({
             ...tei,
             relationships: _.concat(relationshipsByFromId[tei.id] || [], relationshipsByToId[tei.id] || []),
@@ -208,7 +210,8 @@ export class ExcelReader {
     private async readTeiEvents(
         template: Template,
         dataSource: TrackerEventRowDataSource,
-        teis: TrackedEntityInstance[]
+        teis: TrackedEntityInstance[],
+        dataForm: DataForm
     ): Promise<DataPackageData[]> {
         const rowStart = 3;
         const getCell = this.getCellValue.bind(this);
@@ -257,13 +260,16 @@ export class ExcelReader {
                     const dataElementId = deIdFormula ? removeCharacters(deIdFormula) : null;
                     if (!item || !programStageId || !dataElementId || !programStageId) return null;
 
+                    // If column id does not exist on program, exclude values => Attributes
+                    if (!dataForm.dataElements.find(({ id }) => id === dataElementId)) return null;
+
                     const { value, optionId } = item;
 
                     const data: DataPackageData = {
                         id: eventId ? String(eventId) : undefined,
                         dataForm: String(programId),
                         orgUnit: tei.orgUnit.id,
-                        period: String(date),
+                        period: this.formatValue(date),
                         attribute: cocId,
                         trackedEntityInstance: String(teiId),
                         programStage: String(programStageId),
@@ -296,15 +302,15 @@ export class ExcelReader {
         const rowIndexes = await this.getRowIndexes(template, dataSource.from, rowStart);
 
         const relationships = await promiseMap<number, Relationship | undefined>(rowIndexes, async rowIdx => {
-            const fromTeiId = await getCell(template, dataSource.from, rowIdx);
-            const toTeiId = await getCell(template, dataSource.to, rowIdx);
-            if (!fromTeiId || !toTeiId || !typeId) return;
+            const fromId = await getCell(template, dataSource.from, rowIdx);
+            const toId = await getCell(template, dataSource.to, rowIdx);
+            if (!fromId || !toId || !typeId) return;
 
             const relationship: Relationship = {
                 typeId: String(typeId),
                 typeName: String(typeName),
-                fromId: String(fromTeiId),
-                toId: String(toTeiId),
+                fromId: String(fromId),
+                toId: String(toId),
             };
             return relationship;
         });
@@ -424,7 +430,10 @@ export class ExcelReader {
     }
 
     private formatValue(value: ExcelValue | undefined): string {
-        if (value instanceof Date) return value.toISOString();
+        if (value instanceof Date) {
+            return moment(value).format("YYYY-MM-DD[T]HH:mm");
+        }
+
         return String(value ?? "");
     }
 

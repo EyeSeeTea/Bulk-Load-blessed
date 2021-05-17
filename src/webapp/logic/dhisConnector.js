@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { promiseMap } from "../../utils/promises";
 import { getTrackerProgramMetadata } from "../../data/Dhis2RelationshipTypes";
+import { promiseMap } from "../../utils/promises";
 
 export async function getElement(api, type, id) {
     const endpoint = type === "dataSets" ? "dataSets" : "programs";
@@ -26,7 +26,7 @@ export async function getElement(api, type, id) {
     return { ...response, type };
 }
 
-export async function getElementMetadata({ element, api, orgUnitIds }) {
+export async function getElementMetadata({ element, api, orgUnitIds, startDate, endDate }) {
     const elementMetadata = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
     const rawMetadata = await api.get(`/${endpoint}/${element.id}/metadata.json`).getData();
@@ -47,9 +47,11 @@ export async function getElementMetadata({ element, api, orgUnitIds }) {
             .getData()
     );
 
-    const metadata = element.type === "trackerPrograms" ? await getTrackerProgramMetadata(element, api) : {};
-
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
+    const metadata =
+        element.type === "trackerPrograms"
+            ? await getTrackerProgramMetadata(element, api, { organisationUnits, startDate, endDate })
+            : {};
 
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }
