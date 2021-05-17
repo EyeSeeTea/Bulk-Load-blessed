@@ -7,8 +7,8 @@ import { buildAllPossiblePeriods } from "../utils/periods";
 import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
-export const programId = "PROGRAM_GENERATED_v3";
-export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v1";
+export const programId = "PROGRAM_GENERATED_v4";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
 const orgNonExistingMessage =
@@ -131,14 +131,14 @@ SheetBuilder.prototype.fillProgramStageSheets = function () {
         let columnId = 1;
         let groupId = 0;
 
+        this.createColumn(sheet, itemRow, columnId++, "Event id");
+
         this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
 
         const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
         const optionsTitle = attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
 
         this.createColumn(sheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
-
-        this.createColumn(sheet, itemRow, columnId++, "Event id");
 
         this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
@@ -605,6 +605,10 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     let columnId = 1;
     let groupId = 0;
 
+    if (element.type === "programs") {
+        this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
+    }
+
     this.createColumn(
         dataEntrySheet,
         itemRow,
@@ -698,8 +702,6 @@ SheetBuilder.prototype.fillDataEntrySheet = function () {
     } else {
         _.forEach(this.getProgramStages(), programStageT => {
             const programStage = metadata.get(programStageT.id);
-
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
 
             this.createColumn(dataEntrySheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
 
