@@ -178,13 +178,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         const rangeCells = workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
 
-        return (
-            rangeCells.cells()[0]?.map(cell => ({
-                type: "cell",
-                sheet,
-                ref: cell.address(),
-            })) ?? []
-        );
+        return _.flatten(rangeCells.cells()).map(cell => ({
+            type: "cell",
+            sheet,
+            ref: cell.address(),
+        }));
     }
 
     public async addPicture(id: string, location: SheetRef, file: File): Promise<void> {

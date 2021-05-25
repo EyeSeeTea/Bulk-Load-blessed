@@ -51,10 +51,9 @@ export class ExcelReader {
                 case "cell":
                     (await this.readByCell(template, dataSource)).map(item => data.push(item));
                     break;
-                case "row": {
+                case "row":
                     (await this.readByRow(template, dataSource)).map(item => data.push(item));
                     break;
-                }
                 case "rowTei":
                     (await this.readTeiRows(template, dataSource)).map(item => teis.push(item));
                     break;
@@ -94,9 +93,9 @@ export class ExcelReader {
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
-        } else {
-            return { type: dataFormType, dataEntries };
         }
+
+        return { type: dataFormType, dataEntries };
     }
 
     private async readByRow(template: Template, dataSource: RowDataSource): Promise<DataPackageData[]> {
