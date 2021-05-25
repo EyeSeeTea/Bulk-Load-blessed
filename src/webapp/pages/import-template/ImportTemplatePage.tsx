@@ -13,21 +13,13 @@ import _ from "lodash";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
-import { ImportPostResponse, processImportResponse } from "../../../data/Dhis2Import";
 import { DataForm, DataFormType } from "../../../domain/entities/DataForm";
 import { DataPackage } from "../../../domain/entities/DataPackage";
-import { AggregatedDataValue } from "../../../domain/entities/DhisDataPackage";
 import { SynchronizationResult } from "../../../domain/entities/SynchronizationResult";
-import { compareDataPackages, ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
+import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemplateUseCase";
 import i18n from "../../../locales";
-import { D2Api, DataValueSetsPostResponse } from "../../../types/d2-api";
-import { cleanOrgUnitPaths } from "../../../utils/dhis";
-import { promiseMap } from "../../../utils/promises";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/app-context";
-import { deleteDataValues, SheetImportResponse } from "../../logic/dataValues";
-import * as dhisConnector from "../../logic/dhisConnector";
-import * as sheetImport from "../../logic/sheetImport";
 import { RouteComponentProps } from "../root/RootPage";
 
 interface ImportState {
@@ -102,93 +94,16 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         if (!importState) return;
 
         try {
-            const { dataForm, file } = importState;
-
-            const useBuilderOrgUnits = settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
-
             loading.show(true, i18n.t("Reading data..."));
-            const result = await dhisConnector.getElementMetadata({
-                api,
-                element: dataForm,
-                orgUnitIds: cleanOrgUnitPaths(selectedOrgUnits),
-                startDate: undefined,
-                endDate: undefined,
-            });
+
+            const { file } = importState;
+            const useBuilderOrgUnits = settings.orgUnitSelection !== "generation" && overwriteOrgUnits;
 
             if (useBuilderOrgUnits && selectedOrgUnits.length === 0) {
                 throw new Error(i18n.t("Select at least one organisation unit to import data"));
             }
 
-            const { custom, rowOffset, colOffset, orgUnits } = await compositionRoot.templates.analyze(file);
-
-            // TODO: Remove if condition and use only new code to import templates
-            if (custom || dataForm.type === "trackerPrograms") {
-                await startImport({
-                    file,
-                    settings,
-                    useBuilderOrgUnits,
-                    selectedOrgUnits,
-                });
-            } else {
-                //const organisationUnits = result.organisationUnits;
-                const orgUnitCoordMap = new Map();
-
-                if (result.element.type === "programs") {
-                    const usedOrgUnitsUIDs = await sheetImport.getUsedOrgUnits({
-                        ...result,
-                        file,
-                        useBuilderOrgUnits,
-                        rowOffset,
-                    });
-
-                    for (const uid of usedOrgUnitsUIDs.values()) {
-                        const orgUnitData = await dhisConnector.importOrgUnitByUID(api, uid);
-                        orgUnitCoordMap.set(uid, orgUnitData);
-                    }
-                }
-
-                const data = await sheetImport.readSheet({
-                    ...result,
-                    file,
-                    useBuilderOrgUnits,
-                    orgUnitCoordMap,
-                    rowOffset,
-                    colOffset,
-                });
-
-                const filterOrgUnits = useBuilderOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : _.map(orgUnits, "id");
-
-                const removedDataValues = _.remove(
-                    //@ts-ignore FIXME Create typings for sheet import code
-                    data.dataValues ?? data.events,
-                    ({ orgUnit }) => !filterOrgUnits.find(id => id === orgUnit)
-                );
-
-                if (removedDataValues.length === 0) {
-                    await checkExistingData(dataForm.type, data);
-                } else {
-                    updateDialog({
-                        title: i18n.t("Invalid organisation units found"),
-                        description: i18n.t(
-                            "There are {{number}} data values with an invalid organisation unit that will be ignored during import.\nYou can still download them and send them to your administrator.",
-                            { number: removedDataValues.length }
-                        ),
-                        onCancel: () => {
-                            updateDialog(null);
-                        },
-                        onSave: () => {
-                            checkExistingData(dataForm.type, data);
-                            updateDialog(null);
-                        },
-                        onInfoAction: () => {
-                            downloadInvalidOrganisationsOld(dataForm.type, removedDataValues);
-                        },
-                        cancelText: i18n.t("Cancel"),
-                        saveText: i18n.t("Proceed"),
-                        infoActionText: i18n.t("Download data values with invalid organisation units"),
-                    });
-                }
-            }
+            await startImport({ file, settings, useBuilderOrgUnits, selectedOrgUnits });
         } catch (reason) {
             console.error(reason);
             snackbar.error(reason.message || reason.toString());
@@ -329,231 +244,6 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
         const blob = new Blob([json], { type: "application/json" });
         const date = moment().format("YYYYMMDDHHmm");
         saveAs(blob, `invalid-organisations-${date}.json`);
-    };
-
-    const downloadInvalidOrganisationsOld = (type: DataFormType, elements: unknown) => {
-        const object = type === "dataSets" ? { dataValues: elements } : { events: elements };
-        const json = JSON.stringify(object, null, 4);
-        const blob = new Blob([json], { type: "application/json" });
-        const date = moment().format("YYYYMMDDHHmm");
-        saveAs(blob, `invalid-organisations-${date}.json`);
-    };
-
-    const checkExistingData = async (type: DataFormType, data: any) => {
-        loading.show(true, i18n.t("Checking duplicates..."));
-        const { newValues, existingValues } = await getDataValuesFromData(data);
-        loading.reset();
-
-        if (existingValues.length === 0) {
-            await performImport(newValues);
-        } else {
-            const dataSetConfig = {
-                title: i18n.t("Existing data values"),
-                message: i18n.t(
-                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. If you proceed, all those data values will be deleted and only the ones in the spreadsheet will be saved. Are you sure?",
-                    { totalExisting: existingValues.length }
-                ),
-                save: i18n.t("Proceed"),
-                cancel: i18n.t("Cancel"),
-                info: i18n.t("Import only new data values"),
-            };
-
-            const programConfig = {
-                title: i18n.t("Warning: Your upload may result in the generation of duplicates", {
-                    nsSeparator: "-",
-                }),
-                message: i18n.t(
-                    "There are {{totalExisting}} records in your template with very similar or exact values as other records that already exist. If you proceed, you risk creating duplicates. What would you like to do?",
-                    { totalExisting: existingValues.length }
-                ),
-                save: i18n.t("Import everything anyway"),
-                cancel: i18n.t("Cancel import"),
-                info: i18n.t("Import only new records"),
-            };
-
-            const { title, message, save, cancel, info } = type === "dataSets" ? dataSetConfig : programConfig;
-
-            updateDialog({
-                title,
-                description: message,
-                onSave: () => {
-                    performImport([...newValues, ...existingValues]);
-                    updateDialog(null);
-                },
-                onInfoAction: () => {
-                    performImport(newValues);
-                    updateDialog(null);
-                },
-                onCancel: () => {
-                    updateDialog(null);
-                },
-                saveText: save,
-                cancelText: cancel,
-                infoActionText: info,
-            });
-        }
-    };
-
-    const getDataValuesFromData = async ({
-        program,
-        dataSet,
-        events,
-        dataValues,
-    }: SheetImportResponse): Promise<{
-        newValues: any;
-        existingValues: any;
-    }> => {
-        const isProgram = !!program && !!events && !dataSet && !dataValues;
-        const isDataSet = !program && !events && !!dataSet && !!dataValues;
-        const type = isProgram ? "programs" : "dataSets";
-        const id = isProgram ? program : dataSet;
-
-        if (!isProgram && !isDataSet) throw new Error("Invalid form type");
-        if (!id) throw new Error("Invalid program or dataSet");
-
-        if (!settings.duplicateEnabled) {
-            return { newValues: isProgram ? events : dataValues, existingValues: [] };
-        }
-
-        const periods = isProgram ? undefined : _.uniq(dataValues?.map(({ period }) => period.toString()));
-        const orgUnits = isProgram
-            ? _.uniq(events?.map(({ orgUnit }) => orgUnit))
-            : _.uniq(dataValues?.map(({ orgUnit }) => orgUnit));
-
-        const result = await compositionRoot.form.getDataPackage({
-            id,
-            periods,
-            orgUnits,
-            type,
-            translateCodes: false,
-        });
-
-        // Adding legacy code here, this should be removed when using the already existing use-case
-        const { categoryOptionCombos = [] } = await api
-            .get<Record<string, { id: string }[]>>("/metadata", {
-                filter: "identifiable:eq:default",
-                fields: "id",
-            })
-            .getData();
-        const defaultCategory = categoryOptionCombos[0]?.id;
-
-        if (isProgram) {
-            const existingEvents = _.remove(
-                events ?? [],
-                ({ event, eventDate, orgUnit, attributeOptionCombo: attribute, dataValues }) => {
-                    return result.dataEntries.find(dataPackage =>
-                        compareDataPackages(
-                            { type: "programs", id },
-                            {
-                                id: event,
-                                period: String(eventDate),
-                                orgUnit,
-                                attribute,
-                                dataValues,
-                            },
-                            dataPackage,
-                            settings.duplicateExclusion,
-                            settings.duplicateTolerance,
-                            settings.duplicateToleranceUnit,
-                            defaultCategory
-                        )
-                    );
-                }
-            );
-
-            return { newValues: events, existingValues: existingEvents };
-        } else {
-            const existingDataValues = _.remove(
-                dataValues ?? [],
-                ({
-                    period,
-                    orgUnit,
-                    attributeOptionCombo: attribute,
-                    dataElement,
-                    categoryOptionCombo: category,
-                    value,
-                }) => {
-                    return result.dataEntries.find(dataPackage =>
-                        compareDataPackages(
-                            { type: "dataSets", id },
-                            {
-                                period: String(period),
-                                orgUnit,
-                                attribute,
-                                dataValues: [{ dataElement, category, value }],
-                            },
-                            dataPackage,
-                            settings.duplicateExclusion,
-                            settings.duplicateTolerance,
-                            settings.duplicateToleranceUnit,
-                            defaultCategory
-                        )
-                    );
-                }
-            );
-
-            return { newValues: dataValues, existingValues: existingDataValues };
-        }
-    };
-
-    const performImport = async (dataValues: any[]) => {
-        if (!importState) return;
-
-        loading.show(true, i18n.t("Importing data..."));
-
-        try {
-            if (importState.dataForm.type === "dataSets") {
-                const deleteResponse = await deleteDataValues(api, dataValues);
-                const response = await importAggregatedData(api, dataValues);
-
-                const deleteResult: SynchronizationResult | null = deleteResponse
-                    ? {
-                          title: "Data values - Delete",
-                          status: response.status,
-                          message: response.description,
-                          stats: [{ ...response.importCount, type: "Data values" }],
-                          errors: response.conflicts?.map(conflict => ({
-                              id: conflict.object,
-                              message: conflict.value,
-                          })),
-                          rawResponse: deleteResponse,
-                      }
-                    : null;
-
-                const updateResult: SynchronizationResult = {
-                    title: "Data values - Create/update",
-                    status: response.status,
-                    message: response.description,
-                    stats: [{ ...response.importCount, type: "Data values" }],
-                    errors: response.conflicts?.map(conflict => ({
-                        id: conflict.object,
-                        message: conflict.value,
-                    })),
-                    rawResponse: response,
-                };
-
-                setSyncResults(_.compact([deleteResult, updateResult]));
-            } else {
-                const response = await importEventsData(api, dataValues);
-                const results = response.map((response: ImportPostResponse) =>
-                    processImportResponse({
-                        title: i18n.t("Data values - Create/update"),
-                        model: i18n.t("Event"),
-                        importResult: response,
-                        splitStatsList: true,
-                    })
-                );
-
-                setSyncResults(results);
-            }
-
-            setMessages(messages);
-        } catch (reason) {
-            console.error(reason);
-            snackbar.error(reason.message || reason.toString());
-        }
-
-        loading.show(false);
     };
 
     const getNameForModel = (key: DataFormType): string => {
@@ -760,31 +450,3 @@ const useStyles = makeStyles({
         )`,
     },
 });
-
-// TODO: This should be migrated into clean code
-async function importEventsData(api: D2Api, data: Event[]): Promise<ImportPostResponse[]> {
-    const sendEvents = (events: Event[]) =>
-        api
-            .request<ImportPostResponse>({
-                method: "post",
-                url: "/events",
-                params: {},
-                data: { events },
-                validateStatus: () => true,
-            })
-            .getData();
-
-    const response = await sendEvents(data);
-
-    // Fixed on versions 2.33.8+ and 2.34.3+ (https://jira.dhis2.org/browse/DHIS2-9936)
-    if (response.status === "ERROR") {
-        return promiseMap(_.chunk(data, 99), events => sendEvents(events));
-    }
-
-    return [response];
-}
-
-// TODO: This should be migrated into clean code
-async function importAggregatedData(api: D2Api, data: AggregatedDataValue[]): Promise<DataValueSetsPostResponse> {
-    return api.post<DataValueSetsPostResponse>("/dataValueSets", {}, { dataValues: data }).getData();
-}
