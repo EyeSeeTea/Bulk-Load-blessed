@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
+"POT-Creation-Date: 2021-05-25T11:10:38.397Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -416,28 +416,6 @@ msgstr "Erreur lors de la suppression des valeurs de données"
 msgid "Select at least one model"
 msgstr "Sélectionnez au moins un modèle"
 
-msgid "Cannot get data entry sheet"
-msgstr "Impossible d'obtenir la feuille de saisie des données"
-
-msgid "Cannot get metadata sheet"
-msgstr "Impossible d'obtenir la feuille de métadonnées"
-
-msgid ""
-"Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr ""
-"Lieu non valide. Veuillez vérifier la ligne {{rowNumber}} pour le pays "
-"{{country}}"
-
-msgid "Event date is empty"
-msgstr "La date de l'événement est vide"
-
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
-msgstr ""
-"Impossible d'importer: les versions ne correspondent pas (base de données = "
-"{{dbVersion}}, fichier = {{sheetVersion}})"
-
 msgid "User with no permissions"
 msgstr ""
 
@@ -487,25 +465,6 @@ msgid "Select at least one organisation unit to import data"
 msgstr ""
 "Sélectionnez au moins une unité d'organisation pour importer des données"
 
-msgid "Invalid organisation units found"
-msgstr "Des unités d'organisation non valides ont été trouvés"
-
-msgid ""
-"There are {{number}} data values with an invalid organisation unit that will "
-"be ignored during import.\n"
-"You can still download them and send them to your administrator."
-msgstr ""
-"Il existe {{nombre}} valeurs de données avec une unité d'organisation non "
-"valide qui seront ignorées lors de l'importation.\n"
-"Vous pouvez toujours les télécharger et les envoyer à votre administrateur."
-
-msgid "Proceed"
-msgstr "Procéder"
-
-msgid "Download data values with invalid organisation units"
-msgstr ""
-"Télécharger des valeurs de données avec des unités d'organisation non valides"
-
 msgid "Importing data..."
 msgstr "Importation de données en cours ..."
 
@@ -521,6 +480,9 @@ msgstr ""
 "cette unité d'organisation et ces périodes. Si vous continuez, toutes ces "
 "valeurs de données seront supprimées et seules celles de la feuille de "
 "calcul seront enregistrées. Êtes-vous sur de vouloir continuer?"
+
+msgid "Proceed"
+msgstr "Procéder"
 
 msgid "Import only new data values"
 msgstr "Importer uniquement de nouvelles données"
@@ -548,14 +510,18 @@ msgstr "Annuler l'importation"
 msgid "Import only new records"
 msgstr "Importez quand même toutes les données"
 
+msgid "Invalid organisation units found"
+msgstr "Des unités d'organisation non valides ont été trouvés"
+
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
 
-msgid "Checking duplicates..."
-msgstr "Vérification des doublons en cours ..."
+msgid "Download data values with invalid organisation units"
+msgstr ""
+"Télécharger des valeurs de données avec des unités d'organisation non valides"
 
 msgid "Bulk data import"
 msgstr "Importation de données en masse"
