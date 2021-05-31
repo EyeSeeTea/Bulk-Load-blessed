@@ -13,7 +13,7 @@ export class ProgramGenerated04 implements GeneratedTemplate {
     public readonly dataSources: DataSource[] = [
         {
             type: "row",
-                        eventId: {
+            eventId: {
                 sheet: "Data Entry",
                 type: "column",
                 ref: "A",
