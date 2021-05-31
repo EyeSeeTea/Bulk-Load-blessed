@@ -2,6 +2,7 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
+import { isDefined } from "../../utils";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
 import { DataForm } from "../entities/DataForm";
@@ -103,7 +104,7 @@ export class ExcelReader {
 
         const values = await promiseMap(cells, async cell => {
             const value = cell ? await this.readCellValue(template, cell) : undefined;
-            if (!value) return undefined;
+            if (!isDefined(value)) return undefined;
 
             const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
             if (!orgUnit) return undefined;
@@ -143,7 +144,7 @@ export class ExcelReader {
     private async readByCell(template: Template, dataSource: CellDataSource): Promise<DataPackageData[]> {
         const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
-        if (!value) return [];
+        if (!isDefined(value)) return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
         if (!orgUnit) return [];
