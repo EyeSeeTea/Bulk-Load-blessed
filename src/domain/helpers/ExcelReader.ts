@@ -2,7 +2,7 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
-import { isDefined } from "../../utils/booleans";
+import { isDefined } from "../../utils";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
 import { DataForm } from "../entities/DataForm";
