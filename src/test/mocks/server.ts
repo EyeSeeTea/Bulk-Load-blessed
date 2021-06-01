@@ -78,7 +78,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name]],displayName,id,name,periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name],id,name]",
+                "access,attributeValues[attribute[code],value],dataSetElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]],displayName,id,name,periodType,sections[dataElements[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType],id,name]",
             filter: [],
         },
     }).reply(200, {
@@ -113,7 +113,7 @@ export function initializeMockServer() {
         params: {
             paging: false,
             fields:
-                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[formName,id,name]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
+                "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
             filter: [],
         },
     }).reply(200, {

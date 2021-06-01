@@ -65,17 +65,6 @@ export class InstanceDhisRepository implements InstanceRepository {
             })
             .getData();
 
-        const formatDataElement = ({
-            formName,
-            categoryCombo,
-            name,
-            ...dataElement
-        }: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
-            ...dataElement,
-            name: formName ?? name ?? "",
-            categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
-        });
-
         return objects.map(
             ({ id, displayName, name, access, periodType, dataSetElements, sections, attributeValues }) => ({
                 type: "dataSets",
@@ -130,15 +119,13 @@ export class InstanceDhisRepository implements InstanceRepository {
                 readAccess: access.data?.read,
                 //@ts-ignore https://github.com/EyeSeeTea/d2-api/issues/43
                 writeAccess: access.data?.write,
-                dataElements: programStages
-                    .flatMap(({ programStageDataElements }) =>
-                        programStageDataElements.map(({ dataElement }) => dataElement)
-                    )
-                    .map(({ formName, name, ...rest }) => ({ ...rest, name: formName ?? name })),
+                dataElements: programStages.flatMap(({ programStageDataElements }) =>
+                    programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement))
+                ),
                 sections: programStages.map(({ id, name, programStageDataElements }) => ({
                     id,
                     name,
-                    dataElements: programStageDataElements.map(({ dataElement }) => dataElement),
+                    dataElements: programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement)),
                 })),
                 teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
@@ -632,7 +619,9 @@ const dataElementFields = {
     id: true,
     formName: true,
     name: true,
+    valueType: true,
     categoryCombo: { categoryOptionCombos: { id: true, name: true } },
+    optionSet: { id: true, options: { id: true, code: true } },
 } as const;
 
 const dataSetFields = {
@@ -654,10 +643,18 @@ const programFields = {
     programStages: {
         id: true,
         name: true,
-        programStageDataElements: { dataElement: { id: true, formName: true, name: true } },
+        programStageDataElements: { dataElement: dataElementFields },
     },
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
     trackedEntityType: { id: true },
 } as const;
+
+const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
+    id: de.id,
+    name: de.formName ?? de.name ?? "",
+    valueType: de.valueType,
+    categoryOptionCombos: de.categoryCombo?.categoryOptionCombos ?? [],
+    options: de.optionSet?.options,
+});
