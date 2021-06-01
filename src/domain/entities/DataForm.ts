@@ -27,10 +27,8 @@ export interface DataForm {
 export interface DataElement {
     id: Id;
     name: string;
-    categoryOptionCombos?: {
-        id: Id;
-        name: string;
-    }[];
+    categoryOptionCombos?: Array<{ id: Id; name: string }>;
+    options: Array<{ id: Id; code: string }>;
 }
 
 export interface OrganisationUnit {
