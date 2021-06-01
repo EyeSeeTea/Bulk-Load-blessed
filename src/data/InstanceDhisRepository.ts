@@ -619,6 +619,7 @@ const dataElementFields = {
     id: true,
     formName: true,
     name: true,
+    valueType: true,
     categoryCombo: { categoryOptionCombos: { id: true, name: true } },
     optionSet: { id: true, options: { id: true, code: true } },
 } as const;
@@ -650,15 +651,10 @@ const programFields = {
     trackedEntityType: { id: true },
 } as const;
 
-const formatDataElement = ({
-    id,
-    formName,
-    categoryCombo,
-    name,
-    optionSet,
-}: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
-    id,
-    name: formName ?? name ?? "",
-    categoryOptionCombos: categoryCombo?.categoryOptionCombos ?? [],
-    options: optionSet?.options,
+const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
+    id: de.id,
+    name: de.formName ?? de.name ?? "",
+    valueType: de.valueType,
+    categoryOptionCombos: de.categoryCombo?.categoryOptionCombos ?? [],
+    options: de.optionSet?.options,
 });
