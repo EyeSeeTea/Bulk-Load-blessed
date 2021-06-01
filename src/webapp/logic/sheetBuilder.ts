@@ -11,7 +11,7 @@ import Settings from "./settings";
 import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
-export const programId = "PROGRAM_GENERATED_v3";
+export const programId = "PROGRAM_GENERATED_v4";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
@@ -653,6 +653,10 @@ export class SheetBuilder {
         let columnId = 1;
         let groupId = 0;
 
+        if (element.type === "programs") {
+            this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
+        }
+
         this.createColumn(
             dataEntrySheet,
             itemRow,
@@ -748,8 +752,6 @@ export class SheetBuilder {
         } else {
             _.forEach(this.getProgramStages(), programStageT => {
                 const programStage = metadata.get(programStageT.id);
-
-                this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
 
                 this.createColumn(
                     dataEntrySheet,
