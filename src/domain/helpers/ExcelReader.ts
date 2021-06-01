@@ -86,6 +86,7 @@ export class ExcelReader {
                     trackedEntityInstance: trackedEntityInstance ? String(trackedEntityInstance) : undefined,
                     programStage: programStage ? String(programStage) : undefined,
                     dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
+                    coordinate: items[0]?.coordinate,
                 };
             })
             .compact()
@@ -122,16 +123,23 @@ export class ExcelReader {
             const attribute = await this.readCellValue(template, dataSource.attribute, cell);
             const eventId = await this.readCellValue(template, dataSource.eventId, cell);
 
+            const latitude = await this.readCellValue(template, dataSource.coordinates?.latitude, cell);
+            const longitude = await this.readCellValue(template, dataSource.coordinates?.longitude, cell);
+            const hasCoordinate = isDefined(latitude) && isDefined(longitude);
+
             return {
-                dataForm: String(dataFormId),
-                id: eventId ? String(eventId) : undefined,
-                orgUnit: String(orgUnit),
-                period: String(period),
-                attribute: attribute ? String(attribute) : undefined,
+                dataForm: this.formatValue(dataFormId),
+                id: eventId ? this.formatValue(eventId) : undefined,
+                orgUnit: this.formatValue(orgUnit),
+                period: this.formatValue(period),
+                attribute: attribute ? this.formatValue(attribute) : undefined,
+                coordinate: hasCoordinate
+                    ? { latitude: this.formatValue(latitude), longitude: this.formatValue(longitude) }
+                    : undefined,
                 dataValues: [
                     {
-                        dataElement: String(dataElement),
-                        category: category ? String(category) : undefined,
+                        dataElement: this.formatValue(dataElement),
+                        category: category ? this.formatValue(category) : undefined,
                         value: this.formatValue(value),
                     },
                 ],
