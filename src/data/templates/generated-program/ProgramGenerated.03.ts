@@ -13,35 +13,15 @@ export class ProgramGenerated03 implements GeneratedTemplate {
     public readonly dataSources: DataSource[] = [
         {
             type: "row",
-            orgUnit: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "A",
-            },
-            attribute: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "D",
-            },
-            eventId: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "E",
-            },
-            period: {
-                sheet: "Data Entry",
-                type: "column",
-                ref: "F",
-            },
-            range: {
-                sheet: "Data Entry",
-                rowStart: 6,
-                columnStart: "G",
-            },
-            dataElement: {
-                sheet: "Data Entry",
-                type: "row",
-                ref: 5,
+            orgUnit: { sheet: "Data Entry", type: "column", ref: "A" },
+            attribute: { sheet: "Data Entry", type: "column", ref: "D" },
+            eventId: { sheet: "Data Entry", type: "column", ref: "E" },
+            period: { sheet: "Data Entry", type: "column", ref: "F" },
+            range: { sheet: "Data Entry", rowStart: 6, columnStart: "G" },
+            dataElement: { sheet: "Data Entry", type: "row", ref: 5 },
+            coordinates: {
+                latitude: { sheet: "Data Entry", type: "column", ref: "B" },
+                longitude: { sheet: "Data Entry", type: "column", ref: "C" },
             },
         },
     ];

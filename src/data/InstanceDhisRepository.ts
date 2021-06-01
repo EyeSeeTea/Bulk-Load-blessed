@@ -340,7 +340,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     private buildEventsPayload(dataPackage: DataPackage): Event[] {
-        return dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm }) => ({
+        return dataPackage.dataEntries.map(({ id, orgUnit, period, attribute, dataValues, dataForm, coordinate }) => ({
             event: id,
             program: dataForm,
             status: "COMPLETED",
@@ -348,6 +348,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             eventDate: period,
             attributeOptionCombo: attribute,
             dataValues: dataValues,
+            coordinate,
         }));
     }
 
