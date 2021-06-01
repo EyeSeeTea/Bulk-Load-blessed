@@ -2,6 +2,7 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import moment from "moment";
+import { isDefined } from "../../utils";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
 import { DataForm } from "../entities/DataForm";
@@ -51,10 +52,9 @@ export class ExcelReader {
                 case "cell":
                     (await this.readByCell(template, dataSource)).map(item => data.push(item));
                     break;
-                case "row": {
+                case "row":
                     (await this.readByRow(template, dataSource)).map(item => data.push(item));
                     break;
-                }
                 case "rowTei":
                     (await this.readTeiRows(template, dataSource)).map(item => teis.push(item));
                     break;
@@ -86,6 +86,7 @@ export class ExcelReader {
                     trackedEntityInstance: trackedEntityInstance ? String(trackedEntityInstance) : undefined,
                     programStage: programStage ? String(programStage) : undefined,
                     dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
+                    coordinate: items[0]?.coordinate,
                 };
             })
             .compact()
@@ -94,9 +95,9 @@ export class ExcelReader {
         if (dataFormType === "trackerPrograms") {
             const trackedEntityInstances = this.addTeiRelationships(teis, relationships);
             return { type: "trackerPrograms", dataEntries, trackedEntityInstances };
-        } else {
-            return { type: dataFormType, dataEntries };
         }
+
+        return { type: dataFormType, dataEntries };
     }
 
     private async readByRow(template: Template, dataSource: RowDataSource): Promise<DataPackageData[]> {
@@ -104,7 +105,7 @@ export class ExcelReader {
 
         const values = await promiseMap(cells, async cell => {
             const value = cell ? await this.readCellValue(template, cell) : undefined;
-            if (!value) return undefined;
+            if (!isDefined(value)) return undefined;
 
             const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
             if (!orgUnit) return undefined;
@@ -122,16 +123,23 @@ export class ExcelReader {
             const attribute = await this.readCellValue(template, dataSource.attribute, cell);
             const eventId = await this.readCellValue(template, dataSource.eventId, cell);
 
+            const latitude = await this.readCellValue(template, dataSource.coordinates?.latitude, cell);
+            const longitude = await this.readCellValue(template, dataSource.coordinates?.longitude, cell);
+            const hasCoordinate = isDefined(latitude) && isDefined(longitude);
+
             return {
-                dataForm: String(dataFormId),
-                id: eventId ? String(eventId) : undefined,
-                orgUnit: String(orgUnit),
-                period: String(period),
-                attribute: attribute ? String(attribute) : undefined,
+                dataForm: this.formatValue(dataFormId),
+                id: eventId ? this.formatValue(eventId) : undefined,
+                orgUnit: this.formatValue(orgUnit),
+                period: this.formatValue(period),
+                attribute: attribute ? this.formatValue(attribute) : undefined,
+                coordinate: hasCoordinate
+                    ? { latitude: this.formatValue(latitude), longitude: this.formatValue(longitude) }
+                    : undefined,
                 dataValues: [
                     {
-                        dataElement: String(dataElement),
-                        category: category ? String(category) : undefined,
+                        dataElement: this.formatValue(dataElement),
+                        category: category ? this.formatValue(category) : undefined,
                         value: this.formatValue(value),
                     },
                 ],
@@ -144,7 +152,7 @@ export class ExcelReader {
     private async readByCell(template: Template, dataSource: CellDataSource): Promise<DataPackageData[]> {
         const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
-        if (!value) return [];
+        if (!isDefined(value)) return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
         if (!orgUnit) return [];

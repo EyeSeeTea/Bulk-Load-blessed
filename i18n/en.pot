@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
-"PO-Revision-Date: 2021-05-11T07:56:11.788Z\n"
+"POT-Creation-Date: 2021-05-25T11:10:38.397Z\n"
+"PO-Revision-Date: 2021-05-25T11:10:38.397Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -411,23 +411,6 @@ msgstr ""
 msgid "Select at least one model"
 msgstr ""
 
-msgid "Cannot get data entry sheet"
-msgstr ""
-
-msgid "Cannot get metadata sheet"
-msgstr ""
-
-msgid "Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr ""
-
-msgid "Event date is empty"
-msgstr ""
-
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
-msgstr ""
-
 msgid "User with no permissions"
 msgstr ""
 
@@ -470,21 +453,6 @@ msgstr ""
 msgid "Select at least one organisation unit to import data"
 msgstr ""
 
-msgid "Invalid organisation units found"
-msgstr ""
-
-msgid ""
-"There are {{number}} data values with an invalid organisation unit that "
-"will be ignored during import.\n"
-"You can still download them and send them to your administrator."
-msgstr ""
-
-msgid "Proceed"
-msgstr ""
-
-msgid "Download data values with invalid organisation units"
-msgstr ""
-
 msgid "Importing data..."
 msgstr ""
 
@@ -495,6 +463,9 @@ msgid ""
 "There are {{totalExisting}} data values in the database for this "
 "organisation unit and periods. If you proceed, all those data values will "
 "be deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+
+msgid "Proceed"
 msgstr ""
 
 msgid "Import only new data values"
@@ -518,13 +489,16 @@ msgstr ""
 msgid "Import only new records"
 msgstr ""
 
+msgid "Invalid organisation units found"
+msgstr ""
+
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
 
-msgid "Checking duplicates..."
+msgid "Download data values with invalid organisation units"
 msgstr ""
 
 msgid "Bulk data import"

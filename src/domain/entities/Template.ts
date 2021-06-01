@@ -125,6 +125,10 @@ interface BaseDataSource {
     categoryOption?: SheetRef | ValueRef;
     attribute?: SheetRef | ValueRef;
     eventId?: SheetRef | ValueRef;
+    coordinates?: {
+        latitude: SheetRef | ValueRef;
+        longitude: SheetRef | ValueRef;
+    }
 }
 
 export interface TrackerRelationship {
