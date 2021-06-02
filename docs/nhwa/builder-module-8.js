@@ -113,5 +113,23 @@ let dataSheet3 = [
     }),
 ];
 
+// This is ignored because it does not belong to annual data reporting
+let ignoredDataSheet4 = [
+    ...getDataElements({
+        sheet: "GSHRH Milestones Reporting",
+        tabSelector: "#tab3",
+        letters: ["D", "E", "F"],
+        dataRowStart: 9,
+        type: "input.entrytrueonly",
+    }),
+    ...getDataElements({
+        sheet: "GSHRH Milestones Reporting",
+        tabSelector: "#tab3",
+        letters: ["G"],
+        dataRowStart: 9,
+        type: "textarea",
+    }),
+];
+
 let result = [...dataSheet1, ...dataSheet2, ...dataSheet3];
 console.log(result);
