@@ -1,8 +1,11 @@
 import { saveAs } from "file-saver";
 import fs from "fs";
+import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
-import * as dhisConnector from "../../webapp/logic/dhisConnector";
+import { getTrackerProgramMetadata } from "../../data/Dhis2RelationshipTypes";
+import { D2Api } from "../../types/d2-api";
+import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
 import { getTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
@@ -35,7 +38,7 @@ export class DownloadTemplateUseCase implements UseCase {
     ) {}
 
     public async execute(
-        api: unknown,
+        api: D2Api,
         {
             type,
             id,
@@ -55,13 +58,13 @@ export class DownloadTemplateUseCase implements UseCase {
         const template = this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
-        const element = await dhisConnector.getElement(api, type, id);
+        const element = await getElement(api, type, id);
         const name = element.displayName ?? element.name;
 
         if (template.type === "custom") {
             await this.excelRepository.loadTemplate({ type: "url", url: template.url });
         } else {
-            const result = await dhisConnector.getElementMetadata({
+            const result = await getElementMetadata({
                 api,
                 element,
                 orgUnitIds: orgUnits,
@@ -134,4 +137,72 @@ export class DownloadTemplateUseCase implements UseCase {
             saveAs(data, filename);
         }
     }
+}
+
+async function getElement(api: D2Api, type: DataFormType, id: string) {
+    const endpoint = type === "dataSets" ? "dataSets" : "programs";
+    const fields = [
+        "id",
+        "displayName",
+        "organisationUnits[id,path]",
+        "attributeValues[attribute[code],value]",
+        "categoryCombo",
+        "dataSetElements",
+        "formType",
+        "sections[id,sortOrder,dataElements[id]]",
+        "periodType",
+        "programStages[id,access]",
+        "programType",
+        "enrollmentDateLabel",
+        "incidentDateLabel",
+        "trackedEntityType",
+        "captureCoordinates",
+        "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
+    ].join(",");
+    const response = await api
+        .get<any>(`/${endpoint}/${id}`, { fields })
+        .getData();
+    return { ...response, type };
+}
+
+async function getElementMetadata({
+    element,
+    api,
+    orgUnitIds,
+    startDate,
+    endDate,
+}: {
+    element: any;
+    api: D2Api;
+    orgUnitIds: string[];
+    startDate?: Date;
+    endDate?: Date;
+}) {
+    const elementMetadata = new Map();
+    const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
+    const rawMetadata = await api.get(`/${endpoint}/${element.id}/metadata.json`).getData();
+    _.forOwn(rawMetadata, (value, type) => {
+        if (Array.isArray(value)) {
+            _.forEach(value, (object: any) => {
+                if (object.id) elementMetadata.set(object.id, { ...object, type });
+            });
+        }
+    });
+
+    const responses = await promiseMap(_.chunk(orgUnitIds, 400), orgUnits =>
+        api
+            .get<{ organisationUnits: { id: string; displayName: string; translations: unknown }[] }>("/metadata", {
+                fields: "id,displayName,translations",
+                filter: `id:in:[${orgUnits}]`,
+            })
+            .getData()
+    );
+
+    const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
+    const metadata =
+        element.type === "trackerPrograms"
+            ? await getTrackerProgramMetadata(element, api, { organisationUnits, startDate, endDate })
+            : {};
+
+    return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }

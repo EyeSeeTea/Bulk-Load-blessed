@@ -1,6 +1,5 @@
 import { UseCase } from "../../CompositionRoot";
 import i18n from "../../locales";
-import { checkVersion, getDataValues } from "../../webapp/logic/sheetImport";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -33,29 +32,20 @@ export class AnalyzeTemplateUseCase implements UseCase {
 
         const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataForm.id);
 
-        if (template.type === "custom" || dataForm.type === "trackerPrograms") {
-            const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
-            const excelDataValues = await reader.readTemplate(template, dataForm);
-            if (!excelDataValues) return { custom: true, dataForm, dataValues: [], orgUnits };
+        const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
+        const excelDataValues = await reader.readTemplate(template, dataForm);
+        if (!excelDataValues) return { custom: true, dataForm, dataValues: [], orgUnits };
 
-            const customDataValues = await reader.templateCustomization(template, excelDataValues);
-            const dataEntries = customDataValues?.dataEntries ?? excelDataValues.dataEntries;
+        const customDataValues = await reader.templateCustomization(template, excelDataValues);
+        const dataEntries = customDataValues?.dataEntries ?? excelDataValues.dataEntries;
 
-            const dataValues = dataEntries.map(({ id, dataValues, period }) => ({
-                count: dataValues.length,
-                id,
-                period,
-            }));
+        const dataValues = dataEntries.map(({ id, dataValues, period }) => ({
+            count: dataValues.length,
+            id,
+            period,
+        }));
 
-            return { custom: true, dataForm, dataValues, orgUnits };
-        } else {
-            const { rowOffset = 0, colOffset = 0 } = template;
-
-            await checkVersion(file, dataForm);
-            const dataValues = await getDataValues(file, dataForm, rowOffset, colOffset);
-
-            return { custom: false, dataForm, dataValues, orgUnits, rowOffset, colOffset };
-        }
+        return { custom: true, dataForm, dataValues, orgUnits };
     }
 }
 

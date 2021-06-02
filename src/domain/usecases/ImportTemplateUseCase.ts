@@ -2,17 +2,18 @@ import _ from "lodash";
 import moment from "moment";
 import { UseCase } from "../../CompositionRoot";
 import { cleanOrgUnitPath } from "../../utils/dhis";
+import { removeCharacters } from "../../utils/string";
 import Settings from "../../webapp/logic/settings";
 import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSettings";
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
+import { SynchronizationResult } from "../entities/SynchronizationResult";
+import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
-import { removeCharacters } from "../../utils/string";
-import { SynchronizationResult } from "../entities/SynchronizationResult";
 
 export type ImportTemplateError =
     | {
@@ -74,16 +75,13 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "DATA_FORM_NOT_FOUND" });
         }
 
-        const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
-        const excelDataValues = await reader.readTemplate(template, dataForm);
-        if (!excelDataValues) {
+        const dataPackage = await this.readTemplate(template, dataForm);
+        if (!dataPackage) {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
-        const customDataValues = await reader.templateCustomization(template, excelDataValues);
-
         const { dataValues, invalidDataValues, existingDataValues, instanceDataValues } = await this.readDataValues(
-            customDataValues ?? excelDataValues,
+            dataPackage,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,
@@ -112,6 +110,22 @@ export class ImportTemplateUseCase implements UseCase {
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
         return Either.success(_.compact([deleteResult, ...importResult]));
+    }
+
+    private async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
+        const reader = new ExcelReader(this.excelRepository, this.instanceRepository);
+        const excelDataValues = await reader.readTemplate(template, dataForm);
+        if (!excelDataValues) return undefined;
+
+        const customDataValues = await reader.templateCustomization(template, excelDataValues);
+        const dataPackage = customDataValues ?? excelDataValues;
+
+        return {
+            ...dataPackage,
+            dataEntries: dataPackage.dataEntries.map(({ dataValues, ...dataEntry }) => {
+                return { ...dataEntry, dataValues: dataValues.map(value => formatDhis2Value(value, dataForm)) };
+            }),
+        };
     }
 
     private async readDataValues(
@@ -309,4 +323,16 @@ export const compareDataPackages = (
     }
 
     return true;
+};
+
+const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue => {
+    const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
+
+    if (dataElement?.valueType === "BOOLEAN" || dataElement?.valueType === "TRUE_ONLY") {
+        return { ...item, value: String(item.value) === "true" || item.value === "Yes" };
+    }
+
+    const selectedOption = dataElement?.options?.find(({ id }) => item.value === id);
+    const value = selectedOption?.code ?? item.value;
+    return { ...item, value };
 };

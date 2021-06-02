@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-05-11T07:56:11.788Z\n"
+"POT-Creation-Date: 2021-05-25T11:10:38.397Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -417,28 +417,6 @@ msgstr "Se ha producido un error borrando valores de datos"
 msgid "Select at least one model"
 msgstr "Seleccione al menos una plantilla"
 
-msgid "Cannot get data entry sheet"
-msgstr "No se puede leer la hoja de entrada de datos"
-
-msgid "Cannot get metadata sheet"
-msgstr "No se puede leer la hoja de metadata"
-
-msgid ""
-"Location not valid. Check row number {{rowNumber}} for country {{country}}"
-msgstr ""
-"Localización inválida. Por favor compruebe la fila {{rowNumber}} para el "
-"país {{country}}"
-
-msgid "Event date is empty"
-msgstr "La fecha del evento esta vacia"
-
-msgid ""
-"Cannot import: Versions do not match (database={{dbVersion}}, "
-"file={{sheetVersion}})"
-msgstr ""
-"No se puede importar: Las versiones no coinciden (base de "
-"datos={{dbVersion}}, fichero={{sheetVersion}})"
-
 msgid "User with no permissions"
 msgstr ""
 
@@ -485,24 +463,6 @@ msgstr "Leyendo datos..."
 msgid "Select at least one organisation unit to import data"
 msgstr "Seleccione al menos una unidad organizativa a la que asignar los datos"
 
-msgid "Invalid organisation units found"
-msgstr "Encontradas unidades organizativas no validas"
-
-msgid ""
-"There are {{number}} data values with an invalid organisation unit that will "
-"be ignored during import.\n"
-"You can still download them and send them to your administrator."
-msgstr ""
-"Existen {{number}} valores asociados a unidades organziativas no válidas que "
-"seran ignorados durante la importación. Por favor, descarguese estos datos y "
-"envieselos a su administrador o gestor de DHIS2"
-
-msgid "Proceed"
-msgstr "Continuar"
-
-msgid "Download data values with invalid organisation units"
-msgstr "Descargar datos con unidades organizativas no válidas"
-
 msgid "Importing data..."
 msgstr "Importando datos..."
 
@@ -518,6 +478,9 @@ msgstr ""
 "organizativa y periodos. Si continua, todos los valores se borrarán y se "
 "remplazarán por aquellos presentes en el archivo. ¿Está seguro que desea "
 "continuar?"
+
+msgid "Proceed"
+msgstr "Continuar"
 
 msgid "Import only new data values"
 msgstr "Importar solo nuevos valores de datos"
@@ -543,14 +506,17 @@ msgstr "Cancelar importación"
 msgid "Import only new records"
 msgstr "Importar solo los datos nuevos"
 
+msgid "Invalid organisation units found"
+msgstr "Encontradas unidades organizativas no validas"
+
 msgid ""
 "There are {{totalInvalid}} data values with an invalid organisation unit "
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
 
-msgid "Checking duplicates..."
-msgstr "Comprobando duplicados..."
+msgid "Download data values with invalid organisation units"
+msgstr "Descargar datos con unidades organizativas no válidas"
 
 msgid "Bulk data import"
 msgstr "Importación de datos"

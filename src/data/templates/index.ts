@@ -6,6 +6,7 @@ export { DataSetGenerated02 } from "./generated-data-set/DataSetGenerated.02";
 export { ProgramGenerated01 } from "./generated-program/ProgramGenerated.01";
 export { ProgramGenerated02 } from "./generated-program/ProgramGenerated.02";
 export { ProgramGenerated03 } from "./generated-program/ProgramGenerated.03";
+export { ProgramGenerated04 } from "./generated-program/ProgramGenerated.04";
 
 export { TrackerProgramGenerated01 } from "./generated-tracker-program/TrackerProgramGenerated.01";
 export { TrackerProgramGenerated02 } from "./generated-tracker-program/TrackerProgramGenerated.02";
