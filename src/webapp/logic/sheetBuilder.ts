@@ -5,6 +5,7 @@ import "lodash.product";
 import { Moment } from "moment";
 import { GeneratedTemplate } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
+import i18n from "../../locales";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import Settings from "./settings";
@@ -664,11 +665,11 @@ export class SheetBuilder {
             "Org Unit *",
             null,
             this.validations.get("organisationUnits"),
-            "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
+            orgNonExistingMessage
         );
 
         if (element.type === "programs") {
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
+            this.createColumn(dataEntrySheet, itemRow, columnId++, i18n.t("Latitude", { lng: this.builder.language }));
             this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
         } else if (element.type === "dataSets") {
             this.createColumn(dataEntrySheet, itemRow, columnId++, "Period", null, this.validations.get("periods"));
