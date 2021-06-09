@@ -16,8 +16,6 @@ export const programId = "PROGRAM_GENERATED_v4";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
-const orgNonExistingMessage =
-    "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
 
 const maxRow = 1048576;
 
@@ -302,7 +300,7 @@ export class SheetBuilder {
             "Org Unit *",
             null,
             this.validations.get("organisationUnits"),
-            orgNonExistingMessage
+            "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
         );
 
         this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
@@ -665,7 +663,7 @@ export class SheetBuilder {
             "Org Unit *",
             null,
             this.validations.get("organisationUnits"),
-            orgNonExistingMessage
+            "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
         );
 
         if (element.type === "programs") {
