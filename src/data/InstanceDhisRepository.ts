@@ -1,4 +1,5 @@
 import _ from "lodash";
+import "lodash.product";
 import moment from "moment";
 import { DataElement, DataForm, DataFormPeriod, DataFormType } from "../domain/entities/DataForm";
 import { DataPackage, TrackerProgramPackage } from "../domain/entities/DataPackage";
@@ -596,20 +597,20 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         // Get all the category options for each category on the categoryCombo
         const categories = _.compact(categoryIds.map(id => _.find(metadata?.categories, { id })));
-        const categoryOptions: MetadataItem[] = _(categories)
-            .map(({ categoryOptions }: MetadataItem) =>
-                categoryOptions.map(({ id }: MetadataItem) => _.find(metadata?.categoryOptions, { id }))
-            )
-            .flatten()
-            .value();
+        // Cartesian product to fix bug in DHIS2 with multiple categories in a combo
+        const optionsByCategory = categories.map(({ categoryOptions }) => categoryOptions.map(({ id }) => id));
 
-        return categoryOptions.map(({ id }) => id);
+        //@ts-ignore Polyfilled lodash product
+        const categoryOptions = _.product(...optionsByCategory).map(items => items.join(";"));
+
+        return categoryOptions;
     }
 }
 
 interface MetadataItem {
     id: string;
     code: string;
+    categoryOptions: MetadataItem[];
     [key: string]: any;
 }
 
