@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-06-09T07:29:25.828Z\n"
-"PO-Revision-Date: 2021-06-09T07:29:25.828Z\n"
+"POT-Creation-Date: 2021-07-30T11:00:12.458Z\n"
+"PO-Revision-Date: 2021-07-30T11:00:12.458Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -411,7 +411,72 @@ msgstr ""
 msgid "Select at least one model"
 msgstr ""
 
+msgid "Event id"
+msgstr ""
+
+msgid "TEI Id"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "TEI id"
+msgstr ""
+
+msgid "Org Unit *"
+msgstr ""
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
+msgstr ""
+
+msgid "Enrollment Date"
+msgstr ""
+
+msgid "Incident Date"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Value Type"
+msgstr ""
+
+msgid "Option Set"
+msgstr ""
+
+msgid "Possible Values"
+msgstr ""
+
+msgid "Organisation Units"
+msgstr ""
+
+msgid "Periods"
+msgstr ""
+
+msgid "Relationship Types"
+msgstr ""
+
+msgid "Relationship Type"
+msgstr ""
+
+msgid "Boolean"
+msgstr ""
+
+msgid "True only"
+msgstr ""
+
 msgid "Latitude"
+msgstr ""
+
+msgid "Longitude"
+msgstr ""
+
+msgid "Invalid choice was chosen"
 msgstr ""
 
 msgid "User with no permissions"

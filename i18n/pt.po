@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2021-06-09T07:29:25.828Z\n"
+"POT-Creation-Date: 2021-07-30T11:00:12.458Z\n"
 "PO-Revision-Date: 2020-06-11T08:45:45.996Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12,16 +12,16 @@ msgid "Data values - Create/update"
 msgstr ""
 
 msgid "Event"
-msgstr ""
+msgstr "Evento"
 
 msgid "Create/update"
 msgstr "Crio/atualizar"
 
 msgid "Relationships"
-msgstr ""
+msgstr "Relacionamentos"
 
 msgid "Tracked Entity Instance"
-msgstr ""
+msgstr "Instância de Entidade Rastreada"
 
 msgid "Template {{id}} not loaded"
 msgstr "Planilha {{id}} não carregada"
@@ -165,10 +165,10 @@ msgid "Select Organisation Units on template generation and import"
 msgstr "Selecione Unidades da organização na geração e importação de planilhas"
 
 msgid "Yes"
-msgstr ""
+msgstr "Sim"
 
 msgid "No"
-msgstr ""
+msgstr "Não"
 
 msgid "Days"
 msgstr "Dias"
@@ -245,7 +245,7 @@ msgid "Permissions"
 msgstr "Permissões"
 
 msgid "Type"
-msgstr ""
+msgstr "Tipo"
 
 msgid "Imported"
 msgstr "Importado"
@@ -263,7 +263,7 @@ msgid "Total"
 msgstr ""
 
 msgid "Identifier"
-msgstr ""
+msgstr "Identificador"
 
 msgid "Message"
 msgstr ""
@@ -411,8 +411,73 @@ msgstr "Erro ao excluir valores de dados"
 msgid "Select at least one model"
 msgstr "Selecione pelo menos uma planilha"
 
+msgid "Event id"
+msgstr "Id. do evento"
+
+msgid "TEI Id"
+msgstr "Id. de TEI"
+
+msgid "Options"
+msgstr "Opções"
+
+msgid "Date"
+msgstr "Data"
+
+msgid "TEI id"
+msgstr "Id. de TEI"
+
+msgid "Org Unit *"
+msgstr "Unidade Organizacional *"
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
+msgstr "Site não existe no DHIS2, contacte o administrador para cria-lo antes de enviar os dados"
+
+msgid "Enrollment Date"
+msgstr "Data de inscrição"
+
+msgid "Incident Date"
+msgstr "Data do Incidente"
+
+msgid "Description"
+msgstr "Descrição"
+
+msgid "Value Type"
+msgstr "Tipo de Valor"
+
+msgid "Option Set"
+msgstr "Conjunto de opções"
+
+msgid "Possible Values"
+msgstr "Valores possíveis"
+
+msgid "Organisation Units"
+msgstr "Unidades Organizacionais"
+
+msgid "Periods"
+msgstr "Períodos"
+
+msgid "Relationship Types"
+msgstr "Tipos de Relacionamentos"
+
+msgid "Relationship Type"
+msgstr "Tipo de Relacionamento"
+
+msgid "Boolean"
+msgstr "Booleano"
+
+msgid "True only"
+msgstr "Verdadeiro apenas"
+
 msgid "Latitude"
-msgstr ""
+msgstr "Latitude"
+
+msgid "Longitude"
+msgstr "Longitude"
+
+msgid "Invalid choice was chosen"
+msgstr "Esta opção é invalida"
 
 msgid "User with no permissions"
 msgstr ""

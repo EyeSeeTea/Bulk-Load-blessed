@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-06-09T07:29:25.828Z\n"
+"POT-Creation-Date: 2021-07-30T11:00:12.458Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -417,7 +417,72 @@ msgstr "Se ha producido un error borrando valores de datos"
 msgid "Select at least one model"
 msgstr "Seleccione al menos una plantilla"
 
+msgid "Event id"
+msgstr ""
+
+msgid "TEI Id"
+msgstr ""
+
+msgid "Options"
+msgstr "Opciones"
+
+msgid "Date"
+msgstr ""
+
+msgid "TEI id"
+msgstr ""
+
+msgid "Org Unit *"
+msgstr ""
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
+msgstr ""
+
+msgid "Enrollment Date"
+msgstr ""
+
+msgid "Incident Date"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Value Type"
+msgstr ""
+
+msgid "Option Set"
+msgstr ""
+
+msgid "Possible Values"
+msgstr ""
+
+msgid "Organisation Units"
+msgstr "Unidades Organizativas"
+
+msgid "Periods"
+msgstr "Periodos"
+
+msgid "Relationship Types"
+msgstr ""
+
+msgid "Relationship Type"
+msgstr ""
+
+msgid "Boolean"
+msgstr ""
+
+msgid "True only"
+msgstr ""
+
 msgid "Latitude"
+msgstr ""
+
+msgid "Longitude"
+msgstr ""
+
+msgid "Invalid choice was chosen"
 msgstr ""
 
 msgid "User with no permissions"
