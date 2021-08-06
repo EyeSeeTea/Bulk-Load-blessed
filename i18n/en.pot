@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-07-30T11:00:12.458Z\n"
-"PO-Revision-Date: 2021-07-30T11:00:12.458Z\n"
+"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
+"PO-Revision-Date: 2021-08-06T08:42:13.224Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -56,6 +56,18 @@ msgid "Cannot read data form id"
 msgstr ""
 
 msgid "Program or DataSet not found in instance"
+msgstr ""
+
+msgid "Case Registration Date"
+msgstr ""
+
+msgid "Date of patient visit"
+msgstr ""
+
+msgid "Date sample received"
+msgstr ""
+
+msgid "Date this form completed"
 msgstr ""
 
 msgid "Field {{field}} cannot be blank"
