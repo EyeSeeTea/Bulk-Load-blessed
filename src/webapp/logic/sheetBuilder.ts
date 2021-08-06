@@ -191,7 +191,10 @@ export class SheetBuilder {
                 sheet,
                 itemRow,
                 columnId++,
-                `${programStage.executionDateLabel ?? i18n.t("Date", { lng: this.builder.language })} *`
+                `${
+                    i18n.t(programStage.executionDateLabel, { lng: this.builder.language }) ??
+                    i18n.t("Date", { lng: this.builder.language })
+                } *`
             );
 
             // Include attribute look-up from TEI Instances sheet
@@ -325,14 +328,16 @@ export class SheetBuilder {
             sheet,
             itemRow,
             3,
-            (program.enrollmentDateLabel || i18n.t("Enrollment Date", { lng: this.builder.language })) + " *"
+            (i18n.t(program.enrollmentDateLabel, { lng: this.builder.language }) ||
+                i18n.t("Enrollment Date", { lng: this.builder.language })) + " *"
         );
 
         this.createColumn(
             sheet,
             itemRow,
             4,
-            program.incidentDateLabel || i18n.t("Incident Date", { lng: this.builder.language })
+            i18n.t(program.incidentDateLabel, { lng: this.builder.language }) ||
+                i18n.t("Incident Date", { lng: this.builder.language })
         );
 
         const programAttributes = program.programTrackedEntityAttributes || [];
@@ -725,7 +730,7 @@ export class SheetBuilder {
             dataEntrySheet,
             itemRow,
             columnId++,
-            "Org Unit *",
+            i18n.t("Org Unit *", { lng: this.builder.language }),
             null,
             this.validations.get("organisationUnits"),
             "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
@@ -831,7 +836,10 @@ export class SheetBuilder {
                     dataEntrySheet,
                     itemRow,
                     columnId++,
-                    `${programStage.executionDateLabel ?? i18n.t("Date", { lng: this.builder.language })} *`
+                    `${
+                        i18n.t(programStage.executionDateLabel, { lng: this.builder.language }) ??
+                        i18n.t("Date", { lng: this.builder.language })
+                    } *`
                 );
 
                 if (programStage.programStageSections.length === 0) {
