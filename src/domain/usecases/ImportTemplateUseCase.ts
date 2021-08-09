@@ -123,7 +123,10 @@ export class ImportTemplateUseCase implements UseCase {
         return {
             ...dataPackage,
             dataEntries: dataPackage.dataEntries.map(({ dataValues, ...dataEntry }) => {
-                return { ...dataEntry, dataValues: dataValues.map(value => formatDhis2Value(value, dataForm)) };
+                return {
+                    ...dataEntry,
+                    dataValues: _.compact(dataValues.map(value => formatDhis2Value(value, dataForm))),
+                };
             }),
         };
     }
@@ -325,11 +328,16 @@ export const compareDataPackages = (
     return true;
 };
 
-const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue => {
+const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined => {
     const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
+    const booleanValue = String(item.value) === "true" || item.value === "Yes";
 
-    if (dataElement?.valueType === "BOOLEAN" || dataElement?.valueType === "TRUE_ONLY") {
-        return { ...item, value: String(item.value) === "true" || item.value === "Yes" };
+    if (dataElement?.valueType === "BOOLEAN") {
+        return { ...item, value: booleanValue };
+    }
+
+    if (dataElement?.valueType === "TRUE_ONLY") {
+        return booleanValue ? { ...item, value: true } : undefined;
     }
 
     const selectedOption = dataElement?.options?.find(({ id }) => item.value === id);

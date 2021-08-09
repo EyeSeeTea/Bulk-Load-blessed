@@ -332,33 +332,15 @@ export default class Settings {
     }
 
     isTemplateGenerationVisible() {
-        const permission = this.permissions.generation;
-        if (permission.type === "all") return true;
-
-        const hasGroupAccess = this.findCurrentUser(permission.groups);
-        const hasUserAccess = this.findCurrentUser(permission.users);
-        return hasGroupAccess || hasUserAccess;
+        return this.hasPermissions(this.permissions.generation);
     }
 
     areSettingsVisibleForCurrentUser(): boolean {
-        const permission = this.permissions.settings;
-        if (permission.type === "all") return true;
-
-        const { authorities } = this.currentUser;
-        const isUserAdmin = authorities.has("ALL");
-
-        const hasGroupAccess = this.findCurrentUser(permission.groups);
-        const hasUserAccess = this.findCurrentUser(permission.users);
-        return isUserAdmin || hasGroupAccess || hasUserAccess;
+        return this.hasPermissions(this.permissions.settings);
     }
 
     isImportDataVisibleForCurrentUser(): boolean {
-        const permission = this.permissions.import;
-        if (permission.type === "all") return true;
-
-        const hasGroupAccess = this.findCurrentUser(permission.groups);
-        const hasUserAccess = this.findCurrentUser(permission.users);
-        return hasGroupAccess || hasUserAccess;
+        return this.hasPermissions(this.permissions.import);
     }
 
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
@@ -366,6 +348,15 @@ export default class Settings {
             { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
             { key: "program", name: i18n.t("Program"), value: this.models.program },
         ];
+    }
+
+    private hasPermissions(permission: PermissionValue): boolean {
+        if (permission.type === "all") return true;
+
+        const hasGroupAccess = this.findCurrentUser(permission.groups);
+        const hasUserAccess = this.findCurrentUser(permission.users);
+        const hasUnknownAccess = this.findCurrentUser(permission.unknown);
+        return hasGroupAccess || hasUserAccess || hasUnknownAccess;
     }
 
     private findCurrentUser(collection: NamedRef[]): boolean {
