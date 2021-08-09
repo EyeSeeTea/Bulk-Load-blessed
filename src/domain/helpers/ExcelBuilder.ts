@@ -1,9 +1,10 @@
 import dateFormat from "dateformat";
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
-import { removeCharacters } from "../../utils/string";
 import { promiseMap } from "../../utils/promises";
+import { removeCharacters } from "../../utils/string";
 import { DataPackage } from "../entities/DataPackage";
+import { Relationship } from "../entities/Relationship";
 import {
     CellDataSource,
     CellRef,
@@ -21,8 +22,7 @@ import {
 import { Theme, ThemeStyle } from "../entities/Theme";
 import { getRelationships } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
-import { InstanceRepository, BuilderMetadata, emptyBuilderMetadata } from "../repositories/InstanceRepository";
-import { Relationship } from "../entities/Relationship";
+import { BuilderMetadata, emptyBuilderMetadata, InstanceRepository } from "../repositories/InstanceRepository";
 
 const dateFormatPattern = "yyyy-mm-dd";
 
@@ -47,7 +47,7 @@ export class ExcelBuilder {
                         await this.fillRows(template, dataSource, payload);
                         break;
                     case "rowTei":
-                        await this.fillTeiRows(template, dataSource, payload, metadata);
+                        await this.fillTeiRows(template, dataSource, payload);
                         break;
                     case "rowTrackedEvent":
                         await this.fillTrackerEventRows(template, dataSource, payload, metadata);
@@ -98,12 +98,7 @@ export class ExcelBuilder {
         return removeCharacters(await this.excelRepository.readCell(template.id, ref));
     }
 
-    private async fillTeiRows(
-        template: Template,
-        dataSource: TeiRowDataSource,
-        payload: DataPackage,
-        metadata: BuilderMetadata
-    ) {
+    private async fillTeiRows(template: Template, dataSource: TeiRowDataSource, payload: DataPackage) {
         let { rowStart } = dataSource.attributes;
         if (payload.type !== "trackerPrograms") return;
 
@@ -118,11 +113,7 @@ export class ExcelBuilder {
 
             const orgUnitCell = await this.excelRepository.findRelativeCell(template.id, dataSource.orgUnit, cells[0]);
             if (orgUnitCell && orgUnit) {
-                await this.excelRepository.writeCell(
-                    template.id,
-                    orgUnitCell,
-                    metadata.orgUnits[orgUnit.id]?.name ?? ""
-                );
+                await this.excelRepository.writeCell(template.id, orgUnitCell, `_${orgUnit.id}`);
             }
 
             const teiIdCell = await this.excelRepository.findRelativeCell(template.id, dataSource.teiId, cells[0]);
@@ -172,8 +163,7 @@ export class ExcelBuilder {
                 const attributeValue = tei.attributeValues.find(av => av.attribute.id === attributeId);
 
                 const value = attributeValue
-                    ? (attributeValue.optionId ? metadata.options[attributeValue.optionId]?.name : null) ||
-                      attributeValue.value
+                    ? (attributeValue.optionId ? `_${attributeValue.optionId}` : null) || attributeValue.value
                     : undefined;
 
                 if (value) {
@@ -280,11 +270,7 @@ export class ExcelBuilder {
                 cells[0]
             );
             if (cocIdCell && cocId) {
-                await this.excelRepository.writeCell(
-                    template.id,
-                    cocIdCell,
-                    metadata.categoryOptionCombos[cocId]?.name ?? ""
-                );
+                await this.excelRepository.writeCell(template.id, cocIdCell, `_${cocId}`);
             }
 
             const dateCell = await this.excelRepository.findRelativeCell(template.id, dataSource.date, cells[0]);
@@ -294,8 +280,8 @@ export class ExcelBuilder {
                 if (!dataElementId || !cell) continue;
                 const { value } = dataValues.find(dv => dv.dataElement === dataElementId) ?? {};
                 if (value) {
-                    const value2 = metadata.options[value.toString()]?.name || value;
-                    await this.excelRepository.writeCell(template.id, cell, value2);
+                    const optionId = metadata.options[value.toString()]?.id;
+                    await this.excelRepository.writeCell(template.id, cell, optionId ? `_${optionId}` : value);
                 }
             }
 

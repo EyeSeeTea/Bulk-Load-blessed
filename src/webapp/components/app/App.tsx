@@ -9,6 +9,7 @@ import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import { useEffect, useState } from "react";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
+import { addExtraTranslations } from "../../../utils/translations";
 import { AppContext, AppContextI } from "../../contexts/app-context";
 import Root from "../../pages/root/RootPage";
 import { useMigrations } from "../migrations/hooks";
@@ -77,6 +78,7 @@ const App = (props: { d2: unknown; api: D2Api }) => {
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
             initFeedbackTool(d2, appConfig);
             setAppContext({ d2: d2 as object, api, compositionRoot });
+            addExtraTranslations();
         };
 
         run();
