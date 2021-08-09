@@ -1,0 +1,665 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Bulk Load\n"
+"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Data values - Create/update"
+msgstr "Значения данных - создание/обновление"
+
+msgid "Event"
+msgstr "Событие"
+
+msgid "Create/update"
+msgstr "Создание/обновление"
+
+msgid "Relationships"
+msgstr "Отношения"
+
+msgid "Tracked Entity Instance"
+msgstr "Отслеживаемый экземпляр сущности"
+
+msgid "Template {{id}} not loaded"
+msgstr "Шаблон {{id}} не загружен"
+
+msgid "Data values - Delete"
+msgstr "Значения данных - Удалить"
+
+msgid ""
+"It is not possible to create products. The maximum number of products has "
+"been reached. Please contact your administrator."
+msgstr ""
+"Невозможно создать продукты. Достигнуто максимальное количество продуктов. "
+"Пожалуйста, свяжитесь с вашим администратором."
+
+msgid "It is not possible to create product. Please provide {{field}}."
+msgstr "Невозможно создать продукт. Пожалуйста, укажите {{поле}}."
+
+msgid ""
+"It is not possible to create product. Monovalent and Polyvalent should be "
+"exclusive for product {{product}}."
+msgstr ""
+"Невозможно создать продукт. Моновалентный и поливалентный должны быть "
+"эксклюзивными для продукта {{продукт}}."
+
+msgid ""
+"Could not import products. Invalid data received. Please review the excel "
+"file."
+msgstr ""
+"Не удалось импортировать продукты. Получены недопустимые данные. Пожалуйста, "
+"просмотрите файл excel."
+
+msgid ""
+"Snake bite data store {{type}} is corrupted. Please contact an administrator."
+msgstr ""
+"Хранилище данных укуса змеи {{тип}} повреждено. Пожалуйста, свяжитесь с "
+"администратором."
+
+msgid "Cannot read data form id"
+msgstr "Невозможно прочитать данные формы id"
+
+msgid "Program or DataSet not found in instance"
+msgstr "Программа или набор данных не найдены в экземпляре"
+
+msgid "Case Registration Date"
+msgstr "Дата регистрации дела"
+
+msgid "Date of patient visit"
+msgstr "Дата посещения пациента"
+
+msgid "Date sample received"
+msgstr "Дата получения образца"
+
+msgid "Date this form completed"
+msgstr "Дата заполнения данной формы"
+
+msgid "Field {{field}} cannot be blank"
+msgstr "Поле {{поле}} не может быть пустым"
+
+msgid "You need to select at least one {{element}}"
+msgstr "Вам необходимо выбрать хотя бы один {{элемент}}"
+
+msgid ""
+"There has been an error. You can either retry or contact your administrator "
+"if you think there has been an un recoverable error"
+msgstr ""
+"Произошла ошибка. Вы можете повторить попытку или связаться с "
+"администратором, если вы считаете, что произошла невосстановимая ошибка."
+
+msgid "There are pending migrations"
+msgstr "Миграция еще не завершена"
+
+msgid "Ignore"
+msgstr "Игнорировать"
+
+msgid "Migrations finished successfully, you may now continue to the app"
+msgstr ""
+"Миграция завершилась успешно, теперь вы можете продолжить работу с "
+"приложением"
+
+msgid "Checking migrations"
+msgstr "Проверка миграций"
+
+msgid "Migrate instance"
+msgstr "Мигрировать экземпляр"
+
+msgid "Migrating..."
+msgstr "Миграция..."
+
+msgid "Continue to the App"
+msgstr "Перейдите к приложению"
+
+msgid ""
+"The app needs to run pending migrations (from version {{instanceVersion}} to "
+"version {{appVersion}}) in order to continue. This may take a long time, "
+"make sure the process is not interrupted."
+msgstr ""
+"Приложению необходимо выполнить ожидающие миграции (с версии "
+"{{instanceVersion}} на версию {{appVersion}}), чтобы продолжить работу. Это "
+"может занять много времени, убедитесь, что процесс не прерван."
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "Continue to the app anyway"
+msgstr "Все равно продолжайте приложение"
+
+msgid ""
+"The database version ({{instanceVersion}}) is greater than the app version "
+"({{appVersion}}), cannot continue. Please contact the administrator to "
+"update the app."
+msgstr ""
+"Версия базы данных ({{instanceVersion}}) больше, чем версия приложения "
+"({{appVersion}}), продолжение невозможно. Пожалуйста, свяжитесь с "
+"администратором для обновления приложения."
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Data set"
+msgstr "Набор данных"
+
+msgid "Search data elements"
+msgstr "Элементы данных поиска"
+
+msgid "All"
+msgstr "Все"
+
+msgid "Data elements used for duplication assessment"
+msgstr "Элементы данных, используемые для оценки дублирования"
+
+msgid "Program"
+msgstr "Программа"
+
+msgid "Access to Template Generation"
+msgstr "Доступ к генерации шаблонов"
+
+msgid "Access to Import Data"
+msgstr "Доступ к импортируемым данным"
+
+msgid "Access to Settings and Themes"
+msgstr "Доступ к настройкам и темам"
+
+msgid "Access Permissions confirmation"
+msgstr "Подтверждение разрешений доступа"
+
+msgid ""
+"This option gives access to all users. The current list of allowed users and "
+"user groups will be deleted. Do you want to proceed?"
+msgstr ""
+"Эта опция предоставляет доступ всем пользователям. Текущий список "
+"разрешенных пользователей и групп пользователей будет удален. Вы хотите "
+"продолжить?"
+
+msgid "Accept"
+msgstr "Принять"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "All users allowed"
+msgstr "Разрешено всем пользователям"
+
+msgid "Search data elements or attributes"
+msgstr "Поиск элементов или атрибутов данных"
+
+msgid "Select Organisation Units on template generation"
+msgstr "Выберите организационные единицы при создании шаблона"
+
+msgid "Select Organisation Units on template import"
+msgstr "Выберите организационные единицы при импорте шаблона"
+
+msgid "Select Organisation Units on template generation and import"
+msgstr "Выберите организационные единицы при создании и импорте шаблона"
+
+msgid "Yes"
+msgstr "Да"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "Days"
+msgstr "Дни"
+
+msgid "Weeks"
+msgstr "Недели"
+
+msgid "Months"
+msgstr "Месяцы"
+
+msgid "Years"
+msgstr "Годы"
+
+msgid "Accessible to all users"
+msgstr "Доступность для всех пользователей"
+
+msgid "Accessible to {{users}} users and {{userGroups}} user groups"
+msgstr ""
+"Доступно пользователям {{users}} и группам пользователей {{userGroups}}."
+
+msgid "Accessible to {{users}} users"
+msgstr "Доступно для пользователей {{users}}"
+
+msgid "Accessible to {{userGroups}} user groups"
+msgstr "Доступно для групп пользователей {{userGroups}}"
+
+msgid "Only accessible to system administrators"
+msgstr "Доступен только системным администраторам"
+
+msgid "Not accessible"
+msgstr "Недоступно"
+
+msgid "Data element filter for data sets"
+msgstr "Фильтр элементов данных для наборов данных"
+
+msgid "Data element and attribute filter for programs"
+msgstr "Фильтр элементов данных и атрибутов для программ"
+
+msgid "Data model"
+msgstr "Модель данных"
+
+msgid "Organisation Unit Visibility"
+msgstr "Видимость организационной единицы"
+
+msgid "Columns layout"
+msgstr "Расположение колонок"
+
+msgid "Filter columns for data sets"
+msgstr "Фильтр столбцов для наборов данных"
+
+msgid ""
+"Data elements (with optional disaggregation) to include/exclude for data sets"
+msgstr ""
+"Элементы данных (с необязательной разбивкой) для включения/исключения из "
+"наборов данных"
+
+msgid "Filter columns for programs"
+msgstr "Фильтр столбцов для программ"
+
+msgid "Data elements and attributes to include/exclude for programs"
+msgstr "Элементы данных и атрибуты для включения/исключения для программ"
+
+msgid "Duplicate detection"
+msgstr "Обнаружение дубликатов"
+
+msgid "Event date time difference for events (programs)"
+msgstr "Разница во времени даты события для событий (программ)"
+
+msgid "Duplicate detection filter for events (programs)"
+msgstr "Фильтр обнаружения дубликатов для событий (программ)"
+
+msgid "Data elements used for duplicates identification"
+msgstr "Элементы данных, используемые для выявления дубликатов"
+
+msgid "Permissions"
+msgstr "Разрешения"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Imported"
+msgstr "Импортировано"
+
+msgid "Updated"
+msgstr "Обновленный"
+
+msgid "Deleted"
+msgstr "Удалено"
+
+msgid "Ignored"
+msgstr "Игнорируется"
+
+msgid "Total"
+msgstr "Всего"
+
+msgid "Identifier"
+msgstr "Идентификатор"
+
+msgid "Message"
+msgstr "Сообщение"
+
+msgid "Synchronization Results"
+msgstr "Результаты синхронизации"
+
+msgid "Ok"
+msgstr "Хорошо"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Summary"
+msgstr "Резюме"
+
+msgid "Messages"
+msgstr "Сообщения"
+
+msgid "JSON Response"
+msgstr "Ответ JSON"
+
+msgid "Data Set"
+msgstr "Набор данных"
+
+msgid "Template"
+msgstr "Шаблон"
+
+msgid "Select template to export..."
+msgstr "Выберите шаблон для экспорта..."
+
+msgid "Data Model"
+msgstr "Модель данных"
+
+msgid "Period"
+msgstr "Период"
+
+msgid "Start period"
+msgstr "Начальный период"
+
+msgid "End period"
+msgstr "Конечный период"
+
+msgid "Organisation units"
+msgstr "Организационные единицы"
+
+msgid "Select organisation unit to populate data"
+msgstr "Выберите организационную единицу для заполнения данных"
+
+msgid "Select available organisation units to include in the template"
+msgstr "Выберите доступные подразделения организации для включения в шаблон"
+
+msgid "User does not have any capture organisations units"
+msgstr "У пользователя нет подразделений организаций захвата"
+
+msgid "Advanced template properties"
+msgstr "Расширенные свойства шаблона"
+
+msgid "Language"
+msgstr "Язык"
+
+msgid "Theme"
+msgstr "Тема"
+
+msgid "<No value>"
+msgstr "<Нет значения>"
+
+msgid "Populate template with data"
+msgstr "Заполнение шаблона данными"
+
+msgid "Start date"
+msgstr "Дата начала"
+
+msgid "End date"
+msgstr "Дата окончания"
+
+msgid "Edit theme"
+msgstr "Редактировать тему"
+
+msgid "New theme"
+msgstr "Новая тема"
+
+msgid "Theme name"
+msgstr "Название темы"
+
+msgid "Colors"
+msgstr "Цвета"
+
+msgid "Color options"
+msgstr "Варианты цветов"
+
+msgid "Headings"
+msgstr "Рубрики"
+
+msgid "Title text"
+msgstr "Текст заглавия"
+
+msgid "Subtitle text"
+msgstr "Текст субтитров"
+
+msgid "Logo"
+msgstr "Логотип"
+
+msgid "Drag and drop logo file"
+msgstr "Перетащите файл логотипа"
+
+msgid "Pattern"
+msgstr "Узор"
+
+msgid "Fixed"
+msgstr "Исправлено"
+
+msgid "An error ocurred while saving theme"
+msgstr "Возникла ошибка при сохранении темы"
+
+msgid "Delete {{count}} themes"
+msgid_plural "Delete {{count}} themes"
+msgstr[0] "Удалить {{count}} темы"
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+msgid "Are you sure you want to remove selected themes"
+msgstr "Вы уверены, что хотите удалить выбранные темы"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Title"
+msgstr "Название"
+
+msgid "Subtitle"
+msgstr "Субтитр"
+
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Create theme"
+msgstr "Создать тему"
+
+msgid "Error deleting data values"
+msgstr "Ошибка при удалении значений данных"
+
+msgid "Select at least one model"
+msgstr "Выберите хотя бы одну модель"
+
+msgid "Event id"
+msgstr "Идентификатор события"
+
+msgid "TEI Id"
+msgstr "Идентификатор TEI"
+
+msgid "Options"
+msgstr "Опции"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "TEI id"
+msgstr "идентификатор TEI"
+
+msgid "Org Unit *"
+msgstr "Оргподразделение *"
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
+msgstr ""
+"Этот сайт не существует в DHIS2, пожалуйста, обратитесь к администратору для "
+"создания этого сайта перед загрузкой данных"
+
+msgid "Enrollment Date"
+msgstr "Дата зачисления"
+
+msgid "Incident Date"
+msgstr "Дата инцидента"
+
+msgid "Description"
+msgstr "Описание"
+
+msgid "Value Type"
+msgstr "Тип значения"
+
+msgid "Option Set"
+msgstr "Набор опций"
+
+msgid "Possible Values"
+msgstr "Возможные значения"
+
+msgid "Organisation Units"
+msgstr "Организационные единицы"
+
+msgid "Periods"
+msgstr "Периоды"
+
+msgid "Relationship Types"
+msgstr "Типы отношений"
+
+msgid "Relationship Type"
+msgstr "Тип отношений"
+
+msgid "Boolean"
+msgstr "Булево"
+
+msgid "True only"
+msgstr "Только правда"
+
+msgid "Latitude"
+msgstr "Широта"
+
+msgid "Longitude"
+msgstr "Долгота"
+
+msgid "Invalid choice was chosen"
+msgstr "Был выбран неправильный вариант"
+
+msgid "User with no permissions"
+msgstr "Пользователь без прав доступа"
+
+msgid "It seems this user account does not have any permission. "
+msgstr "Похоже, что у этой учетной записи пользователя нет никаких прав. "
+
+msgid ""
+"Please get in touch with the admin if you need access to these sections."
+msgstr ""
+"Пожалуйста, свяжитесь с администратором, если вам нужен доступ к этим "
+"разделам."
+
+msgid "You need to select at least one element to export"
+msgstr "Вам необходимо выбрать хотя бы один элемент для экспорта"
+
+msgid "You need to select start and end periods for dataSet templates"
+msgstr ""
+"Вам необходимо выбрать начальный и конечный периоды для шаблонов наборов "
+"данных"
+
+msgid "You need to select start and end dates to populate template"
+msgstr ""
+"Вам необходимо выбрать начальную и конечную даты для заполнения шаблона"
+
+msgid "Downloading template..."
+msgstr "Загрузка шаблона..."
+
+msgid "Couldn't generate template"
+msgstr "Не удалось сгенерировать шаблон"
+
+msgid "Download template"
+msgstr "Скачать шаблон"
+
+msgid "Reading file..."
+msgstr "Чтение файла..."
+
+msgid "Cannot read file"
+msgstr "Невозможно прочитать файл"
+
+msgid "You don't have write permissions for {{type}} {{name}}"
+msgstr "У вас нет прав на запись для {{тип}} {{name}}"
+
+msgid "Reading data..."
+msgstr "Чтение данных..."
+
+msgid "Select at least one organisation unit to import data"
+msgstr "Выберите хотя бы одно организационное подразделение для импорта данных"
+
+msgid "Importing data..."
+msgstr "Импорт данных..."
+
+msgid "Existing data values"
+msgstr "Существующие значения данных"
+
+msgid ""
+"There are {{totalExisting}} data values in the database for this "
+"organisation unit and periods. If you proceed, all those data values will be "
+"deleted and only the ones in the spreadsheet will be saved. Are you sure?"
+msgstr ""
+"В базе данных имеются значения данных {{totalExisting}} для этой "
+"организационной единицы и периодов. Если вы продолжите, все эти значения "
+"данных будут удалены, и будут сохранены только те, которые находятся в "
+"электронной таблице. Вы уверены?"
+
+msgid "Proceed"
+msgstr "Действуйте"
+
+msgid "Import only new data values"
+msgstr "Импортируйте только новые значения данных"
+
+msgid "Warning: Your upload may result in the generation of duplicates"
+msgstr "Предупреждение: Ваша загрузка может привести к созданию дубликатов"
+
+msgid ""
+"There are {{totalExisting}} records in your template with very similar or "
+"exact values as other records that already exist. If you proceed, you risk "
+"creating duplicates. What would you like to do?"
+msgstr ""
+"В вашем шаблоне есть записи {{totalExisting}} с очень похожими или точными "
+"значениями, как у других уже существующих записей. Если вы продолжите, вы "
+"рискуете создать дубликаты. Что бы вы хотели сделать?"
+
+msgid "Import everything anyway"
+msgstr "Импортируйте все в любом случае"
+
+msgid "Cancel import"
+msgstr "Отменить импорт"
+
+msgid "Import only new records"
+msgstr "Импортировать только новые записи"
+
+msgid "Invalid organisation units found"
+msgstr "Найдены недопустимые организационные единицы"
+
+msgid ""
+"There are {{totalInvalid}} data values with an invalid organisation unit "
+"that will be ignored during import.\n"
+"You can still download them and send them to your administrator."
+msgstr ""
+"Существуют значения данных {{totalInvalid}} с недопустимой организационной "
+"единицей, которые будут проигнорированы при импорте.\n"
+"Вы все еще можете загрузить их и отправить администратору."
+
+msgid "Download data values with invalid organisation units"
+msgstr "Загрузка значений данных с недопустимыми организационными единицами"
+
+msgid "Bulk data import"
+msgstr "Массовый импорт данных"
+
+msgid "Drag and drop file to import"
+msgstr "Перетащите файл для импорта"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "event"
+msgstr "мероприятие"
+
+msgid "Update"
+msgstr "Обновление"
+
+msgid "data values"
+msgstr "значения данных"
+
+msgid "Select import Organisation Unit"
+msgstr "Выберите импортируемое организационное подразделение"
+
+msgid "No capture org unit match element org units"
+msgstr "Нет захвата орг единицы соответствие элемента орг единицы"
+
+msgid "Import data"
+msgstr "Импортные данные"
+
+msgid "Home"
+msgstr "Главная"
+
+msgid "Themes"
+msgstr "Темы"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Settings saved"
+msgstr "Сохранение настроек"
