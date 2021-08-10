@@ -192,8 +192,11 @@ export class SheetBuilder {
                 itemRow,
                 columnId++,
                 `${
-                    i18n.t(programStage.executionDateLabel, { lng: this.builder.language }) ??
-                    i18n.t("Date", { lng: this.builder.language })
+                    programStage.executionDateLabel
+                        ? i18n.t(programStage.executionDateLabel, {
+                              lng: this.builder.language,
+                          })
+                        : i18n.t("Date", { lng: this.builder.language })
                 } *`
             );
 
@@ -328,16 +331,20 @@ export class SheetBuilder {
             sheet,
             itemRow,
             3,
-            (i18n.t(program.enrollmentDateLabel, { lng: this.builder.language }) ||
-                i18n.t("Enrollment Date", { lng: this.builder.language })) + " *"
+            `${
+                program.enrollmentDateLabel
+                    ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
+                    : i18n.t("Enrollment Date", { lng: this.builder.language })
+            } *`
         );
 
         this.createColumn(
             sheet,
             itemRow,
             4,
-            i18n.t(program.incidentDateLabel, { lng: this.builder.language }) ||
-                i18n.t("Incident Date", { lng: this.builder.language })
+            program.incidentDateLabel
+                ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
+                : i18n.t("Incident Date", { lng: this.builder.language })
         );
 
         const programAttributes = program.programTrackedEntityAttributes || [];
@@ -837,8 +844,11 @@ export class SheetBuilder {
                     itemRow,
                     columnId++,
                     `${
-                        i18n.t(programStage.executionDateLabel, { lng: this.builder.language }) ??
-                        i18n.t("Date", { lng: this.builder.language })
+                        programStage.executionDateLabel
+                            ? i18n.t(programStage.executionDateLabel, {
+                                  lng: this.builder.language,
+                              })
+                            : i18n.t("Date", { lng: this.builder.language })
                     } *`
                 );
 
