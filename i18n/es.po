@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-05-25T11:10:38.397Z\n"
+"Project-Id-Version: Bulk Load\n"
+"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -10,53 +10,73 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "Data values - Create/update"
-msgstr ""
+msgstr "Valores de los datos - Crear/actualizar"
 
 msgid "Event"
-msgstr ""
+msgstr "Evento"
 
 msgid "Create/update"
 msgstr "Crear/actualizar"
 
 msgid "Relationships"
-msgstr ""
+msgstr "Relaciones"
 
 msgid "Tracked Entity Instance"
-msgstr ""
+msgstr "Instancia de la entidad rastreada"
 
 msgid "Template {{id}} not loaded"
 msgstr "La plantilla {{id}} no se pudo cargar"
 
 msgid "Data values - Delete"
-msgstr ""
+msgstr "Valores de los datos - Borrar"
 
 msgid ""
 "It is not possible to create products. The maximum number of products has "
 "been reached. Please contact your administrator."
 msgstr ""
+"No es posible crear productos. Se ha alcanzado el número máximo de "
+"productos. Póngase en contacto con su administrador."
 
 msgid "It is not possible to create product. Please provide {{field}}."
-msgstr ""
+msgstr "No es posible crear el producto. Por favor, proporcione {{campo}}."
 
 msgid ""
 "It is not possible to create product. Monovalent and Polyvalent should be "
 "exclusive for product {{product}}."
 msgstr ""
+"No es posible crear el producto. Monovalente y Polivalente deben ser "
+"exclusivos para el producto {{producto}}."
 
 msgid ""
 "Could not import products. Invalid data received. Please review the excel "
 "file."
 msgstr ""
+"No se han podido importar productos. Los datos recibidos no son válidos. Por "
+"favor, revise el archivo excel."
 
 msgid ""
 "Snake bite data store {{type}} is corrupted. Please contact an administrator."
 msgstr ""
+"El almacén de datos de mordedura de serpiente {{tipo}} está dañado. Por "
+"favor, póngase en contacto con un administrador."
 
 msgid "Cannot read data form id"
-msgstr ""
+msgstr "No se pueden leer los datos del formulario id"
 
 msgid "Program or DataSet not found in instance"
 msgstr "No se encontraron el programa o el set de datos en la instancia"
+
+msgid "Case Registration Date"
+msgstr ""
+
+msgid "Date of patient visit"
+msgstr ""
+
+msgid "Date sample received"
+msgstr ""
+
+msgid "Date this form completed"
+msgstr ""
 
 msgid "Field {{field}} cannot be blank"
 msgstr "El campo {{field}} no se puede dejar vacio"
@@ -68,45 +88,54 @@ msgid ""
 "There has been an error. You can either retry or contact your administrator "
 "if you think there has been an un recoverable error"
 msgstr ""
+"Se ha producido un error. Puede volver a intentarlo o ponerse en contacto "
+"con su administrador si cree que se ha producido un error irrecuperable"
 
 msgid "There are pending migrations"
-msgstr ""
+msgstr "Hay migraciones pendientes"
 
 msgid "Ignore"
 msgstr "Ignorar"
 
 msgid "Migrations finished successfully, you may now continue to the app"
 msgstr ""
+"La migración ha finalizado con éxito, ahora puede continuar con la aplicación"
 
 msgid "Checking migrations"
 msgstr "Comprobando migraciones..."
 
 msgid "Migrate instance"
-msgstr ""
+msgstr "Migrar la instancia"
 
 msgid "Migrating..."
-msgstr ""
+msgstr "La migración..."
 
 msgid "Continue to the App"
-msgstr ""
+msgstr "Continuar con la aplicación"
 
 msgid ""
 "The app needs to run pending migrations (from version {{instanceVersion}} to "
 "version {{appVersion}}) in order to continue. This may take a long time, "
 "make sure the process is not interrupted."
 msgstr ""
+"La aplicación necesita ejecutar las migraciones pendientes (de la versión "
+"{{instanceVersion}} a la versión {{appVersion}}) para poder continuar. Esto "
+"puede llevar mucho tiempo, asegúrate de que el proceso no se interrumpe."
 
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 msgid "Continue to the app anyway"
-msgstr ""
+msgstr "Continuar con la aplicación de todos modos"
 
 msgid ""
 "The database version ({{instanceVersion}}) is greater than the app version "
 "({{appVersion}}), cannot continue. Please contact the administrator to "
 "update the app."
 msgstr ""
+"La versión de la base de datos ({{instanceVersion}}) es mayor que la versión "
+"de la app ({{appVersion}}), no puede continuar. Póngase en contacto con el "
+"administrador para actualizar la app."
 
 msgid "Close"
 msgstr "Cerrar"
@@ -155,7 +184,7 @@ msgid "All users allowed"
 msgstr "Permitir todos los usuarios"
 
 msgid "Search data elements or attributes"
-msgstr ""
+msgstr "Buscar elementos de datos o atributos"
 
 msgid "Select Organisation Units on template generation"
 msgstr "Mostrar unidades organizativas durante la generación de la plantilla"
@@ -169,10 +198,10 @@ msgstr ""
 "importar datos"
 
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 msgid "No"
-msgstr ""
+msgstr "No"
 
 msgid "Days"
 msgstr "Días"
@@ -206,10 +235,10 @@ msgid "Not accessible"
 msgstr "No accesible"
 
 msgid "Data element filter for data sets"
-msgstr ""
+msgstr "Filtro de elementos de datos para conjuntos de datos"
 
 msgid "Data element and attribute filter for programs"
-msgstr ""
+msgstr "Filtro de elementos de datos y atributos de los programas"
 
 msgid "Data model"
 msgstr "Modelos de Datos"
@@ -218,20 +247,22 @@ msgid "Organisation Unit Visibility"
 msgstr "Visibilidad de unidades organizativas"
 
 msgid "Columns layout"
-msgstr ""
+msgstr "Diseño de las columnas"
 
 msgid "Filter columns for data sets"
-msgstr ""
+msgstr "Filtrar las columnas de los conjuntos de datos"
 
 msgid ""
 "Data elements (with optional disaggregation) to include/exclude for data sets"
 msgstr ""
+"Elementos de datos (con desagregación opcional) para incluir/excluir en los "
+"conjuntos de datos"
 
 msgid "Filter columns for programs"
-msgstr ""
+msgstr "Filtrar las columnas de los programas"
 
 msgid "Data elements and attributes to include/exclude for programs"
-msgstr ""
+msgstr "Elementos de datos y atributos a incluir/excluir para los programas"
 
 msgid "Duplicate detection"
 msgstr "Detección de duplicados"
@@ -242,7 +273,7 @@ msgstr ""
 "de duplicados para eventos (programas)"
 
 msgid "Duplicate detection filter for events (programs)"
-msgstr ""
+msgstr "Filtro de detección de duplicados para eventos (programas)"
 
 msgid "Data elements used for duplicates identification"
 msgstr "Elementos de datos usados para identificar los duplicados"
@@ -251,7 +282,7 @@ msgid "Permissions"
 msgstr "Permisos"
 
 msgid "Type"
-msgstr ""
+msgstr "Tipo"
 
 msgid "Imported"
 msgstr "Importados"
@@ -266,31 +297,31 @@ msgid "Ignored"
 msgstr "Ignorados"
 
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 msgid "Identifier"
-msgstr ""
+msgstr "Identificador"
 
 msgid "Message"
-msgstr ""
+msgstr "Mensaje"
 
 msgid "Synchronization Results"
-msgstr ""
+msgstr "Resultados de la sincronización"
 
 msgid "Ok"
 msgstr "Ok"
 
 msgid "Status"
-msgstr ""
+msgstr "Estado"
 
 msgid "Summary"
-msgstr ""
+msgstr "Resumen"
 
 msgid "Messages"
-msgstr ""
+msgstr "Mensajes"
 
 msgid "JSON Response"
-msgstr ""
+msgstr "Respuesta JSON"
 
 msgid "Data Set"
 msgstr "Data Set"
@@ -317,7 +348,7 @@ msgid "Organisation units"
 msgstr "Unidades Organizativas"
 
 msgid "Select organisation unit to populate data"
-msgstr ""
+msgstr "Seleccione la unidad de organización para rellenar los datos"
 
 msgid "Select available organisation units to include in the template"
 msgstr "Seleccione las unidades organizativas para añadir a la plantilla"
@@ -417,11 +448,81 @@ msgstr "Se ha producido un error borrando valores de datos"
 msgid "Select at least one model"
 msgstr "Seleccione al menos una plantilla"
 
-msgid "User with no permissions"
+msgid "Event id"
+msgstr "ID del evento"
+
+msgid "TEI Id"
+msgstr "Id. TEI"
+
+msgid "Options"
+msgstr "Opciones"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "TEI id"
+msgstr "ID TEI"
+
+msgid "Org Unit *"
+msgstr "Unidad organizativa *"
+
+msgid ""
+"This site does not exist in DHIS2, please talk to your administrator to "
+"create this site before uploading data"
 msgstr ""
+"Este sitio no existe en DHIS2, por favor hable con su administrador para "
+"crear este sitio antes de cargar los datos"
+
+msgid "Enrollment Date"
+msgstr "Fecha de inscripción"
+
+msgid "Incident Date"
+msgstr "Fecha del incidente"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "Value Type"
+msgstr "Tipo de valor"
+
+msgid "Option Set"
+msgstr "Conjunto de opciones"
+
+msgid "Possible Values"
+msgstr "Valores posibles"
+
+msgid "Organisation Units"
+msgstr "Unidades Organizativas"
+
+msgid "Periods"
+msgstr "Periodos"
+
+msgid "Relationship Types"
+msgstr "Tipos de relación"
+
+msgid "Relationship Type"
+msgstr "Tipo de relación"
+
+msgid "Boolean"
+msgstr "Booleano"
+
+msgid "True only"
+msgstr "Sólo es cierto"
+
+msgid "Latitude"
+msgstr "Latitud"
+
+msgid "Longitude"
+msgstr "Longitud"
+
+msgid "Invalid choice was chosen"
+msgstr "Se ha elegido una opción no válida"
+
+msgid "User with no permissions"
+msgstr "Usuario sin permisos"
 
 msgid "It seems this user account does not have any permission. "
-msgstr ""
+msgstr "Parece que esta cuenta de usuario no tiene ningún permiso. "
 
 msgid ""
 "Please get in touch with the admin if you need access to these sections."
@@ -443,7 +544,7 @@ msgid "Downloading template..."
 msgstr "Descargando plantilla..."
 
 msgid "Couldn't generate template"
-msgstr ""
+msgstr "No se ha podido generar la plantilla"
 
 msgid "Download template"
 msgstr "Descargar plantilla"
@@ -514,6 +615,9 @@ msgid ""
 "that will be ignored during import.\n"
 "You can still download them and send them to your administrator."
 msgstr ""
+"Hay valores de datos {{totalInvalid}} con una unidad de organización no "
+"válida que serán ignorados durante la importación.\n"
+"Aun así, puede descargarlos y enviarlos a su administrador."
 
 msgid "Download data values with invalid organisation units"
 msgstr "Descargar datos con unidades organizativas no válidas"
@@ -548,7 +652,7 @@ msgid "Import data"
 msgstr "Importar datos"
 
 msgid "Home"
-msgstr ""
+msgstr "Inicio"
 
 msgid "Themes"
 msgstr "Temas"

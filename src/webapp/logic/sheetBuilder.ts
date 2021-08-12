@@ -5,6 +5,7 @@ import "lodash.product";
 import { Moment } from "moment";
 import { GeneratedTemplate } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
+import i18n from "../../locales";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import Settings from "./settings";
@@ -15,8 +16,6 @@ export const programId = "PROGRAM_GENERATED_v4";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
 
 const teiSheetName = "TEI Instances";
-const orgNonExistingMessage =
-    "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data";
 
 const maxRow = 1048576;
 
@@ -169,16 +168,37 @@ export class SheetBuilder {
             let columnId = 1;
             let groupId = 0;
 
-            this.createColumn(sheet, itemRow, columnId++, "Event id");
+            this.createColumn(sheet, itemRow, columnId++, i18n.t("Event id", { lng: this.builder.language }));
 
-            this.createColumn(sheet, itemRow, columnId++, "TEI Id", null, this.getTeiIdValidation());
+            this.createColumn(
+                sheet,
+                itemRow,
+                columnId++,
+                i18n.t("TEI Id", { lng: this.builder.language }),
+                null,
+                this.getTeiIdValidation()
+            );
 
             const { code: attributeCode } = metadata.get(program.categoryCombo?.id);
-            const optionsTitle = attributeCode !== "default" ? `_${program.categoryCombo.id}` : "Options";
+            const optionsTitle =
+                attributeCode !== "default"
+                    ? `_${program.categoryCombo.id}`
+                    : i18n.t("Options", { lng: this.builder.language });
 
             this.createColumn(sheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
 
-            this.createColumn(sheet, itemRow, columnId++, `${programStage.executionDateLabel ?? "Date"} *`);
+            this.createColumn(
+                sheet,
+                itemRow,
+                columnId++,
+                `${
+                    programStage.executionDateLabel
+                        ? i18n.t(programStage.executionDateLabel, {
+                              lng: this.builder.language,
+                          })
+                        : i18n.t("Date", { lng: this.builder.language })
+                } *`
+            );
 
             // Include attribute look-up from TEI Instances sheet
             _.forEach(settingsFilter?.attributesIncluded, ({ id: attributeId }) => {
@@ -292,21 +312,40 @@ export class SheetBuilder {
         // Add template version
         sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
-        this.createColumn(sheet, itemRow, 1, "TEI id");
+        this.createColumn(sheet, itemRow, 1, i18n.t("TEI id", { lng: this.builder.language }));
 
         this.createColumn(
             sheet,
             itemRow,
             2,
-            "Org Unit *",
+            i18n.t("Org Unit *", { lng: this.builder.language }),
             null,
             this.validations.get("organisationUnits"),
-            orgNonExistingMessage
+            i18n.t(
+                "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data",
+                { lng: this.builder.language }
+            )
         );
 
-        this.createColumn(sheet, itemRow, 3, (program.enrollmentDateLabel || "Enrollment Date") + " *");
+        this.createColumn(
+            sheet,
+            itemRow,
+            3,
+            `${
+                program.enrollmentDateLabel
+                    ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
+                    : i18n.t("Enrollment Date", { lng: this.builder.language })
+            } *`
+        );
 
-        this.createColumn(sheet, itemRow, 4, program.incidentDateLabel || "Incident Date");
+        this.createColumn(
+            sheet,
+            itemRow,
+            4,
+            program.incidentDateLabel
+                ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
+                : i18n.t("Incident Date", { lng: this.builder.language })
+        );
 
         const programAttributes = program.programTrackedEntityAttributes || [];
         this.instancesSheetValuesRow = itemRow + 1;
@@ -335,20 +374,34 @@ export class SheetBuilder {
         legendSheet.column(5).setWidth(40);
 
         // Add column titles
-        legendSheet.cell(1, 1, 2, 1, true).string("Name").style(baseStyle);
-        legendSheet.cell(1, 2, 2, 2, true).string("Description").style(baseStyle);
-        legendSheet.cell(1, 3, 2, 3, true).string("Value Type").style(baseStyle);
-        legendSheet.cell(1, 4, 2, 4, true).string("Option Set").style(baseStyle);
-        legendSheet.cell(1, 5, 2, 5, true).string("Possible Values").style(baseStyle);
+        legendSheet
+            .cell(1, 1, 2, 1, true)
+            .string(i18n.t("Name", { lng: this.builder.language }))
+            .style(baseStyle);
+        legendSheet
+            .cell(1, 2, 2, 2, true)
+            .string(i18n.t("Description", { lng: this.builder.language }))
+            .style(baseStyle);
+        legendSheet
+            .cell(1, 3, 2, 3, true)
+            .string(i18n.t("Value Type", { lng: this.builder.language }))
+            .style(baseStyle);
+        legendSheet
+            .cell(1, 4, 2, 4, true)
+            .string(i18n.t("Option Set", { lng: this.builder.language }))
+            .style(baseStyle);
+        legendSheet
+            .cell(1, 5, 2, 5, true)
+            .string(i18n.t("Possible Values", { lng: this.builder.language }))
+            .style(baseStyle);
 
         let rowId = 3;
         _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
             const { name, description } = this.translate(item);
             const optionSet = metadata.get(item.optionSet?.id);
             const { name: optionSetName } = this.translate(optionSet);
-            const options = optionSet?.options
-                ?.map(({ id }: any) => metadata.get(id))
-                .map((option: any) => this.translate(option).name)
+            const options = _.slice(optionSet?.options ?? [], 0, 25)
+                .map(({ id }: any) => this.translate(metadata.get(id)).name)
                 .join(", ");
 
             legendSheet.cell(rowId, 1).string(name ?? "");
@@ -371,7 +424,7 @@ export class SheetBuilder {
         // Add column titles
         let rowId = 2;
         let columnId = 1;
-        validationSheet.cell(rowId++, columnId).string("Organisation Units");
+        validationSheet.cell(rowId++, columnId).string(i18n.t("Organisation Units", { lng: this.builder.language }));
         _.forEach(organisationUnits, orgUnit => {
             validationSheet.cell(rowId++, columnId).formula(`_${orgUnit.id}`);
         });
@@ -383,7 +436,7 @@ export class SheetBuilder {
         if (element.type === "dataSets") {
             rowId = 2;
             columnId++;
-            validationSheet.cell(rowId++, columnId).string("Periods");
+            validationSheet.cell(rowId++, columnId).string(i18n.t("Periods", { lng: this.builder.language }));
             buildAllPossiblePeriods(element.periodType, startDate, endDate).forEach((period: any) => {
                 if (isNaN(period)) {
                     validationSheet.cell(rowId++, columnId).string(period);
@@ -400,7 +453,9 @@ export class SheetBuilder {
         if (isTrackerProgram(element)) {
             rowId = 2;
             columnId++;
-            validationSheet.cell(rowId++, columnId).string("Relationship Types");
+            validationSheet
+                .cell(rowId++, columnId)
+                .string(i18n.t("Relationship Types", { lng: this.builder.language }));
             _.forEach(metadata.relationshipTypes, relationshipType => {
                 validationSheet.cell(rowId++, columnId).formula(`_${relationshipType.id}`);
             });
@@ -415,7 +470,11 @@ export class SheetBuilder {
                     columnId++;
                     validationSheet
                         .cell(rowId++, columnId)
-                        .string(`Relationship Type ${relationshipType.name} (${key})`);
+                        .string(
+                            `${i18n.t("Relationship Type", { lng: this.builder.language })} ${
+                                relationshipType.name
+                            } (${key})`
+                        );
                     const constraint = relationshipType.constraints[key];
 
                     switch (constraint.type) {
@@ -450,7 +509,7 @@ export class SheetBuilder {
 
         rowId = 2;
         columnId++;
-        validationSheet.cell(rowId++, columnId).string("Options");
+        validationSheet.cell(rowId++, columnId).string(i18n.t("Options", { lng: this.builder.language }));
         const dataSetOptionComboId = element.categoryCombo.id;
         elementMetadata.forEach(e => {
             if (e.type === "categoryOptionCombos" && e.categoryCombo.id === dataSetOptionComboId) {
@@ -486,7 +545,7 @@ export class SheetBuilder {
 
         rowId = 2;
         columnId++;
-        validationSheet.cell(rowId++, columnId).string("Boolean");
+        validationSheet.cell(rowId++, columnId).string(i18n.t("Boolean", { lng: this.builder.language }));
         validationSheet.cell(rowId++, columnId).formula("_true");
         validationSheet.cell(rowId++, columnId).formula("_false");
         this.validations.set(
@@ -496,7 +555,7 @@ export class SheetBuilder {
 
         rowId = 2;
         columnId++;
-        validationSheet.cell(rowId++, columnId).string("True only");
+        validationSheet.cell(rowId++, columnId).string(i18n.t("True only", { lng: this.builder.language }));
         validationSheet.cell(rowId++, columnId).formula("_true");
         this.validations.set(
             "TRUE_ONLY",
@@ -518,21 +577,38 @@ export class SheetBuilder {
         metadataSheet.column(3).setWidth(70);
 
         // Add column titles
-        metadataSheet.cell(1, 1, 2, 1, true).string("Identifier").style(baseStyle);
-        metadataSheet.cell(1, 2, 2, 2, true).string("Type").style(baseStyle);
-        metadataSheet.cell(1, 3, 2, 3, true).string("Name").style(baseStyle);
-        metadataSheet.cell(1, 4, 2, 4, true).string("Value Type").style(baseStyle);
-        metadataSheet.cell(1, 5, 2, 5, true).string("Option Set").style(baseStyle);
-        metadataSheet.cell(1, 6, 2, 6, true).string("Possible Values").style(baseStyle);
+        metadataSheet
+            .cell(1, 1, 2, 1, true)
+            .string(i18n.t("Identifier", { lng: this.builder.language }))
+            .style(baseStyle);
+        metadataSheet
+            .cell(1, 2, 2, 2, true)
+            .string(i18n.t("Type", { lng: this.builder.language }))
+            .style(baseStyle);
+        metadataSheet
+            .cell(1, 3, 2, 3, true)
+            .string(i18n.t("Name", { lng: this.builder.language }))
+            .style(baseStyle);
+        metadataSheet
+            .cell(1, 4, 2, 4, true)
+            .string(i18n.t("Value Type", { lng: this.builder.language }))
+            .style(baseStyle);
+        metadataSheet
+            .cell(1, 5, 2, 5, true)
+            .string(i18n.t("Option Set", { lng: this.builder.language }))
+            .style(baseStyle);
+        metadataSheet
+            .cell(1, 6, 2, 6, true)
+            .string(i18n.t("Possible Values", { lng: this.builder.language }))
+            .style(baseStyle);
 
         let rowId = 3;
         metadata.forEach(item => {
             const { name } = this.translate(item);
             const optionSet = metadata.get(item.optionSet?.id);
             const { name: optionSetName } = this.translate(optionSet);
-            const options = optionSet?.options
-                ?.map(({ id }: any) => metadata.get(id))
-                .map((option: any) => this.translate(option).name)
+            const options = _.slice(optionSet?.options ?? [], 0, 25)
+                .map(({ id }: any) => this.translate(metadata.get(id)).name)
                 .join(", ");
             const isCompulsory = this.isMetadataItemCompulsory(item);
 
@@ -585,7 +661,7 @@ export class SheetBuilder {
 
         metadataSheet.cell(rowId, 1).string("true");
         metadataSheet.cell(rowId, 2).string("boolean");
-        metadataSheet.cell(rowId, 3).string("Yes");
+        metadataSheet.cell(rowId, 3).string(i18n.t("Yes", { lng: this.builder.language }));
         this.workbook.definedNameCollection.addDefinedName({
             refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
             name: "_true",
@@ -594,7 +670,7 @@ export class SheetBuilder {
 
         metadataSheet.cell(rowId, 1).string("false");
         metadataSheet.cell(rowId, 2).string("boolean");
-        metadataSheet.cell(rowId, 3).string("No");
+        metadataSheet.cell(rowId, 3).string(i18n.t("No", { lng: this.builder.language }));
         this.workbook.definedNameCollection.addDefinedName({
             refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
             name: "_false",
@@ -654,28 +730,38 @@ export class SheetBuilder {
         let groupId = 0;
 
         if (element.type === "programs") {
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Event id");
+            this.createColumn(dataEntrySheet, itemRow, columnId++, i18n.t("Event id", { lng: this.builder.language }));
         }
 
         this.createColumn(
             dataEntrySheet,
             itemRow,
             columnId++,
-            "Org Unit *",
+            i18n.t("Org Unit *", { lng: this.builder.language }),
             null,
             this.validations.get("organisationUnits"),
             "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
         );
 
         if (element.type === "programs") {
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Latitude");
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Longitude");
+            this.createColumn(dataEntrySheet, itemRow, columnId++, i18n.t("Latitude", { lng: this.builder.language }));
+            this.createColumn(dataEntrySheet, itemRow, columnId++, i18n.t("Longitude", { lng: this.builder.language }));
         } else if (element.type === "dataSets") {
-            this.createColumn(dataEntrySheet, itemRow, columnId++, "Period", null, this.validations.get("periods"));
+            this.createColumn(
+                dataEntrySheet,
+                itemRow,
+                columnId++,
+                i18n.t("Period", { lng: this.builder.language }),
+                null,
+                this.validations.get("periods")
+            );
         }
 
         const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
-        const optionsTitle = attributeCode !== "default" ? `_${element.categoryCombo.id}` : "Options";
+        const optionsTitle =
+            attributeCode !== "default"
+                ? `_${element.categoryCombo.id}`
+                : i18n.t("Options", { lng: this.builder.language });
 
         this.createColumn(dataEntrySheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
 
@@ -757,7 +843,13 @@ export class SheetBuilder {
                     dataEntrySheet,
                     itemRow,
                     columnId++,
-                    `${programStage.executionDateLabel ?? "Date"} *`
+                    `${
+                        programStage.executionDateLabel
+                            ? i18n.t(programStage.executionDateLabel, {
+                                  lng: this.builder.language,
+                              })
+                            : i18n.t("Date", { lng: this.builder.language })
+                    } *`
                 );
 
                 if (programStage.programStageSections.length === 0) {
@@ -872,7 +964,7 @@ export class SheetBuilder {
         label: any,
         groupId: any = null,
         validation: any = null,
-        validationMessage = "Invalid choice was chosen",
+        validationMessage: any = null,
         defaultLabel = false
     ) {
         sheet.column(columnId).setWidth(20);
@@ -900,7 +992,7 @@ export class SheetBuilder {
             sheet.addDataValidation({
                 type: "list",
                 allowBlank: true,
-                error: validationMessage,
+                error: validationMessage ?? i18n.t("Invalid choice was chosen", { lng: this.builder.language }),
                 errorStyle: "warning",
                 showDropDown: true,
                 sqref: ref,
