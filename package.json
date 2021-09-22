@@ -46,12 +46,12 @@
         "styled-jsx": "4.0.1"
     },
     "scripts": {
-        "prestart": "yarn localize && d2-manifest package.json manifest.webapp",
         "start": "react-scripts start",
+        "craco-start": "craco start",
         "prebuild": "yarn localize && yarn test",
-        "build": "rm -rf build/ && d2-manifest package.json manifest.webapp && react-scripts build && yarn run manifest && cp -r i18n icon.png build",
-        "build-webapp": "yarn build && rm -f $npm_package_name.zip && cd build && zip -r ../$npm_package_name.zip *",
-        "test": "jest",
+        "build-folder": "rm -rf build/ && d2-manifest package.json manifest.webapp && react-scripts build && yarn run manifest && cp -r i18n icon.png build",
+        "build": "yarn build-folder && rm -f $npm_package_name.zip && cd build && zip --quiet -r ../$npm_package_name.zip *",
+        "test": "jest --passWithNoTests",
         "lint": "eslint src cypress --ext .js,.jsx,.ts,.tsx",
         "eject": "react-scripts eject",
         "prettify": "prettier \"./**/*.{js,jsx,json,css,ts,tsx}\" --write",
@@ -61,8 +61,8 @@
         "manifest": "d2-manifest package.json build/manifest.webapp",
         "cy:verify": "cypress verify",
         "check-uncommited": "test -z \"$(git status -uno --porcelain)\"",
-        "cy:e2e:open": "CYPRESS_E2E=true cypress open",
-        "cy:e2e:run": "CYPRESS_E2E=true cypress run --browser chrome",
+        "cy:e2e:open": "NODE_ENV=test CYPRESS_E2E=true cypress open",
+        "cy:e2e:run": "NODE_ENV=test CYPRESS_E2E=true cypress run --browser chrome",
         "prepare": "husky install"
     },
     "devDependencies": {
