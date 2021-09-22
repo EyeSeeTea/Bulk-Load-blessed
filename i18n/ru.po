@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
+"POT-Creation-Date: 2021-09-22T08:59:36.327Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -519,6 +519,21 @@ msgstr "Долгота"
 msgid "Invalid choice was chosen"
 msgstr "Был выбран неправильный вариант"
 
+msgid "Home"
+msgstr "Главная"
+
+msgid "Download template"
+msgstr "Скачать шаблон"
+
+msgid "Import data"
+msgstr "Импортные данные"
+
+msgid "Themes"
+msgstr "Темы"
+
+msgid "Settings"
+msgstr "Настройки"
+
 msgid "User with no permissions"
 msgstr "Пользователь без прав доступа"
 
@@ -548,9 +563,6 @@ msgstr "Загрузка шаблона..."
 
 msgid "Couldn't generate template"
 msgstr "Не удалось сгенерировать шаблон"
-
-msgid "Download template"
-msgstr "Скачать шаблон"
 
 msgid "Reading file..."
 msgstr "Чтение файла..."
@@ -648,18 +660,6 @@ msgstr "Выберите импортируемое организационно
 
 msgid "No capture org unit match element org units"
 msgstr "Нет захвата орг единицы соответствие элемента орг единицы"
-
-msgid "Import data"
-msgstr "Импортные данные"
-
-msgid "Home"
-msgstr "Главная"
-
-msgid "Themes"
-msgstr "Темы"
-
-msgid "Settings"
-msgstr "Настройки"
 
 msgid "Settings saved"
 msgstr "Сохранение настроек"

@@ -28,9 +28,7 @@ export class Either<Error, Data> {
     }
 
     map<Data1>(fn: (data: Data) => Data1): Either<Error, Data1> {
-        return this.flatMap(
-            data => new Either<Error, Data1>({ type: "success", data: fn(data) })
-        );
+        return this.flatMap(data => new Either<Error, Data1>({ type: "success", data: fn(data) }));
     }
 
     flatMap<Data1>(fn: (data: Data) => Either<Error, Data1>): Either<Error, Data1> {

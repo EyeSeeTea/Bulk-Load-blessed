@@ -4,16 +4,16 @@ import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles, Paper } from "@material-ui/core";
 import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
-import { Theme } from "../../../domain/entities/Theme";
-import i18n from "../../../locales";
-import { AppDrawer, AppDrawerToggle } from "../../components/drawer/Drawer";
-import { useAppContext } from "../../contexts/app-context";
-import Settings from "../../logic/settings";
-import DownloadTemplatePage from "../download-template/DownloadTemplatePage";
-import ImportTemplatePage from "../import-template/ImportTemplatePage";
-import SettingsPage from "../settings/SettingsPage";
-import ThemesPage from "../themes/ThemesPage";
-import BlankTemplatePage from "../blank-template/BlankTemplatePage";
+import { Theme } from "../../domain/entities/Theme";
+import i18n from "../../locales";
+import { AppDrawer, AppDrawerToggle } from "../components/drawer/Drawer";
+import { useAppContext } from "../contexts/app-context";
+import Settings from "../logic/settings";
+import DownloadTemplatePage from "./download-template/DownloadTemplatePage";
+import ImportTemplatePage from "./import-template/ImportTemplatePage";
+import SettingsPage from "./settings/SettingsPage";
+import ThemesPage from "./themes/ThemesPage";
+import BlankTemplatePage from "./blank-template/BlankTemplatePage";
 
 export interface RouteComponentProps {
     settings: Settings;
@@ -33,7 +33,7 @@ export interface AppRoute {
     auth?: (settings: Settings) => boolean;
 }
 
-const Root = () => {
+export const Router: React.FC = React.memo(() => {
     const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const classes = useStyles();
@@ -141,7 +141,7 @@ const Root = () => {
             </div>
         </HashRouter>
     );
-};
+});
 
 const useStyles = makeStyles({
     flex: { display: "flex" },
@@ -151,5 +151,3 @@ const useStyles = makeStyles({
     contentOpen: { marginLeft: 325 },
     contentCollapsed: { marginLeft: 25 },
 });
-
-export default Root;

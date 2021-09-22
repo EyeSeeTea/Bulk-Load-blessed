@@ -5,13 +5,23 @@ import { init } from "d2";
 import _ from "lodash";
 import React from "react";
 import ReactDOM from "react-dom";
+import { D2Api } from "./types/d2-api";
 import { getD2APiFromInstance } from "./utils/d2-api";
 import App from "./webapp/components/app/App";
+import "./webapp/utils/wdyr";
+
+declare global {
+    interface Window {
+        $: { feedbackDhis2(d2: object, appKey: string, feedbackOptions: object): void };
+        api: D2Api;
+    }
+}
+
+const isDev = process.env.NODE_ENV === "development";
 
 async function getBaseUrl() {
-    if (process.env.NODE_ENV === "development") {
-        const baseUrl = process.env.REACT_APP_DHIS2_BASE_URL || "http://localhost:8080";
-        return baseUrl.replace(/\/*$/, "");
+    if (isDev) {
+        return "/dhis2"; // See src/setupProxy.js
     } else {
         const { data: manifest } = await axios.get("manifest.webapp");
         return manifest.activities.dhis.href;
@@ -35,7 +45,7 @@ async function main() {
     try {
         const d2 = await init({ baseUrl: baseUrl + "/api", schemas: [] });
         const api = getD2APiFromInstance({ type: "local", url: baseUrl });
-        Object.assign(window, { d2, api });
+        if (isDev) window.api = api;
 
         const userSettings = await api.get<{ keyUiLocale: string }>("/userSettings").getData();
         configI18n(userSettings);
@@ -43,14 +53,14 @@ async function main() {
         ReactDOM.render(
             <React.StrictMode>
                 <Provider config={{ baseUrl, apiVersion: 30 }}>
-                    <App d2={d2} api={api} />
+                    <App d2={d2 as object} api={api} />
                 </Provider>
             </React.StrictMode>,
             document.getElementById("root")
         );
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
-        const message = err.toString().match("Unable to get schemas") ? (
+        const feedback = err.toString().match("Unable to get schemas") ? (
             <h3 style={{ margin: 20 }}>
                 <a rel="noopener noreferrer" target="_blank" href={baseUrl}>
                     Login
@@ -58,9 +68,9 @@ async function main() {
                 {` ${baseUrl}`}
             </h3>
         ) : (
-            err.toString()
+            <h3>{err.toString()}</h3>
         );
-        ReactDOM.render(<div>{message}</div>, document.getElementById("root"));
+        ReactDOM.render(<div>{feedback}</div>, document.getElementById("root"));
     }
 }
 

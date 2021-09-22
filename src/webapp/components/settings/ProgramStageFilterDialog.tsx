@@ -40,9 +40,10 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
 
     const programStageOptions = useMemo(() => getSelectOptionsFromNamedRefs(programStages), [programStages]);
     const dataElementItems = useMemo(() => getDataElementItems(programStage), [programStage]);
-    const dataElementsOptions = useMemo(() => getMultiSelectorOptionsFromNamedRefs(dataElementItems), [
-        dataElementItems,
-    ]);
+    const dataElementsOptions = useMemo(
+        () => getMultiSelectorOptionsFromNamedRefs(dataElementItems),
+        [dataElementItems]
+    );
     const selectedIds = getSelectedIds(settings, programStage);
 
     const updateSelection = useCallback(

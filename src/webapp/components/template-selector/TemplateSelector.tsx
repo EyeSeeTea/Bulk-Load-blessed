@@ -138,8 +138,11 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onTemplateChange = ({ value }: SelectOption) => {
         if (dataSource) {
-            const { periodType, type, readAccess = false } =
-                dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
+            const {
+                periodType,
+                type,
+                readAccess = false,
+            } = dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {

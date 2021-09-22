@@ -35,7 +35,7 @@ export class StorageDataStoreRepository extends StorageRepository {
     public async removeObject(key: string): Promise<void> {
         try {
             await this.dataStore.delete(key).getData();
-        } catch (error) {
+        } catch (error: any) {
             if (!error.response || error.response.status !== 404) {
                 throw error;
             }
