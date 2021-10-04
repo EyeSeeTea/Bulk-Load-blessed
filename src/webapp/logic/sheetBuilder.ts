@@ -22,6 +22,12 @@ const maxRow = 1048576;
 // Excel shows all empty rows, limit the maximum number of TEIs
 const maxTeiRows = 1024;
 
+const dateFormats: Record<string, string> = {
+    DATE: "YYYY-MM-DD",
+    TIME: "HH:mm",
+    DATETIME: "YYYY-MM-DDTHH:mm",
+};
+
 export interface SheetBuilderParams {
     element: any;
     metadata: any;
@@ -611,10 +617,16 @@ export class SheetBuilder {
                 .map(({ id }: any) => this.translate(metadata.get(id)).name)
                 .join(", ");
             const isCompulsory = this.isMetadataItemCompulsory(item);
+            const dateFormat = dateFormats[item.valueType];
+            const nameCellValue = _.compact([
+                name,
+                isCompulsory ? " *" : "",
+                dateFormat ? `\n(${dateFormat})` : "",
+            ]).join("");
 
             metadataSheet.cell(rowId, 1).string(item.id ?? "");
             metadataSheet.cell(rowId, 2).string(item.type ?? "");
-            metadataSheet.cell(rowId, 3).string(name?.concat(isCompulsory ? " *" : "") ?? "");
+            metadataSheet.cell(rowId, 3).string(nameCellValue);
             metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
             metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
             metadataSheet.cell(rowId, 6).string(options ?? "");
