@@ -75,14 +75,12 @@ export function processImportResponse(options: {
     const fields = ["imported", "updated", "ignored", "deleted", "total"] as const;
     const totalStats: SynchronizationStats = { type: "TOTAL", ..._.pick(response, fields) };
 
-    const eventStatsList = (response.importSummaries || []).map(
-        (importSummary): SynchronizationStats => {
-            return {
-                type: i18n.t(`${model} ${importSummary.reference || "-"}`),
-                ...importSummary.importCount,
-            };
-        }
-    );
+    const eventStatsList = (response.importSummaries || []).map((importSummary): SynchronizationStats => {
+        return {
+            type: i18n.t(`${model} ${importSummary.reference || "-"}`),
+            ...importSummary.importCount,
+        };
+    });
 
     const stats = splitStatsList
         ? _.compact([eventStatsList.length === 1 ? null : totalStats, ...eventStatsList])
@@ -104,7 +102,7 @@ export async function postImport(
             importResult: response,
             splitStatsList,
         });
-    } catch (error) {
+    } catch (error: any) {
         if (error?.response?.data) {
             return processImportResponse({
                 title,

@@ -6,12 +6,12 @@ import { MuiThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
 //@ts-ignore
 import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
 import { addExtraTranslations } from "../../../utils/translations";
 import { AppContext, AppContextI } from "../../contexts/app-context";
-import Root from "../../pages/root/RootPage";
+import { Router } from "../../pages/Router";
 import { useMigrations } from "../migrations/hooks";
 import Migrations from "../migrations/Migrations";
 import Share from "../share/Share";
@@ -19,48 +19,12 @@ import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
 
-interface AppConfig {
-    appKey: string;
-    appearance: {
-        showShareButton: boolean;
-    };
-    feedback: {
-        token: string[];
-        createIssue: boolean;
-        sendToDhis2UserGroups: string[];
-        issues: {
-            repository: string;
-            title: string;
-            body: string;
-        };
-        snapshots: {
-            repository: string;
-            branch: string;
-        };
-        feedbackOptions: {};
-    };
+export interface AppProps {
+    api: D2Api;
+    d2: object;
 }
 
-interface AppWindow extends Window {
-    $: {
-        feedbackDhis2: (d2: unknown, appKey: string, appConfig: AppConfig["feedback"]["feedbackOptions"]) => void;
-    };
-}
-
-function initFeedbackTool(d2: unknown, appConfig: AppConfig): void {
-    const appKey = _(appConfig).get("appKey");
-
-    if (appConfig && appConfig.feedback) {
-        const feedbackOptions = {
-            ...appConfig.feedback,
-            i18nPath: "feedback-tool/i18n",
-        };
-        ((window as unknown) as AppWindow).$.feedbackDhis2(d2, appKey, feedbackOptions);
-    }
-}
-
-const App = (props: { d2: unknown; api: D2Api }) => {
-    const { d2, api } = props;
+export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
     const { baseUrl } = useConfig();
 
     const [showShareButton, setShowShareButton] = useState(false);
@@ -109,7 +73,7 @@ const App = (props: { d2: unknown; api: D2Api }) => {
                         <LoadingProvider>
                             <SnackbarProvider>
                                 <div id="app">
-                                    <Root />
+                                    <Router />
                                 </div>
                                 <Share visible={showShareButton} />
                             </SnackbarProvider>
@@ -121,6 +85,40 @@ const App = (props: { d2: unknown; api: D2Api }) => {
     }
 
     return null;
-};
+});
+
+interface AppConfig {
+    appKey: string;
+    appearance: {
+        showShareButton: boolean;
+    };
+    feedback: {
+        token: string[];
+        createIssue: boolean;
+        sendToDhis2UserGroups: string[];
+        issues: {
+            repository: string;
+            title: string;
+            body: string;
+        };
+        snapshots: {
+            repository: string;
+            branch: string;
+        };
+        feedbackOptions: {};
+    };
+}
+
+function initFeedbackTool(d2: object, appConfig: AppConfig): void {
+    const appKey = _(appConfig).get("appKey");
+
+    if (appConfig && appConfig.feedback) {
+        const feedbackOptions = {
+            ...appConfig.feedback,
+            i18nPath: "feedback-tool/i18n",
+        };
+        window.$.feedbackDhis2(d2, appKey, feedbackOptions);
+    }
+}
 
 export default App;

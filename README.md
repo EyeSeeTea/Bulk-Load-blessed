@@ -5,49 +5,71 @@ The Bulk Load application generates templates (an Excel sheet) and imports multi
 -   Settings are only visible for superusers (`ALL` authority) or users that belong to the settings groups.
 -   The generation box is only visible for users that belong to the configurable `Template Generation` groups (initial value: `HMIS Officers`).
 
-## Set up
+## Setup
+
+Install dependencies:
 
 ```
 $ yarn install
 ```
 
-## Start a development server
+## Development
 
-Edit .env file to set `PORT` and `REACT_APP_DHIS2_BASE_URL` (or use normal shell environment variables) and execute the development server:
+Start the development server:
 
 ```
-$ yarn start
+$ PORT=8081 REACT_APP_DHIS2_BASE_URL="http://localhost:8080" yarn start
 ```
+
+Now in your browser, go to `http://localhost:8081`.
+
+Notes:
+
+-   Requests to DHIS2 will be transparently proxied (see `src/setupProxy.js`) from `http://localhost:8081/dhis2/path` to `http://localhost:8080/path` to avoid CORS and cross-domain problems.
+
+-   The optional environment variable `REACT_APP_DHIS2_AUTH=USERNAME:PASSWORD` forces some credentials to be used by the proxy. This variable is usually not set, so the app has the same user logged in at `REACT_APP_DHIS2_BASE_URL`.
+
+-   The optional environment variable `REACT_APP_PROXY_LOG_LEVEL` can be helpful to debug the proxyfied requests (accepts: "warn" | "debug" | "info" | "error" | "silent")
+
+-   Create a file `.env.local` (copy it from `.env`) to customize environment variables so you can simply run `yarn start`.
+
+-   [why-did-you-render](https://github.com/welldone-software/why-did-you-render) is installed, but it does not work when using standard react scripts (`yarn start`). Instead, use `yarn craco-start` to debug re-renders with WDYR. Note that hot reloading does not work out-of-the-box with [craco](https://github.com/gsoft-inc/craco).
 
 ## Tests
 
-Run integration tests locally:
+### Unit tests
 
 ```
-$ export CYPRESS_DHIS2_AUTH='admin:district'
+$ yarn test
+```
+
+### Integration tests (Cypress)
+
+Create the required users for testing (`cypress/support/App.ts`) in your instance and run:
+
+```
 $ export CYPRESS_EXTERNAL_API="http://localhost:8080"
 $ export CYPRESS_ROOT_URL=http://localhost:8081
 
-$ yarn cy:e2e:open # interactive UI
-$ yarn cy:e2e:run # non-interactive UI
+# non-interactive
+$ yarn cy:e2e:run
+
+# interactive UI
+$ yarn cy:e2e:open
 ```
 
-For cypress tests to work in Travis CI, you will have to create an environment variable CYPRESS_DHIS2_AUTH (Settings -> Environment Variables) with the authentication used in your testing DHIS2 instance.
-
-## Build a release package
-
-Create a packaged zip:
+## Build app ZIP
 
 ```
-$ yarn build-webapp
+$ yarn build
 ```
 
 ## i18n
 
-### Update translations
-
 ```
-$ yarn update-po
-# ... add/edit translations in po files ...
 $ yarn localize
 ```
+
+### App context
+
+The file `src/webapp/contexts/app-context.ts` holds some general context so typical infrastructure objects (`api`, `d2`, ...) are readily available. Add your own global objects if necessary.

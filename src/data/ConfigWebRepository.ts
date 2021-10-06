@@ -32,7 +32,7 @@ export class ConfigWebRepository implements ConfigRepository {
             allPermissionsForSettings: true,
             allPermissionsForImport: true,
             orgUnitSelection: "both",
-            duplicateEnabled: true,
+            duplicateEnabled: false,
             duplicateExclusion: {},
             duplicateTolerance: 1,
             duplicateToleranceUnit: "day",

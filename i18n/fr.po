@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
+"POT-Creation-Date: 2021-09-22T08:59:36.327Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -496,6 +496,21 @@ msgstr ""
 msgid "Invalid choice was chosen"
 msgstr ""
 
+msgid "Home"
+msgstr ""
+
+msgid "Download template"
+msgstr "Télécharger modèle"
+
+msgid "Import data"
+msgstr "Importer des données"
+
+msgid "Themes"
+msgstr "Thèmes"
+
+msgid "Settings"
+msgstr "Paramètres"
+
 msgid "User with no permissions"
 msgstr ""
 
@@ -524,9 +539,6 @@ msgstr "Téléchargement du modèle ..."
 
 msgid "Couldn't generate template"
 msgstr ""
-
-msgid "Download template"
-msgstr "Télécharger modèle"
 
 msgid "Reading file..."
 msgstr "Lecture du fichier en cours ..."
@@ -628,18 +640,6 @@ msgid "No capture org unit match element org units"
 msgstr ""
 "Aucune unité organisationnelle de capture ne correspond aux unités "
 "organisationnelles de l'élément"
-
-msgid "Import data"
-msgstr "Importer des données"
-
-msgid "Home"
-msgstr ""
-
-msgid "Themes"
-msgstr "Thèmes"
-
-msgid "Settings"
-msgstr "Paramètres"
 
 msgid "Settings saved"
 msgstr "Paramètres sauvegardés"

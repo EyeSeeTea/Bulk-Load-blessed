@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
+"POT-Creation-Date: 2021-09-22T08:59:36.327Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -517,6 +517,21 @@ msgstr "Longitude"
 msgid "Invalid choice was chosen"
 msgstr "Esta opção é invalida"
 
+msgid "Home"
+msgstr "Início"
+
+msgid "Download template"
+msgstr "Descarregar a planilha"
+
+msgid "Import data"
+msgstr "Importar dados"
+
+msgid "Themes"
+msgstr "Temas"
+
+msgid "Settings"
+msgstr "Configurações"
+
 msgid "User with no permissions"
 msgstr "Utilizador sem permissões"
 
@@ -546,9 +561,6 @@ msgstr "Descarregando a planilha..."
 
 msgid "Couldn't generate template"
 msgstr "Não foi possível gerar um modelo"
-
-msgid "Download template"
-msgstr "Descarregar a planilha"
 
 msgid "Reading file..."
 msgstr "Lendo arquivo ..."
@@ -648,18 +660,6 @@ msgid "No capture org unit match element org units"
 msgstr ""
 "Nenhuma unidade organizacional de captura corresponde às unidades "
 "organizacionais do elemento"
-
-msgid "Import data"
-msgstr "Importar dados"
-
-msgid "Home"
-msgstr "Início"
-
-msgid "Themes"
-msgstr "Temas"
-
-msgid "Settings"
-msgstr "Configurações"
 
 msgid "Settings saved"
 msgstr "Configurações salvas"

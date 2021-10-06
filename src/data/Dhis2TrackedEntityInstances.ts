@@ -285,27 +285,21 @@ async function getApiEvents(
             }
 
             const dataValues: DataValueApi[] = _(data.dataValues)
-                .flatMap(
-                    (dataValue): DataValueApi => {
-                        // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
-                        const valueType = valueTypeByDataElementId[dataValue.dataElement];
-                        let value: string;
+                .flatMap((dataValue): DataValueApi => {
+                    // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
+                    const valueType = valueTypeByDataElementId[dataValue.dataElement];
+                    let value: string;
 
-                        if (
-                            valueType === "DATE" &&
-                            typeof dataValue.value === "string" &&
-                            dataValue.value.match(/^\d+$/)
-                        ) {
-                            value = parseDate(parseInt(dataValue.value)).toString();
-                        } else {
-                            value = getValue(dataValue, optionById);
-                        }
-                        return {
-                            dataElement: dataValue.dataElement,
-                            value,
-                        };
+                    if (valueType === "DATE" && typeof dataValue.value === "string" && dataValue.value.match(/^\d+$/)) {
+                        value = parseDate(parseInt(dataValue.value)).toString();
+                    } else {
+                        value = getValue(dataValue, optionById);
                     }
-                )
+                    return {
+                        dataElement: dataValue.dataElement,
+                        value,
+                    };
+                })
                 .value();
 
             return {
@@ -425,21 +419,19 @@ function buildTei(
         }))
         .first();
 
-    const attributeValues: AttributeValue[] = teiApi.attributes.map(
-        (attrApi): AttributeValue => {
-            const optionSet = attributesById[attrApi.attribute]?.optionSet;
-            const option = optionSet && optionSet.options.find(option => option.code === attrApi.value);
+    const attributeValues: AttributeValue[] = teiApi.attributes.map((attrApi): AttributeValue => {
+        const optionSet = attributesById[attrApi.attribute]?.optionSet;
+        const option = optionSet && optionSet.options.find(option => option.code === attrApi.value);
 
-            return {
-                attribute: {
-                    id: attrApi.attribute,
-                    ...(optionSet ? { optionSet } : {}),
-                },
-                value: attrApi.value,
-                ...(option ? { optionId: option.id } : {}),
-            };
-        }
-    );
+        return {
+            attribute: {
+                id: attrApi.attribute,
+                ...(optionSet ? { optionSet } : {}),
+            },
+            value: attrApi.value,
+            ...(option ? { optionId: option.id } : {}),
+        };
+    });
 
     return {
         program: { id: program.id },
