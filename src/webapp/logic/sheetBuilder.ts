@@ -350,9 +350,9 @@ export class SheetBuilder {
             sheet,
             itemRow,
             4,
-            program.incidentDateLabel
+            (program.incidentDateLabel
                 ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
-                : i18n.t("Incident Date", { lng: this.builder.language })
+                : i18n.t("Incident Date", { lng: this.builder.language })) + dateFormatInfo
         );
 
         const programAttributes = program.programTrackedEntityAttributes || [];
