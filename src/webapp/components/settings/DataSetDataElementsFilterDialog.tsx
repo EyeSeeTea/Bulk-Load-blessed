@@ -147,15 +147,13 @@ function getMultiSelectorDataElementOptions(dataElements: DataElementItem[]): Da
         .orderBy([item => item.name, item => (item.categoryOptionCombo ? 1 : 0)], ["asc", "asc"])
         .value();
 
-    return sortedDataElements.map(
-        (item): DataElementOption => {
-            const dataElementDis = getDataElementDisaggregatedFromItem(item);
-            const coc = item.categoryOptionCombo;
-            const text = coc
-                ? item.name + (coc.name === "default" ? "" : ` (${coc.name})`)
-                : item.name + ` (${i18n.t("All")})`;
+    return sortedDataElements.map((item): DataElementOption => {
+        const dataElementDis = getDataElementDisaggregatedFromItem(item);
+        const coc = item.categoryOptionCombo;
+        const text = coc
+            ? item.name + (coc.name === "default" ? "" : ` (${coc.name})`)
+            : item.name + ` (${i18n.t("All")})`;
 
-            return { value: getDataElementDisaggregatedId(dataElementDis), text };
-        }
-    );
+        return { value: getDataElementDisaggregatedId(dataElementDis), text };
+    });
 }

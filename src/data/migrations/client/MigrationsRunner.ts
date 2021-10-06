@@ -84,7 +84,7 @@ export class MigrationsRunner<T> {
             });
             try {
                 await migration.migrate(storage, debug, migrationParams);
-            } catch (error) {
+            } catch (error: any) {
                 const errorMsg = `${migration.name}: ${error.message}`;
                 await this.saveConfig({ errorMsg });
                 throw error;

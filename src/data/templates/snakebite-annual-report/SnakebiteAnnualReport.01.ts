@@ -298,8 +298,12 @@ export class SnakebiteAnnualReport implements CustomTemplate {
 
         await promiseMap(nationalDataElements, async (dataElement, index) => {
             const { categoryOptionCombos = [] } = dataElement;
-            const { showTotal = true, totalName, showName = true, backgroundColor = "#EEEEEE" } =
-                metadata.dataElements[dataElement.id] ?? {};
+            const {
+                showTotal = true,
+                totalName,
+                showName = true,
+                backgroundColor = "#EEEEEE",
+            } = metadata.dataElements[dataElement.id] ?? {};
 
             // A new reporting group appears each 6 rows starting from row number 6
             // For each group row 2 is the data element, row 3 is the category and row 4 is the value
@@ -680,9 +684,7 @@ export class SnakebiteAnnualReport implements CustomTemplate {
         return dataForms.find(({ id }) => id === "XBgvNrxpcDC");
     }
 
-    private async readDataStore(
-        instanceRepository: InstanceRepository
-    ): Promise<{
+    private async readDataStore(instanceRepository: InstanceRepository): Promise<{
         metadata: CustomMetadata;
         antivenomEntries: AntivenomEntries;
         antivenomProducts: AntivenomProducts;

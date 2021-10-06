@@ -74,9 +74,8 @@ export class ExcelReader {
                 [d.dataForm, d.id, d.period, d.orgUnit, d.attribute, d.trackedEntityInstance, d.programStage].join("@")
             )
             .map((items, key) => {
-                const [dataForm = "", id, period, orgUnit, attribute, trackedEntityInstance, programStage] = key.split(
-                    "@"
-                );
+                const [dataForm = "", id, period, orgUnit, attribute, trackedEntityInstance, programStage] =
+                    key.split("@");
                 return {
                     dataForm,
                     id: id ? String(id) : undefined,
@@ -237,64 +236,61 @@ export class ExcelReader {
             this.excelRepository.readCell(template.id, cell, { formula: true })
         );
 
-        const events = await promiseMap(
-            rowIndexes,
-            async (rowIdx): Promise<DataPackageData[]> => {
-                const teiId = await getCell(template, dataSource.teiId, rowIdx);
-                const cocId = await this.getFormulaValue(template, dataSource.categoryOptionCombo, rowIdx);
-                const eventId = await getCell(template, dataSource.eventId, rowIdx);
-                const date = parseDate(await getCell(template, dataSource.date, rowIdx));
-                if (!teiId || !date) return [];
+        const events = await promiseMap(rowIndexes, async (rowIdx): Promise<DataPackageData[]> => {
+            const teiId = await getCell(template, dataSource.teiId, rowIdx);
+            const cocId = await this.getFormulaValue(template, dataSource.categoryOptionCombo, rowIdx);
+            const eventId = await getCell(template, dataSource.eventId, rowIdx);
+            const date = parseDate(await getCell(template, dataSource.date, rowIdx));
+            if (!teiId || !date) return [];
 
-                const tei = teiById[String(teiId)];
-                if (!tei) return [];
+            const tei = teiById[String(teiId)];
+            if (!tei) return [];
 
-                const valuesCells = await this.excelRepository.getCellsInRange(template.id, {
-                    ...dataSource.dataElements,
-                    rowStart: rowIdx,
-                    rowEnd: rowIdx,
-                });
+            const valuesCells = await this.excelRepository.getCellsInRange(template.id, {
+                ...dataSource.dataElements,
+                rowStart: rowIdx,
+                rowEnd: rowIdx,
+            });
 
-                const dataItems = await promiseMap(valuesCells, async valueCell => {
-                    return {
-                        value: await this.excelRepository.readCell(template.id, valueCell),
-                        optionId: await this.excelRepository.readCell(template.id, valueCell, {
-                            formula: true,
-                        }),
-                    };
-                });
+            const dataItems = await promiseMap(valuesCells, async valueCell => {
+                return {
+                    value: await this.excelRepository.readCell(template.id, valueCell),
+                    optionId: await this.excelRepository.readCell(template.id, valueCell, {
+                        formula: true,
+                    }),
+                };
+            });
 
-                const dataList = _.zip(dataItems, dataElementIds).map(([item, deIdFormula]) => {
-                    const dataElementId = deIdFormula ? removeCharacters(deIdFormula) : null;
-                    if (!item || !programStageId || !dataElementId || !programStageId) return null;
+            const dataList = _.zip(dataItems, dataElementIds).map(([item, deIdFormula]) => {
+                const dataElementId = deIdFormula ? removeCharacters(deIdFormula) : null;
+                if (!item || !programStageId || !dataElementId || !programStageId) return null;
 
-                    // If column id does not exist on program, exclude values => Attributes
-                    if (!dataForm.dataElements.find(({ id }) => id === dataElementId)) return null;
+                // If column id does not exist on program, exclude values => Attributes
+                if (!dataForm.dataElements.find(({ id }) => id === dataElementId)) return null;
 
-                    const { value, optionId } = item;
+                const { value, optionId } = item;
 
-                    const data: DataPackageData = {
-                        id: eventId ? String(eventId) : undefined,
-                        dataForm: String(programId),
-                        orgUnit: tei.orgUnit.id,
-                        period: this.formatValue(date),
-                        attribute: cocId,
-                        trackedEntityInstance: String(teiId),
-                        programStage: String(programStageId),
-                        dataValues: [
-                            {
-                                dataElement: String(dataElementId),
-                                value: this.formatValue(value),
-                                optionId: optionId ? removeCharacters(optionId) : undefined,
-                            },
-                        ],
-                    };
-                    return data;
-                });
+                const data: DataPackageData = {
+                    id: eventId ? String(eventId) : undefined,
+                    dataForm: String(programId),
+                    orgUnit: tei.orgUnit.id,
+                    period: this.formatValue(date),
+                    attribute: cocId,
+                    trackedEntityInstance: String(teiId),
+                    programStage: String(programStageId),
+                    dataValues: [
+                        {
+                            dataElement: String(dataElementId),
+                            value: this.formatValue(value),
+                            optionId: optionId ? removeCharacters(optionId) : undefined,
+                        },
+                    ],
+                };
+                return data;
+            });
 
-                return _.compact(dataList);
-            }
-        );
+            return _.compact(dataList);
+        });
 
         return _.flatten(events);
     }

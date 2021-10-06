@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-08-06T08:42:13.224Z\n"
-"PO-Revision-Date: 2021-08-06T08:42:13.224Z\n"
+"POT-Creation-Date: 2021-09-22T08:59:36.327Z\n"
+"PO-Revision-Date: 2021-09-22T08:59:36.327Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -491,6 +491,21 @@ msgstr ""
 msgid "Invalid choice was chosen"
 msgstr ""
 
+msgid "Home"
+msgstr ""
+
+msgid "Download template"
+msgstr ""
+
+msgid "Import data"
+msgstr ""
+
+msgid "Themes"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
 msgid "User with no permissions"
 msgstr ""
 
@@ -513,9 +528,6 @@ msgid "Downloading template..."
 msgstr ""
 
 msgid "Couldn't generate template"
-msgstr ""
-
-msgid "Download template"
 msgstr ""
 
 msgid "Reading file..."
@@ -603,18 +615,6 @@ msgid "Select import Organisation Unit"
 msgstr ""
 
 msgid "No capture org unit match element org units"
-msgstr ""
-
-msgid "Import data"
-msgstr ""
-
-msgid "Home"
-msgstr ""
-
-msgid "Themes"
-msgstr ""
-
-msgid "Settings"
 msgstr ""
 
 msgid "Settings saved"

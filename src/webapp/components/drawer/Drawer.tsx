@@ -13,7 +13,7 @@ import {
 import _ from "lodash";
 import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { AppRoute } from "../../pages/root/RootPage";
+import { AppRoute } from "../../pages/Router";
 
 export interface AppDrawerProps {
     isOpen: boolean;

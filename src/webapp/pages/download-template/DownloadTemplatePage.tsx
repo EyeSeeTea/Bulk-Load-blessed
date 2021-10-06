@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import i18n from "../../../locales";
 import { TemplateSelector, TemplateSelectorState } from "../../components/template-selector/TemplateSelector";
 import { useAppContext } from "../../contexts/app-context";
-import { RouteComponentProps } from "../root/RootPage";
+import { RouteComponentProps } from "../Router";
 
 export default function DownloadTemplatePage({ settings, themes }: RouteComponentProps) {
     const loading = useLoading();
@@ -20,16 +20,8 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             return;
         }
 
-        const {
-            type,
-            startDate,
-            endDate,
-            populate,
-            populateStartDate,
-            populateEndDate,
-            templateType,
-            orgUnits,
-        } = template;
+        const { type, startDate, endDate, populate, populateStartDate, populateEndDate, templateType, orgUnits } =
+            template;
 
         if (type === "dataSets" && (!startDate || !endDate)) {
             snackbar.info(i18n.t("You need to select start and end periods for dataSet templates"));
@@ -49,7 +41,7 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
 
         try {
             await compositionRoot.templates.download(api, template);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
             snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
         }

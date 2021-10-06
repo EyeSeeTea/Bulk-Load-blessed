@@ -150,7 +150,11 @@ export async function getTrackerProgramMetadata(
     api: D2Api,
     filters?: ProgramFilters
 ): Promise<RelationshipMetadata> {
-    const { trackedEntityTypes, relationshipTypes: allRelationshipTypes, programs } = await api.metadata
+    const {
+        trackedEntityTypes,
+        relationshipTypes: allRelationshipTypes,
+        programs,
+    } = await api.metadata
         .get({
             trackedEntityTypes: { fields: { id: true, name: true } },
             relationshipTypes: {

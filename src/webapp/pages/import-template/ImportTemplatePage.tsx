@@ -20,7 +20,7 @@ import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemp
 import i18n from "../../../locales";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/app-context";
-import { RouteComponentProps } from "../root/RootPage";
+import { RouteComponentProps } from "../Router";
 
 interface ImportState {
     dataForm: DataForm;
@@ -80,7 +80,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 file,
                 summary: dataValues,
             });
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
             const msg = err.message || err.toString();
             snackbar.error(msg);
@@ -104,7 +104,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             }
 
             await startImport({ file, settings, useBuilderOrgUnits, selectedOrgUnits });
-        } catch (reason) {
+        } catch (reason: any) {
             console.error(reason);
             snackbar.error(reason.message || reason.toString());
         }
