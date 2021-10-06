@@ -28,6 +28,8 @@ const dateFormats: Record<string, string> = {
     DATETIME: "YYYY-MM-DDTHH:mm",
 };
 
+const dateFormatInfo = `\n(${dateFormats["DATE"]})`;
+
 export interface SheetBuilderParams {
     element: any;
     metadata: any;
@@ -203,7 +205,7 @@ export class SheetBuilder {
                               lng: this.builder.language,
                           })
                         : i18n.t("Date", { lng: this.builder.language })
-                } *`
+                } *` + dateFormatInfo
             );
 
             // Include attribute look-up from TEI Instances sheet
@@ -341,7 +343,7 @@ export class SheetBuilder {
                 program.enrollmentDateLabel
                     ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
                     : i18n.t("Enrollment Date", { lng: this.builder.language })
-            } *`
+            } *` + dateFormatInfo
         );
 
         this.createColumn(
@@ -861,7 +863,7 @@ export class SheetBuilder {
                                   lng: this.builder.language,
                               })
                             : i18n.t("Date", { lng: this.builder.language })
-                    } *`
+                    } *` + dateFormatInfo
                 );
 
                 if (programStage.programStageSections.length === 0) {
