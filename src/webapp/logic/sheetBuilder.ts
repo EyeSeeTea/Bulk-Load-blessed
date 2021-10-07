@@ -22,6 +22,14 @@ const maxRow = 1048576;
 // Excel shows all empty rows, limit the maximum number of TEIs
 const maxTeiRows = 1024;
 
+const dateFormats: Record<string, string> = {
+    DATE: "YYYY-MM-DD",
+    TIME: "HH:mm",
+    DATETIME: "YYYY-MM-DDTHH:mm",
+};
+
+const dateFormatInfo = `\n(${dateFormats["DATE"]})`;
+
 export interface SheetBuilderParams {
     element: any;
     metadata: any;
@@ -197,7 +205,7 @@ export class SheetBuilder {
                               lng: this.builder.language,
                           })
                         : i18n.t("Date", { lng: this.builder.language })
-                } *`
+                } *` + dateFormatInfo
             );
 
             // Include attribute look-up from TEI Instances sheet
@@ -335,16 +343,16 @@ export class SheetBuilder {
                 program.enrollmentDateLabel
                     ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
                     : i18n.t("Enrollment Date", { lng: this.builder.language })
-            } *`
+            } *` + dateFormatInfo
         );
 
         this.createColumn(
             sheet,
             itemRow,
             4,
-            program.incidentDateLabel
+            (program.incidentDateLabel
                 ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
-                : i18n.t("Incident Date", { lng: this.builder.language })
+                : i18n.t("Incident Date", { lng: this.builder.language })) + dateFormatInfo
         );
 
         const programAttributes = program.programTrackedEntityAttributes || [];
@@ -611,10 +619,16 @@ export class SheetBuilder {
                 .map(({ id }: any) => this.translate(metadata.get(id)).name)
                 .join(", ");
             const isCompulsory = this.isMetadataItemCompulsory(item);
+            const dateFormat = dateFormats[item.valueType];
+            const nameCellValue = _.compact([
+                name,
+                isCompulsory ? " *" : "",
+                dateFormat ? `\n(${dateFormat})` : "",
+            ]).join("");
 
             metadataSheet.cell(rowId, 1).string(item.id ?? "");
             metadataSheet.cell(rowId, 2).string(item.type ?? "");
-            metadataSheet.cell(rowId, 3).string(name?.concat(isCompulsory ? " *" : "") ?? "");
+            metadataSheet.cell(rowId, 3).string(nameCellValue);
             metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
             metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
             metadataSheet.cell(rowId, 6).string(options ?? "");
@@ -849,7 +863,7 @@ export class SheetBuilder {
                                   lng: this.builder.language,
                               })
                             : i18n.t("Date", { lng: this.builder.language })
-                    } *`
+                    } *` + dateFormatInfo
                 );
 
                 if (programStage.programStageSections.length === 0) {

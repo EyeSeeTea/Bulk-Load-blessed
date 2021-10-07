@@ -46,7 +46,7 @@ const defaultSettings: OldAppSettings = {
     permissionsForSettings: [],
     permissionsForImport: [],
     orgUnitSelection: "both",
-    duplicateEnabled: true,
+    duplicateEnabled: false,
     duplicateExclusion: {},
     duplicateTolerance: 1,
     duplicateToleranceUnit: "day",

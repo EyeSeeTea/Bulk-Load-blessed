@@ -159,9 +159,7 @@ async function getElement(api: D2Api, type: DataFormType, id: string) {
         "captureCoordinates",
         "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
     ].join(",");
-    const response = await api
-        .get<any>(`/${endpoint}/${id}`, { fields })
-        .getData();
+    const response = await api.get<any>(`/${endpoint}/${id}`, { fields }).getData();
     return { ...response, type };
 }
 

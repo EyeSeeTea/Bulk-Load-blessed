@@ -5,7 +5,6 @@ import XLSX, {
     Workbook as ExcelWorkbook,
     Workbook,
 } from "@eyeseetea/xlsx-populate";
-import Blob from "cross-blob";
 import _ from "lodash";
 import moment from "moment";
 import { Sheet } from "../domain/entities/Sheet";
@@ -54,7 +53,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     public async toBuffer(id: string): Promise<Buffer> {
         const workbook = await this.getWorkbook(id);
-        return (workbook.outputAsync() as unknown) as Buffer;
+        return workbook.outputAsync() as unknown as Buffer;
     }
 
     public async findRelativeCell(id: string, location?: SheetRef, cellRef?: CellRef): Promise<CellRef | undefined> {
