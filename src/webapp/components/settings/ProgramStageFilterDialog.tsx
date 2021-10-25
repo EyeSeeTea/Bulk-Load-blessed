@@ -62,11 +62,17 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
                 .filter(id => programStage.attributes.find(e => e.id === id))
                 .map(id => ({ id }));
 
+            const externalDataElementsIncluded = _.difference(newSelectedIds, [
+                ...programStage.dataElements.map(({ id }) => id),
+                ...programStage.attributes.map(({ id }) => id),
+            ]).map(id => ({ id }));
+
             onChange(
                 settings.setProgramStageFilterFromSelection({
                     programStage: programStage.id,
                     dataElementsExcluded,
                     attributesIncluded,
+                    externalDataElementsIncluded,
                 })
             );
         },
@@ -137,14 +143,16 @@ function getSelectedIds(settings: Settings, programStage: ProgramStage | undefin
     const programStageFilter = settings.programStageFilter[programStage.id];
     const includedAttributes = programStageFilter?.attributesIncluded ?? [];
     const excludedDataElements = programStageFilter?.dataElementsExcluded ?? [];
+    const externalDataElementsIncluded = programStageFilter?.externalDataElementsIncluded ?? [];
 
     const selectedAttributes = includedAttributes.map(({ id }) => id);
+    const selectedExternalDataElements = externalDataElementsIncluded.map(({ id }) => id);
     const selectedDataElements = _.difference(
         programStage.dataElements.map(({ id }) => id),
         excludedDataElements.map(({ id }) => id)
     );
 
-    return [...selectedDataElements, ...selectedAttributes];
+    return [...selectedAttributes, ...selectedDataElements, ...selectedExternalDataElements];
 }
 
 function getDataElementItems(allStages: ProgramStage[], stage?: ProgramStage): NamedRef[] {
