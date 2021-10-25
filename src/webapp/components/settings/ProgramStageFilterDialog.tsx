@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataForm } from "../../../domain/entities/DataForm";
-import { NamedRef } from "../../../domain/entities/ReferenceObject";
+import { NamedRef, Ref } from "../../../domain/entities/ReferenceObject";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
@@ -39,7 +39,10 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
     );
 
     const programStageOptions = useMemo(() => getSelectOptionsFromNamedRefs(programStages), [programStages]);
-    const dataElementItems = useMemo(() => getDataElementItems(programStage), [programStage]);
+    const dataElementItems = useMemo(
+        () => getDataElementItems(programStages, programStage),
+        [programStages, programStage]
+    );
     const dataElementsOptions = useMemo(
         () => getMultiSelectorOptionsFromNamedRefs(dataElementItems),
         [dataElementItems]
@@ -109,17 +112,21 @@ const useStyles = makeStyles({
 interface ProgramStage {
     id: string;
     name: string;
+    program: Ref;
     dataElements: NamedRef[];
     attributes: NamedRef[];
+    repeatable: boolean;
 }
 
 function getProgramStages(programs: DataForm[]): ProgramStage[] {
-    return _.flatMap(programs, ({ name: programName, sections, teiAttributes = [] }) =>
-        sections.map(({ id, name, dataElements }) => ({
+    return _.flatMap(programs, ({ id: programId, name: programName, sections, teiAttributes = [] }) =>
+        sections.map(({ id, name, dataElements, repeatable }) => ({
             id,
             name: programName === name ? programName : `${programName} - ${name}`,
             dataElements: dataElements.map(({ id, name }) => ({ id, name })),
             attributes: teiAttributes,
+            program: { id: programId },
+            repeatable,
         }))
     );
 }
@@ -140,9 +147,21 @@ function getSelectedIds(settings: Settings, programStage: ProgramStage | undefin
     return [...selectedDataElements, ...selectedAttributes];
 }
 
-function getDataElementItems(stage: ProgramStage | undefined): NamedRef[] {
-    const dataElements = stage?.dataElements.map(({ id, name }) => ({ id, name: `[Data element] ${name}` })) ?? [];
-    const attributes = stage?.attributes.map(({ id, name }) => ({ id, name: `[Attribute] ${name}` })) ?? [];
+function getDataElementItems(allStages: ProgramStage[], stage?: ProgramStage): NamedRef[] {
+    if (!stage) return [];
 
-    return _.compact([...dataElements, ...attributes]);
+    const dataElements = stage.dataElements.map(({ id, name }) => ({ id, name: `[Data element] ${name}` })) ?? [];
+    const attributes = stage.attributes.map(({ id, name }) => ({ id, name: `[Attribute] ${name}` })) ?? [];
+    const externalDataElements = allStages
+        .filter(({ id, program, repeatable }) => {
+            const sameProgram = program.id === stage.program.id;
+            const differentStage = id !== stage.id;
+
+            return sameProgram && differentStage && !repeatable;
+        })
+        .flatMap(({ id: stageId, name: stageName, dataElements }) =>
+            dataElements.map(({ id, name }) => ({ id: `${stageId}.${id}`, name: `[External] ${name} (${stageName})` }))
+        );
+
+    return [...dataElements, ...attributes, ...externalDataElements];
 }
