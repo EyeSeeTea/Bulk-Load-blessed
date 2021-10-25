@@ -609,6 +609,10 @@ export class SheetBuilder {
             .cell(1, 6, 2, 6, true)
             .string(i18n.t("Possible Values", { lng: this.builder.language }))
             .style(baseStyle);
+        metadataSheet
+            .cell(1, 7, 2, 7, true)
+            .string(i18n.t("Metadata version", { lng: this.builder.language }))
+            .style(baseStyle);
 
         let rowId = 3;
         metadata.forEach(item => {
@@ -632,6 +636,7 @@ export class SheetBuilder {
             metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
             metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
             metadataSheet.cell(rowId, 6).string(options ?? "");
+            metadataSheet.cell(rowId, 7).string(`${item.version ?? ""}`);
 
             if (name !== undefined) {
                 this.workbook.definedNameCollection.addDefinedName({
