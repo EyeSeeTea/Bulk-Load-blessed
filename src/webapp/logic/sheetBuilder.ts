@@ -245,7 +245,7 @@ export class SheetBuilder {
                 this.createColumn(sheet, itemRow, columnId, `_${dataElement.id}`);
 
                 const colName = Excel.getExcelAlpha(columnId);
-                const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
+                const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$B$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
 
                 sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
 
