@@ -1,31 +1,31 @@
-import _ from "lodash";
 import { generateUid } from "d2/uid";
-
+import _ from "lodash";
 import { DataPackageData } from "../domain/entities/DataPackage";
-import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
-import { D2Api, D2RelationshipType, Id, Ref } from "../types/d2-api";
-import { getUid } from "./dhis2-uid";
-import { emptyImportSummary } from "../domain/entities/ImportSummary";
-import { postEvents } from "./Dhis2Events";
 import { Event } from "../domain/entities/DhisDataPackage";
-import { parseDate } from "../domain/helpers/ExcelReader";
+import { emptyImportSummary } from "../domain/entities/ImportSummary";
+import { Relationship } from "../domain/entities/Relationship";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
+import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
+import { parseDate } from "../domain/helpers/ExcelReader";
+import i18n from "../locales";
+import { D2Api, D2RelationshipType, Id, Pager, Ref } from "../types/d2-api";
+import { promiseMap } from "../utils/promises";
+import { getUid } from "./dhis2-uid";
+import { postEvents } from "./Dhis2Events";
 import { ImportPostResponse, postImport } from "./Dhis2Import";
 import {
-    DataValueApi,
-    TrackedEntityInstanceApiUpload,
-    TrackedEntityInstancesResponse,
-    TrackedEntityInstanceApi,
-    TrackedEntityInstancesRequest,
-} from "./TrackedEntityInstanceTypes";
-import {
-    getApiRelationships,
     fromApiRelationships,
-    RelationshipMetadata,
+    getApiRelationships,
     getTrackerProgramMetadata,
+    RelationshipMetadata,
 } from "./Dhis2RelationshipTypes";
-import i18n from "../locales";
-import { Relationship } from "../domain/entities/Relationship";
+import {
+    DataValueApi,
+    TrackedEntityInstanceApi,
+    TrackedEntityInstanceApiUpload,
+    TrackedEntityInstancesRequest,
+    TrackedEntityInstancesResponse,
+} from "./TrackedEntityInstanceTypes";
 
 export interface GetOptions {
     api: D2Api;
@@ -357,19 +357,33 @@ function getApiTeiToUpload(
 }
 
 interface TeiIdsResponse {
+    pager: Pager;
     trackedEntityInstances: Ref[];
 }
 
 async function getExistingTeis(api: D2Api): Promise<Ref[]> {
     const query: TrackedEntityInstancesRequest = {
         ouMode: "CAPTURE",
-        pageSize: 1e6,
+        pageSize: 1000,
         totalPages: true,
         fields: "trackedEntityInstance~rename(id)",
     };
 
-    const { trackedEntityInstances } = await api.get<TeiIdsResponse>("/trackedEntityInstances", query).getData();
-    return trackedEntityInstances;
+    const { trackedEntityInstances: firstPage, pager } = await api
+        .get<TeiIdsResponse>("/trackedEntityInstances", query)
+        .getData();
+
+    const pages = _.range(2, pager.total + 1);
+
+    const otherPages = await promiseMap(pages, async page => {
+        const { trackedEntityInstances } = await api
+            .get<TeiIdsResponse>("/trackedEntityInstances", { ...query, page })
+            .getData();
+
+        return trackedEntityInstances;
+    });
+
+    return [...firstPage, ..._.flatten(otherPages)];
 }
 async function getTeisFromApi(options: {
     api: D2Api;
