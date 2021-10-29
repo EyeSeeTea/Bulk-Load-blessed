@@ -30,10 +30,7 @@ msgstr "Planilha {{id}} não carregada"
 msgid "Data values - Delete"
 msgstr "Valores de dados - Eliminar"
 
-#, fuzzy
 msgid "Failed to import data values"
-msgstr "Valores de dados existentes"
-
 msgid ""
 "It is not possible to create products. The maximum number of products has "
 "been reached. Please contact your administrator."

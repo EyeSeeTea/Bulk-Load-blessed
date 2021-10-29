@@ -30,10 +30,7 @@ msgstr "La plantilla {{id}} no se pudo cargar"
 msgid "Data values - Delete"
 msgstr "Valores de los datos - Borrar"
 
-#, fuzzy
 msgid "Failed to import data values"
-msgstr "Existen valores para estos elementos de datos"
-
 msgid ""
 "It is not possible to create products. The maximum number of products has "
 "been reached. Please contact your administrator."
