@@ -3221,10 +3221,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@eyeseetea/d2-api@1.9.2":
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.9.2.tgz#a06bef44199b1e7031d1bb74d50bd3223d745b2a"
-  integrity sha512-O0NtSIse8ZimyA7kbjS+/D3M/ZeEA6nvW1DYaiXnG8hF7vQ15+d2Y4JuFunbg9mdo3KVcZLPPS8NAGi6rsKLWw==
+"@eyeseetea/d2-api@1.9.3-beta.5":
+  version "1.9.3-beta.5"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.9.3-beta.5.tgz#0b4d1f71545568ee29114f79c3a20d0c06764624"
+  integrity sha512-J6tU3bxn7TqbeNnVw6Bo+RyGdFarNvh5FFEi1irIXRxdwidsfXLgtNz8IaXnAQQLohIaq59TDdEdqxFw0KHd5w==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
