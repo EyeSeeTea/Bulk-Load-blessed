@@ -6,7 +6,7 @@ import {
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { DataPackageData } from "../domain/entities/DataPackage";
-import { Event } from "../domain/entities/DhisDataPackage";
+import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { Relationship } from "../domain/entities/Relationship";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
@@ -24,7 +24,6 @@ import {
     getTrackerProgramMetadata,
     RelationshipMetadata,
 } from "./Dhis2RelationshipTypes";
-import { DataValueApi } from "./TrackedEntityInstanceTypes";
 
 export interface GetOptions {
     api: D2Api;
@@ -288,8 +287,8 @@ async function getApiEvents(
                 return null;
             }
 
-            const dataValues: DataValueApi[] = _(data.dataValues)
-                .flatMap((dataValue): DataValueApi => {
+            const dataValues = _(data.dataValues)
+                .flatMap((dataValue): EventDataValue => {
                     // Leave dataValue.optionId as fallback so virtual IDS like true/false are used
                     const valueType = valueTypeByDataElementId[dataValue.dataElement];
                     let value: string;
@@ -471,7 +470,7 @@ export function updateTeiIds(
 }
 
 function getValue(
-    dataValue: { optionId?: string; value: DataValueApi["value"] },
+    dataValue: { optionId?: string; value: EventDataValue["value"] },
     optionById: Record<Id, { id: Id; code: string } | undefined>
 ): string {
     if (dataValue.optionId) {
