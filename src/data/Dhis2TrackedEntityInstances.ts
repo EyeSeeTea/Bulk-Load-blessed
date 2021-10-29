@@ -1,8 +1,4 @@
-import {
-    PaginatedTeiGetResponse,
-    TeiGetRequest,
-    TrackedEntityInstance as TrackedEntityInstanceApi,
-} from "@eyeseetea/d2-api/api/teis";
+import { PaginatedTeiGetResponse, TrackedEntityInstance as TrackedEntityInstanceApi } from "@eyeseetea/d2-api/api/teis";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { DataPackageData } from "../domain/entities/DataPackage";
@@ -205,7 +201,7 @@ async function uploadTeis(options: {
 
     return postImport(
         async () => {
-            const { response } = await api.teis
+            const { response } = await api.trackedEntityInstances
                 .postAsync({ strategy: "CREATE_AND_UPDATE", async: true }, { trackedEntityInstances: apiTeis })
                 .getData();
 
@@ -360,18 +356,18 @@ function getApiTeiToUpload(
 }
 
 async function getExistingTeis(api: D2Api): Promise<Ref[]> {
-    const query: TeiGetRequest = {
+    const query = {
         ouMode: "CAPTURE",
         pageSize: 1000,
         totalPages: true,
         fields: "trackedEntityInstance",
-    };
+    } as const;
 
-    const { trackedEntityInstances: firstPage, pager } = await api.teis.get(query).getData();
+    const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
     const pages = _.range(2, pager.total + 1);
 
     const otherPages = await promiseMap(pages, async page => {
-        const { trackedEntityInstances } = await api.teis.get({ ...query, page }).getData();
+        const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
         return trackedEntityInstances;
     });
 
@@ -398,9 +394,9 @@ async function getTeisFromApi(options: {
         "relationships",
     ];
 
-    return api.teis
+    return api.trackedEntityInstances
         .get({
-            ou: orgUnits.map(ou => ou.id).join(";"),
+            ou: orgUnits.map(ou => ou.id),
             ouMode: "SELECTED",
             order: "created:asc",
             program: program.id,

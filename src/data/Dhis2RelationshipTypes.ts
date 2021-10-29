@@ -1,7 +1,6 @@
 import {
     Relationship as RelationshipApi,
     RelationshipItem as RelationshipItemApi,
-    TeiGetRequest,
     TrackedEntityInstance as TrackedEntityInstanceApi,
 } from "@eyeseetea/d2-api/api/teis";
 import _ from "lodash";
@@ -231,7 +230,7 @@ async function getConstraintForTypeTei(
 ): Promise<RelationshipConstraint> {
     const trackedEntityTypesById = _.keyBy(trackedEntityTypes, obj => obj.id);
 
-    const query: TeiGetRequest = {
+    const query = {
         ouMode: "CAPTURE",
         order: "created:asc",
         program: constraint.program?.id,
@@ -240,14 +239,14 @@ async function getConstraintForTypeTei(
         pageSize: 1000,
         totalPages: true,
         fields: "trackedEntityInstance",
-    };
+    } as const;
 
-    const { trackedEntityInstances: firstPage, pager } = await api.teis.get(query).getData();
+    const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
 
     const pages = _.range(2, pager.total + 1);
 
     const otherPages = await promiseMap(pages, async page => {
-        const { trackedEntityInstances } = await api.teis.get({ ...query, page }).getData();
+        const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
         return trackedEntityInstances;
     });
 
