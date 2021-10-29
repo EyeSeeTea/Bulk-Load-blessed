@@ -32,6 +32,8 @@ msgid "Data values - Delete"
 msgstr "Значения данных - Удалить"
 
 msgid "Failed to import data values"
+msgstr ""
+
 msgid ""
 "It is not possible to create products. The maximum number of products has "
 "been reached. Please contact your administrator."
