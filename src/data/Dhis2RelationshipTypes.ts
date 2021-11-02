@@ -251,7 +251,7 @@ async function getConstraintForTypeTei(
         .get<TeiIdsResponse>("/trackedEntityInstances", query)
         .getData();
 
-    const pages = _.range(2, pager.total + 1);
+    const pages = _.range(2, pager.pageCount + 1);
 
     const otherPages = await promiseMap(pages, async page => {
         const { trackedEntityInstances } = await api
