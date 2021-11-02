@@ -71,12 +71,22 @@ export class ExcelReader {
 
         const dataEntries = _(data)
             .groupBy(d =>
-                [d.dataForm, d.id, d.period, d.orgUnit, d.attribute, d.trackedEntityInstance, d.programStage].join("@")
+                [
+                    d.dataForm,
+                    d.id,
+                    d.period,
+                    d.orgUnit,
+                    d.attribute,
+                    d.trackedEntityInstance,
+                    d.programStage,
+                    d.group,
+                ].join("@")
             )
             .map((items, key) => {
-                const [dataForm = "", id, period, orgUnit, attribute, trackedEntityInstance, programStage] =
+                const [dataForm = "", id, period, orgUnit, attribute, trackedEntityInstance, programStage, group] =
                     key.split("@");
                 return {
+                    group,
                     dataForm,
                     id: id ? String(id) : undefined,
                     orgUnit: String(orgUnit),
@@ -127,6 +137,7 @@ export class ExcelReader {
             const hasCoordinate = isDefined(latitude) && isDefined(longitude);
 
             return {
+                group: this.excelRepository.buildRowNumber(cell.ref),
                 dataForm: this.formatValue(dataFormId),
                 id: eventId ? this.formatValue(eventId) : undefined,
                 orgUnit: this.formatValue(orgUnit),
@@ -171,6 +182,7 @@ export class ExcelReader {
 
         return [
             {
+                group: undefined, // TODO: Add a way for custom templates to group by event
                 dataForm: String(dataFormId),
                 id: eventId ? String(eventId) : undefined,
                 orgUnit: String(orgUnit),
@@ -271,6 +283,7 @@ export class ExcelReader {
                 const { value, optionId } = item;
 
                 const data: DataPackageData = {
+                    group: rowIdx,
                     id: eventId ? String(eventId) : undefined,
                     dataForm: String(programId),
                     orgUnit: tei.orgUnit.id,
