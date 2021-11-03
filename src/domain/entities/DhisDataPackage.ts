@@ -29,8 +29,10 @@ export interface Event {
     attributeOptionCombo?: string;
     trackedEntityInstance?: string;
     programStage?: string;
-    dataValues: Array<{
-        dataElement: string;
-        value: string | number | boolean;
-    }>;
+    dataValues: EventDataValue[];
+}
+
+export interface EventDataValue {
+    dataElement: string;
+    value: string | number | boolean;
 }

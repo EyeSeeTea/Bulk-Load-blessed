@@ -3,6 +3,7 @@ import * as Excel from "excel4node";
 import _ from "lodash";
 import "lodash.product";
 import { Moment } from "moment";
+import { NamedRef } from "../../domain/entities/ReferenceObject";
 import { GeneratedTemplate } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
 import i18n from "../../locales";
@@ -156,6 +157,9 @@ export class SheetBuilder {
     private fillProgramStageSheets() {
         const { elementMetadata: metadata, element: program, settings } = this.builder;
 
+        const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+        const programStageSheets = withSheetNames(programStages);
+
         _.forEach(this.programStageSheets, (sheet, programStageId) => {
             const programStageT = { id: programStageId };
             const programStage = metadata.get(programStageId);
@@ -217,6 +221,31 @@ export class SheetBuilder {
 
                 const colName = Excel.getExcelAlpha(columnId);
                 const lookupFormula = `IFERROR(INDEX('${teiSheetName}'!$A$5:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${teiSheetName}'!$A$5:$A$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${teiSheetName}'!$A$5:$ZZ$5,0)),"")`;
+
+                sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
+
+                sheet.addDataValidation({
+                    type: "textLength",
+                    error: "This cell cannot be changed",
+                    sqref: `${colName}${itemRow + 1}:${colName}${maxRow}`,
+                    operator: "equal",
+                    formulas: [`${lookupFormula.length}`],
+                });
+
+                columnId++;
+            });
+
+            // Include external data element look-up from Other program stage sheets
+            _.forEach(settingsFilter?.externalDataElementsIncluded, ({ id }) => {
+                const [programStageId, dataElementId] = id.split(".");
+                const programStageSheet = programStageSheets.find(({ id }) => id === programStageId)?.sheetName;
+                const dataElement = metadata.get(dataElementId);
+                if (!programStageSheet || !dataElement) return;
+
+                this.createColumn(sheet, itemRow, columnId, `_${dataElement.id}`);
+
+                const colName = Excel.getExcelAlpha(columnId);
+                const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$B$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
 
                 sheet.cell(itemRow + 1, columnId, maxTeiRows, columnId).formula(lookupFormula);
 
@@ -609,6 +638,10 @@ export class SheetBuilder {
             .cell(1, 6, 2, 6, true)
             .string(i18n.t("Possible Values", { lng: this.builder.language }))
             .style(baseStyle);
+        metadataSheet
+            .cell(1, 7, 2, 7, true)
+            .string(i18n.t("Metadata version", { lng: this.builder.language }))
+            .style(baseStyle);
 
         let rowId = 3;
         metadata.forEach(item => {
@@ -632,6 +665,7 @@ export class SheetBuilder {
             metadataSheet.cell(rowId, 4).string(item.valueType ?? "");
             metadataSheet.cell(rowId, 5).string(optionSetName ?? "");
             metadataSheet.cell(rowId, 6).string(options ?? "");
+            metadataSheet.cell(rowId, 7).string(`${item.version ?? ""}`);
 
             if (name !== undefined) {
                 this.workbook.definedNameCollection.addDefinedName({
@@ -1245,17 +1279,17 @@ function getRelationshipTypeKey(relationshipType: any, key: any) {
     return ["relationshipType", relationshipType.id, key].join("-");
 }
 
-function getValidSheetName(name: any, maxLength = 31) {
+function getValidSheetName(name: string, maxLength = 31) {
     // Invalid chars: \ / * ? : [ ]
     // Maximum length: 31
     return name.replace(/[\\/*?:[\]]/g, "").slice(0, maxLength);
 }
 
 /* Add prop 'sheetName' with a valid sheet name to an array of objects having a string property 'name' */
-function withSheetNames(objs: any, options: any = {}) {
+function withSheetNames(objs: NamedRef[], options: any = {}) {
     const { prefix } = options;
 
-    return objs.filter(Boolean).map((obj: any, idx: number) => {
+    return objs.filter(Boolean).map((obj, idx: number) => {
         const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
             .compact()
             .join(" ");
