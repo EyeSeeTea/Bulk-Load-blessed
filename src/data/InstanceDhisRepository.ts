@@ -82,6 +82,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     id,
                     name,
                     dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+                    repeatable: false,
                 })),
             })
         );
@@ -123,10 +124,11 @@ export class InstanceDhisRepository implements InstanceRepository {
                 dataElements: programStages.flatMap(({ programStageDataElements }) =>
                     programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement))
                 ),
-                sections: programStages.map(({ id, name, programStageDataElements }) => ({
+                sections: programStages.map(({ id, name, programStageDataElements, repeatable }) => ({
                     id,
                     name,
                     dataElements: programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement)),
+                    repeatable,
                 })),
                 teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
@@ -645,6 +647,7 @@ const programFields = {
         id: true,
         name: true,
         programStageDataElements: { dataElement: dataElementFields },
+        repeatable: true,
     },
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
