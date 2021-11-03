@@ -20,6 +20,7 @@ export interface TrackerProgramPackage extends BaseDataPackage {
 }
 
 export interface DataPackageData {
+    group?: number | string;
     id?: Id;
     dataForm: Id;
     orgUnit: Id;

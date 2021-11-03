@@ -313,6 +313,23 @@ export class ExcelPopulateRepository extends ExcelRepository {
         return name;
     }
 
+    public buildColumnNumber(column: string): number {
+        const letters = column.split("");
+        let number = 0;
+
+        for (let i = 0; i < letters.length; i++) {
+            const start = letters[i]?.charCodeAt(0) ?? 0;
+            number += Math.pow(26, letters.length - i - 1) * (start - "A".charCodeAt(0) + 1);
+        }
+
+        return number - 1;
+    }
+
+    public buildRowNumber(row: string): number {
+        const rowNumber = row.match(/\d+/g);
+        return rowNumber ? parseInt(rowNumber[0] ?? "0") : 0;
+    }
+
     private listMergedCells(workbook: Workbook, sheet: string | number): MergedCell[] {
         return workbook
             .sheet(sheet)
