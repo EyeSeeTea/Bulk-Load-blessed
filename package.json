@@ -16,7 +16,7 @@
         "@dhis2/ui-core": "6.24.0",
         "@dhis2/ui-widgets": "6.24.0",
         "@eyeseetea/d2-api": "1.9.3-beta.8",
-        "@eyeseetea/d2-ui-components": "2.6.7",
+        "@eyeseetea/d2-ui-components": "2.6.8-beta.1",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.12.3",
         "@material-ui/icons": "4.11.2",

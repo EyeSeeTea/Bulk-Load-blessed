@@ -364,7 +364,7 @@ async function getExistingTeis(api: D2Api): Promise<Ref[]> {
     } as const;
 
     const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
-    const pages = _.range(2, pager.total + 1);
+    const pages = _.range(2, pager.pageCount + 1);
 
     const otherPages = await promiseMap(pages, async page => {
         const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
