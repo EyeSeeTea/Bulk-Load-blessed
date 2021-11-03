@@ -3221,10 +3221,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@eyeseetea/d2-api@1.9.3-beta.8":
-  version "1.9.3-beta.8"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.9.3-beta.8.tgz#d4cfe6fa907fa48b711f442674c9e5707b6f4b53"
-  integrity sha512-ijkwAjL4zFru2+XVxpfO1spW9K2c1KwChB763u8+GJQlXfyLB9ahz1c53EXPEICn3W6fh5RcFQ9FRySRbZXtkw==
+"@eyeseetea/d2-api@1.9.3":
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.9.3.tgz#deb965947e3f2ce007d1d7d990983b3ba7420c10"
+  integrity sha512-4cAck/b1oLPYMXIGZwrgRh4LZwN1hs+NXX4b8JHEJLMD50flrsR7t6h91MWzV2ocMNipDq4i+Ew5hbBzOEVAKQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
@@ -3250,10 +3250,10 @@
     react "^16.12.0"
     yargs "^14.0.0"
 
-"@eyeseetea/d2-ui-components@2.6.8-beta.1":
-  version "2.6.8-beta.1"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-ui-components/-/d2-ui-components-2.6.8-beta.1.tgz#ae6bcf3012c065177fc500e72c4359ccb09db164"
-  integrity sha512-DKgJ7+c6PRdred5gIaGoyRxm2vCPSU3MoF/cR5fwyAsFUrGqMKBs9sN0wrk0AKiqhGbXRfbRsmbLlRnEHLUwwQ==
+"@eyeseetea/d2-ui-components@2.6.8":
+  version "2.6.8"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-ui-components/-/d2-ui-components-2.6.8.tgz#bc6f655074fba28b77fee5128259ae60dd6adcec"
+  integrity sha512-BE8dcR9DEgGcOOdgSkRa5LBDjPhlot2duZP3YmL51m36jDlRbrVyTgy0xwWT0xc4Qx1HMPetIP3oTZO8yQFLTQ==
   dependencies:
     "@date-io/core" "1.3.6"
     "@date-io/moment" "1.0.2"
