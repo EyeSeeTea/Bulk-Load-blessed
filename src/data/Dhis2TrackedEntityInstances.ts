@@ -206,11 +206,10 @@ async function uploadTeis(options: {
                 .getData();
 
             const result = await api.system.waitFor(response.jobType, response.id).getData();
-            if (!result) return { status: "ERROR" };
 
             return {
-                ...result,
-                status: result.status === "SUCCESS" ? "OK" : "ERROR",
+                status: result?.status === "SUCCESS" ? "OK" : "ERROR",
+                response: result ?? undefined,
             };
         },
         {
