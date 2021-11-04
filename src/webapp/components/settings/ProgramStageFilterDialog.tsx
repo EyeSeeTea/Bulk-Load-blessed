@@ -90,7 +90,7 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
         >
             <div className={classes.row}>
                 <Select
-                    placeholder={i18n.t("Program")}
+                    placeholder={i18n.t("Program stage")}
                     options={programStageOptions}
                     onChange={selectProgram}
                     value={programStage?.id ?? ""}
@@ -105,6 +105,7 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
                     onChange={updateSelection}
                     options={dataElementsOptions}
                     selected={selectedIds}
+                    ordered={false}
                 />
             </div>
         </ConfirmationDialog>
