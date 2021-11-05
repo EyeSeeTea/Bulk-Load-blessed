@@ -12,6 +12,7 @@ import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from 
 import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, ExcelValue, LoadOptions, ReadCellOptions } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
+import { cache } from "../utils/cache";
 import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
@@ -167,12 +168,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.getWorkbook(id);
 
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
-        const xlsxSheet = workbook.sheet(range.sheet);
-        if (!xlsxSheet) return [];
 
-        const endCell = xlsxSheet.usedRange()?.endCell();
-        const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
-        const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+        const rangeColumnEnd = columnEnd ?? (await this.getSheetFinalColumn(id, range.sheet)) ?? "XFD";
+        const rangeRowEnd = rowEnd ?? (await this.getSheetRowsCount(id, range.sheet)) ?? 1048576;
+
         if (rangeRowEnd < rowStart) return [];
 
         const rangeCells = workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd);
@@ -268,6 +267,7 @@ export class ExcelPopulateRepository extends ExcelRepository {
         }
     }
 
+    @cache()
     public async getSheetRowsCount(id: string, sheetId: string | number): Promise<number | undefined> {
         const workbook = await this.getWorkbook(id);
         const sheet = workbook.sheet(sheetId);
@@ -283,6 +283,22 @@ export class ExcelPopulateRepository extends ExcelRepository {
             .last();
 
         return lastRowWithValues ? lastRowWithValues.rowNumber() : 0;
+    }
+
+    @cache()
+    public async getSheetFinalColumn(id: string, sheetId: string | number): Promise<string | undefined> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(sheetId);
+        if (!sheet) return;
+
+        const maxColumn = _(sheet._rows)
+            .take(1000)
+            .compact()
+            //@ts-ignore
+            .map(row => row.maxUsedColumnNumber())
+            .max();
+
+        return this.buildColumnName(maxColumn ?? 0);
     }
 
     public async getOrCreateSheet(id: string, name: string): Promise<Sheet> {
@@ -365,14 +381,12 @@ export class ExcelPopulateRepository extends ExcelRepository {
     }
 
     public async mergeCells(id: string, range: Range): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+
         const { sheet, columnStart, rowStart, columnEnd, rowEnd } = range;
 
-        const workbook = await this.getWorkbook(id);
-        const xlsxSheet = workbook.sheet(range.sheet);
-
-        const endCell = xlsxSheet.usedRange()?.endCell();
-        const rangeColumnEnd = columnEnd ?? endCell?.columnName() ?? "XFD";
-        const rangeRowEnd = rowEnd ?? endCell?.rowNumber() ?? 1048576;
+        const rangeColumnEnd = columnEnd ?? (await this.getSheetFinalColumn(id, range.sheet)) ?? "XFD";
+        const rangeRowEnd = rowEnd ?? (await this.getSheetRowsCount(id, range.sheet)) ?? 1048576;
 
         if (rangeRowEnd >= rowStart) {
             workbook.sheet(sheet).range(rowStart, columnStart, rangeRowEnd, rangeColumnEnd).merged(true);
