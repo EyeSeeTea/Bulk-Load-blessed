@@ -1,3 +1,8 @@
+import {
+    Relationship as RelationshipApi,
+    RelationshipItem as RelationshipItemApi,
+    TrackedEntityInstance as TrackedEntityInstanceApi,
+} from "@eyeseetea/d2-api/api/teis";
 import _ from "lodash";
 import moment from "moment";
 import { NamedRef } from "../domain/entities/ReferenceObject";
@@ -8,12 +13,6 @@ import { D2Api, D2RelationshipConstraint, D2RelationshipType, Id, Ref } from "..
 import { memoizeAsync } from "../utils/cache";
 import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
-import {
-    RelationshipApi,
-    RelationshipItemApi,
-    TrackedEntityInstanceApi,
-    TrackedEntityInstancesRequest,
-} from "./TrackedEntityInstanceTypes";
 
 type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
 
@@ -224,10 +223,6 @@ const getConstraint = memoizeAsync(
     }
 );
 
-interface TeiIdsResponse {
-    trackedEntityInstances: Ref[];
-}
-
 async function getConstraintForTypeTei(
     api: D2Api,
     trackedEntityTypes: NamedRef[],
@@ -235,18 +230,28 @@ async function getConstraintForTypeTei(
 ): Promise<RelationshipConstraint> {
     const trackedEntityTypesById = _.keyBy(trackedEntityTypes, obj => obj.id);
 
-    const query: TrackedEntityInstancesRequest = {
+    const query = {
         ouMode: "CAPTURE",
         order: "created:asc",
         program: constraint.program?.id,
         // Program and tracked entity cannot be specified simultaneously
         trackedEntityType: constraint.program ? undefined : constraint.trackedEntityType.id,
-        pageSize: 1e6,
+        pageSize: 1000,
         totalPages: true,
-        fields: "trackedEntityInstance~rename(id)",
-    };
+        fields: "trackedEntityInstance",
+    } as const;
 
-    const { trackedEntityInstances } = await api.get<TeiIdsResponse>("/trackedEntityInstances", query).getData();
+    const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
+    const pages = _.range(2, pager.pageCount + 1);
+
+    const otherPages = await promiseMap(pages, async page => {
+        const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
+        return trackedEntityInstances;
+    });
+
+    const trackedEntityInstances = [...firstPage, ..._.flatten(otherPages)].map(
+        ({ trackedEntityInstance, ...rest }) => ({ ...rest, id: trackedEntityInstance })
+    );
 
     const teis = _.sortBy(trackedEntityInstances, tei => tei.id.toLowerCase());
     const name = trackedEntityTypesById[constraint.trackedEntityType.id]?.name ?? "Unknown";

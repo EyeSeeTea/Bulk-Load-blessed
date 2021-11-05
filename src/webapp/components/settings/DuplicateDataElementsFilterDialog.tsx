@@ -79,6 +79,7 @@ export function DuplicateDataElementsFilterDialog({
                     onChange={onChangeExclude}
                     options={modelToSelectOption(selectedProgram?.dataElements)}
                     selected={selection}
+                    ordered={false}
                 />
             </div>
         </ConfirmationDialog>

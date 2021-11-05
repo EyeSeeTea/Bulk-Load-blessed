@@ -735,8 +735,8 @@ const CustomMetadataModel = Schema.object({
                 totalName: Schema.optional(Schema.string),
                 showName: Schema.optionalSafe(Schema.boolean, true),
                 showTotal: Schema.optionalSafe(Schema.boolean, true),
-                backgroundColor: Schema.optional(Schema.color),
-                color: Schema.optional(Schema.color),
+                backgroundColor: Schema.optional(Schema.string),
+                color: Schema.optional(Schema.string),
                 info: Schema.optional(Schema.string),
                 defaultCatOptionComboName: Schema.optional(Schema.string), // Not used in excel
             })
@@ -750,8 +750,8 @@ const CustomMetadataModel = Schema.object({
                 name: Schema.optional(Schema.string),
                 info: Schema.optional(Schema.string),
                 order: Schema.optionalSafe(Schema.integer, 0),
-                backgroundColor: Schema.optional(Schema.color),
-                color: Schema.optional(Schema.color),
+                backgroundColor: Schema.optional(Schema.string),
+                color: Schema.optional(Schema.string),
             })
         ),
         {}

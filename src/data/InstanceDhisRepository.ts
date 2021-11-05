@@ -23,13 +23,11 @@ import {
     D2DataElementSchema,
     DataStore,
     DataValueSetsGetResponse,
-    DataValueSetsPostResponse,
     Id,
     Pager,
     SelectedPick,
 } from "../types/d2-api";
 import { cache } from "../utils/cache";
-import { timeout } from "../utils/promises";
 import { promiseMap } from "../utils/promises";
 import { postEvents } from "./Dhis2Events";
 import { getProgram, getTrackedEntityInstances, updateTrackedEntityInstances } from "./Dhis2TrackedEntityInstances";
@@ -82,6 +80,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     id,
                     name,
                     dataElements: dataElements.map(dataElement => formatDataElement(dataElement)),
+                    repeatable: false,
                 })),
             })
         );
@@ -123,10 +122,11 @@ export class InstanceDhisRepository implements InstanceRepository {
                 dataElements: programStages.flatMap(({ programStageDataElements }) =>
                     programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement))
                 ),
-                sections: programStages.map(({ id, name, programStageDataElements }) => ({
+                sections: programStages.map(({ id, name, programStageDataElements, repeatable }) => ({
                     id,
                     name,
                     dataElements: programStageDataElements.map(({ dataElement }) => formatDataElement(dataElement)),
+                    repeatable,
                 })),
                 teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
@@ -349,37 +349,15 @@ export class InstanceDhisRepository implements InstanceRepository {
         const title =
             importStrategy === "DELETE" ? i18n.t("Data values - Delete") : i18n.t("Data values - Create/update");
 
-        const {
-            response: { id, jobType },
-        } = await this.api.dataValues.postSetAsync({ importStrategy }, { dataValues }).getData();
+        const { response } = await this.api.dataValues.postSetAsync({ importStrategy }, { dataValues }).getData();
 
-        const checkTask = async () => {
-            const response =
-                (await this.api
-                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
-                    .getData()) ?? [];
-
-            return !response[0]?.completed;
-        };
-
-        do {
-            await timeout(1500);
-        } while (await checkTask());
-
-        const importSummary = await this.api
-            .get<DataValueSetsPostResponse | null>(`/system/taskSummaries/${jobType}/${id}`)
-            .getData();
+        const importSummary = await this.api.system.waitFor(response.jobType, response.id).getData();
 
         if (!importSummary) {
-            const response =
-                (await this.api
-                    .get<{ message: string; completed: boolean }[]>(`/system/tasks/${jobType}/${id}`)
-                    .getData()) ?? [];
-
             return {
                 title,
                 status: "ERROR",
-                message: response[0]?.message,
+                message: i18n.t("Failed to import data values"),
                 stats: [{ imported: 0, deleted: 0, updated: 0, ignored: 0 }],
                 errors: [],
                 rawResponse: {},
@@ -645,6 +623,7 @@ const programFields = {
         id: true,
         name: true,
         programStageDataElements: { dataElement: dataElementFields },
+        repeatable: true,
     },
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,

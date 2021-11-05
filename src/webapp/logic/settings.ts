@@ -308,13 +308,14 @@ export default class Settings {
         programStage: string;
         dataElementsExcluded: Ref[];
         attributesIncluded: Ref[];
+        externalDataElementsIncluded: Ref[];
     }): Settings {
-        const { programStage, dataElementsExcluded, attributesIncluded } = options;
+        const { programStage, dataElementsExcluded, attributesIncluded, externalDataElementsIncluded } = options;
 
         return this.updateOptions({
             programStageFilter: {
                 ...this.programStageFilter,
-                [programStage]: { dataElementsExcluded, attributesIncluded },
+                [programStage]: { dataElementsExcluded, attributesIncluded, externalDataElementsIncluded },
             },
         });
     }
