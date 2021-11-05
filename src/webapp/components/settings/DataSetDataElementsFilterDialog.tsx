@@ -89,6 +89,7 @@ export function DataSetDataElementsFilterDialog(props: DataSetDataElementsFilter
                     onChange={updateSelection}
                     options={dataElementsOptions}
                     selected={selectedIds}
+                    ordered={false}
                 />
             </div>
         </ConfirmationDialog>

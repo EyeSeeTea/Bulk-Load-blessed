@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-10-29T06:50:00.696Z\n"
-"PO-Revision-Date: 2021-10-29T06:50:00.696Z\n"
+"POT-Creation-Date: 2021-11-04T17:11:30.337Z\n"
+"PO-Revision-Date: 2021-11-04T17:11:30.337Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -165,6 +165,9 @@ msgid "Cancel"
 msgstr ""
 
 msgid "All users allowed"
+msgstr ""
+
+msgid "Program stage"
 msgstr ""
 
 msgid "Search data elements or attributes"
