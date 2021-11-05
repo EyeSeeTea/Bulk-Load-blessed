@@ -111,7 +111,7 @@ export function initializeMockServer() {
     mock.onGet("/programs", {
         params: {
             paging: false,
-            fields: "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]]],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
+            fields: "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]],repeatable],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
             filter: [],
         },
     }).reply(200, {

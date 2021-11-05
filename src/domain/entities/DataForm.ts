@@ -13,6 +13,7 @@ export interface DataForm {
         id: Id;
         name: string;
         dataElements: DataElement[];
+        repeatable: boolean;
     }[];
     attributeValues: {
         attribute: { code: string };

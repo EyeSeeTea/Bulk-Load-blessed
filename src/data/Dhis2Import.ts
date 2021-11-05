@@ -22,14 +22,14 @@ export interface ImportPostResponse {
             responseType: "ImportSummary";
             description?: string;
             status: SynchronizationStatus;
-            href: string;
+            href?: string;
             importCount: {
                 imported: number;
                 updated: number;
                 deleted: number;
                 ignored: number;
             };
-            reference: string;
+            reference?: string;
             conflicts?: {
                 object: string;
                 value: string;
@@ -65,7 +65,7 @@ export function processImportResponse(options: {
     const errors =
         _.flatMap(
             importSummaries,
-            ({ reference, description, conflicts }) =>
+            ({ reference = "", description, conflicts }) =>
                 conflicts?.map(({ object, value }) => ({
                     id: reference,
                     message: _([description, object, value]).compact().join(" "),

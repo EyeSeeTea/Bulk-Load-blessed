@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-09-22T08:59:36.327Z\n"
-"PO-Revision-Date: 2021-09-22T08:59:36.327Z\n"
+"POT-Creation-Date: 2021-11-04T17:11:30.337Z\n"
+"PO-Revision-Date: 2021-11-04T17:11:30.337Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -27,6 +27,9 @@ msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Data values - Delete"
+msgstr ""
+
+msgid "Failed to import data values"
 msgstr ""
 
 msgid ""
@@ -162,6 +165,9 @@ msgid "Cancel"
 msgstr ""
 
 msgid "All users allowed"
+msgstr ""
+
+msgid "Program stage"
 msgstr ""
 
 msgid "Search data elements or attributes"
@@ -480,6 +486,9 @@ msgid "Boolean"
 msgstr ""
 
 msgid "True only"
+msgstr ""
+
+msgid "Metadata version"
 msgstr ""
 
 msgid "Latitude"

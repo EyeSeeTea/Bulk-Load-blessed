@@ -46,6 +46,8 @@ export abstract class ExcelRepository {
     public abstract listDefinedNames(id: string): Promise<string[]>;
     public abstract getOrCreateSheet(id: string, name: string): Promise<Sheet>;
     public abstract buildColumnName(column: number | string): string;
+    public abstract buildColumnNumber(column: string): number;
+    public abstract buildRowNumber(row: string): number;
     public abstract defineName(id: string, name: string, cell: CellRef): Promise<void>;
     public abstract mergeCells(id: string, range: Range): Promise<void>;
     public abstract hideCells(id: string, ref: ColumnRef | RowRef, hidden?: boolean): Promise<void>;
