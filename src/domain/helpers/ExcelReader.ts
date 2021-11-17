@@ -117,7 +117,6 @@ export class ExcelReader {
             if (!isDefined(value)) return undefined;
 
             const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
-            if (!orgUnit) return undefined;
 
             const period = await this.readCellValue(template, dataSource.period, cell);
             if (!period) return undefined;
@@ -165,7 +164,6 @@ export class ExcelReader {
         if (!isDefined(value)) return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
-        if (!orgUnit) return [];
 
         const period = await this.readCellValue(template, dataSource.period);
         if (!period) return [];
