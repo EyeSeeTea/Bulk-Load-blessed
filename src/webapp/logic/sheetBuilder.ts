@@ -47,6 +47,7 @@ export interface SheetBuilderParams {
     theme?: Theme;
     template: GeneratedTemplate;
     settings: Settings;
+    downloadRelationships: boolean;
 }
 
 export class SheetBuilder {
@@ -86,11 +87,14 @@ export class SheetBuilder {
                 this.programStageSheets[programStage.id] = sheet;
             });
 
-            // RelationshipType sheets
-            withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach((relationshipType: any) => {
-                const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
-                this.relationshipsSheets.push([relationshipType, sheet]);
-            });
+            if(builder.downloadRelationships) {
+                // RelationshipType sheets
+                withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach((relationshipType: any) => {
+                    const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
+                    this.relationshipsSheets.push([relationshipType, sheet]);
+                });
+            }
+
         } else {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
@@ -1288,7 +1292,6 @@ function getValidSheetName(name: string, maxLength = 31) {
 /* Add prop 'sheetName' with a valid sheet name to an array of objects having a string property 'name' */
 function withSheetNames(objs: NamedRef[], options: any = {}) {
     const { prefix } = options;
-
     return objs.filter(Boolean).map((obj, idx: number) => {
         const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
             .compact()

@@ -28,6 +28,7 @@ export interface DownloadTemplateProps {
     populateEndDate?: Moment;
     writeFile?: string;
     settings: Settings;
+   downloadRelationships: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -52,6 +53,7 @@ export class DownloadTemplateUseCase implements UseCase {
             populateEndDate,
             writeFile,
             settings,
+            downloadRelationships
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
@@ -67,11 +69,11 @@ export class DownloadTemplateUseCase implements UseCase {
             const result = await getElementMetadata({
                 api,
                 element,
+                downloadRelationships,
                 orgUnitIds: orgUnits,
                 startDate: populateStartDate?.toDate(),
                 endDate: populateEndDate?.toDate(),
             });
-
             // FIXME: Legacy code, sheet generator
             const sheetBuilder = new SheetBuilder({
                 ...result,
@@ -81,6 +83,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 theme,
                 template,
                 settings,
+                downloadRelationships
             });
             const workbook = await sheetBuilder.generate();
 
@@ -169,12 +172,14 @@ async function getElementMetadata({
     orgUnitIds,
     startDate,
     endDate,
+    downloadRelationships
 }: {
     element: any;
     api: D2Api;
     orgUnitIds: string[];
     startDate?: Date;
     endDate?: Date;
+    downloadRelationships: boolean;
 }) {
     const elementMetadata = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
@@ -198,9 +203,8 @@ async function getElementMetadata({
 
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
     const metadata =
-        element.type === "trackerPrograms"
+        element.type === "trackerPrograms" && downloadRelationships
             ? await getTrackerProgramMetadata(element, api, { organisationUnits, startDate, endDate })
             : {};
-
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }

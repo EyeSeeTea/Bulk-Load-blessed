@@ -52,6 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment().add("-1", "year").endOf("year"),
         populate: false,
+        downloadRelationships: true,
         language: "en",
         settings,
     });
@@ -195,6 +196,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
         setState(state => ({ ...state, populate }));
+    };
+
+    const onDownloadRelationshipsChange = (_event: React.ChangeEvent, downloadRelationships: boolean) => {
+        setState(state => ({ ...state, downloadRelationships }));
     };
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
@@ -398,6 +403,15 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                             InputLabelProps={{ style: { color: "#494949" } }}
                         />
                     </div>
+                </div>
+            )}
+            {userHasReadAccess && state.type === "trackerPrograms" && (
+                <div>
+                    <FormControlLabel
+                        className={classes.checkbox}
+                        control={<Checkbox checked={state.downloadRelationships} onChange={onDownloadRelationshipsChange} />}
+                        label={i18n.t("Download relationships")}
+                    />
                 </div>
             )}
         </React.Fragment>
