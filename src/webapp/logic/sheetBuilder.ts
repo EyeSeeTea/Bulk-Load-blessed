@@ -87,14 +87,15 @@ export class SheetBuilder {
                 this.programStageSheets[programStage.id] = sheet;
             });
 
-            if(builder.downloadRelationships) {
+            if (builder.downloadRelationships) {
                 // RelationshipType sheets
-                withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach((relationshipType: any) => {
-                    const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
-                    this.relationshipsSheets.push([relationshipType, sheet]);
-                });
+                withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(
+                    (relationshipType: any) => {
+                        const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
+                        this.relationshipsSheets.push([relationshipType, sheet]);
+                    }
+                );
             }
-
         } else {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }

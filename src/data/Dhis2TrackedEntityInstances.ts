@@ -1,5 +1,6 @@
 import { PaginatedTeiGetResponse, TrackedEntityInstance as TrackedEntityInstanceApi } from "@eyeseetea/d2-api/api/teis";
 import { generateUid } from "d2/uid";
+import moment, { Moment } from "moment";
 import _ from "lodash";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
@@ -26,10 +27,12 @@ export interface GetOptions {
     program: Ref;
     orgUnits: Ref[];
     pageSize?: number;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }
 
 export async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, pageSize = 500 } = options;
+    const { api, orgUnits, pageSize = 500, enrollmentStartDate, enrollmentEndDate } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const program = await getProgram(api, options.program.id);
@@ -46,9 +49,22 @@ export async function getTrackedEntityInstances(options: GetOptions): Promise<Tr
     for (const orgUnits of orgUnitsList) {
         // Limit response size by requesting paginated TEIs
         for (let page = 1; ; page++) {
-            const apiOptions = { api, program, orgUnits, page, pageSize };
+            const apiOptions = { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
-            apiTeis.push(...trackedEntityInstances);
+            const trackedEntityInstancesFilteredByEnrollmentIfSet =
+                enrollmentStartDate && enrollmentEndDate
+                    ? trackedEntityInstances.filter(trackedEntityInstance => {
+                          return trackedEntityInstance.enrollments.every(item =>
+                              moment(item.enrollmentDate).isBetween(
+                                  enrollmentStartDate,
+                                  enrollmentEndDate,
+                                  undefined,
+                                  "[]"
+                              )
+                          );
+                      })
+                    : trackedEntityInstances;
+            apiTeis.push(...trackedEntityInstancesFilteredByEnrollmentIfSet);
             if (pager.pageCount <= page) break;
         }
     }

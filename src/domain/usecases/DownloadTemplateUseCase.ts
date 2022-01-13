@@ -28,7 +28,9 @@ export interface DownloadTemplateProps {
     populateEndDate?: Moment;
     writeFile?: string;
     settings: Settings;
-   downloadRelationships: boolean;
+    downloadRelationships: boolean;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -53,7 +55,9 @@ export class DownloadTemplateUseCase implements UseCase {
             populateEndDate,
             writeFile,
             settings,
-            downloadRelationships
+            downloadRelationships,
+            enrollmentStartDate,
+            enrollmentEndDate,
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
@@ -83,7 +87,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 theme,
                 template,
                 settings,
-                downloadRelationships
+                downloadRelationships,
             });
             const workbook = await sheetBuilder.generate();
 
@@ -101,10 +105,11 @@ export class DownloadTemplateUseCase implements UseCase {
                   orgUnits,
                   startDate: populateStartDate,
                   endDate: populateEndDate,
+                  enrollmentStartDate,
+                  enrollmentEndDate,
                   translateCodes: template.type !== "custom",
               })
             : undefined;
-
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
         await builder.templateCustomization(template, { populate, dataPackage, orgUnits });
 
@@ -172,7 +177,7 @@ async function getElementMetadata({
     orgUnitIds,
     startDate,
     endDate,
-    downloadRelationships
+    downloadRelationships,
 }: {
     element: any;
     api: D2Api;
