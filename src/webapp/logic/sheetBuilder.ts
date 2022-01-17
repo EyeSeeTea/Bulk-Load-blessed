@@ -1293,6 +1293,7 @@ function getValidSheetName(name: string, maxLength = 31) {
 /* Add prop 'sheetName' with a valid sheet name to an array of objects having a string property 'name' */
 function withSheetNames(objs: NamedRef[], options: any = {}) {
     const { prefix } = options;
+
     return objs.filter(Boolean).map((obj, idx: number) => {
         const baseSheetName = _([prefix, `(${idx + 1}) ${obj.name}`])
             .compact()

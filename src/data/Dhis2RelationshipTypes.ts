@@ -2,7 +2,7 @@ import {
     Relationship as RelationshipApi,
     RelationshipItem as RelationshipItemApi,
     TrackedEntityInstance as TrackedEntityInstanceApi,
-} from "@eyeseetea/d2-api/api/teis";
+} from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import _ from "lodash";
 import moment from "moment";
 import { NamedRef } from "../domain/entities/ReferenceObject";
@@ -144,7 +144,7 @@ export interface RelationshipMetadata {
     relationshipTypes: RelationshipType[];
 }
 
-export async function getTrackerProgramMetadata(
+export async function getRelationshipMetadata(
     program: Program,
     api: D2Api,
     filters?: ProgramFilters

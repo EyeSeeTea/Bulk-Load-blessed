@@ -1,7 +1,10 @@
-import { PaginatedTeiGetResponse, TrackedEntityInstance as TrackedEntityInstanceApi } from "@eyeseetea/d2-api/api/teis";
+import {
+    PaginatedTeiGetResponse,
+    TrackedEntityInstance as TrackedEntityInstanceApi,
+} from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import { generateUid } from "d2/uid";
-import moment, { Moment } from "moment";
 import _ from "lodash";
+import moment, { Moment } from "moment";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
@@ -18,7 +21,7 @@ import { postImport } from "./Dhis2Import";
 import {
     fromApiRelationships,
     getApiRelationships,
-    getTrackerProgramMetadata,
+    getRelationshipMetadata,
     RelationshipMetadata,
 } from "./Dhis2RelationshipTypes";
 
@@ -38,7 +41,7 @@ export async function getTrackedEntityInstances(options: GetOptions): Promise<Tr
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    const metadata = await getTrackerProgramMetadata(program, api);
+    const metadata = await getRelationshipMetadata(program, api);
 
     // Avoid 414-uri-too-large by spliting orgUnit in chunks
     const orgUnitsList = _.chunk(orgUnits, 250);

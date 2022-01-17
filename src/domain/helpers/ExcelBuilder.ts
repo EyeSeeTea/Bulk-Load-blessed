@@ -1,4 +1,4 @@
-import dateFormat from "dateformat";
+import { format } from "date-fns";
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
@@ -24,7 +24,7 @@ import { getRelationships } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 import { BuilderMetadata, emptyBuilderMetadata, InstanceRepository } from "../repositories/InstanceRepository";
 
-const dateFormatPattern = "yyyy-mm-dd";
+const dateFormatPattern = "yyyy-MM-dd";
 
 export class ExcelBuilder {
     constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceRepository) {}
@@ -130,7 +130,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     enrollmentDateCell,
-                    dateFormat(new Date(enrollment.enrollmentDate), dateFormatPattern)
+                    format(new Date(enrollment.enrollmentDate), dateFormatPattern)
                 );
 
             const incidentDateCell = await this.excelRepository.findRelativeCell(
@@ -142,7 +142,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     incidentDateCell,
-                    dateFormat(new Date(enrollment.incidentDate), dateFormatPattern)
+                    format(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
             for (const cell of cells) {

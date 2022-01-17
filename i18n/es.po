@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-01-12T18:00:09.635Z\n"
+"POT-Creation-Date: 2022-01-17T08:04:23.007Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -383,9 +383,20 @@ msgstr "Fecha inicial"
 msgid "End date"
 msgstr "Fecha final"
 
-#, fuzzy
 msgid "Download relationships"
-msgstr "Relaciones"
+msgstr ""
+
+#, fuzzy
+msgid "Enrollment date"
+msgstr "Fecha de inscripción"
+
+#, fuzzy
+msgid "Enrollment start date"
+msgstr "Fecha de inscripción"
+
+#, fuzzy
+msgid "Enrollment end date"
+msgstr "Fecha de inscripción"
 
 msgid "Edit theme"
 msgstr "Editar tema"

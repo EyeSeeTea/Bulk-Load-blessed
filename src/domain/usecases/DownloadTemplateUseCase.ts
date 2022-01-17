@@ -3,7 +3,7 @@ import fs from "fs";
 import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
-import { getTrackerProgramMetadata } from "../../data/Dhis2RelationshipTypes";
+import { getRelationshipMetadata } from "../../data/Dhis2RelationshipTypes";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
@@ -78,6 +78,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 startDate: populateStartDate?.toDate(),
                 endDate: populateEndDate?.toDate(),
             });
+
             // FIXME: Legacy code, sheet generator
             const sheetBuilder = new SheetBuilder({
                 ...result,
@@ -110,6 +111,7 @@ export class DownloadTemplateUseCase implements UseCase {
                   translateCodes: template.type !== "custom",
               })
             : undefined;
+
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
         await builder.templateCustomization(template, { populate, dataPackage, orgUnits });
 
@@ -209,7 +211,8 @@ async function getElementMetadata({
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
     const metadata =
         element.type === "trackerPrograms" && downloadRelationships
-            ? await getTrackerProgramMetadata(element, api, { organisationUnits, startDate, endDate })
+            ? await getRelationshipMetadata(element, api, { organisationUnits, startDate, endDate })
             : {};
+
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
 }

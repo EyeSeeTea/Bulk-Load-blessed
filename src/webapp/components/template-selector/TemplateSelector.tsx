@@ -56,6 +56,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         language: "en",
         settings,
     });
+
     const models = useMemo(() => {
         return _.compact([
             settings.allModelsEnabled() && {

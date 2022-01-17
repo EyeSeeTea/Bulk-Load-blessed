@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-01-12T18:00:09.635Z\n"
-"PO-Revision-Date: 2022-01-12T18:00:09.635Z\n"
+"POT-Creation-Date: 2022-01-17T08:04:23.007Z\n"
+"PO-Revision-Date: 2022-01-17T08:04:23.007Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -359,6 +359,15 @@ msgid "End date"
 msgstr ""
 
 msgid "Download relationships"
+msgstr ""
+
+msgid "Enrollment date"
+msgstr ""
+
+msgid "Enrollment start date"
+msgstr ""
+
+msgid "Enrollment end date"
 msgstr ""
 
 msgid "Edit theme"

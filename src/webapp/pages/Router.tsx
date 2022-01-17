@@ -3,7 +3,7 @@ import { HeaderBar } from "@dhis2/ui-widgets";
 import { useSnackbar } from "@eyeseetea/d2-ui-components";
 import { makeStyles, Paper } from "@material-ui/core";
 import React, { useEffect, useMemo, useState } from "react";
-import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Theme } from "../../domain/entities/Theme";
 import i18n from "../../locales";
 import { AppDrawer, AppDrawerToggle } from "../components/drawer/Drawer";
@@ -120,22 +120,22 @@ export const Router: React.FC = React.memo(() => {
 
                 <div className={`${classes.content} ${isOpen ? classes.contentOpen : classes.contentCollapsed}`}>
                     <Paper className={classes.paper}>
-                        <Switch>
-                            {defaultRoute && (
-                                <Route exact={true} path={"/"} render={() => <Redirect to={defaultRoute.path} />} />
-                            )}
+                        <Routes>
+                            {defaultRoute && <Route path={"/"} element={<Navigate to={defaultRoute.path} />} />}
 
                             {userRoutes.map(({ key, path, component }) => (
-                                <Route key={key} path={path}>
-                                    {component({
+                                <Route
+                                    key={key}
+                                    path={path}
+                                    element={component({
                                         settings,
                                         themes,
                                         setSettings,
                                         setThemes,
                                     })}
-                                </Route>
+                                />
                             ))}
-                        </Switch>
+                        </Routes>
                     </Paper>
                 </div>
             </div>
