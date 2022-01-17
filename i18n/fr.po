@@ -366,9 +366,8 @@ msgstr "Date de fin"
 msgid "Download relationships"
 msgstr ""
 
-#, fuzzy
 msgid "Enrollment date"
-msgstr "Date de fin"
+msgstr ""
 
 msgid "Enrollment start date"
 msgstr ""

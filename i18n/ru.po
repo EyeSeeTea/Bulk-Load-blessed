@@ -385,17 +385,14 @@ msgstr "Дата окончания"
 msgid "Download relationships"
 msgstr ""
 
-#, fuzzy
 msgid "Enrollment date"
-msgstr "Дата зачисления"
+msgstr ""
 
-#, fuzzy
 msgid "Enrollment start date"
-msgstr "Дата зачисления"
+msgstr ""
 
-#, fuzzy
 msgid "Enrollment end date"
-msgstr "Дата зачисления"
+msgstr ""
 
 msgid "Edit theme"
 msgstr "Редактировать тему"
