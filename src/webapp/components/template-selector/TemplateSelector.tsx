@@ -427,37 +427,41 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     />
                 </div>
             )}
-            {state.type === "trackerPrograms" && state.populate && state.templateType !== "custom" && (
-                <>
-                    <h4>{i18n.t("Enrollment date")}</h4>
-                    <div className={classes.row}>
-                        <div className={classes.select}>
-                            <DatePicker
-                                className={classes.fullWidth}
-                                label={i18n.t("Enrollment start date")}
-                                value={state.enrollmentStartDate ?? null}
-                                onChange={(date: Date) => onStartDateChange("enrollmentStartDate", date)}
-                                maxDate={state.enrollmentEndDate}
-                                views={datePickerFormat?.views}
-                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                                InputLabelProps={{ style: { color: "#494949" } }}
-                            />
+            {state.type === "trackerPrograms" &&
+                userHasReadAccess &&
+                filterOrgUnits &&
+                state.downloadRelationships &&
+                state.templateType !== "custom" && (
+                    <>
+                        <h4 className={classes.title}>{i18n.t("Filter relationships by enrollment date (optional)")}</h4>
+                        <div className={classes.row}>
+                            <div className={classes.select}>
+                                <DatePicker
+                                    className={classes.fullWidth}
+                                    label={i18n.t("Enrollment start date")}
+                                    value={state.enrollmentStartDate ?? null}
+                                    onChange={(date: Date) => onStartDateChange("enrollmentStartDate", date)}
+                                    maxDate={state.enrollmentEndDate}
+                                    views={datePickerFormat?.views}
+                                    format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                    InputLabelProps={{ style: { color: "#494949" } }}
+                                />
+                            </div>
+                            <div className={classes.select}>
+                                <DatePicker
+                                    className={classes.fullWidth}
+                                    label={i18n.t("Enrollment end date")}
+                                    value={state.enrollmentEndDate ?? null}
+                                    onChange={(date: Date) => onEndDateChange("enrollmentEndDate", date)}
+                                    minDate={state.enrollmentStartDate}
+                                    views={datePickerFormat?.views}
+                                    format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                    InputLabelProps={{ style: { color: "#494949" } }}
+                                />
+                            </div>
                         </div>
-                        <div className={classes.select}>
-                            <DatePicker
-                                className={classes.fullWidth}
-                                label={i18n.t("Enrollment end date")}
-                                value={state.enrollmentEndDate ?? null}
-                                onChange={(date: Date) => onEndDateChange("enrollmentEndDate", date)}
-                                minDate={state.enrollmentStartDate}
-                                views={datePickerFormat?.views}
-                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                                InputLabelProps={{ style: { color: "#494949" } }}
-                            />
-                        </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )}
         </React.Fragment>
     );
 };
@@ -470,7 +474,7 @@ const useStyles = makeStyles({
         marginRight: "1em",
     },
     title: { marginBottom: 0 },
-    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0, marginTop: 0 },
     checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },
