@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-01-17T08:04:23.007Z\n"
+"POT-Creation-Date: 2022-01-18T07:49:40.090Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -386,7 +386,22 @@ msgstr "Fecha final"
 msgid "Download relationships"
 msgstr ""
 
-msgid "Enrollment date"
+msgid "Filter relationships by organisation unit type"
+msgstr ""
+
+msgid "Selected"
+msgstr ""
+
+msgid "Selected with descendants"
+msgstr ""
+
+msgid "Data view (current user)"
+msgstr ""
+
+msgid "Data capture (current user)"
+msgstr ""
+
+msgid "Filter relationships by enrollment date (optional)"
 msgstr ""
 
 msgid "Enrollment start date"

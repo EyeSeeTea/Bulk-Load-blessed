@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-01-17T08:04:23.007Z\n"
-"PO-Revision-Date: 2022-01-17T08:04:23.007Z\n"
+"POT-Creation-Date: 2022-01-18T07:49:40.090Z\n"
+"PO-Revision-Date: 2022-01-18T07:49:40.090Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -361,7 +361,22 @@ msgstr ""
 msgid "Download relationships"
 msgstr ""
 
-msgid "Enrollment date"
+msgid "Filter relationships by organisation unit type"
+msgstr ""
+
+msgid "Selected"
+msgstr ""
+
+msgid "Selected with descendants"
+msgstr ""
+
+msgid "Data view (current user)"
+msgstr ""
+
+msgid "Data capture (current user)"
+msgstr ""
+
+msgid "Filter relationships by enrollment date (optional)"
 msgstr ""
 
 msgid "Enrollment start date"
