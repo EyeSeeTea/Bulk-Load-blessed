@@ -3,7 +3,7 @@ import fs from "fs";
 import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
-import { getRelationshipMetadata } from "../../data/Dhis2RelationshipTypes";
+import { getRelationshipMetadata, RelationshipOrgUnitFilter } from "../../data/Dhis2RelationshipTypes";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
@@ -31,6 +31,7 @@ export interface DownloadTemplateProps {
     downloadRelationships: boolean;
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
+    relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -58,6 +59,7 @@ export class DownloadTemplateUseCase implements UseCase {
             downloadRelationships,
             enrollmentStartDate,
             enrollmentEndDate,
+            relationshipsOuFilter,
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
@@ -77,6 +79,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 orgUnitIds: orgUnits,
                 startDate: populateStartDate?.toDate(),
                 endDate: populateEndDate?.toDate(),
+                relationshipsOuFilter,
             });
 
             // FIXME: Legacy code, sheet generator
@@ -109,6 +112,7 @@ export class DownloadTemplateUseCase implements UseCase {
                   enrollmentStartDate,
                   enrollmentEndDate,
                   translateCodes: template.type !== "custom",
+                  relationshipsOuFilter,
               })
             : undefined;
 
@@ -180,6 +184,7 @@ async function getElementMetadata({
     startDate,
     endDate,
     downloadRelationships,
+    relationshipsOuFilter,
 }: {
     element: any;
     api: D2Api;
@@ -187,6 +192,7 @@ async function getElementMetadata({
     startDate?: Date;
     endDate?: Date;
     downloadRelationships: boolean;
+    relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }) {
     const elementMetadata = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
@@ -211,7 +217,12 @@ async function getElementMetadata({
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
     const metadata =
         element.type === "trackerPrograms" && downloadRelationships
-            ? await getRelationshipMetadata(element, api, { organisationUnits, startDate, endDate })
+            ? await getRelationshipMetadata(element, api, {
+                  organisationUnits,
+                  startDate,
+                  endDate,
+                  ouMode: relationshipsOuFilter,
+              })
             : {};
 
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };

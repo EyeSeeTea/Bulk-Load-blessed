@@ -23,6 +23,7 @@ import {
     getApiRelationships,
     getRelationshipMetadata,
     RelationshipMetadata,
+    RelationshipOrgUnitFilter,
 } from "./Dhis2RelationshipTypes";
 
 export interface GetOptions {
@@ -32,16 +33,20 @@ export interface GetOptions {
     pageSize?: number;
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
+    relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }
 
 export async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, pageSize = 500, enrollmentStartDate, enrollmentEndDate } = options;
+    const { api, orgUnits, pageSize = 500, enrollmentStartDate, enrollmentEndDate, relationshipsOuFilter } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    const metadata = await getRelationshipMetadata(program, api);
+    const metadata = await getRelationshipMetadata(program, api, {
+        organisationUnits: orgUnits,
+        ouMode: relationshipsOuFilter,
+    });
 
     // Avoid 414-uri-too-large by spliting orgUnit in chunks
     const orgUnitsList = _.chunk(orgUnits, 250);
@@ -133,6 +138,7 @@ export async function updateTrackedEntityInstances(
         api,
         program: { id: programId },
         orgUnits: orgUnitIds.map(id => ({ id })),
+        relationshipsOuFilter: "SELECTED",
     });
 
     const program = await getProgram(api, programId);
