@@ -4,7 +4,7 @@ import {
 } from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
-import moment, { Moment } from "moment";
+import { Moment } from "moment";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
@@ -59,20 +59,7 @@ export async function getTrackedEntityInstances(options: GetOptions): Promise<Tr
         for (let page = 1; ; page++) {
             const apiOptions = { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
-            const trackedEntityInstancesFilteredByEnrollmentIfSet =
-                enrollmentStartDate && enrollmentEndDate
-                    ? trackedEntityInstances.filter(trackedEntityInstance => {
-                          return trackedEntityInstance.enrollments.every(item =>
-                              moment(item.enrollmentDate).isBetween(
-                                  enrollmentStartDate,
-                                  enrollmentEndDate,
-                                  undefined,
-                                  "[]"
-                              )
-                          );
-                      })
-                    : trackedEntityInstances;
-            apiTeis.push(...trackedEntityInstancesFilteredByEnrollmentIfSet);
+            apiTeis.push(...trackedEntityInstances);
             if (pager.pageCount <= page) break;
         }
     }
@@ -407,8 +394,10 @@ async function getTeisFromApi(options: {
     orgUnits: Ref[];
     page: number;
     pageSize: number;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
-    const { api, program, orgUnits, page, pageSize } = options;
+    const { api, program, orgUnits, page, pageSize,enrollmentStartDate, enrollmentEndDate } = options;
     const fields: Array<keyof TrackedEntityInstanceApi> = [
         "trackedEntityInstance",
         "inactive",
@@ -428,6 +417,10 @@ async function getTeisFromApi(options: {
             page,
             totalPages: true,
             fields: fields.join(","),
+            programStartDate: enrollmentStartDate?.format("YYYY-MM-DD") || undefined,
+            programEndDate: enrollmentEndDate?.format("YYYY-MM-DD") || undefined,
+
+
         })
         .getData();
 }
