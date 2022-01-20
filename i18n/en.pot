@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-01-17T08:04:23.007Z\n"
-"PO-Revision-Date: 2022-01-17T08:04:23.007Z\n"
+"POT-Creation-Date: 2022-01-20T13:29:24.842Z\n"
+"PO-Revision-Date: 2022-01-20T13:29:24.842Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -171,6 +171,9 @@ msgid "Program stage"
 msgstr ""
 
 msgid "Search data elements or attributes"
+msgstr ""
+
+msgid "Populate events for every Tracked Entity Instance (TEI)"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
