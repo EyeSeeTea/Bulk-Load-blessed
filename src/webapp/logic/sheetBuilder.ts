@@ -72,7 +72,6 @@ export class SheetBuilder {
     public generate() {
         const { builder } = this;
         const { element } = builder;
-
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
             this.instancesSheet = this.workbook.addWorksheet(teiSheetName);

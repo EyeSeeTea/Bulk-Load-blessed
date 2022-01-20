@@ -9,6 +9,7 @@ import {
     Models,
     OrgUnitSelectionSetting,
     ProgramStageFilter,
+    ProgramStagePopulateEventsForEveryTei,
 } from "../../domain/entities/AppSettings";
 import {
     DataElementDisaggregated,
@@ -33,6 +34,7 @@ const publicFields = [
     "duplicateToleranceUnit",
     "dataSetDataElementsFilter",
     "programStageFilter",
+    "programStagePopulateEventsForEveryTei",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -74,6 +76,7 @@ export default class Settings {
     public duplicateToleranceUnit: DuplicateToleranceUnit;
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
     public programStageFilter: ProgramStageFilter;
+    public programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -88,6 +91,7 @@ export default class Settings {
         this.duplicateToleranceUnit = options.duplicateToleranceUnit;
         this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
         this.programStageFilter = options.programStageFilter;
+        this.programStagePopulateEventsForEveryTei = options.programStagePopulateEventsForEveryTei;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -140,6 +144,8 @@ export default class Settings {
             duplicateToleranceUnit: data.duplicateToleranceUnit ?? defaultSettings.duplicateToleranceUnit,
             dataSetDataElementsFilter: data.dataSetDataElementsFilter ?? defaultSettings.dataSetDataElementsFilter,
             programStageFilter: data.programStageFilter ?? defaultSettings.programStageFilter,
+            programStagePopulateEventsForEveryTei:
+                data.programStagePopulateEventsForEveryTei ?? defaultSettings.programStagePopulateEventsForEveryTei,
         });
     }
 
@@ -159,6 +165,7 @@ export default class Settings {
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
             programStageFilter,
+            programStagePopulateEventsForEveryTei,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -185,6 +192,7 @@ export default class Settings {
             duplicateToleranceUnit,
             dataSetDataElementsFilter,
             programStageFilter,
+            programStagePopulateEventsForEveryTei,
         };
 
         try {
@@ -311,11 +319,21 @@ export default class Settings {
         externalDataElementsIncluded: Ref[];
     }): Settings {
         const { programStage, dataElementsExcluded, attributesIncluded, externalDataElementsIncluded } = options;
-
         return this.updateOptions({
             programStageFilter: {
                 ...this.programStageFilter,
                 [programStage]: { dataElementsExcluded, attributesIncluded, externalDataElementsIncluded },
+            },
+        });
+    }
+
+    setPopulateEventsForEveryTei(options: { programStage: string; populateEventsForEveryTei: boolean }): Settings {
+        const { programStage, populateEventsForEveryTei } = options;
+
+        return this.updateOptions({
+            programStagePopulateEventsForEveryTei: {
+                ...this.programStagePopulateEventsForEveryTei,
+                [programStage]: populateEventsForEveryTei,
             },
         });
     }

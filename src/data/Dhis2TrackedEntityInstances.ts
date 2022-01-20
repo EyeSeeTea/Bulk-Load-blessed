@@ -391,7 +391,7 @@ async function getTeisFromApi(options: {
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
-    const { api, program, orgUnits, page, pageSize,enrollmentStartDate, enrollmentEndDate } = options;
+    const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate } = options;
     const fields: Array<keyof TrackedEntityInstanceApi> = [
         "trackedEntityInstance",
         "inactive",
@@ -413,8 +413,6 @@ async function getTeisFromApi(options: {
             fields: fields.join(","),
             programStartDate: enrollmentStartDate?.format("YYYY-MM-DD") || undefined,
             programEndDate: enrollmentEndDate?.format("YYYY-MM-DD") || undefined,
-
-
         })
         .getData();
 }

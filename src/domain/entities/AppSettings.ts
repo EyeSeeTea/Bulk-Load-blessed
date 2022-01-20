@@ -17,6 +17,7 @@ export type ProgramStageFilter = Record<
     ProgramStageId,
     { dataElementsExcluded: Ref[]; attributesIncluded: Ref[]; externalDataElementsIncluded: Ref[] }
 >;
+export type ProgramStagePopulateEventsForEveryTei = Record<ProgramStageId, boolean>;
 
 export interface AppSettings {
     models: Record<Model, boolean>;
@@ -33,4 +34,5 @@ export interface AppSettings {
     duplicateToleranceUnit: DuplicateToleranceUnit;
     dataSetDataElementsFilter: DataSetDataElementsFilter;
     programStageFilter: ProgramStageFilter;
+    programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
 }
