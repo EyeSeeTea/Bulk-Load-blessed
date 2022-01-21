@@ -248,6 +248,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             orgUnits,
             enrollmentStartDate,
             enrollmentEndDate,
+            relationshipsOuFilter: params.relationshipsOuFilter,
         });
 
         return {

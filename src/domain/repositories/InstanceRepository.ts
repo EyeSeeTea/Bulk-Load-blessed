@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { RelationshipOrgUnitFilter } from "../../data/Dhis2RelationshipTypes";
 import { DataStore } from "../../types/d2-api";
 import { DataForm, DataFormType } from "../entities/DataForm";
 import { DataPackage } from "../entities/DataPackage";
@@ -19,6 +20,7 @@ export interface GetDataPackageParams {
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
     translateCodes?: boolean;
+    relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }
 
 export interface GetDataFormsParams {
