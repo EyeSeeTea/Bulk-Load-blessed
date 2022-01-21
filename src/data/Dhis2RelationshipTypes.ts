@@ -1,6 +1,7 @@
 import {
     Relationship as RelationshipApi,
     RelationshipItem as RelationshipItemApi,
+    TeiOuRequest as TrackedEntityOURequestApi,
     TrackedEntityInstance as TrackedEntityInstanceApi,
 } from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import _ from "lodash";
@@ -15,6 +16,8 @@ import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 
 type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
+
+export type RelationshipOrgUnitFilter = TrackedEntityOURequestApi["ouMode"];
 
 export function getApiRelationships(
     existingTei: TrackedEntityInstance | undefined,
@@ -138,6 +141,7 @@ interface ProgramFilters {
     organisationUnits?: Ref[];
     startDate?: Date;
     endDate?: Date;
+    ouMode?: RelationshipOrgUnitFilter;
 }
 
 export interface RelationshipMetadata {
@@ -209,7 +213,7 @@ const getConstraint = memoizeAsync(
 
         switch (constraint.relationshipEntity) {
             case "TRACKED_ENTITY_INSTANCE":
-                return getConstraintForTypeTei(api, trackedEntityTypes, constraint);
+                return getConstraintForTypeTei(api, filters, trackedEntityTypes, constraint);
             case "PROGRAM_STAGE_INSTANCE": {
                 if ("program" in constraint) {
                     const program = programsById[constraint.program.id];
@@ -225,13 +229,20 @@ const getConstraint = memoizeAsync(
 
 async function getConstraintForTypeTei(
     api: D2Api,
+    filters: ProgramFilters | undefined,
     trackedEntityTypes: NamedRef[],
     constraint: Extract<D2RelationshipConstraint, { relationshipEntity: "TRACKED_ENTITY_INSTANCE" }>
 ): Promise<RelationshipConstraint> {
+    const { ouMode = "CAPTURE", organisationUnits = [] } = filters || {};
     const trackedEntityTypesById = _.keyBy(trackedEntityTypes, obj => obj.id);
 
+    const ouModeQuery =
+        ouMode === "SELECTED" || ouMode === "CHILDREN" || ouMode === "DESCENDANTS"
+            ? { ouMode, ou: organisationUnits?.map(({ id }) => id) }
+            : { ouMode };
+
     const query = {
-        ouMode: "CAPTURE",
+        ...ouModeQuery,
         order: "created:asc",
         program: constraint.program?.id,
         // Program and tracked entity cannot be specified simultaneously

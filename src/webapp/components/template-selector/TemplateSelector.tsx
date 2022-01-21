@@ -3,6 +3,7 @@ import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
+import { RelationshipOrgUnitFilter } from "../../../data/Dhis2RelationshipTypes";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
@@ -51,6 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment().add("-1", "year").endOf("year"),
+        relationshipsOuFilter: "SELECTED",
         populate: false,
         downloadRelationships: true,
         language: "en",
@@ -203,6 +205,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onOrgUnitChange = (orgUnitPaths: string[]) => {
         setSelectedOrgUnits(orgUnitPaths);
+    };
+
+    const onRelationshipsOuFilterChange = (relationshipsOuFilter: RelationshipOrgUnitFilter) => {
+        setState(state => ({ ...state, relationshipsOuFilter }));
     };
 
     const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
@@ -416,7 +422,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 </div>
             )}
-            {userHasReadAccess && filterOrgUnits && state.type === "trackerPrograms" && (
+            {state.type === "trackerPrograms" && userHasReadAccess && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}
@@ -427,37 +433,60 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     />
                 </div>
             )}
-            {state.type === "trackerPrograms" && state.populate && state.templateType !== "custom" && (
-                <>
-                    <h4>{i18n.t("Enrollment date")}</h4>
-                    <div className={classes.row}>
-                        <div className={classes.select}>
-                            <DatePicker
-                                className={classes.fullWidth}
-                                label={i18n.t("Enrollment start date")}
-                                value={state.enrollmentStartDate ?? null}
-                                onChange={(date: Date) => onStartDateChange("enrollmentStartDate", date)}
-                                maxDate={state.enrollmentEndDate}
-                                views={datePickerFormat?.views}
-                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                                InputLabelProps={{ style: { color: "#494949" } }}
-                            />
+            {state.type === "trackerPrograms" &&
+                userHasReadAccess &&
+                state.downloadRelationships &&
+                state.templateType !== "custom" && (
+                    <>
+                        <h4 className={classes.title}>{i18n.t("Filter relationships by organisation unit type")}</h4>
+                        <div className={classes.row}>
+                            <div className={classes.select}>
+                                <Select
+                                    value={state.relationshipsOuFilter}
+                                    onChange={({ value }) =>
+                                        onRelationshipsOuFilterChange(value as RelationshipOrgUnitFilter)
+                                    }
+                                    options={[
+                                        { label: i18n.t("Selected"), value: "SELECTED" },
+                                        { label: i18n.t("Selected with descendants"), value: "DESCENDANTS" },
+                                        { label: i18n.t("Data view (current user)"), value: "ACCESSIBLE" },
+                                        { label: i18n.t("Data capture (current user)"), value: "CAPTURE" },
+                                    ]}
+                                />
+                            </div>
                         </div>
-                        <div className={classes.select}>
-                            <DatePicker
-                                className={classes.fullWidth}
-                                label={i18n.t("Enrollment end date")}
-                                value={state.enrollmentEndDate ?? null}
-                                onChange={(date: Date) => onEndDateChange("enrollmentEndDate", date)}
-                                minDate={state.enrollmentStartDate}
-                                views={datePickerFormat?.views}
-                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                                InputLabelProps={{ style: { color: "#494949" } }}
-                            />
+
+                        <h4 className={classes.title}>
+                            {i18n.t("Filter relationships by enrollment date (optional)")}
+                        </h4>
+                        <div className={classes.row}>
+                            <div className={classes.select}>
+                                <DatePicker
+                                    className={classes.fullWidth}
+                                    label={i18n.t("Enrollment start date")}
+                                    value={state.enrollmentStartDate ?? null}
+                                    onChange={(date: Date) => onStartDateChange("enrollmentStartDate", date)}
+                                    maxDate={state.enrollmentEndDate}
+                                    views={datePickerFormat?.views}
+                                    format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                    InputLabelProps={{ style: { color: "#494949" } }}
+                                />
+                            </div>
+                            <div className={classes.select}>
+                                <DatePicker
+                                    className={classes.fullWidth}
+                                    label={i18n.t("Enrollment end date")}
+                                    value={state.enrollmentEndDate ?? null}
+                                    onChange={(date: Date) => onEndDateChange("enrollmentEndDate", date)}
+                                    minDate={state.enrollmentStartDate}
+                                    views={datePickerFormat?.views}
+                                    format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                    InputLabelProps={{ style: { color: "#494949" } }}
+                                />
+                            </div>
                         </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )}
         </React.Fragment>
     );
 };
@@ -470,7 +499,7 @@ const useStyles = makeStyles({
         marginRight: "1em",
     },
     title: { marginBottom: 0 },
-    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0, marginTop: "1em" },
     checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },

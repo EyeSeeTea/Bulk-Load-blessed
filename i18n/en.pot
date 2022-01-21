@@ -364,7 +364,22 @@ msgstr ""
 msgid "Download relationships"
 msgstr ""
 
-msgid "Enrollment date"
+msgid "Filter relationships by organisation unit type"
+msgstr ""
+
+msgid "Selected"
+msgstr ""
+
+msgid "Selected with descendants"
+msgstr ""
+
+msgid "Data view (current user)"
+msgstr ""
+
+msgid "Data capture (current user)"
+msgstr ""
+
+msgid "Filter relationships by enrollment date (optional)"
 msgstr ""
 
 msgid "Enrollment start date"
