@@ -3,7 +3,7 @@ import fs from "fs";
 import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
-import { getTrackerProgramMetadata } from "../../data/Dhis2RelationshipTypes";
+import { getRelationshipMetadata } from "../../data/Dhis2RelationshipTypes";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
@@ -28,6 +28,9 @@ export interface DownloadTemplateProps {
     populateEndDate?: Moment;
     writeFile?: string;
     settings: Settings;
+    downloadRelationships: boolean;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -52,6 +55,9 @@ export class DownloadTemplateUseCase implements UseCase {
             populateEndDate,
             writeFile,
             settings,
+            downloadRelationships,
+            enrollmentStartDate,
+            enrollmentEndDate,
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
@@ -67,6 +73,7 @@ export class DownloadTemplateUseCase implements UseCase {
             const result = await getElementMetadata({
                 api,
                 element,
+                downloadRelationships,
                 orgUnitIds: orgUnits,
                 startDate: populateStartDate?.toDate(),
                 endDate: populateEndDate?.toDate(),
@@ -81,6 +88,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 theme,
                 template,
                 settings,
+                downloadRelationships,
             });
             const workbook = await sheetBuilder.generate();
 
@@ -98,6 +106,8 @@ export class DownloadTemplateUseCase implements UseCase {
                   orgUnits,
                   startDate: populateStartDate,
                   endDate: populateEndDate,
+                  enrollmentStartDate,
+                  enrollmentEndDate,
                   translateCodes: template.type !== "custom",
               })
             : undefined;
@@ -169,12 +179,14 @@ async function getElementMetadata({
     orgUnitIds,
     startDate,
     endDate,
+    downloadRelationships,
 }: {
     element: any;
     api: D2Api;
     orgUnitIds: string[];
     startDate?: Date;
     endDate?: Date;
+    downloadRelationships: boolean;
 }) {
     const elementMetadata = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
@@ -198,8 +210,8 @@ async function getElementMetadata({
 
     const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
     const metadata =
-        element.type === "trackerPrograms"
-            ? await getTrackerProgramMetadata(element, api, { organisationUnits, startDate, endDate })
+        element.type === "trackerPrograms" && downloadRelationships
+            ? await getRelationshipMetadata(element, api, { organisationUnits, startDate, endDate })
             : {};
 
     return { element, metadata, elementMetadata, organisationUnits, rawMetadata };

@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import _ from "lodash";
 import React from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppRoute } from "../../pages/Router";
 
 export interface AppDrawerProps {
@@ -22,13 +22,13 @@ export interface AppDrawerProps {
 
 export const AppDrawer = ({ isOpen, routes }: AppDrawerProps) => {
     const classes = useStyles();
-    const history = useHistory();
+    const navigate = useNavigate();
     const { pathname } = useLocation();
 
     const sections = _.groupBy(routes, "section");
 
     const handleDrawerClick = (path: string) => {
-        if (history.location.pathname !== path) history.push(path);
+        if (pathname !== path) navigate(path);
     };
 
     return (

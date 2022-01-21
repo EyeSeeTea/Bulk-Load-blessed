@@ -1,6 +1,10 @@
-import { PaginatedTeiGetResponse, TrackedEntityInstance as TrackedEntityInstanceApi } from "@eyeseetea/d2-api/api/teis";
+import {
+    PaginatedTeiGetResponse,
+    TrackedEntityInstance as TrackedEntityInstanceApi,
+} from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
+import { Moment } from "moment";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
@@ -17,7 +21,7 @@ import { postImport } from "./Dhis2Import";
 import {
     fromApiRelationships,
     getApiRelationships,
-    getTrackerProgramMetadata,
+    getRelationshipMetadata,
     RelationshipMetadata,
 } from "./Dhis2RelationshipTypes";
 
@@ -26,16 +30,18 @@ export interface GetOptions {
     program: Ref;
     orgUnits: Ref[];
     pageSize?: number;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }
 
 export async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, pageSize = 500 } = options;
+    const { api, orgUnits, pageSize = 500, enrollmentStartDate, enrollmentEndDate } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const program = await getProgram(api, options.program.id);
     if (!program) return [];
 
-    const metadata = await getTrackerProgramMetadata(program, api);
+    const metadata = await getRelationshipMetadata(program, api);
 
     // Avoid 414-uri-too-large by spliting orgUnit in chunks
     const orgUnitsList = _.chunk(orgUnits, 250);
@@ -46,7 +52,7 @@ export async function getTrackedEntityInstances(options: GetOptions): Promise<Tr
     for (const orgUnits of orgUnitsList) {
         // Limit response size by requesting paginated TEIs
         for (let page = 1; ; page++) {
-            const apiOptions = { api, program, orgUnits, page, pageSize };
+            const apiOptions = { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate };
             const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
             apiTeis.push(...trackedEntityInstances);
             if (pager.pageCount <= page) break;
@@ -382,8 +388,10 @@ async function getTeisFromApi(options: {
     orgUnits: Ref[];
     page: number;
     pageSize: number;
+    enrollmentStartDate?: Moment;
+    enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
-    const { api, program, orgUnits, page, pageSize } = options;
+    const { api, program, orgUnits, page, pageSize,enrollmentStartDate, enrollmentEndDate } = options;
     const fields: Array<keyof TrackedEntityInstanceApi> = [
         "trackedEntityInstance",
         "inactive",
@@ -403,6 +411,10 @@ async function getTeisFromApi(options: {
             page,
             totalPages: true,
             fields: fields.join(","),
+            programStartDate: enrollmentStartDate?.format("YYYY-MM-DD") || undefined,
+            programEndDate: enrollmentEndDate?.format("YYYY-MM-DD") || undefined,
+
+
         })
         .getData();
 }

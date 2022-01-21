@@ -52,6 +52,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment().add("-1", "year").endOf("year"),
         populate: false,
+        downloadRelationships: true,
         language: "en",
         settings,
     });
@@ -122,6 +123,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const clearPopulateDates = () => {
         setState(state => ({ ...state, populateStartDate: undefined, populateEndDate: undefined }));
     };
+    const clearEnrollmentDates = () => {
+        setState(state => ({ ...state, enrollmentStartDate: undefined, enrollmentEndDate: undefined }));
+    };
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
@@ -160,6 +164,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             const templateType = getTemplateId(type, value).type as TemplateType;
             setState(state => ({ ...state, id: value, type, templateType, populate: false }));
             clearPopulateDates();
+            clearEnrollmentDates();
+            clearEnrollmentDates();
             setSelectedOrgUnits([]);
         }
     };
@@ -172,14 +178,20 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         const { unit = "date" } = datePickerFormat ?? {};
         const startDate = date ? moment(date).startOf(unit) : undefined;
         setState(state => ({ ...state, [field]: startDate }));
-        if (clear) clearPopulateDates();
+        if (clear) {
+            clearPopulateDates();
+            clearEnrollmentDates();
+        }
     };
 
     const onEndDateChange = (field: keyof DownloadTemplateProps, date: Date, clear = false) => {
         const { unit = "date" } = datePickerFormat ?? {};
         const endDate = date ? moment(date).endOf(unit) : undefined;
         setState(state => ({ ...state, [field]: endDate }));
-        if (clear) clearPopulateDates();
+        if (clear) {
+            clearPopulateDates();
+            clearEnrollmentDates();
+        }
     };
 
     const onCustomFormDateChange = (date: Date) => {
@@ -195,6 +207,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
 
     const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
         setState(state => ({ ...state, populate }));
+    };
+
+    const onDownloadRelationshipsChange = (_event: React.ChangeEvent, downloadRelationships: boolean) => {
+        setState(state => ({ ...state, downloadRelationships }));
     };
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
@@ -399,6 +415,48 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         />
                     </div>
                 </div>
+            )}
+            {userHasReadAccess && filterOrgUnits && state.type === "trackerPrograms" && (
+                <div>
+                    <FormControlLabel
+                        className={classes.checkbox}
+                        control={
+                            <Checkbox checked={state.downloadRelationships} onChange={onDownloadRelationshipsChange} />
+                        }
+                        label={i18n.t("Download relationships")}
+                    />
+                </div>
+            )}
+            {state.type === "trackerPrograms" && state.populate && state.templateType !== "custom" && (
+                <>
+                    <h4>{i18n.t("Enrollment date")}</h4>
+                    <div className={classes.row}>
+                        <div className={classes.select}>
+                            <DatePicker
+                                className={classes.fullWidth}
+                                label={i18n.t("Enrollment start date")}
+                                value={state.enrollmentStartDate ?? null}
+                                onChange={(date: Date) => onStartDateChange("enrollmentStartDate", date)}
+                                maxDate={state.enrollmentEndDate}
+                                views={datePickerFormat?.views}
+                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                InputLabelProps={{ style: { color: "#494949" } }}
+                            />
+                        </div>
+                        <div className={classes.select}>
+                            <DatePicker
+                                className={classes.fullWidth}
+                                label={i18n.t("Enrollment end date")}
+                                value={state.enrollmentEndDate ?? null}
+                                onChange={(date: Date) => onEndDateChange("enrollmentEndDate", date)}
+                                minDate={state.enrollmentStartDate}
+                                views={datePickerFormat?.views}
+                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                InputLabelProps={{ style: { color: "#494949" } }}
+                            />
+                        </div>
+                    </div>
+                </>
             )}
         </React.Fragment>
     );

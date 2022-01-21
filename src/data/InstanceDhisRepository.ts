@@ -238,10 +238,17 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
         const { api } = this;
+        const { enrollmentStartDate, enrollmentEndDate } = params;
         const dataPackage = await this.getProgramPackage(params);
         const orgUnits = params.orgUnits.map(id => ({ id }));
         const program = { id: params.id };
-        const trackedEntityInstances = await getTrackedEntityInstances({ api, program, orgUnits });
+        const trackedEntityInstances = await getTrackedEntityInstances({
+            api,
+            program,
+            orgUnits,
+            enrollmentStartDate,
+            enrollmentEndDate,
+        });
 
         return {
             type: "trackerPrograms",
