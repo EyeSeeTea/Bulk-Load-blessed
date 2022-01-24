@@ -422,7 +422,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     </div>
                 </div>
             )}
-            {state.type === "trackerPrograms" && userHasReadAccess && (
+            {state.populate && state.type === "trackerPrograms" && userHasReadAccess && (
                 <div>
                     <FormControlLabel
                         className={classes.checkbox}
@@ -433,7 +433,8 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                     />
                 </div>
             )}
-            {state.type === "trackerPrograms" &&
+            {state.populate &&
+                state.type === "trackerPrograms" &&
                 userHasReadAccess &&
                 state.downloadRelationships &&
                 state.templateType !== "custom" && (

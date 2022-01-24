@@ -547,10 +547,11 @@ export class InstanceDhisRepository implements InstanceRepository {
                         coordinate,
                         trackedEntityInstance,
                         programStage,
-                        dataValues: dataValues.map(({ dataElement, value }) => ({
-                            dataElement,
-                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                        })),
+                        dataValues:
+                            dataValues?.map(({ dataElement, value }) => ({
+                                dataElement,
+                                value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                            })) ?? [],
                     })
                 )
                 .value(),
