@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-01-18T07:49:40.090Z\n"
-"PO-Revision-Date: 2022-01-18T07:49:40.090Z\n"
+"POT-Creation-Date: 2022-01-28T13:06:20.912Z\n"
+"PO-Revision-Date: 2022-01-28T13:06:20.912Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -525,6 +525,15 @@ msgid "Longitude"
 msgstr ""
 
 msgid "Invalid choice was chosen"
+msgstr ""
+
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
 msgstr ""
 
 msgid "Home"

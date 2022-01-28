@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2022-01-18T07:49:40.090Z\n"
+"POT-Creation-Date: 2022-01-28T13:06:20.912Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -530,6 +530,15 @@ msgid "Longitude"
 msgstr ""
 
 msgid "Invalid choice was chosen"
+msgstr ""
+
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
 msgstr ""
 
 msgid "Home"

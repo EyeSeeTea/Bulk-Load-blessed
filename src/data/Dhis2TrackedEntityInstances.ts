@@ -1,6 +1,8 @@
 import {
     PaginatedTeiGetResponse,
     TrackedEntityInstance as TrackedEntityInstanceApi,
+    TrackedEntityInstanceGeometryAttributes,
+    TrackedEntityInstanceToPost,
 } from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
@@ -10,7 +12,13 @@ import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { Relationship } from "../domain/entities/Relationship";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
-import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
+import {
+    AttributeValue,
+    Enrollment,
+    Geometry,
+    Program,
+    TrackedEntityInstance,
+} from "../domain/entities/TrackedEntityInstance";
 import { parseDate } from "../domain/helpers/ExcelReader";
 import i18n from "../locales";
 import { D2Api, D2RelationshipType, Id, Ref } from "../types/d2-api";
@@ -74,7 +82,7 @@ export async function getProgram(api: D2Api, id: Id): Promise<Program | undefine
         .get({
             fields: {
                 id: true,
-                trackedEntityType: { id: true },
+                trackedEntityType: { id: true, featureType: true },
                 programTrackedEntityAttributes: {
                     trackedEntityAttribute: {
                         id: true,
@@ -333,7 +341,7 @@ function getApiTeiToUpload(
     metadata: Metadata,
     tei: TrackedEntityInstance,
     existingTeis: TrackedEntityInstance[]
-): Omit<TrackedEntityInstanceApi, "inactive"> {
+): TrackedEntityInstanceToPost {
     const { orgUnit, enrollment, relationships } = tei;
     const optionById = _.keyBy(metadata.options, option => option.id);
 
@@ -363,7 +371,25 @@ function getApiTeiToUpload(
                   ]
                 : [],
         relationships: apiRelationships,
+        ...getGeometryAttributes(tei),
     };
+}
+
+function getGeometryAttributes(tei: TrackedEntityInstance): TrackedEntityInstanceGeometryAttributes {
+    const { geometry } = tei;
+
+    switch (geometry.type) {
+        case "none":
+            return { featureType: "NONE" };
+        case "point": {
+            const coordinates = [geometry.coordinates.longitude, geometry.coordinates.latitude] as [number, number];
+            return { featureType: "POINT", geometry: { type: "Point", coordinates } };
+        }
+        case "polygon": {
+            const coordinates = geometry.coordinatesList.map(cs => [cs.longitude, cs.latitude] as [number, number]);
+            return { featureType: "POLYGON", geometry: { type: "Polygon", coordinates } };
+        }
+    }
 }
 
 async function getExistingTeis(api: D2Api): Promise<Ref[]> {
@@ -398,13 +424,15 @@ async function getTeisFromApi(options: {
     enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
     const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate } = options;
-    const fields: Array<keyof TrackedEntityInstanceApi> = [
+    const fields: Array<keyof TrackedEntityInstanceApi | "geometry"> = [
         "trackedEntityInstance",
         "inactive",
         "orgUnit",
         "attributes",
         "enrollments",
         "relationships",
+        "featureType",
+        "geometry",
     ];
 
     return api.trackedEntityInstances
@@ -462,7 +490,25 @@ function buildTei(
         enrollment,
         attributeValues,
         relationships: fromApiRelationships(metadata, teiApi),
+        geometry: getEntityGeometry(teiApi),
     };
+}
+
+function getEntityGeometry(teiApi: TrackedEntityInstanceApi): Geometry {
+    switch (teiApi.featureType) {
+        case "NONE":
+            return { type: "none" };
+        case "POINT": {
+            const [longitude, latitude] = teiApi.geometry.coordinates;
+            return { type: "point", coordinates: { latitude, longitude } };
+        }
+        case "POLYGON": {
+            const coordinatesList = teiApi.geometry.coordinates.map(([longitude, latitude]) => {
+                return { latitude, longitude };
+            });
+            return { type: "polygon", coordinatesList };
+        }
+    }
 }
 
 export function updateTeiIds(

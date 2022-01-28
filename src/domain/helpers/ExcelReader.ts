@@ -23,7 +23,7 @@ import {
     TrackerRelationship,
     ValueRef,
 } from "../entities/Template";
-import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
+import { Coordinates, Geometry, TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue, ReadCellOptions } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 
@@ -56,7 +56,7 @@ export class ExcelReader {
                     (await this.readByRow(template, dataSource)).map(item => data.push(item));
                     break;
                 case "rowTei":
-                    (await this.readTeiRows(template, dataSource)).map(item => teis.push(item));
+                    (await this.readTeiRows(template, dataSource, dataForm)).map(item => teis.push(item));
                     break;
                 case "rowTeiRelationship":
                     (await this.readTeiRelationships(template, dataSource)).map(item => relationships.push(item));
@@ -328,7 +328,11 @@ export class ExcelReader {
         return _.compact(relationships);
     }
 
-    private async readTeiRows(template: Template, dataSource: TeiRowDataSource): Promise<TrackedEntityInstance[]> {
+    private async readTeiRows(
+        template: Template,
+        dataSource: TeiRowDataSource,
+        dataForm: DataForm
+    ): Promise<TrackedEntityInstance[]> {
         const programId = await this.getFormulaCell(template, template.dataFormId);
         if (!programId) return [];
 
@@ -370,6 +374,7 @@ export class ExcelReader {
             // Generate random one UID for TEI if empty.
             const teiId = (await this.getCellValue(template, dataSource.teiId, rowIdx)) || generateUid();
             const orgUnitId = await this.getFormulaValue(template, dataSource.orgUnit, rowIdx);
+            const geometry = parseGeometry(dataForm, await this.getCellValue(template, dataSource.geometry, rowIdx));
             const enrollmentDate = parseDate(await this.getCellValue(template, dataSource.enrollmentDate, rowIdx));
             const incidentDate = parseDate(await this.getCellValue(template, dataSource.incidentDate, rowIdx));
 
@@ -386,6 +391,7 @@ export class ExcelReader {
                     incidentDate: this.formatValue(incidentDate || enrollmentDate),
                 },
                 relationships: [],
+                geometry,
             };
 
             return trackedEntityInstance;
@@ -396,10 +402,12 @@ export class ExcelReader {
 
     private async getCellValue(
         template: Template,
-        columnRef: ColumnRef,
+        columnRef: ColumnRef | undefined,
         rowIndex: number,
         options?: ReadCellOptions
     ): Promise<ExcelValue> {
+        if (!columnRef) return "";
+
         const relative: CellRef = {
             ...columnRef,
             type: "cell",
@@ -471,4 +479,35 @@ export function parseDate(value: ExcelValue): ExcelValue {
     } else {
         return value;
     }
+}
+
+function parseGeometry(dataForm: DataForm, value: ExcelValue): Geometry {
+    const { trackedEntityType } = dataForm;
+    if (!trackedEntityType) {
+        console.error(`Expected tracked entity type on dataForm`);
+        return { type: "none" };
+    }
+    const strValue = value.toString().trim().replace(/\s*/g, "");
+    if (!strValue) return { type: "none" };
+
+    switch (trackedEntityType.featureType) {
+        case "none":
+            return { type: "none" };
+        case "point":
+            return { type: "point", coordinates: getCoordinatesFromString(strValue) };
+        case "polygon": {
+            const match = strValue.match(/^\[(.+)\]/);
+            if (!match) throw new Error(`Invalid format for polygon: ${strValue}`);
+            const coordinatesList = (match[1] || "").split(",").map(getCoordinatesFromString);
+            return { type: "polygon", coordinatesList };
+        }
+    }
+}
+
+function getCoordinatesFromString(s: string): Coordinates {
+    const match = s.match(/^\[([\d.]+),([\d.]+)\]$/);
+    if (!match) throw new Error(`Invalid format for a coordinate: ${s}`);
+
+    const [longitude = "", latitude = ""] = match.slice(1);
+    return { latitude: parseFloat(latitude), longitude: parseFloat(longitude) };
 }

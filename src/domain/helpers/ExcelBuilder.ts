@@ -20,7 +20,7 @@ import {
     ValueRef,
 } from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
-import { getRelationships } from "../entities/TrackedEntityInstance";
+import { getGeometryAsString, getRelationships } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 import { BuilderMetadata, emptyBuilderMetadata, InstanceRepository } from "../repositories/InstanceRepository";
 
@@ -119,6 +119,15 @@ export class ExcelBuilder {
             const teiIdCell = await this.excelRepository.findRelativeCell(template.id, dataSource.teiId, cells[0]);
             if (teiIdCell && id) {
                 await this.excelRepository.writeCell(template.id, teiIdCell, id);
+            }
+
+            const geometryCell = await this.excelRepository.findRelativeCell(
+                template.id,
+                dataSource.geometry,
+                cells[0]
+            );
+            if (geometryCell) {
+                await this.excelRepository.writeCell(template.id, geometryCell, getGeometryAsString(tei.geometry));
             }
 
             const enrollmentDateCell = await this.excelRepository.findRelativeCell(

@@ -10,6 +10,31 @@ export interface TrackedEntityInstance {
     attributeValues: AttributeValue[];
     enrollment: Enrollment | undefined;
     relationships: Relationship[];
+    geometry: Geometry;
+}
+
+export type Coordinates = { latitude: number; longitude: number };
+
+export type Geometry =
+    | { type: "none" }
+    | { type: "point"; coordinates: Coordinates }
+    | { type: "polygon"; coordinatesList: Coordinates[] };
+
+export function getGeometryAsString(geometry: Geometry): string {
+    switch (geometry.type) {
+        case "none":
+            return "";
+        case "point": {
+            const { longitude, latitude } = geometry.coordinates;
+            return `[${longitude}, ${latitude}]`;
+        }
+        case "polygon": {
+            const items = geometry.coordinatesList.map(
+                coordinates => `[${coordinates.longitude}, ${coordinates.latitude}]`
+            );
+            return `[${items.join(", ")}]`;
+        }
+    }
 }
 
 export interface Enrollment {
