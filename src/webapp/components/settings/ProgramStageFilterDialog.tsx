@@ -80,13 +80,11 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
     );
 
     const updatePopulateEventsForEveryTeiCheckbox = useCallback(
-        (ev: any) => {
+        (_event: React.ChangeEvent, populateEventsForEveryTei: boolean) => {
             if (!programStage) return;
+
             onChange(
-                settings.setPopulateEventsForEveryTei({
-                    programStage: programStage.id,
-                    populateEventsForEveryTei: ev.target.checked,
-                })
+                settings.setPopulateEventsForEveryTei({ programStage: programStage.id, populateEventsForEveryTei })
             );
         },
         [programStage, settings, onChange]
