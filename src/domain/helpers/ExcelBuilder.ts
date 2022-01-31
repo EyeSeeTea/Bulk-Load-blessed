@@ -295,32 +295,35 @@ export class ExcelBuilder {
             rowStart += 1;
         }
 
-        if (settings.programStagePopulateEventsForEveryTei[dataSourceProgramStageId as string]) {
-            const teisInProgramStage = payload.dataEntries
+        if (settings.programStagePopulateEventsForEveryTei[String(dataSourceProgramStageId)]) {
+            const allTEIs = payload.trackedEntityInstances.map(trackedEntityInstances => trackedEntityInstances.id);
+            const existingTEIs = _(payload.dataEntries)
                 .filter(
                     dataEntry =>
                         _(dataEntry.dataValues).some(dv => dataElementIdsSet.has(dv.dataElement)) &&
-                        dataSourceProgramStageId &&
+                        dataSourceProgramStageId !== undefined &&
                         dataSourceProgramStageId === dataEntry.programStage
                 )
-                .map(dataEntry => dataEntry.trackedEntityInstance);
+                .map(dataEntry => dataEntry.trackedEntityInstance)
+                .compact()
+                .uniq()
+                .value();
 
-            const uniqueTeisInProgramStage = _.uniq(teisInProgramStage);
-            const trackedEntityInstancesIds = payload.trackedEntityInstances.map(
-                trackedEntityInstances => trackedEntityInstances.id
-            );
-            const teisInProgramStageToAddIntoEvents = _.difference(trackedEntityInstancesIds, uniqueTeisInProgramStage);
+            const newTEIs = _.difference(allTEIs, existingTEIs);
 
-            for (const id of teisInProgramStageToAddIntoEvents) {
+            for (const id of newTEIs) {
                 const cells = await this.excelRepository.getCellsInRange(template.id, {
                     ...dataSource.dataValues,
                     rowStart,
                     rowEnd: rowStart,
                 });
+
                 const teiIdCell = await this.excelRepository.findRelativeCell(template.id, dataSource.teiId, cells[0]);
+
                 if (teiIdCell && id) {
                     await this.excelRepository.writeCell(template.id, teiIdCell, id);
                 }
+
                 rowStart += 1;
             }
         }
