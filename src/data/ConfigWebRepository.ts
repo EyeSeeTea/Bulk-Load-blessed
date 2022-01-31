@@ -38,6 +38,7 @@ export class ConfigWebRepository implements ConfigRepository {
             duplicateToleranceUnit: "day",
             dataSetDataElementsFilter: {},
             programStageFilter: {},
+            programStagePopulateEventsForEveryTei: {},
             ...defaultSettings,
         };
     }

@@ -135,7 +135,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 );
             }
 
-            await builder.populateTemplate(template, dataPackage);
+            await builder.populateTemplate(template, dataPackage, settings);
         }
 
         const filename = `${name}.xlsx`;
