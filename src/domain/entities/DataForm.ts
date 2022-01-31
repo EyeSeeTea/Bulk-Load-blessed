@@ -27,7 +27,7 @@ export interface DataForm {
 
 export interface TrackedEntityType {
     id: Id;
-    featureType: "none" | "point" | "polygon";
+    featureType: TrackedEntityTypeFeatureType;
 }
 
 export type TrackedEntityTypeFeatureType = "none" | "point" | "polygon";

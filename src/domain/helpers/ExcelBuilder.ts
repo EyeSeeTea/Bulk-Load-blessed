@@ -4,6 +4,7 @@ import { fromBase64 } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
 import { DataPackage } from "../entities/DataPackage";
+import { getGeometryAsString } from "../entities/Geometry";
 import { Relationship } from "../entities/Relationship";
 import {
     CellDataSource,
@@ -20,7 +21,7 @@ import {
     ValueRef,
 } from "../entities/Template";
 import { Theme, ThemeStyle } from "../entities/Theme";
-import { getGeometryAsString, getRelationships } from "../entities/TrackedEntityInstance";
+import { getRelationships } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 import { BuilderMetadata, emptyBuilderMetadata, InstanceRepository } from "../repositories/InstanceRepository";
 

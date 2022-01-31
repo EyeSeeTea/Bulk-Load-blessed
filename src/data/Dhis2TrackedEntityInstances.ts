@@ -9,19 +9,15 @@ import _ from "lodash";
 import { Moment } from "moment";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
+import { Geometry } from "../domain/entities/Geometry";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { Relationship } from "../domain/entities/Relationship";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
-import {
-    AttributeValue,
-    Enrollment,
-    Geometry,
-    Program,
-    TrackedEntityInstance,
-} from "../domain/entities/TrackedEntityInstance";
+import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../domain/entities/TrackedEntityInstance";
 import { parseDate } from "../domain/helpers/ExcelReader";
 import i18n from "../locales";
 import { D2Api, D2RelationshipType, Id, Ref } from "../types/d2-api";
+import { KeysOfUnion } from "../types/utils";
 import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import { postEvents } from "./Dhis2Events";
@@ -82,7 +78,7 @@ export async function getProgram(api: D2Api, id: Id): Promise<Program | undefine
         .get({
             fields: {
                 id: true,
-                trackedEntityType: { id: true, featureType: true },
+                trackedEntityType: { id: true },
                 programTrackedEntityAttributes: {
                     trackedEntityAttribute: {
                         id: true,
@@ -371,25 +367,8 @@ function getApiTeiToUpload(
                   ]
                 : [],
         relationships: apiRelationships,
-        ...getGeometryAttributes(tei),
+        ...getD2TeiGeometryAttributes(tei),
     };
-}
-
-function getGeometryAttributes(tei: TrackedEntityInstance): TrackedEntityInstanceGeometryAttributes {
-    const { geometry } = tei;
-
-    switch (geometry.type) {
-        case "none":
-            return { featureType: "NONE" };
-        case "point": {
-            const coordinates = [geometry.coordinates.longitude, geometry.coordinates.latitude] as [number, number];
-            return { featureType: "POINT", geometry: { type: "Point", coordinates } };
-        }
-        case "polygon": {
-            const coordinates = geometry.coordinatesList.map(cs => [cs.longitude, cs.latitude] as [number, number]);
-            return { featureType: "POLYGON", geometry: { type: "Polygon", coordinates } };
-        }
-    }
 }
 
 async function getExistingTeis(api: D2Api): Promise<Ref[]> {
@@ -414,6 +393,8 @@ async function getExistingTeis(api: D2Api): Promise<Ref[]> {
     }));
 }
 
+type TeiKey = KeysOfUnion<TrackedEntityInstanceApi>;
+
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;
@@ -424,7 +405,8 @@ async function getTeisFromApi(options: {
     enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
     const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate } = options;
-    const fields: Array<keyof TrackedEntityInstanceApi | "geometry"> = [
+
+    const fields: TeiKey[] = [
         "trackedEntityInstance",
         "inactive",
         "orgUnit",
@@ -490,11 +472,31 @@ function buildTei(
         enrollment,
         attributeValues,
         relationships: fromApiRelationships(metadata, teiApi),
-        geometry: getEntityGeometry(teiApi),
+        geometry: getGeometry(teiApi),
     };
 }
 
-function getEntityGeometry(teiApi: TrackedEntityInstanceApi): Geometry {
+function getD2TeiGeometryAttributes(tei: TrackedEntityInstance): TrackedEntityInstanceGeometryAttributes {
+    const { geometry } = tei;
+
+    switch (geometry.type) {
+        case "none":
+            return { featureType: "NONE" };
+        case "point": {
+            const { coordinates } = geometry;
+            const coordinatesPair = [coordinates.longitude, coordinates.latitude] as [number, number];
+            return { featureType: "POINT", geometry: { type: "Point", coordinates: coordinatesPair } };
+        }
+        case "polygon": {
+            const coordinatesPairs = geometry.coordinatesList.map(
+                coordinates => [coordinates.longitude, coordinates.latitude] as [number, number]
+            );
+            return { featureType: "POLYGON", geometry: { type: "Polygon", coordinates: [coordinatesPairs] } };
+        }
+    }
+}
+
+function getGeometry(teiApi: TrackedEntityInstanceApi): Geometry {
     switch (teiApi.featureType) {
         case "NONE":
             return { type: "none" };
@@ -503,9 +505,8 @@ function getEntityGeometry(teiApi: TrackedEntityInstanceApi): Geometry {
             return { type: "point", coordinates: { latitude, longitude } };
         }
         case "POLYGON": {
-            const coordinatesList = teiApi.geometry.coordinates.map(([longitude, latitude]) => {
-                return { latitude, longitude };
-            });
+            const coordinatesPairs = teiApi.geometry.coordinates[0] || [];
+            const coordinatesList = coordinatesPairs.map(([longitude, latitude]) => ({ latitude, longitude }));
             return { type: "polygon", coordinatesList };
         }
     }
