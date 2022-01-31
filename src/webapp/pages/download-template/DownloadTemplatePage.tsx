@@ -23,6 +23,16 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
         const { type, startDate, endDate, populate, populateStartDate, populateEndDate, templateType, orgUnits } =
             template;
 
+        if (
+            (template.relationshipsOuFilter === "SELECTED" ||
+                template.relationshipsOuFilter === "CHILDREN" ||
+                template.relationshipsOuFilter === "DESCENDANTS") &&
+            orgUnits?.length === 0
+        ) {
+            snackbar.info(i18n.t("You need to select at least one organisation unit to export"));
+            return;
+        }
+
         if (type === "dataSets" && (!startDate || !endDate)) {
             snackbar.info(i18n.t("You need to select start and end periods for dataSet templates"));
             return;

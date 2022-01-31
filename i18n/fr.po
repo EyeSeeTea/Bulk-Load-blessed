@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2022-01-28T13:06:20.912Z\n"
+"POT-Creation-Date: 2022-01-31T08:02:56.914Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -171,6 +171,9 @@ msgid "Program stage"
 msgstr ""
 
 msgid "Search data elements or attributes"
+msgstr ""
+
+msgid "Populate events for every Tracked Entity Instance (TEI)"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -357,38 +360,41 @@ msgstr "<Aucune valeur>"
 msgid "Populate template with data"
 msgstr "Remplir le modèle avec des données"
 
+msgid "Also filter TEI and relationships by their enrollment date"
+msgstr ""
+
+msgid "TEI and relationships enrollment by organisation unit type"
+msgstr ""
+
+msgid "Current user organisation units (data capture)"
+msgstr ""
+
+msgid "Selected organisation units with their descendants"
+msgstr ""
+
+msgid "Only selected organisation units"
+msgstr ""
+
+msgid "Include relationships"
+msgstr ""
+
+msgid "Start date of Events and TEI enrollments"
+msgstr ""
+
+msgid "End date of Events and TEI enrollments"
+msgstr ""
+
+msgid "Start date of Events"
+msgstr ""
+
+msgid "End date of Events"
+msgstr ""
+
 msgid "Start date"
 msgstr "Date de début"
 
 msgid "End date"
 msgstr "Date de fin"
-
-msgid "Download relationships"
-msgstr ""
-
-msgid "Filter relationships by organisation unit type"
-msgstr ""
-
-msgid "Selected"
-msgstr ""
-
-msgid "Selected with descendants"
-msgstr ""
-
-msgid "Data view (current user)"
-msgstr ""
-
-msgid "Data capture (current user)"
-msgstr ""
-
-msgid "Filter relationships by enrollment date (optional)"
-msgstr ""
-
-msgid "Enrollment start date"
-msgstr ""
-
-msgid "Enrollment end date"
-msgstr ""
 
 msgid "Edit theme"
 msgstr "Modifier le thème"
@@ -568,6 +574,9 @@ msgstr ""
 
 msgid "You need to select at least one element to export"
 msgstr "Vous devez sélectionner au moins un élément à exporter"
+
+msgid "You need to select at least one organisation unit to export"
+msgstr ""
 
 msgid "You need to select start and end periods for dataSet templates"
 msgstr ""

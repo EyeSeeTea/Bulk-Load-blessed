@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-01-28T13:06:20.912Z\n"
+"POT-Creation-Date: 2022-01-31T08:02:56.914Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -194,6 +194,9 @@ msgstr ""
 msgid "Search data elements or attributes"
 msgstr "Pesquisar elementos de dados ou atributos"
 
+msgid "Populate events for every Tracked Entity Instance (TEI)"
+msgstr ""
+
 msgid "Select Organisation Units on template generation"
 msgstr "Selecione unidades organizacionais na geração de planilhas"
 
@@ -376,38 +379,41 @@ msgstr "<Sem valor>"
 msgid "Populate template with data"
 msgstr "Preencher a planilha com dados"
 
+msgid "Also filter TEI and relationships by their enrollment date"
+msgstr ""
+
+msgid "TEI and relationships enrollment by organisation unit type"
+msgstr ""
+
+msgid "Current user organisation units (data capture)"
+msgstr ""
+
+msgid "Selected organisation units with their descendants"
+msgstr ""
+
+msgid "Only selected organisation units"
+msgstr ""
+
+msgid "Include relationships"
+msgstr ""
+
+msgid "Start date of Events and TEI enrollments"
+msgstr ""
+
+msgid "End date of Events and TEI enrollments"
+msgstr ""
+
+msgid "Start date of Events"
+msgstr ""
+
+msgid "End date of Events"
+msgstr ""
+
 msgid "Start date"
 msgstr "Data de início"
 
 msgid "End date"
 msgstr "Data de fim"
-
-msgid "Download relationships"
-msgstr ""
-
-msgid "Filter relationships by organisation unit type"
-msgstr ""
-
-msgid "Selected"
-msgstr ""
-
-msgid "Selected with descendants"
-msgstr ""
-
-msgid "Data view (current user)"
-msgstr ""
-
-msgid "Data capture (current user)"
-msgstr ""
-
-msgid "Filter relationships by enrollment date (optional)"
-msgstr ""
-
-msgid "Enrollment start date"
-msgstr ""
-
-msgid "Enrollment end date"
-msgstr ""
 
 msgid "Edit theme"
 msgstr "Editar tema"
@@ -591,6 +597,9 @@ msgstr ""
 
 msgid "You need to select at least one element to export"
 msgstr "Você precisa selecionar pelo menos um elemento para exportar"
+
+msgid "You need to select at least one organisation unit to export"
+msgstr ""
 
 msgid "You need to select start and end periods for dataSet templates"
 msgstr ""

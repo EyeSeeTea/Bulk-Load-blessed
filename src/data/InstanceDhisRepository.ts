@@ -239,7 +239,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
     private async getTrackerProgramPackage(params: GetDataPackageParams): Promise<DataPackage> {
         const { api } = this;
-        const { enrollmentStartDate, enrollmentEndDate } = params;
+
         const dataPackage = await this.getProgramPackage(params);
         const orgUnits = params.orgUnits.map(id => ({ id }));
         const program = { id: params.id };
@@ -247,8 +247,8 @@ export class InstanceDhisRepository implements InstanceRepository {
             api,
             program,
             orgUnits,
-            enrollmentStartDate,
-            enrollmentEndDate,
+            enrollmentStartDate: params.filterTEIEnrollmentDate ? params.startDate : undefined,
+            enrollmentEndDate: params.filterTEIEnrollmentDate ? params.endDate : undefined,
             relationshipsOuFilter: params.relationshipsOuFilter,
         });
 
@@ -548,10 +548,11 @@ export class InstanceDhisRepository implements InstanceRepository {
                         coordinate,
                         trackedEntityInstance,
                         programStage,
-                        dataValues: dataValues.map(({ dataElement, value }) => ({
-                            dataElement,
-                            value: this.formatDataValue(dataElement, value, metadata, translateCodes),
-                        })),
+                        dataValues:
+                            dataValues?.map(({ dataElement, value }) => ({
+                                dataElement,
+                                value: this.formatDataValue(dataElement, value, metadata, translateCodes),
+                            })) ?? [],
                     })
                 )
                 .value(),
