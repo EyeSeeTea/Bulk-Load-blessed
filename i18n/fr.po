@@ -369,14 +369,11 @@ msgstr ""
 msgid "Current user organisation units (data capture)"
 msgstr ""
 
-#, fuzzy
 msgid "Selected organisation units with their descendants"
 msgstr ""
-"Sélectionnez au moins une unité d'organisation pour importer des données"
 
-#, fuzzy
 msgid "Only selected organisation units"
-msgstr "Unités d'organisation"
+msgstr ""
 
 msgid "Include relationships"
 msgstr ""
@@ -387,13 +384,11 @@ msgstr ""
 msgid "End date of Events and TEI enrollments"
 msgstr ""
 
-#, fuzzy
 msgid "Start date of Events"
-msgstr "Date de début"
+msgstr ""
 
-#, fuzzy
 msgid "End date of Events"
-msgstr "Date de fin"
+msgstr ""
 
 msgid "Start date"
 msgstr "Date de début"
@@ -571,9 +566,8 @@ msgstr ""
 msgid "You need to select at least one element to export"
 msgstr "Vous devez sélectionner au moins un élément à exporter"
 
-#, fuzzy
 msgid "You need to select at least one organisation unit to export"
-msgstr "Vous devez sélectionner au moins un élément à exporter"
+msgstr ""
 
 msgid "You need to select start and end periods for dataSet templates"
 msgstr ""
