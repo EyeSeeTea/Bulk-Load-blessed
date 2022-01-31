@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-01-20T13:29:24.842Z\n"
+"POT-Creation-Date: 2022-01-31T08:02:56.914Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -379,38 +379,46 @@ msgstr "<Sem valor>"
 msgid "Populate template with data"
 msgstr "Preencher a planilha com dados"
 
+msgid "Also filter TEI and relationships by their enrollment date"
+msgstr ""
+
+msgid "TEI and relationships enrollment by organisation unit type"
+msgstr ""
+
+msgid "Current user organisation units (data capture)"
+msgstr ""
+
+#, fuzzy
+msgid "Selected organisation units with their descendants"
+msgstr "Selecione a unidade da organização para preencher os dados"
+
+#, fuzzy
+msgid "Only selected organisation units"
+msgstr "Unidades organizacionais"
+
+#, fuzzy
+msgid "Include relationships"
+msgstr "Relacionamentos"
+
+msgid "Start date of Events and TEI enrollments"
+msgstr ""
+
+msgid "End date of Events and TEI enrollments"
+msgstr ""
+
+#, fuzzy
+msgid "Start date of Events"
+msgstr "Data de início"
+
+#, fuzzy
+msgid "End date of Events"
+msgstr "Data de fim"
+
 msgid "Start date"
 msgstr "Data de início"
 
 msgid "End date"
 msgstr "Data de fim"
-
-msgid "Download relationships"
-msgstr ""
-
-msgid "Filter relationships by organisation unit type"
-msgstr ""
-
-msgid "Selected"
-msgstr ""
-
-msgid "Selected with descendants"
-msgstr ""
-
-msgid "Data view (current user)"
-msgstr ""
-
-msgid "Data capture (current user)"
-msgstr ""
-
-msgid "Filter relationships by enrollment date (optional)"
-msgstr ""
-
-msgid "Enrollment start date"
-msgstr ""
-
-msgid "Enrollment end date"
-msgstr ""
 
 msgid "Edit theme"
 msgstr "Editar tema"
@@ -584,6 +592,10 @@ msgstr ""
 "estas seções."
 
 msgid "You need to select at least one element to export"
+msgstr "Você precisa selecionar pelo menos um elemento para exportar"
+
+#, fuzzy
+msgid "You need to select at least one organisation unit to export"
 msgstr "Você precisa selecionar pelo menos um elemento para exportar"
 
 msgid "You need to select start and end periods for dataSet templates"

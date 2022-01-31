@@ -17,10 +17,9 @@ export interface GetDataPackageParams {
     periods?: Id[];
     startDate?: Moment;
     endDate?: Moment;
-    enrollmentStartDate?: Moment;
-    enrollmentEndDate?: Moment;
     translateCodes?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
+    filterTEIEnrollmentDate?: boolean;
 }
 
 export interface GetDataFormsParams {

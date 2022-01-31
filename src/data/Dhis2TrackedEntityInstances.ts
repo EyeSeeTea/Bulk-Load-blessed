@@ -417,8 +417,8 @@ async function getTeisFromApi(options: {
             page,
             totalPages: true,
             fields: fields.join(","),
-            programStartDate: enrollmentStartDate?.format("YYYY-MM-DD") || undefined,
-            programEndDate: enrollmentEndDate?.format("YYYY-MM-DD") || undefined,
+            programStartDate: enrollmentStartDate?.format("YYYY-MM-DD[T]HH:mm"),
+            programEndDate: enrollmentEndDate?.format("YYYY-MM-DD[T]HH:mm"),
         })
         .getData();
 }

@@ -29,8 +29,7 @@ export interface DownloadTemplateProps {
     writeFile?: string;
     settings: Settings;
     downloadRelationships: boolean;
-    enrollmentStartDate?: Moment;
-    enrollmentEndDate?: Moment;
+    filterTEIEnrollmentDate?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }
 
@@ -57,8 +56,7 @@ export class DownloadTemplateUseCase implements UseCase {
             writeFile,
             settings,
             downloadRelationships,
-            enrollmentStartDate,
-            enrollmentEndDate,
+            filterTEIEnrollmentDate,
             relationshipsOuFilter,
         }: DownloadTemplateProps
     ): Promise<void> {
@@ -109,8 +107,7 @@ export class DownloadTemplateUseCase implements UseCase {
                   orgUnits,
                   startDate: populateStartDate,
                   endDate: populateEndDate,
-                  enrollmentStartDate,
-                  enrollmentEndDate,
+                  filterTEIEnrollmentDate,
                   translateCodes: template.type !== "custom",
                   relationshipsOuFilter,
               })
