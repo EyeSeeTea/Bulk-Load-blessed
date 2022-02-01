@@ -651,7 +651,10 @@ const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElem
 
 type TrackedEntityTypeApi = Pick<D2TrackedEntityType, "id" | "featureType">;
 
-function getTrackedEntityTypeFromApi(trackedEntityType: TrackedEntityTypeApi): DataForm["trackedEntityType"] {
+function getTrackedEntityTypeFromApi(trackedEntityType?: TrackedEntityTypeApi): DataForm["trackedEntityType"] | undefined {
+    // TODO: Review when adding other types
+    if (!trackedEntityType) return undefined;
+
     const d2FeatureType = trackedEntityType.featureType;
     const featureType = d2FeatureType === "POINT" ? "point" : d2FeatureType === "POLYGON" ? "polygon" : "none";
     return { id: trackedEntityType.id, featureType };
