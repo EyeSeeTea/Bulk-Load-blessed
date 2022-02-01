@@ -91,8 +91,9 @@ export function fromApiRelationships(metadata: RelationshipMetadata, teiApi: Tra
                 getFromToRelationship(relationshipType, relApi.to, relApi.from);
 
             if (!fromToRelationship) {
-                const msg = `${relApi.from.trackedEntityInstance} -> ${relApi.to.trackedEntityInstance}`;
-                console.error(`No valid TEIs for relationship ${relApi.relationship}: ${msg}`);
+                const from = relApi.from.trackedEntityInstance?.trackedEntityInstance || "undefined";
+                const to = relApi.to.trackedEntityInstance?.trackedEntityInstance || "undefined";
+                console.error(`No valid TEIs for relationship ${relApi.relationship}: ${from} -> ${to}`);
                 return null;
             }
 

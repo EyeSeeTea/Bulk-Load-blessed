@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { Geometry } from "./Geometry";
 import { Id, Ref } from "./ReferenceObject";
 import { Relationship } from "./Relationship";
 
@@ -10,6 +11,7 @@ export interface TrackedEntityInstance {
     attributeValues: AttributeValue[];
     enrollment: Enrollment | undefined;
     relationships: Relationship[];
+    geometry: Geometry;
 }
 
 export interface Enrollment {

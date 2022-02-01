@@ -21,6 +21,7 @@ import {
     D2Api,
     D2ApiDefault,
     D2DataElementSchema,
+    D2TrackedEntityType,
     DataStore,
     DataValueSetsGetResponse,
     Id,
@@ -132,7 +133,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
                 })),
-                trackedEntityType,
+                trackedEntityType: getTrackedEntityTypeFromApi(trackedEntityType),
             })
         );
     }
@@ -637,7 +638,7 @@ const programFields = {
     programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
     access: true,
     programType: true,
-    trackedEntityType: { id: true },
+    trackedEntityType: { id: true, featureType: true },
 } as const;
 
 const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElementFields>): DataElement => ({
@@ -647,3 +648,11 @@ const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElem
     categoryOptionCombos: de.categoryCombo?.categoryOptionCombos ?? [],
     options: de.optionSet?.options,
 });
+
+type TrackedEntityTypeApi = Pick<D2TrackedEntityType, "id" | "featureType">;
+
+function getTrackedEntityTypeFromApi(trackedEntityType: TrackedEntityTypeApi): DataForm["trackedEntityType"] {
+    const d2FeatureType = trackedEntityType.featureType;
+    const featureType = d2FeatureType === "POINT" ? "point" : d2FeatureType === "POLYGON" ? "polygon" : "none";
+    return { id: trackedEntityType.id, featureType };
+}

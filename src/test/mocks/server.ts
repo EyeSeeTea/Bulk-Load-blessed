@@ -111,7 +111,7 @@ export function initializeMockServer() {
     mock.onGet("/programs", {
         params: {
             paging: false,
-            fields: "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]],repeatable],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[id]",
+            fields: "access,attributeValues[attribute[code],value],displayName,id,name,programStages[id,name,programStageDataElements[dataElement[categoryCombo[categoryOptionCombos[id,name]],formName,id,name,optionSet[id,options[code,id]],valueType]],repeatable],programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programType,trackedEntityType[featureType,id]",
             filter: [],
         },
     }).reply(200, {
@@ -135,6 +135,7 @@ export function initializeMockServer() {
                 attributeValues: [],
                 programStages: [],
                 programTrackedEntityAttributes: [],
+                trackedEntityType: { id: "ZhmIeRK6IfG", featureType: "NONE" },
             },
         ],
     });

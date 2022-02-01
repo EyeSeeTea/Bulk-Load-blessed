@@ -560,6 +560,15 @@ msgstr "Longitud"
 msgid "Invalid choice was chosen"
 msgstr "Se ha elegido una opción no válida"
 
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
+msgstr ""
+
 msgid "Home"
 msgstr "Inicio"
 

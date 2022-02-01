@@ -1,12 +1,15 @@
 import {
     PaginatedTeiGetResponse,
     TrackedEntityInstance as TrackedEntityInstanceApi,
+    TrackedEntityInstanceGeometryAttributes,
+    TrackedEntityInstanceToPost,
 } from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { Moment } from "moment";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
+import { Geometry } from "../domain/entities/Geometry";
 import { emptyImportSummary } from "../domain/entities/ImportSummary";
 import { Relationship } from "../domain/entities/Relationship";
 import { SynchronizationResult } from "../domain/entities/SynchronizationResult";
@@ -14,6 +17,7 @@ import { AttributeValue, Enrollment, Program, TrackedEntityInstance } from "../d
 import { parseDate } from "../domain/helpers/ExcelReader";
 import i18n from "../locales";
 import { D2Api, D2RelationshipType, Id, Ref } from "../types/d2-api";
+import { KeysOfUnion } from "../types/utils";
 import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 import { postEvents } from "./Dhis2Events";
@@ -333,7 +337,7 @@ function getApiTeiToUpload(
     metadata: Metadata,
     tei: TrackedEntityInstance,
     existingTeis: TrackedEntityInstance[]
-): Omit<TrackedEntityInstanceApi, "inactive"> {
+): TrackedEntityInstanceToPost {
     const { orgUnit, enrollment, relationships } = tei;
     const optionById = _.keyBy(metadata.options, option => option.id);
 
@@ -363,6 +367,7 @@ function getApiTeiToUpload(
                   ]
                 : [],
         relationships: apiRelationships,
+        ...getD2TeiGeometryAttributes(tei),
     };
 }
 
@@ -388,6 +393,8 @@ async function getExistingTeis(api: D2Api): Promise<Ref[]> {
     }));
 }
 
+type TeiKey = KeysOfUnion<TrackedEntityInstanceApi>;
+
 async function getTeisFromApi(options: {
     api: D2Api;
     program: Program;
@@ -398,13 +405,16 @@ async function getTeisFromApi(options: {
     enrollmentEndDate?: Moment;
 }): Promise<PaginatedTeiGetResponse> {
     const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate } = options;
-    const fields: Array<keyof TrackedEntityInstanceApi> = [
+
+    const fields: TeiKey[] = [
         "trackedEntityInstance",
         "inactive",
         "orgUnit",
         "attributes",
         "enrollments",
         "relationships",
+        "featureType",
+        "geometry",
     ];
 
     return api.trackedEntityInstances
@@ -462,7 +472,44 @@ function buildTei(
         enrollment,
         attributeValues,
         relationships: fromApiRelationships(metadata, teiApi),
+        geometry: getGeometry(teiApi),
     };
+}
+
+function getD2TeiGeometryAttributes(tei: TrackedEntityInstance): TrackedEntityInstanceGeometryAttributes {
+    const { geometry } = tei;
+
+    switch (geometry.type) {
+        case "none":
+            return { featureType: "NONE" };
+        case "point": {
+            const { coordinates } = geometry;
+            const coordinatesPair = [coordinates.longitude, coordinates.latitude] as [number, number];
+            return { featureType: "POINT", geometry: { type: "Point", coordinates: coordinatesPair } };
+        }
+        case "polygon": {
+            const coordinatesPairs = geometry.coordinatesList.map(
+                coordinates => [coordinates.longitude, coordinates.latitude] as [number, number]
+            );
+            return { featureType: "POLYGON", geometry: { type: "Polygon", coordinates: [coordinatesPairs] } };
+        }
+    }
+}
+
+function getGeometry(teiApi: TrackedEntityInstanceApi): Geometry {
+    switch (teiApi.featureType) {
+        case "NONE":
+            return { type: "none" };
+        case "POINT": {
+            const [longitude, latitude] = teiApi.geometry.coordinates;
+            return { type: "point", coordinates: { latitude, longitude } };
+        }
+        case "POLYGON": {
+            const coordinatesPairs = teiApi.geometry.coordinates[0] || [];
+            const coordinatesList = coordinatesPairs.map(([longitude, latitude]) => ({ latitude, longitude }));
+            return { type: "polygon", coordinatesList };
+        }
+    }
 }
 
 export function updateTeiIds(

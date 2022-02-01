@@ -561,6 +561,15 @@ msgstr "Долгота"
 msgid "Invalid choice was chosen"
 msgstr "Был выбран неправильный вариант"
 
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
+msgstr ""
+
 msgid "Home"
 msgstr "Главная"
 

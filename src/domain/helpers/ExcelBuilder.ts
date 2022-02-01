@@ -3,6 +3,7 @@ import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
+import { getGeometryAsString } from "../entities/Geometry";
 import { DataPackage, TrackerProgramPackage } from "../entities/DataPackage";
 import { Relationship } from "../entities/Relationship";
 import {
@@ -126,6 +127,15 @@ export class ExcelBuilder {
             const teiIdCell = await this.excelRepository.findRelativeCell(template.id, dataSource.teiId, cells[0]);
             if (teiIdCell && id) {
                 await this.excelRepository.writeCell(template.id, teiIdCell, id);
+            }
+
+            const geometryCell = await this.excelRepository.findRelativeCell(
+                template.id,
+                dataSource.geometry,
+                cells[0]
+            );
+            if (geometryCell) {
+                await this.excelRepository.writeCell(template.id, geometryCell, getGeometryAsString(tei.geometry));
             }
 
             const enrollmentDateCell = await this.excelRepository.findRelativeCell(

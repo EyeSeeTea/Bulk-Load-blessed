@@ -166,7 +166,7 @@ async function getElement(api: D2Api, type: DataFormType, id: string) {
         "programType",
         "enrollmentDateLabel",
         "incidentDateLabel",
-        "trackedEntityType",
+        "trackedEntityType[id,featureType]",
         "captureCoordinates",
         "programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,confidential,optionSet[id,name,options[id]]]],",
     ].join(",");
