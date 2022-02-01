@@ -3956,10 +3956,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@eyeseetea/d2-api@1.10.2-beta.2":
-  version "1.10.2-beta.2"
-  resolved "https://registry.npmjs.org/@eyeseetea/d2-api/-/d2-api-1.10.2-beta.2.tgz#2a1c160276184fad52d3eeae38a680651f0ba843"
-  integrity sha512-UYVW46grASx38kGv+AM2oeUcz+PUhqi+lK3KHjinYuMUGPjfpIFKwjractbub4uZXejyEVzbpmvl14KJstL2pw==
+"@eyeseetea/d2-api@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/d2-api/-/d2-api-1.11.0.tgz#dc76fe0c0f00cc844b0326d740c03c15428fc362"
+  integrity sha512-zNIatB/MqKoSgrsOgIbDygIAKs0D1kEzHNxVA59+QqFOPXZ5l1p7GBrgjz8e/JkS/7KrvZWEnSqDku/o7eLRxg==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@dhis2/d2-i18n" "^1.0.5"
