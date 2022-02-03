@@ -202,7 +202,13 @@ async function getElementMetadata({
         }
     });
 
-    const responses = await promiseMap(_.chunk(orgUnitIds, 400), orgUnits =>
+    // FIXME: This is needed for getting all possible org units for a program/dataSet
+    const requestOrgUnits =
+        relationshipsOuFilter === "DESCENDANTS" || relationshipsOuFilter === "CHILDREN"
+            ? elementMetadata.get(element.id)?.organisationUnits?.map(({ id }: { id: string }) => id) ?? orgUnitIds
+            : orgUnitIds;
+
+    const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
         api
             .get<{ organisationUnits: { id: string; displayName: string; translations: unknown }[] }>("/metadata", {
                 fields: "id,displayName,translations",
