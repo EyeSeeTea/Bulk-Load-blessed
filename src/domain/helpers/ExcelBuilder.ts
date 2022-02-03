@@ -1,9 +1,10 @@
-import dateFormat from "dateformat";
+import { format } from "date-fns";
 import _ from "lodash";
 import { fromBase64 } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
-import { DataPackage } from "../entities/DataPackage";
+import { getGeometryAsString } from "../entities/Geometry";
+import { DataPackage, TrackerProgramPackage } from "../entities/DataPackage";
 import { Relationship } from "../entities/Relationship";
 import {
     CellDataSource,
@@ -23,13 +24,14 @@ import { Theme, ThemeStyle } from "../entities/Theme";
 import { getRelationships } from "../entities/TrackedEntityInstance";
 import { ExcelRepository, ExcelValue } from "../repositories/ExcelRepository";
 import { BuilderMetadata, emptyBuilderMetadata, InstanceRepository } from "../repositories/InstanceRepository";
+import Settings from "../../webapp/logic/settings";
 
-const dateFormatPattern = "yyyy-mm-dd";
+const dateFormatPattern = "yyyy-MM-dd";
 
 export class ExcelBuilder {
     constructor(private excelRepository: ExcelRepository, private instanceRepository: InstanceRepository) {}
 
-    public async populateTemplate(template: Template, payload: DataPackage): Promise<void> {
+    public async populateTemplate(template: Template, payload: DataPackage, settings: Settings): Promise<void> {
         const { dataSources = [] } = template;
         const dataSourceValues = await this.getDataSourceValues(template, dataSources);
         const metadata =
@@ -50,7 +52,13 @@ export class ExcelBuilder {
                         await this.fillTeiRows(template, dataSource, payload);
                         break;
                     case "rowTrackedEvent":
-                        await this.fillTrackerEventRows(template, dataSource, payload, metadata);
+                        await this.fillTrackerEventRows(
+                            template,
+                            dataSource,
+                            payload as TrackerProgramPackage,
+                            metadata,
+                            settings
+                        );
                         break;
                     case "rowTeiRelationship":
                         await this.fillTrackerRelationshipRows(template, dataSource, payload);
@@ -121,6 +129,15 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(template.id, teiIdCell, id);
             }
 
+            const geometryCell = await this.excelRepository.findRelativeCell(
+                template.id,
+                dataSource.geometry,
+                cells[0]
+            );
+            if (geometryCell) {
+                await this.excelRepository.writeCell(template.id, geometryCell, getGeometryAsString(tei.geometry));
+            }
+
             const enrollmentDateCell = await this.excelRepository.findRelativeCell(
                 template.id,
                 dataSource.enrollmentDate,
@@ -130,7 +147,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     enrollmentDateCell,
-                    dateFormat(new Date(enrollment.enrollmentDate), dateFormatPattern)
+                    format(new Date(enrollment.enrollmentDate), dateFormatPattern)
                 );
 
             const incidentDateCell = await this.excelRepository.findRelativeCell(
@@ -142,7 +159,7 @@ export class ExcelBuilder {
                 await this.excelRepository.writeCell(
                     template.id,
                     incidentDateCell,
-                    dateFormat(new Date(enrollment.incidentDate), dateFormatPattern)
+                    format(new Date(enrollment.incidentDate), dateFormatPattern)
                 );
 
             for (const cell of cells) {
@@ -220,8 +237,9 @@ export class ExcelBuilder {
     private async fillTrackerEventRows(
         template: Template,
         dataSource: TrackerEventRowDataSource,
-        payload: DataPackage,
-        metadata: BuilderMetadata
+        payload: TrackerProgramPackage,
+        metadata: BuilderMetadata,
+        settings: Settings
     ) {
         let { rowStart } = dataSource.dataValues;
         const dataElementCells = await this.excelRepository.getCellsInRange(template.id, dataSource.dataElements);
@@ -238,12 +256,12 @@ export class ExcelBuilder {
 
         const dataElementIdsSet = new Set(dataElementIds);
 
+        const dataSourceProgramStageId = await this.readCellValue(template, dataSource.programStage);
         for (const dataEntry of payload.dataEntries) {
             const { id, period, dataValues, trackedEntityInstance, attribute: cocId, programStage } = dataEntry;
             const someDataElementPresentInSheet = _(dataValues).some(dv => dataElementIdsSet.has(dv.dataElement));
             if (!someDataElementPresentInSheet) continue;
 
-            const dataSourceProgramStageId = await this.readCellValue(template, dataSource.programStage);
             const eventBelongsToCurrentProgramStage =
                 dataSourceProgramStageId && dataSourceProgramStageId === programStage;
             if (!eventBelongsToCurrentProgramStage) continue;
@@ -284,8 +302,40 @@ export class ExcelBuilder {
                     await this.excelRepository.writeCell(template.id, cell, optionId ? `_${optionId}` : value);
                 }
             }
-
             rowStart += 1;
+        }
+
+        if (settings.programStagePopulateEventsForEveryTei[String(dataSourceProgramStageId)]) {
+            const allTEIs = payload.trackedEntityInstances.map(trackedEntityInstances => trackedEntityInstances.id);
+            const existingTEIs = _(payload.dataEntries)
+                .filter(
+                    dataEntry =>
+                        _(dataEntry.dataValues).some(dv => dataElementIdsSet.has(dv.dataElement)) &&
+                        dataSourceProgramStageId !== undefined &&
+                        dataSourceProgramStageId === dataEntry.programStage
+                )
+                .map(dataEntry => dataEntry.trackedEntityInstance)
+                .compact()
+                .uniq()
+                .value();
+
+            const newTEIs = _.difference(allTEIs, existingTEIs);
+
+            for (const id of newTEIs) {
+                const cells = await this.excelRepository.getCellsInRange(template.id, {
+                    ...dataSource.dataValues,
+                    rowStart,
+                    rowEnd: rowStart,
+                });
+
+                const teiIdCell = await this.excelRepository.findRelativeCell(template.id, dataSource.teiId, cells[0]);
+
+                if (teiIdCell && id) {
+                    await this.excelRepository.writeCell(template.id, teiIdCell, id);
+                }
+
+                rowStart += 1;
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Checkbox, FormControlLabel } from "@material-ui/core";
 import _ from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataForm } from "../../../domain/entities/DataForm";
@@ -79,6 +79,17 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
         [programStage, settings, onChange]
     );
 
+    const updatePopulateEventsForEveryTeiCheckbox = useCallback(
+        (_event: React.ChangeEvent, populateEventsForEveryTei: boolean) => {
+            if (!programStage) return;
+
+            onChange(
+                settings.setPopulateEventsForEveryTei({ programStage: programStage.id, populateEventsForEveryTei })
+            );
+        },
+        [programStage, settings, onChange]
+    );
+
     return (
         <ConfirmationDialog
             isOpen={true}
@@ -108,6 +119,19 @@ export function ProgramStageFilterDialog(props: ProgramStageFilterDialogProps): 
                     ordered={false}
                 />
             </div>
+            {programStage && (
+                <div className={classes.row}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={settings.programStagePopulateEventsForEveryTei[programStage.id]}
+                                onChange={updatePopulateEventsForEveryTeiCheckbox}
+                            />
+                        }
+                        label={i18n.t("Populate events for every Tracked Entity Instance (TEI)")}
+                    />
+                </div>
+            )}
         </ConfirmationDialog>
     );
 }

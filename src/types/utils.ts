@@ -20,9 +20,11 @@ export function isValueInUnionType<S, T extends S>(value: S, values: readonly T[
 }
 
 export function buildObject<Value>() {
-    return <T>(object: { [K in keyof T]: Value }) => object;
+    return <T extends {}>(object: { [K in keyof T]: Value }) => object;
 }
 
 export function isNotEmpty<T>(xs: T[] | undefined): xs is NonEmptyArray<T> {
     return xs ? xs.length > 0 : false;
 }
+
+export type KeysOfUnion<T> = T extends T ? keyof T : never;

@@ -14,7 +14,7 @@ import { getObjectVersion } from "./utils";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v4";
-export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v2";
+export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v3";
 
 const teiSheetName = "TEI Instances";
 
@@ -47,6 +47,7 @@ export interface SheetBuilderParams {
     theme?: Theme;
     template: GeneratedTemplate;
     settings: Settings;
+    downloadRelationships: boolean;
 }
 
 export class SheetBuilder {
@@ -86,11 +87,15 @@ export class SheetBuilder {
                 this.programStageSheets[programStage.id] = sheet;
             });
 
-            // RelationshipType sheets
-            withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach((relationshipType: any) => {
-                const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
-                this.relationshipsSheets.push([relationshipType, sheet]);
-            });
+            if (builder.downloadRelationships) {
+                // RelationshipType sheets
+                withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(
+                    (relationshipType: any) => {
+                        const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
+                        this.relationshipsSheets.push([relationshipType, sheet]);
+                    }
+                );
+            }
         } else {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
@@ -364,10 +369,12 @@ export class SheetBuilder {
             )
         );
 
+        this.createFeatureTypeColumn({ program, sheet, itemRow, columnId: 3 });
+
         this.createColumn(
             sheet,
             itemRow,
-            3,
+            4,
             `${
                 program.enrollmentDateLabel
                     ? i18n.t(program.enrollmentDateLabel, { lng: this.builder.language })
@@ -378,7 +385,7 @@ export class SheetBuilder {
         this.createColumn(
             sheet,
             itemRow,
-            4,
+            5,
             (program.incidentDateLabel
                 ? i18n.t(program.incidentDateLabel, { lng: this.builder.language })
                 : i18n.t("Incident Date", { lng: this.builder.language })) + dateFormatInfo
@@ -393,7 +400,7 @@ export class SheetBuilder {
             if (tea.confidential) return;
             const validationId = tea.optionSet ? tea.optionSet.id : tea.valueType;
             const validation = this.validations.get(validationId);
-            this.createColumn(sheet, itemRow, 5 + idx, `_${tea.id}`, 1, validation);
+            this.createColumn(sheet, itemRow, 6 + idx, `_${tea.id}`, 1, validation);
             idx++;
         });
     }
@@ -1087,6 +1094,29 @@ export class SheetBuilder {
 
     private getTeiIdValidation() {
         return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
+    }
+
+    private createFeatureTypeColumn(options: { program: any; sheet: any; itemRow: number; columnId: number }) {
+        const { program, sheet, itemRow, columnId } = options;
+        const header = this.getFeatureTypeHeader(program);
+        const defaultHeader = i18n.t("No geometry", { lng: this.builder.language });
+
+        this.createColumn(sheet, itemRow, 3, header || defaultHeader);
+        if (!header) sheet.column(columnId).hide();
+    }
+
+    private getFeatureTypeHeader(program: any): string | undefined {
+        const { featureType } = program.trackedEntityType;
+        const opts = { lng: this.builder.language };
+
+        switch (featureType) {
+            case "POINT":
+                return [i18n.t("Point in map", opts), "([LON, LAT])"].join("\n");
+            case "POLYGON":
+                return [i18n.t("Polygon in map", opts), "([[LON1, LAT1], [LON2, LAT2], ...])"].join("\n");
+            default:
+                return undefined;
+        }
     }
 }
 

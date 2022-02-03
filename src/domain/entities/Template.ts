@@ -168,6 +168,7 @@ export interface TeiRowDataSource {
     skipPopulate?: boolean;
     teiId: ColumnRef;
     orgUnit: ColumnRef;
+    geometry?: ColumnRef;
     enrollmentDate: ColumnRef;
     incidentDate: ColumnRef;
     attributes: Range;
