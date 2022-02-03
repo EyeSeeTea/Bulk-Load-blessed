@@ -61,8 +61,16 @@ export async function getTrackedEntityInstances(options: GetOptions): Promise<Tr
     for (const orgUnits of orgUnitsList) {
         // Limit response size by requesting paginated TEIs
         for (let page = 1; ; page++) {
-            const apiOptions = { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate };
-            const { pager, trackedEntityInstances } = await getTeisFromApi(apiOptions);
+            const { pager, trackedEntityInstances } = await getTeisFromApi({
+                api,
+                program,
+                orgUnits,
+                page,
+                pageSize,
+                enrollmentStartDate,
+                enrollmentEndDate,
+                ouMode: relationshipsOuFilter,
+            });
             apiTeis.push(...trackedEntityInstances);
             if (pager.pageCount <= page) break;
         }
@@ -403,8 +411,9 @@ async function getTeisFromApi(options: {
     pageSize: number;
     enrollmentStartDate?: Moment;
     enrollmentEndDate?: Moment;
+    ouMode: RelationshipOrgUnitFilter;
 }): Promise<PaginatedTeiGetResponse> {
-    const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate } = options;
+    const { api, program, orgUnits, page, pageSize, enrollmentStartDate, enrollmentEndDate, ouMode } = options;
 
     const fields: TeiKey[] = [
         "trackedEntityInstance",
@@ -417,10 +426,14 @@ async function getTeisFromApi(options: {
         "geometry",
     ];
 
+    const ouModeQuery =
+        ouMode === "SELECTED" || ouMode === "CHILDREN" || ouMode === "DESCENDANTS"
+            ? { ouMode, ou: orgUnits?.map(({ id }) => id) }
+            : { ouMode };
+
     return api.trackedEntityInstances
         .get({
-            ou: orgUnits.map(ou => ou.id),
-            ouMode: "SELECTED",
+            ...ouModeQuery,
             order: "created:asc",
             program: program.id,
             pageSize,
