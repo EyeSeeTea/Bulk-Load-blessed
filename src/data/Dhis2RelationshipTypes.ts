@@ -1,8 +1,9 @@
 import {
     Relationship as RelationshipApi,
     RelationshipItem as RelationshipItemApi,
+    TeiOuRequest as TrackedEntityOURequestApi,
     TrackedEntityInstance as TrackedEntityInstanceApi,
-} from "@eyeseetea/d2-api/api/teis";
+} from "@eyeseetea/d2-api/api/trackedEntityInstances";
 import _ from "lodash";
 import moment from "moment";
 import { NamedRef } from "../domain/entities/ReferenceObject";
@@ -15,6 +16,8 @@ import { promiseMap } from "../utils/promises";
 import { getUid } from "./dhis2-uid";
 
 type RelationshipTypesById = Record<Id, Pick<D2RelationshipType, "id" | "toConstraint" | "fromConstraint">>;
+
+export type RelationshipOrgUnitFilter = TrackedEntityOURequestApi["ouMode"];
 
 export function getApiRelationships(
     existingTei: TrackedEntityInstance | undefined,
@@ -88,8 +91,9 @@ export function fromApiRelationships(metadata: RelationshipMetadata, teiApi: Tra
                 getFromToRelationship(relationshipType, relApi.to, relApi.from);
 
             if (!fromToRelationship) {
-                const msg = `${relApi.from.trackedEntityInstance} -> ${relApi.to.trackedEntityInstance}`;
-                console.error(`No valid TEIs for relationship ${relApi.relationship}: ${msg}`);
+                const from = relApi.from.trackedEntityInstance?.trackedEntityInstance || "undefined";
+                const to = relApi.to.trackedEntityInstance?.trackedEntityInstance || "undefined";
+                console.error(`No valid TEIs for relationship ${relApi.relationship}: ${from} -> ${to}`);
                 return null;
             }
 
@@ -138,13 +142,14 @@ interface ProgramFilters {
     organisationUnits?: Ref[];
     startDate?: Date;
     endDate?: Date;
+    ouMode?: RelationshipOrgUnitFilter;
 }
 
 export interface RelationshipMetadata {
     relationshipTypes: RelationshipType[];
 }
 
-export async function getTrackerProgramMetadata(
+export async function getRelationshipMetadata(
     program: Program,
     api: D2Api,
     filters?: ProgramFilters
@@ -209,7 +214,7 @@ const getConstraint = memoizeAsync(
 
         switch (constraint.relationshipEntity) {
             case "TRACKED_ENTITY_INSTANCE":
-                return getConstraintForTypeTei(api, trackedEntityTypes, constraint);
+                return getConstraintForTypeTei(api, filters, trackedEntityTypes, constraint);
             case "PROGRAM_STAGE_INSTANCE": {
                 if ("program" in constraint) {
                     const program = programsById[constraint.program.id];
@@ -225,13 +230,20 @@ const getConstraint = memoizeAsync(
 
 async function getConstraintForTypeTei(
     api: D2Api,
+    filters: ProgramFilters | undefined,
     trackedEntityTypes: NamedRef[],
     constraint: Extract<D2RelationshipConstraint, { relationshipEntity: "TRACKED_ENTITY_INSTANCE" }>
 ): Promise<RelationshipConstraint> {
+    const { ouMode = "CAPTURE", organisationUnits = [] } = filters || {};
     const trackedEntityTypesById = _.keyBy(trackedEntityTypes, obj => obj.id);
 
+    const ouModeQuery =
+        ouMode === "SELECTED" || ouMode === "CHILDREN" || ouMode === "DESCENDANTS"
+            ? { ouMode, ou: organisationUnits?.map(({ id }) => id) }
+            : { ouMode };
+
     const query = {
-        ouMode: "CAPTURE",
+        ...ouModeQuery,
         order: "created:asc",
         program: constraint.program?.id,
         // Program and tracked entity cannot be specified simultaneously

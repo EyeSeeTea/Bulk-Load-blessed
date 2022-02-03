@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2021-11-04T17:11:30.337Z\n"
-"PO-Revision-Date: 2021-11-04T17:11:30.337Z\n"
+"POT-Creation-Date: 2022-01-31T08:02:56.914Z\n"
+"PO-Revision-Date: 2022-01-31T08:02:56.914Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -171,6 +171,9 @@ msgid "Program stage"
 msgstr ""
 
 msgid "Search data elements or attributes"
+msgstr ""
+
+msgid "Populate events for every Tracked Entity Instance (TEI)"
 msgstr ""
 
 msgid "Select Organisation Units on template generation"
@@ -352,6 +355,36 @@ msgstr ""
 msgid "Populate template with data"
 msgstr ""
 
+msgid "Also filter TEI and relationships by their enrollment date"
+msgstr ""
+
+msgid "TEI and relationships enrollment by organisation unit type"
+msgstr ""
+
+msgid "Current user organisation units (data capture)"
+msgstr ""
+
+msgid "Selected organisation units with their descendants"
+msgstr ""
+
+msgid "Only selected organisation units"
+msgstr ""
+
+msgid "Include relationships"
+msgstr ""
+
+msgid "Start date of Events and TEI enrollments"
+msgstr ""
+
+msgid "End date of Events and TEI enrollments"
+msgstr ""
+
+msgid "Start date of Events"
+msgstr ""
+
+msgid "End date of Events"
+msgstr ""
+
 msgid "Start date"
 msgstr ""
 
@@ -500,6 +533,15 @@ msgstr ""
 msgid "Invalid choice was chosen"
 msgstr ""
 
+msgid "No geometry"
+msgstr ""
+
+msgid "Point in map"
+msgstr ""
+
+msgid "Polygon in map"
+msgstr ""
+
 msgid "Home"
 msgstr ""
 
@@ -525,6 +567,9 @@ msgid "Please get in touch with the admin if you need access to these sections."
 msgstr ""
 
 msgid "You need to select at least one element to export"
+msgstr ""
+
+msgid "You need to select at least one organisation unit to export"
 msgstr ""
 
 msgid "You need to select start and end periods for dataSet templates"

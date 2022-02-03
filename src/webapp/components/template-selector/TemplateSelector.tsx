@@ -3,6 +3,7 @@ import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
+import { RelationshipOrgUnitFilter } from "../../../data/Dhis2RelationshipTypes";
 import { DataForm } from "../../../domain/entities/DataForm";
 import { TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
@@ -51,7 +52,10 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
         startDate: moment().add("-1", "year").startOf("year"),
         endDate: moment().add("-1", "year").endOf("year"),
+        relationshipsOuFilter: "CAPTURE",
         populate: false,
+        downloadRelationships: true,
+        filterTEIEnrollmentDate: false,
         language: "en",
         settings,
     });
@@ -193,8 +197,20 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
         setSelectedOrgUnits(orgUnitPaths);
     };
 
+    const onRelationshipsOuFilterChange = (relationshipsOuFilter: RelationshipOrgUnitFilter) => {
+        setState(state => ({ ...state, relationshipsOuFilter }));
+    };
+
     const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
         setState(state => ({ ...state, populate }));
+    };
+
+    const onDownloadRelationshipsChange = (_event: React.ChangeEvent, downloadRelationships: boolean) => {
+        setState(state => ({ ...state, downloadRelationships }));
+    };
+
+    const onFilterTEIEnrollmentDateChange = (_event: React.ChangeEvent, filterTEIEnrollmentDate: boolean) => {
+        setState(state => ({ ...state, filterTEIEnrollmentDate }));
     };
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
@@ -359,43 +375,100 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
             )}
 
             {state.populate && state.templateType !== "custom" && (
-                <div className={classes.row}>
-                    <div className={classes.select}>
-                        <DatePicker
-                            className={classes.fullWidth}
-                            label={i18n.t("Start date")}
-                            value={state.populateStartDate ?? null}
-                            onChange={(date: Date) => onStartDateChange("populateStartDate", date)}
-                            minDate={
-                                state.type === "dataSets"
-                                    ? state.startDate?.startOf(datePickerFormat?.unit ?? "day")
-                                    : undefined
+                <>
+                    <div>
+                        <FormControlLabel
+                            className={classes.checkbox}
+                            control={
+                                <Checkbox
+                                    checked={state.filterTEIEnrollmentDate}
+                                    onChange={onFilterTEIEnrollmentDateChange}
+                                />
                             }
-                            maxDate={moment.min(
-                                _.compact([state.type === "dataSets" && state.endDate, state.populateEndDate])
-                            )}
-                            views={datePickerFormat?.views}
-                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                            InputLabelProps={{ style: { color: "#494949" } }}
+                            label={i18n.t("Also filter TEI and relationships by their enrollment date")}
                         />
                     </div>
-                    <div className={classes.select}>
-                        <DatePicker
-                            className={classes.fullWidth}
-                            label={i18n.t("End date")}
-                            value={state.populateEndDate ?? null}
-                            onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
-                            minDate={moment.max(
-                                _.compact([state.type === "dataSets" && state.startDate, state.populateStartDate])
-                            )}
-                            maxDate={
-                                state.type === "dataSets"
-                                    ? state.endDate?.endOf(datePickerFormat?.unit ?? "day")
-                                    : undefined
+
+                    <div className={classes.row}>
+                        <div className={classes.select}>
+                            <DatePicker
+                                className={classes.fullWidth}
+                                label={getPopulateDateLabel(state, "start")}
+                                value={state.populateStartDate ?? null}
+                                onChange={(date: Date) => onStartDateChange("populateStartDate", date)}
+                                minDate={
+                                    state.type === "dataSets"
+                                        ? state.startDate?.startOf(datePickerFormat?.unit ?? "day")
+                                        : undefined
+                                }
+                                maxDate={moment.min(
+                                    _.compact([state.type === "dataSets" && state.endDate, state.populateEndDate])
+                                )}
+                                views={datePickerFormat?.views}
+                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                InputLabelProps={{ style: { color: "#494949" } }}
+                            />
+                        </div>
+                        <div className={classes.select}>
+                            <DatePicker
+                                className={classes.fullWidth}
+                                label={getPopulateDateLabel(state, "end")}
+                                value={state.populateEndDate ?? null}
+                                onChange={(date: Date) => onEndDateChange("populateEndDate", date)}
+                                minDate={moment.max(
+                                    _.compact([state.type === "dataSets" && state.startDate, state.populateStartDate])
+                                )}
+                                maxDate={
+                                    state.type === "dataSets"
+                                        ? state.endDate?.endOf(datePickerFormat?.unit ?? "day")
+                                        : undefined
+                                }
+                                views={datePickerFormat?.views}
+                                format={datePickerFormat?.format ?? "DD/MM/YYYY"}
+                                InputLabelProps={{ style: { color: "#494949" } }}
+                            />
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {state.populate && state.type === "trackerPrograms" && userHasReadAccess && (
+                <div>
+                    <h4 className={classes.title}>
+                        {i18n.t("TEI and relationships enrollment by organisation unit type")}
+                    </h4>
+                    <div className={classes.row}>
+                        <div className={classes.select}>
+                            <Select
+                                value={state.relationshipsOuFilter}
+                                onChange={({ value }) =>
+                                    onRelationshipsOuFilterChange(value as RelationshipOrgUnitFilter)
+                                }
+                                options={[
+                                    {
+                                        label: i18n.t("Current user organisation units (data capture)"),
+                                        value: "CAPTURE",
+                                    },
+                                    {
+                                        label: i18n.t("Selected organisation units with their descendants"),
+                                        value: "DESCENDANTS",
+                                    },
+                                    { label: i18n.t("Only selected organisation units"), value: "SELECTED" },
+                                ]}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <FormControlLabel
+                            className={classes.checkbox}
+                            control={
+                                <Checkbox
+                                    checked={state.downloadRelationships}
+                                    onChange={onDownloadRelationshipsChange}
+                                />
                             }
-                            views={datePickerFormat?.views}
-                            format={datePickerFormat?.format ?? "DD/MM/YYYY"}
-                            InputLabelProps={{ style: { color: "#494949" } }}
+                            label={i18n.t("Include relationships")}
                         />
                     </div>
                 </div>
@@ -412,7 +485,7 @@ const useStyles = makeStyles({
         marginRight: "1em",
     },
     title: { marginBottom: 0 },
-    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0 },
+    select: { flexBasis: "100%", margin: "0.5em", marginLeft: 0, marginTop: "1em" },
     checkbox: { marginTop: "1em" },
     orgUnitSelector: { marginTop: "1em", marginBottom: "2em" },
     fullWidth: { width: "100%" },
@@ -431,4 +504,22 @@ function modelToSelectOption<T extends { id: string; name: string }>(array: T[])
             label: name,
         })) ?? []
     );
+}
+
+function getPopulateDateLabel(state: Partial<TemplateSelectorState>, picker: "start" | "end") {
+    if (state.type === "trackerPrograms" && state.filterTEIEnrollmentDate && picker === "start") {
+        return i18n.t("Start date of Events and TEI enrollments");
+    } else if (state.type === "trackerPrograms" && state.filterTEIEnrollmentDate && picker === "end") {
+        return i18n.t("End date of Events and TEI enrollments");
+    } else if (state.type === "trackerPrograms" && picker === "start") {
+        return i18n.t("Start date of Events");
+    } else if (state.type === "trackerPrograms" && picker === "end") {
+        return i18n.t("End date of Events");
+    } else if (picker === "start") {
+        return i18n.t("Start date");
+    } else if (picker === "end") {
+        return i18n.t("End date");
+    } else {
+        return "Unknown date picker";
+    }
 }

@@ -7,6 +7,7 @@ import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData } from "../entities/DataPackage";
+import { getGeometryFromString } from "../entities/Geometry";
 import { Relationship } from "../entities/Relationship";
 import {
     CellDataSource,
@@ -56,7 +57,7 @@ export class ExcelReader {
                     (await this.readByRow(template, dataSource)).map(item => data.push(item));
                     break;
                 case "rowTei":
-                    (await this.readTeiRows(template, dataSource)).map(item => teis.push(item));
+                    (await this.readTeiRows(template, dataSource, dataForm)).map(item => teis.push(item));
                     break;
                 case "rowTeiRelationship":
                     (await this.readTeiRelationships(template, dataSource)).map(item => relationships.push(item));
@@ -328,7 +329,11 @@ export class ExcelReader {
         return _.compact(relationships);
     }
 
-    private async readTeiRows(template: Template, dataSource: TeiRowDataSource): Promise<TrackedEntityInstance[]> {
+    private async readTeiRows(
+        template: Template,
+        dataSource: TeiRowDataSource,
+        dataForm: DataForm
+    ): Promise<TrackedEntityInstance[]> {
         const programId = await this.getFormulaCell(template, template.dataFormId);
         if (!programId) return [];
 
@@ -370,6 +375,8 @@ export class ExcelReader {
             // Generate random one UID for TEI if empty.
             const teiId = (await this.getCellValue(template, dataSource.teiId, rowIdx)) || generateUid();
             const orgUnitId = await this.getFormulaValue(template, dataSource.orgUnit, rowIdx);
+            const geometryExcelValue = await this.getCellValue(template, dataSource.geometry, rowIdx);
+            const geometry = getGeometryFromString(dataForm.trackedEntityType, geometryExcelValue.toString());
             const enrollmentDate = parseDate(await this.getCellValue(template, dataSource.enrollmentDate, rowIdx));
             const incidentDate = parseDate(await this.getCellValue(template, dataSource.incidentDate, rowIdx));
 
@@ -386,6 +393,7 @@ export class ExcelReader {
                     incidentDate: this.formatValue(incidentDate || enrollmentDate),
                 },
                 relationships: [],
+                geometry,
             };
 
             return trackedEntityInstance;
@@ -396,10 +404,12 @@ export class ExcelReader {
 
     private async getCellValue(
         template: Template,
-        columnRef: ColumnRef,
+        columnRef: ColumnRef | undefined,
         rowIndex: number,
         options?: ReadCellOptions
     ): Promise<ExcelValue> {
+        if (!columnRef) return "";
+
         const relative: CellRef = {
             ...columnRef,
             type: "cell",

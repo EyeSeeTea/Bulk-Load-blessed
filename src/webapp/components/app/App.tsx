@@ -1,7 +1,6 @@
 //@ts-ignore
 import { useConfig } from "@dhis2/app-runtime";
 import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
-import { LinearProgress } from "@material-ui/core";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
 //@ts-ignore
@@ -49,12 +48,7 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
     }, [d2, api, baseUrl]);
 
     if (!appContext) {
-        return (
-            <div style={{ margin: 20 }}>
-                <h3>Connecting to {baseUrl}...</h3>
-                <LinearProgress />
-            </div>
-        );
+        return null;
     }
 
     if (migrations.state.type === "pending") {
