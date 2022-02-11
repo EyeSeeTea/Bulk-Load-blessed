@@ -651,7 +651,9 @@ const formatDataElement = (de: SelectedPick<D2DataElementSchema, typeof dataElem
 
 type TrackedEntityTypeApi = Pick<D2TrackedEntityType, "id" | "featureType">;
 
-function getTrackedEntityTypeFromApi(trackedEntityType?: TrackedEntityTypeApi): DataForm["trackedEntityType"] | undefined {
+function getTrackedEntityTypeFromApi(
+    trackedEntityType?: TrackedEntityTypeApi
+): DataForm["trackedEntityType"] | undefined {
     // TODO: Review when adding other types
     if (!trackedEntityType) return undefined;
 
