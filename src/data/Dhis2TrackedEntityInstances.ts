@@ -41,7 +41,14 @@ export interface GetOptions {
 }
 
 export async function getTrackedEntityInstances(options: GetOptions): Promise<TrackedEntityInstance[]> {
-    const { api, orgUnits, pageSize = 500, enrollmentStartDate, enrollmentEndDate, relationshipsOuFilter } = options;
+    const {
+        api,
+        orgUnits,
+        pageSize = 500,
+        enrollmentStartDate,
+        enrollmentEndDate,
+        relationshipsOuFilter = "CAPTURE",
+    } = options;
     if (_.isEmpty(orgUnits)) return [];
 
     const program = await getProgram(api, options.program.id);
