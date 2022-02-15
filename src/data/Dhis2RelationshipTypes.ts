@@ -253,17 +253,28 @@ async function getConstraintForTypeTei(
         fields: "trackedEntityInstance",
     } as const;
 
-    const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
-    const pages = _.range(2, pager.pageCount + 1);
+    const results = await promiseMap(_.chunk(query.ou, 250), async ouChunk => {
+        const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances
+            .get(
+                query.ouMode === "SELECTED" || query.ouMode === "CHILDREN" || query.ouMode === "DESCENDANTS"
+                    ? { ...query, ou: ouChunk }
+                    : query
+            )
+            .getData();
 
-    const otherPages = await promiseMap(pages, async page => {
-        const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
-        return trackedEntityInstances;
+        const pages = _.range(2, pager.pageCount + 1);
+        const otherPages = await promiseMap(pages, async page => {
+            const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
+            return trackedEntityInstances;
+        });
+
+        return [...firstPage, ..._.flatten(otherPages)];
     });
 
-    const trackedEntityInstances = [...firstPage, ..._.flatten(otherPages)].map(
-        ({ trackedEntityInstance, ...rest }) => ({ ...rest, id: trackedEntityInstance })
-    );
+    const trackedEntityInstances = _.flatten(results).map(({ trackedEntityInstance, ...rest }) => ({
+        ...rest,
+        id: trackedEntityInstance,
+    }));
 
     const teis = _.sortBy(trackedEntityInstances, tei => tei.id.toLowerCase());
     const name = trackedEntityTypesById[constraint.trackedEntityType.id]?.name ?? "Unknown";
