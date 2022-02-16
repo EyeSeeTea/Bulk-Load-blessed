@@ -254,17 +254,18 @@ async function getConstraintForTypeTei(
     } as const;
 
     const results = await promiseMap(_.chunk(query.ou, 250), async ouChunk => {
+        const filterQuery =
+            query.ouMode === "SELECTED" || query.ouMode === "CHILDREN" || query.ouMode === "DESCENDANTS"
+                ? { ...query, ou: ouChunk }
+                : query;
+
         const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances
-            .get(
-                query.ouMode === "SELECTED" || query.ouMode === "CHILDREN" || query.ouMode === "DESCENDANTS"
-                    ? { ...query, ou: ouChunk }
-                    : query
-            )
+            .get(filterQuery)
             .getData();
 
         const pages = _.range(2, pager.pageCount + 1);
         const otherPages = await promiseMap(pages, async page => {
-            const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
+            const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...filterQuery, page }).getData();
             return trackedEntityInstances;
         });
 
