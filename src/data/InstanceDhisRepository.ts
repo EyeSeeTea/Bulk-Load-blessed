@@ -508,6 +508,8 @@ export class InstanceDhisRepository implements InstanceRepository {
                     startDate: startDate?.format("YYYY-MM-DD"),
                     endDate: endDate?.format("YYYY-MM-DD"),
                     cache: Math.random(),
+                    // @ts-ignore FIXME: Add property in d2-api
+                    fields: "*",
                 })
                 .getData();
         };
