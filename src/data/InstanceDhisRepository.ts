@@ -250,6 +250,8 @@ export class InstanceDhisRepository implements InstanceRepository {
             enrollmentStartDate: params.filterTEIEnrollmentDate ? params.startDate : undefined,
             enrollmentEndDate: params.filterTEIEnrollmentDate ? params.endDate : undefined,
             relationshipsOuFilter: params.relationshipsOuFilter,
+            // @ts-ignore FIXME: Add property in d2-api
+            fields: "*",
         });
 
         return {
