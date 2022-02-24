@@ -260,7 +260,7 @@ export class ExcelBuilder {
         for (const dataEntry of payload.dataEntries) {
             const { id, period, dataValues, trackedEntityInstance, attribute: cocId, programStage } = dataEntry;
             const someDataElementPresentInSheet = _(dataValues).some(dv => dataElementIdsSet.has(dv.dataElement));
-            if (!someDataElementPresentInSheet) continue;
+            if (!someDataElementPresentInSheet && !_.isEmpty(dataValues)) continue;
 
             const eventBelongsToCurrentProgramStage =
                 dataSourceProgramStageId && dataSourceProgramStageId === programStage;
