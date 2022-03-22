@@ -11,6 +11,7 @@ declare module "@dhis2/d2-i18n" {
     export function t(value: string): string;
     export function t(value: string, options?: { [key: string]: any }): string;
     export function changeLanguage(locale: string);
+    export function setDefaultNamespace(namespace: string);
 }
 
 declare module "nano-memoize" {
