@@ -61,14 +61,14 @@ export class DownloadTemplateUseCase implements UseCase {
         }: DownloadTemplateProps
     ): Promise<void> {
         const { id: templateId } = getTemplateId(type, id);
-        const template = this.templateRepository.getTemplate(templateId);
+        const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
         const element = await getElement(api, type, id);
         const name = element.displayName ?? element.name;
 
         if (template.type === "custom") {
-            await this.excelRepository.loadTemplate({ type: "url", url: template.url });
+            await this.excelRepository.loadTemplate({ type: "file-base64", contents: template.file.blob });
         } else {
             const result = await getElementMetadata({
                 api,

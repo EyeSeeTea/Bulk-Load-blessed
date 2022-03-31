@@ -26,6 +26,7 @@ import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
+import { PersistTemplatesFromStaticModulesUseCase } from "./domain/usecases/PersistTemplatesFromStaticModulesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { RunMigrationsUseCase } from "./domain/usecases/RunMigrationsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
@@ -63,6 +64,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             download: new DownloadTemplateUseCase(instance, templateManager, excelReader),
             import: new ImportTemplateUseCase(instance, templateManager, excelReader),
             list: new ListDataFormsUseCase(instance),
+            persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager),
         }),
         themes: getExecute({
             list: new ListThemesUseCase(templateManager),

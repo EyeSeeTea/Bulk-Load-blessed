@@ -59,7 +59,7 @@ export class ImportTemplateUseCase implements UseCase {
         }
 
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
-        const template = this.templateRepository.getTemplate(templateId);
+        const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = removeCharacters(
             await this.excelRepository.readCell(templateId, template.dataFormId, {

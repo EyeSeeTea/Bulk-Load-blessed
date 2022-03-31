@@ -89,6 +89,7 @@
         "babel-core": "6.26.3",
         "babel-eslint": "10.1.0",
         "babel-preset-react-app": "10.0.1",
+        "cmd-ts": "^0.10.0",
         "craco": "0.0.3",
         "cypress": "9.2.1",
         "cypress-xpath": "1.6.2",

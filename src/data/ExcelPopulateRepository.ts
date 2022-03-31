@@ -39,6 +39,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
             case "file": {
                 return XLSX.fromDataAsync(options.file);
             }
+            case "file-base64": {
+                const buffer = Buffer.from(options.contents, "base64");
+                const blob = new Blob([buffer]);
+                return XLSX.fromDataAsync(blob);
+            }
             default: {
                 return XLSX.fromBlankAsync();
             }

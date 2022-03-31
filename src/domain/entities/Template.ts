@@ -28,7 +28,13 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
-export type Template = GeneratedTemplate | CustomTemplate;
+type Base64Blob = { blob: string };
+
+interface CustomFileTemplate extends Omit<CustomTemplate, "url"> {
+    file: Base64Blob;
+}
+
+export type Template = GeneratedTemplate | CustomFileTemplate;
 
 interface BaseTemplate {
     type: TemplateType;

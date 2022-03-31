@@ -1,32 +1,46 @@
 import _ from "lodash";
+import path from "path";
+import fs from "fs";
 import { Id } from "../domain/entities/ReferenceObject";
 import { Template } from "../domain/entities/Template";
 import { Theme } from "../domain/entities/Theme";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 import { TemplateRepository } from "../domain/repositories/TemplateRepository";
+import { cache } from "../utils/cache";
 import * as templates from "./templates";
+import * as customTemplates from "./templates/custom-templates";
 
 const themeCollectionKey = "themes";
 
-export function getTemplates(): Template[] {
-    return _.values(templates).map(TemplateClass => {
-        return new TemplateClass();
-    });
-}
-
 export class TemplateWebRepository implements TemplateRepository {
-    private templates: Template[];
+    constructor(private storage: StorageRepository) {}
 
-    constructor(private storage: StorageRepository) {
-        this.templates = getTemplates();
+    @cache()
+    private async getTemplates(): Promise<Template[]> {
+        const customTemplates = await this.storage.getObject<Template[]>("templates", []);
+        const genericTemplates = _.values(templates).map(TemplateClass => new TemplateClass());
+        return _.concat(genericTemplates, customTemplates);
     }
 
-    public listTemplates(): Pick<Template, "id" | "name">[] {
-        return this.templates.map(({ id, name }) => ({ id, name }));
+    public getCustomTemplates(): Template[] {
+        const rootDir = path.join(__dirname, "../..", "public");
+
+        return _.values(customTemplates).map((TemplateClass): Template => {
+            const template = new TemplateClass();
+            const spreadsheetPath = path.join(rootDir, template.url);
+            const buffer = fs.readFileSync(spreadsheetPath);
+            const file = { blob: buffer.toString("base64") };
+            return { ...template, file };
+        });
     }
 
-    public getTemplate(templateId: Id): Template {
-        const template = this.templates.find(({ id }) => id === templateId);
+    public saveTemplates(templates: Template[]): Promise<void> {
+        return this.storage.saveObject("templates", templates);
+    }
+
+    public async getTemplate(templateId: Id): Promise<Template> {
+        const templates = await this.getTemplates();
+        const template = templates.find(({ id }) => id === templateId);
         if (!template) throw new Error(`Attempt to read from invalid template ${templateId}`);
         return template;
     }
