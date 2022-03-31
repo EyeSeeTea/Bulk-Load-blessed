@@ -19,6 +19,13 @@ export type ProgramStageFilter = Record<
 >;
 export type ProgramStagePopulateEventsForEveryTei = Record<ProgramStageId, boolean>;
 
+export interface DataFormTemplate {
+    relationships: Record<DataFormId, Array<{ templateId: TemplateId }>>;
+}
+
+type DataFormId = Id;
+type TemplateId = Id;
+
 export interface AppSettings {
     models: Record<Model, boolean>;
     permissionsForGeneration: NamedRef[];
@@ -35,4 +42,5 @@ export interface AppSettings {
     dataSetDataElementsFilter: DataSetDataElementsFilter;
     programStageFilter: ProgramStageFilter;
     programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
+    dataFormTemplate: DataFormTemplate;
 }

@@ -2,6 +2,7 @@ import _ from "lodash";
 import { CompositionRoot } from "../../CompositionRoot";
 import {
     AppSettings,
+    DataFormTemplate,
     DataSetDataElementsFilter,
     DuplicateExclusion,
     DuplicateToleranceUnit,
@@ -20,7 +21,7 @@ import {
 import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
-import { GetArrayInnerType } from "../../types/utils";
+import { GetArrayInnerType, Maybe } from "../../types/utils";
 
 const privateFields = ["currentUser"] as const;
 
@@ -35,6 +36,7 @@ const publicFields = [
     "dataSetDataElementsFilter",
     "programStageFilter",
     "programStagePopulateEventsForEveryTei",
+    "dataFormTemplate",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -77,6 +79,7 @@ export default class Settings {
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
     public programStageFilter: ProgramStageFilter;
     public programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
+    public dataFormTemplate: DataFormTemplate;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -92,6 +95,7 @@ export default class Settings {
         this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
         this.programStageFilter = options.programStageFilter;
         this.programStagePopulateEventsForEveryTei = options.programStagePopulateEventsForEveryTei;
+        this.dataFormTemplate = options.dataFormTemplate;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -146,6 +150,7 @@ export default class Settings {
             programStageFilter: data.programStageFilter ?? defaultSettings.programStageFilter,
             programStagePopulateEventsForEveryTei:
                 data.programStagePopulateEventsForEveryTei ?? defaultSettings.programStagePopulateEventsForEveryTei,
+            dataFormTemplate: data.dataFormTemplate ?? defaultSettings.dataFormTemplate,
         });
     }
 
@@ -166,6 +171,7 @@ export default class Settings {
             dataSetDataElementsFilter,
             programStageFilter,
             programStagePopulateEventsForEveryTei,
+            dataFormTemplate,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -193,6 +199,7 @@ export default class Settings {
             dataSetDataElementsFilter,
             programStageFilter,
             programStagePopulateEventsForEveryTei,
+            dataFormTemplate,
         };
 
         try {
@@ -367,6 +374,26 @@ export default class Settings {
             { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
             { key: "program", name: i18n.t("Program"), value: this.models.program },
         ];
+    }
+
+    getTemplateIdsForDataForm(dataForm: Maybe<Ref>): Id[] {
+        if (dataForm) {
+            const relationshipsForDataForm = this.dataFormTemplate.relationships[dataForm.id] || [];
+            return relationshipsForDataForm.map(r => r.templateId);
+        } else {
+            return [];
+        }
+    }
+
+    updateDataFormTemplateRelationship(dataForm: Ref, templateIds: Id[]): Settings {
+        const newValue: DataFormTemplate = {
+            relationships: {
+                ...this.dataFormTemplate.relationships,
+                [dataForm.id]: templateIds.map(id => ({ templateId: id })),
+            },
+        };
+
+        return this.update({ dataFormTemplate: newValue });
     }
 
     private hasPermissions(permission: PermissionValue): boolean {

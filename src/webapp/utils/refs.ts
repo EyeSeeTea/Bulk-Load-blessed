@@ -10,3 +10,7 @@ export function getMultiSelectorOptionsFromNamedRefs<Model extends NamedRef>(
 ): Array<{ value: string; text: string }> {
     return models.map(({ id, name }) => ({ value: id, text: name }));
 }
+
+export function modelToSelectOption<Obj extends NamedRef>(objects: Obj[]) {
+    return (objects || []).map(({ id, name }) => ({ value: id, text: name }));
+}

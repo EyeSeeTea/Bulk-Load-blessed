@@ -16,6 +16,7 @@ import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase
 import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
+import { GetCustomTemplatesUseCase } from "./domain/usecases/GetCustomTemplatesUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
@@ -65,6 +66,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             import: new ImportTemplateUseCase(instance, templateManager, excelReader),
             list: new ListDataFormsUseCase(instance),
             persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager),
+            getCustom: new GetCustomTemplatesUseCase(templateManager),
         }),
         themes: getExecute({
             list: new ListThemesUseCase(templateManager),

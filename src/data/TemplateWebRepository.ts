@@ -16,7 +16,7 @@ export class TemplateWebRepository implements TemplateRepository {
     constructor(private storage: StorageRepository) {}
 
     @cache()
-    private async getTemplates(): Promise<Template[]> {
+    public async getTemplates(): Promise<Template[]> {
         const customTemplates = await this.storage.getObject<Template[]>("templates", []);
         const genericTemplates = _.values(templates).map(TemplateClass => new TemplateClass());
         return _.concat(genericTemplates, customTemplates);
