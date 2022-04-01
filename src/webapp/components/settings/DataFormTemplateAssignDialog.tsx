@@ -23,7 +23,7 @@ export function DataFormTemplateAssignDialog(props: ModuleTemplateDialogProps): 
 
     const [dataForms, setDataForms] = useState<NamedRef[]>([]);
     const [selectedDataForm, setSelectedDataForm] = useState<NamedRef>();
-    const [templates, setTemplates] = useState<Template[]>([]);
+    const [templates, setTemplates] = useState<NamedRef[]>([]);
 
     useEffect(() => {
         compositionRoot.templates.list().then(({ dataSets, programs }) => {
