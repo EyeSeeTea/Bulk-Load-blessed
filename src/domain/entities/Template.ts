@@ -30,11 +30,11 @@ export type StyleSource = {
 
 type Base64Blob = { blob: string };
 
-interface CustomFileTemplate extends Omit<CustomTemplate, "url"> {
+export interface CustomTemplate extends Omit<CustomTemplateWithUrl, "url"> {
     file: Base64Blob;
 }
 
-export type Template = GeneratedTemplate | CustomFileTemplate;
+export type Template = GeneratedTemplate | CustomTemplate;
 
 interface BaseTemplate {
     type: TemplateType;
@@ -49,7 +49,6 @@ interface BaseTemplate {
 export interface GeneratedTemplate extends BaseTemplate {
     type: "generated";
     rowOffset: number;
-    colOffset: number;
 }
 
 export interface DownloadCustomizationOptions {
@@ -62,9 +61,10 @@ export interface ImportCustomizationOptions {
     dataPackage: DataPackage;
 }
 
-export interface CustomTemplate extends BaseTemplate {
+export interface CustomTemplateWithUrl extends BaseTemplate {
     type: "custom";
     url: string;
+    description: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
     downloadCustomization?: (

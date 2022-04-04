@@ -1,3 +1,4 @@
+import React from "react";
 import {
     ConfirmationDialog,
     ConfirmationDialogProps,
@@ -9,29 +10,35 @@ import { Checkbox, FormControlLabel } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import i18n from "../../../locales";
 import { D2Api } from "../../../types/d2-api";
+import { ofType } from "../../../types/utils";
 import { useAppContext } from "../../contexts/app-context";
 import { PermissionSetting, PermissionType } from "../../logic/settings";
 import { SettingsFieldsProps } from "./SettingsFields";
 
-interface PermissionsDialogProps extends SettingsFieldsProps {
+export interface PermissionsDialogProps extends SettingsFieldsProps {
     onClose: () => void;
     permissionsType: PermissionSetting;
+}
+
+function getTranslations() {
+    return {
+        permissionType: ofType<Record<PermissionSetting, string>>({
+            generation: i18n.t("Access to Template Generation"),
+            import: i18n.t("Access to Import Data"),
+            settings: i18n.t("Access to Settings and Themes"),
+            templates: i18n.t("Access to Templates"),
+        }),
+    };
 }
 
 export function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
     const { api } = useAppContext();
     const search = useCallback((query: string) => searchUsers(api, query), [api]);
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
+    const t = React.useMemo(getTranslations, []);
 
     const buildMetaObject = useCallback(
         (setting: PermissionSetting) => {
-            const displayName =
-                setting === "generation"
-                    ? i18n.t("Access to Template Generation")
-                    : setting === "import"
-                    ? i18n.t("Access to Import Data")
-                    : i18n.t("Access to Settings and Themes");
-
             const buildSharings = (type: PermissionType) =>
                 settings.getPermissions(setting, type).map(({ id, name }) => ({ id, displayName: name, access: "" }));
 
@@ -42,7 +49,7 @@ export function PermissionsDialog({ onClose, permissionsType, settings, onChange
                 },
                 object: {
                     id: "",
-                    displayName,
+                    displayName: t.permissionType[setting],
                     externalAccess: false,
                     publicAccess: "",
                     userAccesses: buildSharings("user"),
@@ -50,7 +57,7 @@ export function PermissionsDialog({ onClose, permissionsType, settings, onChange
                 },
             };
         },
-        [settings]
+        [settings, t]
     );
 
     const onUpdateSharingOptions = useCallback(
