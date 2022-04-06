@@ -9,6 +9,7 @@ import { TemplateRepository } from "../domain/repositories/TemplateRepository";
 import { cache } from "../utils/cache";
 import * as templates from "./templates";
 import * as customTemplates from "./templates/custom-templates";
+import { User } from "../domain/entities/User";
 
 const themeCollectionKey = "themes";
 
@@ -22,7 +23,7 @@ export class TemplateWebRepository implements TemplateRepository {
         return _.concat(genericTemplates, customTemplates);
     }
 
-    public getCustomTemplates(): Template[] {
+    public getCustomTemplates(currentUser: User): Template[] {
         const rootDir = path.join(__dirname, "../..", "public");
 
         return _.values(customTemplates).map((TemplateClass): Template => {
@@ -30,7 +31,15 @@ export class TemplateWebRepository implements TemplateRepository {
             const spreadsheetPath = path.join(rootDir, template.url);
             const buffer = fs.readFileSync(spreadsheetPath);
             const file = { blob: buffer.toString("base64") };
-            return { ...template, file };
+            const date = new Date().toISOString();
+            const user = _.pick(currentUser, ["id", "username", "name"]);
+
+            return {
+                ...template,
+                file,
+                created: { user, timestamp: date },
+                lastUpdated: { user, timestamp: date },
+            };
         });
     }
 

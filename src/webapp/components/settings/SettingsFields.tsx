@@ -37,8 +37,8 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
     const [isExclusionDialogVisible, showExclusionDialog] = useState<boolean>(false);
     const [isDataSetDataElementsFilterDialogVisible, showDataSetDataElementsFilterDialog] = useState<boolean>(false);
     const [isProgramStageFilterDialogVisible, showProgramStageFilterDialog] = useState<boolean>(false);
-    const [isModuleTemplateDialogVisible, showModuleTemplateDialog] = useState<boolean>(true);
-    const [isCustomTemplatesDialogVisible, showCustomTemplatesDialog] = useState<boolean>(false);
+    const [isModuleTemplateDialogVisible, showModuleTemplateDialog] = useState<boolean>(false);
+    const [isCustomTemplatesDialogVisible, showCustomTemplatesDialog] = useState<boolean>(true);
 
     const setModel = useCallback(
         (model: Model) => {

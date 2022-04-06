@@ -1,4 +1,5 @@
 import { ConfigWebRepository, JsonConfig } from "./data/ConfigWebRepository";
+import { D2UsersRepository } from "./data/D2UsersRepository";
 import { ExcelPopulateRepository } from "./data/ExcelPopulateRepository";
 import { InstanceDhisRepository } from "./data/InstanceDhisRepository";
 import { MigrationsAppRepository } from "./data/MigrationsAppRepository";
@@ -50,6 +51,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const templateManager: TemplateRepository = new TemplateWebRepository(storage);
     const excelReader: ExcelRepository = new ExcelPopulateRepository();
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
+    const usersRepository = new D2UsersRepository(dhisInstance);
 
     return {
         orgUnits: getExecute({
@@ -65,7 +67,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             download: new DownloadTemplateUseCase(instance, templateManager, excelReader),
             import: new ImportTemplateUseCase(instance, templateManager, excelReader),
             list: new ListDataFormsUseCase(instance),
-            persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager),
+            persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager, usersRepository),
             getCustom: new GetCustomTemplatesUseCase(templateManager),
         }),
         themes: getExecute({
@@ -82,7 +84,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             list: new ListLanguagesUseCase(instance),
         }),
         migrations: getExecute({
-            run: new RunMigrationsUseCase(migrations, dhisInstance),
+            run: new RunMigrationsUseCase(migrations, usersRepository),
             getVersions: new GetMigrationVersionsUseCase(migrations),
             hasPending: new HasPendingMigrationsUseCase(migrations),
         }),

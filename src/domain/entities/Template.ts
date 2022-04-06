@@ -5,6 +5,7 @@ import { DataFormType } from "./DataForm";
 import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
+import { User } from "./User";
 
 export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
@@ -33,6 +34,13 @@ type Base64Blob = { blob: string };
 
 export interface CustomTemplate extends Omit<CustomTemplateWithUrl, "url"> {
     file: Base64Blob;
+    created: UserTimestamp;
+    lastUpdated: UserTimestamp;
+}
+
+export interface UserTimestamp {
+    user: Pick<User, "id" | "username" | "name">;
+    timestamp: string;
 }
 
 export type Template = GeneratedTemplate | CustomTemplate;
