@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-04T12:06:50.406Z\n"
-"PO-Revision-Date: 2022-04-04T12:06:50.406Z\n"
+"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
+"PO-Revision-Date: 2022-04-06T09:18:23.150Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -351,6 +351,12 @@ msgid "Type"
 msgstr ""
 
 msgid "Custom"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Last Updated"
 msgstr ""
 
 msgid "Sharing Settings"

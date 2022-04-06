@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-04T12:06:50.406Z\n"
+"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -387,6 +387,14 @@ msgstr "Тип"
 
 msgid "Custom"
 msgstr ""
+
+#, fuzzy
+msgid "Created"
+msgstr "Создать"
+
+#, fuzzy
+msgid "Last Updated"
+msgstr "Обновленный"
 
 #, fuzzy
 msgid "Sharing Settings"

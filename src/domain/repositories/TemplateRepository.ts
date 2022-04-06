@@ -1,12 +1,12 @@
 import { Id } from "../entities/ReferenceObject";
-import { Template } from "../entities/Template";
+import { CustomTemplateWithUrl, Template } from "../entities/Template";
 import { Theme } from "../entities/Theme";
 import { User } from "../entities/User";
 
 export interface TemplateRepository {
     // Template access
     getTemplates(): Promise<Template[]>;
-    getCustomTemplates(currentUser: User): Template[];
+    getCustomTemplates(): CustomTemplateWithUrl[];
     saveTemplates(templates: Template[]): Promise<void>;
     getTemplate(id: Id): Promise<Template>;
     // Template themes

@@ -1,15 +1,12 @@
 import _ from "lodash";
-import path from "path";
-import fs from "fs";
 import { Id } from "../domain/entities/ReferenceObject";
-import { Template } from "../domain/entities/Template";
+import { CustomTemplateWithUrl, Template } from "../domain/entities/Template";
 import { Theme } from "../domain/entities/Theme";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 import { TemplateRepository } from "../domain/repositories/TemplateRepository";
 import { cache } from "../utils/cache";
 import * as templates from "./templates";
 import * as customTemplates from "./templates/custom-templates";
-import { User } from "../domain/entities/User";
 
 const themeCollectionKey = "themes";
 
@@ -23,23 +20,10 @@ export class TemplateWebRepository implements TemplateRepository {
         return _.concat(genericTemplates, customTemplates);
     }
 
-    public getCustomTemplates(currentUser: User): Template[] {
-        const rootDir = path.join(__dirname, "../..", "public");
-
-        return _.values(customTemplates).map((TemplateClass): Template => {
+    public getCustomTemplates(): CustomTemplateWithUrl[] {
+        return _.values(customTemplates).map(TemplateClass => {
             const template = new TemplateClass();
-            const spreadsheetPath = path.join(rootDir, template.url);
-            const buffer = fs.readFileSync(spreadsheetPath);
-            const file = { blob: buffer.toString("base64") };
-            const date = new Date().toISOString();
-            const user = _.pick(currentUser, ["id", "username", "name"]);
-
-            return {
-                ...template,
-                file,
-                created: { user, timestamp: date },
-                lastUpdated: { user, timestamp: date },
-            };
+            return template;
         });
     }
 

@@ -129,12 +129,14 @@ export default function TemplateListTable(props: TemplateListTableProps) {
             primary: true,
             onClick: edit,
             icon: <Icon>edit</Icon>,
+            isActive: rows => rows.length === 1 && rows[0]?.type === "custom",
         },
         {
             name: "delete",
             text: i18n.t("Delete"),
             onClick: deleteTemplates,
             icon: <Icon>delete</Icon>,
+            isActive: rows => rows.length === 1 && rows[0]?.type === "custom",
         },
     ];
 
