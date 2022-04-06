@@ -1,7 +1,6 @@
 import { Id } from "../entities/ReferenceObject";
 import { CustomTemplateWithUrl, Template } from "../entities/Template";
 import { Theme } from "../entities/Theme";
-import { User } from "../entities/User";
 
 export interface TemplateRepository {
     // Template access
