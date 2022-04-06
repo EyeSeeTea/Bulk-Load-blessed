@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
+"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -179,10 +179,6 @@ msgstr "Доступ к импортируемым данным"
 
 msgid "Access to Settings and Themes"
 msgstr "Доступ к настройкам и темам"
-
-#, fuzzy
-msgid "Access to Templates"
-msgstr "Доступ к генерации шаблонов"
 
 msgid "Access Permissions confirmation"
 msgstr "Подтверждение разрешений доступа"
@@ -373,7 +369,7 @@ msgstr[2] ""
 msgstr[3] ""
 
 #, fuzzy
-msgid "Are you sure you want to remove selected templates"
+msgid "Are you sure you want to remove the selected templates"
 msgstr "Вы уверены, что хотите удалить выбранные темы"
 
 msgid "Name"
@@ -412,6 +408,10 @@ msgstr "Хорошо"
 #, fuzzy
 msgid "Create template"
 msgstr "Создать тему"
+
+#, fuzzy
+msgid "Access to Templates"
+msgstr "Доступ к генерации шаблонов"
 
 msgid "Imported"
 msgstr "Импортировано"

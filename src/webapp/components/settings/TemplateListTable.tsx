@@ -19,6 +19,7 @@ import { CustomTemplate } from "../../../domain/entities/Template";
 import { firstOrFail } from "../../../types/utils";
 import moment from "moment";
 import { TemplatePermissionsDialog } from "./TemplatePermissionsDialog";
+import { useAppContext } from "../../contexts/app-context";
 
 interface WarningDialog {
     title?: string;
@@ -44,6 +45,7 @@ type FormState = { type: "edit" | "new"; template?: CustomTemplate };
 
 export default function TemplateListTable(props: TemplateListTableProps) {
     const { settings, setSettings, customTemplates, setCustomTemplates } = props;
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
@@ -87,12 +89,11 @@ export default function TemplateListTable(props: TemplateListTableProps) {
     const deleteTemplates = (ids: string[]) => {
         setWarningDialog({
             title: i18n.t("Delete {{count}} templates", { count: ids.length }),
-            description: i18n.t("Are you sure you want to remove selected templates"),
+            description: i18n.t("Are you sure you want to remove the selected templates"),
             action: async () => {
                 loading.show();
-                await promiseMap(ids, _id => {
-                    //return compositionRoot.themes.delete(id);
-                    return Promise.resolve(undefined);
+                await promiseMap(ids, id => {
+                    return compositionRoot.templates.delete(id);
                 });
                 setSelection([]);
                 setCustomTemplates(_.reject(customTemplates, ({ id }) => ids.includes(id)));

@@ -8,6 +8,7 @@ export interface TemplateRepository {
     getCustomTemplates(): CustomTemplateWithUrl[];
     saveTemplates(templates: Template[]): Promise<void>;
     getTemplate(id: Id): Promise<Template>;
+    deleteTemplate(id: Id): Promise<void>;
     // Template themes
     listThemes(): Promise<Theme[]>;
     getTheme(id: Id): Promise<Theme>;

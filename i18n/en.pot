@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
-"PO-Revision-Date: 2022-04-06T09:18:23.150Z\n"
+"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
+"PO-Revision-Date: 2022-04-06T12:23:15.403Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -157,9 +157,6 @@ msgid "Access to Import Data"
 msgstr ""
 
 msgid "Access to Settings and Themes"
-msgstr ""
-
-msgid "Access to Templates"
 msgstr ""
 
 msgid "Access Permissions confirmation"
@@ -338,7 +335,7 @@ msgid_plural "Delete {{count}} templates"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Are you sure you want to remove selected templates"
+msgid "Are you sure you want to remove the selected templates"
 msgstr ""
 
 msgid "Name"
@@ -372,6 +369,9 @@ msgid "Ok"
 msgstr ""
 
 msgid "Create template"
+msgstr ""
+
+msgid "Access to Templates"
 msgstr ""
 
 msgid "Imported"

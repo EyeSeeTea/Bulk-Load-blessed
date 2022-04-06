@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
+"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -146,11 +146,9 @@ msgstr ""
 msgid "Close"
 msgstr "Cerrar"
 
-#, fuzzy
 msgid "Dataset/Program"
 msgstr "Programa"
 
-#, fuzzy
 msgid "Search templates"
 msgstr "Buscar elementos de datos"
 
@@ -177,10 +175,6 @@ msgstr "Acceso a la importación de datos"
 
 msgid "Access to Settings and Themes"
 msgstr "Acceso al área de configuración y a los temas"
-
-#, fuzzy
-msgid "Access to Templates"
-msgstr "Acceso a la generación de plantillas"
 
 msgid "Access Permissions confirmation"
 msgstr "Confirme los permisos de accesso"
@@ -372,7 +366,7 @@ msgstr[0] "Borrar {{count}} temas"
 msgstr[1] ""
 
 #, fuzzy
-msgid "Are you sure you want to remove selected templates"
+msgid "Are you sure you want to remove the selected templates"
 msgstr "Esta seguro que quiere borrar los temas seleccionados"
 
 msgid "Name"
@@ -411,6 +405,10 @@ msgstr "Ok"
 #, fuzzy
 msgid "Create template"
 msgstr "Crear tema"
+
+#, fuzzy
+msgid "Access to Templates"
+msgstr "Acceso a la generación de plantillas"
 
 msgid "Imported"
 msgstr "Importados"
@@ -785,6 +783,3 @@ msgstr ""
 msgid "Settings saved"
 msgstr "Configuración guardada"
 
-#, fuzzy
-#~ msgid "Custom Templates"
-#~ msgstr "Plantilla"

@@ -15,6 +15,7 @@ import { StorageRepository } from "./domain/repositories/StorageRepository";
 import { TemplateRepository } from "./domain/repositories/TemplateRepository";
 import { AnalyzeTemplateUseCase } from "./domain/usecases/AnalyzeTemplateUseCase";
 import { ConvertDataPackageUseCase } from "./domain/usecases/ConvertDataPackageUseCase";
+import { DeleteCustomTemplateUseCase } from "./domain/usecases/DeleteCustomTemplateUseCase";
 import { DeleteThemeUseCase } from "./domain/usecases/DeleteThemeUseCase";
 import { DownloadTemplateUseCase } from "./domain/usecases/DownloadTemplateUseCase";
 import { GetCustomTemplatesUseCase } from "./domain/usecases/GetCustomTemplatesUseCase";
@@ -70,6 +71,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             list: new ListDataFormsUseCase(instance),
             persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager, usersRepository),
             getCustom: new GetCustomTemplatesUseCase(templateManager),
+            delete: new DeleteCustomTemplateUseCase(templateManager),
         }),
         themes: getExecute({
             list: new ListThemesUseCase(templateManager),

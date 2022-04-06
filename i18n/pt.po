@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T09:18:23.150Z\n"
+"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -179,10 +179,6 @@ msgstr "Acesso aos dados de importação"
 
 msgid "Access to Settings and Themes"
 msgstr "Acesso a configurações e temas"
-
-#, fuzzy
-msgid "Access to Templates"
-msgstr "Acesso à geração de planilhas"
 
 msgid "Access Permissions confirmation"
 msgstr "Confirmação de permissões de acesso"
@@ -371,7 +367,7 @@ msgstr[0] "Excluir {{count}} temas"
 msgstr[1] ""
 
 #, fuzzy
-msgid "Are you sure you want to remove selected templates"
+msgid "Are you sure you want to remove the selected templates"
 msgstr "Tem certeza de que deseja excluir os temas selecionados"
 
 msgid "Name"
@@ -410,6 +406,10 @@ msgstr "Ok"
 #, fuzzy
 msgid "Create template"
 msgstr "Criar tema"
+
+#, fuzzy
+msgid "Access to Templates"
+msgstr "Acesso à geração de planilhas"
 
 msgid "Imported"
 msgstr "Importado"

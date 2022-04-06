@@ -8,6 +8,7 @@ import { cache } from "../utils/cache";
 import * as templates from "./templates";
 import * as customTemplates from "./templates/custom-templates";
 
+const templatesCollectionKey = "templates";
 const themeCollectionKey = "themes";
 
 export class TemplateWebRepository implements TemplateRepository {
@@ -15,7 +16,7 @@ export class TemplateWebRepository implements TemplateRepository {
 
     @cache()
     public async getTemplates(): Promise<Template[]> {
-        const customTemplates = await this.storage.getObject<Template[]>("templates", []);
+        const customTemplates = await this.storage.getObject<Template[]>(templatesCollectionKey, []);
         const genericTemplates = _.values(templates).map(TemplateClass => new TemplateClass());
         return _.concat(genericTemplates, customTemplates);
     }
@@ -28,7 +29,7 @@ export class TemplateWebRepository implements TemplateRepository {
     }
 
     public saveTemplates(templates: Template[]): Promise<void> {
-        return this.storage.saveObject("templates", templates);
+        return this.storage.saveObject(templatesCollectionKey, templates);
     }
 
     public async getTemplate(templateId: Id): Promise<Template> {
@@ -37,6 +38,12 @@ export class TemplateWebRepository implements TemplateRepository {
         if (!template) throw new Error(`Attempt to read from invalid template ${templateId}`);
         return template;
     }
+
+    async deleteTemplate(templateId: Id): Promise<void> {
+        await this.storage.removeObjectInCollection(templatesCollectionKey, templateId);
+    }
+
+    /* Themes */
 
     public async listThemes(): Promise<Theme[]> {
         const objects = await this.storage.listObjectsInCollection(themeCollectionKey);
