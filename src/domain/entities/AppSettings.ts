@@ -1,4 +1,5 @@
 import { GetArrayInnerType } from "../../types/utils";
+import { PermissionType } from "../../webapp/logic/settings";
 import { DataElementDisaggregated } from "./DataElementDisaggregated";
 import { DataFormTemplate } from "./DataFormTemplate";
 import { Id, NamedRef, Ref } from "./ReferenceObject";
@@ -25,11 +26,9 @@ export interface AppSettings {
     permissionsForGeneration: NamedRef[];
     permissionsForSettings: NamedRef[];
     permissionsForImport: NamedRef[];
-    permissionsForTemplates: NamedRef[];
     allPermissionsForGeneration: boolean;
     allPermissionsForSettings: boolean;
     allPermissionsForImport: boolean;
-    allPermissionsForTemplates: boolean;
     orgUnitSelection: OrgUnitSelectionSetting;
     duplicateEnabled: boolean;
     duplicateExclusion: DuplicateExclusion;
@@ -39,4 +38,18 @@ export interface AppSettings {
     programStageFilter: ProgramStageFilter;
     programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
     dataFormTemplate: DataFormTemplate;
+    templatePermissions: TemplatePermissions;
 }
+
+export type TemplatePermissions = Record<TemplateId, TemplatePermission>;
+
+export interface TemplatePermission {
+    accesses: TemplatePermissionAccess[];
+    all: boolean;
+}
+
+export interface TemplatePermissionAccess extends NamedRef {
+    type: PermissionType | "unknown";
+}
+
+type TemplateId = Id;

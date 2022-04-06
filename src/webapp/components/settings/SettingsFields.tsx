@@ -38,7 +38,7 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
     const [isDataSetDataElementsFilterDialogVisible, showDataSetDataElementsFilterDialog] = useState<boolean>(false);
     const [isProgramStageFilterDialogVisible, showProgramStageFilterDialog] = useState<boolean>(false);
     const [isModuleTemplateDialogVisible, showModuleTemplateDialog] = useState<boolean>(false);
-    const [isCustomTemplatesDialogVisible, showCustomTemplatesDialog] = useState<boolean>(false);
+    const [isTemplatesDialogVisible, showTemplatesDialog] = useState<boolean>(true);
 
     const setModel = useCallback(
         (model: Model) => {
@@ -184,10 +184,10 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
                 />
             )}
 
-            {isCustomTemplatesDialogVisible && (
+            {isTemplatesDialogVisible && (
                 <TemplatesDialog
                     title={i18n.t("Templates")}
-                    onClose={() => showCustomTemplatesDialog(false)}
+                    onClose={() => showTemplatesDialog(false)}
                     settings={settings}
                     onChange={onChange}
                     customTemplates={customTemplates}
@@ -290,7 +290,7 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
                     />
                 </ListItem>
 
-                <ListItem button onClick={() => showCustomTemplatesDialog(true)}>
+                <ListItem button onClick={() => showTemplatesDialog(true)}>
                     <ListItemIcon>
                         <Icon>description</Icon>
                     </ListItemIcon>

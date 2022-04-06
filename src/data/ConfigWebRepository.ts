@@ -28,11 +28,9 @@ export class ConfigWebRepository implements ConfigRepository {
             permissionsForGeneration: [],
             permissionsForSettings: [],
             permissionsForImport: [],
-            permissionsForTemplates: [],
             allPermissionsForGeneration: true,
             allPermissionsForSettings: true,
             allPermissionsForImport: true,
-            allPermissionsForTemplates: true,
             orgUnitSelection: "both",
             duplicateEnabled: false,
             duplicateExclusion: {},
@@ -42,6 +40,7 @@ export class ConfigWebRepository implements ConfigRepository {
             programStageFilter: {},
             programStagePopulateEventsForEveryTei: {},
             dataFormTemplate: { relationships: {} },
+            templatePermissions: {},
             ...defaultSettings,
         };
     }

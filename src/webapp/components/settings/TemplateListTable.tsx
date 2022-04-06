@@ -16,9 +16,9 @@ import i18n from "../../../locales";
 import { RouteComponentProps } from "../../pages/Router";
 import { promiseMap } from "../../../utils/promises";
 import { CustomTemplate } from "../../../domain/entities/Template";
-import { PermissionsDialog } from "./PermissionsDialog";
 import { firstOrFail } from "../../../types/utils";
 import moment from "moment";
+import { TemplatePermissionsDialog } from "./TemplatePermissionsDialog";
 
 interface WarningDialog {
     title?: string;
@@ -168,9 +168,9 @@ export default function TemplateListTable(props: TemplateListTableProps) {
             )}
 
             {settingsState.type === "open" && (
-                <PermissionsDialog
+                <TemplatePermissionsDialog
                     onClose={closeSettings}
-                    permissionsType="templates"
+                    templateId={settingsState.id}
                     settings={settings}
                     onChange={setSettings}
                 />
