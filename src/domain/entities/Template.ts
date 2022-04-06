@@ -1,3 +1,4 @@
+import { Maybe } from "../../types/utils";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
@@ -201,4 +202,18 @@ export interface CellDataSource extends BaseDataSource {
     categoryOption?: CellRef | ValueRef;
     attribute?: CellRef | ValueRef;
     eventId?: CellRef | ValueRef;
+}
+
+interface DataFormRef {
+    type: Maybe<DataFormType>;
+    id: Maybe<string>;
+}
+
+export function getDataFormRef(template: BaseTemplate): DataFormRef {
+    const { dataFormType, dataFormId } = template;
+
+    return {
+        type: dataFormType.type === "value" ? dataFormType.id : undefined,
+        id: dataFormId.type === "value" ? dataFormId.id : undefined,
+    };
 }
