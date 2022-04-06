@@ -1,7 +1,7 @@
 import { D2Api } from "@eyeseetea/d2-api/2.33";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { User } from "../domain/entities/User";
-import { UsersRepository } from "../domain/repositories/UsersRepository";
+import { SearchResults, UsersRepository } from "../domain/repositories/UsersRepository";
 import { D2ApiDefault } from "../types/d2-api";
 
 export class D2UsersRepository implements UsersRepository {
@@ -29,5 +29,14 @@ export class D2UsersRepository implements UsersRepository {
             username: apiUser.userCredentials.username,
             authorities: apiUser.authorities,
         };
+    }
+
+    search(query: string): Promise<SearchResults> {
+        const options = {
+            fields: { id: true, displayName: true },
+            filter: { displayName: { ilike: query } },
+        };
+
+        return this.api.metadata.get({ users: options, userGroups: options }).getData();
     }
 }

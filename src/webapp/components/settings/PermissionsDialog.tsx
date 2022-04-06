@@ -9,7 +9,6 @@ import {
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import i18n from "../../../locales";
-import { D2Api } from "../../../types/d2-api";
 import { ofType } from "../../../types/utils";
 import { useAppContext } from "../../contexts/app-context";
 import { PermissionSetting, PermissionType } from "../../logic/settings";
@@ -31,8 +30,9 @@ function getTranslations() {
 }
 
 export function PermissionsDialog({ onClose, permissionsType, settings, onChange }: PermissionsDialogProps) {
-    const { api } = useAppContext();
-    const search = useCallback((query: string) => searchUsers(api, query), [api]);
+    const { compositionRoot } = useAppContext();
+
+    const search = useCallback((query: string) => compositionRoot.users.search(query), [compositionRoot]);
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
     const t = React.useMemo(getTranslations, []);
 
@@ -130,12 +130,4 @@ export function PermissionsDialog({ onClose, permissionsType, settings, onChange
             />
         </ConfirmationDialog>
     );
-}
-
-function searchUsers(api: D2Api, query: string) {
-    const options = {
-        fields: { id: true, displayName: true },
-        filter: { displayName: { ilike: query } },
-    };
-    return api.metadata.get({ users: options, userGroups: options }).getData();
 }

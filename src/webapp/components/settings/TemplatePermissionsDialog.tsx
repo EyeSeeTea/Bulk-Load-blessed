@@ -8,7 +8,6 @@ import {
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 import { useCallback, useState } from "react";
 import i18n from "../../../locales";
-import { D2Api } from "../../../types/d2-api";
 import { useAppContext } from "../../contexts/app-context";
 import { PermissionType } from "../../logic/settings";
 import { SettingsFieldsProps } from "./SettingsFields";
@@ -21,8 +20,9 @@ export interface TemplatePermissionsDialogProps extends SettingsFieldsProps {
 
 export function TemplatePermissionsDialog(props: TemplatePermissionsDialogProps) {
     const { templateId, onClose, settings, onChange } = props;
-    const { api } = useAppContext();
-    const search = useCallback((query: string) => searchUsers(api, query), [api]);
+    const { compositionRoot } = useAppContext();
+
+    const search = useCallback((query: string) => compositionRoot.users.search(query), [compositionRoot]);
     const [dialogProps, updateDialog] = useState<ConfirmationDialogProps | null>(null);
 
     const buildMetaObject = useCallback(() => {
@@ -111,12 +111,4 @@ export function TemplatePermissionsDialog(props: TemplatePermissionsDialogProps)
             />
         </ConfirmationDialog>
     );
-}
-
-function searchUsers(api: D2Api, query: string) {
-    const options = {
-        fields: { id: true, displayName: true },
-        filter: { displayName: { ilike: query } },
-    };
-    return api.metadata.get({ users: options, userGroups: options }).getData();
 }

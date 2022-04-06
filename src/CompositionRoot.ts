@@ -32,6 +32,7 @@ import { PersistTemplatesFromStaticModulesUseCase } from "./domain/usecases/Pers
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { RunMigrationsUseCase } from "./domain/usecases/RunMigrationsUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
+import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api } from "./types/d2-api";
 
@@ -87,6 +88,9 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             run: new RunMigrationsUseCase(migrations, usersRepository),
             getVersions: new GetMigrationVersionsUseCase(migrations),
             hasPending: new HasPendingMigrationsUseCase(migrations),
+        }),
+        users: getExecute({
+            search: new SearchUsersUseCase(usersRepository),
         }),
     };
 }
