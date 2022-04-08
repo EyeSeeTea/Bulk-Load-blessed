@@ -1,33 +1,44 @@
-import { makeStyles, TextField, Typography } from "@material-ui/core";
+import { Grid, makeStyles, TextField, Typography } from "@material-ui/core";
 import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
-import { ChangeEvent, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Theme, ThemeableSections } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { toBase64 } from "../../../utils/files";
-import { generatorOriginalPalette } from "../../utils/colors";
-import { ColorPicker } from "../color-picker/ColorPicker";
-import { ColorScaleSelect } from "../color-scale/ColorScaleSelect";
-import { Select, SelectOption } from "../select/Select";
+import { Select } from "../select/Select";
+import { CustomTemplate } from "../../../domain/entities/Template";
+import React from "react";
+import { useDataForms } from "./settings.hooks";
+import {
+    CustomTemplateProgramViewModel,
+    CustomTemplateProgramViewModelActions,
+} from "./templates/CustomTemplateProgramViewModel";
 
-interface ThemeEditDialogProps {
-    type: "new" | "edit";
-    theme?: Theme;
-    onSave: (theme: Theme) => void;
+export interface CustomTemplateEditDialogProps {
+    action: CustomTemplateAction;
+    onSave: (template: CustomTemplate) => void;
     onCancel: () => void;
 }
 
-export default function ThemeEditDialog({ type, theme: editTheme, onSave, onCancel }: ThemeEditDialogProps) {
-    const classes = useStyles();
-    const [theme, updateTheme] = useState<Theme>(editTheme ?? new Theme());
+export type CustomTemplateAction = { type: "new" } | { type: "edit"; template: CustomTemplate };
 
-    const defaultColorOption = theme.palette.length > 1 ? "pattern" : "fixed";
-    const [colorOption, setColorOption] = useState<string>(defaultColorOption);
+export function CustomTemplateEditDialog(props: CustomTemplateEditDialogProps) {
+    const { action, onSave, onCancel } = props;
+    const classes = useStyles();
+
+    const getInitialTemplate = (): CustomTemplateProgramViewModel =>
+        props.action.type === "edit"
+            ? CustomTemplateProgramViewModelActions.fromTemplate(props.action.template)
+            : CustomTemplateProgramViewModelActions.build();
+
+    const [template, setTemplate] = useState(getInitialTemplate);
+
+    const dataForms = useDataForms({ initialSelectionId: template.dataFormId || undefined });
 
     const onDrop = useCallback(async ([file]: File[]) => {
         if (!file) return;
         const src = await toBase64(file);
-        updateTheme(theme => theme.updatePicture("logo", { name: file.name, src }));
+        console.debug(src);
+        //updateTemplate(theme => theme.updatePicture("logo", { name: file.name, src }));
     }, []);
 
     const { getRootProps, getInputProps } = useDropzone({
@@ -35,127 +46,106 @@ export default function ThemeEditDialog({ type, theme: editTheme, onSave, onCanc
         accept: "image/jpeg, image/png",
     });
 
-    const title = type === "edit" ? i18n.t("Edit theme") : i18n.t("New theme");
+    const title = action.type === "edit" ? i18n.t("Edit custom template") : i18n.t("New custom template");
 
-    const updateName = (event: ChangeEvent<HTMLInputElement>) => {
-        const name = event.target.value;
-        updateTheme(theme => theme.setName(name));
-    };
+    const save = React.useCallback(() => {
+        onSave(template as unknown as CustomTemplate);
+    }, [onSave, template]);
 
-    const updatePalette = (newColors: string | string[]) => {
-        const palette = [newColors].flat();
-        updateTheme(theme => theme.updateColorPalette(palette));
-    };
-
-    const updateSection = (field: ThemeableSections) => {
-        return (event: ChangeEvent<HTMLInputElement>) => {
-            const text = event.target.value;
-
-            // TODO: This should be configurable from the UI
-            const fontSize = field === "title" ? 22 : 12;
-            const italic = field === "subtitle";
-
-            updateTheme(theme => theme.updateSection(field, text ? { text, fontSize, italic } : undefined));
+    function setFieldFromEvent(field: keyof CustomTemplateProgramViewModel) {
+        return (ev: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+            setTemplate(prevTemplate =>
+                CustomTemplateProgramViewModelActions.update(prevTemplate, field, ev.target.value)
+            );
         };
-    };
-
-    const saveTheme = () => onSave(theme);
-
-    const changeColorOption = ({ value }: SelectOption) => {
-        const fixedColor = theme.palette[0];
-        if (!fixedColor) return;
-
-        const defaultPalette = generatorOriginalPalette["default"][9];
-        const palette = theme.palette.length > 1 ? theme.palette : defaultPalette;
-
-        updatePalette(value === "fixed" ? [fixedColor] : palette);
-        setColorOption(value);
-    };
+    }
 
     return (
         <ConfirmationDialog
             isOpen={true}
             title={title}
-            onSave={saveTheme}
+            onSave={save}
             onCancel={onCancel}
             maxWidth={"lg"}
             fullWidth={true}
         >
-            <div className={classes.group}>
+            <Group>
                 <TextField
                     className={classes.text}
-                    label={i18n.t("Theme name")}
+                    label={i18n.t("Template Code")}
                     required={true}
                     fullWidth={true}
-                    value={theme.name ?? ""}
-                    onChange={updateName}
+                    value={template.code || ""}
+                    disabled={action.type === "edit"}
+                    onChange={setFieldFromEvent("code")}
                 />
-            </div>
 
-            <div className={classes.group} style={{ marginBottom: 5 }}>
-                <Typography variant="h6">{i18n.t("Colors")}</Typography>
-                <div className={classes.colorOptions}>
-                    <div className={classes.colorOptionsPicker}>
-                        <Select
-                            placeholder={i18n.t("Color options")}
-                            options={colorPickerOptions}
-                            value={colorOption}
-                            onChange={changeColorOption}
-                        />
-                    </div>
-
-                    {theme.palette.length > 1 ? (
-                        <ColorScaleSelect
-                            selected={theme.palette}
-                            onChange={updatePalette}
-                            additionalPalettes={generatorOriginalPalette}
-                        />
-                    ) : (
-                        <ColorPicker
-                            color={theme.palette[0]}
-                            onChange={updatePalette}
-                            width={34}
-                            height={36}
-                            disableArrow={true}
-                        />
-                    )}
-                </div>
-            </div>
-
-            <div className={classes.group}>
-                <Typography variant="h6">{i18n.t("Headings")}</Typography>
                 <TextField
                     className={classes.text}
-                    label={i18n.t("Title text")}
+                    label={i18n.t("Template Name")}
+                    required={true}
                     fullWidth={true}
-                    multiline={true}
-                    value={theme.sections?.title?.text ?? ""}
-                    onChange={updateSection("title")}
+                    value={template.name || ""}
+                    onChange={setFieldFromEvent("name")}
                 />
+
                 <TextField
                     className={classes.text}
-                    label={i18n.t("Subtitle text")}
+                    label={i18n.t("Template Description")}
+                    required={false}
                     fullWidth={true}
-                    multiline={true}
-                    value={theme.sections?.subtitle?.text ?? ""}
-                    onChange={updateSection("subtitle")}
+                    value={template.description || ""}
+                    onChange={setFieldFromEvent("description")}
                 />
-            </div>
 
-            <div className={classes.group}>
-                <Typography variant="h6">{i18n.t("Logo")}</Typography>
+                <Select
+                    placeholder={i18n.t("Program/Dataset")}
+                    options={dataForms.options}
+                    value={dataForms.selected?.id}
+                    onChange={dataForms.setSelected}
+                />
+            </Group>
+
+            <Group title={i18n.t("Data Source Configuration")}>
+                <Grid container spacing={1}>
+                    <Grid item xs={6}>
+                        <TextField
+                            className={classes.text}
+                            label={i18n.t("Event UID - Sheet")}
+                            fullWidth={true}
+                            value={template.eventIdSheet}
+                            onChange={setFieldFromEvent("eventIdSheet")}
+                        />
+                    </Grid>
+
+                    <Grid item xs={6}>
+                        <TextField
+                            className={classes.text}
+                            label={i18n.t("Event UID - Column")}
+                            fullWidth={true}
+                            value={template.eventIdColumn}
+                            onChange={setFieldFromEvent("eventIdColumn")}
+                        />
+                    </Grid>
+                </Grid>
+            </Group>
+
+            <Group title={i18n.t("Styles")}></Group>
+
+            <Group title={i18n.t("File")}>
                 <div {...getRootProps({ className: classes.dropzone })}>
                     <input {...getInputProps()} />
-                    {theme.pictures?.logo?.name ?? <p>{i18n.t("Drag and drop logo file")}</p>}
+
+                    {"template.xlsx" ?? <p>{i18n.t("Drag and drop template file")}</p>}
                 </div>
-            </div>
+            </Group>
         </ConfirmationDialog>
     );
 }
 
 const useStyles = makeStyles({
     group: { marginBottom: 25, marginLeft: 0 },
-    text: { marginTop: 8 },
+    text: { marginTop: 10, marginBottom: 10 },
     colorOptions: { marginTop: 12, marginBottom: 0, display: "flex" },
     colorOptionsPicker: { width: "20%", marginRight: 30 },
     dropzone: {
@@ -174,13 +164,14 @@ const useStyles = makeStyles({
     },
 });
 
-const colorPickerOptions = [
-    {
-        label: i18n.t("Pattern"),
-        value: "pattern",
-    },
-    {
-        label: i18n.t("Fixed"),
-        value: "fixed",
-    },
-];
+const Group: React.FC<{ title?: string }> = props => {
+    const { title, children } = props;
+    const classes = useStyles();
+
+    return (
+        <div className={classes.group}>
+            {title && <Typography variant="h6">{title}</Typography>}
+            {children}
+        </div>
+    );
+};

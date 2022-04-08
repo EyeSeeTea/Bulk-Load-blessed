@@ -24,7 +24,7 @@ import {
 import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
-import { GetArrayInnerType, Maybe } from "../../types/utils";
+import { GetArrayInnerType, Maybe, OkOrError } from "../../types/utils";
 
 const privateFields = ["currentUser"] as const;
 
@@ -55,8 +55,6 @@ interface CurrentUser extends Ref {
     userGroups: Ref[];
     authorities: Set<string>;
 }
-
-type OkOrError = { status: true } | { status: false; error: string };
 
 type PermissionValue =
     | { type: "all" }

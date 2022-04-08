@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
     ConfirmationDialog,
     ObjectsTable,
@@ -11,15 +12,18 @@ import {
 } from "@eyeseetea/d2-ui-components";
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
-import React, { useState } from "react";
+import moment from "moment";
+
 import i18n from "../../../locales";
 import { RouteComponentProps } from "../../pages/Router";
 import { promiseMap } from "../../../utils/promises";
 import { CustomTemplate } from "../../../domain/entities/Template";
-import { firstOrFail } from "../../../types/utils";
-import moment from "moment";
+import { firstOrFail, isValueInUnionType } from "../../../types/utils";
 import { TemplatePermissionsDialog } from "./TemplatePermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
+import { CustomTemplateAction, CustomTemplateEditDialog } from "./TemplateEditDialog";
+import { downloadFile } from "../../utils/download";
+import { DataFormType, dataFormTypes, getTranslations } from "../../../domain/entities/DataForm";
 
 interface WarningDialog {
     title?: string;
@@ -34,6 +38,8 @@ export interface TemplateRow {
     description: string;
     created: string;
     lastUpdated: string;
+    dataFormId: string;
+    dataFormType: DataFormType;
 }
 
 type TemplateListTableProps = Pick<
@@ -41,16 +47,17 @@ type TemplateListTableProps = Pick<
     "settings" | "setSettings" | "customTemplates" | "setCustomTemplates"
 >;
 
-type FormState = { type: "edit" | "new"; template?: CustomTemplate };
-
 export default function TemplateListTable(props: TemplateListTableProps) {
     const { settings, setSettings, customTemplates, setCustomTemplates } = props;
-    const { compositionRoot } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
-    const [customTemplateEdit, setCustomTemplateEdit] = useState<FormState>();
+    const [customTemplateEdit, setCustomTemplateEdit] = useState<CustomTemplateAction | undefined>({
+        type: "edit",
+        template: firstOrFail(customTemplates),
+    });
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
     const rows = buildCustomTemplateRow(customTemplates);
@@ -83,30 +90,67 @@ export default function TemplateListTable(props: TemplateListTableProps) {
 
     const edit = (ids: string[]) => {
         const template = customTemplates.find(row => row.id === ids[0]);
-        if (template) setCustomTemplateEdit({ type: "edit", template: template });
+        if (template) setCustomTemplateEdit({ type: "edit", template });
     };
 
-    const deleteTemplates = (ids: string[]) => {
-        setWarningDialog({
-            title: i18n.t("Delete {{count}} templates", { count: ids.length }),
-            description: i18n.t("Are you sure you want to remove the selected templates"),
-            action: async () => {
-                loading.show();
-                await promiseMap(ids, id => {
-                    return compositionRoot.templates.delete(id);
+    const deleteTemplates = React.useCallback(
+        (ids: string[]) => {
+            setWarningDialog({
+                title: i18n.t("Delete {{count}} templates", { count: ids.length }),
+                description: i18n.t("Are you sure you want to remove the selected templates"),
+                action: async () => {
+                    loading.show();
+                    await promiseMap(ids, id => compositionRoot.templates.delete(id));
+                    setSelection([]);
+                    setCustomTemplates(_.reject(customTemplates, ({ id }) => ids.includes(id)));
+                    loading.hide();
+                },
+            });
+        },
+        [compositionRoot.templates, customTemplates, loading, setCustomTemplates]
+    );
+
+    const downloadSpreadsheet = React.useCallback(
+        (templateId: string) => {
+            const template = customTemplates.find(row => row.id === templateId);
+            const row = rows.find(row => row.id === templateId);
+
+            if (template) {
+                downloadFile({
+                    filename: template.id + ".xlsx",
+                    data: Buffer.from(template.file.blob, "base64"),
+                    mimeType: "application/vnd.ms-excel",
                 });
-                setSelection([]);
-                setCustomTemplates(_.reject(customTemplates, ({ id }) => ids.includes(id)));
-                loading.hide();
-            },
-        });
-    };
+            } else if (row) {
+                compositionRoot.templates.download(api, {
+                    type: row.dataFormType,
+                    id: row.dataFormId,
+                    language: "en",
+                    settings,
+                    populate: false,
+                    downloadRelationships: false,
+                });
+            } else {
+                snackbar.error(i18n.t("Cannot download spreadsheet for template"));
+                return;
+            }
+        },
+        [customTemplates, compositionRoot, rows, snackbar, api, settings]
+    );
 
-    const closeWarningDialog = () => setWarningDialog(null);
+    const closeWarningDialog = React.useCallback(() => {
+        setWarningDialog(null);
+    }, []);
+
+    const translations = React.useMemo(getTranslations, []);
 
     const columns: TableColumn<TemplateRow>[] = [
         { name: "name", text: i18n.t("Name") },
-        { name: "description", text: i18n.t("Description"), getValue: row => row.description || "-" },
+        {
+            name: "dataFormType",
+            text: i18n.t("Data Form Type"),
+            getValue: row => translations.dataFormTypes[row.dataFormType],
+        },
         {
             name: "type",
             text: i18n.t("Type"),
@@ -122,6 +166,13 @@ export default function TemplateListTable(props: TemplateListTableProps) {
             text: i18n.t("Sharing Settings"),
             primary: false,
             onClick: selectedIds => setSettingsState({ type: "open", id: firstOrFail(selectedIds) }),
+            icon: <Icon>share</Icon>,
+        },
+        {
+            name: "download_spreadsheet",
+            text: i18n.t("Download spreadsheet"),
+            primary: false,
+            onClick: selectedIds => downloadSpreadsheet(firstOrFail(selectedIds)),
             icon: <Icon>share</Icon>,
         },
         {
@@ -177,14 +228,9 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                 />
             )}
 
-            {/*!!customTemplateEdit && (
-                <CustomTemplateDialog
-                    type={customTemplateEdit.type}
-                    theme={customTemplateEdit.theme}
-                    onSave={saveTheme}
-                    onCancel={closeThemeEdit}
-                />
-            ) */}
+            {customTemplateEdit && (
+                <CustomTemplateEditDialog action={customTemplateEdit} onSave={save} onCancel={closeEdit} />
+            )}
 
             <ObjectsTable<TemplateRow>
                 rows={rows}
@@ -205,23 +251,32 @@ export default function TemplateListTable(props: TemplateListTableProps) {
 
 function buildCustomTemplateRow(customTemplates: CustomTemplate[]): TemplateRow[] {
     return _(customTemplates)
-        .flatMap(({ id, name, description, created, lastUpdated }) => {
+        .flatMap(({ id, name, description, created, lastUpdated, dataFormId, dataFormType }) => {
+            const dataFormId_ = dataFormId.type === "value" ? dataFormId.id : undefined;
+            const dataFormType_ = dataFormType.type === "value" ? dataFormType.id : undefined;
+            if (!dataFormId_) return [];
+            if (!(dataFormType_ && isValueInUnionType(dataFormType_, dataFormTypes))) return [];
+
             const customRow: TemplateRow = {
                 type: "custom",
                 id,
                 name,
                 description,
-                created: "",
-                lastUpdated: "",
+                created: `${created.user.username} (${formatDate(created.timestamp)})`,
+                lastUpdated: `${created.user.username} (${formatDate(lastUpdated.timestamp)})`,
+                dataFormId: dataFormId_,
+                dataFormType: dataFormType_,
             };
 
             const autogeneratedRow: TemplateRow = {
                 ...customRow,
-                id: "autogenerated-customRow.id",
+                id: "autogenerated-" + customRow.id,
                 type: "autogenerated",
                 description: "",
-                created: `${created.user.username} (${formatDate(created.timestamp)})`,
-                lastUpdated: `${created.user.username} (${formatDate(lastUpdated.timestamp)})`,
+                created: "",
+                lastUpdated: "",
+                dataFormId: dataFormId_,
+                dataFormType: dataFormType_,
             };
 
             return [customRow, autogeneratedRow];

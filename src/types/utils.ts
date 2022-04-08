@@ -41,3 +41,9 @@ export function firstOrFail<T>(xs: T[]) {
         return x;
     }
 }
+
+export function assertUnreachable(_value: never): never {
+    throw new Error();
+}
+
+export type OkOrError = { status: true } | { status: false; error: string };
