@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
+"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,6 +63,17 @@ msgid ""
 msgstr ""
 "Хранилище данных укуса змеи {{тип}} повреждено. Пожалуйста, свяжитесь с "
 "администратором."
+
+msgid "Data Set"
+msgstr "Набор данных"
+
+#, fuzzy
+msgid "Event Program"
+msgstr "Программа"
+
+#, fuzzy
+msgid "Tracker Program"
+msgstr "Программа"
 
 msgid "Cannot read data form id"
 msgstr "Невозможно прочитать данные формы id"
@@ -320,41 +331,49 @@ msgstr "Элементы данных, используемые для выяв�
 msgid "Permissions"
 msgstr "Разрешения"
 
-msgid "Edit theme"
-msgstr "Редактировать тему"
+#, fuzzy
+msgid "Edit custom template"
+msgstr "Шаблон"
 
-msgid "New theme"
-msgstr "Новая тема"
+#, fuzzy
+msgid "New custom template"
+msgstr "Шаблон"
 
-msgid "Theme name"
-msgstr "Название темы"
+#, fuzzy
+msgid "Template Code"
+msgstr "Шаблон"
 
-msgid "Colors"
-msgstr "Цвета"
+#, fuzzy
+msgid "Template Name"
+msgstr "Шаблон"
 
-msgid "Color options"
-msgstr "Варианты цветов"
+#, fuzzy
+msgid "Template Description"
+msgstr "Доступ к генерации шаблонов"
 
-msgid "Headings"
-msgstr "Рубрики"
+#, fuzzy
+msgid "Program/Dataset"
+msgstr "Программа"
 
-msgid "Title text"
-msgstr "Текст заглавия"
+#, fuzzy
+msgid "Data Source Configuration"
+msgstr "Доступ к генерации шаблонов"
 
-msgid "Subtitle text"
-msgstr "Текст субтитров"
+msgid "Event UID - Sheet"
+msgstr ""
 
-msgid "Logo"
-msgstr "Логотип"
+msgid "Event UID - Column"
+msgstr ""
 
-msgid "Drag and drop logo file"
+msgid "Styles"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+#, fuzzy
+msgid "Drag and drop template file"
 msgstr "Перетащите файл логотипа"
-
-msgid "Pattern"
-msgstr "Узор"
-
-msgid "Fixed"
-msgstr "Исправлено"
 
 #, fuzzy
 msgid "An error ocurred while saving custom template"
@@ -372,11 +391,14 @@ msgstr[3] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Вы уверены, что хотите удалить выбранные темы"
 
+msgid "Cannot download spreadsheet for template"
+msgstr ""
+
 msgid "Name"
 msgstr "Имя"
 
-msgid "Description"
-msgstr "Описание"
+msgid "Data Form Type"
+msgstr ""
 
 msgid "Type"
 msgstr "Тип"
@@ -395,6 +417,10 @@ msgstr "Обновленный"
 #, fuzzy
 msgid "Sharing Settings"
 msgstr "Настройки"
+
+#, fuzzy
+msgid "Download spreadsheet"
+msgstr "Скачать шаблон"
 
 msgid "Edit"
 msgstr "Редактировать"
@@ -448,9 +474,6 @@ msgstr "Сообщения"
 
 msgid "JSON Response"
 msgstr "Ответ JSON"
-
-msgid "Data Set"
-msgstr "Набор данных"
 
 msgid "Template"
 msgstr "Шаблон"
@@ -533,6 +556,42 @@ msgstr "Дата начала"
 msgid "End date"
 msgstr "Дата окончания"
 
+msgid "Edit theme"
+msgstr "Редактировать тему"
+
+msgid "New theme"
+msgstr "Новая тема"
+
+msgid "Theme name"
+msgstr "Название темы"
+
+msgid "Colors"
+msgstr "Цвета"
+
+msgid "Color options"
+msgstr "Варианты цветов"
+
+msgid "Headings"
+msgstr "Рубрики"
+
+msgid "Title text"
+msgstr "Текст заглавия"
+
+msgid "Subtitle text"
+msgstr "Текст субтитров"
+
+msgid "Logo"
+msgstr "Логотип"
+
+msgid "Drag and drop logo file"
+msgstr "Перетащите файл логотипа"
+
+msgid "Pattern"
+msgstr "Узор"
+
+msgid "Fixed"
+msgstr "Исправлено"
+
 msgid "An error ocurred while saving theme"
 msgstr "Возникла ошибка при сохранении темы"
 
@@ -591,6 +650,9 @@ msgstr "Дата зачисления"
 
 msgid "Incident Date"
 msgstr "Дата инцидента"
+
+msgid "Description"
+msgstr "Описание"
 
 msgid "Value Type"
 msgstr "Тип значения"
@@ -787,7 +849,3 @@ msgstr "Нет захвата орг единицы соответствие э�
 
 msgid "Settings saved"
 msgstr "Сохранение настроек"
-
-#, fuzzy
-#~ msgid "Custom Templates"
-#~ msgstr "Шаблон"

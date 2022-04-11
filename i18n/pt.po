@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
+"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -62,6 +62,17 @@ msgid ""
 msgstr ""
 "O armazenamento de dados da mordida da cobra {{tipo}} está corrompido. Por "
 "favor contacte um administrador."
+
+msgid "Data Set"
+msgstr "Data Set"
+
+#, fuzzy
+msgid "Event Program"
+msgstr "Programa"
+
+#, fuzzy
+msgid "Tracker Program"
+msgstr "Programa"
 
 msgid "Cannot read data form id"
 msgstr "Não é possível ler os dados do formulário de identificação"
@@ -320,41 +331,49 @@ msgstr "Elementos de dados usados para identificação de duplicatas"
 msgid "Permissions"
 msgstr "Permissões"
 
-msgid "Edit theme"
-msgstr "Editar tema"
+#, fuzzy
+msgid "Edit custom template"
+msgstr "Modelo"
 
-msgid "New theme"
-msgstr "Novo tema"
+#, fuzzy
+msgid "New custom template"
+msgstr "Modelo"
 
-msgid "Theme name"
-msgstr "Nome do tema"
+#, fuzzy
+msgid "Template Code"
+msgstr "Modelo"
 
-msgid "Colors"
-msgstr "Cores"
+#, fuzzy
+msgid "Template Name"
+msgstr "Modelo"
 
-msgid "Color options"
-msgstr "Opções de cores"
+#, fuzzy
+msgid "Template Description"
+msgstr "Acesso à geração de planilhas"
 
-msgid "Headings"
-msgstr "Cabeçalhos"
+#, fuzzy
+msgid "Program/Dataset"
+msgstr "Programa"
 
-msgid "Title text"
-msgstr "Texto do título"
+#, fuzzy
+msgid "Data Source Configuration"
+msgstr "Acesso à geração de planilhas"
 
-msgid "Subtitle text"
-msgstr "Texto da legenda"
+msgid "Event UID - Sheet"
+msgstr ""
 
-msgid "Logo"
-msgstr "Logotipo"
+msgid "Event UID - Column"
+msgstr ""
 
-msgid "Drag and drop logo file"
+msgid "Styles"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+#, fuzzy
+msgid "Drag and drop template file"
 msgstr "Arraste e solte o logotipo aqui"
-
-msgid "Pattern"
-msgstr "Padrão"
-
-msgid "Fixed"
-msgstr "Fixo"
 
 #, fuzzy
 msgid "An error ocurred while saving custom template"
@@ -370,11 +389,14 @@ msgstr[1] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Tem certeza de que deseja excluir os temas selecionados"
 
+msgid "Cannot download spreadsheet for template"
+msgstr ""
+
 msgid "Name"
 msgstr "Nome"
 
-msgid "Description"
-msgstr "Descrição"
+msgid "Data Form Type"
+msgstr ""
 
 msgid "Type"
 msgstr "Tipo"
@@ -393,6 +415,10 @@ msgstr "Atualizada"
 #, fuzzy
 msgid "Sharing Settings"
 msgstr "Configurações"
+
+#, fuzzy
+msgid "Download spreadsheet"
+msgstr "Descarregar a planilha"
 
 msgid "Edit"
 msgstr "Editar"
@@ -446,9 +472,6 @@ msgstr "Mensagens"
 
 msgid "JSON Response"
 msgstr "Resposta do JSON"
-
-msgid "Data Set"
-msgstr "Data Set"
 
 msgid "Template"
 msgstr "Modelo"
@@ -531,6 +554,42 @@ msgstr "Data de início"
 msgid "End date"
 msgstr "Data de fim"
 
+msgid "Edit theme"
+msgstr "Editar tema"
+
+msgid "New theme"
+msgstr "Novo tema"
+
+msgid "Theme name"
+msgstr "Nome do tema"
+
+msgid "Colors"
+msgstr "Cores"
+
+msgid "Color options"
+msgstr "Opções de cores"
+
+msgid "Headings"
+msgstr "Cabeçalhos"
+
+msgid "Title text"
+msgstr "Texto do título"
+
+msgid "Subtitle text"
+msgstr "Texto da legenda"
+
+msgid "Logo"
+msgstr "Logotipo"
+
+msgid "Drag and drop logo file"
+msgstr "Arraste e solte o logotipo aqui"
+
+msgid "Pattern"
+msgstr "Padrão"
+
+msgid "Fixed"
+msgstr "Fixo"
+
 msgid "An error ocurred while saving theme"
 msgstr "Ocorreu um erro ao salvar o tema"
 
@@ -587,6 +646,9 @@ msgstr "Data de inscrição"
 
 msgid "Incident Date"
 msgstr "Data do Incidente"
+
+msgid "Description"
+msgstr "Descrição"
 
 msgid "Value Type"
 msgstr "Tipo de Valor"
@@ -785,7 +847,3 @@ msgstr ""
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
-
-#, fuzzy
-#~ msgid "Custom Templates"
-#~ msgstr "Modelo"

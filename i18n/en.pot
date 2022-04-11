@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
-"PO-Revision-Date: 2022-04-06T12:23:15.403Z\n"
+"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
+"PO-Revision-Date: 2022-04-08T12:27:13.174Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -53,6 +53,15 @@ msgstr ""
 msgid ""
 "Snake bite data store {{type}} is corrupted. Please contact an "
 "administrator."
+msgstr ""
+
+msgid "Data Set"
+msgstr ""
+
+msgid "Event Program"
+msgstr ""
+
+msgid "Tracker Program"
 msgstr ""
 
 msgid "Cannot read data form id"
@@ -291,40 +300,40 @@ msgstr ""
 msgid "Permissions"
 msgstr ""
 
-msgid "Edit theme"
+msgid "Edit custom template"
 msgstr ""
 
-msgid "New theme"
+msgid "New custom template"
 msgstr ""
 
-msgid "Theme name"
+msgid "Template Code"
 msgstr ""
 
-msgid "Colors"
+msgid "Template Name"
 msgstr ""
 
-msgid "Color options"
+msgid "Template Description"
 msgstr ""
 
-msgid "Headings"
+msgid "Program/Dataset"
 msgstr ""
 
-msgid "Title text"
+msgid "Data Source Configuration"
 msgstr ""
 
-msgid "Subtitle text"
+msgid "Event UID - Sheet"
 msgstr ""
 
-msgid "Logo"
+msgid "Event UID - Column"
 msgstr ""
 
-msgid "Drag and drop logo file"
+msgid "Styles"
 msgstr ""
 
-msgid "Pattern"
+msgid "File"
 msgstr ""
 
-msgid "Fixed"
+msgid "Drag and drop template file"
 msgstr ""
 
 msgid "An error ocurred while saving custom template"
@@ -338,10 +347,13 @@ msgstr[1] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr ""
 
+msgid "Cannot download spreadsheet for template"
+msgstr ""
+
 msgid "Name"
 msgstr ""
 
-msgid "Description"
+msgid "Data Form Type"
 msgstr ""
 
 msgid "Type"
@@ -357,6 +369,9 @@ msgid "Last Updated"
 msgstr ""
 
 msgid "Sharing Settings"
+msgstr ""
+
+msgid "Download spreadsheet"
 msgstr ""
 
 msgid "Edit"
@@ -408,9 +423,6 @@ msgid "Messages"
 msgstr ""
 
 msgid "JSON Response"
-msgstr ""
-
-msgid "Data Set"
 msgstr ""
 
 msgid "Template"
@@ -494,6 +506,42 @@ msgstr ""
 msgid "End date"
 msgstr ""
 
+msgid "Edit theme"
+msgstr ""
+
+msgid "New theme"
+msgstr ""
+
+msgid "Theme name"
+msgstr ""
+
+msgid "Colors"
+msgstr ""
+
+msgid "Color options"
+msgstr ""
+
+msgid "Headings"
+msgstr ""
+
+msgid "Title text"
+msgstr ""
+
+msgid "Subtitle text"
+msgstr ""
+
+msgid "Logo"
+msgstr ""
+
+msgid "Drag and drop logo file"
+msgstr ""
+
+msgid "Pattern"
+msgstr ""
+
+msgid "Fixed"
+msgstr ""
+
 msgid "An error ocurred while saving theme"
 msgstr ""
 
@@ -547,6 +595,9 @@ msgid "Enrollment Date"
 msgstr ""
 
 msgid "Incident Date"
+msgstr ""
+
+msgid "Description"
 msgstr ""
 
 msgid "Value Type"

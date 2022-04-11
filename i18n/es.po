@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-06T12:23:15.403Z\n"
+"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -62,6 +62,17 @@ msgid ""
 msgstr ""
 "El almacén de datos de mordedura de serpiente {{tipo}} está dañado. Por "
 "favor, póngase en contacto con un administrador."
+
+msgid "Data Set"
+msgstr "Data Set"
+
+#, fuzzy
+msgid "Event Program"
+msgstr "Programa"
+
+#, fuzzy
+msgid "Tracker Program"
+msgstr "Programa"
 
 msgid "Cannot read data form id"
 msgstr "No se pueden leer los datos del formulario id"
@@ -319,41 +330,49 @@ msgstr "Elementos de datos usados para identificar los duplicados"
 msgid "Permissions"
 msgstr "Permisos"
 
-msgid "Edit theme"
-msgstr "Editar tema"
+#, fuzzy
+msgid "Edit custom template"
+msgstr "Acceso a la generación de plantillas"
 
-msgid "New theme"
-msgstr "Nuevo tema"
+#, fuzzy
+msgid "New custom template"
+msgstr "Crear tema"
 
-msgid "Theme name"
-msgstr "Nombre del tema"
+#, fuzzy
+msgid "Template Code"
+msgstr "Plantilla"
 
-msgid "Colors"
-msgstr "Colores"
+#, fuzzy
+msgid "Template Name"
+msgstr "Plantilla"
 
-msgid "Color options"
-msgstr "Opciones de color"
+#, fuzzy
+msgid "Template Description"
+msgstr "Acceso a la generación de plantillas"
 
-msgid "Headings"
-msgstr "Encabezamientos"
+#, fuzzy
+msgid "Program/Dataset"
+msgstr "Programa"
 
-msgid "Title text"
-msgstr "Título"
+#, fuzzy
+msgid "Data Source Configuration"
+msgstr "Acceso a la generación de plantillas"
 
-msgid "Subtitle text"
-msgstr "Subtítulo"
+msgid "Event UID - Sheet"
+msgstr ""
 
-msgid "Logo"
-msgstr "Logo"
+msgid "Event UID - Column"
+msgstr ""
 
-msgid "Drag and drop logo file"
+msgid "Styles"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+#, fuzzy
+msgid "Drag and drop template file"
 msgstr "Mueva aquí los ficheros a importar"
-
-msgid "Pattern"
-msgstr "Patrón de colores"
-
-msgid "Fixed"
-msgstr "Fijo"
 
 #, fuzzy
 msgid "An error ocurred while saving custom template"
@@ -369,11 +388,14 @@ msgstr[1] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Esta seguro que quiere borrar los temas seleccionados"
 
+msgid "Cannot download spreadsheet for template"
+msgstr ""
+
 msgid "Name"
 msgstr "Nombre"
 
-msgid "Description"
-msgstr "Descripción"
+msgid "Data Form Type"
+msgstr ""
 
 msgid "Type"
 msgstr "Tipo"
@@ -392,6 +414,10 @@ msgstr "Actualizados"
 #, fuzzy
 msgid "Sharing Settings"
 msgstr "Configuración"
+
+#, fuzzy
+msgid "Download spreadsheet"
+msgstr "Descargar plantilla"
 
 msgid "Edit"
 msgstr "Editar"
@@ -445,9 +471,6 @@ msgstr "Mensajes"
 
 msgid "JSON Response"
 msgstr "Respuesta JSON"
-
-msgid "Data Set"
-msgstr "Data Set"
 
 msgid "Template"
 msgstr "Plantilla"
@@ -530,6 +553,42 @@ msgstr "Fecha inicial"
 msgid "End date"
 msgstr "Fecha final"
 
+msgid "Edit theme"
+msgstr "Editar tema"
+
+msgid "New theme"
+msgstr "Nuevo tema"
+
+msgid "Theme name"
+msgstr "Nombre del tema"
+
+msgid "Colors"
+msgstr "Colores"
+
+msgid "Color options"
+msgstr "Opciones de color"
+
+msgid "Headings"
+msgstr "Encabezamientos"
+
+msgid "Title text"
+msgstr "Título"
+
+msgid "Subtitle text"
+msgstr "Subtítulo"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Drag and drop logo file"
+msgstr "Mueva aquí los ficheros a importar"
+
+msgid "Pattern"
+msgstr "Patrón de colores"
+
+msgid "Fixed"
+msgstr "Fijo"
+
 msgid "An error ocurred while saving theme"
 msgstr "Ha ocurrido un error mientras se guardaba el tema"
 
@@ -586,6 +645,9 @@ msgstr "Fecha de inscripción"
 
 msgid "Incident Date"
 msgstr "Fecha del incidente"
+
+msgid "Description"
+msgstr "Descripción"
 
 msgid "Value Type"
 msgstr "Tipo de valor"
@@ -782,4 +844,3 @@ msgstr ""
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
