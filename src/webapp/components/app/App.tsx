@@ -4,7 +4,6 @@ import { LoadingProvider, SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
 //@ts-ignore
-import OldMuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import React, { useEffect, useState } from "react";
 import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
@@ -15,7 +14,6 @@ import { useMigrations } from "../migrations/hooks";
 import Migrations from "../migrations/Migrations";
 import Share from "../share/Share";
 import "./App.css";
-import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
 
 export interface AppProps {
@@ -63,16 +61,14 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
         return (
             <AppContext.Provider value={appContext}>
                 <MuiThemeProvider theme={muiTheme}>
-                    <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
-                        <LoadingProvider>
-                            <SnackbarProvider>
-                                <div id="app">
-                                    <Router />
-                                </div>
-                                <Share visible={showShareButton} />
-                            </SnackbarProvider>
-                        </LoadingProvider>
-                    </OldMuiThemeProvider>
+                    <LoadingProvider>
+                        <SnackbarProvider>
+                            <div id="app">
+                                <Router />
+                            </div>
+                            <Share visible={showShareButton} />
+                        </SnackbarProvider>
+                    </LoadingProvider>
                 </MuiThemeProvider>
             </AppContext.Provider>
         );

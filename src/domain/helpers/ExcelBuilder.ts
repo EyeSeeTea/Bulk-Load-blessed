@@ -13,6 +13,7 @@ import {
     DataSourceValue,
     DownloadCustomizationOptions,
     RowDataSource,
+    setSheet,
     SheetRef,
     TeiRowDataSource,
     Template,
@@ -77,6 +78,11 @@ export class ExcelBuilder {
             if (typeof dataSource === "function") {
                 return _(sheets)
                     .flatMap(sheet => dataSource(sheet.name))
+                    .compact()
+                    .value();
+            } else if ("sheetsMatch" in dataSource) {
+                return _(sheets)
+                    .map(sheet => (sheet.name.match(dataSource.sheetsMatch) ? setSheet(dataSource, sheet.name) : null))
                     .compact()
                     .value();
             } else {

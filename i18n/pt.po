@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
+"POT-Creation-Date: 2022-04-17T18:33:49.009Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -339,31 +339,15 @@ msgstr "Modelo"
 msgid "New custom template"
 msgstr "Modelo"
 
-#, fuzzy
-msgid "Template Code"
-msgstr "Modelo"
+msgid "Advanced"
+msgstr ""
 
-#, fuzzy
-msgid "Template Name"
-msgstr "Modelo"
-
-#, fuzzy
-msgid "Template Description"
-msgstr "Acesso à geração de planilhas"
-
-#, fuzzy
-msgid "Program/Dataset"
-msgstr "Programa"
+msgid "Basic (only row schema)"
+msgstr ""
 
 #, fuzzy
 msgid "Data Source Configuration"
 msgstr "Acesso à geração de planilhas"
-
-msgid "Event UID - Sheet"
-msgstr ""
-
-msgid "Event UID - Column"
-msgstr ""
 
 msgid "Styles"
 msgstr ""
@@ -372,8 +356,16 @@ msgid "File"
 msgstr ""
 
 #, fuzzy
+msgid "Download"
+msgstr "Descarregar a planilha"
+
+#, fuzzy
 msgid "Drag and drop template file"
 msgstr "Arraste e solte o logotipo aqui"
+
+#, fuzzy
+msgid "Template saved"
+msgstr "Modelo"
 
 #, fuzzy
 msgid "An error ocurred while saving custom template"
@@ -436,6 +428,257 @@ msgstr "Criar tema"
 #, fuzzy
 msgid "Access to Templates"
 msgstr "Acesso à geração de planilhas"
+
+#, fuzzy
+msgid "Field cannot be empty"
+msgstr "O campo {{field}} não pode ficar em branco"
+
+msgid "Mode"
+msgstr ""
+
+msgid "Code"
+msgstr ""
+
+msgid "Description"
+msgstr "Descrição"
+
+#, fuzzy
+msgid "Program/Dataset"
+msgstr "Programa"
+
+#, fuzzy
+msgid "Spreadsheet template"
+msgstr "Criar tema"
+
+msgid "Event UID - Sheet"
+msgstr ""
+
+msgid "Event UID - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Organisation Unit - Sheet"
+msgstr "Unidades Organizacionais"
+
+#, fuzzy
+msgid "Organisation Unit - Column"
+msgstr "Unidades Organizacionais"
+
+msgid "Attribute - Sheet"
+msgstr ""
+
+msgid "Attribute - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Period - Sheet"
+msgstr "Período"
+
+msgid "Period - Column"
+msgstr ""
+
+msgid "Range - Sheet"
+msgstr ""
+
+msgid "Range - Starting row"
+msgstr ""
+
+msgid "Range - Starting column"
+msgstr ""
+
+#, fuzzy
+msgid "Data Element - Sheet"
+msgstr "Valores de dados - Eliminar"
+
+msgid "Data Element - Row"
+msgstr ""
+
+#, fuzzy
+msgid "Category Option - Sheet"
+msgstr "Período"
+
+msgid "Category Option - Row"
+msgstr ""
+
+msgid "Coordinates Latitude - Sheet"
+msgstr ""
+
+msgid "Coordinates Latitude - Column"
+msgstr ""
+
+msgid "Coordinates Longitude - Sheet"
+msgstr ""
+
+msgid "Coordinates Longitude - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Title - Sheet"
+msgstr "Texto do título"
+
+msgid "Title Range (example D2:I2)"
+msgstr ""
+
+#, fuzzy
+msgid "Subtitle - Sheet"
+msgstr "Texto da legenda"
+
+msgid "Title Range (example D3:I3)"
+msgstr ""
+
+msgid "Logo - Sheet"
+msgstr ""
+
+msgid "Title Range (example A2:C3)"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Id - Sheet"
+msgstr "Texto do título"
+
+msgid "TEI Id - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Organisation Unit - Sheet"
+msgstr "Unidades Organizacionais"
+
+#, fuzzy
+msgid "TEI Organisation Unit - Column"
+msgstr "Unidades Organizacionais"
+
+#, fuzzy
+msgid "TEI Geometry - Sheet"
+msgstr "Valores de dados - Eliminar"
+
+msgid "TEI Geometry - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Enrolmment Date - Sheet"
+msgstr "Data de inscrição"
+
+#, fuzzy
+msgid "TEI Enrolmment Date - Column"
+msgstr "Data de inscrição"
+
+#, fuzzy
+msgid "TEI Incident Date - Sheet"
+msgstr "Data do Incidente"
+
+#, fuzzy
+msgid "TEI Incident Date - Column"
+msgstr "Data do Incidente"
+
+#, fuzzy
+msgid "TEI Attributes - Sheet"
+msgstr "Texto do título"
+
+msgid "TEI Attributes - Row Start"
+msgstr ""
+
+msgid "TEI Attributes - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Attribute ID - Sheet"
+msgstr "Texto do título"
+
+msgid "TEI Attribute ID - Row"
+msgstr ""
+
+msgid "TEI Relationship Range - Sheet"
+msgstr ""
+
+msgid "TEI Relationship Range - Row Start"
+msgstr ""
+
+msgid "TEI Relationship Range - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Relationship Type - Sheet"
+msgstr "Tipo de Relacionamento"
+
+#, fuzzy
+msgid "TEI Relationship Type - Cell"
+msgstr "Tipo de Relacionamento"
+
+#, fuzzy
+msgid "TEI Relationship From - Sheet"
+msgstr "Tipo de Relacionamento"
+
+msgid "TEI Relationship From - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Relationship To - Sheet"
+msgstr "Tipo de Relacionamento"
+
+#, fuzzy
+msgid "TEI Relationship To - Column"
+msgstr "Tipo de Relacionamento"
+
+#, fuzzy
+msgid "TEI Event Event-Id - Sheet"
+msgstr "Valores de dados - Eliminar"
+
+msgid "TEI Event Event-Id - Column"
+msgstr ""
+
+msgid "TEI Event TEI-Id - Sheet"
+msgstr ""
+
+msgid "TEI Event TEI-Id - Column"
+msgstr ""
+
+msgid "TEI Event Category Option Combo - Sheet"
+msgstr ""
+
+msgid "TEI Event Category Option Combo - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Event Date - Sheet"
+msgstr "Texto do título"
+
+msgid "TEI Event Date - Column"
+msgstr ""
+
+msgid "TEI Event Program Stage - Sheet"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Event Program Stage - Cell"
+msgstr "Programa"
+
+#, fuzzy
+msgid "TEI Event Data Elements - Sheet"
+msgstr "Valores de dados - Eliminar"
+
+#, fuzzy
+msgid "TEI Event Data Elements - Row Start"
+msgstr "Valores de dados - Eliminar"
+
+msgid "TEI Event Data Elements - Row End"
+msgstr ""
+
+msgid "TEI Event Data Elements - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Event Data Values - Sheet"
+msgstr "Valores de dados - Eliminar"
+
+msgid "TEI Event Data Values - Row Start"
+msgstr ""
+
+msgid "TEI Event Data Values - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "Data Source"
+msgstr "Data Set"
 
 msgid "Imported"
 msgstr "Importado"
@@ -647,9 +890,6 @@ msgstr "Data de inscrição"
 msgid "Incident Date"
 msgstr "Data do Incidente"
 
-msgid "Description"
-msgstr "Descrição"
-
 msgid "Value Type"
 msgstr "Tipo de Valor"
 
@@ -847,3 +1087,11 @@ msgstr ""
 
 msgid "Settings saved"
 msgstr "Configurações salvas"
+
+#, fuzzy
+#~ msgid "Template Code"
+#~ msgstr "Modelo"
+
+#, fuzzy
+#~ msgid "Template Description"
+#~ msgstr "Acesso à geração de planilhas"

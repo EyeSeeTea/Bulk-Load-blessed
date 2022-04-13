@@ -21,7 +21,7 @@ import { CustomTemplate } from "../../../domain/entities/Template";
 import { firstOrFail, isValueInUnionType } from "../../../types/utils";
 import { TemplatePermissionsDialog } from "./TemplatePermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
-import { CustomTemplateAction, CustomTemplateEditDialog } from "./TemplateEditDialog";
+import { FormMode, CustomTemplateEditDialog } from "./TemplateEditDialog";
 import { downloadFile } from "../../utils/download";
 import { DataFormType, dataFormTypes, getTranslations } from "../../../domain/entities/DataForm";
 
@@ -50,11 +50,15 @@ type TemplateListTableProps = Pick<
 export default function TemplateListTable(props: TemplateListTableProps) {
     const { settings, setSettings, customTemplates, setCustomTemplates } = props;
     const { api, compositionRoot } = useAppContext();
+    const { currentUser } = settings;
     const snackbar = useSnackbar();
     const loading = useLoading();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
-    const [customTemplateEdit, setCustomTemplateEdit] = useState<CustomTemplateAction | undefined>();
+    const [customTemplateEdit, setCustomTemplateEdit] = useState<FormMode | undefined>({
+        type: "new",
+        //template: firstOrFail(customTemplates.filter(t => t.id === "NHWA_MODULE_1_v1")),
+    });
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
     const rows = buildCustomTemplateRow(customTemplates);
@@ -67,28 +71,31 @@ export default function TemplateListTable(props: TemplateListTableProps) {
         setCustomTemplateEdit(undefined);
     };
 
-    const save = async (customTemplate: CustomTemplate) => {
-        try {
-            loading.show();
-            //const errors = await compositionRoot.templates.save(customTemplate);
-            const errors: string[] = []; // TODO
-            if (errors.length === 0) {
+    const save = React.useCallback(
+        async (customTemplate: CustomTemplate) => {
+            try {
+                loading.show();
+                await compositionRoot.templates.save({ template: customTemplate, currentUser });
                 closeEdit();
+                snackbar.success(i18n.t("Template saved"));
                 setCustomTemplates(_.uniqBy([customTemplate, ...customTemplates], "id"));
-            } else {
-                snackbar.error(errors.join("\n"));
+            } catch (error) {
+                console.error(error);
+                snackbar.error(i18n.t("An error ocurred while saving custom template"));
+            } finally {
+                loading.hide();
             }
-        } catch (error) {
-            console.error(error);
-            snackbar.error(i18n.t("An error ocurred while saving custom template"));
-        }
-        loading.hide();
-    };
+        },
+        [compositionRoot, currentUser, customTemplates, loading, setCustomTemplates, snackbar]
+    );
 
-    const edit = (ids: string[]) => {
-        const template = customTemplates.find(row => row.id === ids[0]);
-        if (template) setCustomTemplateEdit({ type: "edit", template });
-    };
+    const edit = React.useCallback(
+        (ids: string[]) => {
+            const template = customTemplates.find(row => row.id === ids[0]);
+            if (template) setCustomTemplateEdit({ type: "edit", template });
+        },
+        [customTemplates]
+    );
 
     const deleteTemplates = React.useCallback(
         (ids: string[]) => {
@@ -115,7 +122,7 @@ export default function TemplateListTable(props: TemplateListTableProps) {
             if (template) {
                 downloadFile({
                     filename: template.id + ".xlsx",
-                    data: Buffer.from(template.file.blob, "base64"),
+                    data: Buffer.from(template.file.contents, "base64"),
                     mimeType: "application/vnd.ms-excel",
                 });
             } else if (row) {
@@ -227,7 +234,7 @@ export default function TemplateListTable(props: TemplateListTableProps) {
             )}
 
             {customTemplateEdit && (
-                <CustomTemplateEditDialog action={customTemplateEdit} onSave={save} onCancel={closeEdit} />
+                <CustomTemplateEditDialog formMode={customTemplateEdit} onSave={save} onCancel={closeEdit} />
             )}
 
             <ObjectsTable<TemplateRow>
@@ -260,8 +267,8 @@ function buildCustomTemplateRow(customTemplates: CustomTemplate[]): TemplateRow[
                 id,
                 name,
                 description,
-                created: `${created.user.username} (${formatDate(created.timestamp)})`,
-                lastUpdated: `${created.user.username} (${formatDate(lastUpdated.timestamp)})`,
+                created: created ? `${created.user.username} (${formatDate(created.timestamp)})` : "-",
+                lastUpdated: lastUpdated ? `${lastUpdated.user.username} (${formatDate(lastUpdated.timestamp)})` : "-",
                 dataFormId: dataFormId_,
                 dataFormType: dataFormType_,
             };

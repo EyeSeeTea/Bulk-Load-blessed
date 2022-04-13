@@ -4,6 +4,7 @@ import path from "path";
 import { Template } from "../entities/Template";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 import { UsersRepository } from "../repositories/UsersRepository";
+import { getCurrentTimestamp } from "../../utils/time";
 
 export class PersistTemplatesFromStaticModulesUseCase {
     constructor(private templateRepository: TemplateRepository, private usersRepository: UsersRepository) {}
@@ -13,15 +14,16 @@ export class PersistTemplatesFromStaticModulesUseCase {
         const customTemplates = this.templateRepository.getCustomTemplates();
         const rootDir = path.join(__dirname, "../../..", "public");
 
-        const templates = customTemplates.map(template => {
+        const templates = customTemplates.map((template): Template => {
             const spreadsheetPath = path.join(rootDir, template.url);
             const buffer = fs.readFileSync(spreadsheetPath);
-            const file = { blob: buffer.toString("base64") };
-            const date = new Date().toISOString();
+            const contents = "data:text;base64," + buffer.toString("base64");
+            const file = { name: path.basename(template.url), contents };
+            const date = getCurrentTimestamp();
             const user = _.pick(currentUser, ["id", "username", "name"]);
 
             return {
-                ...template,
+                ..._.omit(template, ["url"]),
                 file,
                 created: { user, timestamp: date },
                 lastUpdated: { user, timestamp: date },

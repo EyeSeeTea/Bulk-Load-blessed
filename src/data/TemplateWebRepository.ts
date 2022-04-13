@@ -28,6 +28,10 @@ export class TemplateWebRepository implements TemplateRepository {
         });
     }
 
+    public saveTemplate(template: Template): Promise<void> {
+        return this.storage.saveObjectInCollection(templatesCollectionKey, template);
+    }
+
     public saveTemplates(templates: Template[]): Promise<void> {
         return this.storage.saveObject(templatesCollectionKey, templates);
     }

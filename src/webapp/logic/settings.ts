@@ -25,6 +25,7 @@ import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
 import { GetArrayInnerType, Maybe, OkOrError } from "../../types/utils";
+import { User } from "../../domain/entities/User";
 
 const privateFields = ["currentUser"] as const;
 
@@ -51,11 +52,6 @@ type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 export type PermissionSetting = "generation" | "settings" | "import";
 export type PermissionType = "user" | "userGroup";
 
-interface CurrentUser extends Ref {
-    userGroups: Ref[];
-    authorities: Set<string>;
-}
-
 type PermissionValue =
     | { type: "all" }
     | {
@@ -70,7 +66,7 @@ type Permissions = {
 };
 
 export default class Settings {
-    public currentUser: CurrentUser;
+    public currentUser: User;
     public permissions: Permissions;
     public templatePermissions: Record<Id, PermissionValue>;
     public models: Models;
@@ -105,8 +101,23 @@ export default class Settings {
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
-        const d2CurrentUser = await api.currentUser.get({ fields: { id: true, userGroups: { id: true } } }).getData();
-        const currentUser: CurrentUser = { ...d2CurrentUser, authorities: new Set(authorities) };
+        const d2CurrentUser = await api.currentUser
+            .get({
+                fields: {
+                    id: true,
+                    name: true,
+                    userCredentials: { username: true },
+                    userGroups: { id: true },
+                },
+            })
+            .getData();
+        const currentUser: User = {
+            id: d2CurrentUser.id,
+            name: d2CurrentUser.name,
+            username: d2CurrentUser.userCredentials.username,
+            authorities: new Set(authorities),
+            userGroups: d2CurrentUser.userGroups,
+        };
         const isUserAdmin = currentUser.authorities.has("ALL");
 
         const defaultSettings = compositionRoot.settings.getDefault();

@@ -1,147 +1,328 @@
-import { Grid, makeStyles, TextField, Typography } from "@material-ui/core";
-import { ConfirmationDialog } from "@eyeseetea/d2-ui-components";
-import { useCallback, useState } from "react";
+import {
+    Button,
+    ButtonProps,
+    FormControlLabel,
+    Grid,
+    GridSize,
+    makeStyles,
+    Switch,
+    SwitchProps,
+    TextField,
+    TextFieldProps,
+    Typography,
+} from "@material-ui/core";
+import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useDropzone } from "react-dropzone";
 import i18n from "../../../locales";
-import { toBase64 } from "../../../utils/files";
 import { Select } from "../select/Select";
 import { CustomTemplate } from "../../../domain/entities/Template";
 import React from "react";
 import { useDataForms } from "./settings.hooks";
 import {
-    CustomTemplateProgramViewModel,
-    CustomTemplateProgramViewModelActions,
-} from "./templates/CustomTemplateProgramViewModel";
+    TemplateView as ViewModel,
+    TemplateViewActions as ViewModelActions,
+    TemplateViewKey as ViewModelField,
+} from "./templates/TemplateView";
+import { downloadFile } from "../../utils/download";
+import { useAppContext } from "../../contexts/app-context";
 
 export interface CustomTemplateEditDialogProps {
-    action: CustomTemplateAction;
+    formMode: FormMode;
     onSave: (template: CustomTemplate) => void;
     onCancel: () => void;
 }
 
-export type CustomTemplateAction = { type: "new" } | { type: "edit"; template: CustomTemplate };
+export interface CustomTemplateEditDialogProps2 extends CustomTemplateEditDialogProps {
+    template: ViewModel;
+    setTemplate: SetTemplate;
+    actions: ViewModelActions;
+}
 
-export function CustomTemplateEditDialog(props: CustomTemplateEditDialogProps) {
-    const { action, onSave, onCancel } = props;
-    const classes = useStyles();
+type SetTemplate = (event: UpdateEvent<ViewModelField>) => void;
 
-    const getInitialTemplate = (): CustomTemplateProgramViewModel =>
-        props.action.type === "edit"
-            ? CustomTemplateProgramViewModelActions.fromTemplate(props.action.template)
-            : CustomTemplateProgramViewModelActions.build();
+export type FormMode = { type: "new" } | { type: "edit"; template: CustomTemplate };
 
-    const [template, setTemplate] = useState(getInitialTemplate);
+type UpdateEvent<Field extends ViewModelField> = { field: Field; value: ViewModel[Field] };
 
-    const dataForms = useDataForms({ initialSelectionId: template.dataFormId || undefined });
+type StateEvent<Field extends ViewModelField> =
+    | { type: "load"; viewModel: ViewModel; actions: ViewModelActions }
+    | { type: "update"; field: Field; value: ViewModel[Field] };
 
-    const onDrop = useCallback(async ([file]: File[]) => {
-        if (!file) return;
-        const src = await toBase64(file);
-        console.debug(src);
-        //updateTemplate(theme => theme.updatePicture("logo", { name: file.name, src }));
+type State = { type: "initial" } | { type: "loaded"; viewModel: ViewModel; actions: ViewModelActions };
+
+function viewModelReducer(state: State, event: StateEvent<ViewModelField>): State {
+    switch (event.type) {
+        case "load":
+            return { type: "loaded", viewModel: event.viewModel, actions: event.actions };
+        case "update":
+            return state.type === "loaded"
+                ? {
+                      ...state,
+                      viewModel: state.actions.update(state.viewModel, event.field, event.value),
+                  }
+                : state;
+    }
+}
+
+export const CustomTemplateEditDialog: React.FC<CustomTemplateEditDialogProps> = React.memo(props => {
+    const { formMode } = props;
+    const [state, dispatch] = React.useReducer(viewModelReducer, { type: "initial" } as State);
+    const { compositionRoot } = useAppContext();
+
+    React.useEffect(() => {
+        async function load() {
+            if (state.type === "loaded") return;
+
+            const generatedTemplates = await compositionRoot.templates.getGenerated();
+            const actions = new ViewModelActions(generatedTemplates);
+
+            const viewModel =
+                formMode.type === "edit"
+                    ? await actions.fromCustomTemplate(formMode.template)
+                    : await actions.build({ dataFormType: undefined });
+
+            dispatch({ type: "load", viewModel, actions });
+        }
+        load();
+    }, [formMode, compositionRoot, state]);
+
+    const setTemplate = React.useCallback((updateEvent: UpdateEvent<ViewModelField>) => {
+        dispatch({ type: "update", ...updateEvent });
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({
-        onDrop,
-        accept: "image/jpeg, image/png",
+    return state.type === "loaded" ? (
+        <EditDialog {...props} template={state.viewModel} actions={state.actions} setTemplate={setTemplate} />
+    ) : null;
+});
+
+const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props => {
+    const { formMode, actions, onSave, onCancel, template, setTemplate } = props;
+
+    const translations = React.useMemo(() => ViewModelActions.getTranslations(), []);
+    const snackbar = useSnackbar();
+    const dataForms = useDataForms({
+        type: template.dataFormType || undefined,
+        initialSelectionId: template.dataFormId || undefined,
     });
 
-    const title = action.type === "edit" ? i18n.t("Edit custom template") : i18n.t("New custom template");
+    const title = formMode.type === "edit" ? i18n.t("Edit custom template") : i18n.t("New custom template");
+    const isAdvancedMode = template.mode === "advanced";
 
-    const save = React.useCallback(() => {
-        onSave(template as unknown as CustomTemplate);
-    }, [onSave, template]);
+    const validateAndSendSaveEvent = React.useCallback(async () => {
+        const validation = actions.validate(template);
+        if (validation.isValid) {
+            const customTemplate = await actions.toCustomTemplate(validation.object);
+            onSave(customTemplate);
+        } else {
+            snackbar.error(validation.errors.join("\n"));
+        }
+    }, [onSave, template, snackbar, actions]);
 
-    function setFieldFromEvent(field: keyof CustomTemplateProgramViewModel) {
-        return (ev: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-            setTemplate(prevTemplate =>
-                CustomTemplateProgramViewModelActions.update(prevTemplate, field, ev.target.value)
-            );
-        };
-    }
+    const toggleMode = React.useCallback<NonNullable<SwitchProps["onChange"]>>(
+        ev => {
+            const mode = ev.target.checked ? "advanced" : "basic";
+            setTemplate(update("mode", mode));
+        },
+        [setTemplate]
+    );
+
+    React.useEffect(() => {
+        const dataForm = dataForms.selected;
+        if (!dataForm) return;
+        setTemplate(update("dataFormId", dataForm.id));
+        setTemplate(update("dataFormType", dataForm.type));
+    }, [dataForms.selected, setTemplate]);
+
+    const data = React.useMemo(() => ({ template, setTemplate }), [template, setTemplate]);
+
+    const hasDataFormType = Boolean(template.dataFormType);
 
     return (
         <ConfirmationDialog
             isOpen={true}
             title={title}
-            onSave={save}
+            onSave={validateAndSendSaveEvent}
             onCancel={onCancel}
             maxWidth={"lg"}
             fullWidth={true}
         >
             <Group>
-                <TextField
-                    className={classes.text}
-                    label={i18n.t("Template Code")}
-                    required={true}
-                    fullWidth={true}
-                    value={template.code || ""}
-                    disabled={action.type === "edit"}
-                    onChange={setFieldFromEvent("code")}
-                />
-
-                <TextField
-                    className={classes.text}
-                    label={i18n.t("Template Name")}
-                    required={true}
-                    fullWidth={true}
-                    value={template.name || ""}
-                    onChange={setFieldFromEvent("name")}
-                />
-
-                <TextField
-                    className={classes.text}
-                    label={i18n.t("Template Description")}
-                    required={false}
-                    fullWidth={true}
-                    value={template.description || ""}
-                    onChange={setFieldFromEvent("description")}
-                />
+                <Field field="code" data={data} disabled={formMode.type === "edit"} />
+                <Field field="name" data={data} />
+                <Field field="description" data={data} />
 
                 <Select
-                    placeholder={i18n.t("Program/Dataset")}
+                    placeholder={translations.dataFormId}
                     options={dataForms.options}
                     value={dataForms.selected?.id}
                     onChange={dataForms.setSelected}
                 />
             </Group>
 
-            <Group title={i18n.t("Data Source Configuration")}>
-                <Grid container spacing={1}>
-                    <Grid item xs={6}>
-                        <TextField
-                            className={classes.text}
-                            label={i18n.t("Event UID - Sheet")}
-                            fullWidth={true}
-                            value={template.eventIdSheet}
-                            onChange={setFieldFromEvent("eventIdSheet")}
-                        />
-                    </Grid>
+            <Div key={template.dataFormType} visible={hasDataFormType}>
+                <FormControlLabel
+                    control={<Switch checked={isAdvancedMode} onChange={toggleMode} />}
+                    label={isAdvancedMode ? i18n.t("Advanced") : i18n.t("Basic (only row schema)")}
+                />
 
-                    <Grid item xs={6}>
-                        <TextField
-                            className={classes.text}
-                            label={i18n.t("Event UID - Column")}
-                            fullWidth={true}
-                            value={template.eventIdColumn}
-                            onChange={setFieldFromEvent("eventIdColumn")}
-                        />
-                    </Grid>
-                </Grid>
-            </Group>
+                <Group title={i18n.t("Data Source Configuration")}>
+                    {isAdvancedMode ? (
+                        <FileField data={data} field="dataSources" mimeType="application/json" />
+                    ) : (
+                        actions
+                            .getFieldsForDataFormType(template.dataFormType)
+                            .map(fields => <FieldsRow key={fields.join()} fields={fields} data={data} />)
+                    )}
+                </Group>
 
-            <Group title={i18n.t("Styles")}></Group>
+                <Group title={i18n.t("Styles")}>
+                    {isAdvancedMode ? (
+                        <>
+                            <FileField data={data} field="styleSources" mimeType="application/json" />
+                        </>
+                    ) : (
+                        <>
+                            <FieldsRow fields={fields.stylesTitle} data={data} />
+                            <FieldsRow fields={fields.stylesSubtitle} data={data} />
+                            <FieldsRow fields={fields.stylesLogo} data={data} />
+                        </>
+                    )}
+                </Group>
 
-            <Group title={i18n.t("File")}>
-                <div {...getRootProps({ className: classes.dropzone })}>
-                    <input {...getInputProps()} />
-
-                    {"template.xlsx" ?? <p>{i18n.t("Drag and drop template file")}</p>}
-                </div>
-            </Group>
+                <Group title={i18n.t("File")}>
+                    <FileField
+                        data={data}
+                        field="spreadsheet"
+                        mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    />
+                </Group>
+            </Div>
         </ConfirmationDialog>
     );
+});
+
+const fields = {
+    stylesTitle: ["stylesTitleSheet", "stylesTitleRange"],
+    stylesSubtitle: ["stylesSubtitleSheet", "stylesSubtitleRange"],
+    stylesLogo: ["stylesLogoSheet", "stylesLogoRange"],
+} as const;
+
+const FileField: React.FC<{
+    data: { template: ViewModel; setTemplate: SetTemplate };
+    field: "spreadsheet" | "dataSources" | "styleSources";
+    mimeType: string;
+}> = React.memo(props => {
+    const { data, field, mimeType } = props;
+    const { template, setTemplate } = data;
+    const classes = useStyles();
+    const file = template[field];
+
+    const onDrop = React.useCallback(
+        async (files: File[]) => {
+            const file = files[0];
+            if (file) setTemplate(update(field, file));
+        },
+        [field, setTemplate]
+    );
+
+    const download = React.useCallback<NonNullable<ButtonProps["onClick"]>>(
+        ev => {
+            if (!file) return;
+            ev.stopPropagation();
+            downloadFile({
+                filename: file.name,
+                data: file,
+                mimeType: "application/vnd.ms-excel",
+            });
+        },
+        [file]
+    );
+
+    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeType });
+
+    return (
+        <div {...getRootProps({ className: classes.dropzone })}>
+            <input {...getInputProps()} />
+
+            {file ? (
+                <div className={classes.dropZoneWrapper}>
+                    <div>{file.name}</div>
+
+                    <Button variant="contained" onClick={download} className={classes.dropZoneButton}>
+                        {i18n.t("Download")}
+                    </Button>
+                </div>
+            ) : (
+                <p>{i18n.t("Drag and drop template file")}</p>
+            )}
+        </div>
+    );
+});
+
+interface FieldDataProp {
+    template: ViewModel;
+    setTemplate: SetTemplate;
 }
+
+interface FieldProps {
+    field: ViewModelField;
+    data: FieldDataProp;
+    disabled?: boolean;
+    multiline?: boolean;
+}
+
+const Field: React.FC<FieldProps> = React.memo(props => {
+    const { field, data, disabled, multiline } = props;
+
+    const { template, setTemplate } = data;
+    const classes = useStyles();
+    const translations = React.useMemo(() => ViewModelActions.getTranslations(), []);
+    const propValue = template[field];
+    const [value, setValue] = React.useState(propValue);
+
+    const setFromEvent = React.useCallback<NonNullable<TextFieldProps["onChange"]>>(
+        ev => setValue(ev.target.value),
+        [setValue]
+    );
+
+    const notifyParent = React.useCallback<NonNullable<TextFieldProps["onChange"]>>(
+        ev => setTemplate(update(field, ev.target.value)),
+        [setTemplate, field]
+    );
+
+    return (
+        <TextField
+            className={classes.text}
+            label={translations[field]}
+            fullWidth={true}
+            multiline={multiline}
+            maxRows={10}
+            value={value}
+            onChange={setFromEvent}
+            onBlur={notifyParent}
+            disabled={disabled}
+        />
+    );
+});
+
+interface TextFieldPairProps extends Omit<FieldProps, "field"> {
+    fields: readonly ViewModelField[];
+}
+
+const FieldsRow: React.FC<TextFieldPairProps> = React.memo(props => {
+    const { fields, data } = props;
+    const xs = 12 / fields.length;
+
+    return (
+        <Grid container spacing={1}>
+            {fields.map(field => (
+                <Grid key={field} item xs={xs as GridSize}>
+                    <Field field={field} data={data} />
+                </Grid>
+            ))}
+        </Grid>
+    );
+});
 
 const useStyles = makeStyles({
     group: { marginBottom: 25, marginLeft: 0 },
@@ -162,11 +343,20 @@ const useStyles = makeStyles({
         backgroundColor: "#f0f0f0",
         cursor: "pointer",
     },
+    dropZoneWrapper: { display: "flex", alignItems: "center" },
+    dropZoneButton: { marginLeft: 20 },
 });
 
-const Group: React.FC<{ title?: string }> = props => {
-    const { title, children } = props;
+const Div: React.FC<{ visible: boolean }> = React.memo(props => {
+    const { visible = true, children } = props;
+
+    return visible ? <div>{children}</div> : null;
+});
+
+const Group: React.FC<{ title?: string; visible?: boolean }> = React.memo(props => {
+    const { title, visible = true, children } = props;
     const classes = useStyles();
+    if (!visible) return null;
 
     return (
         <div className={classes.group}>
@@ -174,4 +364,8 @@ const Group: React.FC<{ title?: string }> = props => {
             {children}
         </div>
     );
-};
+});
+
+function update<Field extends ViewModelField>(field: Field, value: ViewModel[Field]) {
+    return { field, value };
+}

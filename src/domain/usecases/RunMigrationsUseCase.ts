@@ -9,7 +9,7 @@ export class RunMigrationsUseCase implements UseCase {
     public async execute(debug: Debug): Promise<void> {
         const currentUser = await this.usersRepository.getCurrentUser();
 
-        if (!currentUser.authorities.includes("ALL")) {
+        if (!currentUser.authorities.has("ALL")) {
             throw new Error("Only a user with authority ALL can run this migration");
         }
 

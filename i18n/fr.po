@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2022-04-08T12:27:13.174Z\n"
+"POT-Creation-Date: 2022-04-17T18:33:49.009Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -318,31 +318,15 @@ msgstr "Modèle"
 msgid "New custom template"
 msgstr "Modèle"
 
-#, fuzzy
-msgid "Template Code"
-msgstr "Modèle"
+msgid "Advanced"
+msgstr ""
 
-#, fuzzy
-msgid "Template Name"
-msgstr "Modèle"
-
-#, fuzzy
-msgid "Template Description"
-msgstr "Accès à la génération de modèles"
-
-#, fuzzy
-msgid "Program/Dataset"
-msgstr "Programme"
+msgid "Basic (only row schema)"
+msgstr ""
 
 #, fuzzy
 msgid "Data Source Configuration"
 msgstr "Accès à la génération de modèles"
-
-msgid "Event UID - Sheet"
-msgstr ""
-
-msgid "Event UID - Column"
-msgstr ""
 
 msgid "Styles"
 msgstr ""
@@ -351,8 +335,16 @@ msgid "File"
 msgstr ""
 
 #, fuzzy
+msgid "Download"
+msgstr "Télécharger modèle"
+
+#, fuzzy
 msgid "Drag and drop template file"
 msgstr "Glissez et déposez le logo ici"
+
+#, fuzzy
+msgid "Template saved"
+msgstr "Modèle"
 
 #, fuzzy
 msgid "An error ocurred while saving custom template"
@@ -415,6 +407,244 @@ msgstr "Créer un thème"
 #, fuzzy
 msgid "Access to Templates"
 msgstr "Accès à la génération de modèles"
+
+#, fuzzy
+msgid "Field cannot be empty"
+msgstr "Le champ {{field}} ne peut pas être vide"
+
+msgid "Mode"
+msgstr ""
+
+msgid "Code"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+#, fuzzy
+msgid "Program/Dataset"
+msgstr "Programme"
+
+#, fuzzy
+msgid "Spreadsheet template"
+msgstr "Créer un thème"
+
+msgid "Event UID - Sheet"
+msgstr ""
+
+msgid "Event UID - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Organisation Unit - Sheet"
+msgstr "Unités d'organisation"
+
+#, fuzzy
+msgid "Organisation Unit - Column"
+msgstr "Unités d'organisation"
+
+msgid "Attribute - Sheet"
+msgstr ""
+
+msgid "Attribute - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Period - Sheet"
+msgstr "Période"
+
+msgid "Period - Column"
+msgstr ""
+
+msgid "Range - Sheet"
+msgstr ""
+
+msgid "Range - Starting row"
+msgstr ""
+
+msgid "Range - Starting column"
+msgstr ""
+
+msgid "Data Element - Sheet"
+msgstr ""
+
+msgid "Data Element - Row"
+msgstr ""
+
+#, fuzzy
+msgid "Category Option - Sheet"
+msgstr "Période"
+
+msgid "Category Option - Row"
+msgstr ""
+
+msgid "Coordinates Latitude - Sheet"
+msgstr ""
+
+msgid "Coordinates Latitude - Column"
+msgstr ""
+
+msgid "Coordinates Longitude - Sheet"
+msgstr ""
+
+msgid "Coordinates Longitude - Column"
+msgstr ""
+
+#, fuzzy
+msgid "Title - Sheet"
+msgstr "Titre"
+
+msgid "Title Range (example D2:I2)"
+msgstr ""
+
+#, fuzzy
+msgid "Subtitle - Sheet"
+msgstr "Sous-titres"
+
+msgid "Title Range (example D3:I3)"
+msgstr ""
+
+msgid "Logo - Sheet"
+msgstr ""
+
+msgid "Title Range (example A2:C3)"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Id - Sheet"
+msgstr "Titre"
+
+msgid "TEI Id - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Organisation Unit - Sheet"
+msgstr "Unités d'organisation"
+
+#, fuzzy
+msgid "TEI Organisation Unit - Column"
+msgstr "Unités d'organisation"
+
+#, fuzzy
+msgid "TEI Geometry - Sheet"
+msgstr "Titre"
+
+msgid "TEI Geometry - Column"
+msgstr ""
+
+msgid "TEI Enrolmment Date - Sheet"
+msgstr ""
+
+msgid "TEI Enrolmment Date - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Incident Date - Sheet"
+msgstr "Titre"
+
+msgid "TEI Incident Date - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Attributes - Sheet"
+msgstr "Titre"
+
+msgid "TEI Attributes - Row Start"
+msgstr ""
+
+msgid "TEI Attributes - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Attribute ID - Sheet"
+msgstr "Titre"
+
+msgid "TEI Attribute ID - Row"
+msgstr ""
+
+msgid "TEI Relationship Range - Sheet"
+msgstr ""
+
+msgid "TEI Relationship Range - Row Start"
+msgstr ""
+
+msgid "TEI Relationship Range - Column Start"
+msgstr ""
+
+msgid "TEI Relationship Type - Sheet"
+msgstr ""
+
+msgid "TEI Relationship Type - Cell"
+msgstr ""
+
+msgid "TEI Relationship From - Sheet"
+msgstr ""
+
+msgid "TEI Relationship From - Column"
+msgstr ""
+
+msgid "TEI Relationship To - Sheet"
+msgstr ""
+
+msgid "TEI Relationship To - Column"
+msgstr ""
+
+msgid "TEI Event Event-Id - Sheet"
+msgstr ""
+
+msgid "TEI Event Event-Id - Column"
+msgstr ""
+
+msgid "TEI Event TEI-Id - Sheet"
+msgstr ""
+
+msgid "TEI Event TEI-Id - Column"
+msgstr ""
+
+msgid "TEI Event Category Option Combo - Sheet"
+msgstr ""
+
+msgid "TEI Event Category Option Combo - Column"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Event Date - Sheet"
+msgstr "Titre"
+
+msgid "TEI Event Date - Column"
+msgstr ""
+
+msgid "TEI Event Program Stage - Sheet"
+msgstr ""
+
+#, fuzzy
+msgid "TEI Event Program Stage - Cell"
+msgstr "Programme"
+
+msgid "TEI Event Data Elements - Sheet"
+msgstr ""
+
+msgid "TEI Event Data Elements - Row Start"
+msgstr ""
+
+msgid "TEI Event Data Elements - Row End"
+msgstr ""
+
+msgid "TEI Event Data Elements - Column Start"
+msgstr ""
+
+msgid "TEI Event Data Values - Sheet"
+msgstr ""
+
+msgid "TEI Event Data Values - Row Start"
+msgstr ""
+
+msgid "TEI Event Data Values - Column Start"
+msgstr ""
+
+#, fuzzy
+msgid "Data Source"
+msgstr "Base de données"
 
 msgid "Imported"
 msgstr "Importé"
@@ -626,9 +856,6 @@ msgstr ""
 msgid "Incident Date"
 msgstr ""
 
-msgid "Description"
-msgstr ""
-
 msgid "Value Type"
 msgstr ""
 
@@ -827,3 +1054,11 @@ msgstr ""
 
 msgid "Settings saved"
 msgstr "Paramètres sauvegardés"
+
+#, fuzzy
+#~ msgid "Template Code"
+#~ msgstr "Modèle"
+
+#, fuzzy
+#~ msgid "Template Description"
+#~ msgstr "Accès à la génération de modèles"

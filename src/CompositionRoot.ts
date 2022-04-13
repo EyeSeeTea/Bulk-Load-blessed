@@ -23,6 +23,7 @@ import { GetDataFormsUseCase } from "./domain/usecases/GetDataFormsUseCase";
 import { GetDefaultSettingsUseCase } from "./domain/usecases/GetDefaultSettingsUseCase";
 import { GetFormDataPackageUseCase } from "./domain/usecases/GetFormDataPackageUseCase";
 import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRootsUseCase";
+import { GetGeneratedTemplatesUseCase } from "./domain/usecases/GetGeneratedTemplatesUseCase";
 import { GetMigrationVersionsUseCase } from "./domain/usecases/GetMigrationVersionsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
 import { HasPendingMigrationsUseCase } from "./domain/usecases/HasPendingMigrationsUseCase";
@@ -33,6 +34,7 @@ import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
 import { PersistTemplatesFromStaticModulesUseCase } from "./domain/usecases/PersistTemplatesFromStaticModulesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { RunMigrationsUseCase } from "./domain/usecases/RunMigrationsUseCase";
+import { SaveCustomTemplateUseCase } from "./domain/usecases/SaveCustomTemplateUseCase";
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
@@ -73,7 +75,9 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             get: new GetDataFormsUseCase(instance),
             persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager, usersRepository),
             getCustom: new GetCustomTemplatesUseCase(templateManager),
+            getGenerated: new GetGeneratedTemplatesUseCase(templateManager),
             delete: new DeleteCustomTemplateUseCase(templateManager),
+            save: new SaveCustomTemplateUseCase(templateManager),
         }),
         themes: getExecute({
             list: new ListThemesUseCase(templateManager),

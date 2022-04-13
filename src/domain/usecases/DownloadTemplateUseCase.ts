@@ -71,7 +71,7 @@ export class DownloadTemplateUseCase implements UseCase {
         const name = element.displayName ?? element.name;
 
         if (template.type === "custom") {
-            await this.excelRepository.loadTemplate({ type: "file-base64", contents: template.file.blob });
+            await this.excelRepository.loadTemplate({ type: "file-base64", contents: template.file.contents });
         } else {
             const result = await getElementMetadata({
                 api,
