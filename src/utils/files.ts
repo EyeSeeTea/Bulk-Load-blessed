@@ -26,3 +26,6 @@ export function getBlobFromBase64(contents: string): Blob {
     const buffer = Buffer.from(contents, "base64");
     return new Blob([buffer]);
 }
+
+export const xlsxMimeType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12";

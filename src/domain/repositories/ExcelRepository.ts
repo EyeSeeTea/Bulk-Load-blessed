@@ -23,6 +23,7 @@ export interface FileLoadOptions {
 export interface FileBase64LoadOptions {
     type: "file-base64";
     contents: string;
+    templateId: string;
 }
 
 export abstract class ExcelRepository {

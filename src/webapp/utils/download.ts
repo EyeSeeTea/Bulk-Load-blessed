@@ -1,6 +1,6 @@
 interface DownloadFileOptions {
     filename: string;
-    data: string | Buffer | Blob;
+    data: string | Buffer | Blob | File;
     mimeType: string;
 }
 

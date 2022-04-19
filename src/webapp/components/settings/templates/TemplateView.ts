@@ -1,5 +1,5 @@
 import _ from "lodash";
-import i18n from "@eyeseetea/d2-ui-components/locales";
+
 import {
     CellRef,
     ColumnRef,
@@ -18,21 +18,24 @@ import {
     TrackerRelationship,
     ValueRef,
 } from "../../../../domain/entities/Template";
-import { Maybe, ofType } from "../../../../types/utils";
+import { assertUnreachable, Maybe, ofType, OkOrError } from "../../../../types/utils";
 import { fromBase64, getStringFromFile, toBase64 } from "../../../../utils/files";
 import { DataFormType } from "../../../../domain/entities/DataForm";
-import { getTemplateId } from "../../../logic/sheetBuilder";
+import { getGeneratedTemplateId } from "../../../logic/sheetBuilder";
+import i18n from "../../../../locales";
 
-export interface TemplateView extends BasicViewModel, AdvancedViewModel {
+export interface TemplateView extends BasicView, AdvancedView {
     mode: "basic" | "advanced";
 }
 
-type ValidViewModel = { [K in keyof TemplateView]: NonNullable<TemplateView[K]> };
+type ValidView = { [K in keyof TemplateView]: NonNullable<TemplateView[K]> };
 
-const baseFields: Array<keyof BaseViewModel> = ["code", "name", "dataFormId", "spreadsheet"];
-const advancedFields: Array<keyof AdvancedViewModel> = ["dataSources", "styleSources"];
+const baseFields: Array<keyof BaseView> = ["code", "name", "dataFormId", "spreadsheet"];
 
-interface BaseViewModel {
+const advancedFields: Array<keyof AdvancedView> = ["dataSources", "styleSources"];
+
+interface BaseView {
+    action: "create" | "edit";
     code: string;
     name: string;
     description: string;
@@ -41,12 +44,12 @@ interface BaseViewModel {
     spreadsheet: Maybe<File>;
 }
 
-export interface AdvancedViewModel extends BaseViewModel {
+export interface AdvancedView extends BaseView {
     dataSources: Maybe<File>;
     styleSources: Maybe<File>;
 }
 
-export interface BasicViewModel extends BaseViewModel {
+export interface BasicView extends BaseView {
     // Data Source (dataSets and programs)
     eventIdSheet: string;
     eventIdColumn: string;
@@ -57,12 +60,12 @@ export interface BasicViewModel extends BaseViewModel {
     periodSheet: string;
     periodColumn: string;
     rangeSheet: string;
-    rangeRowStart: number;
+    rangeRowStart: string;
     rangeColumnStart: string;
     dataElementSheet: string;
-    dataElementRow: number;
+    dataElementRow: string;
     categoryOptionSheet: string;
-    categoryOptionRow: number;
+    categoryOptionRow: string;
     coordinatesLatitudeSheet: string;
     coordinatesLatitudeColumn: string;
     coordinatesLongitudeSheet: string;
@@ -80,12 +83,12 @@ export interface BasicViewModel extends BaseViewModel {
     teiIncidentDateSheet: string;
     teiIncidentDateColumn: string;
     teiAttributesSheet: string;
-    teiAttributesRowStart: number;
+    teiAttributesRowStart: string;
     teiAttributesColumnStart: string;
     teiAttributeIdSheet: string;
-    teiAttributeIdRow: number;
+    teiAttributeIdRow: string;
     teiRelRangeSheet: string;
-    teiRelRangeRowStart: number;
+    teiRelRangeRowStart: string;
     teiRelRangeColumnStart: string;
     teiRelRelationshipTypeSheet: string;
     teiRelRelationshipTypeCell: string;
@@ -104,11 +107,11 @@ export interface BasicViewModel extends BaseViewModel {
     teiEventProgramStageSheet: string;
     teiEventProgramStageCell: string;
     teiEventDataElementsSheet: string;
-    teiEventDataElementsRowStart: number;
-    teiEventDataElementsRowEnd: number;
+    teiEventDataElementsRowStart: string;
+    teiEventDataElementsRowEnd: string;
     teiEventDataElementsColumnStart: string;
     teiEventDataValuesSheet: string;
-    teiEventDataValuesRowStart: number;
+    teiEventDataValuesRowStart: string;
     teiEventDataValuesColumnStart: string;
 
     // Styles
@@ -120,87 +123,100 @@ export interface BasicViewModel extends BaseViewModel {
     stylesLogoRange: string;
 }
 
-const dataEntryDefaultSheet = "Data Entry";
+const defaultSheet = "Data Entry";
 
-const viewModelEmpty: TemplateView = {
-    mode: "basic",
-    code: "",
-    name: "",
-    dataFormType: undefined,
-    dataFormId: undefined,
-    description: "",
-    eventIdSheet: dataEntryDefaultSheet,
-    eventIdColumn: "",
-    orgUnitSheet: dataEntryDefaultSheet,
-    orgUnitColumn: "",
-    attributeSheet: dataEntryDefaultSheet,
-    attributeColumn: "",
-    periodSheet: dataEntryDefaultSheet,
-    periodColumn: "",
-    rangeSheet: dataEntryDefaultSheet,
-    rangeRowStart: 1,
-    rangeColumnStart: "",
-    dataElementSheet: dataEntryDefaultSheet,
-    dataElementRow: 1,
-    categoryOptionSheet: dataEntryDefaultSheet,
-    categoryOptionRow: 1,
-    coordinatesLatitudeSheet: dataEntryDefaultSheet,
-    coordinatesLatitudeColumn: "",
-    coordinatesLongitudeSheet: dataEntryDefaultSheet,
-    coordinatesLongitudeColumn: "",
+type ValidationKey = "column" | "row" | "range" | "cell";
 
-    teiIdSheet: "",
-    teiIdColumn: "",
-    teiOrgUnitSheet: "",
-    teiOrgUnitColumn: "",
-    teiGeometrySheet: "",
-    teiGeometryColumn: "",
-    teiEnrollmentDateSheet: "",
-    teiEnrollmentDateColumn: "",
-    teiIncidentDateSheet: "",
-    teiIncidentDateColumn: "",
-    teiAttributesSheet: "",
-    teiAttributesRowStart: 1,
-    teiAttributesColumnStart: "",
-    teiAttributeIdSheet: "",
-    teiAttributeIdRow: 1,
-    teiRelRangeSheet: "",
-    teiRelRangeRowStart: 1,
-    teiRelRangeColumnStart: "",
-    teiRelRelationshipTypeSheet: "",
-    teiRelRelationshipTypeCell: "",
-    teiRelFromSheet: "",
-    teiRelFromColumn: "",
-    teiRelToSheet: "",
-    teiRelToColumn: "",
-    teiEventEventIdSheet: "",
-    teiEventEventIdColumn: "",
-    teiEventTeiIdSheet: "",
-    teiEventTeiIdColumn: "",
-    teiEventCategoryOptionComboSheet: "",
-    teiEventCategoryOptionComboColumn: "",
-    teiEventDateSheet: "",
-    teiEventDateColumn: "",
-    teiEventProgramStageSheet: "",
-    teiEventProgramStageCell: "",
-    teiEventDataElementsSheet: "",
-    teiEventDataElementsRowStart: 1,
-    teiEventDataElementsRowEnd: 1,
-    teiEventDataElementsColumnStart: "",
-    teiEventDataValuesSheet: "",
-    teiEventDataValuesRowStart: 1,
-    teiEventDataValuesColumnStart: "",
-    stylesTitleSheet: dataEntryDefaultSheet,
-    stylesTitleRange: "",
-    stylesSubtitleSheet: dataEntryDefaultSheet,
-    stylesSubtitleRange: "",
-    stylesLogoSheet: dataEntryDefaultSheet,
-    stylesLogoRange: "",
+interface Definition {
+    default: unknown;
+    validations: ValidationKey[];
+}
 
-    spreadsheet: undefined,
-    dataSources: undefined,
-    styleSources: undefined,
-};
+function definition<T>(defaultValue: T, validations?: ValidationKey[]): Definition {
+    return { default: defaultValue, validations: validations || [] };
+}
+const viewDefs = {
+    action: definition("create"),
+    mode: definition("basic"),
+    code: definition(""),
+    name: definition(""),
+    dataFormType: definition(undefined),
+    dataFormId: definition(undefined),
+    description: definition(""),
+    eventIdSheet: definition(defaultSheet),
+    eventIdColumn: definition("", ["column"]),
+    orgUnitSheet: definition(defaultSheet),
+    orgUnitColumn: definition("", ["column"]),
+    attributeSheet: definition(defaultSheet),
+    attributeColumn: definition("", ["column"]),
+    periodSheet: definition(defaultSheet),
+    periodColumn: definition("", ["column"]),
+    rangeSheet: definition(defaultSheet),
+    rangeRowStart: definition("", ["row"]),
+    rangeColumnStart: definition("", ["column"]),
+    dataElementSheet: definition(defaultSheet),
+    dataElementRow: definition("", ["row"]),
+    categoryOptionSheet: definition(defaultSheet),
+    categoryOptionRow: definition("", ["row"]),
+    coordinatesLatitudeSheet: definition(defaultSheet),
+    coordinatesLatitudeColumn: definition("", ["column"]),
+    coordinatesLongitudeSheet: definition(defaultSheet),
+    coordinatesLongitudeColumn: definition("", ["column"]),
+
+    teiIdSheet: definition(""),
+    teiIdColumn: definition("", ["column"]),
+    teiOrgUnitSheet: definition(""),
+    teiOrgUnitColumn: definition("", ["column"]),
+    teiGeometrySheet: definition(""),
+    teiGeometryColumn: definition("", ["column"]),
+    teiEnrollmentDateSheet: definition(""),
+    teiEnrollmentDateColumn: definition("", ["column"]),
+    teiIncidentDateSheet: definition(""),
+    teiIncidentDateColumn: definition("", ["column"]),
+    teiAttributesSheet: definition(""),
+    teiAttributesRowStart: definition("", ["row"]),
+    teiAttributesColumnStart: definition("", ["column"]),
+    teiAttributeIdSheet: definition(""),
+    teiAttributeIdRow: definition("", ["row"]),
+    teiRelRangeSheet: definition(""),
+    teiRelRangeRowStart: definition("", ["row"]),
+    teiRelRangeColumnStart: definition("", ["column"]),
+    teiRelRelationshipTypeSheet: definition(""),
+    teiRelRelationshipTypeCell: definition("", ["cell"]),
+    teiRelFromSheet: definition(""),
+    teiRelFromColumn: definition("", ["column"]),
+    teiRelToSheet: definition(""),
+    teiRelToColumn: definition("", ["column"]),
+    teiEventEventIdSheet: definition(""),
+    teiEventEventIdColumn: definition("", ["column"]),
+    teiEventTeiIdSheet: definition(""),
+    teiEventTeiIdColumn: definition("", ["column"]),
+    teiEventCategoryOptionComboSheet: definition(""),
+    teiEventCategoryOptionComboColumn: definition("", ["column"]),
+    teiEventDateSheet: definition(""),
+    teiEventDateColumn: definition("", ["column"]),
+    teiEventProgramStageSheet: definition(""),
+    teiEventProgramStageCell: definition("", ["cell"]),
+    teiEventDataElementsSheet: definition(""),
+    teiEventDataElementsRowStart: definition("", ["row"]),
+    teiEventDataElementsRowEnd: definition("", ["row"]),
+    teiEventDataElementsColumnStart: definition("", ["column"]),
+    teiEventDataValuesSheet: definition(""),
+    teiEventDataValuesRowStart: definition("", ["row"]),
+    teiEventDataValuesColumnStart: definition("", ["column"]),
+    stylesTitleSheet: definition(defaultSheet),
+    stylesTitleRange: definition("", ["range"]),
+    stylesSubtitleSheet: definition(defaultSheet),
+    stylesSubtitleRange: definition("", ["range"]),
+    stylesLogoSheet: definition(defaultSheet),
+    stylesLogoRange: definition("", ["range"]),
+
+    spreadsheet: definition(undefined),
+    dataSources: definition(undefined),
+    styleSources: definition(undefined),
+} as const;
+
+const viewEmpty = _.mapValues(viewDefs, def => def.default) as TemplateView;
 
 const fieldsByKey = {
     // dataSets and programs
@@ -213,6 +229,7 @@ const fieldsByKey = {
     dataElement: ["dataElementSheet", "dataElementRow"],
     categoryOption: ["categoryOptionSheet", "categoryOptionRow"],
     range: ["rangeSheet", "rangeColumnStart", "rangeRowStart"],
+
     // trackerPrograms
     teiId: ["teiIdSheet", "teiIdColumn"],
     teiOrgUnit: ["teiOrgUnitSheet", "teiOrgUnitColumn"],
@@ -240,21 +257,27 @@ const fieldsByKey = {
 
 export type TemplateViewKey = keyof TemplateView;
 
-type Validation = { isValid: true; object: ValidViewModel } | { isValid: false; errors: string[] };
+type Validation = { isValid: true; object: ValidView } | { isValid: false; errors: string[] };
+
+type Translations = Record<TemplateViewKey, string>;
 
 export class TemplateViewActions {
-    constructor(private generatedTemplates: GeneratedTemplate[]) {}
+    translations: Translations;
+
+    constructor(private customTemplates: CustomTemplate[], private generatedTemplates: GeneratedTemplate[]) {
+        this.translations = TemplateViewActions.getTranslations();
+    }
 
     async build(options: { dataFormType: DataFormType | undefined }): Promise<TemplateView> {
         const { dataFormType } = options;
-        if (!dataFormType) return viewModelEmpty;
-        const generatedTemplate = this.getGenerateTemplate(dataFormType);
+        if (!dataFormType) return viewEmpty;
+        const generatedTemplate = this.getGeneratedTemplate(dataFormType);
 
-        return { ...viewModelEmpty, ...this.get(generatedTemplate) };
+        return { ...viewEmpty, ...this.get(generatedTemplate), action: "create" };
     }
 
-    private getGenerateTemplate(dataFormType: DataFormType): GeneratedTemplate {
-        const templateId = getTemplateId(dataFormType, null).id;
+    private getGeneratedTemplate(dataFormType: DataFormType): GeneratedTemplate {
+        const templateId = getGeneratedTemplateId(dataFormType);
         const generatedTemplate = this.generatedTemplates.find(t => t.id === templateId);
         if (!generatedTemplate) throw new Error("Cannot find generated template");
         return generatedTemplate;
@@ -262,6 +285,7 @@ export class TemplateViewActions {
 
     async fromCustomTemplate(template: CustomTemplate): Promise<TemplateView> {
         const base: Partial<TemplateView> = {
+            action: "edit",
             code: template.id,
             name: template.name,
             dataFormId: template.dataFormId.type === "value" ? template.dataFormId.id : undefined,
@@ -270,46 +294,53 @@ export class TemplateViewActions {
             spreadsheet: await getFile(template.file),
         };
 
-        return { ...viewModelEmpty, ...base, ...this.get(template) };
+        return { ...viewEmpty, ...base, ...this.get(template) };
     }
 
     getFieldsForDataFormType(dataFormType: Maybe<DataFormType>): Array<readonly TemplateViewKey[]> {
-        const f = fieldsByKey;
+        const fields = fieldsByKey;
 
         switch (dataFormType) {
+            case "dataSets":
+                return [
+                    fields.orgUnit,
+                    fields.period,
+                    fields.attribute,
+                    fields.range,
+                    fields.dataElement,
+                    fields.categoryOption,
+                ];
             case "programs":
                 return [
-                    f.eventId,
-                    f.orgUnit,
-                    f.attribute,
-                    f.period,
-                    f.range,
-                    f.dataElement,
-                    f.coordinatesLatitude,
-                    f.coordinatesLongitude,
+                    fields.eventId,
+                    fields.orgUnit,
+                    fields.attribute,
+                    fields.period,
+                    fields.range,
+                    fields.dataElement,
+                    fields.coordinatesLatitude,
+                    fields.coordinatesLongitude,
                 ];
-            case "dataSets":
-                return [f.orgUnit, f.period, f.attribute, f.range, f.dataElement, f.categoryOption];
             case "trackerPrograms":
                 return [
-                    f.teiId,
-                    f.teiOrgUnit,
-                    f.teiGeometry,
-                    f.teiEnrollmentDate,
-                    f.teiIncidentDate,
-                    f.teiAttributes,
-                    f.teiAttributeId,
-                    f.teiRelRange,
-                    f.teiRelRelationshipType,
-                    f.teiRelFrom,
-                    f.teiRelTo,
-                    f.teiEventEventId,
-                    f.teiEventTeiId,
-                    f.teiEventCategoryOptionCombo,
-                    f.teiEventDateSheet,
-                    f.teiEventProgramStage,
-                    f.teiEventDataElements,
-                    f.teiEventDataValues,
+                    fields.teiId,
+                    fields.teiOrgUnit,
+                    fields.teiGeometry,
+                    fields.teiEnrollmentDate,
+                    fields.teiIncidentDate,
+                    fields.teiAttributes,
+                    fields.teiAttributeId,
+                    fields.teiRelRange,
+                    fields.teiRelRelationshipType,
+                    fields.teiRelFrom,
+                    fields.teiRelTo,
+                    fields.teiEventEventId,
+                    fields.teiEventTeiId,
+                    fields.teiEventCategoryOptionCombo,
+                    fields.teiEventDateSheet,
+                    fields.teiEventProgramStage,
+                    fields.teiEventDataElements,
+                    fields.teiEventDataValues,
                 ];
             default:
                 return [];
@@ -321,7 +352,7 @@ export class TemplateViewActions {
         const dataFormType = template.dataFormType.type === "value" ? template.dataFormType.id : undefined;
         if (!dataFormType) return {};
 
-        const advancedViewModel: Partial<TemplateView> = {
+        const advancedView: Partial<TemplateView> = {
             mode: "advanced",
             dataSources: getFileFromTemplateField(template, "Data Sources", template.dataSources),
             styleSources: getFileFromTemplateField(template, "Styles Sources", template.styleSources),
@@ -342,9 +373,9 @@ export class TemplateViewActions {
             case "programs": {
                 const dataSource = dataSources?.[0];
                 const dataSourceHasTypeRow = dataSource && "type" in dataSource && dataSource.type === "row";
-                if (!dataSourceHasTypeRow || dataSources?.length !== 1) return advancedViewModel;
+                if (!dataSourceHasTypeRow || dataSources?.length !== 1) return advancedView;
 
-                const viewModel: Partial<TemplateView> = {
+                const view: Partial<TemplateView> = {
                     mode: "basic",
                     ...getColumnAttrs(dataSource.eventId, "eventId"),
                     ...getColumnAttrs(dataSource.orgUnit, "orgUnit"),
@@ -358,18 +389,18 @@ export class TemplateViewActions {
                     ...stylesAttrs,
                 };
 
-                return viewModel;
+                return view;
             }
             case "trackerPrograms": {
-                if (!dataSources || dataSources.length !== 3) return advancedViewModel;
+                if (!dataSources || dataSources.length !== 3) return advancedView;
 
                 const rowTei = findDataSourceByType(dataSources, "rowTei");
                 const rowTeiRelationship = findDataSourceByType(dataSources, "rowTeiRelationship");
                 const rowTrackedEvent = findDataSourceByType(dataSources, "rowTrackedEvent");
 
-                if (!(rowTei && rowTeiRelationship && rowTrackedEvent)) return advancedViewModel;
+                if (!(rowTei && rowTeiRelationship && rowTrackedEvent)) return advancedView;
 
-                const viewModel: Partial<TemplateView> = {
+                const view: Partial<TemplateView> = {
                     mode: "basic",
                     ...getColumnAttrs(rowTei.teiId, "teiId"),
                     ...getColumnAttrs(rowTei.orgUnit, "teiOrgUnit"),
@@ -395,54 +426,53 @@ export class TemplateViewActions {
                     ...stylesAttrs,
                 };
 
-                return viewModel;
+                return view;
             }
         }
     }
 
-    async toCustomTemplate(viewModel: ValidViewModel): Promise<CustomTemplate> {
-        const base: Pick<
-            CustomTemplate,
-            "type" | "id" | "name" | "dataFormType" | "dataFormId" | "description" | "file" | "created" | "lastUpdated"
-        > = {
+    async toCustomTemplate(view: ValidView): Promise<CustomTemplate> {
+        type BaseField =
+            | "type"
+            | "id"
+            | "name"
+            | "dataFormType"
+            | "dataFormId"
+            | "description"
+            | "file"
+            | "created"
+            | "lastUpdated";
+
+        const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
-            id: viewModel.code,
-            name: viewModel.name,
-            dataFormType: { type: "value", id: viewModel.dataFormType },
-            dataFormId: { type: "value", id: viewModel.dataFormId },
-            description: viewModel.description,
-            file: { name: viewModel.spreadsheet.name, contents: await toBase64(viewModel.spreadsheet) },
+            id: view.code,
+            name: view.name,
+            dataFormType: { type: "value", id: view.dataFormType },
+            dataFormId: { type: "value", id: view.dataFormId },
+            description: view.description,
+            file: { name: view.spreadsheet.name, contents: await toBase64(view.spreadsheet) },
             created: undefined,
             lastUpdated: undefined,
         };
 
         const styleSources: StyleSource[] = [
-            {
-                section: "title",
-                source: { type: "range", ref: viewModel.stylesTitleRange, sheet: "Data Entry" },
-            },
-            {
-                section: "subtitle",
-                source: { type: "range", ref: viewModel.stylesSubtitleRange, sheet: "Data Entry" },
-            },
-            {
-                section: "logo",
-                source: { type: "range", ref: viewModel.stylesLogoRange, sheet: "Data Entry" },
-            },
+            getStyleSource("title", defaultSheet, view.stylesTitleRange),
+            getStyleSource("subtitle", defaultSheet, view.stylesSubtitleRange),
+            getStyleSource("logo", defaultSheet, view.stylesLogoRange),
         ];
 
-        switch (viewModel.mode) {
+        switch (view.mode) {
             case "basic": {
-                switch (viewModel.dataFormType) {
+                switch (view.dataFormType) {
                     case "dataSets": {
                         const dataSource: RowDataSource = {
                             type: "row",
-                            orgUnit: getDataSourceColumnAttrs(viewModel, "orgUnit"),
-                            period: getDataSourceColumnAttrs(viewModel, "period"),
-                            attribute: getDataSourceColumnAttrs(viewModel, "attribute"),
-                            range: getDataSourceRangeAttrs(viewModel, "range"),
-                            dataElement: getDataSourceRowAttrs(viewModel, "dataElement"),
-                            categoryOption: getDataSourceRowAttrs(viewModel, "categoryOption"),
+                            orgUnit: getDataSourceColumnAttrs(view, "orgUnit"),
+                            period: getDataSourceColumnAttrs(view, "period"),
+                            attribute: getDataSourceColumnAttrs(view, "attribute"),
+                            range: getDataSourceRangeAttrs(view, "range"),
+                            dataElement: getDataSourceRowAttrs(view, "dataElement"),
+                            categoryOption: getDataSourceRowAttrs(view, "categoryOption"),
                         };
 
                         return { ...base, dataSources: [dataSource], styleSources };
@@ -450,63 +480,55 @@ export class TemplateViewActions {
                     case "programs": {
                         const dataSource: RowDataSource = {
                             type: "row",
-                            eventId: getDataSourceColumnAttrs(viewModel, "eventId"),
-                            orgUnit: getDataSourceColumnAttrs(viewModel, "orgUnit"),
-                            attribute: getDataSourceColumnAttrs(viewModel, "attribute"),
-                            period: getDataSourceColumnAttrs(viewModel, "period"),
-                            range: getDataSourceRangeAttrs(viewModel, "range"),
-                            dataElement: getDataSourceRowAttrs(viewModel, "dataElement"),
+                            eventId: getDataSourceColumnAttrs(view, "eventId"),
+                            orgUnit: getDataSourceColumnAttrs(view, "orgUnit"),
+                            attribute: getDataSourceColumnAttrs(view, "attribute"),
+                            period: getDataSourceColumnAttrs(view, "period"),
+                            range: getDataSourceRangeAttrs(view, "range"),
+                            dataElement: getDataSourceRowAttrs(view, "dataElement"),
                             coordinates: {
-                                latitude: {
-                                    type: "column",
-                                    sheet: viewModel.coordinatesLatitudeSheet,
-                                    ref: viewModel.coordinatesLatitudeColumn,
-                                },
-                                longitude: {
-                                    type: "column",
-                                    sheet: viewModel.coordinatesLongitudeSheet,
-                                    ref: viewModel.coordinatesLongitudeColumn,
-                                },
+                                latitude: getDataSourceColumnAttrs(view, "coordinatesLatitude"),
+                                longitude: getDataSourceColumnAttrs(view, "coordinatesLongitude"),
                             },
                         };
 
                         return { ...base, dataSources: [dataSource], styleSources };
                     }
                     case "trackerPrograms": {
-                        const dataSource1: TeiRowDataSource = {
+                        const dataSourceRowTei: TeiRowDataSource = {
                             type: "rowTei",
-                            teiId: getDataSourceColumnAttrs(viewModel, "teiId"),
-                            orgUnit: getDataSourceColumnAttrs(viewModel, "teiOrgUnit"),
-                            geometry: getDataSourceColumnAttrs(viewModel, "teiGeometry"),
-                            enrollmentDate: getDataSourceColumnAttrs(viewModel, "teiEnrollmentDate"),
-                            incidentDate: getDataSourceColumnAttrs(viewModel, "teiIncidentDate"),
-                            attributes: getDataSourceRangeAttrs(viewModel, "teiAttributes"),
-                            attributeId: getDataSourceRowAttrs(viewModel, "teiAttributeId"),
+                            teiId: getDataSourceColumnAttrs(view, "teiId"),
+                            orgUnit: getDataSourceColumnAttrs(view, "teiOrgUnit"),
+                            geometry: getDataSourceColumnAttrs(view, "teiGeometry"),
+                            enrollmentDate: getDataSourceColumnAttrs(view, "teiEnrollmentDate"),
+                            incidentDate: getDataSourceColumnAttrs(view, "teiIncidentDate"),
+                            attributes: getDataSourceRangeAttrs(view, "teiAttributes"),
+                            attributeId: getDataSourceRowAttrs(view, "teiAttributeId"),
                         };
 
-                        const dataSource2: TrackerRelationship = {
+                        const dataSourceRelationships: TrackerRelationship = {
                             type: "rowTeiRelationship",
                             sheetsMatch: "^Rel",
-                            range: getDataSourceRangeAttrs(viewModel, "teiRelRange"),
-                            relationshipType: getDataSourceCellAttrs(viewModel, "teiRelRelationshipType"),
-                            from: getDataSourceColumnAttrs(viewModel, "teiRelFrom"),
-                            to: getDataSourceColumnAttrs(viewModel, "teiRelTo"),
+                            range: getDataSourceRangeAttrs(view, "teiRelRange"),
+                            relationshipType: getDataSourceCellAttrs(view, "teiRelRelationshipType"),
+                            from: getDataSourceColumnAttrs(view, "teiRelFrom"),
+                            to: getDataSourceColumnAttrs(view, "teiRelTo"),
                         };
 
-                        const dataSource3: TrackerEventRowDataSource = {
+                        const dataSourceEvents: TrackerEventRowDataSource = {
                             type: "rowTrackedEvent",
                             sheetsMatch: "^(Stage|\\()",
-                            eventId: getDataSourceColumnAttrs(viewModel, "teiEventEventId"),
-                            teiId: getDataSourceColumnAttrs(viewModel, "teiEventTeiId"),
-                            date: getDataSourceColumnAttrs(viewModel, "teiEventDate"),
-                            categoryOptionCombo: getDataSourceColumnAttrs(viewModel, "teiEventCategoryOptionCombo"),
-                            dataValues: getDataSourceRangeAttrs(viewModel, "teiEventDataValues"),
-                            programStage: getDataSourceCellAttrs(viewModel, "teiEventProgramStage"),
-                            dataElements: getDataSourceRangeAttrs(viewModel, "teiEventDataElements"),
+                            eventId: getDataSourceColumnAttrs(view, "teiEventEventId"),
+                            teiId: getDataSourceColumnAttrs(view, "teiEventTeiId"),
+                            date: getDataSourceColumnAttrs(view, "teiEventDate"),
+                            categoryOptionCombo: getDataSourceColumnAttrs(view, "teiEventCategoryOptionCombo"),
+                            dataValues: getDataSourceRangeAttrs(view, "teiEventDataValues"),
+                            programStage: getDataSourceCellAttrs(view, "teiEventProgramStage"),
+                            dataElements: getDataSourceRangeAttrs(view, "teiEventDataElements"),
                         };
 
-                        const dataSources = [dataSource1, dataSource2, dataSource3];
-                        return { ...base, dataSources: dataSources, styleSources };
+                        const dataSources = [dataSourceRowTei, dataSourceRelationships, dataSourceEvents];
+                        return { ...base, dataSources, styleSources };
                     }
                 }
                 break;
@@ -514,47 +536,62 @@ export class TemplateViewActions {
             case "advanced":
                 return {
                     ...base,
-                    dataSources: await arrayFromFile<DataSource>(viewModel.dataSources),
-                    styleSources: await arrayFromFile<StyleSource>(viewModel.styleSources),
+                    dataSources: await arrayFromFile<DataSource>(view.dataSources),
+                    styleSources: await arrayFromFile<StyleSource>(view.styleSources),
                 };
         }
     }
 
     update<Field extends keyof TemplateView>(
-        viewModel: TemplateView,
+        view: TemplateView,
         field: Field,
         value: TemplateView[Field]
     ): TemplateView {
-        if (field === "dataFormType" && value && viewModel.dataFormType !== value) {
+        const dataFormTypeChanged = field === "dataFormType" && value && view.dataFormType !== value;
+
+        if (dataFormTypeChanged) {
             const newDataFormType = value as DataFormType;
-            const generatedTemplate = this.getGenerateTemplate(newDataFormType);
-            return { ...viewModel, dataFormType: newDataFormType, ...this.get(generatedTemplate) };
+            const generatedTemplate = this.getGeneratedTemplate(newDataFormType);
+            return { ...view, dataFormType: newDataFormType, ...this.get(generatedTemplate) };
         } else {
-            return { ...viewModel, [field]: value };
+            return { ...view, [field]: value };
         }
     }
 
-    validate(viewModel: TemplateView): Validation {
-        switch (viewModel.mode) {
+    validateCodeUniqueness(view: TemplateView): OkOrError {
+        return view.action === "create" && _(this.customTemplates).some(ct => ct.id === view.code)
+            ? { status: false, error: i18n.t("A custom template exists with this same code: ") + view.code }
+            : { status: true };
+    }
+
+    validate(view: TemplateView): Validation {
+        const codeValidation = this.validateCodeUniqueness(view);
+        if (!codeValidation.status) return { isValid: false, errors: [codeValidation.error] };
+
+        switch (view.mode) {
             case "basic": {
-                const fieldsByType = _.flatten(this.getFieldsForDataFormType(viewModel.dataFormType));
-                return this.validatePresence(viewModel, _.concat(baseFields, fieldsByType));
+                const fieldsForType = _.flatten(this.getFieldsForDataFormType(view.dataFormType));
+                const errorsByDefinition = getErrorsByDefinition(fieldsForType, view, this.translations);
+                if (!_.isEmpty(errorsByDefinition)) return { isValid: false, errors: errorsByDefinition };
+
+                return this.validatePresence(view, _.concat(baseFields, fieldsForType));
             }
             case "advanced":
-                return this.validatePresence(viewModel, _.concat(baseFields, advancedFields));
+                return this.validatePresence(view, _.concat(baseFields, advancedFields));
         }
     }
 
-    private validatePresence(viewModel: TemplateView, fields: TemplateViewKey[]): Validation {
+    private validatePresence(view: TemplateView, fields: TemplateViewKey[]): Validation {
         const translations = TemplateViewActions.getTranslations();
-        const emptyFields = fields.filter(field => !viewModel[field]);
+        const emptyFields = fields.filter(field => !view[field]);
         const errors = emptyFields.map(field => `${i18n.t("Field cannot be empty")}: ${translations[field]}`);
 
-        return _.isEmpty(errors) ? { isValid: true, object: viewModel as ValidViewModel } : { isValid: false, errors };
+        return _.isEmpty(errors) ? { isValid: true, object: view as ValidView } : { isValid: false, errors };
     }
 
     static getTranslations() {
-        return ofType<Record<TemplateViewKey, string>>({
+        return ofType<Translations>({
+            action: i18n.t("Action"),
             mode: i18n.t("Mode"),
             code: i18n.t("Code"),
             name: i18n.t("Name"),
@@ -615,8 +652,8 @@ export class TemplateViewActions {
             teiRelToColumn: i18n.t("TEI Relationship To - Column"),
             teiEventEventIdSheet: i18n.t("TEI Event Event-Id - Sheet"),
             teiEventEventIdColumn: i18n.t("TEI Event Event-Id - Column"),
-            teiEventTeiIdSheet: i18n.t("TEI Event TEI-Id - Sheet"),
-            teiEventTeiIdColumn: i18n.t("TEI Event TEI-Id - Column"),
+            teiEventTeiIdSheet: i18n.t("TEI Event TEI Id - Sheet"),
+            teiEventTeiIdColumn: i18n.t("TEI Event TEI Id - Column"),
             teiEventCategoryOptionComboSheet: i18n.t("TEI Event Category Option Combo - Sheet"),
             teiEventCategoryOptionComboColumn: i18n.t("TEI Event Category Option Combo - Column"),
             teiEventDateSheet: i18n.t("TEI Event Date - Sheet"),
@@ -658,7 +695,7 @@ type DataSourceColumnField =
     | "teiEventDate"
     | "teiEventCategoryOptionCombo";
 
-function getColumnAttrs<Field extends DataSourceColumnField>(columnRef: SheetRef | ValueRef | undefined, field: Field) {
+function getColumnAttrs<Field extends DataSourceColumnField>(columnRef: Maybe<SheetRef | ValueRef>, field: Field) {
     if (columnRef?.type !== "column") return;
 
     const sheetField = (field + "Sheet") as `${typeof field}Sheet`;
@@ -677,7 +714,7 @@ function getRowAttrs<Field extends DataSourceRowField>(rowRef: RowRef | ValueRef
     const columnField = (field + "Row") as `${typeof field}Row`;
     const attrs = { [sheetField]: rowRef.sheet.toString(), [columnField]: rowRef.ref };
 
-    return attrs as Record<`${Field}Sheet`, string> & Record<`${Field}Row`, number>;
+    return attrs as Record<`${Field}Sheet` | `${Field}Row`, string>;
 }
 
 type DataSourceRangeField = "range" | "teiAttributes" | "teiRelRange" | "teiEventDataValues" | "teiEventDataElements";
@@ -693,8 +730,8 @@ function getRangeAttrs<Field extends DataSourceRangeField>(range: Range, field: 
         [rowStartField]: range.rowStart,
         [rowEndField]: range.rowEnd,
         [columnStartField]: range.columnStart,
-    } as Record<`${Field}RowStart`, number> &
-        Record<`${Field}RowEnd`, number | undefined> &
+    } as Record<`${Field}RowStart`, string> &
+        Record<`${Field}RowEnd`, string | undefined> &
         Record<`${Field}Sheet` | `${Field}ColumnStart`, string>;
 }
 
@@ -712,56 +749,51 @@ function getCellAttrs<Field extends DataSourceCellField>(range: CellRef, field: 
 
 //
 
-function getDataSourceColumnAttrs<Field extends DataSourceColumnField>(
-    viewModel: ValidViewModel,
-    field: Field
-): ColumnRef {
+function getDataSourceColumnAttrs<Field extends DataSourceColumnField>(view: ValidView, field: Field): ColumnRef {
     const sheetField = (field + "Sheet") as `${Field}Sheet`;
     const columnField = (field + "Column") as `${Field}Column`;
 
     return {
         type: "column",
-        sheet: viewModel[sheetField],
-        ref: viewModel[columnField],
+        sheet: view[sheetField],
+        ref: view[columnField],
     };
 }
 
-function getDataSourceRangeAttrs<Field extends DataSourceRangeField>(viewModel: ValidViewModel, field: Field): Range {
+function getDataSourceRangeAttrs<Field extends DataSourceRangeField>(view: ValidView, field: Field): Range {
     const sheetField = (field + "Sheet") as `${Field}Sheet`;
     const rowStartField = (field + "RowStart") as `${Field}RowStart`;
     const rowEndField = (field + "RowEnd") as `${Field}RowEnd`;
     const columnStartField = (field + "ColumnStart") as `${Field}ColumnStart`;
 
     return {
-        sheet: viewModel[sheetField],
-        rowStart: viewModel[rowStartField],
-        rowEnd: viewModel[rowEndField as keyof ValidViewModel & `${string}RowEnd`],
-        columnStart: viewModel[columnStartField],
+        sheet: view[sheetField],
+        rowStart: toInt(view[rowStartField]),
+        rowEnd: toOptionalInt(view[rowEndField as keyof ValidView & `${string}RowEnd`]),
+        columnStart: view[columnStartField],
     };
 }
 
-function getDataSourceRowAttrs<Field extends DataSourceRowField>(viewModel: ValidViewModel, field: Field): RowRef {
+function getDataSourceRowAttrs<Field extends DataSourceRowField>(view: ValidView, field: Field): RowRef {
     const sheetField = (field + "Sheet") as `${Field}Sheet`;
     const rowField = (field + "Row") as `${Field}Row`;
 
     return {
         type: "row",
-        sheet: viewModel[sheetField],
-        ref: viewModel[rowField],
+        sheet: view[sheetField],
+        ref: toInt(view[rowField]),
     };
 }
 
-function getDataSourceCellAttrs<Field extends DataSourceCellField>(viewModel: ValidViewModel, field: Field): CellRef {
+function getDataSourceCellAttrs<Field extends DataSourceCellField>(view: ValidView, field: Field): CellRef {
     const sheetField = (field + "Sheet") as `${Field}Sheet`;
     const cellField = (field + "Cell") as `${Field}Cell`;
     return {
         type: "cell",
-        sheet: viewModel[sheetField],
-        ref: viewModel[cellField],
+        sheet: view[sheetField],
+        ref: view[cellField],
     };
 }
-
-//
 
 async function getFile(file: CustomTemplate["file"]): Promise<File> {
     return fromBase64(file.contents, file.name);
@@ -780,13 +812,55 @@ async function arrayFromFile<T>(file: File): Promise<T[]> {
 }
 
 function findDataSourceByType<Type extends DataSourceValue["type"]>(
-    dataSources: DataSource[] | undefined,
+    dataSources: Maybe<DataSource[]>,
     type: Type
 ): Extract<DataSourceValue, { type: Type }> | undefined {
     return _(dataSources)
-        .map(ds => {
-            return "type" in ds && ds.type === type ? (ds as Extract<DataSourceValue, { type: Type }>) : null;
-        })
+        .map(ds => ("type" in ds && ds.type === type ? (ds as Extract<DataSourceValue, { type: Type }>) : null))
         .compact()
         .first();
+}
+
+function getStyleSource(section: StyleSource["section"], sheet: string, ref: string): StyleSource {
+    return {
+        section,
+        source: { type: "range", sheet, ref },
+    };
+}
+
+function toInt(s: string): number {
+    const n = parseInt(s);
+    return Number.isNaN(n) ? 0 : n;
+}
+
+function toOptionalInt(s: string): number | undefined {
+    const n = parseInt(s);
+    return Number.isNaN(n) ? undefined : n;
+}
+
+function getErrorsByDefinition(fieldsByType: (keyof TemplateView)[], view: TemplateView, translations: Translations) {
+    return _.flatMap(fieldsByType, field => {
+        const value = view[field];
+        const { validations } = viewDefs[field];
+        const fieldT = translations[field];
+        const msg = i18n.t("Value for field '{{field}}' is invalid: {{value}}", { field: fieldT, value });
+
+        return _(validations)
+            .map((validation): string | null => {
+                switch (validation) {
+                    case "column":
+                        return value?.toString().match(/^[A-Z]+$/) ? null : msg;
+                    case "row":
+                        return value?.toString().match(/^\d+$/) ? null : msg;
+                    case "range":
+                        return value?.toString().match(/^[A-Z]+\d+:[A-Z]+\d+$/) ? null : msg;
+                    case "cell":
+                        return value?.toString().match(/^[A-Z]+\d+$/) ? null : msg;
+                    default:
+                        return assertUnreachable(validation);
+                }
+            })
+            .compact()
+            .value();
+    });
 }

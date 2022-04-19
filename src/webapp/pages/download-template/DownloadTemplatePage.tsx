@@ -6,7 +6,7 @@ import { TemplateSelector, TemplateSelectorState } from "../../components/templa
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../Router";
 
-export default function DownloadTemplatePage({ settings, themes }: RouteComponentProps) {
+export default function DownloadTemplatePage({ settings, themes, customTemplates }: RouteComponentProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
@@ -61,7 +61,12 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
 
     return (
         <React.Fragment>
-            <TemplateSelector settings={settings} themes={themes} onChange={setTemplate} />
+            <TemplateSelector
+                settings={settings}
+                themes={themes}
+                onChange={setTemplate}
+                customTemplates={customTemplates}
+            />
 
             <div className={classes.downloadTemplateRow}>
                 <Button variant="contained" color="primary" onClick={handleTemplateDownloadClick}>

@@ -25,11 +25,13 @@ import {
 } from "./templates/TemplateView";
 import { downloadFile } from "../../utils/download";
 import { useAppContext } from "../../contexts/app-context";
+import { xlsxMimeType } from "../../../utils/files";
 
 export interface CustomTemplateEditDialogProps {
     formMode: FormMode;
     onSave: (template: CustomTemplate) => void;
     onCancel: () => void;
+    customTemplates: CustomTemplate[];
 }
 
 export interface CustomTemplateEditDialogProps2 extends CustomTemplateEditDialogProps {
@@ -65,7 +67,7 @@ function viewModelReducer(state: State, event: StateEvent<ViewModelField>): Stat
 }
 
 export const CustomTemplateEditDialog: React.FC<CustomTemplateEditDialogProps> = React.memo(props => {
-    const { formMode } = props;
+    const { formMode, customTemplates } = props;
     const [state, dispatch] = React.useReducer(viewModelReducer, { type: "initial" } as State);
     const { compositionRoot } = useAppContext();
 
@@ -74,7 +76,7 @@ export const CustomTemplateEditDialog: React.FC<CustomTemplateEditDialogProps> =
             if (state.type === "loaded") return;
 
             const generatedTemplates = await compositionRoot.templates.getGenerated();
-            const actions = new ViewModelActions(generatedTemplates);
+            const actions = new ViewModelActions(customTemplates, generatedTemplates);
 
             const viewModel =
                 formMode.type === "edit"
@@ -84,7 +86,7 @@ export const CustomTemplateEditDialog: React.FC<CustomTemplateEditDialogProps> =
             dispatch({ type: "load", viewModel, actions });
         }
         load();
-    }, [formMode, compositionRoot, state]);
+    }, [formMode, compositionRoot, state, customTemplates]);
 
     const setTemplate = React.useCallback((updateEvent: UpdateEvent<ViewModelField>) => {
         dispatch({ type: "update", ...updateEvent });
@@ -147,8 +149,8 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
             fullWidth={true}
         >
             <Group>
-                <Field field="code" data={data} disabled={formMode.type === "edit"} />
                 <Field field="name" data={data} />
+                <Field field="code" data={data} disabled={formMode.type === "edit"} />
                 <Field field="description" data={data} />
 
                 <Select
@@ -182,29 +184,25 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                         </>
                     ) : (
                         <>
-                            <FieldsRow fields={fields.stylesTitle} data={data} />
-                            <FieldsRow fields={fields.stylesSubtitle} data={data} />
-                            <FieldsRow fields={fields.stylesLogo} data={data} />
+                            <FieldsRow fields={stylesFields.title} data={data} />
+                            <FieldsRow fields={stylesFields.subtitle} data={data} />
+                            <FieldsRow fields={stylesFields.logo} data={data} />
                         </>
                     )}
                 </Group>
 
                 <Group title={i18n.t("File")}>
-                    <FileField
-                        data={data}
-                        field="spreadsheet"
-                        mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    />
+                    <FileField data={data} field="spreadsheet" mimeType={xlsxMimeType} />
                 </Group>
             </Div>
         </ConfirmationDialog>
     );
 });
 
-const fields = {
-    stylesTitle: ["stylesTitleSheet", "stylesTitleRange"],
-    stylesSubtitle: ["stylesSubtitleSheet", "stylesSubtitleRange"],
-    stylesLogo: ["stylesLogoSheet", "stylesLogoRange"],
+const stylesFields = {
+    title: ["stylesTitleSheet", "stylesTitleRange"],
+    subtitle: ["stylesSubtitleSheet", "stylesSubtitleRange"],
+    logo: ["stylesLogoSheet", "stylesLogoRange"],
 } as const;
 
 const FileField: React.FC<{
@@ -229,19 +227,17 @@ const FileField: React.FC<{
         ev => {
             if (!file) return;
             ev.stopPropagation();
-            downloadFile({
-                filename: file.name,
-                data: file,
-                mimeType: "application/vnd.ms-excel",
-            });
+            downloadFile({ filename: file.name, data: file, mimeType });
         },
-        [file]
+        [file, mimeType]
     );
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeType });
+    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeType, multiple: false });
+
+    const mainProps = React.useMemo(() => ({ className: classes.dropzone }), [classes]);
 
     return (
-        <div {...getRootProps({ className: classes.dropzone })}>
+        <div {...getRootProps(mainProps)}>
             <input {...getInputProps()} />
 
             {file ? (

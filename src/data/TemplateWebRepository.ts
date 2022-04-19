@@ -4,7 +4,6 @@ import { CustomTemplateWithUrl, Template } from "../domain/entities/Template";
 import { Theme } from "../domain/entities/Theme";
 import { StorageRepository } from "../domain/repositories/StorageRepository";
 import { TemplateRepository } from "../domain/repositories/TemplateRepository";
-import { cache } from "../utils/cache";
 import * as templates from "./templates";
 import * as customTemplates from "./templates/custom-templates";
 
@@ -14,7 +13,6 @@ const themeCollectionKey = "themes";
 export class TemplateWebRepository implements TemplateRepository {
     constructor(private storage: StorageRepository) {}
 
-    @cache()
     public async getTemplates(): Promise<Template[]> {
         const customTemplates = await this.storage.getObject<Template[]>(templatesCollectionKey, []);
         const genericTemplates = _.values(templates).map(TemplateClass => new TemplateClass());

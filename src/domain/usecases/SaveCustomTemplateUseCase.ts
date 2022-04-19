@@ -5,7 +5,7 @@ import { TemplateRepository } from "../repositories/TemplateRepository";
 export class SaveCustomTemplateUseCase {
     constructor(private templatesRepository: TemplateRepository) {}
 
-    async execute(options: { template: CustomTemplate; currentUser: User }): Promise<void> {
+    async execute(options: { template: CustomTemplate; currentUser: User }): Promise<CustomTemplate> {
         const { template, currentUser } = options;
         const existingTemplate = await this.getExistingCustomTemplate(template);
 
@@ -16,7 +16,9 @@ export class SaveCustomTemplateUseCase {
             created: existingTemplate?.created || getUserTimestamp(currentUser),
         };
 
-        return this.templatesRepository.saveTemplate(templateToSave);
+        await this.templatesRepository.saveTemplate(templateToSave);
+
+        return templateToSave;
     }
 
     private async getExistingCustomTemplate(template: CustomTemplate): Promise<Partial<CustomTemplate>> {

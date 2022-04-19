@@ -20,10 +20,18 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     public async loadTemplate(options: LoadOptions): Promise<string> {
         const workbook = await this.parseFile(options);
-        const id = workbook.sheet(0).cell("A1").value();
+        const forcedCleanId = options.type === "file-base64" ? options.templateId : null;
+        let cleanId: string;
+        const cell = workbook.sheet(0).cell("A1");
+        if (forcedCleanId) {
+            cell.value(forcedCleanId);
+            cleanId = forcedCleanId;
+        } else {
+            const id = cell.value();
 
-        if (!id || typeof id !== "string") throw new Error("Invalid id");
-        const cleanId = id.replace(/^.*?:/, "").trim();
+            if (!id || typeof id !== "string") throw new Error("Invalid id");
+            cleanId = id.replace(/^.*?:/, "").trim();
+        }
 
         this.workbooks[cleanId] = workbook;
         return cleanId;
