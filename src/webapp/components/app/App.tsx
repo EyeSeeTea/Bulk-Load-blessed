@@ -39,7 +39,9 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
             });
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
-            initFeedbackTool(d2, appConfig);
+            
+
+            initFeedbackTool(d2, appConfig, currentUser.username);
             setAppContext({ d2: d2 as object, api, compositionRoot });
             addExtraTranslations();
         };
@@ -87,31 +89,39 @@ interface AppConfig {
         showShareButton: boolean;
     };
     feedback: {
-        token: string[];
         createIssue: boolean;
         sendToDhis2UserGroups: string[];
-        issues: {
-            repository: string;
+        clickUp?: {
+            apiUrl: string;
+            listId: string;
             title: string;
             body: string;
+            status: string;
         };
         snapshots: {
             repository: string;
             branch: string;
         };
-        feedbackOptions: {};
+        feedbackOptions: object;
     };
 }
 
-function initFeedbackTool(d2: object, appConfig: AppConfig): void {
-    const appKey = _(appConfig).get("appKey");
-
+function initFeedbackTool(d2: object, appConfig: AppConfig, username: string): void {
+    
     if (appConfig && appConfig.feedback) {
-        const feedbackOptions = {
+        const options = {
             ...appConfig.feedback,
             i18nPath: "feedback-tool/i18n",
         };
-        window.$.feedbackDhis2(d2, appKey, feedbackOptions);
+        const clickup = window.feedbackClickUp({ ...options.clickUp, username });
+        window.$.feedback({
+            postFunction: (data: any) => {
+                return clickup.send(data).then(data.success, data.error);
+            },
+            buttonPosition: "bottom",
+            undefined,
+            ...options.feedbackOptions,
+        });
     }
 }
 
