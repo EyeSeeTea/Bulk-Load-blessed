@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-17T18:33:49.009Z\n"
-"PO-Revision-Date: 2022-04-17T18:33:49.009Z\n"
+"POT-Creation-Date: 2022-04-20T12:14:11.837Z\n"
+"PO-Revision-Date: 2022-04-20T12:14:11.837Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -383,7 +383,13 @@ msgstr ""
 msgid "Access to Templates"
 msgstr ""
 
+msgid "A custom template exists with this same code - "
+msgstr ""
+
 msgid "Field cannot be empty"
+msgstr ""
+
+msgid "Action"
 msgstr ""
 
 msgid "Mode"
@@ -467,7 +473,7 @@ msgstr ""
 msgid "Subtitle - Sheet"
 msgstr ""
 
-msgid "Title Range (example D3:I3)"
+msgid "Subtitle - Range (example D3:I3)"
 msgstr ""
 
 msgid "Logo - Sheet"
@@ -554,10 +560,10 @@ msgstr ""
 msgid "TEI Event Event-Id - Column"
 msgstr ""
 
-msgid "TEI Event TEI-Id - Sheet"
+msgid "TEI Event TEI Id - Sheet"
 msgstr ""
 
-msgid "TEI Event TEI-Id - Column"
+msgid "TEI Event TEI Id - Column"
 msgstr ""
 
 msgid "TEI Event Category Option Combo - Sheet"
@@ -600,6 +606,9 @@ msgid "TEI Event Data Values - Column Start"
 msgstr ""
 
 msgid "Data Source"
+msgstr ""
+
+msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""
 
 msgid "Imported"

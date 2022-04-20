@@ -560,7 +560,7 @@ export class TemplateViewActions {
 
     validateCodeUniqueness(view: TemplateView): OkOrError {
         return view.action === "create" && _(this.customTemplates).some(ct => ct.id === view.code)
-            ? { status: false, error: i18n.t("A custom template exists with this same code: ") + view.code }
+            ? { status: false, error: i18n.t("A custom template exists with this same code - ") + view.code }
             : { status: true };
     }
 
@@ -622,7 +622,7 @@ export class TemplateViewActions {
             stylesTitleSheet: i18n.t("Title - Sheet"),
             stylesTitleRange: i18n.t("Title Range (example D2:I2)", { nsSeparator: false }),
             stylesSubtitleSheet: i18n.t("Subtitle - Sheet"),
-            stylesSubtitleRange: i18n.t("Title Range (example D3:I3)", { nsSeparator: false }),
+            stylesSubtitleRange: i18n.t("Subtitle - Range (example D3:I3)", { nsSeparator: false }),
             stylesLogoSheet: i18n.t("Logo - Sheet"),
             stylesLogoRange: i18n.t("Title Range (example A2:C3)", { nsSeparator: false }),
 
@@ -843,7 +843,7 @@ function getErrorsByDefinition(fieldsByType: (keyof TemplateView)[], view: Templ
         const value = view[field];
         const { validations } = viewDefs[field];
         const fieldT = translations[field];
-        const msg = i18n.t("Value for field '{{field}}' is invalid: {{value}}", { field: fieldT, value });
+        const msg = i18n.t("Value for field '{{field}}' is invalid - {{value}}", { field: fieldT, value });
 
         return _(validations)
             .map((validation): string | null => {

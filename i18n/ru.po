@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-17T18:33:49.009Z\n"
+"POT-Creation-Date: 2022-04-20T12:14:11.837Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -431,9 +431,16 @@ msgstr "Создать тему"
 msgid "Access to Templates"
 msgstr "Доступ к генерации шаблонов"
 
+msgid "A custom template exists with this same code - "
+msgstr ""
+
 #, fuzzy
 msgid "Field cannot be empty"
 msgstr "Поле {{поле}} не может быть пустым"
+
+#, fuzzy
+msgid "Action"
+msgstr "Опции"
 
 msgid "Mode"
 msgstr ""
@@ -525,7 +532,7 @@ msgstr ""
 msgid "Subtitle - Sheet"
 msgstr "Текст субтитров"
 
-msgid "Title Range (example D3:I3)"
+msgid "Subtitle - Range (example D3:I3)"
 msgstr ""
 
 msgid "Logo - Sheet"
@@ -628,11 +635,13 @@ msgstr "Значения данных - Удалить"
 msgid "TEI Event Event-Id - Column"
 msgstr ""
 
-msgid "TEI Event TEI-Id - Sheet"
-msgstr ""
+#, fuzzy
+msgid "TEI Event TEI Id - Sheet"
+msgstr "Значения данных - Удалить"
 
-msgid "TEI Event TEI-Id - Column"
-msgstr ""
+#, fuzzy
+msgid "TEI Event TEI Id - Column"
+msgstr "Дата зачисления"
 
 msgid "TEI Event Category Option Combo - Sheet"
 msgstr ""
@@ -681,6 +690,9 @@ msgstr ""
 #, fuzzy
 msgid "Data Source"
 msgstr "Набор данных"
+
+msgid "Value for field '{{field}}' is invalid - {{value}}"
+msgstr ""
 
 msgid "Imported"
 msgstr "Импортировано"
