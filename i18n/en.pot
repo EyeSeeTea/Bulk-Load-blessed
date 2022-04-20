@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-20T12:14:11.837Z\n"
-"PO-Revision-Date: 2022-04-20T12:14:11.837Z\n"
+"POT-Creation-Date: 2022-04-20T12:30:37.694Z\n"
+"PO-Revision-Date: 2022-04-20T12:30:37.694Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -347,6 +347,12 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
+msgid "Data Form"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
 msgid "Data Form Type"
 msgstr ""
 
@@ -396,9 +402,6 @@ msgid "Mode"
 msgstr ""
 
 msgid "Code"
-msgstr ""
-
-msgid "Description"
 msgstr ""
 
 msgid "Program/Dataset"

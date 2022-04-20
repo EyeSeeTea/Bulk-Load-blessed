@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-20T12:14:11.837Z\n"
+"POT-Creation-Date: 2022-04-20T12:30:37.694Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -373,6 +373,13 @@ msgstr ""
 msgid "Name"
 msgstr "Nombre"
 
+#, fuzzy
+msgid "Data Form"
+msgstr "Fuente de datos"
+
+msgid "Description"
+msgstr "Descripción"
+
 msgid "Data Form Type"
 msgstr ""
 
@@ -423,9 +430,6 @@ msgstr "Modo"
 
 msgid "Code"
 msgstr "Código"
-
-msgid "Description"
-msgstr "Descripción"
 
 msgid "Program/Dataset"
 msgstr "Programa/Dataset"
