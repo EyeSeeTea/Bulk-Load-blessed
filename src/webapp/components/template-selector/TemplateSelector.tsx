@@ -230,6 +230,8 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         setState(state => ({ ...state, language: value }));
     };
 
+    const singleSelection = state.templateType === "custom" && state.type === "dataSets";
+
     return (
         <React.Fragment>
             <h3 className={classes.title}>{i18n.t("Template")}</h3>
@@ -330,8 +332,8 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
                                         selectAll: state.templateType !== "custom",
                                     }}
                                     withElevation={false}
-                                    singleSelection={state.templateType === "custom"}
-                                    typeInput={state.templateType === "custom" ? "radio" : undefined}
+                                    singleSelection={singleSelection}
+                                    typeInput={singleSelection ? "radio" : undefined}
                                 />
                             </div>
                         ) : (
