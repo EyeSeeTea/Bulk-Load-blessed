@@ -19,7 +19,7 @@ import {
     ValueRef,
 } from "../../../../domain/entities/Template";
 import { assertUnreachable, Maybe, ofType, OkOrError } from "../../../../types/utils";
-import { fromBase64, getStringFromFile, toBase64 } from "../../../../utils/files";
+import { fromBase64, getStringFromFile, toBase64, xlsxMimeType } from "../../../../utils/files";
 import { DataFormType } from "../../../../domain/entities/DataForm";
 import { getGeneratedTemplateId } from "../../../logic/sheetBuilder";
 import i18n from "../../../../locales";
@@ -443,6 +443,9 @@ export class TemplateViewActions {
             | "created"
             | "lastUpdated";
 
+        const base64 = await toBase64(view.spreadsheet);
+        const base64WithMimeType = xlsxMimeType + "," + base64.split(",")[1];
+
         const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
             id: view.code,
@@ -450,7 +453,7 @@ export class TemplateViewActions {
             dataFormType: { type: "value", id: view.dataFormType },
             dataFormId: { type: "value", id: view.dataFormId },
             description: view.description,
-            file: { name: view.spreadsheet.name, contents: await toBase64(view.spreadsheet) },
+            file: { name: view.spreadsheet.name, contents: base64WithMimeType },
             created: undefined,
             lastUpdated: undefined,
         };
