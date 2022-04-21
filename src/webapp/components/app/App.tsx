@@ -10,6 +10,7 @@ import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
 import { addExtraTranslations } from "../../../utils/translations";
 import { AppContext, AppContextI } from "../../contexts/app-context";
+import Settings from "../../logic/settings";
 import { Router } from "../../pages/Router";
 import { useMigrations } from "../migrations/hooks";
 import Migrations from "../migrations/Migrations";
@@ -37,11 +38,11 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
                 appConfig,
                 dhisInstance: { type: "local", url: baseUrl },
             });
+            const settings = await Settings.build(api, compositionRoot);
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
-            
 
-            initFeedbackTool(d2, appConfig, currentUser.username);
+            initFeedbackTool(d2, appConfig, settings.currentUser.username);
             setAppContext({ d2: d2 as object, api, compositionRoot });
             addExtraTranslations();
         };
@@ -107,7 +108,6 @@ interface AppConfig {
 }
 
 function initFeedbackTool(d2: object, appConfig: AppConfig, username: string): void {
-    
     if (appConfig && appConfig.feedback) {
         const options = {
             ...appConfig.feedback,

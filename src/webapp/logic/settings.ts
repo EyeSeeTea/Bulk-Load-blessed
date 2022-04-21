@@ -48,6 +48,7 @@ export type PermissionType = "user" | "userGroup";
 interface CurrentUser extends Ref {
     userGroups: Ref[];
     authorities: Set<string>;
+    username: string;
 }
 
 type OkOrError = { status: true } | { status: false; error: string };
@@ -97,8 +98,14 @@ export default class Settings {
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
-        const d2CurrentUser = await api.currentUser.get({ fields: { id: true, userGroups: { id: true } } }).getData();
-        const currentUser: CurrentUser = { ...d2CurrentUser, authorities: new Set(authorities) };
+        const d2CurrentUser = await api.currentUser
+            .get({ fields: { id: true, userGroups: { id: true }, userCredentials: { username: true } } })
+            .getData();
+        const currentUser: CurrentUser = {
+            ...d2CurrentUser,
+            authorities: new Set(authorities),
+            username: d2CurrentUser.userCredentials.username,
+        };
         const isUserAdmin = currentUser.authorities.has("ALL");
 
         const defaultSettings = compositionRoot.settings.getDefault();
