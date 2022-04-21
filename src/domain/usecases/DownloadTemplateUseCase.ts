@@ -4,6 +4,7 @@ import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
 import { getRelationshipMetadata, RelationshipOrgUnitFilter } from "../../data/Dhis2RelationshipTypes";
+import i18n from "../../locales";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
@@ -65,6 +66,7 @@ export class DownloadTemplateUseCase implements UseCase {
             templateType,
         }: DownloadTemplateProps
     ): Promise<void> {
+        i18n.setDefaultNamespace("bulk-load");
         const templateId =
             templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
         const template = await this.templateRepository.getTemplate(templateId);
