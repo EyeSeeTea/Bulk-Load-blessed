@@ -221,7 +221,9 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
     };
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
-        setState(state => ({ ...state, populate: false }));
+        const isCustomProgram = state.templateType === "custom" && state.type !== "dataSets";
+        const populate = isCustomProgram && filterOrgUnits;
+        setState(state => ({ ...state, populate }));
         clearPopulateDates();
         setFilterOrgUnits(filterOrgUnits);
     };
@@ -230,7 +232,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         setState(state => ({ ...state, language: value }));
     };
 
-    const singleSelection = state.templateType === "custom" && state.type === "dataSets";
+    const isCustomDataSet = state.templateType === "custom" && state.type === "dataSets";
 
     return (
         <React.Fragment>
@@ -332,8 +334,8 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
                                         selectAll: state.templateType !== "custom",
                                     }}
                                     withElevation={false}
-                                    singleSelection={singleSelection}
-                                    typeInput={singleSelection ? "radio" : undefined}
+                                    singleSelection={isCustomDataSet}
+                                    typeInput={isCustomDataSet ? "radio" : undefined}
                                 />
                             </div>
                         ) : (
@@ -383,7 +385,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
                 </div>
             )}
 
-            {state.populate && state.templateType !== "custom" && (
+            {state.populate && !isCustomDataSet && (
                 <>
                     <div>
                         <FormControlLabel

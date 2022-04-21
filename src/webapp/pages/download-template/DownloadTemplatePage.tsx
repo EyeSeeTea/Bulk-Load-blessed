@@ -38,19 +38,26 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
             return;
         }
 
-        if (templateType === "custom" && !!orgUnits) {
-            template.populate = true;
-            template.populateStartDate = template.startDate;
-            template.populateEndDate = template.endDate;
+        let templateToDownload: TemplateSelectorState;
+
+        if (templateType === "custom" && Boolean(orgUnits)) {
+            templateToDownload = {
+                ...template,
+                populate: true,
+                populateStartDate: template.populateStartDate || template.startDate,
+                populateEndDate: template.populateEndDate || template.endDate,
+            };
         } else if (populate && (!populateStartDate || !populateEndDate)) {
             snackbar.info(i18n.t("You need to select start and end dates to populate template"));
             return;
+        } else {
+            templateToDownload = template;
         }
 
         loading.show(true, i18n.t("Downloading template..."));
 
         try {
-            await compositionRoot.templates.download(api, template);
+            await compositionRoot.templates.download(api, templateToDownload);
         } catch (error: any) {
             console.error(error);
             snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
