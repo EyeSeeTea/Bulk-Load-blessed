@@ -17,7 +17,8 @@ export class PersistTemplatesFromStaticModulesUseCase {
         const templates = customTemplates.map((template): Template => {
             const spreadsheetPath = path.join(rootDir, template.url);
             const buffer = fs.readFileSync(spreadsheetPath);
-            const contents = "data:text;base64," + buffer.toString("base64");
+            const prefix = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,";
+            const contents = prefix + buffer.toString("base64");
             const file = { name: path.basename(template.url), contents };
             const date = getCurrentTimestamp();
             const user = _.pick(currentUser, ["id", "username", "name"]);
