@@ -10,6 +10,7 @@ import { getCompositionRoot } from "../../../CompositionRoot";
 import { D2Api } from "../../../types/d2-api";
 import { addExtraTranslations } from "../../../utils/translations";
 import { AppContext, AppContextI } from "../../contexts/app-context";
+import Settings from "../../logic/settings";
 import { Router } from "../../pages/Router";
 import { useMigrations } from "../migrations/hooks";
 import Migrations from "../migrations/Migrations";
@@ -37,9 +38,11 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
                 appConfig,
                 dhisInstance: { type: "local", url: baseUrl },
             });
+            const settings = await Settings.build(api, compositionRoot);
 
             setShowShareButton(_(appConfig).get("appearance.showShareButton") || false);
-            initFeedbackTool(d2, appConfig);
+
+            initFeedbackTool(d2, appConfig, settings.currentUser.username);
             setAppContext({ d2: d2 as object, api, compositionRoot });
             addExtraTranslations();
         };
@@ -87,31 +90,38 @@ interface AppConfig {
         showShareButton: boolean;
     };
     feedback: {
-        token: string[];
         createIssue: boolean;
         sendToDhis2UserGroups: string[];
-        issues: {
-            repository: string;
+        clickUp?: {
+            apiUrl: string;
+            listId: string;
             title: string;
             body: string;
+            status: string;
         };
         snapshots: {
             repository: string;
             branch: string;
         };
-        feedbackOptions: {};
+        feedbackOptions: object;
     };
 }
 
-function initFeedbackTool(d2: object, appConfig: AppConfig): void {
-    const appKey = _(appConfig).get("appKey");
-
+function initFeedbackTool(d2: object, appConfig: AppConfig, username: string): void {
     if (appConfig && appConfig.feedback) {
-        const feedbackOptions = {
+        const options = {
             ...appConfig.feedback,
             i18nPath: "feedback-tool/i18n",
         };
-        window.$.feedbackDhis2(d2, appKey, feedbackOptions);
+        const clickup = window.feedbackClickUp({ ...options.clickUp, username });
+        window.$.feedback({
+            postFunction: (data: any) => {
+                return clickup.send(data).then(data.success, data.error);
+            },
+            buttonPosition: "bottom",
+            undefined,
+            ...options.feedbackOptions,
+        });
     }
 }
 

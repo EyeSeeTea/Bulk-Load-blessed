@@ -12,7 +12,8 @@ import "./webapp/utils/wdyr";
 
 declare global {
     interface Window {
-        $: { feedbackDhis2(d2: object, appKey: string, feedbackOptions: object): void };
+        $: { feedback(options: object): void };
+        feedbackClickUp(feedbackOptions: object): any;
         api: D2Api;
     }
 }
