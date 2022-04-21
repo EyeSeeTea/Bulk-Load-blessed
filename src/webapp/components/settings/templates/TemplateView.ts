@@ -19,7 +19,7 @@ import {
     ValueRef,
 } from "../../../../domain/entities/Template";
 import { assertUnreachable, Maybe, ofType, OkOrError } from "../../../../types/utils";
-import { fromBase64, getStringFromFile, toBase64, xlsxMimeType } from "../../../../utils/files";
+import { fromBase64, getStringFromFile, toBase64 } from "../../../../utils/files";
 import { DataFormType } from "../../../../domain/entities/DataForm";
 import { getGeneratedTemplateId } from "../../../logic/sheetBuilder";
 import i18n from "../../../../locales";
@@ -291,7 +291,7 @@ export class TemplateViewActions {
             dataFormId: template.dataFormId.type === "value" ? template.dataFormId.id : undefined,
             dataFormType: template.dataFormType.type === "value" ? template.dataFormType.id : undefined,
             description: template.description,
-            spreadsheet: await getFile(template.file),
+            spreadsheet: await getSpreadsheetFile(template.file).catch(() => undefined),
         };
 
         return { ...viewEmpty, ...base, ...this.get(template) };
@@ -443,9 +443,6 @@ export class TemplateViewActions {
             | "created"
             | "lastUpdated";
 
-        const base64 = await toBase64(view.spreadsheet);
-        const base64WithMimeType = xlsxMimeType + "," + base64.split(",")[1];
-
         const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
             id: view.code,
@@ -453,7 +450,7 @@ export class TemplateViewActions {
             dataFormType: { type: "value", id: view.dataFormType },
             dataFormId: { type: "value", id: view.dataFormId },
             description: view.description,
-            file: { name: view.spreadsheet.name, contents: base64WithMimeType },
+            file: { name: view.spreadsheet.name, contents: await toBase64(view.spreadsheet) },
             created: undefined,
             lastUpdated: undefined,
         };
@@ -798,7 +795,7 @@ function getDataSourceCellAttrs<Field extends DataSourceCellField>(view: ValidVi
     };
 }
 
-async function getFile(file: CustomTemplate["file"]): Promise<File> {
+async function getSpreadsheetFile(file: CustomTemplate["file"]): Promise<File> {
     return fromBase64(file.contents, file.name);
 }
 

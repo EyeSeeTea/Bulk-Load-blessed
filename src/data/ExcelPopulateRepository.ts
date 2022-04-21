@@ -13,6 +13,7 @@ import { ThemeStyle } from "../domain/entities/Theme";
 import { ExcelRepository, ExcelValue, LoadOptions, ReadCellOptions } from "../domain/repositories/ExcelRepository";
 import i18n from "../locales";
 import { cache } from "../utils/cache";
+import { fromBase64 } from "../utils/files";
 import { removeCharacters } from "../utils/string";
 
 export class ExcelPopulateRepository extends ExcelRepository {
@@ -55,8 +56,8 @@ export class ExcelPopulateRepository extends ExcelRepository {
                 return XLSX.fromDataAsync(options.file);
             }
             case "file-base64": {
-                const buffer = Buffer.from(options.contents, "base64");
-                const blob = new Blob([buffer]);
+                const file = await fromBase64(options.contents);
+                const blob = new Blob([file]);
                 return XLSX.fromDataAsync(blob);
             }
             default: {

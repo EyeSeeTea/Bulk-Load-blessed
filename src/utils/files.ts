@@ -16,10 +16,10 @@ export const getStringFromFile = (file: File): Promise<string> => {
     });
 };
 
-export const fromBase64 = async (uri: string, filename?: string): Promise<File> => {
+export const fromBase64 = async (uri: string, filename?: string, options?: { mimeType: string }): Promise<File> => {
     const response = await fetch(uri);
     const buffer = await response.arrayBuffer();
-    return new File([buffer], filename || "Logo");
+    return new File([buffer], filename || "Logo", { type: options?.mimeType });
 };
 
 export function getBlobFromBase64(contents: string): Blob {
@@ -27,5 +27,4 @@ export function getBlobFromBase64(contents: string): Blob {
     return new Blob([buffer]);
 }
 
-export const xlsxMimeType =
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12";
+export const xlsxMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
