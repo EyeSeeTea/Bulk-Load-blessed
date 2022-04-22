@@ -14,7 +14,7 @@ export class AnalyzeTemplateUseCase implements UseCase {
 
     public async execute(file: File) {
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
-        const template = this.templateRepository.getTemplate(templateId);
+        const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId, {
             formula: true,

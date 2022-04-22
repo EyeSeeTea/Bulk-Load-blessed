@@ -4,7 +4,7 @@ import { Codec } from "purify-ts";
 import { DataElement, DataForm } from "../../../domain/entities/DataForm";
 import { DataPackage } from "../../../domain/entities/DataPackage";
 import {
-    CustomTemplate,
+    CustomTemplateWithUrl,
     DataSource,
     DownloadCustomizationOptions,
     ImportCustomizationOptions,
@@ -29,10 +29,11 @@ const NATIONAL_SHEET_VALUE_LOCATION = NATIONAL_SHEET_START + 4;
 const METADATA_SHEET_START = 2;
 const ORGUNIT_SHEET_START = 2;
 
-export class SnakebiteAnnualReport implements CustomTemplate {
+export class SnakebiteAnnualReport implements CustomTemplateWithUrl {
     public readonly type = "custom";
     public readonly id = "SNAKEBITE_ANNUAL_REPORT_v1";
     public readonly name = "Snakebite Annual Report";
+    public readonly description = "";
     public readonly url = "templates/Snakebite_Annual_Report.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "XBgvNrxpcDC" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };

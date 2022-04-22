@@ -1,5 +1,7 @@
 import { GetArrayInnerType } from "../../types/utils";
+import { PermissionType } from "../../webapp/logic/settings";
 import { DataElementDisaggregated } from "./DataElementDisaggregated";
+import { DataFormTemplate } from "./DataFormTemplate";
 import { Id, NamedRef, Ref } from "./ReferenceObject";
 
 const models = ["dataSet", "program"] as const;
@@ -35,4 +37,19 @@ export interface AppSettings {
     dataSetDataElementsFilter: DataSetDataElementsFilter;
     programStageFilter: ProgramStageFilter;
     programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
+    dataFormTemplate: DataFormTemplate;
+    templatePermissions: TemplatePermissions;
 }
+
+export type TemplatePermissions = Record<TemplateId, TemplatePermission>;
+
+export interface TemplatePermission {
+    accesses: TemplatePermissionAccess[];
+    all: boolean;
+}
+
+export interface TemplatePermissionAccess extends NamedRef {
+    type: PermissionType | "unknown";
+}
+
+type TemplateId = Id;

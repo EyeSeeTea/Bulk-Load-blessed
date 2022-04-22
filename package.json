@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.17.3",
+    "version": "3.18.0",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -89,6 +89,7 @@
         "babel-core": "6.26.3",
         "babel-eslint": "10.1.0",
         "babel-preset-react-app": "10.0.1",
+        "cmd-ts": "^0.10.0",
         "craco": "0.0.3",
         "cypress": "9.2.1",
         "cypress-xpath": "1.6.2",

@@ -5,7 +5,7 @@ import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { RelationshipOrgUnitFilter } from "../../../data/Dhis2RelationshipTypes";
 import { DataForm } from "../../../domain/entities/DataForm";
-import { TemplateType } from "../../../domain/entities/Template";
+import { CustomTemplate, TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
 import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
@@ -13,7 +13,6 @@ import { PartialBy } from "../../../types/utils";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
-import { getTemplateId } from "../../logic/sheetBuilder";
 import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<string, DataForm[]>;
@@ -26,6 +25,7 @@ interface PickerFormat {
 }
 
 export interface TemplateSelectorState extends DownloadTemplateProps {
+    templateId?: string;
     templateType?: TemplateType;
 }
 
@@ -33,9 +33,10 @@ export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
     onChange(state: TemplateSelectorState | null): void;
+    customTemplates: CustomTemplate[];
 }
 
-export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelectorProps) => {
+export const TemplateSelector = ({ settings, themes, onChange, customTemplates }: TemplateSelectorProps) => {
     const classes = useStyles();
     const { api, compositionRoot } = useAppContext();
 
@@ -78,23 +79,25 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     }, [settings]);
 
     useEffect(() => {
-        compositionRoot.templates.list().then(({ dataSets, programs }) => {
-            const dataSource: DataSource = {
-                dataSets,
-                programs,
-                all: _.sortBy([...dataSets, ...programs], ["name"]),
-            };
+        compositionRoot.templates
+            .getDataFormsForGeneration({ settings, customTemplates })
+            .then(({ dataSets, programs }) => {
+                const dataSource: DataSource = {
+                    dataSets,
+                    programs,
+                    all: _.sortBy([...dataSets, ...programs], ["name"]),
+                };
 
-            setDataSource(dataSource);
-            const model = models[0]?.value;
-            const dataSourceModel = dataSource[model ?? ""];
+                setDataSource(dataSource);
+                const model = models[0]?.value;
+                const dataSourceModel = dataSource[model ?? ""];
 
-            if (model && dataSourceModel) {
-                setTemplates(modelToSelectOption(dataSourceModel));
-                setSelectedModel(model);
-            }
-        });
-    }, [models, compositionRoot]);
+                if (model && dataSourceModel) {
+                    setTemplates(modelToSelectOption(dataSourceModel));
+                    setSelectedModel(model);
+                }
+            });
+    }, [models, compositionRoot, customTemplates, settings]);
 
     useEffect(() => {
         const { type, id } = state;
@@ -161,8 +164,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 setDatePickerFormat(undefined);
             }
 
-            const templateType = getTemplateId(type, value).type as TemplateType;
-            setState(state => ({ ...state, id: value, type, templateType, populate: false }));
+            const customTemplate = customTemplates.find(t => t.id === value);
+            const templateId = customTemplate?.id || value;
+            const dataFormId = customTemplate?.dataFormId.type === "value" ? customTemplate.dataFormId.id : value;
+            const templateType: TemplateType = customTemplate ? "custom" : "generated";
+
+            setState(state => ({ ...state, id: dataFormId, type, templateId, templateType, populate: false }));
+            setFilterOrgUnits(false);
             clearPopulateDates();
             setSelectedOrgUnits([]);
         }
@@ -214,7 +222,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     };
 
     const onFilterOrgUnitsChange = (_event: React.ChangeEvent, filterOrgUnits: boolean) => {
-        setState(state => ({ ...state, populate: false }));
+        const isCustomProgram = state.templateType === "custom" && state.type !== "dataSets";
+        const populate = isCustomProgram && filterOrgUnits;
+        setState(state => ({ ...state, populate }));
         clearPopulateDates();
         setFilterOrgUnits(filterOrgUnits);
     };
@@ -222,6 +232,9 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
     const onLanguageChange = ({ value }: SelectOption) => {
         setState(state => ({ ...state, language: value }));
     };
+
+    const isCustomDataSet = state.templateType === "custom" && state.type === "dataSets";
+    const isMultipleSelection = !isCustomDataSet;
 
     return (
         <React.Fragment>
@@ -233,7 +246,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                         placeholder={i18n.t("Select template to export...")}
                         onChange={onTemplateChange}
                         options={templates}
-                        value={state.id ?? ""}
+                        value={state.templateId || ""}
                     />
                 </div>
 
@@ -318,13 +331,13 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                                     fullWidth={false}
                                     height={250}
                                     controls={{
-                                        filterByLevel: state.templateType !== "custom",
-                                        filterByGroup: state.templateType !== "custom",
-                                        selectAll: state.templateType !== "custom",
+                                        filterByLevel: isMultipleSelection,
+                                        filterByGroup: isMultipleSelection,
+                                        selectAll: isMultipleSelection,
                                     }}
                                     withElevation={false}
-                                    singleSelection={state.templateType === "custom"}
-                                    typeInput={state.templateType === "custom" ? "radio" : undefined}
+                                    singleSelection={!isMultipleSelection}
+                                    typeInput={isMultipleSelection ? undefined : "radio"}
                                 />
                             </div>
                         ) : (
@@ -374,7 +387,7 @@ export const TemplateSelector = ({ settings, themes, onChange }: TemplateSelecto
                 </div>
             )}
 
-            {state.populate && state.templateType !== "custom" && (
+            {state.populate && !isCustomDataSet && (
                 <>
                     <div>
                         <FormControlLabel

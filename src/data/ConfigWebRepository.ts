@@ -39,6 +39,8 @@ export class ConfigWebRepository implements ConfigRepository {
             dataSetDataElementsFilter: {},
             programStageFilter: {},
             programStagePopulateEventsForEveryTei: {},
+            dataFormTemplate: { relationships: {} },
+            templatePermissions: {},
             ...defaultSettings,
         };
     }

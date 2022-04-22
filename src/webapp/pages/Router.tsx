@@ -14,12 +14,15 @@ import ImportTemplatePage from "./import-template/ImportTemplatePage";
 import SettingsPage from "./settings/SettingsPage";
 import ThemesPage from "./themes/ThemesPage";
 import BlankTemplatePage from "./blank-template/BlankTemplatePage";
+import { CustomTemplate } from "../../domain/entities/Template";
 
 export interface RouteComponentProps {
     settings: Settings;
     setSettings: (settings: Settings) => void;
     themes: Theme[];
     setThemes: (themes: Theme[]) => void;
+    customTemplates: CustomTemplate[];
+    setCustomTemplates: (customTemplates: CustomTemplate[]) => void;
 }
 
 export interface AppRoute {
@@ -41,6 +44,7 @@ export const Router: React.FC = React.memo(() => {
     const [isOpen, setOpen] = useState(true);
     const [settings, setSettings] = useState<Settings>();
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
 
     useEffect(() => {
         Settings.build(api, compositionRoot)
@@ -50,6 +54,10 @@ export const Router: React.FC = React.memo(() => {
 
     useEffect(() => {
         compositionRoot.themes.list().then(setThemes);
+    }, [compositionRoot]);
+
+    useEffect(() => {
+        compositionRoot.templates.getCustom().then(setCustomTemplates);
     }, [compositionRoot]);
 
     const routes: AppRoute[] = useMemo(
@@ -132,6 +140,8 @@ export const Router: React.FC = React.memo(() => {
                                         themes,
                                         setSettings,
                                         setThemes,
+                                        customTemplates,
+                                        setCustomTemplates,
                                     })}
                                 />
                             ))}

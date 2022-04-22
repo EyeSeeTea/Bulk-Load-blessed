@@ -28,3 +28,22 @@ export function isNotEmpty<T>(xs: T[] | undefined): xs is NonEmptyArray<T> {
 }
 
 export type KeysOfUnion<T> = T extends T ? keyof T : never;
+
+export function ofType<T>(obj: T): T {
+    return obj;
+}
+
+export function firstOrFail<T>(xs: T[]) {
+    const x = xs[0];
+    if (x === undefined) {
+        throw new Error();
+    } else {
+        return x;
+    }
+}
+
+export function assertUnreachable(_value: never): never {
+    throw new Error();
+}
+
+export type OkOrError = { status: true } | { status: false; error: string };

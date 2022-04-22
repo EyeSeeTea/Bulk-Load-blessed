@@ -59,7 +59,7 @@ export class ImportTemplateUseCase implements UseCase {
         }
 
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
-        const template = this.templateRepository.getTemplate(templateId);
+        const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = removeCharacters(
             await this.excelRepository.readCell(templateId, template.dataFormId, {
@@ -330,7 +330,7 @@ export const compareDataPackages = (
 
 const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined => {
     const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-    const booleanValue = String(item.value) === "true" || item.value === "Yes";
+    const booleanValue = String(item.optionId) === "true" || item.optionId === "true";
 
     if (dataElement?.valueType === "BOOLEAN") {
         return { ...item, value: booleanValue };
