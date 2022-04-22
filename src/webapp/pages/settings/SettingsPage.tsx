@@ -5,7 +5,12 @@ import SettingsFields, { SettingsFieldsProps } from "../../components/settings/S
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../Router";
 
-export default function SettingsPage({ settings, setSettings }: RouteComponentProps) {
+type CustomTemplatesProps = Pick<RouteComponentProps, "customTemplates" | "setCustomTemplates">;
+
+type SettingsPageProps = RouteComponentProps & CustomTemplatesProps;
+
+export default function SettingsPage(props: SettingsPageProps) {
+    const { settings, setSettings, customTemplates, setCustomTemplates } = props;
     const snackbar = useSnackbar();
     const { compositionRoot } = useAppContext();
 
@@ -23,5 +28,12 @@ export default function SettingsPage({ settings, setSettings }: RouteComponentPr
         [setSettings, snackbar, compositionRoot]
     );
 
-    return <SettingsFields settings={settings} onChange={save} />;
+    return (
+        <SettingsFields
+            settings={settings}
+            onChange={save}
+            customTemplates={customTemplates}
+            setCustomTemplates={setCustomTemplates}
+        />
+    );
 }

@@ -4,7 +4,7 @@ export function initializeMockServer() {
     const { api, mock } = getMockApi();
 
     // User settings
-    mock.onGet("/me").reply(200, { userGroups: [{ id: "BwyMfDBLih9" }] });
+    mock.onGet("/me").reply(200, { userCredentials: { username: "user" }, userGroups: [{ id: "BwyMfDBLih9" }] });
     mock.onGet("/me/authorization").reply(200, ["USER_GROUP_TEST"]);
     mock.onGet("/metadata", { params: { "userGroups:fields": "displayName,id,name" } }).reply(200, {
         userGroups: [{ name: "USER_GROUP_TEST", id: "BwyMfDBLih9", displayName: "USER_GROUP_TEST" }],

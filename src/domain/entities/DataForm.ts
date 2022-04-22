@@ -1,7 +1,20 @@
+import i18n from "../../locales";
+import { ofType } from "../../types/utils";
 import { Id, NamedRef } from "./ReferenceObject";
 
-export type DataFormType = "dataSets" | "programs" | "trackerPrograms";
+export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
+export type DataFormType = typeof dataFormTypes[number];
 export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
+
+export function getTranslations() {
+    return {
+        dataFormTypes: ofType<Record<DataFormType, string>>({
+            dataSets: i18n.t("Data Set"),
+            programs: i18n.t("Event Program"),
+            trackerPrograms: i18n.t("Tracker Program"),
+        }),
+    };
+}
 
 export interface DataForm {
     type: DataFormType;

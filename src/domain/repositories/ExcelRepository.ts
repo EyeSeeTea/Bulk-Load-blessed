@@ -2,28 +2,28 @@ import { Sheet } from "../entities/Sheet";
 import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../entities/Template";
 import { ThemeStyle } from "../entities/Theme";
 
-export type LoadOptions = WebLoadOptions | FileLoadOptions;
+export type LoadOptions = WebLoadOptions | FileLoadOptions | FileBase64LoadOptions;
 export type ExcelValue = string | number | boolean | Date;
 export type Result = [string, ExcelValue];
-
-export interface BaseLoadOptions {
-    type: "url" | "file";
-    url?: string;
-    file?: File | Blob;
-}
 
 export interface ReadCellOptions {
     formula?: boolean;
 }
 
-export interface WebLoadOptions extends BaseLoadOptions {
+export interface WebLoadOptions {
     type: "url";
     url: string;
 }
 
-export interface FileLoadOptions extends BaseLoadOptions {
+export interface FileLoadOptions {
     type: "file";
     file: Blob;
+}
+
+export interface FileBase64LoadOptions {
+    type: "file-base64";
+    contents: string;
+    templateId: string;
 }
 
 export abstract class ExcelRepository {

@@ -49,70 +49,70 @@ export class TrackerProgramGenerated03 implements GeneratedTemplate {
                 ref: 5,
             },
         },
-        (sheet: string) =>
-            isRelationshipSheet(sheet) && {
-                type: "rowTeiRelationship",
-                range: {
-                    sheet,
-                    rowStart: 3,
-                    columnStart: "A",
-                },
-                relationshipType: {
-                    sheet,
-                    type: "cell",
-                    ref: "A1",
-                },
-                from: {
-                    sheet,
-                    type: "column",
-                    ref: "A",
-                },
-                to: {
-                    sheet,
-                    type: "column",
-                    ref: "B",
-                },
+        {
+            type: "rowTeiRelationship",
+            sheetsMatch: "^Rel",
+            range: {
+                sheet: "",
+                rowStart: 3,
+                columnStart: "A",
             },
-        (sheet: string) =>
-            isStageSheet(sheet) && {
-                type: "rowTrackedEvent",
-                eventId: {
-                    sheet,
-                    type: "column",
-                    ref: "A",
-                },
-                teiId: {
-                    sheet,
-                    type: "column",
-                    ref: "B",
-                },
-                categoryOptionCombo: {
-                    sheet,
-                    type: "column",
-                    ref: "C",
-                },
-                date: {
-                    sheet,
-                    type: "column",
-                    ref: "D",
-                },
-                programStage: {
-                    sheet,
-                    type: "cell",
-                    ref: "A1",
-                },
-                dataElements: {
-                    sheet,
-                    rowStart: 2,
-                    rowEnd: 2,
-                    columnStart: "E",
-                },
-                dataValues: {
-                    sheet,
-                    rowStart: 3,
-                    columnStart: "E",
-                },
+            relationshipType: {
+                sheet: "",
+                type: "cell",
+                ref: "A1",
             },
+            from: {
+                sheet: "",
+                type: "column",
+                ref: "A",
+            },
+            to: {
+                sheet: "",
+                type: "column",
+                ref: "B",
+            },
+        },
+        {
+            type: "rowTrackedEvent",
+            sheetsMatch: "^(Stage|\\()",
+            eventId: {
+                sheet: "",
+                type: "column",
+                ref: "A",
+            },
+            teiId: {
+                sheet: "",
+                type: "column",
+                ref: "B",
+            },
+            categoryOptionCombo: {
+                sheet: "",
+                type: "column",
+                ref: "C",
+            },
+            date: {
+                sheet: "",
+                type: "column",
+                ref: "D",
+            },
+            programStage: {
+                sheet: "",
+                type: "cell",
+                ref: "A1",
+            },
+            dataElements: {
+                sheet: "",
+                rowStart: 2,
+                rowEnd: 2,
+                columnStart: "E",
+            },
+            dataValues: {
+                sheet: "",
+                rowStart: 3,
+                columnStart: "E",
+            },
+        },
     ];
 
     public readonly styleSources: StyleSource[] = [
@@ -141,12 +141,4 @@ export class TrackerProgramGenerated03 implements GeneratedTemplate {
             },
         },
     ];
-}
-
-function isStageSheet(name: string): boolean {
-    return name.startsWith("Stage") || name.startsWith("(");
-}
-
-function isRelationshipSheet(name: string): boolean {
-    return name.startsWith("Rel");
 }
