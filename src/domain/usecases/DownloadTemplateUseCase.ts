@@ -8,9 +8,10 @@ import i18n from "../../locales";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
-import { getTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
+import { getGeneratedTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id } from "../entities/ReferenceObject";
+import { TemplateType } from "../entities/Template";
 import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -32,6 +33,8 @@ export interface DownloadTemplateProps {
     downloadRelationships: boolean;
     filterTEIEnrollmentDate?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
+    templateId?: string;
+    templateType?: TemplateType;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -59,18 +62,26 @@ export class DownloadTemplateUseCase implements UseCase {
             downloadRelationships,
             filterTEIEnrollmentDate,
             relationshipsOuFilter,
+            templateId: customTemplateId,
+            templateType,
         }: DownloadTemplateProps
     ): Promise<void> {
         i18n.setDefaultNamespace("bulk-load");
-        const { id: templateId } = getTemplateId(type, id);
-        const template = this.templateRepository.getTemplate(templateId);
+        const templateId =
+            templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
+        const template = await this.templateRepository.getTemplate(templateId);
+
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
 
         const element = await getElement(api, type, id);
         const name = element.displayName ?? element.name;
 
         if (template.type === "custom") {
-            await this.excelRepository.loadTemplate({ type: "url", url: template.url });
+            await this.excelRepository.loadTemplate({
+                type: "file-base64",
+                contents: template.file.contents,
+                templateId: template.id,
+            });
         } else {
             const result = await getElementMetadata({
                 api,

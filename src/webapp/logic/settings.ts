@@ -10,7 +10,11 @@ import {
     OrgUnitSelectionSetting,
     ProgramStageFilter,
     ProgramStagePopulateEventsForEveryTei,
+    TemplatePermission,
+    TemplatePermissionAccess,
+    TemplatePermissions,
 } from "../../domain/entities/AppSettings";
+import { DataFormTemplate } from "../../domain/entities/DataFormTemplate";
 import {
     DataElementDisaggregated,
     DataElementDisaggregatedId,
@@ -20,7 +24,8 @@ import {
 import { Id, NamedRef } from "../../domain/entities/ReferenceObject";
 import i18n from "../../locales";
 import { D2Api, Ref } from "../../types/d2-api";
-import { GetArrayInnerType } from "../../types/utils";
+import { GetArrayInnerType, Maybe, OkOrError } from "../../types/utils";
+import { User } from "../../domain/entities/User";
 
 const privateFields = ["currentUser"] as const;
 
@@ -35,6 +40,8 @@ const publicFields = [
     "dataSetDataElementsFilter",
     "programStageFilter",
     "programStagePopulateEventsForEveryTei",
+    "dataFormTemplate",
+    "templatePermissions",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -44,14 +51,6 @@ type PublicOption = Pick<Options, GetArrayInnerType<typeof publicFields>>;
 
 export type PermissionSetting = "generation" | "settings" | "import";
 export type PermissionType = "user" | "userGroup";
-
-interface CurrentUser extends Ref {
-    userGroups: Ref[];
-    authorities: Set<string>;
-    username: string;
-}
-
-type OkOrError = { status: true } | { status: false; error: string };
 
 type PermissionValue =
     | { type: "all" }
@@ -67,8 +66,9 @@ type Permissions = {
 };
 
 export default class Settings {
-    public currentUser: CurrentUser;
+    public currentUser: User;
     public permissions: Permissions;
+    public templatePermissions: Record<Id, PermissionValue>;
     public models: Models;
     public orgUnitSelection: OrgUnitSelectionSetting;
     public duplicateEnabled: boolean;
@@ -78,12 +78,14 @@ export default class Settings {
     public dataSetDataElementsFilter: DataSetDataElementsFilter;
     public programStageFilter: ProgramStageFilter;
     public programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
+    public dataFormTemplate: DataFormTemplate;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
     constructor(options: Options) {
         this.currentUser = options.currentUser;
         this.permissions = options.permissions;
+        this.templatePermissions = options.templatePermissions;
         this.models = options.models;
         this.orgUnitSelection = options.orgUnitSelection;
         this.duplicateEnabled = options.duplicateEnabled;
@@ -93,18 +95,28 @@ export default class Settings {
         this.dataSetDataElementsFilter = options.dataSetDataElementsFilter;
         this.programStageFilter = options.programStageFilter;
         this.programStagePopulateEventsForEveryTei = options.programStagePopulateEventsForEveryTei;
+        this.dataFormTemplate = options.dataFormTemplate;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
         const authorities = await api.get<string[]>("/me/authorization").getData();
 
         const d2CurrentUser = await api.currentUser
-            .get({ fields: { id: true, userGroups: { id: true }, userCredentials: { username: true } } })
+            .get({
+                fields: {
+                    id: true,
+                    name: true,
+                    userCredentials: { username: true },
+                    userGroups: { id: true },
+                },
+            })
             .getData();
-        const currentUser: CurrentUser = {
-            ...d2CurrentUser,
-            authorities: new Set(authorities),
+        const currentUser: User = {
+            id: d2CurrentUser.id,
+            name: d2CurrentUser.name,
             username: d2CurrentUser.userCredentials.username,
+            authorities: new Set(authorities),
+            userGroups: d2CurrentUser.userGroups,
         };
         const isUserAdmin = currentUser.authorities.has("ALL");
 
@@ -134,6 +146,22 @@ export default class Settings {
             return { type: "sharing", users, groups, unknown };
         };
 
+        const buildTemplatesPermission = (
+            templatePermissions: Maybe<TemplatePermissions>
+        ): Record<Id, PermissionValue> => {
+            return _.mapValues(templatePermissions || {}, (permissionsForTemplate): PermissionValue => {
+                if (permissionsForTemplate.all) return { type: "all" };
+
+                const storedValues = permissionsForTemplate.accesses;
+                const allValues = storedValues;
+                const users = permissionsForTemplate.accesses.filter(access => access.type === "user");
+                const groups = permissionsForTemplate.accesses.filter(access => access.type === "userGroup");
+                const unknown = isUserAdmin ? [] : _.differenceBy(allValues, users, groups, "id");
+
+                return { type: "sharing", users, groups, unknown };
+            });
+        };
+
         const permissions = {
             generation: await buildPermission("generation"),
             import: await buildPermission("import"),
@@ -153,6 +181,8 @@ export default class Settings {
             programStageFilter: data.programStageFilter ?? defaultSettings.programStageFilter,
             programStagePopulateEventsForEveryTei:
                 data.programStagePopulateEventsForEveryTei ?? defaultSettings.programStagePopulateEventsForEveryTei,
+            dataFormTemplate: data.dataFormTemplate ?? defaultSettings.dataFormTemplate,
+            templatePermissions: buildTemplatesPermission(data.templatePermissions),
         });
     }
 
@@ -173,6 +203,7 @@ export default class Settings {
             dataSetDataElementsFilter,
             programStageFilter,
             programStagePopulateEventsForEveryTei,
+            dataFormTemplate,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -182,6 +213,23 @@ export default class Settings {
             if (!permission || permission.type !== "sharing") return [];
 
             return [...permission.users, ...permission.groups, ...permission.unknown];
+        };
+
+        const buildTemplatePermissions = (): TemplatePermissions => {
+            const addType = (refs: NamedRef[], type: TemplatePermissionAccess["type"]): TemplatePermissionAccess[] =>
+                refs.map(ref => ({ ...ref, type }));
+
+            return _.mapValues(this.templatePermissions, (permission): TemplatePermission => {
+                if (!permission || permission.type !== "sharing") return { accesses: [], all: true };
+
+                const accesses = _.concat(
+                    addType(permission.users, "user"),
+                    addType(permission.groups, "userGroup"),
+                    addType(permission.unknown, "unknown")
+                );
+
+                return { accesses, all: false };
+            });
         };
 
         const data: AppSettings = {
@@ -200,6 +248,8 @@ export default class Settings {
             dataSetDataElementsFilter,
             programStageFilter,
             programStagePopulateEventsForEveryTei,
+            dataFormTemplate,
+            templatePermissions: buildTemplatePermissions(),
         };
 
         try {
@@ -230,6 +280,13 @@ export default class Settings {
         return permission[getPermissionField(type)];
     }
 
+    getTemplatePermissions(templateId: Id, type: PermissionType): TemplatePermissionAccess[] {
+        const permission = this.templatePermissions[templateId];
+        if (!permission || permission.type !== "sharing") return [];
+
+        return permission[getPermissionField(type)].map(obj => ({ ...obj, type }));
+    }
+
     setPermissions(setting: PermissionSetting, type: PermissionType, collection: NamedRef[]): Settings {
         const permission = this.permissions[setting];
         const field = getPermissionField(type);
@@ -249,13 +306,44 @@ export default class Settings {
         });
     }
 
+    setTemplatePermissions(templateId: Id, type: PermissionType, collection: TemplatePermissionAccess[]): Settings {
+        const permission = this.templatePermissions[templateId];
+        const field = getPermissionField(type);
+        const existing: PermissionValue =
+            !permission || permission.type !== "sharing"
+                ? { type: "sharing", users: [], groups: [], unknown: [] }
+                : permission;
+
+        return this.updateOptions({
+            templatePermissions: {
+                ...this.templatePermissions,
+                [templateId]: { ...existing, [field]: collection },
+            },
+        });
+    }
+
     hasAllPermission(setting: PermissionSetting): boolean {
         return this.permissions[setting].type === "all";
+    }
+
+    hasAllPermissionForTemplate(templateId: string): boolean {
+        const permissionsForTemplate = this.templatePermissions[templateId];
+        return !permissionsForTemplate || this.templatePermissions[templateId]?.type === "all";
     }
 
     setAllPermission(setting: PermissionSetting, value: boolean): Settings {
         const permission = value ? { type: "all" } : { type: "sharing", users: [], groups: [], unknown: [] };
         return this.updateOptions({ permissions: { ...this.permissions, [setting]: permission } });
+    }
+
+    setTemplateAllPermission(templateId: Id, value: boolean): Settings {
+        const permission: PermissionValue = value
+            ? { type: "all" }
+            : { type: "sharing", users: [], groups: [], unknown: [] };
+
+        return this.updateOptions({
+            templatePermissions: { ...this.templatePermissions, [templateId]: permission },
+        });
     }
 
     setDuplicateEnabled(duplicateEnabled: boolean): Settings {
@@ -369,11 +457,39 @@ export default class Settings {
         return this.hasPermissions(this.permissions.import);
     }
 
+    isDataFormVisibleForCurrentUser(dataFormId: Id): boolean {
+        const permission = this.templatePermissions[dataFormId];
+        return !permission || this.hasPermissions(permission);
+    }
+
     getModelsInfo(): Array<{ key: Model; name: string; value: boolean }> {
         return [
             { key: "dataSet", name: i18n.t("Data set"), value: this.models.dataSet },
             { key: "program", name: i18n.t("Program"), value: this.models.program },
         ];
+    }
+
+    getTemplateIdsForDataForm(dataForm: Maybe<Ref>): Id[] | undefined {
+        const { relationships } = this.dataFormTemplate;
+        const hasRelationships = dataForm && dataForm.id in relationships;
+
+        if (dataForm && hasRelationships) {
+            const relationshipsForDataForm = relationships[dataForm.id] || [];
+            return relationshipsForDataForm.map(r => r.templateId);
+        } else {
+            return undefined;
+        }
+    }
+
+    updateDataFormTemplateRelationship(dataForm: Ref, templateIds: Id[]): Settings {
+        const newValue: DataFormTemplate = {
+            relationships: {
+                ...this.dataFormTemplate.relationships,
+                [dataForm.id]: templateIds.map(id => ({ templateId: id })),
+            },
+        };
+
+        return this.update({ dataFormTemplate: newValue });
     }
 
     private hasPermissions(permission: PermissionValue): boolean {
@@ -410,8 +526,6 @@ function mapPermissionSettingToConfig(prop: PermissionSetting) {
             return "permissionsForImport";
         case "settings":
             return "permissionsForSettings";
-        default:
-            throw new Error(`Unknown type ${prop} to map as permission setting`);
     }
 }
 
@@ -423,7 +537,5 @@ function mapPermissionSettingToAllConfig(prop: PermissionSetting) {
             return "allPermissionsForImport";
         case "settings":
             return "allPermissionsForSettings";
-        default:
-            throw new Error(`Unknown type ${prop} to map as all permission setting`);
     }
 }

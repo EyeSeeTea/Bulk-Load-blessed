@@ -6,7 +6,7 @@ import { TemplateSelector, TemplateSelectorState } from "../../components/templa
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../Router";
 
-export default function DownloadTemplatePage({ settings, themes }: RouteComponentProps) {
+export default function DownloadTemplatePage({ settings, themes, customTemplates }: RouteComponentProps) {
     const loading = useLoading();
     const snackbar = useSnackbar();
     const classes = useStyles();
@@ -38,19 +38,26 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
             return;
         }
 
-        if (templateType === "custom" && !!orgUnits) {
-            template.populate = true;
-            template.populateStartDate = template.startDate;
-            template.populateEndDate = template.endDate;
+        let templateToDownload: TemplateSelectorState;
+
+        if (templateType === "custom" && Boolean(orgUnits)) {
+            templateToDownload = {
+                ...template,
+                populate: true,
+                populateStartDate: template.populateStartDate || template.startDate,
+                populateEndDate: template.populateEndDate || template.endDate,
+            };
         } else if (populate && (!populateStartDate || !populateEndDate)) {
             snackbar.info(i18n.t("You need to select start and end dates to populate template"));
             return;
+        } else {
+            templateToDownload = template;
         }
 
         loading.show(true, i18n.t("Downloading template..."));
 
         try {
-            await compositionRoot.templates.download(api, template);
+            await compositionRoot.templates.download(api, templateToDownload);
         } catch (error: any) {
             console.error(error);
             snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
@@ -61,7 +68,12 @@ export default function DownloadTemplatePage({ settings, themes }: RouteComponen
 
     return (
         <React.Fragment>
-            <TemplateSelector settings={settings} themes={themes} onChange={setTemplate} />
+            <TemplateSelector
+                settings={settings}
+                themes={themes}
+                onChange={setTemplate}
+                customTemplates={customTemplates}
+            />
 
             <div className={classes.downloadTemplateRow}>
                 <Button variant="contained" color="primary" onClick={handleTemplateDownloadClick}>

@@ -1,9 +1,11 @@
+import { Maybe } from "../../types/utils";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
 import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
+import { UserTimestamp } from "./User";
 
 export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
@@ -28,6 +30,14 @@ export type StyleSource = {
     source: CellRef | RangeRef;
 };
 
+type Base64String = string;
+
+export interface CustomTemplate extends Omit<CustomTemplateWithUrl, "url"> {
+    file: { name: string; contents: Base64String };
+    created: Maybe<UserTimestamp>;
+    lastUpdated: Maybe<UserTimestamp>;
+}
+
 export type Template = GeneratedTemplate | CustomTemplate;
 
 interface BaseTemplate {
@@ -43,7 +53,6 @@ interface BaseTemplate {
 export interface GeneratedTemplate extends BaseTemplate {
     type: "generated";
     rowOffset: number;
-    colOffset: number;
 }
 
 export interface DownloadCustomizationOptions {
@@ -56,9 +65,10 @@ export interface ImportCustomizationOptions {
     dataPackage: DataPackage;
 }
 
-export interface CustomTemplate extends BaseTemplate {
+export interface CustomTemplateWithUrl extends BaseTemplate {
     type: "custom";
     url: string;
+    description: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
     downloadCustomization?: (
@@ -133,6 +143,7 @@ interface BaseDataSource {
 
 export interface TrackerRelationship {
     type: "rowTeiRelationship";
+    sheetsMatch: string;
     skipPopulate?: boolean;
     range: Range;
     relationshipType: CellRef;
@@ -142,6 +153,7 @@ export interface TrackerRelationship {
 
 export interface TrackerEventRowDataSource {
     type: "rowTrackedEvent";
+    sheetsMatch: string;
     skipPopulate?: boolean;
     teiId: ColumnRef;
     eventId: ColumnRef;
@@ -195,4 +207,47 @@ export interface CellDataSource extends BaseDataSource {
     categoryOption?: CellRef | ValueRef;
     attribute?: CellRef | ValueRef;
     eventId?: CellRef | ValueRef;
+}
+
+interface DataFormRef {
+    type: Maybe<DataFormType>;
+    id: Maybe<string>;
+}
+
+export function getDataFormRef(template: BaseTemplate): DataFormRef {
+    const { dataFormType, dataFormId } = template;
+
+    return {
+        type: dataFormType.type === "value" ? dataFormType.id : undefined,
+        id: dataFormId.type === "value" ? dataFormId.id : undefined,
+    };
+}
+
+export function setSheet<DS extends TrackerRelationship | TrackerEventRowDataSource>(
+    dataSource: DS,
+    sheetName: string
+): DS {
+    const sheet = sheetName;
+
+    switch (dataSource.type) {
+        case "rowTeiRelationship":
+            return {
+                ...dataSource,
+                range: { ...dataSource.range, sheet },
+                relationshipType: { ...dataSource.relationshipType, sheet },
+                from: { ...dataSource.from, sheet },
+                to: { ...dataSource.to, sheet },
+            };
+        case "rowTrackedEvent":
+            return {
+                ...dataSource,
+                teiId: { ...dataSource.teiId, sheet },
+                eventId: { ...dataSource.eventId, sheet },
+                date: { ...dataSource.date, sheet },
+                categoryOptionCombo: { ...dataSource.categoryOptionCombo, sheet },
+                dataValues: { ...dataSource.dataValues, sheet },
+                programStage: { ...dataSource.programStage, sheet },
+                dataElements: { ...dataSource.dataElements, sheet },
+            };
+    }
 }

@@ -1,9 +1,10 @@
-import { CustomTemplate, DataSource, StyleSource } from "../../../domain/entities/Template";
+import { CustomTemplateWithUrl, DataSource, StyleSource } from "../../../domain/entities/Template";
 
-export class NHWAModule401 implements CustomTemplate {
+export class NHWAModule401 implements CustomTemplateWithUrl {
     public readonly type = "custom";
     public readonly id = "NHWA_MODULE_4_v1";
     public readonly name = "NHWA Module 4";
+    public readonly description = "";
     public readonly url = "templates/NHWA_Module_4.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "HtZb6Cg7TXo" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };

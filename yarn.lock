@@ -7473,6 +7473,16 @@ clsx@^1.0.2, clsx@^1.0.4:
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.1.0.tgz#62937c6adfea771247c34b54d320fb99624f5702"
   integrity sha512-3avwM37fSK5oP6M5rQ9CNe99lwxhXDOeSWVPAOYF6OazUTgZCMb0yWlJpmdD74REy1gkEaFiub2ULv4fq9GUhA==
 
+cmd-ts@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/cmd-ts/-/cmd-ts-0.10.0.tgz#bde0e00431477fdfe10bc222f0ae3edd654d8701"
+  integrity sha512-DsVhXSE8yljY96pu+UOlFr67CNrZVCowLh6X1e7sIoLZkR2esoI5Agbokxi8HXu79ow4HBCCI2EcE3t7hrra8Q==
+  dependencies:
+    chalk "^4.0.0"
+    debug "^4.1.1"
+    didyoumean "^1.2.1"
+    strip-ansi "^6.0.0"
+
 co@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
@@ -8527,6 +8537,11 @@ detect-port-alt@1.1.6:
   dependencies:
     address "^1.0.1"
     debug "^2.6.0"
+
+didyoumean@^1.2.1:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/didyoumean/-/didyoumean-1.2.2.tgz#989346ffe9e839b4555ecf5666edea0d3e8ad037"
+  integrity sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==
 
 diff-sequences@^25.2.6:
   version "25.2.6"
