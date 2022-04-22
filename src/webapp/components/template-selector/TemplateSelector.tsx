@@ -170,6 +170,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
             const templateType: TemplateType = customTemplate ? "custom" : "generated";
 
             setState(state => ({ ...state, id: dataFormId, type, templateId, templateType, populate: false }));
+            setFilterOrgUnits(false);
             clearPopulateDates();
             setSelectedOrgUnits([]);
         }
