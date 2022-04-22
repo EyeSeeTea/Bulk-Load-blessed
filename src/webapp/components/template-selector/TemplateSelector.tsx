@@ -234,6 +234,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
     };
 
     const isCustomDataSet = state.templateType === "custom" && state.type === "dataSets";
+    const isMultipleSelection = !isCustomDataSet;
 
     return (
         <React.Fragment>
@@ -330,13 +331,13 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
                                     fullWidth={false}
                                     height={250}
                                     controls={{
-                                        filterByLevel: state.templateType !== "custom",
-                                        filterByGroup: state.templateType !== "custom",
-                                        selectAll: state.templateType !== "custom",
+                                        filterByLevel: isMultipleSelection,
+                                        filterByGroup: isMultipleSelection,
+                                        selectAll: isMultipleSelection,
                                     }}
                                     withElevation={false}
-                                    singleSelection={isCustomDataSet}
-                                    typeInput={isCustomDataSet ? "radio" : undefined}
+                                    singleSelection={!isMultipleSelection}
+                                    typeInput={isMultipleSelection ? undefined : "radio"}
                                 />
                             </div>
                         ) : (
