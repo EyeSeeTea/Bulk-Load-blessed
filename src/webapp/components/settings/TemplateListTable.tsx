@@ -3,6 +3,7 @@ import {
     ConfirmationDialog,
     ObjectsTable,
     PaginationOptions,
+    SearchBox,
     TableAction,
     TableColumn,
     TableSelection,
@@ -10,7 +11,7 @@ import {
     useLoading,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { Button, Icon } from "@material-ui/core";
+import { Button, Icon, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import moment from "moment";
 
@@ -64,9 +65,20 @@ export default function TemplateListTable(props: TemplateListTableProps) {
     const dataForms = useDataForms();
     const dataFormsById = React.useMemo(() => _.keyBy(dataForms, df => df.id), [dataForms]);
 
-    const rows = React.useMemo(() => {
+    const [searchText, search] = React.useState("");
+
+    const allRows = React.useMemo(() => {
         return buildCustomTemplateRow(dataFormsById, customTemplates);
     }, [dataFormsById, customTemplates]);
+
+    const rows = React.useMemo(() => {
+        const searchText2 = searchText.toLowerCase().trim();
+        return searchText2
+            ? allRows.filter(row => {
+                  return row.id.toLowerCase().includes(searchText2) || row.name.toLowerCase().includes(searchText2);
+              })
+            : allRows;
+    }, [allRows, searchText]);
 
     const newTemplate = () => {
         setCustomTemplateEdit({ type: "new" });
@@ -214,6 +226,8 @@ export default function TemplateListTable(props: TemplateListTableProps) {
         setSettingsState({ type: "closed" });
     }, []);
 
+    const classes = useStyles();
+
     return (
         <React.Fragment>
             {warningDialog && (
@@ -256,9 +270,19 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                 onChange={onTableChange}
                 paginationOptions={paginationOptions}
                 filterComponents={
-                    <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
-                        {i18n.t("Create template")}
-                    </Button>
+                    <React.Fragment key="filters">
+                        <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
+                            {i18n.t("Create template")}
+                        </Button>
+
+                        <SearchBox
+                            key="objects-table-search-box"
+                            className={classes.searchBox}
+                            value={searchText}
+                            hintText={i18n.t("Search by name/code")}
+                            onChange={search}
+                        />
+                    </React.Fragment>
                 }
             />
         </React.Fragment>
@@ -324,3 +348,7 @@ const paginationOptions: PaginationOptions = {
     pageSizeOptions: [10, 20],
     pageSizeInitialValue: 10,
 };
+
+const useStyles = makeStyles({
+    searchBox: { maxWidth: "500px", width: "30%", marginLeft: 20 },
+});
