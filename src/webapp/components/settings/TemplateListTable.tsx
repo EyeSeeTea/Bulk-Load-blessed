@@ -19,14 +19,15 @@ import i18n from "../../../locales";
 import { RouteComponentProps } from "../../pages/Router";
 import { promiseMap } from "../../../utils/promises";
 import { CustomTemplate } from "../../../domain/entities/Template";
-import { firstOrFail } from "../../../types/utils";
+import { firstOrFail, isValueInUnionType } from "../../../types/utils";
 import { TemplatePermissionsDialog } from "./TemplatePermissionsDialog";
 import { useAppContext } from "../../contexts/app-context";
 import { FormMode, CustomTemplateEditDialog } from "./TemplateEditDialog";
 import { downloadFile } from "../../utils/download";
-import { DataForm, DataFormType, getTranslations } from "../../../domain/entities/DataForm";
+import { DataForm, DataFormType, dataFormTypes, getTranslations } from "../../../domain/entities/DataForm";
 import { fromBase64, xlsxMimeType } from "../../../utils/files";
 import { useDataForms } from "../../hooks/useDataForms";
+import { Select, SelectProps } from "../select/Select";
 
 interface WarningDialog {
     title?: string;
@@ -65,20 +66,12 @@ export default function TemplateListTable(props: TemplateListTableProps) {
     const dataForms = useDataForms();
     const dataFormsById = React.useMemo(() => _.keyBy(dataForms, df => df.id), [dataForms]);
 
-    const [searchText, search] = React.useState("");
-
     const allRows = React.useMemo(() => {
         return buildCustomTemplateRow(dataFormsById, customTemplates);
     }, [dataFormsById, customTemplates]);
 
-    const rows = React.useMemo(() => {
-        const searchText2 = searchText.toLowerCase().trim();
-        return searchText2
-            ? allRows.filter(row => {
-                  return row.id.toLowerCase().includes(searchText2) || row.name.toLowerCase().includes(searchText2);
-              })
-            : allRows;
-    }, [allRows, searchText]);
+    const { rows, searchText, search, dataFormTypeOptions, dataFormType, setDataFormTypeFromOption } =
+        useFilters(allRows);
 
     const newTemplate = () => {
         setCustomTemplateEdit({ type: "new" });
@@ -271,10 +264,6 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                 paginationOptions={paginationOptions}
                 filterComponents={
                     <React.Fragment key="filters">
-                        <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
-                            {i18n.t("Create template")}
-                        </Button>
-
                         <SearchBox
                             key="objects-table-search-box"
                             className={classes.searchBox}
@@ -282,6 +271,22 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                             hintText={i18n.t("Search by name/code")}
                             onChange={search}
                         />
+                        <div className={classes.dataFormSelect}>
+                            <Select
+                                placeholder={i18n.t("Data Form Type")}
+                                options={dataFormTypeOptions}
+                                onChange={setDataFormTypeFromOption}
+                                value={dataFormType}
+                                allowEmpty
+                                emptyLabel={i18n.t("All")}
+                            />
+                        </div>
+
+                        <div className={classes.createTemplateButton}>
+                            <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
+                                {i18n.t("Create template")}
+                            </Button>
+                        </div>
                     </React.Fragment>
                 }
             />
@@ -350,5 +355,42 @@ const paginationOptions: PaginationOptions = {
 };
 
 const useStyles = makeStyles({
+    createTemplateButton: { marginLeft: 20 },
+    dataFormSelect: { width: 150, marginLeft: 20, marginTop: -9 },
     searchBox: { maxWidth: "500px", width: "30%", marginLeft: 20 },
 });
+
+function useFilters(allRows: TemplateRow[]) {
+    const [searchText, search] = React.useState("");
+
+    const dataFormTypeOptions = React.useMemo(() => {
+        return [
+            { value: "dataSets", label: i18n.t("Data Set") },
+            { value: "programs", label: i18n.t("Event Program") },
+            { value: "trackerPrograms", label: i18n.t("Tracker Program") },
+        ];
+    }, []);
+
+    const [dataFormType, setDataFormType] = React.useState<DataFormType>();
+
+    const setDataFormTypeFromOption = React.useCallback<SelectProps["onChange"]>(option => {
+        if (!option.value) {
+            setDataFormType(undefined);
+        } else if (isValueInUnionType(option.value, dataFormTypes)) {
+            setDataFormType(option.value);
+        }
+    }, []);
+
+    const rowsByText = React.useMemo(() => {
+        const text = searchText.toLowerCase().trim();
+        return text
+            ? allRows.filter(row => row.id.toLowerCase().includes(text) || row.name.toLowerCase().includes(text))
+            : allRows;
+    }, [allRows, searchText]);
+
+    const rows = React.useMemo(() => {
+        return dataFormType ? rowsByText.filter(row => row.dataFormType === dataFormType) : rowsByText;
+    }, [dataFormType, rowsByText]);
+
+    return { rows, searchText, search, dataFormTypeOptions, dataFormType, setDataFormTypeFromOption };
+}
