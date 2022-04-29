@@ -3,6 +3,7 @@ import {
     ConfirmationDialog,
     ObjectsTable,
     PaginationOptions,
+    SearchBox,
     TableAction,
     TableColumn,
     TableSelection,
@@ -10,7 +11,7 @@ import {
     useLoading,
     useSnackbar,
 } from "@eyeseetea/d2-ui-components";
-import { Button, Icon } from "@material-ui/core";
+import { Button, Icon, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import moment from "moment";
 
@@ -25,7 +26,8 @@ import { FormMode, CustomTemplateEditDialog } from "./TemplateEditDialog";
 import { downloadFile } from "../../utils/download";
 import { DataForm, DataFormType, dataFormTypes, getTranslations } from "../../../domain/entities/DataForm";
 import { fromBase64, xlsxMimeType } from "../../../utils/files";
-import { useDataForms } from "./settings.hooks";
+import { useDataForms } from "../../hooks/useDataForms";
+import { Select, SelectProps } from "../select/Select";
 
 interface WarningDialog {
     title?: string;
@@ -62,9 +64,14 @@ export default function TemplateListTable(props: TemplateListTableProps) {
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
     const dataForms = useDataForms();
-    const dataFormsById = React.useMemo(() => _.keyBy(dataForms.objects, df => df.id), [dataForms.objects]);
+    const dataFormsById = React.useMemo(() => _.keyBy(dataForms, df => df.id), [dataForms]);
 
-    const rows = buildCustomTemplateRow(dataFormsById, customTemplates);
+    const allRows = React.useMemo(() => {
+        return buildCustomTemplateRow(dataFormsById, customTemplates);
+    }, [dataFormsById, customTemplates]);
+
+    const { rows, searchText, search, dataFormTypeOptions, dataFormType, setDataFormTypeFromOption } =
+        useFilters(allRows);
 
     const newTemplate = () => {
         setCustomTemplateEdit({ type: "new" });
@@ -212,6 +219,8 @@ export default function TemplateListTable(props: TemplateListTableProps) {
         setSettingsState({ type: "closed" });
     }, []);
 
+    const classes = useStyles();
+
     return (
         <React.Fragment>
             {warningDialog && (
@@ -254,9 +263,31 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                 onChange={onTableChange}
                 paginationOptions={paginationOptions}
                 filterComponents={
-                    <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
-                        {i18n.t("Create template")}
-                    </Button>
+                    <React.Fragment key="filters">
+                        <SearchBox
+                            key="objects-table-search-box"
+                            className={classes.searchBox}
+                            value={searchText}
+                            hintText={i18n.t("Search by name/code")}
+                            onChange={search}
+                        />
+                        <div className={classes.dataFormSelect}>
+                            <Select
+                                placeholder={i18n.t("Data Form Type")}
+                                options={dataFormTypeOptions}
+                                onChange={setDataFormTypeFromOption}
+                                value={dataFormType}
+                                allowEmpty
+                                emptyLabel={i18n.t("All")}
+                            />
+                        </div>
+
+                        <div className={classes.createTemplateButton}>
+                            <Button variant="contained" color="primary" onClick={newTemplate} disableElevation>
+                                {i18n.t("Create template")}
+                            </Button>
+                        </div>
+                    </React.Fragment>
                 }
             />
         </React.Fragment>
@@ -267,42 +298,51 @@ function buildCustomTemplateRow(
     dataFormsById: _.Dictionary<DataForm>,
     customTemplates: CustomTemplate[]
 ): TemplateRow[] {
-    return _(customTemplates)
-        .flatMap(({ id, name, description, created, lastUpdated, dataFormId, dataFormType }) => {
-            const dataFormId_ = dataFormId.type === "value" ? dataFormId.id : undefined;
-            const dataFormType_ = dataFormType.type === "value" ? dataFormType.id : undefined;
-            if (!dataFormId_) return [];
-            if (!(dataFormType_ && isValueInUnionType(dataFormType_, dataFormTypes))) return [];
-            const dataFormName = dataFormsById[dataFormId_]?.name || name;
+    const customTemplatesByDataFormId = _(customTemplates)
+        .keyBy(template => (template.dataFormId.type === "value" ? template.dataFormId.id : ""))
+        .value();
 
-            const customRow: TemplateRow = {
-                type: "custom",
-                id,
-                name,
-                description,
-                created: created ? `${created.user.username} (${formatDate(created.timestamp)})` : "-",
-                lastUpdated: lastUpdated ? `${lastUpdated.user.username} (${formatDate(lastUpdated.timestamp)})` : "-",
-                dataFormId: dataFormId_,
-                dataFormType: dataFormType_,
-                dataFormName,
-            };
+    const rows = _(dataFormsById)
+        .flatMap((dataForm, dataFormId) => {
+            const customTemplate = customTemplatesByDataFormId[dataFormId];
+
+            const customRow: TemplateRow | undefined = customTemplate
+                ? {
+                      type: "custom",
+                      id: customTemplate.id,
+                      name: customTemplate.name,
+                      description: customTemplate.description,
+                      created: customTemplate.created
+                          ? `${customTemplate.created.user.username} (${formatDate(customTemplate.created.timestamp)})`
+                          : "-",
+                      lastUpdated: customTemplate.lastUpdated
+                          ? `${customTemplate.lastUpdated.user.username} (${formatDate(
+                                customTemplate.lastUpdated.timestamp
+                            )})`
+                          : "-",
+                      dataFormId: dataForm.id,
+                      dataFormType: dataForm.type,
+                      dataFormName: dataForm.name,
+                  }
+                : undefined;
 
             const autogeneratedRow: TemplateRow = {
-                ...customRow,
-                name: dataFormName,
-                id: dataFormId_,
                 type: "autogenerated",
+                name: dataForm.name,
+                id: dataForm.id,
                 description: "",
                 created: "",
                 lastUpdated: "",
-                dataFormId: dataFormId_,
-                dataFormType: dataFormType_,
-                dataFormName,
+                dataFormId: dataForm.id,
+                dataFormType: dataForm.type,
+                dataFormName: dataForm.name,
             };
 
-            return [customRow, autogeneratedRow];
+            return _.compact([customRow, autogeneratedRow]);
         })
         .value();
+
+    return rows;
 }
 
 function formatDate(timestamp: string): string {
@@ -313,3 +353,44 @@ const paginationOptions: PaginationOptions = {
     pageSizeOptions: [10, 20],
     pageSizeInitialValue: 10,
 };
+
+const useStyles = makeStyles({
+    createTemplateButton: { marginLeft: 20 },
+    dataFormSelect: { width: 150, marginLeft: 20, marginTop: -9 },
+    searchBox: { maxWidth: "500px", width: "30%", marginLeft: 20 },
+});
+
+function useFilters(allRows: TemplateRow[]) {
+    const [searchText, search] = React.useState("");
+
+    const dataFormTypeOptions = React.useMemo(() => {
+        return [
+            { value: "dataSets", label: i18n.t("Data Set") },
+            { value: "programs", label: i18n.t("Event Program") },
+            { value: "trackerPrograms", label: i18n.t("Tracker Program") },
+        ];
+    }, []);
+
+    const [dataFormType, setDataFormType] = React.useState<DataFormType>();
+
+    const setDataFormTypeFromOption = React.useCallback<SelectProps["onChange"]>(option => {
+        if (!option.value) {
+            setDataFormType(undefined);
+        } else if (isValueInUnionType(option.value, dataFormTypes)) {
+            setDataFormType(option.value);
+        }
+    }, []);
+
+    const rowsByText = React.useMemo(() => {
+        const text = searchText.toLowerCase().trim();
+        return text
+            ? allRows.filter(row => row.id.toLowerCase().includes(text) || row.name.toLowerCase().includes(text))
+            : allRows;
+    }, [allRows, searchText]);
+
+    const rows = React.useMemo(() => {
+        return dataFormType ? rowsByText.filter(row => row.dataFormType === dataFormType) : rowsByText;
+    }, [dataFormType, rowsByText]);
+
+    return { rows, searchText, search, dataFormTypeOptions, dataFormType, setDataFormTypeFromOption };
+}
