@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-20T12:30:37.694Z\n"
+"POT-Creation-Date: 2022-04-29T09:28:31.324Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -429,6 +429,9 @@ msgstr "Удалить"
 
 msgid "Ok"
 msgstr "Хорошо"
+
+msgid "Search by name/code"
+msgstr ""
 
 #, fuzzy
 msgid "Create template"

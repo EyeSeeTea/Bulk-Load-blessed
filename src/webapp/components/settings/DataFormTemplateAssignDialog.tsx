@@ -10,7 +10,7 @@ import { useAppContext } from "../../contexts/app-context";
 import { modelToSelectOption } from "../../utils/refs";
 import { Select } from "../select/Select";
 import { SettingsFieldsProps } from "./SettingsFields";
-import { useDataForms } from "./settings.hooks";
+import { useDataFormsSelector } from "../../hooks/useDataForms";
 
 export interface ModuleTemplateDialogProps extends SettingsFieldsProps {
     title: string;
@@ -25,7 +25,7 @@ export function DataFormTemplateAssignDialog(props: ModuleTemplateDialogProps): 
 
     const [templates, setTemplates] = useState<NamedRef[]>([]);
 
-    const dataForms = useDataForms();
+    const dataForms = useDataFormsSelector();
     const selectedDataForm = dataForms.selected;
 
     useEffect(() => {

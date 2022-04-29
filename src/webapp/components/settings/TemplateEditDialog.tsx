@@ -17,7 +17,7 @@ import i18n from "../../../locales";
 import { Select } from "../select/Select";
 import { CustomTemplate } from "../../../domain/entities/Template";
 import React from "react";
-import { useDataForms } from "./settings.hooks";
+import { useDataFormsSelector } from "../../hooks/useDataForms";
 import {
     TemplateView as ViewModel,
     TemplateViewActions as ViewModelActions,
@@ -102,7 +102,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
 
     const translations = React.useMemo(() => ViewModelActions.getTranslations(), []);
     const snackbar = useSnackbar();
-    const dataForms = useDataForms({
+    const dataForms = useDataFormsSelector({
         type: template.dataFormType || undefined,
         initialSelectionId: template.dataFormId || undefined,
     });
