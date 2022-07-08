@@ -32,7 +32,7 @@
         "lodash": "4.17.21",
         "lodash.product": "18.9.19",
         "md5": "2.3.0",
-        "moment": "2.29.1",
+        "moment": "2.29.4",
         "prop-types": "15.8.1",
         "purify-ts": "1.1.0",
         "purify-ts-extra-codec": "0.6.0",
