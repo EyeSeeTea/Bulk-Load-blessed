@@ -253,7 +253,9 @@ async function getConstraintForTypeTei(
         fields: "trackedEntityInstance",
     } as const;
 
-    const results = await promiseMap(_.chunk(query.ou, 250), async ouChunk => {
+    const orgUnitsChunks = query.ou ? _.chunk(query.ou, 250) : [[]];
+
+    const results = await promiseMap(orgUnitsChunks, async ouChunk => {
         const filterQuery =
             query.ouMode === "SELECTED" || query.ouMode === "CHILDREN" || query.ouMode === "DESCENDANTS"
                 ? { ...query, ou: ouChunk }
