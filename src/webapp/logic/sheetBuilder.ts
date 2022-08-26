@@ -60,6 +60,7 @@ export class SheetBuilder {
     private relationshipsSheets: any;
     private dataEntrySheet: any;
     private legendSheet: any;
+    private dataSetSheet: any;
     private validationSheet: any;
     private metadataSheet: any;
 
@@ -73,6 +74,7 @@ export class SheetBuilder {
     public generate() {
         const { builder } = this;
         const { element } = builder;
+        const { rawMetadata } = this.builder;
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -100,6 +102,12 @@ export class SheetBuilder {
         } else {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
+
+        _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
+            const { name } = this.translate(item);
+            this.dataSetSheet = this.workbook.addWorksheet(name, protectedSheet);
+            this.fillDataSetSheet();
+        });
 
         this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
         this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
@@ -403,6 +411,24 @@ export class SheetBuilder {
             const validation = this.validations.get(validationId);
             this.createColumn(sheet, itemRow, 6 + idx, `_${tea.id}`, 1, validation);
             idx++;
+        });
+    }
+
+    private fillDataSetSheet() {
+        const { rawMetadata } = this.builder;
+        const dataSetSheet = this.dataSetSheet;
+
+        // Freeze and format column titles
+        dataSetSheet.row(2).freeze();
+        dataSetSheet.column(1).setWidth(50);
+
+        _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
+            const { name } = this.translate(item);
+
+            dataSetSheet
+                .cell(1, 1, 2, 1, true)
+                .string(name ?? "")
+                .style(baseStyle);
         });
     }
 
