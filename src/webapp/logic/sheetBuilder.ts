@@ -73,8 +73,7 @@ export class SheetBuilder {
 
     public generate() {
         const { builder } = this;
-        const { element } = builder;
-        const { rawMetadata } = this.builder;
+        const { element, rawMetadata } = builder;
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -103,11 +102,14 @@ export class SheetBuilder {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
 
-        _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
-            const { name } = this.translate(item);
-            this.dataSetSheet = this.workbook.addWorksheet(name, protectedSheet);
-            this.fillDataSetSheet();
-        });
+        if (element.formType === "SECTION") {
+            _.sortBy(rawMetadata["sections"], ["name", "id"]).forEach(item => {
+                const { name } = this.translate(item);
+
+                this.dataSetSheet = this.workbook.addWorksheet(name, protectedSheet);
+                this.fillSectionSheet(item.id);
+            });
+        }
 
         this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
         this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
@@ -414,7 +416,7 @@ export class SheetBuilder {
         });
     }
 
-    private fillDataSetSheet() {
+    private fillSectionSheet(id: any) {
         const { rawMetadata } = this.builder;
         const dataSetSheet = this.dataSetSheet;
 
@@ -422,13 +424,11 @@ export class SheetBuilder {
         dataSetSheet.row(2).freeze();
         dataSetSheet.column(1).setWidth(50);
 
-        _.sortBy(rawMetadata["dataElements"], ["name"]).forEach(item => {
-            const { name } = this.translate(item);
-
-            dataSetSheet
-                .cell(1, 1, 2, 1, true)
-                .string(name ?? "")
-                .style(baseStyle);
+        _.find(rawMetadata.sections, item => {
+            if (item.id === id) {
+                dataSetSheet.cell(1, 1, 2, 1, true).string(item.name ?? "");
+                return true;
+            }
         });
     }
 
