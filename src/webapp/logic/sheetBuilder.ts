@@ -98,15 +98,15 @@ export class SheetBuilder {
                     }
                 );
             }
-        } else {
+        } else if (element.formType !== "SECTION") {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
 
-        if (element.formType === "SECTION") {
+        if (element.formType === "SECTION" && element.type === "dataSets") {
             _.sortBy(rawMetadata["sections"], ["name", "id"]).forEach(item => {
                 const { name } = this.translate(item);
 
-                this.dataSetSheet = this.workbook.addWorksheet(name, protectedSheet);
+                this.dataSetSheet = this.workbook.addWorksheet(`Data Entry- ${name}`, protectedSheet);
                 this.fillSectionSheet(item.id);
             });
         }
@@ -123,7 +123,7 @@ export class SheetBuilder {
             this.fillInstancesSheet();
             this.fillProgramStageSheets();
             this.fillRelationshipSheets();
-        } else {
+        } else if (element.formType !== "SECTION") {
             this.fillDataEntrySheet();
         }
 
@@ -417,16 +417,73 @@ export class SheetBuilder {
     }
 
     private fillSectionSheet(id: any) {
-        const { rawMetadata } = this.builder;
+        const { element, elementMetadata: metadata, rawMetadata } = this.builder;
         const dataSetSheet = this.dataSetSheet;
+        const { rowOffset = 0 } = this.builder.template;
+
+        // Add cells for themes
+        const sectionRow = rowOffset + 1;
+        const itemRow = rowOffset + 2;
+
+        // Hide theme rows by default
+        for (let row = 1; row < sectionRow; row++) {
+            dataSetSheet.row(row).hide();
+        }
 
         // Freeze and format column titles
-        dataSetSheet.row(2).freeze();
-        dataSetSheet.column(1).setWidth(50);
+        dataSetSheet.row(itemRow).freeze();
+        dataSetSheet.row(sectionRow).setHeight(30);
+        dataSetSheet.row(itemRow).setHeight(50);
 
+        // Add template version
+        dataSetSheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
+
+        // Add column titles
+        let columnId = 1;
+
+        this.createColumn(
+            dataSetSheet,
+            itemRow,
+            columnId++,
+            i18n.t("Org Unit *", { lng: this.builder.language }),
+            null,
+            this.validations.get("organisationUnits"),
+            "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
+        );
+
+        this.createColumn(
+            dataSetSheet,
+            itemRow,
+            columnId++,
+            i18n.t("Period", { lng: this.builder.language }),
+            null,
+            this.validations.get("periods")
+        );
+
+        const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
+        const optionsTitle =
+            attributeCode !== "default"
+                ? `_${element.categoryCombo.id}`
+                : i18n.t("Options", { lng: this.builder.language });
+
+        this.createColumn(dataSetSheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
+
+        // Add dataSet title
+        dataSetSheet
+            .cell(sectionRow, 1, sectionRow, columnId - 1, true)
+            .formula(`_${element.id}`)
+            .style({ ...baseStyle, font: { size: 16, bold: true } });
+
+        let rowId = 6;
         _.find(rawMetadata.sections, item => {
             if (item.id === id) {
-                dataSetSheet.cell(1, 1, 2, 1, true).string(item.name ?? "");
+                this.createColumn(dataSetSheet, itemRow, columnId++, item.name);
+                _.forEach(item.dataElements, dataElement => {
+                    dataSetSheet
+                        .cell(rowId, 4)
+                        .string(rawMetadata.dataElements.find((i: { id: any }) => i.id === dataElement.id).name ?? "");
+                    rowId++;
+                });
                 return true;
             }
         });
