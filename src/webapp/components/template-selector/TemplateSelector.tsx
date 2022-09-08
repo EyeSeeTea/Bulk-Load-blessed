@@ -138,9 +138,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
         clearPopulateDates();
         setTemplates(options);
-        setSelectedOrgUnits([]);
         setOrgUnitTreeFilter([]);
-        setUserHasReadAccess(false);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
