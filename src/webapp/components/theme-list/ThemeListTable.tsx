@@ -11,13 +11,17 @@ import {
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { ReactNode, useState } from "react";
-import { Theme } from "../../../domain/entities/Theme";
+import { SharingSettings, Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/Router";
 import { promiseMap } from "../../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
+import { ThemePermissionsDialog } from "./ThemePermissionsDialog";
+import { firstOrFail } from "../../../types/utils";
+import { getCurrentUser } from "../../logic/utils";
+import { User } from "../../../domain/entities/User";
 
 interface WarningDialog {
     title?: string;
@@ -32,20 +36,48 @@ export interface ThemeDetail {
     subtitle: string;
     logo: ReactNode;
     palette: string[];
+    users: SharingSettings[];
+    userGroups: SharingSettings[];
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
 
 export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
-    const { compositionRoot } = useAppContext();
+    const { api, compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
+
+    const [currentUser, setCurrentUser] = useState<User>();
+    getCurrentUser(api).then(user => setCurrentUser(user));
+
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
     const rows = buildThemeDetails(themes);
+    const usersVisibility = rows
+        .map(row => row.users)
+        .map(user => user.map(u => u.id))
+        .map(u => {
+            const arr = u.map(id => {
+                return currentUser?.id === id;
+            });
+            return arr.every(Boolean) && !!arr.length;
+        });
+
+    const userGroupsVisibility = rows
+        .map(row => row.userGroups)
+        .map(userGroup => userGroup.map(uG => uG.id))
+        .map(uG => {
+            const arr = uG.map(id => {
+                return currentUser?.userGroups.map(userGroup => userGroup.id).some(uGID => uGID === id);
+            });
+            return arr.every(Boolean) && !!arr.length;
+        });
+
+    const newRows = rows.map((item, i) => ({ ...item, visible: userGroupsVisibility[i] || usersVisibility[i] }));
+    const rowsToShow = newRows.filter(row => row.visible === true);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
@@ -109,6 +141,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 
     const actions: TableAction<ThemeDetail>[] = [
         {
+            name: "sharing",
+            text: i18n.t("Sharing Settings"),
+            onClick: selectedIds => setSettingsState({ type: "open", id: firstOrFail(selectedIds) }),
+            icon: <Icon>share</Icon>,
+        },
+        {
             name: "edit",
             text: i18n.t("Edit"),
             primary: true,
@@ -126,6 +164,13 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const onTableChange = ({ selection }: TableState<ThemeDetail>) => {
         setSelection(selection);
     };
+
+    type SettingsState = { type: "closed" } | { type: "open"; id: string };
+    const [settingsState, setSettingsState] = useState<SettingsState>({ type: "closed" });
+
+    const closeSettings = React.useCallback(() => {
+        setSettingsState({ type: "closed" });
+    }, []);
 
     return (
         <React.Fragment>
@@ -152,8 +197,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
                 />
             )}
 
+            {settingsState.type === "open" && (
+                <ThemePermissionsDialog onClose={closeSettings} rows={rows} themeId={settingsState.id} />
+            )}
+
             <ObjectsTable<ThemeDetail>
-                rows={rows}
+                rows={rowsToShow}
                 columns={columns}
                 actions={actions}
                 selection={selection}
@@ -169,12 +218,14 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 }
 
 function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
-    return themes.map(({ id, name, sections, pictures, palette }) => ({
+    return themes.map(({ id, name, sections, pictures, palette, sharing }) => ({
         id,
         name,
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
         logo: pictures?.logo?.src ? <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" /> : null,
         palette,
+        users: sharing?.users ?? [],
+        userGroups: sharing?.userGroups ?? [],
     }));
 }

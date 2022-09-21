@@ -32,6 +32,11 @@ export interface CellImage {
     src: string;
 }
 
+export interface SharingSettings {
+    access: string;
+    id: string;
+}
+
 export class Theme {
     public readonly id: Id;
     public readonly name: string;
@@ -43,6 +48,12 @@ export class Theme {
     public readonly pictures?: {
         [key in ImageSections]?: CellImage;
     };
+    public readonly sharing?: {
+        external: boolean;
+        public: string;
+        userGroups: SharingSettings[];
+        users: SharingSettings[];
+    };
 
     constructor({
         id = generateUid(),
@@ -51,6 +62,12 @@ export class Theme {
         palette = defaultColorScale,
         sections = {},
         pictures = {},
+        sharing = {
+            external: false,
+            public: "",
+            userGroups: [],
+            users: []
+        },
     }: Partial<Theme> = {}) {
         this.id = id;
         this.name = name;
@@ -58,6 +75,7 @@ export class Theme {
         this.palette = palette;
         this.sections = sections;
         this.pictures = pictures;
+        this.sharing = sharing;
     }
 
     private update(partialUpdate: Partial<Theme>): Theme {
