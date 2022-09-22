@@ -1,6 +1,7 @@
 import {
     ConfirmationDialog,
     ObjectsTable,
+    SharingRule,
     TableAction,
     TableColumn,
     TableSelection,
@@ -11,7 +12,7 @@ import {
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { ReactNode, useState } from "react";
-import { SharingSettings, Theme } from "../../../domain/entities/Theme";
+import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/Router";
@@ -36,8 +37,8 @@ export interface ThemeDetail {
     subtitle: string;
     logo: ReactNode;
     palette: string[];
-    users: SharingSettings[];
-    userGroups: SharingSettings[];
+    users: SharingRule[];
+    userGroups: SharingRule[];
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
@@ -63,7 +64,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             const arr = u.map(id => {
                 return currentUser?.id === id;
             });
-            return arr.every(Boolean) && !!arr.length;
+            return arr.every(Boolean) && arr.length !== 0;
         });
 
     const userGroupsVisibility = rows
@@ -73,7 +74,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             const arr = uG.map(id => {
                 return currentUser?.userGroups.map(userGroup => userGroup.id).some(uGID => uGID === id);
             });
-            return arr.every(Boolean) && !!arr.length;
+            return arr.every(Boolean) && arr.length !== 0;
         });
 
     const newRows = rows.map((item, i) => ({ ...item, visible: userGroupsVisibility[i] || usersVisibility[i] }));

@@ -1,3 +1,4 @@
+import { SharingRule } from "@eyeseetea/d2-ui-components";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { defaultColorScale } from "../../webapp/utils/colors";
@@ -32,11 +33,6 @@ export interface CellImage {
     src: string;
 }
 
-export interface SharingSettings {
-    access: string;
-    id: string;
-}
-
 export class Theme {
     public readonly id: Id;
     public readonly name: string;
@@ -51,8 +47,8 @@ export class Theme {
     public readonly sharing?: {
         external: boolean;
         public: string;
-        userGroups: SharingSettings[];
-        users: SharingSettings[];
+        userGroups: SharingRule[];
+        users: SharingRule[];
     };
 
     constructor({
