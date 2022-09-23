@@ -48,14 +48,12 @@ export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
         return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
             const newThemes = themes.map((theme): Theme => {
                 if (theme.id !== themeId) return theme;
-                return theme.updateSharing(
-                    {
-                        external: false,
-                        public: "",
-                        users: users ?? [],
-                        userGroups: userGroups ?? [],
-                    }
-                );
+                return theme.updateSharing({
+                    external: false,
+                    public: "",
+                    users: users ?? [],
+                    userGroups: userGroups ?? [],
+                });
             });
 
             onChange(newThemes);
