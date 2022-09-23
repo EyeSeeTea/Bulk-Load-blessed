@@ -62,7 +62,7 @@ export class Theme {
             external: false,
             public: "",
             userGroups: [],
-            users: []
+            users: [],
         },
     }: Partial<Theme> = {}) {
         this.id = id;
@@ -98,6 +98,10 @@ export class Theme {
 
     public updateColorPalette(palette: string[]): Theme {
         return this.update({ palette });
+    }
+
+    public updateSharing(sharing: Theme["sharing"]): Theme {
+        return this.update({ sharing });
     }
 
     public validate(): Validation {

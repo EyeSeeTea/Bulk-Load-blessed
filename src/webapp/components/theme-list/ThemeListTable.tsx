@@ -199,7 +199,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             )}
 
             {settingsState.type === "open" && (
-                <ThemePermissionsDialog onClose={closeSettings} rows={rows} themeId={settingsState.id} />
+                <ThemePermissionsDialog onClose={closeSettings} rows={themes} themeId={settingsState.id} onChange={setThemes} />
             )}
 
             <ObjectsTable<ThemeDetail>
