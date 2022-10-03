@@ -33,6 +33,13 @@ export interface CellImage {
     src: string;
 }
 
+const defaultSharing = {
+    external: false,
+    public: "",
+    userGroups: [],
+    users: [],
+};
+
 export class Theme {
     public readonly id: Id;
     public readonly name: string;
@@ -44,7 +51,7 @@ export class Theme {
     public readonly pictures?: {
         [key in ImageSections]?: CellImage;
     };
-    public readonly sharing?: {
+    public readonly sharing: {
         external: boolean;
         public: string;
         userGroups: SharingRule[];
@@ -58,12 +65,7 @@ export class Theme {
         palette = defaultColorScale,
         sections = {},
         pictures = {},
-        sharing = {
-            external: false,
-            public: "",
-            userGroups: [],
-            users: [],
-        },
+        sharing = defaultSharing,
     }: Partial<Theme> = {}) {
         this.id = id;
         this.name = name;

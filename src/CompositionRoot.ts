@@ -27,6 +27,7 @@ import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRoot
 import { GetGeneratedTemplatesUseCase } from "./domain/usecases/GetGeneratedTemplatesUseCase";
 import { GetMigrationVersionsUseCase } from "./domain/usecases/GetMigrationVersionsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
+import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { HasPendingMigrationsUseCase } from "./domain/usecases/HasPendingMigrationsUseCase";
 import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
@@ -100,6 +101,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             hasPending: new HasPendingMigrationsUseCase(migrations),
         }),
         users: getExecute({
+            getCurrentUser: new GetCurrentUserUseCase(usersRepository),
             search: new SearchUsersUseCase(usersRepository),
         }),
     };

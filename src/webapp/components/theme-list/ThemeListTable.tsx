@@ -11,7 +11,7 @@ import {
 } from "@eyeseetea/d2-ui-components";
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
@@ -21,8 +21,8 @@ import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 import { ThemePermissionsDialog } from "./ThemePermissionsDialog";
 import { firstOrFail } from "../../../types/utils";
-import { getCurrentUser } from "../../logic/utils";
 import { User } from "../../../domain/entities/User";
+import { Id } from "../../../types/d2-api";
 
 interface WarningDialog {
     title?: string;
@@ -42,42 +42,46 @@ export interface ThemeDetail {
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
+type SettingsState = { type: "closed" } | { type: "open"; id: string };
 
 export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
-    const { api, compositionRoot } = useAppContext();
+    const { compositionRoot } = useAppContext();
     const snackbar = useSnackbar();
     const loading = useLoading();
 
     const [selection, setSelection] = useState<TableSelection[]>([]);
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
-
-    const [currentUser, setCurrentUser] = useState<User>();
-    getCurrentUser(api).then(user => setCurrentUser(user));
-
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
+    const [currentUser, setCurrentUser] = useState<User>();
+    useEffect(() => {
+        compositionRoot.users.getCurrentUser().then(user => setCurrentUser(user));
+    }, [compositionRoot.users]);
+
     const rows = buildThemeDetails(themes);
-    const usersVisibility = rows
-        .map(row => row.users)
-        .map(user => user.map(u => u.id))
-        .map(u => {
-            const arr = u.map(id => {
-                return currentUser?.id === id;
-            });
-            return arr.every(Boolean) && arr.length !== 0;
-        });
+    const usersVisibility: Record<Id, boolean> = _(rows)
+        .map((themeDetail): [Id, boolean] => {
+            const isCurrentUserInUsers = _(themeDetail.users).some(user => user.id === currentUser?.id);
+            return [themeDetail.id, isCurrentUserInUsers];
+        })
+        .fromPairs()
+        .value();
 
-    const userGroupsVisibility = rows
-        .map(row => row.userGroups)
-        .map(userGroup => userGroup.map(uG => uG.id))
-        .map(uG => {
-            const arr = uG.map(id => {
-                return currentUser?.userGroups.map(userGroup => userGroup.id).some(uGID => uGID === id);
-            });
-            return arr.every(Boolean) && arr.length !== 0;
-        });
+    const userGroupsVisibility: Record<Id, boolean> = _(rows)
+        .map((themeDetail): [Id, boolean] => {
+            const isCurrentUserInUserGroups =
+                currentUser?.userGroups?.some(ug =>
+                    _(themeDetail.userGroups).some(userGroup => ug.id === userGroup.id)
+                ) ?? false;
+            return [themeDetail.id, isCurrentUserInUserGroups];
+        })
+        .fromPairs()
+        .value();
 
-    const newRows = rows.map((item, i) => ({ ...item, visible: userGroupsVisibility[i] || usersVisibility[i] }));
+    const newRows = rows.map((item, i) => ({
+        ...item,
+        visible: Object.values(userGroupsVisibility)[i] || Object.values(usersVisibility)[i],
+    }));
     const rowsToShow = newRows.filter(row => row.visible === true);
 
     const newTheme = () => {
@@ -166,7 +170,6 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
         setSelection(selection);
     };
 
-    type SettingsState = { type: "closed" } | { type: "open"; id: string };
     const [settingsState, setSettingsState] = useState<SettingsState>({ type: "closed" });
 
     const closeSettings = React.useCallback(() => {
