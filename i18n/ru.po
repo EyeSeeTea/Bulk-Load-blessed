@@ -1100,7 +1100,6 @@ msgstr "Обновление"
 msgid "data values"
 msgstr "значения данных"
 
-#, fuzzy
 msgid "Override import Organisation Unit"
 msgstr "Выберите импортируемое организационное подразделение"
 

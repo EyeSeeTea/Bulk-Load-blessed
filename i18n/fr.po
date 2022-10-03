@@ -1062,7 +1062,6 @@ msgstr "Mettre à jour"
 msgid "data values"
 msgstr "valeurs de données"
 
-#, fuzzy
 msgid "Override import Organisation Unit"
 msgstr "Sélectionnez l'unité d'organisation d'importation"
 
