@@ -138,7 +138,6 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
         clearPopulateDates();
         setTemplates(options);
-        setOrgUnitTreeFilter([]);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
