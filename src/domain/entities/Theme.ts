@@ -35,7 +35,7 @@ export interface CellImage {
 
 const defaultSharing = {
     external: false,
-    public: "",
+    public: "r-------",
     userGroups: [],
     users: [],
 };

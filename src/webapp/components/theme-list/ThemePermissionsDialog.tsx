@@ -1,10 +1,10 @@
 import { ConfirmationDialog, ShareUpdate, Sharing } from "@eyeseetea/d2-ui-components";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { Id } from "../../../domain/entities/ReferenceObject";
-import { PermissionType } from "../../logic/settings";
 import { Theme } from "../../../domain/entities/Theme";
+import _ from "lodash";
 
 export interface ThemePermissionsDialogProps {
     themeId: Id;
@@ -16,28 +16,34 @@ export interface ThemePermissionsDialogProps {
 export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
     const { themeId, onClose, rows: themes, onChange } = props;
     const { compositionRoot } = useAppContext();
+    const [errors, setErrors] = useState<string[]>([]);
 
     const search = useCallback((query: string) => compositionRoot.users.search(query), [compositionRoot]);
 
     const buildMetaObject = useCallback(
         (id: Id) => {
-            const buildSharings = (type: PermissionType) => {
+            const buildSharings = () => {
                 const theme = themes.find(theme => theme.id === id);
-                return type === "user" ? theme?.sharing?.users : theme?.sharing?.userGroups;
+                return {
+                    users: theme?.sharing?.users,
+                    userGroups: theme?.sharing?.userGroups,
+                    external: theme?.sharing?.external,
+                    public: theme?.sharing?.public,
+                };
             };
 
             return {
                 meta: {
-                    allowPublicAccess: false,
+                    allowPublicAccess: true,
                     allowExternalAccess: false,
                 },
                 object: {
                     id: "",
                     displayName: i18n.t("Access to Themes"),
-                    externalAccess: false,
-                    publicAccess: "",
-                    userAccesses: buildSharings("user"),
-                    userGroupAccesses: buildSharings("userGroup"),
+                    externalAccess: buildSharings().external,
+                    publicAccess: buildSharings().public,
+                    userAccesses: buildSharings().users,
+                    userGroupAccesses: buildSharings().userGroups,
                 },
             };
         },
@@ -45,20 +51,34 @@ export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
     );
 
     const onUpdateSharingOptions = useCallback(() => {
-        return async ({ userAccesses: users, userGroupAccesses: userGroups }: ShareUpdate) => {
+        return async ({
+            userAccesses: users,
+            userGroupAccesses: userGroups,
+            publicAccess: publicSharing,
+            externalAccess: external,
+        }: ShareUpdate) => {
             const newThemes = themes.map((theme): Theme => {
-                if (theme.id !== themeId) return theme;
-                return theme.updateSharing({
-                    external: false,
-                    public: "",
-                    users: users ?? [],
-                    userGroups: userGroups ?? [],
-                });
+                if (theme.id !== themeId) {
+                    return theme;
+                } else {
+                    const newTheme = theme.updateSharing({
+                        external: external ?? false,
+                        public: publicSharing ?? "r-------",
+                        users: users ?? [],
+                        userGroups: userGroups ?? [],
+                    });
+                    compositionRoot.themes.save(newTheme).then(errors => setErrors(errors));
+                    if (errors.length === 0) {
+                        onChange(_.uniqBy([theme, ...themes], "id"));
+                    } else {
+                        console.error(errors.join("\n"));
+                    }
+                    return newTheme;
+                }
             });
-
             onChange(newThemes);
         };
-    }, [onChange, themes, themeId]);
+    }, [themes, onChange, themeId, compositionRoot.themes, errors]);
 
     return (
         <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>

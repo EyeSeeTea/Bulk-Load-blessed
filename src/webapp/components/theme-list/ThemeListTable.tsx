@@ -39,6 +39,8 @@ export interface ThemeDetail {
     palette: string[];
     users: SharingRule[];
     userGroups: SharingRule[];
+    external: boolean;
+    public: string;
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
@@ -80,7 +82,11 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 
     const newRows = rows.map((item, i) => ({
         ...item,
-        visible: Object.values(userGroupsVisibility)[i] || Object.values(usersVisibility)[i],
+        visible:
+            Object.values(userGroupsVisibility)[i] ||
+            Object.values(usersVisibility)[i] ||
+            rows[i]?.public !== "--------" ||
+            rows[i]?.external,
     }));
     const rowsToShow = newRows.filter(row => row.visible === true);
 
@@ -236,5 +242,7 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
         palette,
         users: sharing?.users ?? [],
         userGroups: sharing?.userGroups ?? [],
+        external: sharing?.external ?? false,
+        public: sharing.public ?? "r-------",
     }));
 }
