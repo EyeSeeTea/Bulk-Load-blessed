@@ -12,7 +12,7 @@ import {
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { ReactNode, useEffect, useState } from "react";
-import { Theme } from "../../../domain/entities/Theme";
+import { Sharing, Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/Router";
@@ -41,6 +41,7 @@ export interface ThemeDetail {
     userGroups: SharingRule[];
     external: boolean;
     public: string;
+    sharing: Sharing;
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
@@ -86,7 +87,8 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             Object.values(userGroupsVisibility)[i] ||
             Object.values(usersVisibility)[i] ||
             rows[i]?.public !== "--------" ||
-            rows[i]?.external,
+            rows[i]?.external ||
+            rows[i]?.sharing === undefined,
     }));
     const rowsToShow = newRows.filter(row => row.visible === true);
 
@@ -244,5 +246,6 @@ function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
         userGroups: sharing?.userGroups ?? [],
         external: sharing?.external ?? false,
         public: sharing.public ?? "r-------",
+        sharing,
     }));
 }

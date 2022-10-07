@@ -10,6 +10,13 @@ export type Color = string;
 export type ThemeableSections = "title" | "subtitle";
 export type ImageSections = "logo";
 
+export type Sharing = {
+    external: boolean;
+    public: string;
+    userGroups: SharingRule[];
+    users: SharingRule[];
+};
+
 export interface ThemeStyle {
     text?: string;
     bold?: boolean;
@@ -51,12 +58,7 @@ export class Theme {
     public readonly pictures?: {
         [key in ImageSections]?: CellImage;
     };
-    public readonly sharing: {
-        external: boolean;
-        public: string;
-        userGroups: SharingRule[];
-        users: SharingRule[];
-    };
+    public readonly sharing: Sharing;
 
     constructor({
         id = generateUid(),
