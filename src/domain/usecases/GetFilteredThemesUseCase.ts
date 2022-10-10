@@ -11,8 +11,8 @@ export class GetFilteredThemesUseCase implements UseCase {
 
         const filteredThemes = themes.filter(theme => {
             return (
-                userGroups.map(uG => theme.sharing.userGroups.map(userGroup => userGroup.id === uG.id)) ||
-                theme.sharing.users.map(user => user.id === currentUser.id) ||
+                userGroups.some(uG => theme.sharing.userGroups.some(userGroup => userGroup.id === uG.id)) ||
+                theme.sharing.users.some(user => user.id === currentUser.id) ||
                 theme.sharing.public !== "--------" ||
                 theme.sharing.external ||
                 theme.sharing === undefined
