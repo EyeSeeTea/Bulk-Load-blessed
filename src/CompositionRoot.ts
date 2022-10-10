@@ -27,7 +27,6 @@ import { GetFormOrgUnitRootsUseCase } from "./domain/usecases/GetFormOrgUnitRoot
 import { GetGeneratedTemplatesUseCase } from "./domain/usecases/GetGeneratedTemplatesUseCase";
 import { GetMigrationVersionsUseCase } from "./domain/usecases/GetMigrationVersionsUseCase";
 import { GetOrgUnitRootsUseCase } from "./domain/usecases/GetOrgUnitRootsUseCase";
-import { GetCurrentUserUseCase } from "./domain/usecases/GetCurrentUserUseCase";
 import { HasPendingMigrationsUseCase } from "./domain/usecases/HasPendingMigrationsUseCase";
 import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
@@ -41,6 +40,7 @@ import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api } from "./types/d2-api";
+import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -86,6 +86,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             list: new ListThemesUseCase(templateManager),
             save: new SaveThemeUseCase(templateManager),
             delete: new DeleteThemeUseCase(templateManager),
+            getFilteredThemes: new GetFilteredThemesUseCase(usersRepository),
         }),
         settings: getExecute({
             getDefault: new GetDefaultSettingsUseCase(config),
@@ -101,7 +102,6 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             hasPending: new HasPendingMigrationsUseCase(migrations),
         }),
         users: getExecute({
-            getCurrentUser: new GetCurrentUserUseCase(usersRepository),
             search: new SearchUsersUseCase(usersRepository),
         }),
     };

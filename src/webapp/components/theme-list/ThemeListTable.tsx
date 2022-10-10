@@ -1,7 +1,6 @@
 import {
     ConfirmationDialog,
     ObjectsTable,
-    SharingRule,
     TableAction,
     TableColumn,
     TableSelection,
@@ -12,7 +11,7 @@ import {
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
 import React, { ReactNode, useEffect, useState } from "react";
-import { Sharing, Theme } from "../../../domain/entities/Theme";
+import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../../pages/Router";
@@ -21,8 +20,6 @@ import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
 import { ThemePermissionsDialog } from "./ThemePermissionsDialog";
 import { firstOrFail } from "../../../types/utils";
-import { User } from "../../../domain/entities/User";
-import { Id } from "../../../types/d2-api";
 
 interface WarningDialog {
     title?: string;
@@ -37,11 +34,6 @@ export interface ThemeDetail {
     subtitle: string;
     logo: ReactNode;
     palette: string[];
-    users: SharingRule[];
-    userGroups: SharingRule[];
-    external: boolean;
-    public: string;
-    sharing: Sharing;
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
@@ -56,41 +48,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
-    const [currentUser, setCurrentUser] = useState<User>();
+    const [theme, setTheme] = useState<Theme[]>();
     useEffect(() => {
-        compositionRoot.users.getCurrentUser().then(user => setCurrentUser(user));
-    }, [compositionRoot.users]);
+        compositionRoot.themes.getFilteredThemes(themes).then(theme => setTheme(theme));
+    }, [compositionRoot.themes, themes]);
 
-    const rows = buildThemeDetails(themes);
-    const usersVisibility: Record<Id, boolean> = _(rows)
-        .map((themeDetail): [Id, boolean] => {
-            const isCurrentUserInUsers = _(themeDetail.users).some(user => user.id === currentUser?.id);
-            return [themeDetail.id, isCurrentUserInUsers];
-        })
-        .fromPairs()
-        .value();
-
-    const userGroupsVisibility: Record<Id, boolean> = _(rows)
-        .map((themeDetail): [Id, boolean] => {
-            const isCurrentUserInUserGroups =
-                currentUser?.userGroups?.some(ug =>
-                    _(themeDetail.userGroups).some(userGroup => ug.id === userGroup.id)
-                ) ?? false;
-            return [themeDetail.id, isCurrentUserInUserGroups];
-        })
-        .fromPairs()
-        .value();
-
-    const newRows = rows.map((item, i) => ({
-        ...item,
-        visible:
-            Object.values(userGroupsVisibility)[i] ||
-            Object.values(usersVisibility)[i] ||
-            rows[i]?.public !== "--------" ||
-            rows[i]?.external ||
-            rows[i]?.sharing === undefined,
-    }));
-    const rowsToShow = newRows.filter(row => row.visible === true);
+    const rows = buildThemeDetails(theme ?? []);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
@@ -219,7 +182,7 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
             )}
 
             <ObjectsTable<ThemeDetail>
-                rows={rowsToShow}
+                rows={rows}
                 columns={columns}
                 actions={actions}
                 selection={selection}
@@ -235,17 +198,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 }
 
 function buildThemeDetails(themes: Theme[]): ThemeDetail[] {
-    return themes.map(({ id, name, sections, pictures, palette, sharing }) => ({
+    return themes.map(({ id, name, sections, pictures, palette }) => ({
         id,
         name,
         title: sections?.title?.text ?? "-",
         subtitle: sections?.subtitle?.text ?? "-",
         logo: pictures?.logo?.src ? <img style={{ maxWidth: 150 }} src={pictures?.logo?.src} alt="logo" /> : null,
         palette,
-        users: sharing?.users ?? [],
-        userGroups: sharing?.userGroups ?? [],
-        external: sharing?.external ?? false,
-        public: sharing.public ?? "r-------",
-        sharing,
     }));
 }

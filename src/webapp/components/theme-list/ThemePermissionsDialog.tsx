@@ -1,5 +1,5 @@
 import { ConfirmationDialog, ShareUpdate, Sharing } from "@eyeseetea/d2-ui-components";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
 import { Id } from "../../../domain/entities/ReferenceObject";
@@ -16,13 +16,12 @@ export interface ThemePermissionsDialogProps {
 export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
     const { themeId, onClose, rows: themes, onChange } = props;
     const { compositionRoot } = useAppContext();
-    const [errors, setErrors] = useState<string[]>([]);
 
     const search = useCallback((query: string) => compositionRoot.users.search(query), [compositionRoot]);
 
     const buildMetaObject = useCallback(
         (id: Id) => {
-            const buildSharings = () => {
+            const buildSharing = () => {
                 const theme = themes.find(theme => theme.id === id);
                 return {
                     users: theme?.sharing?.users,
@@ -32,6 +31,8 @@ export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
                 };
             };
 
+            const sharing = buildSharing();
+
             return {
                 meta: {
                     allowPublicAccess: true,
@@ -40,10 +41,10 @@ export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
                 object: {
                     id: "",
                     displayName: i18n.t("Access to Themes"),
-                    externalAccess: buildSharings().external,
-                    publicAccess: buildSharings().public,
-                    userAccesses: buildSharings().users,
-                    userGroupAccesses: buildSharings().userGroups,
+                    externalAccess: sharing.external,
+                    publicAccess: sharing.public,
+                    userAccesses: sharing.users,
+                    userGroupAccesses: sharing.userGroups,
                 },
             };
         },
@@ -67,18 +68,19 @@ export function ThemePermissionsDialog(props: ThemePermissionsDialogProps) {
                         users: users ?? [],
                         userGroups: userGroups ?? [],
                     });
-                    compositionRoot.themes.save(newTheme).then(errors => setErrors(errors));
-                    if (errors.length === 0) {
-                        onChange(_.uniqBy([theme, ...themes], "id"));
-                    } else {
-                        console.error(errors.join("\n"));
-                    }
+                    compositionRoot.themes
+                        .save(newTheme)
+                        .then(errors =>
+                            errors.length === 0
+                                ? onChange(_.uniqBy([theme, ...themes], "id"))
+                                : console.error(errors.join("\n"))
+                        );
                     return newTheme;
                 }
             });
             onChange(newThemes);
         };
-    }, [themes, onChange, themeId, compositionRoot.themes, errors]);
+    }, [themes, onChange, themeId, compositionRoot.themes]);
 
     return (
         <ConfirmationDialog isOpen={true} fullWidth={true} onCancel={onClose} cancelText={i18n.t("Close")}>

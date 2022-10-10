@@ -40,7 +40,7 @@ export interface CellImage {
     src: string;
 }
 
-const defaultSharing = {
+const defaultSharing: Sharing = {
     external: false,
     public: "r-------",
     userGroups: [],
