@@ -135,7 +135,6 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         const options = modelToSelectOption(dataSource[value] ?? []);
 
         setSelectedModel(value);
-        setState(state => ({ ...state, type: undefined, id: undefined, populate: false }));
         clearPopulateDates();
         setTemplates(options);
     };
