@@ -872,6 +872,10 @@ msgstr "Legenda"
 msgid "Create theme"
 msgstr "Criar tema"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Acesso à geração de planilhas"
+
 msgid "Error deleting data values"
 msgstr "Erro ao excluir valores de dados"
 

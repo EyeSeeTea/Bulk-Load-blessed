@@ -790,6 +790,9 @@ msgstr ""
 msgid "Create theme"
 msgstr ""
 
+msgid "Access to Themes"
+msgstr ""
+
 msgid "Error deleting data values"
 msgstr ""
 

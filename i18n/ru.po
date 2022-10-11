@@ -876,6 +876,10 @@ msgstr "Субтитр"
 msgid "Create theme"
 msgstr "Создать тему"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Доступ к генерации шаблонов"
+
 msgid "Error deleting data values"
 msgstr "Ошибка при удалении значений данных"
 

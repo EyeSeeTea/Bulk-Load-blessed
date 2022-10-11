@@ -817,6 +817,10 @@ msgstr "Subtítulo"
 msgid "Create theme"
 msgstr "Crear tema"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Acceso a plantillas"
+
 msgid "Error deleting data values"
 msgstr "Se ha producido un error borrando valores de datos"
 
