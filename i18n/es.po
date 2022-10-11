@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-29T09:28:31.324Z\n"
+"POT-Creation-Date: 2022-09-23T11:44:46.069Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -816,6 +816,10 @@ msgstr "Subtítulo"
 
 msgid "Create theme"
 msgstr "Crear tema"
+
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Acceso a plantillas"
 
 msgid "Error deleting data values"
 msgstr "Se ha producido un error borrando valores de datos"
