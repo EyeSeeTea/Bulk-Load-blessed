@@ -29,14 +29,26 @@ export interface TemplateSelectorState extends DownloadTemplateProps {
     templateType?: TemplateType;
 }
 
+export interface DataModelProps {
+    value: string;
+    label: string;
+}
+
 export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
     onChange(state: TemplateSelectorState | null): void;
+    onChangeModel(state: DataModelProps[]): void;
     customTemplates: CustomTemplate[];
 }
 
-export const TemplateSelector = ({ settings, themes, onChange, customTemplates }: TemplateSelectorProps) => {
+export const TemplateSelector = ({
+    settings,
+    themes,
+    onChange,
+    onChangeModel,
+    customTemplates,
+}: TemplateSelectorProps) => {
     const classes = useStyles();
     const { api, compositionRoot } = useAppContext();
 
@@ -100,6 +112,10 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
     }, [models, compositionRoot, customTemplates, settings]);
 
     useEffect(() => {
+        onChangeModel(templates);
+    }, [onChangeModel, templates]);
+
+    useEffect(() => {
         const { type, id } = state;
         if (type && id) {
             compositionRoot.orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
@@ -137,6 +153,7 @@ export const TemplateSelector = ({ settings, themes, onChange, customTemplates }
         setSelectedModel(value);
         clearPopulateDates();
         setTemplates(options);
+        onChangeModel(templates);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
