@@ -10,7 +10,7 @@ import {
 } from "@eyeseetea/d2-ui-components";
 import { Button, Icon } from "@material-ui/core";
 import _ from "lodash";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Theme } from "../../../domain/entities/Theme";
 import i18n from "../../../locales";
 import { useAppContext } from "../../contexts/app-context";
@@ -18,6 +18,8 @@ import { RouteComponentProps } from "../../pages/Router";
 import { promiseMap } from "../../../utils/promises";
 import { ColorScale } from "../color-scale/ColorScale";
 import ThemeEditDialog from "./ThemeEditDialog";
+import { ThemePermissionsDialog } from "./ThemePermissionsDialog";
+import { firstOrFail } from "../../../types/utils";
 
 interface WarningDialog {
     title?: string;
@@ -35,6 +37,7 @@ export interface ThemeDetail {
 }
 
 type ThemeListTableProps = Pick<RouteComponentProps, "themes" | "setThemes">;
+type SettingsState = { type: "closed" } | { type: "open"; id: string };
 
 export default function ThemeListTable({ themes, setThemes }: ThemeListTableProps) {
     const { compositionRoot } = useAppContext();
@@ -45,7 +48,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const [themeEdit, setThemeEdit] = useState<{ type: "edit" | "new"; theme?: Theme }>();
     const [warningDialog, setWarningDialog] = useState<WarningDialog | null>(null);
 
-    const rows = buildThemeDetails(themes);
+    const [theme, setTheme] = useState<Theme[]>();
+    useEffect(() => {
+        compositionRoot.themes.getFilteredThemes(themes).then(theme => setTheme(theme));
+    }, [compositionRoot.themes, themes]);
+
+    const rows = buildThemeDetails(theme ?? []);
 
     const newTheme = () => {
         setThemeEdit({ type: "new" });
@@ -109,6 +117,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
 
     const actions: TableAction<ThemeDetail>[] = [
         {
+            name: "sharing",
+            text: i18n.t("Sharing Settings"),
+            onClick: selectedIds => setSettingsState({ type: "open", id: firstOrFail(selectedIds) }),
+            icon: <Icon>share</Icon>,
+        },
+        {
             name: "edit",
             text: i18n.t("Edit"),
             primary: true,
@@ -126,6 +140,12 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
     const onTableChange = ({ selection }: TableState<ThemeDetail>) => {
         setSelection(selection);
     };
+
+    const [settingsState, setSettingsState] = useState<SettingsState>({ type: "closed" });
+
+    const closeSettings = React.useCallback(() => {
+        setSettingsState({ type: "closed" });
+    }, []);
 
     return (
         <React.Fragment>
@@ -149,6 +169,15 @@ export default function ThemeListTable({ themes, setThemes }: ThemeListTableProp
                     theme={themeEdit.theme}
                     onSave={saveTheme}
                     onCancel={closeThemeEdit}
+                />
+            )}
+
+            {settingsState.type === "open" && (
+                <ThemePermissionsDialog
+                    onClose={closeSettings}
+                    rows={themes}
+                    themeId={settingsState.id}
+                    onChange={setThemes}
                 />
             )}
 

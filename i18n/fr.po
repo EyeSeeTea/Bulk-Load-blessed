@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2022-04-29T09:28:31.324Z\n"
+"POT-Creation-Date: 2022-09-08T10:43:07.553Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -839,6 +839,10 @@ msgstr "Sous-titre"
 msgid "Create theme"
 msgstr "Créer un thème"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Accès à la génération de modèles"
+
 msgid "Error deleting data values"
 msgstr "Erreur lors de la suppression des valeurs de données"
 
@@ -1062,7 +1066,7 @@ msgstr "Mettre à jour"
 msgid "data values"
 msgstr "valeurs de données"
 
-msgid "Select import Organisation Unit"
+msgid "Override import Organisation Unit"
 msgstr "Sélectionnez l'unité d'organisation d'importation"
 
 msgid "No capture org unit match element org units"

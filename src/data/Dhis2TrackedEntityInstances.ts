@@ -1,5 +1,6 @@
 import {
     PaginatedTeiGetResponse,
+    TeiGetRequest,
     TrackedEntityInstance as TrackedEntityInstanceApi,
     TrackedEntityInstanceGeometryAttributes,
     TrackedEntityInstanceToPost,
@@ -175,7 +176,7 @@ async function runSequentialPromisesOnSuccess(
 
 // Private
 
-/* A TEI cannot be posted if it includes relationships to other TEIs which are not created 
+/* A TEI cannot be posted if it includes relationships to other TEIs which are not created
     yet (creation of TEIS is sequential). So let's split pre/post TEI's so they can be
     posted separatedly.
 */
@@ -394,18 +395,34 @@ async function getExistingTeis(api: D2Api): Promise<Ref[]> {
         fields: "trackedEntityInstance",
     } as const;
 
-    const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances.get(query).getData();
-    const pages = _.range(2, pager.pageCount + 1);
+    // DHIS 2.37 added a new requirement: "Either Program or Tracked entity type should be specified"
+    // Requests to /api/trackedEntityInstances for these two params are singled-value, so we must
+    // perform multiple requests. Use Tracked Entity Types as tipically there will be more programs.
 
-    const otherPages = await promiseMap(pages, async page => {
-        const { trackedEntityInstances } = await api.trackedEntityInstances.get({ ...query, page }).getData();
-        return trackedEntityInstances;
+    const metadata = await api.metadata.get({ trackedEntityTypes: { fields: { id: true } } }).getData();
+
+    const teisGroups = await promiseMap(metadata.trackedEntityTypes, async entityType => {
+        const queryWithEntityType: TeiGetRequest = { ...query, trackedEntityType: entityType.id };
+
+        const { trackedEntityInstances: firstPage, pager } = await api.trackedEntityInstances
+            .get(queryWithEntityType)
+            .getData();
+        const pages = _.range(2, pager.pageCount + 1);
+
+        const otherPages = await promiseMap(pages, async page => {
+            const { trackedEntityInstances } = await api.trackedEntityInstances
+                .get({ ...queryWithEntityType, page })
+                .getData();
+            return trackedEntityInstances;
+        });
+
+        return [...firstPage, ..._.flatten(otherPages)].map(({ trackedEntityInstance, ...rest }) => ({
+            ...rest,
+            id: trackedEntityInstance,
+        }));
     });
 
-    return [...firstPage, ..._.flatten(otherPages)].map(({ trackedEntityInstance, ...rest }) => ({
-        ...rest,
-        id: trackedEntityInstance,
-    }));
+    return _.flatten(teisGroups);
 }
 
 type TeiKey = KeysOfUnion<TrackedEntityInstanceApi>;

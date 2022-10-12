@@ -467,7 +467,8 @@ function getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValid
 }
 
 function _getFormulaWithValidation(workbook: XLSX.Workbook, sheet: SheetWithValidations, cell: XLSX.Cell) {
-    const defaultValue = cell.formula();
+    // Formulas some times return the = prefix, which the called does not expect. Force the removal.
+    const defaultValue = cell.formula()?.replace(/^=/, "");
     const value = getValue(cell);
     if (defaultValue || !value) return defaultValue;
 

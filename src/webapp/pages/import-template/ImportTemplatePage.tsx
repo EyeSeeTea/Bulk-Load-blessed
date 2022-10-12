@@ -344,7 +344,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                     <FormControlLabel
                         style={{ marginTop: "1em" }}
                         control={<Checkbox checked={overwriteOrgUnits} onChange={onOverwriteOrgUnitsChange} />}
-                        label={i18n.t("Select import Organisation Unit")}
+                        label={i18n.t("Override import Organisation Unit")}
                     />
                 </div>
             )}

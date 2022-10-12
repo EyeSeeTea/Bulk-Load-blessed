@@ -1,3 +1,4 @@
+import { SharingRule } from "@eyeseetea/d2-ui-components";
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { defaultColorScale } from "../../webapp/utils/colors";
@@ -8,6 +9,13 @@ export type Color = string;
 
 export type ThemeableSections = "title" | "subtitle";
 export type ImageSections = "logo";
+
+export type Sharing = {
+    external: boolean;
+    public: string;
+    userGroups: SharingRule[];
+    users: SharingRule[];
+};
 
 export interface ThemeStyle {
     text?: string;
@@ -32,6 +40,13 @@ export interface CellImage {
     src: string;
 }
 
+const defaultSharing: Sharing = {
+    external: false,
+    public: "r-------",
+    userGroups: [],
+    users: [],
+};
+
 export class Theme {
     public readonly id: Id;
     public readonly name: string;
@@ -43,6 +58,7 @@ export class Theme {
     public readonly pictures?: {
         [key in ImageSections]?: CellImage;
     };
+    public readonly sharing: Sharing;
 
     constructor({
         id = generateUid(),
@@ -51,6 +67,7 @@ export class Theme {
         palette = defaultColorScale,
         sections = {},
         pictures = {},
+        sharing = defaultSharing,
     }: Partial<Theme> = {}) {
         this.id = id;
         this.name = name;
@@ -58,6 +75,7 @@ export class Theme {
         this.palette = palette;
         this.sections = sections;
         this.pictures = pictures;
+        this.sharing = sharing;
     }
 
     private update(partialUpdate: Partial<Theme>): Theme {
@@ -84,6 +102,10 @@ export class Theme {
 
     public updateColorPalette(palette: string[]): Theme {
         return this.update({ palette });
+    }
+
+    public updateSharing(sharing: Theme["sharing"]): Theme {
+        return this.update({ sharing });
     }
 
     public validate(): Validation {
