@@ -116,6 +116,7 @@ export class ExcelReader {
 
         const values = await promiseMap(cells, async cell => {
             const value = cell ? await this.readCellValue(template, cell) : undefined;
+            const optionId = await this.excelRepository.readCell(template.id, cell, { formula: true });
             if (!isDefined(value)) return undefined;
 
             const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
@@ -152,6 +153,7 @@ export class ExcelReader {
                         dataElement: this.formatValue(dataElement),
                         category: category ? this.formatValue(category) : undefined,
                         value: this.formatValue(value),
+                        optionId: optionId ? removeCharacters(optionId) : undefined,
                     },
                 ],
             };
@@ -163,6 +165,7 @@ export class ExcelReader {
     private async readByCell(template: Template, dataSource: CellDataSource): Promise<DataPackageData[]> {
         const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
+        const optionId = await this.excelRepository.readCell(template.id, cell, { formula: true });
         if (!isDefined(value)) return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
@@ -193,6 +196,7 @@ export class ExcelReader {
                         dataElement: String(dataElement),
                         category: category ? String(category) : undefined,
                         value: this.formatValue(value),
+                        optionId: optionId ? removeCharacters(optionId) : undefined,
                     },
                 ],
             },
