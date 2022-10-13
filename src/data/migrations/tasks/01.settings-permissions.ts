@@ -75,9 +75,9 @@ export async function migrate(storage: AppStorage, _debug: Debug, params: Migrat
         permissionsForGeneration: await mapSharingSettings(api, settings.permissionsForGeneration),
         permissionsForSettings: await mapSharingSettings(api, settings.permissionsForSettings),
         permissionsForImport: await mapSharingSettings(api, settings.permissionsForImport),
-        allPermissionsForGeneration: settings.permissionsForGeneration?.includes("ALL"),
-        allPermissionsForSettings: settings.permissionsForSettings?.includes("ALL"),
-        allPermissionsForImport: settings.permissionsForImport?.includes("ALL"),
+        allPermissionsForGeneration: true,
+        allPermissionsForSettings: true,
+        allPermissionsForImport: true,
     };
 
     await storage.save<Partial<NewAppSettings>>("BULK_LOAD_SETTINGS", newSettings);
