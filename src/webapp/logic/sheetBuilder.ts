@@ -74,6 +74,7 @@ export class SheetBuilder {
     public generate() {
         const { builder } = this;
         const { element, rawMetadata } = builder;
+        const useDataSetSections = element.formType === "SECTION" || !_(element.sections).isEmpty();
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -98,15 +99,15 @@ export class SheetBuilder {
                     }
                 );
             }
-        } else if (element.formType !== "SECTION") {
+        } else if (!useDataSetSections) {
             this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
         }
 
-        if (element.formType === "SECTION" && element.type === "dataSets") {
+        if (useDataSetSections) {
             _.sortBy(rawMetadata["sections"], ["name", "id"]).forEach(item => {
                 const { name } = this.translate(item);
 
-                this.dataSetSheet = this.workbook.addWorksheet(`Data Entry- ${name}`, protectedSheet);
+                this.dataSetSheet = this.workbook.addWorksheet(`Data Entry- ${name}`);
                 this.fillSectionSheet(item.id);
             });
         }
@@ -123,7 +124,7 @@ export class SheetBuilder {
             this.fillInstancesSheet();
             this.fillProgramStageSheets();
             this.fillRelationshipSheets();
-        } else if (element.formType !== "SECTION") {
+        } else if (!useDataSetSections) {
             this.fillDataEntrySheet();
         }
 
