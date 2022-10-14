@@ -441,6 +441,7 @@ export class SheetBuilder {
 
         // Add column titles
         let columnId = 1;
+        let groupId = 0;
 
         this.createColumn(
             dataSetSheet,
@@ -475,17 +476,31 @@ export class SheetBuilder {
             .formula(`_${element.id}`)
             .style({ ...baseStyle, font: { size: 16, bold: true } });
 
-        let rowId = 6;
-        _.find(rawMetadata.sections, item => {
-            if (item.id === id) {
-                this.createColumn(dataSetSheet, itemRow, columnId++, item.name);
-                _.forEach(item.dataElements, dataElement => {
-                    dataSetSheet
-                        .cell(rowId, 4)
-                        .string(rawMetadata.dataElements.find((i: { id: any }) => i.id === dataElement.id).name ?? "");
-                    rowId++;
+        _.find(rawMetadata.sections, section => {
+            if (section.id === id) {
+                const firstColumnId = columnId;
+
+                _.forEach(section.dataElements, dataElement => {
+                    this.createColumn(
+                        dataSetSheet,
+                        itemRow,
+                        columnId,
+                        `_${dataElement.id}`,
+                        groupId,
+                    );
+
+                    columnId++;
                 });
-                return true;
+
+                const noColumnAdded = columnId === firstColumnId;
+                if (noColumnAdded) return;
+
+                dataSetSheet
+                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .formula(`_${section.id}`)
+                    .style(this.groupStyle(groupId));
+
+                groupId++;
             }
         });
     }
