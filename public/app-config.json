@@ -1,15 +1,11 @@
 {
     "appKey": "bulk-load",
     "appearance": {
-        "showShareButton": false
+        "showShareButton": true
     },
     "feedback": {
         "createIssue": false,
         "sendToDhis2UserGroups": [],
-        "snapshots": {
-            "repository": "EyeSeeTeaBotTest/snapshots",
-            "branch": "master"
-        },
         "clickUp": {
             "apiUrl": "https://dev.eyeseetea.com/clickup",
             "listId": "170646821",
@@ -22,12 +18,5 @@
             "descriptionTemplate": "## Summary\n\n## Steps to reproduce\n\n## Actual results\n\n## Expected results\n\n"
         }
     },
-    "storage": "dataStore",
-    "defaultSettings": {
-        "models": {
-            "dataSet": true,
-            "program": true
-        },
-        "orgUnitSelection": "both"
-    }
+    "storage": "dataStore"
 }
