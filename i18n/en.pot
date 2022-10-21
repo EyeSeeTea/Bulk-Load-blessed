@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-04-29T09:28:31.324Z\n"
-"PO-Revision-Date: 2022-04-29T09:28:31.324Z\n"
+"POT-Creation-Date: 2022-10-21T11:58:05.943Z\n"
+"PO-Revision-Date: 2022-10-21T11:58:05.943Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -687,6 +687,9 @@ msgid "Advanced template properties"
 msgstr ""
 
 msgid "Language"
+msgstr ""
+
+msgid "Split data entry tabs by section"
 msgstr ""
 
 msgid "Theme"

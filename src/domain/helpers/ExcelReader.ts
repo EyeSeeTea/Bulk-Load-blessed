@@ -17,6 +17,7 @@ import {
     DataSourceValue,
     GenericSheetRef,
     RowDataSource,
+    setDataEntrySheet,
     setSheet,
     SheetRef,
     TeiRowDataSource,
@@ -465,6 +466,8 @@ export class ExcelReader {
                     .map(sheet => (sheet.name.match(dataSource.sheetsMatch) ? setSheet(dataSource, sheet.name) : null))
                     .compact()
                     .value();
+            } else if (dataSource.type === "row") {
+                return setDataEntrySheet(dataSource, sheets);
             } else {
                 return [dataSource];
             }

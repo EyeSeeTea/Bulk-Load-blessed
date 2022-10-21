@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2022-04-29T09:28:31.324Z\n"
+"POT-Creation-Date: 2022-10-21T11:58:05.943Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -770,6 +770,9 @@ msgstr "Propriedades avançadas da planilha"
 
 msgid "Language"
 msgstr "Língua"
+
+msgid "Split data entry tabs by section"
+msgstr ""
 
 msgid "Theme"
 msgstr "Tema"

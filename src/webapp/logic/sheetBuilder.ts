@@ -4,7 +4,7 @@ import _ from "lodash";
 import "lodash.product";
 import { Moment } from "moment";
 import { DataFormType } from "../../domain/entities/DataForm";
-import { NamedRef } from "../../domain/entities/ReferenceObject";
+import { NamedRef, Ref } from "../../domain/entities/ReferenceObject";
 import { GeneratedTemplate } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
 import i18n from "../../locales";
@@ -49,6 +49,7 @@ export interface SheetBuilderParams {
     template: GeneratedTemplate;
     settings: Settings;
     downloadRelationships: boolean;
+    splitDataEntryTabsBySection: boolean;
 }
 
 export class SheetBuilder {
@@ -58,7 +59,6 @@ export class SheetBuilder {
     private instancesSheet: any;
     private programStageSheets: any;
     private relationshipsSheets: any;
-    private dataEntrySheet: any;
     private legendSheet: any;
     private dataSetSheet: any;
     private validationSheet: any;
@@ -74,7 +74,8 @@ export class SheetBuilder {
     public generate() {
         const { builder } = this;
         const { element, rawMetadata } = builder;
-        const useDataSetSections = element.formType === "SECTION" || !_(element.sections).isEmpty();
+        const useDataSetSections =
+            builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -99,17 +100,22 @@ export class SheetBuilder {
                     }
                 );
             }
-        } else if (!useDataSetSections) {
-            this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
-        }
+        } else {
+            const dataEntryTabName = "Data Entry";
 
-        if (useDataSetSections) {
-            _.sortBy(rawMetadata["sections"], ["name", "id"]).forEach(item => {
-                const { name } = this.translate(item);
+            if (useDataSetSections) {
+                const sections = _.orderBy(rawMetadata.sections as Section[], section => section.sortOrder);
 
-                this.dataSetSheet = this.workbook.addWorksheet(`Data Entry- ${name}`);
-                this.fillSectionSheet(item.id);
-            });
+                sections.forEach(section => {
+                    const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
+                    const dataEntrySheet = this.workbook.addWorksheet(tabName);
+                    const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
+                    this.fillDataEntrySheet(dataEntrySheet, { includedDataElementIds });
+                });
+            } else {
+                const dataEntrySheet = this.workbook.addWorksheet(dataEntryTabName);
+                this.fillDataEntrySheet(dataEntrySheet, {});
+            }
         }
 
         this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
@@ -124,8 +130,6 @@ export class SheetBuilder {
             this.fillInstancesSheet();
             this.fillProgramStageSheets();
             this.fillRelationshipSheets();
-        } else if (!useDataSetSections) {
-            this.fillDataEntrySheet();
         }
 
         return this.workbook;
@@ -414,94 +418,6 @@ export class SheetBuilder {
             const validation = this.validations.get(validationId);
             this.createColumn(sheet, itemRow, 6 + idx, `_${tea.id}`, 1, validation);
             idx++;
-        });
-    }
-
-    private fillSectionSheet(id: any) {
-        const { element, elementMetadata: metadata, rawMetadata } = this.builder;
-        const dataSetSheet = this.dataSetSheet;
-        const { rowOffset = 0 } = this.builder.template;
-
-        // Add cells for themes
-        const sectionRow = rowOffset + 1;
-        const itemRow = rowOffset + 2;
-
-        // Hide theme rows by default
-        for (let row = 1; row < sectionRow; row++) {
-            dataSetSheet.row(row).hide();
-        }
-
-        // Freeze and format column titles
-        dataSetSheet.row(itemRow).freeze();
-        dataSetSheet.row(sectionRow).setHeight(30);
-        dataSetSheet.row(itemRow).setHeight(50);
-
-        // Add template version
-        dataSetSheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
-
-        // Add column titles
-        let columnId = 1;
-        let groupId = 0;
-
-        this.createColumn(
-            dataSetSheet,
-            itemRow,
-            columnId++,
-            i18n.t("Org Unit *", { lng: this.builder.language }),
-            null,
-            this.validations.get("organisationUnits"),
-            "This site does not exist in DHIS2, please talk to your administrator to create this site before uploading data"
-        );
-
-        this.createColumn(
-            dataSetSheet,
-            itemRow,
-            columnId++,
-            i18n.t("Period", { lng: this.builder.language }),
-            null,
-            this.validations.get("periods")
-        );
-
-        const { code: attributeCode } = metadata.get(element.categoryCombo?.id);
-        const optionsTitle =
-            attributeCode !== "default"
-                ? `_${element.categoryCombo.id}`
-                : i18n.t("Options", { lng: this.builder.language });
-
-        this.createColumn(dataSetSheet, itemRow, columnId++, optionsTitle, null, this.validations.get("options"));
-
-        // Add dataSet title
-        dataSetSheet
-            .cell(sectionRow, 1, sectionRow, columnId - 1, true)
-            .formula(`_${element.id}`)
-            .style({ ...baseStyle, font: { size: 16, bold: true } });
-
-        _.find(rawMetadata.sections, section => {
-            if (section.id === id) {
-                const firstColumnId = columnId;
-
-                _.forEach(section.dataElements, dataElement => {
-                    this.createColumn(
-                        dataSetSheet,
-                        itemRow,
-                        columnId,
-                        `_${dataElement.id}`,
-                        groupId,
-                    );
-
-                    columnId++;
-                });
-
-                const noColumnAdded = columnId === firstColumnId;
-                if (noColumnAdded) return;
-
-                dataSetSheet
-                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
-                    .formula(`_${section.id}`)
-                    .style(this.groupStyle(groupId));
-
-                groupId++;
-            }
         });
     }
 
@@ -858,10 +774,10 @@ export class SheetBuilder {
         return getObjectVersion(element) ?? defaultVersion;
     }
 
-    private fillDataEntrySheet() {
+    private fillDataEntrySheet(dataEntrySheet: any, options: { includedDataElementIds?: Set<string> }) {
+        const { includedDataElementIds } = options;
         const { element, elementMetadata: metadata, settings } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
-        const dataEntrySheet = this.dataEntrySheet;
 
         // Add cells for themes
         const sectionRow = rowOffset + 1;
@@ -928,7 +844,10 @@ export class SheetBuilder {
 
         if (element.type === "dataSets") {
             const dataSet = element;
-            const dataElements = getDataSetDataElements(dataSet, metadata);
+            const dataElementsAll = getDataSetDataElements(dataSet, metadata);
+            const dataElements = includedDataElementIds
+                ? dataElementsAll.filter(obj => includedDataElementIds.has(obj.dataElement.id))
+                : dataElementsAll;
             const dataElementsExclusion = settings.dataSetDataElementsFilter;
 
             _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
@@ -1409,3 +1328,5 @@ function withSheetNames(objs: NamedRef[], options: any = {}) {
         };
     });
 }
+
+type Section = { name: string; sortOrder: number; dataElements: Ref[] };
