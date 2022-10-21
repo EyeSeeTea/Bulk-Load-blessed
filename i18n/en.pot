@@ -793,6 +793,9 @@ msgstr ""
 msgid "Create theme"
 msgstr ""
 
+msgid "Access to Themes"
+msgstr ""
+
 msgid "Error deleting data values"
 msgstr ""
 
@@ -999,7 +1002,7 @@ msgstr ""
 msgid "data values"
 msgstr ""
 
-msgid "Select import Organisation Unit"
+msgid "Override import Organisation Unit"
 msgstr ""
 
 msgid "No capture org unit match element org units"

@@ -842,6 +842,10 @@ msgstr "Sous-titre"
 msgid "Create theme"
 msgstr "Créer un thème"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Accès à la génération de modèles"
+
 msgid "Error deleting data values"
 msgstr "Erreur lors de la suppression des valeurs de données"
 
@@ -1065,7 +1069,7 @@ msgstr "Mettre à jour"
 msgid "data values"
 msgstr "valeurs de données"
 
-msgid "Select import Organisation Unit"
+msgid "Override import Organisation Unit"
 msgstr "Sélectionnez l'unité d'organisation d'importation"
 
 msgid "No capture org unit match element org units"

@@ -875,6 +875,10 @@ msgstr "Legenda"
 msgid "Create theme"
 msgstr "Criar tema"
 
+#, fuzzy
+msgid "Access to Themes"
+msgstr "Acesso à geração de planilhas"
+
 msgid "Error deleting data values"
 msgstr "Erro ao excluir valores de dados"
 
@@ -1099,7 +1103,7 @@ msgstr "Atualizar"
 msgid "data values"
 msgstr "valores de dados"
 
-msgid "Select import Organisation Unit"
+msgid "Override import Organisation Unit"
 msgstr "Selecione a unidade organizacional para importar os dados"
 
 msgid "No capture org unit match element org units"

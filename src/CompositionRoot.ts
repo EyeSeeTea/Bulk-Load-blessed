@@ -40,6 +40,7 @@ import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api } from "./types/d2-api";
+import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -85,6 +86,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             list: new ListThemesUseCase(templateManager),
             save: new SaveThemeUseCase(templateManager),
             delete: new DeleteThemeUseCase(templateManager),
+            getFilteredThemes: new GetFilteredThemesUseCase(usersRepository),
         }),
         settings: getExecute({
             getDefault: new GetDefaultSettingsUseCase(config),
