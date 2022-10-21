@@ -435,7 +435,7 @@ export class ExcelReader {
             });
 
             const definedNames = await this.excelRepository.listDefinedNames(template.id);
-            if (typeof formula === "string" && definedNames.includes(formula)) {
+            if (typeof formula === "string" && definedNames.includes(formula.replace(/^=/, ""))) {
                 return removeCharacters(formula);
             }
 
