@@ -13,6 +13,7 @@ import {
     DataSourceValue,
     DownloadCustomizationOptions,
     RowDataSource,
+    setDataEntrySheet,
     setSheet,
     SheetRef,
     TeiRowDataSource,
@@ -85,6 +86,8 @@ export class ExcelBuilder {
                     .map(sheet => (sheet.name.match(dataSource.sheetsMatch) ? setSheet(dataSource, sheet.name) : null))
                     .compact()
                     .value();
+            } else if (dataSource.type === "row") {
+                return setDataEntrySheet(dataSource, sheets);
             } else {
                 return [dataSource];
             }

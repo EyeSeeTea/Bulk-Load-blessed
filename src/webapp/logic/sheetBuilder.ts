@@ -4,7 +4,7 @@ import _ from "lodash";
 import "lodash.product";
 import { Moment } from "moment";
 import { DataFormType } from "../../domain/entities/DataForm";
-import { NamedRef } from "../../domain/entities/ReferenceObject";
+import { NamedRef, Ref } from "../../domain/entities/ReferenceObject";
 import { GeneratedTemplate } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
 import i18n from "../../locales";
@@ -49,6 +49,7 @@ export interface SheetBuilderParams {
     template: GeneratedTemplate;
     settings: Settings;
     downloadRelationships: boolean;
+    splitDataEntryTabsBySection: boolean;
 }
 
 export class SheetBuilder {
@@ -58,8 +59,8 @@ export class SheetBuilder {
     private instancesSheet: any;
     private programStageSheets: any;
     private relationshipsSheets: any;
-    private dataEntrySheet: any;
     private legendSheet: any;
+    private dataSetSheet: any;
     private validationSheet: any;
     private metadataSheet: any;
 
@@ -72,7 +73,9 @@ export class SheetBuilder {
 
     public generate() {
         const { builder } = this;
-        const { element } = builder;
+        const { element, rawMetadata } = builder;
+        const useDataSetSections =
+            builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -98,7 +101,21 @@ export class SheetBuilder {
                 );
             }
         } else {
-            this.dataEntrySheet = this.workbook.addWorksheet("Data Entry");
+            const dataEntryTabName = "Data Entry";
+
+            if (useDataSetSections) {
+                const sections = _.orderBy(rawMetadata.sections as Section[], section => section.sortOrder);
+
+                sections.forEach(section => {
+                    const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
+                    const dataEntrySheet = this.workbook.addWorksheet(tabName);
+                    const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
+                    this.fillDataEntrySheet(dataEntrySheet, { includedDataElementIds });
+                });
+            } else {
+                const dataEntrySheet = this.workbook.addWorksheet(dataEntryTabName);
+                this.fillDataEntrySheet(dataEntrySheet, {});
+            }
         }
 
         this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
@@ -113,8 +130,6 @@ export class SheetBuilder {
             this.fillInstancesSheet();
             this.fillProgramStageSheets();
             this.fillRelationshipSheets();
-        } else {
-            this.fillDataEntrySheet();
         }
 
         return this.workbook;
@@ -759,10 +774,10 @@ export class SheetBuilder {
         return getObjectVersion(element) ?? defaultVersion;
     }
 
-    private fillDataEntrySheet() {
+    private fillDataEntrySheet(dataEntrySheet: any, options: { includedDataElementIds?: Set<string> }) {
+        const { includedDataElementIds } = options;
         const { element, elementMetadata: metadata, settings } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
-        const dataEntrySheet = this.dataEntrySheet;
 
         // Add cells for themes
         const sectionRow = rowOffset + 1;
@@ -829,7 +844,10 @@ export class SheetBuilder {
 
         if (element.type === "dataSets") {
             const dataSet = element;
-            const dataElements = getDataSetDataElements(dataSet, metadata);
+            const dataElementsAll = getDataSetDataElements(dataSet, metadata);
+            const dataElements = includedDataElementIds
+                ? dataElementsAll.filter(obj => includedDataElementIds.has(obj.dataElement.id))
+                : dataElementsAll;
             const dataElementsExclusion = settings.dataSetDataElementsFilter;
 
             _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
@@ -1310,3 +1328,5 @@ function withSheetNames(objs: NamedRef[], options: any = {}) {
         };
     });
 }
+
+type Section = { name: string; sortOrder: number; dataElements: Ref[] };

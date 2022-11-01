@@ -71,7 +71,14 @@ export const TemplateSelector = ({
         filterTEIEnrollmentDate: false,
         language: "en",
         settings,
+        splitDataEntryTabsBySection: false,
     });
+
+    const selectedId = state.id;
+    const isDataSet = React.useMemo(() => {
+        const dataSetIds = dataSource?.dataSets?.map(ds => ds.id);
+        return selectedId && dataSetIds && dataSetIds.includes(selectedId);
+    }, [selectedId, dataSource]);
 
     const models = useMemo(() => {
         return _.compact([
@@ -230,6 +237,10 @@ export const TemplateSelector = ({
         setState(state => ({ ...state, downloadRelationships }));
     };
 
+    const toggleSplitDataEntryTabsBySection = () => {
+        setState(state => ({ ...state, splitDataEntryTabsBySection: !state.splitDataEntryTabsBySection }));
+    };
+
     const onFilterTEIEnrollmentDateChange = (_event: React.ChangeEvent, filterTEIEnrollmentDate: boolean) => {
         setState(state => ({ ...state, filterTEIEnrollmentDate }));
     };
@@ -375,6 +386,20 @@ export const TemplateSelector = ({
                     </div>
                 </div>
             )}
+
+            {isDataSet && (
+                <FormControlLabel
+                    className={classes.checkbox}
+                    control={
+                        <Checkbox
+                            checked={state.splitDataEntryTabsBySection}
+                            onChange={toggleSplitDataEntryTabsBySection}
+                        />
+                    }
+                    label={i18n.t("Split data entry tabs by section")}
+                />
+            )}
+
             {themeOptions.length > 0 && state.templateType !== "custom" && (
                 <div className={classes.row}>
                     <div className={classes.select}>
