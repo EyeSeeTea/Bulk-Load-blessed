@@ -35,6 +35,7 @@ export interface DownloadTemplateProps {
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
     templateId?: string;
     templateType?: TemplateType;
+    splitDataEntryTabsBySection: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -64,6 +65,7 @@ export class DownloadTemplateUseCase implements UseCase {
             relationshipsOuFilter,
             templateId: customTemplateId,
             templateType,
+            splitDataEntryTabsBySection,
         }: DownloadTemplateProps
     ): Promise<void> {
         i18n.setDefaultNamespace("bulk-load");
@@ -103,6 +105,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 template,
                 settings,
                 downloadRelationships,
+                splitDataEntryTabsBySection,
             });
             const workbook = await sheetBuilder.generate();
 

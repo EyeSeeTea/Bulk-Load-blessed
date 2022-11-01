@@ -1,4 +1,5 @@
 import { Maybe } from "../../types/utils";
+import _ from "lodash";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataFormType } from "./DataForm";
@@ -6,6 +7,7 @@ import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 import { UserTimestamp } from "./User";
+import { Sheet as SheetE } from "./Sheet";
 
 export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
@@ -221,6 +223,66 @@ export function getDataFormRef(template: BaseTemplate): DataFormRef {
         type: dataFormType.type === "value" ? dataFormType.id : undefined,
         id: dataFormId.type === "value" ? dataFormId.id : undefined,
     };
+}
+
+type ReferenceType = ColumnRef | CellRef | RowRef | Range | ValueRef | undefined;
+
+/* Transform a row data source with a fixed sheet name (ex: "Data Entry") to multiple data sources
+   using the existing sheets as reference. Note that this only works when all the references
+   in the data source point to the same sheet. Example with a data set with sections "Basic"
+   and "Extra", with split tabs enabled:
+
+   - dataSource - Input dataSource using `sheet: "Data Entry"` in its references.
+   - sheets- Input sheets with names "Data Entry - Basic" and "Data Entry - Extra".
+   - Outputs: two data sources, one with sheet "Data Entry - Basic", the other "Data Entry - Extra".
+*/
+export function setDataEntrySheet(dataSource: RowDataSource, sheets: SheetE[]): RowDataSource[] {
+    const get = <T extends ReferenceType>(ref: T | undefined) =>
+        ref && "sheet" in ref ? ref.sheet.toString() : undefined;
+
+    const sheetsFromDataSourceAll = _.compact([
+        get(dataSource.orgUnit),
+        get(dataSource.period),
+        get(dataSource.dataElement),
+        get(dataSource.categoryOption),
+        get(dataSource.attribute),
+        get(dataSource.eventId),
+    ]);
+
+    const sheetsFromDataSource = _.uniq(sheetsFromDataSourceAll);
+    const allSheetNamesEqual = sheetsFromDataSource.length === 1;
+    const sheetFromDataSource = sheetsFromDataSourceAll[0];
+
+    if (!allSheetNamesEqual || !sheetFromDataSource) {
+        console.warn(`[setDataEntrySheet] Different sheet names used as data source, return unchanged`);
+        return [dataSource];
+    }
+
+    const sheetNamesFromMapping = _(sheets)
+        .map(sheet => sheet.name)
+        .groupBy(name => name.split("-")[0]?.trim())
+        .get(sheetFromDataSource);
+
+    if (!sheetNamesFromMapping) {
+        console.error(`[setDataEntrySheet] Could not map: ${sheetFromDataSource}`);
+        return [dataSource];
+    }
+
+    return sheetNamesFromMapping.map((sheetName): RowDataSource => {
+        const set = <Ref extends ReferenceType>(ref: Ref): Ref =>
+            ref && "sheet" in ref ? { ...ref, sheet: sheetName } : ref;
+
+        return {
+            type: "row",
+            range: set(dataSource.range),
+            orgUnit: set(dataSource.orgUnit),
+            period: set(dataSource.period),
+            dataElement: set(dataSource.dataElement),
+            categoryOption: set(dataSource.categoryOption),
+            attribute: set(dataSource.attribute),
+            eventId: set(dataSource.eventId),
+        };
+    });
 }
 
 export function setSheet<DS extends TrackerRelationship | TrackerEventRowDataSource>(

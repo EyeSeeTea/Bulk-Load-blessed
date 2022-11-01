@@ -17,6 +17,7 @@ import {
     DataSourceValue,
     GenericSheetRef,
     RowDataSource,
+    setDataEntrySheet,
     setSheet,
     SheetRef,
     TeiRowDataSource,
@@ -439,7 +440,7 @@ export class ExcelReader {
             });
 
             const definedNames = await this.excelRepository.listDefinedNames(template.id);
-            if (typeof formula === "string" && definedNames.includes(formula)) {
+            if (typeof formula === "string" && definedNames.includes(formula.replace(/^=/, ""))) {
                 return removeCharacters(formula);
             }
 
@@ -469,6 +470,8 @@ export class ExcelReader {
                     .map(sheet => (sheet.name.match(dataSource.sheetsMatch) ? setSheet(dataSource, sheet.name) : null))
                     .compact()
                     .value();
+            } else if (dataSource.type === "row") {
+                return setDataEntrySheet(dataSource, sheets);
             } else {
                 return [dataSource];
             }
