@@ -12,6 +12,7 @@ import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import Settings from "./settings";
 import { getObjectVersion } from "./utils";
+import { Sheet, StyleOptions, Workbook } from "./Workbook";
 
 export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v4";
@@ -53,25 +54,15 @@ export interface SheetBuilderParams {
 }
 
 export class SheetBuilder {
-    private workbook: any;
-    private validations: any;
-
-    private instancesSheet: any;
-    private programStageSheets: any;
-    private relationshipsSheets: any;
-    private legendSheet: any;
-    private dataSetSheet: any;
-    private validationSheet: any;
-    private metadataSheet: any;
-
+    private validations: Validations;
     private instancesSheetValuesRow = 0;
 
     constructor(private builder: SheetBuilderParams) {
-        this.workbook = new Excel.Workbook();
         this.validations = new Map();
     }
 
-    public generate() {
+    public async generate(): Promise<Workbook> {
+        const workbook = await Workbook.build();
         const { builder } = this;
         const { element, rawMetadata } = builder;
         const useDataSetSections =
@@ -79,27 +70,32 @@ export class SheetBuilder {
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
-            this.instancesSheet = this.workbook.addWorksheet(teiSheetName);
-            this.programStageSheets = {};
-            this.relationshipsSheets = [];
+            const instancesSheet = workbook.addWorksheet(teiSheetName);
+            this.fillInstancesSheet(instancesSheet);
+
+            const programStageSheets: Record<string, Sheet> = {};
+            const relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
 
             // ProgramStage sheets
             const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
 
             withSheetNames(programStages).forEach((programStage: any) => {
-                const sheet = this.workbook.addWorksheet(programStage.sheetName);
-                this.programStageSheets[programStage.id] = sheet;
+                const sheet = workbook.addWorksheet(programStage.sheetName);
+                programStageSheets[programStage.id] = sheet;
             });
 
             if (builder.downloadRelationships) {
                 // RelationshipType sheets
                 withSheetNames(builder.metadata.relationshipTypes, { prefix: "Rel" }).forEach(
                     (relationshipType: any) => {
-                        const sheet = this.workbook.addWorksheet(relationshipType.sheetName);
-                        this.relationshipsSheets.push([relationshipType, sheet]);
+                        const sheet = workbook.addWorksheet(relationshipType.sheetName);
+                        relationshipsSheets.push([relationshipType, sheet]);
                     }
                 );
             }
+
+            this.fillProgramStageSheets(programStageSheets);
+            this.fillRelationshipSheets(relationshipsSheets);
         } else {
             const dataEntryTabName = "Data Entry";
 
@@ -108,37 +104,31 @@ export class SheetBuilder {
 
                 sections.forEach(section => {
                     const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
-                    const dataEntrySheet = this.workbook.addWorksheet(tabName);
+                    const dataEntrySheet = workbook.addWorksheet(tabName);
                     const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
                     this.fillDataEntrySheet(dataEntrySheet, { includedDataElementIds });
                 });
             } else {
-                const dataEntrySheet = this.workbook.addWorksheet(dataEntryTabName);
+                const dataEntrySheet = workbook.addWorksheet(dataEntryTabName);
                 this.fillDataEntrySheet(dataEntrySheet, {});
             }
         }
 
-        this.legendSheet = this.workbook.addWorksheet("Legend", protectedSheet);
-        this.validationSheet = this.workbook.addWorksheet("Validation", protectedSheet);
-        this.metadataSheet = this.workbook.addWorksheet("Metadata", protectedSheet);
+        const legendSheet = workbook.addWorksheet("Legend", protectedSheet);
+        const validationSheet = workbook.addWorksheet("Validation", protectedSheet);
+        const metadataSheet = workbook.addWorksheet("Metadata", protectedSheet);
 
-        this.fillValidationSheet();
-        this.fillMetadataSheet();
-        this.fillLegendSheet();
+        this.fillValidationSheet(validationSheet);
+        this.fillMetadataSheet(metadataSheet);
+        this.fillLegendSheet(legendSheet);
 
-        if (isTrackerProgram(element)) {
-            this.fillInstancesSheet();
-            this.fillProgramStageSheets();
-            this.fillRelationshipSheets();
-        }
-
-        return this.workbook;
+        return workbook;
     }
 
-    private fillRelationshipSheets() {
+    private fillRelationshipSheets(relationshipsSheets: Array<[relationshipType: any, sheet: Sheet]>) {
         const { element: program } = this.builder;
 
-        _.forEach(this.relationshipsSheets, ([relationshipType, sheet]) => {
+        _.forEach(relationshipsSheets, ([relationshipType, sheet]) => {
             sheet.cell(1, 1).formula(`=_${relationshipType.id}`).style(baseStyle);
 
             ["from", "to"].forEach((key, idx) => {
@@ -175,13 +165,13 @@ export class SheetBuilder {
         });
     }
 
-    private fillProgramStageSheets() {
+    private fillProgramStageSheets(programStageSheets: Record<Id, Sheet>) {
         const { elementMetadata: metadata, element: program, settings } = this.builder;
 
         const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
-        const programStageSheets = withSheetNames(programStages);
+        const sheets = withSheetNames(programStages);
 
-        _.forEach(this.programStageSheets, (sheet, programStageId) => {
+        _.forEach(programStageSheets, (sheet, programStageId) => {
             const programStageT = { id: programStageId };
             const programStage = metadata.get(programStageId);
             const settingsFilter = settings.programStageFilter[programStage.id];
@@ -259,7 +249,7 @@ export class SheetBuilder {
             // Include external data element look-up from Other program stage sheets
             _.forEach(settingsFilter?.externalDataElementsIncluded, ({ id }) => {
                 const [programStageId, dataElementId] = id.split(".");
-                const programStageSheet = programStageSheets.find(({ id }) => id === programStageId)?.sheetName;
+                const programStageSheet = sheets.find(({ id }) => id === programStageId)?.sheetName;
                 const dataElement = metadata.get(dataElementId);
                 if (!programStageSheet || !dataElement) return;
 
@@ -348,10 +338,9 @@ export class SheetBuilder {
         });
     }
 
-    private fillInstancesSheet() {
+    private fillInstancesSheet(sheet: Sheet) {
         const { element: program } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
-        const sheet = this.instancesSheet;
 
         // Add cells for themes
         const sectionRow = rowOffset + 1;
@@ -421,9 +410,8 @@ export class SheetBuilder {
         });
     }
 
-    private fillLegendSheet() {
+    private fillLegendSheet(legendSheet: Sheet) {
         const { elementMetadata: metadata, rawMetadata } = this.builder;
-        const legendSheet = this.legendSheet;
 
         // Freeze and format column titles
         legendSheet.row(2).freeze();
@@ -474,9 +462,8 @@ export class SheetBuilder {
         });
     }
 
-    private fillValidationSheet() {
+    private fillValidationSheet(validationSheet: Sheet) {
         const { organisationUnits, element, metadata, rawMetadata, elementMetadata, startDate, endDate } = this.builder;
-        const validationSheet = this.validationSheet;
 
         // Freeze and format column titles
         validationSheet.row(2).freeze();
@@ -626,9 +613,9 @@ export class SheetBuilder {
         validationSheet.cell(1, 1, 1, columnId, true).formula(`_${element.id}`).style(baseStyle);
     }
 
-    private fillMetadataSheet() {
+    private fillMetadataSheet(metadataSheet: Sheet) {
+        const { workbook } = metadataSheet;
         const { elementMetadata: metadata, organisationUnits } = this.builder;
-        const metadataSheet = this.metadataSheet;
 
         // Freeze and format column titles
         metadataSheet.row(2).freeze();
@@ -691,7 +678,7 @@ export class SheetBuilder {
             metadataSheet.cell(rowId, 7).string(`${item.version ?? ""}`);
 
             if (name !== undefined) {
-                this.workbook.definedNameCollection.addDefinedName({
+                workbook.definedNameCollection.addDefinedName({
                     refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
                     name: `_${item.id}`,
                 });
@@ -707,7 +694,7 @@ export class SheetBuilder {
             metadataSheet.cell(rowId, 3).string(name ?? "");
 
             if (name !== undefined)
-                this.workbook.definedNameCollection.addDefinedName({
+                workbook.definedNameCollection.addDefinedName({
                     refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
                     name: `_${orgUnit.id}`,
                 });
@@ -722,7 +709,7 @@ export class SheetBuilder {
                 metadataSheet.cell(rowId, 1).string(relationshipType.id);
                 metadataSheet.cell(rowId, 2).string("relationshipType");
                 metadataSheet.cell(rowId, 3).string(relationshipType.name);
-                this.workbook.definedNameCollection.addDefinedName({
+                workbook.definedNameCollection.addDefinedName({
                     refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
                     name: `_${relationshipType.id}`,
                 });
@@ -733,7 +720,7 @@ export class SheetBuilder {
         metadataSheet.cell(rowId, 1).string("true");
         metadataSheet.cell(rowId, 2).string("boolean");
         metadataSheet.cell(rowId, 3).string(i18n.t("Yes", { lng: this.builder.language }));
-        this.workbook.definedNameCollection.addDefinedName({
+        workbook.definedNameCollection.addDefinedName({
             refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
             name: "_true",
         });
@@ -742,7 +729,7 @@ export class SheetBuilder {
         metadataSheet.cell(rowId, 1).string("false");
         metadataSheet.cell(rowId, 2).string("boolean");
         metadataSheet.cell(rowId, 3).string(i18n.t("No", { lng: this.builder.language }));
-        this.workbook.definedNameCollection.addDefinedName({
+        workbook.definedNameCollection.addDefinedName({
             refFormula: `'Metadata'!$${Excel.getExcelAlpha(3)}$${rowId}`,
             name: "_false",
         });
@@ -774,7 +761,7 @@ export class SheetBuilder {
         return getObjectVersion(element) ?? defaultVersion;
     }
 
-    private fillDataEntrySheet(dataEntrySheet: any, options: { includedDataElementIds?: Set<string> }) {
+    private fillDataEntrySheet(dataEntrySheet: Sheet, options: { includedDataElementIds?: Set<string> }) {
         const { includedDataElementIds } = options;
         const { element, elementMetadata: metadata, settings } = this.builder;
         const { rowOffset = 0 } = this.builder.template;
@@ -1032,15 +1019,16 @@ export class SheetBuilder {
     }
 
     private createColumn(
-        sheet: any,
+        sheet: Sheet,
         rowId: any,
         columnId: any,
         label: any,
         groupId: any = null,
-        validation: any = null,
+        validation: Validation | undefined | null = null,
         validationMessage: any = null,
         defaultLabel = false
     ) {
+        const workbook = sheet.workbook;
         sheet.column(columnId).setWidth(20);
         const cell = sheet.cell(rowId, columnId);
 
@@ -1079,7 +1067,7 @@ export class SheetBuilder {
                 formula: `ISERROR(MATCH(${Excel.getExcelAlpha(columnId)}${rowId + 1},${validation
                     .toString()
                     .substr(1)},0))`, // formula that returns nonzero or 0
-                style: this.workbook.createStyle({
+                style: workbook.createStyle({
                     font: {
                         bold: true,
                         color: "FF0000",
@@ -1089,7 +1077,7 @@ export class SheetBuilder {
         }
     }
 
-    private transparentFontStyle(groupId: number) {
+    private transparentFontStyle(groupId: number): StyleOptions {
         const { palette = defaultColorScale } = this.builder.theme ?? {};
 
         return {
@@ -1099,7 +1087,7 @@ export class SheetBuilder {
         };
     }
 
-    private groupStyle(groupId: number) {
+    private groupStyle(groupId: number): StyleOptions {
         const { palette = defaultColorScale } = this.builder.theme ?? {};
         return {
             ...baseStyle,
@@ -1115,7 +1103,7 @@ export class SheetBuilder {
         return `='${teiSheetName}'!$A$${this.instancesSheetValuesRow}:$A$${maxTeiRows}`;
     }
 
-    private createFeatureTypeColumn(options: { program: any; sheet: any; itemRow: number; columnId: number }) {
+    private createFeatureTypeColumn(options: { program: any; sheet: Sheet; itemRow: number; columnId: number }) {
         const { program, sheet, itemRow, columnId } = options;
         const header = this.getFeatureTypeHeader(program);
         const defaultHeader = i18n.t("No geometry", { lng: this.builder.language });
@@ -1260,9 +1248,8 @@ function getDataSetDataElements(dataSet: any, metadata: any) {
 
 /**
  * Common cell style definition
- * @type {{alignment: {horizontal: string, vertical: string, wrapText: boolean, shrinkToFit: boolean}}}
  */
-const baseStyle = {
+const baseStyle: StyleOptions = {
     alignment: {
         horizontal: "center",
         vertical: "center",
@@ -1329,4 +1316,9 @@ function withSheetNames(objs: NamedRef[], options: any = {}) {
     });
 }
 
+type Id = string;
 type Section = { name: string; sortOrder: number; dataElements: Ref[] };
+
+type Validations = Map<IdOrValueType, Validation>;
+type IdOrValueType = string;
+type Validation = string;
