@@ -67,13 +67,15 @@ export class SheetBuilder {
         const useDataSetSections =
             builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
 
+        const dataEntrySheetsInfo: Array<{ sheet: any; options: { includedDataElementIds?: Set<string> } }> = [];
+
+        let instancesSheet: Sheet | undefined = undefined;
+        let programStageSheets: Record<string, Sheet> = {};
+        let relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
+
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
-            const instancesSheet = workbook.addWorksheet(teiSheetName);
-            this.fillInstancesSheet(instancesSheet);
-
-            const programStageSheets: Record<string, Sheet> = {};
-            const relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
+            instancesSheet = workbook.addWorksheet(teiSheetName);
 
             // ProgramStage sheets
             const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
@@ -92,9 +94,6 @@ export class SheetBuilder {
                     }
                 );
             }
-
-            this.fillProgramStageSheets(programStageSheets);
-            this.fillRelationshipSheets(relationshipsSheets);
         } else {
             const dataEntryTabName = "Data Entry";
 
@@ -105,11 +104,11 @@ export class SheetBuilder {
                     const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
                     const dataEntrySheet = workbook.addWorksheet(tabName);
                     const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
-                    this.fillDataEntrySheet(dataEntrySheet, { includedDataElementIds });
+                    dataEntrySheetsInfo.push({ sheet: dataEntrySheet, options: { includedDataElementIds } });
                 });
             } else {
                 const dataEntrySheet = workbook.addWorksheet(dataEntryTabName);
-                this.fillDataEntrySheet(dataEntrySheet, {});
+                dataEntrySheetsInfo.push({ sheet: dataEntrySheet, options: {} });
             }
         }
 
@@ -120,6 +119,16 @@ export class SheetBuilder {
         this.fillValidationSheet(validationSheet);
         this.fillMetadataSheet(metadataSheet);
         this.fillLegendSheet(legendSheet);
+
+        if (isTrackerProgram(element)) {
+            if (instancesSheet) this.fillInstancesSheet(instancesSheet);
+            this.fillProgramStageSheets(programStageSheets);
+            this.fillRelationshipSheets(relationshipsSheets);
+        } else {
+            dataEntrySheetsInfo.forEach(({ sheet, options }) => {
+                this.fillDataEntrySheet(sheet, options);
+            });
+        }
 
         return workbook;
     }
