@@ -1,5 +1,3 @@
-//@ts-ignore
-import * as Excel from "excel4node";
 import _ from "lodash";
 import "lodash.product";
 import { Moment } from "moment";
@@ -18,6 +16,7 @@ export const dataSetId = "DATASET_GENERATED_v2";
 export const programId = "PROGRAM_GENERATED_v4";
 export const trackerProgramId = "TRACKER_PROGRAM_GENERATED_v3";
 
+const Excel = Workbook;
 const teiSheetName = "TEI Instances";
 
 const maxRow = 1048576;

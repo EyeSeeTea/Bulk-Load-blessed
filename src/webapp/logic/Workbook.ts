@@ -23,6 +23,13 @@ export class Workbook {
         return new Workbook(workbook);
     }
 
+    /* Accepts column as integer and returns corresponding column reference as alpha */
+    static getExcelAlpha(n: number): string {
+        if (n === 0) return "";
+        const [div, mod] = [Math.floor((n - 1) / 26), (n - 1) % 26];
+        return Workbook.getExcelAlpha(div) + String.fromCharCode(65 + mod);
+    }
+
     addWorksheet(name: string, _options?: AddWorksheetOptions) {
         // xlsx defines an initial sheet, re-use when adding our first sheet.
         const firstSheet = this.xworkbook.sheet(0);
