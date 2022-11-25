@@ -67,11 +67,10 @@ export class SheetBuilder {
         const useDataSetSections =
             builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
 
-        const dataEntrySheetsInfo: Array<{ sheet: any; options: { includedDataElementIds?: Set<string> } }> = [];
-
         let instancesSheet: Sheet | undefined = undefined;
-        let programStageSheets: Record<string, Sheet> = {};
-        let relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
+        const programStageSheets: Record<string, Sheet> = {};
+        const relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
+        const dataEntrySheetsInfo: Array<{ sheet: any; options: { includedDataElementIds?: Set<string> } }> = [];
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
