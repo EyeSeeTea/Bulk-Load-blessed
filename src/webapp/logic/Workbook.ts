@@ -2,11 +2,12 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import _ from "lodash";
 import { assertUnreachable, RecursivePartial } from "../../types/utils";
 
-/* The original sheetBuilder.js used excel4node, we now transition to xlsx-populate. Let's define a wrapper that exposes only the used parts. Known limitations of xlsx-populate of our use case:
+/* The original sheetBuilder.js used excel4node, we now transition to xlsx-populate.
+   Let's define a wrapper that exposes only the used parts. Known limitations of
+   upstream xlsx-populate for our use case:
 
-  - Conditional formatting is not supported (check upstream Backlog).
-        It's used for extra live validation for metadata.
-  - Cell comments are not supported (check upstream Backlog).
+    - Conditional formatting is not supported (used for extra live validation for metadata).
+    - Cell comments are not supported, but it has been implemented in our fork.
 
   Upstream Backlog: https://github.com/dtjohnson/xlsx-populate/blob/master/backlog.md
 */
@@ -115,8 +116,8 @@ export class Sheet {
                 xrange.formula(formulaValue);
                 return cell;
             },
-            comment: (_text: string, _options: { height: string; width: string }) => {
-                // Unsupported
+            comment: (text: string, options: { height: string; width: string }) => {
+                xcell1.comment({ text, ...options });
                 return cell;
             },
             style: (options: StyleOptions) => {
