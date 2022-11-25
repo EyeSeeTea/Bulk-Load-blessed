@@ -145,8 +145,16 @@ export class Sheet {
     addDataValidation(validation: Validation) {
         // xlsx-populate exposes cell/range data validation, create a range for the whole sheet.
         // https://github.com/dtjohnson/xlsx-populate/issues/273
-        const range = this.xsheet.range("A1:XFD1048576");
-        range.dataValidation(validation);
+        const obj = validation.sqref.includes(":")
+            ? this.xsheet.range(validation.sqref)
+            : this.xsheet.cell(validation.sqref);
+
+        const xvalidation = {
+            ..._.omit(validation, "formulas"),
+            formula1: validation.formulas[0],
+            formula2: validation.formulas[1] || "String",
+        };
+        obj.dataValidation(xvalidation);
     }
 
     addConditionalFormattingRule(_ref: string, _options: object) {
@@ -181,7 +189,7 @@ interface CustomValidation {
     type: "custom";
     error: string;
     sqref: string;
-    formulas: string[];
+    formulas: Formulas;
 }
 
 interface ListValidation {
@@ -191,16 +199,18 @@ interface ListValidation {
     errorStyle: "warning";
     showDropDown: boolean;
     sqref: string;
-    formulas: string[];
+    formulas: Formulas;
 }
 
 interface TextLengthValidation {
     type: "textLength";
     error: string;
     sqref: string;
-    operator: "equal";
-    formulas: string[];
+    operator: string;
+    formulas: Formulas;
 }
+
+type Formulas = [string] | [string, string];
 
 export type StyleOptions = RecursivePartial<StyleOptions_>;
 
