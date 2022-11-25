@@ -160,8 +160,8 @@ function getPopulateFill(fill: StyleOptions["fill"]) {
     switch (type) {
         case "pattern":
             return {
-                type: "pattern",
-                foreground: toPopulateColor(fill?.fgColor),
+                type: "solid",
+                color: { rgb: toPopulateColor(fill?.fgColor) },
             };
         default:
             assertUnreachable(type);
