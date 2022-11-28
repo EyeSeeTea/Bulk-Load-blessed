@@ -2,12 +2,12 @@ import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import _ from "lodash";
 import { assertUnreachable, RecursivePartial } from "../../types/utils";
 
-/* The original sheetBuilder.js used excel4node, we now transition to xlsx-populate.
-   Let's define a wrapper that exposes only the used parts. Known limitations of
-   upstream xlsx-populate for our use case:
+/* The original sheetBuilder.js used excel4node, transition it to xlsx-populate.
+   Workbook is a wrapper that implements only what's being use in the builder. 
+   Known limitations of upstream xlsx-populate for our use case:
 
-    - Conditional formatting is not supported (used for extra live validation for metadata).
-    - Cell comments are not supported, but it has been implemented in our fork.
+    - Conditional formatting is not supported (used to highlight invalid data).
+    - Cell comments are not supported, implemented in fork @eyeseetea/xlsx-populate.
 
   Upstream Backlog: https://github.com/dtjohnson/xlsx-populate/blob/master/backlog.md
 */
@@ -27,12 +27,14 @@ export class Workbook {
     /* Accepts column as integer and returns corresponding column reference as alpha */
     static getExcelAlpha(n: number): string {
         if (n === 0) return "";
-        const [div, mod] = [Math.floor((n - 1) / 26), (n - 1) % 26];
-        return Workbook.getExcelAlpha(div) + String.fromCharCode(65 + mod);
+        const columnsRange = 26;
+        const charCodeFormUpperA = 65;
+        const [div, mod] = [Math.floor((n - 1) / columnsRange), (n - 1) % columnsRange];
+        return Workbook.getExcelAlpha(div) + String.fromCharCode(charCodeFormUpperA + mod);
     }
 
     addWorksheet(name: string, _options?: AddWorksheetOptions) {
-        // xlsx defines an initial sheet, re-use when adding our first sheet.
+        // xlsx defines an initial sheet, re-use it when adding the first sheet.
         const firstSheet = this.xworkbook.sheet(0);
         const xsheet = this.isInitialState && firstSheet ? firstSheet.name(name) : this.xworkbook.addSheet(name);
         this.isInitialState = false;
@@ -56,7 +58,7 @@ export class Workbook {
     }
 
     createStyle(_style: StyleOptions): void {
-        // TODO
+        // Used only in conditional formatting.
     }
 }
 
@@ -67,14 +69,17 @@ export class Sheet {
         const row = this.xsheet.row(rowNumber);
 
         return {
+            setHeight: (height: number) => {
+                row.height(height);
+                return row;
+            },
             freeze: () => {
                 this.xsheet.freezePanes(0, rowNumber);
+                return row;
             },
             hide: () => {
                 row.hidden(true);
-            },
-            setHeight: (height: number) => {
-                row.height(height);
+                return row;
             },
         };
     }
@@ -85,9 +90,11 @@ export class Sheet {
         return {
             setWidth: (width: number) => {
                 column.width(width);
+                return column;
             },
             hide: () => {
                 column.hidden(true);
+                return column;
             },
         };
     }
@@ -149,11 +156,21 @@ export class Sheet {
             ? this.xsheet.range(validation.sqref)
             : this.xsheet.cell(validation.sqref);
 
-        const xvalidation = {
-            ..._.omit(validation, "formulas"),
+        const xvalidation: PopulateDataValidation = {
+            type: validation.type,
+            allowBlank: validation.allowBlank,
+            showInputMessage: validation.showDropDown,
+            prompt: "",
+            promptTitle: "",
+            showErrorMessage: true,
+            error: validation.error,
+            errorTitle: "",
+            errorStyle: validation.errorStyle,
+            operator: "",
             formula1: validation.formulas[0],
-            formula2: validation.formulas[1] || "String",
+            formula2: validation.formulas[1] || "",
         };
+
         obj.dataValidation(xvalidation);
     }
 
@@ -162,51 +179,17 @@ export class Sheet {
     }
 }
 
-function getPopulateFill(fill: StyleOptions["fill"]) {
-    const type = fill?.type;
-    if (!type) return;
-
-    switch (type) {
-        case "pattern":
-            return {
-                type: "solid",
-                color: { rgb: toPopulateColor(fill?.fgColor) },
-            };
-        default:
-            assertUnreachable(type);
-    }
-}
-
-function toPopulateColor(s: string | undefined): string | undefined {
-    return s?.replace(/^#/, "");
-}
-
 type Position = "center";
 
-type Validation = CustomValidation | ListValidation | TextLengthValidation;
-
-interface CustomValidation {
-    type: "custom";
+interface Validation {
+    type: "list" | "custom" | "textLength";
+    showInputMessage?: boolean;
+    allowBlank?: boolean;
     error: string;
+    errorStyle?: "warning";
+    showDropDown?: boolean;
+    operator?: string;
     sqref: string;
-    formulas: Formulas;
-}
-
-interface ListValidation {
-    type: "list";
-    allowBlank: boolean;
-    error: string;
-    errorStyle: "warning";
-    showDropDown: boolean;
-    sqref: string;
-    formulas: Formulas;
-}
-
-interface TextLengthValidation {
-    type: "textLength";
-    error: string;
-    sqref: string;
-    operator: string;
     formulas: Formulas;
 }
 
@@ -241,4 +224,40 @@ interface AddWorksheetOptions {
         formatColumns: boolean;
         formatRows: boolean;
     };
+}
+
+interface PopulateDataValidation {
+    type: string;
+    allowBlank?: boolean;
+    showInputMessage?: boolean;
+    prompt: string;
+    promptTitle: string;
+    showErrorMessage: boolean;
+    error: string;
+    errorTitle: string;
+    operator: string;
+    formula1: string;
+    formula2: string;
+    errorStyle?: string;
+}
+
+/* Helper functions */
+
+function getPopulateFill(fill: StyleOptions["fill"]) {
+    const type = fill?.type;
+    if (!type) return;
+
+    switch (type) {
+        case "pattern":
+            return {
+                type: "solid",
+                color: { rgb: toPopulateColor(fill?.fgColor) },
+            };
+        default:
+            assertUnreachable(type);
+    }
+}
+
+function toPopulateColor(s: string | undefined): string | undefined {
+    return s?.replace(/^#/, "");
 }
