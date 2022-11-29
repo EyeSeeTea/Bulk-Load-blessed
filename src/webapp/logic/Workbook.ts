@@ -135,7 +135,7 @@ export class Sheet {
 
         const cell = {
             value: () => {
-                return xrange.value();
+                return xcell1.value();
             },
             string: (strValue: string) => {
                 xrange.value(strValue);

@@ -273,7 +273,7 @@ export class SheetBuilder {
                 const dataElement = metadata.get(dataElementId);
                 if (!programStageSheet || !dataElement) return;
 
-                this.createColumn2(sheet, itemRow, columnId, `_${dataElement.id}`);
+                this.createColumn(sheet, itemRow, columnId, `_${dataElement.id}`);
 
                 const colName = Excel.getExcelAlpha(columnId);
                 const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$B$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
@@ -320,7 +320,7 @@ export class SheetBuilder {
                     const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
-                    this.createColumn2(
+                    this.createColumn(
                         sheet,
                         itemRow,
                         columnId,
@@ -963,7 +963,7 @@ export class SheetBuilder {
                         const { name, description } = this.translate(dataElement);
 
                         const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
-                        this.createColumn2(
+                        this.createColumn(
                             dataEntrySheet,
                             itemRow,
                             columnId,
@@ -1058,10 +1058,6 @@ export class SheetBuilder {
         }
     }
 
-    private createColumn2(...args: Parameters<SheetBuilder["createColumn"]>) {
-        return this.createColumn(...args);
-    }
-
     protected createColumn(
         sheet: Sheet,
         rowId: any,
@@ -1071,9 +1067,9 @@ export class SheetBuilder {
         validation: Validation | undefined | null = null,
         validationMessage: any = null,
         defaultLabel = false,
-        options: { skipIfCustomTemplate: boolean } = { skipIfCustomTemplate: true }
+        _options: { skipIfCustomTemplate: boolean } = { skipIfCustomTemplate: true }
     ) {
-        if (this.builder.template.type === "custom" && options.skipIfCustomTemplate) return;
+        // if (this.builder.template.type === "custom" && options.skipIfCustomTemplate) return;
 
         const workbook = sheet.workbook;
         sheet.column(columnId).setWidth(20);
@@ -1086,8 +1082,11 @@ export class SheetBuilder {
             );
         }
 
-        if (label.startsWith("_")) cell.formula(label);
-        else cell.string(label);
+        const isEmpty = !cell.value();
+        if (isEmpty) {
+            if (label.startsWith("_")) cell.formula(label);
+            else cell.string(label);
+        }
 
         sheet.addDataValidation({
             type: "custom",
