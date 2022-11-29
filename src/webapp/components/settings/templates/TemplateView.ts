@@ -26,6 +26,7 @@ import i18n from "../../../../locales";
 
 export interface TemplateView extends BasicView, AdvancedView {
     mode: "basic" | "advanced";
+    generateMetadata: boolean;
 }
 
 type ValidView = { [K in keyof TemplateView]: NonNullable<TemplateView[K]> };
@@ -138,6 +139,7 @@ function definition<T>(defaultValue: T, validations?: ValidationKey[]): Definiti
 const viewDefs = {
     action: definition("create"),
     mode: definition("basic"),
+    generateMetadata: definition(false),
     code: definition(""),
     name: definition(""),
     dataFormType: definition(undefined),
@@ -286,6 +288,7 @@ export class TemplateViewActions {
     async fromCustomTemplate(template: CustomTemplate): Promise<TemplateView> {
         const base: Partial<TemplateView> = {
             action: "edit",
+            generateMetadata: template.generateMetadata,
             code: template.id,
             name: template.name,
             dataFormId: template.dataFormId.type === "value" ? template.dataFormId.id : undefined,
@@ -434,6 +437,7 @@ export class TemplateViewActions {
     async toCustomTemplate(view: ValidView): Promise<CustomTemplate> {
         type BaseField =
             | "type"
+            | "generateMetadata"
             | "id"
             | "name"
             | "dataFormType"
@@ -445,6 +449,7 @@ export class TemplateViewActions {
 
         const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
+            generateMetadata: view.generateMetadata,
             id: view.code,
             name: view.name,
             dataFormType: { type: "value", id: view.dataFormType },
@@ -593,6 +598,7 @@ export class TemplateViewActions {
         return ofType<Translations>({
             action: i18n.t("Action"),
             mode: i18n.t("Mode"),
+            generateMetadata: i18n.t("Generate automatic metadata"),
             code: i18n.t("Code"),
             name: i18n.t("Name"),
             description: i18n.t("Description"),

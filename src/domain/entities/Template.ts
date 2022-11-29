@@ -69,6 +69,7 @@ export interface ImportCustomizationOptions {
 
 export interface CustomTemplateWithUrl extends BaseTemplate {
     type: "custom";
+    generateMetadata?: boolean;
     url: string;
     description: string;
     fixedOrgUnit?: CellRef;
@@ -312,4 +313,16 @@ export function setSheet<DS extends TrackerRelationship | TrackerEventRowDataSou
                 dataElements: { ...dataSource.dataElements, sheet },
             };
     }
+}
+
+export function getDataSources(template: Template, sheetName: string): DataSourceValue[] {
+    return _.flatMap(template.dataSources, dataSource => {
+        if (!dataSource) {
+            return [];
+        } else if (typeof dataSource === "function") {
+            return dataSource(sheetName) || [];
+        } else {
+            return [dataSource];
+        }
+    });
 }

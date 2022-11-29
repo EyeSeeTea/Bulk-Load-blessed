@@ -1,6 +1,7 @@
 import XlsxPopulate from "@eyeseetea/xlsx-populate";
 import _ from "lodash";
 import { assertUnreachable, RecursivePartial } from "../../types/utils";
+import { fromBase64 } from "../../utils/files";
 
 /* The original sheetBuilder.js used excel4node, transition it to xlsx-populate.
    Workbook is a wrapper that implements only what's being use in the builder. 
@@ -19,8 +20,14 @@ export class Workbook {
         this.isInitialState = true;
     }
 
-    static async build() {
+    static async empty() {
         const workbook = await XlsxPopulate.fromBlankAsync();
+        return new Workbook(workbook);
+    }
+
+    static async fromBase64(base64: string) {
+        const file = await fromBase64(base64);
+        const workbook = await XlsxPopulate.fromDataAsync(file);
         return new Workbook(workbook);
     }
 
@@ -33,16 +40,32 @@ export class Workbook {
         return Workbook.getExcelAlpha(div) + String.fromCharCode(charCodeFormUpperA + mod);
     }
 
-    addWorksheet(name: string, _options?: AddWorksheetOptions) {
-        // xlsx defines an initial sheet, re-use it when adding the first sheet.
-        const firstSheet = this.xworkbook.sheet(0);
-        const xsheet = this.isInitialState && firstSheet ? firstSheet.name(name) : this.xworkbook.addSheet(name);
-        this.isInitialState = false;
+    static getColumnIndex(column: string): number {
+        return Array.from(column.toUpperCase()).reduce((acc, char) => {
+            return char.charCodeAt(0) - 64 + acc * 26;
+        }, 0);
+    }
 
+    addWorksheet(name: string, _options?: AddWorksheetOptions) {
+        const xsheet = this.getPopulateSheet(name);
         const sheetProtection = _options?.sheetProtection;
         if (sheetProtection) xsheet.protected(sheetProtection.password, sheetProtection);
-
         return new Sheet(this, xsheet);
+    }
+
+    private getPopulateSheet(name: string): XlsxPopulate.Sheet {
+        // xlsx-populate defines an initial sheet, re-use it when adding the first sheet.
+        const firstSheet = this.xworkbook.sheet(0);
+        const existingSheet = this.xworkbook.sheet(name);
+        const xsheet =
+            this.isInitialState && firstSheet
+                ? firstSheet.name(name)
+                : existingSheet
+                ? existingSheet
+                : this.xworkbook.addSheet(name);
+        this.isInitialState = false;
+
+        return xsheet;
     }
 
     writeToBuffer(): Promise<Blob> {
@@ -64,6 +87,10 @@ export class Workbook {
 
 export class Sheet {
     constructor(public workbook: Workbook, private xsheet: XlsxPopulate.Sheet) {}
+
+    get name() {
+        return this.xsheet.name();
+    }
 
     row(rowNumber: number) {
         const row = this.xsheet.row(rowNumber);
@@ -107,6 +134,9 @@ export class Sheet {
         if (isMerged) xrange.merged(true);
 
         const cell = {
+            value: () => {
+                return xrange.value();
+            },
             string: (strValue: string) => {
                 xrange.value(strValue);
                 return cell;

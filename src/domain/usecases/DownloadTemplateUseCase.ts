@@ -71,20 +71,13 @@ export class DownloadTemplateUseCase implements UseCase {
         i18n.setDefaultNamespace("bulk-load");
         const templateId =
             templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
+
         const template = await this.templateRepository.getTemplate(templateId);
-
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
-
         const element = await getElement(api, type, id);
         const name = element.displayName ?? element.name;
 
-        if (template.type === "custom") {
-            await this.excelRepository.loadTemplate({
-                type: "file-base64",
-                contents: template.file.contents,
-                templateId: template.id,
-            });
-        } else {
+        async function getGenerateFile() {
             const result = await getElementMetadata({
                 api,
                 element,
@@ -107,10 +100,24 @@ export class DownloadTemplateUseCase implements UseCase {
                 downloadRelationships,
                 splitDataEntryTabsBySection,
             });
+
             const workbook = await sheetBuilder.generate();
+            return workbook.writeToBuffer();
+        }
 
-            const file = await workbook.writeToBuffer();
-
+        if (template.type === "custom") {
+            if (template.generateMetadata) {
+                const file = await getGenerateFile();
+                await this.excelRepository.loadTemplate({ type: "file", file: file });
+            } else {
+                await this.excelRepository.loadTemplate({
+                    type: "file-base64",
+                    contents: template.file.contents,
+                    templateId: template.id,
+                });
+            }
+        } else {
+            const file = await getGenerateFile();
             await this.excelRepository.loadTemplate({ type: "file", file });
         }
 

@@ -3,7 +3,7 @@ import "lodash.product";
 import { Moment } from "moment";
 import { DataFormType } from "../../domain/entities/DataForm";
 import { NamedRef, Ref } from "../../domain/entities/ReferenceObject";
-import { GeneratedTemplate } from "../../domain/entities/Template";
+import { getDataSources, Template } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
 import i18n from "../../locales";
 import { defaultColorScale } from "../utils/colors";
@@ -46,7 +46,7 @@ export interface SheetBuilderParams {
     endDate?: Moment;
     language: string;
     theme?: Theme;
-    template: GeneratedTemplate;
+    template: Template;
     settings: Settings;
     downloadRelationships: boolean;
     splitDataEntryTabsBySection: boolean;
@@ -55,15 +55,22 @@ export interface SheetBuilderParams {
 export class SheetBuilder {
     private validations: Validations;
     private instancesSheetValuesRow = 0;
+    private rowOffset;
 
     constructor(private builder: SheetBuilderParams) {
         this.validations = new Map();
+        const { template } = this.builder;
+        this.rowOffset = template.type === "custom" ? 3 : template.rowOffset;
     }
 
     public async generate(): Promise<Workbook> {
-        const workbook = await Workbook.build();
         const { builder } = this;
-        const { element, rawMetadata } = builder;
+        const { element, rawMetadata, template } = builder;
+
+        const workbook = await (template.type === "custom"
+            ? Workbook.fromBase64(template.file.contents)
+            : Workbook.empty());
+
         const useDataSetSections =
             builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
 
@@ -128,6 +135,12 @@ export class SheetBuilder {
                 this.fillDataEntrySheet(sheet, options);
             });
         }
+
+        // Add template version
+        workbook.definedNameCollection.addDefinedName({
+            name: `Version: ${this.getVersion()}`,
+            refFormula: "",
+        });
 
         return workbook;
     }
@@ -260,7 +273,7 @@ export class SheetBuilder {
                 const dataElement = metadata.get(dataElementId);
                 if (!programStageSheet || !dataElement) return;
 
-                this.createColumn(sheet, itemRow, columnId, `_${dataElement.id}`);
+                this.createColumn2(sheet, itemRow, columnId, `_${dataElement.id}`);
 
                 const colName = Excel.getExcelAlpha(columnId);
                 const lookupFormula = `IFERROR(INDEX('${programStageSheet}'!$B$2:$ZZ$${maxTeiRows},MATCH(INDIRECT("B" & ROW()),'${programStageSheet}'!$B$2:$B$${maxTeiRows},0),MATCH(${colName}$${itemRow},'${programStageSheet}'!$B$2:$ZZ$2,0)),"")`;
@@ -307,7 +320,7 @@ export class SheetBuilder {
                     const { name, description } = this.translate(dataElement);
 
                     const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
-                    this.createColumn(
+                    this.createColumn2(
                         sheet,
                         itemRow,
                         columnId,
@@ -347,7 +360,7 @@ export class SheetBuilder {
 
     private fillInstancesSheet(sheet: Sheet) {
         const { element: program } = this.builder;
-        const { rowOffset = 0 } = this.builder.template;
+        const { rowOffset } = this;
 
         // Add cells for themes
         const sectionRow = rowOffset + 1;
@@ -362,9 +375,6 @@ export class SheetBuilder {
         sheet.row(itemRow).freeze();
         sheet.row(sectionRow).setHeight(30);
         sheet.row(itemRow).setHeight(50);
-
-        // Add template version
-        sheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
         this.createColumn(sheet, itemRow, 1, i18n.t("TEI id", { lng: this.builder.language }));
 
@@ -763,19 +773,22 @@ export class SheetBuilder {
     }
 
     private getVersion() {
-        const { element } = this.builder;
+        const { element, template } = this.builder;
+        const customVersion = template.type === "custom" ? template.id : undefined;
         const defaultVersion = getGeneratedTemplateId(element.type);
-        return getObjectVersion(element) ?? defaultVersion;
+        return customVersion ?? getObjectVersion(element) ?? defaultVersion;
     }
 
     private fillDataEntrySheet(dataEntrySheet: Sheet, options: { includedDataElementIds?: Set<string> }) {
         const { includedDataElementIds } = options;
         const { element, elementMetadata: metadata, settings } = this.builder;
-        const { rowOffset = 0 } = this.builder.template;
+        const { rowOffset } = this;
+        const dataSource = this.getDataSource({ sheet: dataEntrySheet });
 
         // Add cells for themes
         const sectionRow = rowOffset + 1;
         const itemRow = rowOffset + 2;
+        const rowDataElement = dataSource?.dataElements.row ?? sectionRow;
 
         // Hide theme rows by default
         for (let row = 1; row < sectionRow; row++) {
@@ -786,9 +799,6 @@ export class SheetBuilder {
         dataEntrySheet.row(itemRow).freeze();
         dataEntrySheet.row(sectionRow).setHeight(30);
         dataEntrySheet.row(itemRow).setHeight(50);
-
-        // Add template version
-        dataEntrySheet.cell(1, 1).string(`Version: ${this.getVersion()}`).style(baseStyle);
 
         // Add column titles
         let columnId = 1;
@@ -844,6 +854,7 @@ export class SheetBuilder {
                 : dataElementsAll;
             const dataElementsExclusion = settings.dataSetDataElementsFilter;
 
+            columnId = dataSource?.dataElements.column ?? columnId;
             _.forEach(dataElements, ({ dataElement, categoryOptionCombos }) => {
                 const { name, description } = this.translate(dataElement);
                 const firstColumnId = columnId;
@@ -859,15 +870,17 @@ export class SheetBuilder {
                     if (isColumnExcluded) return;
 
                     const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
+
                     this.createColumn(
                         dataEntrySheet,
-                        itemRow,
+                        dataSource?.categoryOptionCombos.row ?? itemRow,
                         columnId,
                         `_${categoryOptionCombo.id}`,
                         groupId,
                         this.validations.get(validation),
                         undefined,
-                        categoryOptionCombo.code === "default"
+                        categoryOptionCombo.code === "default",
+                        { skipIfCustomTemplate: false }
                     );
 
                     columnId++;
@@ -881,20 +894,20 @@ export class SheetBuilder {
                 }
 
                 dataEntrySheet
-                    .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                    .cell(rowDataElement, firstColumnId, rowDataElement, columnId - 1, true)
                     .formula(`_${dataElement.id}`)
                     .style(this.groupStyle(groupId));
 
                 if (dataElement.url !== undefined) {
                     dataEntrySheet
-                        .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                        .cell(rowDataElement, firstColumnId, rowDataElement, columnId - 1, true)
                         .link(dataElement.url)
                         .formula(`=_${dataElement.id}`);
                 }
 
                 if (description !== undefined) {
                     dataEntrySheet
-                        .cell(sectionRow, firstColumnId, sectionRow, columnId - 1, true)
+                        .cell(rowDataElement, firstColumnId, rowDataElement, columnId - 1, true)
                         .comment(description, {
                             height: "100pt",
                             width: "160pt",
@@ -950,7 +963,7 @@ export class SheetBuilder {
                         const { name, description } = this.translate(dataElement);
 
                         const validation = dataElement.optionSet ? dataElement.optionSet.id : dataElement.valueType;
-                        this.createColumn(
+                        this.createColumn2(
                             dataEntrySheet,
                             itemRow,
                             columnId,
@@ -989,6 +1002,26 @@ export class SheetBuilder {
         }
     }
 
+    getDataSource(options: { sheet: Sheet }) {
+        const { template } = this.builder;
+        const dataSource = getDataSources(template, options.sheet.name)[0];
+
+        // Partial support: dataSource[row] and categoryOption[row]
+        if (!(dataSource && dataSource.type === "row")) return;
+
+        const column = dataSource.range.columnStart;
+        const columnStartIndex = Workbook.getColumnIndex(column);
+        const rowNumberCoc = dataSource.categoryOption?.type === "row" ? dataSource.categoryOption.ref : undefined;
+        const rowNumberDataElement = dataSource.dataElement?.type === "row" ? dataSource.dataElement.ref : undefined;
+
+        if (!(rowNumberCoc && rowNumberDataElement)) return;
+
+        return {
+            dataElements: { column: columnStartIndex, row: rowNumberDataElement },
+            categoryOptionCombos: { column: columnStartIndex, row: rowNumberCoc },
+        };
+    }
+
     // Return only program stages for which the current user has permissions to export/import data.
     private getProgramStages() {
         const { element } = this.builder;
@@ -1025,7 +1058,11 @@ export class SheetBuilder {
         }
     }
 
-    private createColumn(
+    private createColumn2(...args: Parameters<SheetBuilder["createColumn"]>) {
+        return this.createColumn(...args);
+    }
+
+    protected createColumn(
         sheet: Sheet,
         rowId: any,
         columnId: any,
@@ -1033,8 +1070,11 @@ export class SheetBuilder {
         groupId: any = null,
         validation: Validation | undefined | null = null,
         validationMessage: any = null,
-        defaultLabel = false
+        defaultLabel = false,
+        options: { skipIfCustomTemplate: boolean } = { skipIfCustomTemplate: true }
     ) {
+        if (this.builder.template.type === "custom" && options.skipIfCustomTemplate) return;
+
         const workbook = sheet.workbook;
         sheet.column(columnId).setWidth(20);
         const cell = sheet.cell(rowId, columnId);

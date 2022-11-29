@@ -381,7 +381,11 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
     private async getWorkbook(id: string) {
         const workbook = this.workbooks[id];
-        if (!workbook) throw new Error(i18n.t("Template {{id}} not loaded", { id }));
+
+        if (!workbook) {
+            const loaded = Object.keys(this.workbooks).join(", ");
+            throw new Error(i18n.t("Template {{id}} not loaded. Loaded: {{loaded}}", { id, loaded }));
+        }
 
         return workbook;
     }

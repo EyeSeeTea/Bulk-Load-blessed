@@ -128,6 +128,15 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
         [setTemplate]
     );
 
+    const generateMetadata = template.generateMetadata;
+    const toggleGenerateMetadata = React.useCallback<NonNullable<SwitchProps["onChange"]>>(
+        ev => {
+            const newValue = ev.target.checked;
+            setTemplate(update("generateMetadata", newValue));
+        },
+        [setTemplate]
+    );
+
     React.useEffect(() => {
         const dataForm = dataForms.selected;
         if (!dataForm) return;
@@ -162,10 +171,19 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
             </Group>
 
             <Div key={template.dataFormType} visible={hasDataFormType}>
-                <FormControlLabel
-                    control={<Switch checked={isAdvancedMode} onChange={toggleMode} />}
-                    label={isAdvancedMode ? i18n.t("Advanced") : i18n.t("Basic (only row schema)")}
-                />
+                <div>
+                    <FormControlLabel
+                        control={<Switch checked={isAdvancedMode} onChange={toggleMode} />}
+                        label={isAdvancedMode ? i18n.t("Advanced") : i18n.t("Basic (only row schema)")}
+                    />
+                </div>
+
+                <div>
+                    <FormControlLabel
+                        control={<Switch checked={generateMetadata} onChange={toggleGenerateMetadata} />}
+                        label={i18n.t("Generate automatic metadata")}
+                    />
+                </div>
 
                 <Group title={i18n.t("Data Source Configuration")}>
                     {isAdvancedMode ? (
