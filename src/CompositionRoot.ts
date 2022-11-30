@@ -32,7 +32,6 @@ import { ImportTemplateUseCase } from "./domain/usecases/ImportTemplateUseCase";
 import { ListDataFormsUseCase } from "./domain/usecases/ListDataFormsUseCase";
 import { ListLanguagesUseCase } from "./domain/usecases/ListLanguagesUseCase";
 import { ListThemesUseCase } from "./domain/usecases/ListThemesUseCase";
-import { PersistTemplatesFromStaticModulesUseCase } from "./domain/usecases/PersistTemplatesFromStaticModulesUseCase";
 import { ReadSettingsUseCase } from "./domain/usecases/ReadSettingsUseCase";
 import { RunMigrationsUseCase } from "./domain/usecases/RunMigrationsUseCase";
 import { SaveCustomTemplateUseCase } from "./domain/usecases/SaveCustomTemplateUseCase";
@@ -76,7 +75,6 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
             list: new ListDataFormsUseCase(instance),
             getDataFormsForGeneration: new GetDataFormsForGenerationUseCase(instance),
             get: new GetDataFormsUseCase(instance),
-            persistFromStaticModules: new PersistTemplatesFromStaticModulesUseCase(templateManager, usersRepository),
             getCustom: new GetCustomTemplatesUseCase(templateManager),
             getGenerated: new GetGeneratedTemplatesUseCase(templateManager),
             delete: new DeleteCustomTemplateUseCase(templateManager),
