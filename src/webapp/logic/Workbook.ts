@@ -80,8 +80,8 @@ export class Workbook {
         };
     }
 
-    createStyle(_style: StyleOptions): void {
-        // Used only in conditional formatting.
+    createStyle(style: StyleOptions): StyleOptions {
+        return style;
     }
 }
 
@@ -158,19 +158,7 @@ export class Sheet {
                 return cell;
             },
             style: (options: StyleOptions) => {
-                const xoptionsBase = {
-                    horizontalAlignment: options.alignment?.horizontal,
-                    verticalAlignment: options.alignment?.vertical,
-                    wrapText: options.alignment?.wrapText,
-                    shrinkToFit: options.alignment?.shrinkToFit,
-                    fill: getPopulateFill(options.fill),
-                    bold: options.font?.bold,
-                    fontFamily: "Calibri",
-                    fontSize: options.font?.size,
-                    fontColor: toPopulateColor(options.font?.color),
-                };
-
-                const xoptions = _.omitBy(xoptionsBase, _.isNil);
+                const xoptions = getPopulateStyleOptions(options);
                 xrange.style(xoptions);
                 return cell;
             },
@@ -204,9 +192,17 @@ export class Sheet {
         obj.dataValidation(xvalidation);
     }
 
-    addConditionalFormattingRule(_ref: string, _options: object) {
-        // Unsupported by xlsx-populate
+    addConditionalFormattingRule(ref: string, conditionalFormatting: ConditionalFormatting) {
+        const xstyleOptions = getPopulateStyleOptions(conditionalFormatting.style);
+        this.xsheet.conditionalFormatting(ref, { ...conditionalFormatting, style: xstyleOptions });
     }
+}
+
+interface ConditionalFormatting {
+    type: string;
+    formula: string;
+    priority: number;
+    style: StyleOptions;
 }
 
 type Position = "center";
@@ -269,6 +265,23 @@ interface PopulateDataValidation {
     formula1: string;
     formula2: string;
     errorStyle?: string;
+}
+
+function getPopulateStyleOptions(options: RecursivePartial<StyleOptions_>) {
+    const xoptionsBase = {
+        horizontalAlignment: options.alignment?.horizontal,
+        verticalAlignment: options.alignment?.vertical,
+        wrapText: options.alignment?.wrapText,
+        shrinkToFit: options.alignment?.shrinkToFit,
+        fill: getPopulateFill(options.fill),
+        bold: options.font?.bold,
+        fontFamily: "Calibri",
+        fontSize: options.font?.size,
+        fontColor: toPopulateColor(options.font?.color),
+    };
+
+    const xoptions = _.omitBy(xoptionsBase, _.isNil);
+    return xoptions;
 }
 
 /* Helper functions */
