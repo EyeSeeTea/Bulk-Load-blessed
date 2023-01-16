@@ -3,35 +3,37 @@ import _ from "lodash";
 import { assertUnreachable, RecursivePartial } from "../../types/utils";
 import { fromBase64 } from "../../utils/files";
 
-/* The original sheetBuilder.js used excel4node, transition it to xlsx-populate.
-   Workbook is a wrapper that implements only what's being use in the builder. 
+/* The original SheetBuilder used excel4node, now we transition to xlsx-populate
+   (so we can start from a template xlsx, excel4node destroyed the workbook).
+
+   This class is a wrapper that implements only what's being used in the builder.
+
    Known limitations of upstream xlsx-populate for our use case:
 
-    - Conditional formatting is not supported (used to highlight invalid data).
-    - Cell comments are not supported, implemented in fork @eyeseetea/xlsx-populate.
+    - Conditional formatting (implemented in fork @eyeseetea/xlsx-populate)
+    - Cell comments (implemented in fork @eyeseetea/xlsx-populate)
 
-  Upstream Backlog: https://github.com/dtjohnson/xlsx-populate/blob/master/backlog.md
+   Upstream Backlog: https://github.com/dtjohnson/xlsx-populate/blob/master/backlog.md
 */
 
 export class Workbook {
-    private isInitialState: boolean;
-
-    private constructor(private xworkbook: XlsxPopulate.Workbook) {
-        this.isInitialState = true;
-    }
+    private constructor(
+        private xworkbook: XlsxPopulate.Workbook,
+        private options: { sheetsToRemove: XlsxPopulate.Sheet[] }
+    ) {}
 
     static async empty() {
         const workbook = await XlsxPopulate.fromBlankAsync();
-        return new Workbook(workbook);
+        // Initial default sheet ("Sheet 1") should be removed on write.
+        return new Workbook(workbook, { sheetsToRemove: workbook.sheets() });
     }
 
     static async fromBase64(base64: string) {
         const file = await fromBase64(base64);
         const workbook = await XlsxPopulate.fromDataAsync(file);
-        return new Workbook(workbook);
+        return new Workbook(workbook, { sheetsToRemove: [] });
     }
 
-    /* Accepts column as integer and returns corresponding column reference as alpha */
     static getExcelAlpha(n: number): string {
         if (n === 0) return "";
         const columnsRange = 26;
@@ -54,21 +56,11 @@ export class Workbook {
     }
 
     private getPopulateSheet(name: string): XlsxPopulate.Sheet {
-        // xlsx-populate defines an initial sheet, re-use it when adding the first sheet.
-        const firstSheet = this.xworkbook.sheet(0);
-        const existingSheet = this.xworkbook.sheet(name);
-        const xsheet =
-            this.isInitialState && firstSheet
-                ? firstSheet.name(name)
-                : existingSheet
-                ? existingSheet
-                : this.xworkbook.addSheet(name);
-        this.isInitialState = false;
-
-        return xsheet;
+        return this.xworkbook.sheet(name) || this.xworkbook.addSheet(name);
     }
 
     writeToBuffer(): Promise<Blob> {
+        this.options.sheetsToRemove.forEach(sheet => this.xworkbook.deleteSheet(sheet));
         return this.xworkbook.outputAsync({ type: "blob" });
     }
 

@@ -77,7 +77,7 @@ export class SheetBuilder {
         let instancesSheet: Sheet | undefined = undefined;
         const programStageSheets: Record<string, Sheet> = {};
         const relationshipsSheets: Array<[relationshipType: unknown, sheet: Sheet]> = [];
-        const dataEntrySheetsInfo: Array<{ sheet: any; options: { includedDataElementIds?: Set<string> } }> = [];
+        const dataEntrySheetsInfo: Array<{ sheet: Sheet; options: { includedDataElementIds?: Set<string> } }> = [];
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
