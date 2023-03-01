@@ -10,7 +10,7 @@ import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
 import { getGeneratedTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
-import { Id } from "../entities/ReferenceObject";
+import { Id, Ref } from "../entities/ReferenceObject";
 import { TemplateType } from "../entities/Template";
 import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -83,8 +83,10 @@ export class DownloadTemplateUseCase implements UseCase {
                 element,
                 downloadRelationships,
                 orgUnitIds: orgUnits,
-                startDate: populateStartDate?.toDate(),
-                endDate: populateEndDate?.toDate(),
+                startDate: startDate?.toDate(),
+                endDate: endDate?.toDate(),
+                populateStartDate: populateStartDate?.toDate(),
+                populateEndDate: populateEndDate?.toDate(),
                 relationshipsOuFilter,
             });
 
@@ -203,24 +205,31 @@ async function getElementMetadata({
     orgUnitIds,
     startDate,
     endDate,
+    populateStartDate,
+    populateEndDate,
     downloadRelationships,
     relationshipsOuFilter,
 }: {
     element: any;
     api: D2Api;
     orgUnitIds: string[];
-    startDate?: Date;
-    endDate?: Date;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    populateStartDate?: Date;
+    populateEndDate?: Date;
     downloadRelationships: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
 }) {
-    const elementMetadata = new Map();
+    const elementMetadataMap = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
-    const rawMetadata = await api.get(`/${endpoint}/${element.id}/metadata.json`).getData();
+    const elementMetadata = await api.get<ElementMetadata>(`/${endpoint}/${element.id}/metadata.json`).getData();
+
+    const rawMetadata = await filterRawMetadata({ api, element, elementMetadata, orgUnitIds, startDate, endDate });
+
     _.forOwn(rawMetadata, (value, type) => {
         if (Array.isArray(value)) {
             _.forEach(value, (object: any) => {
-                if (object.id) elementMetadata.set(object.id, { ...object, type });
+                if (object.id) elementMetadataMap.set(object.id, { ...object, type });
             });
         }
     });
@@ -228,7 +237,7 @@ async function getElementMetadata({
     // FIXME: This is needed for getting all possible org units for a program/dataSet
     const requestOrgUnits =
         relationshipsOuFilter === "DESCENDANTS" || relationshipsOuFilter === "CHILDREN"
-            ? elementMetadata.get(element.id)?.organisationUnits?.map(({ id }: { id: string }) => id) ?? orgUnitIds
+            ? elementMetadataMap.get(element.id)?.organisationUnits?.map(({ id }: { id: string }) => id) ?? orgUnitIds
             : orgUnitIds;
 
     const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
@@ -245,11 +254,117 @@ async function getElementMetadata({
         element.type === "trackerPrograms" && downloadRelationships
             ? await getRelationshipMetadata(element, api, {
                   organisationUnits,
-                  startDate,
-                  endDate,
+                  startDate: populateStartDate,
+                  endDate: populateEndDate,
                   ouMode: relationshipsOuFilter,
               })
             : {};
 
-    return { element, metadata, elementMetadata, organisationUnits, rawMetadata };
+    return { element, metadata, elementMetadata: elementMetadataMap, organisationUnits, rawMetadata };
+}
+
+interface ElementMetadata {
+    categoryOptionCombos: CategoryOptionCombo[];
+}
+
+interface CategoryOptionCombo {
+    categoryOptions: Ref[];
+}
+
+interface Element {
+    type: "dataSets" | "programs";
+    organisationUnits: Ref[];
+}
+
+/* Return the raw metadata filtering out non-relevant category option combos.
+
+    /api/dataSets/ID/metadata returns categoryOptionCombos that may not be relevant for the
+    data set. Here we filter out category option combos with categoryOptions not matching these
+    conditions:
+
+     - categoryOption.startDate/endDate outside the startDate -> endDate interval
+     - categoryOption.orgUnit EMPTY or assigned to the dataSet orgUnits (intersected with the requested).
+*/
+
+async function filterRawMetadata(options: {
+    api: D2Api;
+    element: Element;
+    elementMetadata: ElementMetadata;
+    orgUnitIds: Id[];
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+}): Promise<ElementMetadata & unknown> {
+    const { api, element, elementMetadata, orgUnitIds } = options;
+
+    if (element.type === "dataSets") {
+        const categoryOptions = await getCategoryOptions(api);
+        const categoryOptionIdsToInclude = getCategoryOptionIdsToInclude(element, orgUnitIds, categoryOptions, options);
+
+        const categoryOptionCombosFiltered = elementMetadata.categoryOptionCombos.filter(coc =>
+            _(coc.categoryOptions).every(categoryOption => {
+                return categoryOptionIdsToInclude.has(categoryOption.id);
+            })
+        );
+
+        return { ...elementMetadata, categoryOptionCombos: categoryOptionCombosFiltered };
+    } else {
+        return elementMetadata;
+    }
+}
+
+interface CategoryOption {
+    id: Id;
+    startDate?: string;
+    endDate?: String;
+    organisationUnits: Ref[];
+}
+
+function getCategoryOptionIdsToInclude(
+    element: Element,
+    orgUnitIds: string[],
+    categoryOptions: CategoryOption[],
+    options: { startDate: Date | undefined; endDate: Date | undefined }
+) {
+    const dataSetOrgUnitIds = element.organisationUnits.map(ou => ou.id);
+
+    const orgUnitIdsToInclude = new Set(
+        _.isEmpty(orgUnitIds) ? dataSetOrgUnitIds : _.intersection(orgUnitIds, dataSetOrgUnitIds)
+    );
+
+    const startDate = options.startDate?.toISOString();
+    const endDate = options.endDate?.toISOString();
+
+    const categoryOptionIdsToInclude = new Set(
+        categoryOptions
+            .filter(categoryOption => {
+                const noStartDateIntersect = startDate && categoryOption.endDate && startDate > categoryOption.endDate;
+                const noEndDateIntersect = endDate && categoryOption.startDate && endDate < categoryOption.startDate;
+                const dateCondition = !noStartDateIntersect && !noEndDateIntersect;
+
+                const categoryOptionOrgUnitCondition =
+                    _.isEmpty(categoryOption.organisationUnits) ||
+                    _(categoryOption.organisationUnits).some(orgUnit => orgUnitIdsToInclude.has(orgUnit.id));
+
+                return dateCondition && categoryOptionOrgUnitCondition;
+            })
+            .map(categoryOption => categoryOption.id)
+    );
+    return categoryOptionIdsToInclude;
+}
+
+async function getCategoryOptions(api: D2Api): Promise<CategoryOption[]> {
+    const { categoryOptions } = await api.metadata
+        .get({
+            categoryOptions: {
+                fields: {
+                    id: true,
+                    startDate: true,
+                    endDate: true,
+                    organisationUnits: { id: true },
+                },
+            },
+        })
+        .getData();
+
+    return categoryOptions;
 }
