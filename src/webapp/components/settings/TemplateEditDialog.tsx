@@ -14,7 +14,7 @@ import {
 import { ConfirmationDialog, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { useDropzone } from "react-dropzone";
 import i18n from "../../../locales";
-import { Select } from "../select/Select";
+import { Select, SelectOption } from "../select/Select";
 import { CustomTemplate } from "../../../domain/entities/Template";
 import React from "react";
 import { useDataFormsSelector } from "../../hooks/useDataForms";
@@ -26,6 +26,7 @@ import {
 import { downloadFile } from "../../utils/download";
 import { useAppContext } from "../../contexts/app-context";
 import { xlsxMimeType } from "../../../utils/files";
+import { isValueInUnionType } from "../../../types/utils";
 
 export interface CustomTemplateEditDialogProps {
     formMode: FormMode;
@@ -148,6 +149,8 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
 
     const hasDataFormType = Boolean(template.dataFormType);
 
+    const applyFor = useApplyTo(template, setTemplate);
+
     return (
         <ConfirmationDialog
             isOpen={true}
@@ -163,11 +166,20 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                 <Field field="description" data={data} />
 
                 <Select
-                    placeholder={translations.dataFormId}
-                    options={dataForms.options}
-                    value={dataForms.selected?.id}
-                    onChange={dataForms.setSelected}
+                    placeholder={i18n.t("Apply to")}
+                    options={applyFor.options}
+                    value={applyFor.current?.value}
+                    onChange={applyFor.set}
                 />
+
+                {applyFor.current.value === "select" && (
+                    <Select
+                        placeholder={translations.dataFormId}
+                        options={dataForms.options}
+                        value={dataForms.selected?.id}
+                        onChange={dataForms.setSelected}
+                    />
+                )}
             </Group>
 
             <Div key={template.dataFormType} visible={hasDataFormType}>
@@ -382,4 +394,46 @@ const Group: React.FC<{ title?: string; visible?: boolean }> = React.memo(props 
 
 function update<Field extends ViewModelField>(field: Field, value: ViewModel[Field]) {
     return { field, value };
+}
+
+function useApplyTo(template: ViewModel, setTemplate: SetTemplate) {
+    const [optionsObj, options, values] = React.useMemo(() => {
+        const obj = {
+            select: { value: "select" as const, label: i18n.t("Specific program/dataset") },
+            dataSets: { value: "dataSets" as const, label: i18n.t("All datasets") },
+            programs: { value: "programs" as const, label: i18n.t("All programs") },
+            trackerPrograms: { value: "trackerPrograms" as const, label: i18n.t("All tracker programs") },
+        };
+
+        const options = [obj.select, obj.dataSets, obj.programs, obj.trackerPrograms];
+        const values = options.map(opt => opt.value);
+
+        return [obj, options, values];
+    }, []);
+
+    const defaultOption =
+        template.isDefault && template.dataFormType ? optionsObj[template.dataFormType] : optionsObj.select;
+
+    const [currentOption, setCurrentOption] = React.useState(defaultOption);
+
+    const setFromString = React.useCallback(
+        (option: SelectOption) => {
+            const { value } = option;
+
+            if (isValueInUnionType(value, values)) {
+                setCurrentOption({ value: value, label: option.label });
+
+                if (value !== "select") {
+                    setTemplate(update("dataFormId", "ALL"));
+                    setTemplate(update("dataFormType", value));
+                    setTemplate(update("isDefault", true));
+                } else {
+                    setTemplate(update("isDefault", false));
+                }
+            }
+        },
+        [values, setTemplate]
+    );
+
+    return { current: currentOption, options: options, set: setFromString };
 }

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2022-10-21T11:58:05.943Z\n"
-"PO-Revision-Date: 2022-10-21T11:58:05.943Z\n"
+"POT-Creation-Date: 2023-03-01T09:02:04.145Z\n"
+"PO-Revision-Date: 2023-03-01T09:02:04.145Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -21,9 +21,6 @@ msgid "Relationships"
 msgstr ""
 
 msgid "Tracked Entity Instance"
-msgstr ""
-
-msgid "Template {{id}} not loaded"
 msgstr ""
 
 msgid "Data values - Delete"
@@ -315,6 +312,9 @@ msgstr ""
 msgid "Data Source Configuration"
 msgstr ""
 
+msgid "Fixed Metadata / Dynamic Metadata (TODO)"
+msgstr ""
+
 msgid "Styles"
 msgstr ""
 
@@ -402,6 +402,9 @@ msgid "Action"
 msgstr ""
 
 msgid "Mode"
+msgstr ""
+
+msgid "Generate automatic metadata"
 msgstr ""
 
 msgid "Code"

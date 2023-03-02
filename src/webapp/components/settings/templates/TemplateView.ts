@@ -27,6 +27,7 @@ import i18n from "../../../../locales";
 export interface TemplateView extends BasicView, AdvancedView {
     mode: "basic" | "advanced";
     generateMetadata: boolean;
+    isDefault: boolean;
 }
 
 type ValidView = { [K in keyof TemplateView]: NonNullable<TemplateView[K]> };
@@ -138,6 +139,7 @@ function definition<T>(defaultValue: T, validations?: ValidationKey[]): Definiti
 }
 const viewDefs = {
     action: definition("create"),
+    isDefault: definition(undefined),
     mode: definition("basic"),
     generateMetadata: definition(false),
     code: definition(""),
@@ -288,6 +290,7 @@ export class TemplateViewActions {
     async fromCustomTemplate(template: CustomTemplate): Promise<TemplateView> {
         const base: Partial<TemplateView> = {
             action: "edit",
+            isDefault: template.isDefault,
             generateMetadata: template.generateMetadata,
             code: template.id,
             name: template.name,
@@ -437,6 +440,7 @@ export class TemplateViewActions {
     async toCustomTemplate(view: ValidView): Promise<CustomTemplate> {
         type BaseField =
             | "type"
+            | "isDefault"
             | "generateMetadata"
             | "id"
             | "name"
@@ -449,6 +453,7 @@ export class TemplateViewActions {
 
         const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
+            isDefault: view.isDefault,
             generateMetadata: view.generateMetadata,
             id: view.code,
             name: view.name,
@@ -597,6 +602,7 @@ export class TemplateViewActions {
     static getTranslations() {
         return ofType<Translations>({
             action: i18n.t("Action"),
+            isDefault: i18n.t("Is default"),
             mode: i18n.t("Mode"),
             generateMetadata: i18n.t("Generate automatic metadata"),
             code: i18n.t("Code"),

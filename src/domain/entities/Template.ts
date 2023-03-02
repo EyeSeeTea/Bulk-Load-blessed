@@ -35,6 +35,8 @@ export type StyleSource = {
 type Base64String = string;
 
 export interface CustomTemplate extends Omit<CustomTemplateWithUrl, "url"> {
+    type: "custom";
+    isDefault: boolean;
     file: { name: string; contents: Base64String };
     created: Maybe<UserTimestamp>;
     lastUpdated: Maybe<UserTimestamp>;
