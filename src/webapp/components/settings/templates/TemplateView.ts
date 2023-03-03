@@ -719,7 +719,10 @@ function getColumnAttrs<Field extends DataSourceColumnField>(columnRef: Maybe<Sh
 
 type DataSourceRowField = "dataElement" | "categoryOption" | "teiAttributeId";
 
-function getRowAttrs<Field extends DataSourceRowField>(rowRef: RowRef | ValueRef | undefined, field: Field) {
+function getRowAttrs<Field extends DataSourceRowField>(
+    rowRef: ColumnRef | RowRef | ValueRef | undefined,
+    field: Field
+) {
     if (rowRef?.type !== "row") return;
 
     const sheetField = (field + "Sheet") as `${typeof field}Sheet`;

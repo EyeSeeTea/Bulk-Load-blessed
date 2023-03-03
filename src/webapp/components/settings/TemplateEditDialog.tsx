@@ -99,7 +99,7 @@ export const CustomTemplateEditDialog: React.FC<CustomTemplateEditDialogProps> =
 });
 
 const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props => {
-    const { formMode, actions, onSave, onCancel, template, setTemplate } = props;
+    const { formMode, actions, onSave, onCancel, template, setTemplate, customTemplates } = props;
 
     const translations = React.useMemo(() => ViewModelActions.getTranslations(), []);
     const snackbar = useSnackbar();
@@ -149,7 +149,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
 
     const hasDataFormType = Boolean(template.dataFormType);
 
-    const applyFor = useApplyTo(template, setTemplate);
+    const applyTo = useApplyTo(customTemplates, template, setTemplate);
 
     return (
         <ConfirmationDialog
@@ -167,12 +167,12 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
 
                 <Select
                     placeholder={i18n.t("Apply to")}
-                    options={applyFor.options}
-                    value={applyFor.current?.value}
-                    onChange={applyFor.set}
+                    options={applyTo.options}
+                    value={applyTo.current?.value}
+                    onChange={applyTo.set}
                 />
 
-                {applyFor.current.value === "select" && (
+                {applyTo.current.value === "select" && (
                     <Select
                         placeholder={translations.dataFormId}
                         options={dataForms.options}
@@ -396,7 +396,7 @@ function update<Field extends ViewModelField>(field: Field, value: ViewModel[Fie
     return { field, value };
 }
 
-function useApplyTo(template: ViewModel, setTemplate: SetTemplate) {
+function useApplyTo(customTemplates: CustomTemplate[], template: ViewModel, setTemplate: SetTemplate) {
     const [optionsObj, options, values] = React.useMemo(() => {
         const obj = {
             select: { value: "select" as const, label: i18n.t("Specific program/dataset") },
@@ -422,13 +422,13 @@ function useApplyTo(template: ViewModel, setTemplate: SetTemplate) {
 
             if (isValueInUnionType(value, values)) {
                 setCurrentOption({ value: value, label: option.label });
-
                 if (value !== "select") {
                     setTemplate(update("dataFormId", "ALL"));
                     setTemplate(update("dataFormType", value));
                     setTemplate(update("isDefault", true));
                 } else {
                     setTemplate(update("isDefault", false));
+                    setTemplate(update("dataFormId", undefined));
                 }
             }
         },
