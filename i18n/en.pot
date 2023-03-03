@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-03-01T09:02:04.145Z\n"
-"PO-Revision-Date: 2023-03-01T09:02:04.145Z\n"
+"POT-Creation-Date: 2023-03-03T13:40:53.939Z\n"
+"PO-Revision-Date: 2023-03-03T13:40:53.940Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -285,6 +285,9 @@ msgid ""
 "templates"
 msgstr ""
 
+msgid "Show autogenerate forms"
+msgstr ""
+
 msgid "Event date time difference for events (programs)"
 msgstr ""
 
@@ -301,6 +304,9 @@ msgid "Edit custom template"
 msgstr ""
 
 msgid "New custom template"
+msgstr ""
+
+msgid "Apply to"
 msgstr ""
 
 msgid "Advanced"
@@ -325,6 +331,18 @@ msgid "Download"
 msgstr ""
 
 msgid "Drag and drop template file"
+msgstr ""
+
+msgid "Specific program/dataset"
+msgstr ""
+
+msgid "All datasets"
+msgstr ""
+
+msgid "All programs"
+msgstr ""
+
+msgid "All tracker programs"
 msgstr ""
 
 msgid "Template saved"
@@ -389,6 +407,9 @@ msgstr ""
 msgid "Create template"
 msgstr ""
 
+msgid "ALL"
+msgstr ""
+
 msgid "Access to Templates"
 msgstr ""
 
@@ -399,6 +420,9 @@ msgid "Field cannot be empty"
 msgstr ""
 
 msgid "Action"
+msgstr ""
+
+msgid "Is default"
 msgstr ""
 
 msgid "Mode"
