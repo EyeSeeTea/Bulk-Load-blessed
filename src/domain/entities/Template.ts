@@ -174,8 +174,8 @@ export interface RowDataSource extends BaseDataSource {
     range: Range;
     orgUnit: ColumnRef | CellRef | ValueRef;
     period: ColumnRef | CellRef | ValueRef;
-    dataElement: RowRef | ValueRef;
-    categoryOption?: RowRef | ValueRef;
+    dataElement: ColumnRef | RowRef | ValueRef;
+    categoryOption?: ColumnRef | RowRef | ValueRef;
     attribute?: ColumnRef | CellRef | ValueRef;
     eventId?: ColumnRef | CellRef | ValueRef;
 }
