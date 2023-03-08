@@ -45,11 +45,10 @@ export class DownloadTemplateUseCase implements UseCase {
         private excelRepository: ExcelRepository
     ) {}
 
-    public async execute(
-        api: D2Api,
-        {
+    public async execute(api: D2Api, options: DownloadTemplateProps): Promise<void> {
+        const {
             type,
-            id,
+            id: id0,
             theme: themeId,
             orgUnits = [],
             startDate,
@@ -63,15 +62,17 @@ export class DownloadTemplateUseCase implements UseCase {
             downloadRelationships,
             filterTEIEnrollmentDate,
             relationshipsOuFilter,
-            templateId: customTemplateId,
+            templateId: customTemplateId0,
             templateType,
             splitDataEntryTabsBySection,
-        }: DownloadTemplateProps
-    ): Promise<void> {
+        } = options;
         i18n.setDefaultNamespace("bulk-load");
+        const customTemplateId =
+            (customTemplateId0?.includes("-") ? customTemplateId0?.split("-", 2)[1] : customTemplateId0) || ""; // TODO: better
         const templateId =
             templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
 
+        const id = id0.split("-", 2)[0] || ""; // TODO: better
         const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
         const element = await getElement(api, type, id);

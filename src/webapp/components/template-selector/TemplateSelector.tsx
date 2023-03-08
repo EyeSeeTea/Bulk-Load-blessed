@@ -184,9 +184,16 @@ export const TemplateSelector = ({
                 setDatePickerFormat(undefined);
             }
 
-            const customTemplate = customTemplates.find(t => t.id === value);
-            const templateId = customTemplate?.id || value;
-            const dataFormId = customTemplate?.dataFormId.type === "value" ? customTemplate.dataFormId.id : value;
+            const [_dataSetIdValue = "", templateIdValue] = value.split("-");
+            const customTemplate = customTemplates.find(t => t.id === (value.includes("-") ? templateIdValue : value));
+            const templateId = customTemplate?.isDefault ? value : customTemplate?.id || value;
+            const dataFormId =
+                customTemplate?.dataFormId.type === "value"
+                    ? customTemplate.isDefault
+                        ? value
+                        : customTemplate.dataFormId.id
+                    : value;
+            //const dataFormId = customTemplate?.dataFormId.type === "value" ? customTemplate.dataFormId.id : value
             const templateType: TemplateType = customTemplate ? "custom" : "generated";
 
             setState(state => ({ ...state, id: dataFormId, type, templateId, templateType, populate: false }));

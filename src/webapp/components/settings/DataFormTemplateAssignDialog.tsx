@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import _ from "lodash";
-import { ConfirmationDialog, MultiSelector, useSnackbar } from "@eyeseetea/d2-ui-components";
+import { ConfirmationDialog, MultiSelector } from "@eyeseetea/d2-ui-components";
 import { makeStyles } from "@material-ui/core";
 
 import { NamedRef } from "../../../domain/entities/ReferenceObject";
