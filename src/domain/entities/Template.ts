@@ -8,6 +8,7 @@ import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 import { UserTimestamp } from "./User";
 import { Sheet as SheetE } from "./Sheet";
+import { ModulesRepositories } from "../repositories/ModulesRepositories";
 
 export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";
@@ -40,6 +41,7 @@ export interface CustomTemplate extends Omit<CustomTemplateWithUrl, "url"> {
     file: { name: string; contents: Base64String };
     created: Maybe<UserTimestamp>;
     lastUpdated: Maybe<UserTimestamp>;
+    mode?: "basic" | "advanced";
 }
 
 export type Template = GeneratedTemplate | CustomTemplate;
@@ -60,6 +62,8 @@ export interface GeneratedTemplate extends BaseTemplate {
 }
 
 export interface DownloadCustomizationOptions {
+    type: DataFormType;
+    id: string;
     populate: boolean;
     dataPackage?: DataPackage;
     orgUnits: string[];
@@ -79,6 +83,7 @@ export interface CustomTemplateWithUrl extends BaseTemplate {
     downloadCustomization?: (
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository,
+        modulesRepositories: ModulesRepositories,
         options: DownloadCustomizationOptions
     ) => Promise<void>;
     importCustomization?: (

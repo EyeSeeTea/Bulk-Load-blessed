@@ -294,7 +294,8 @@ export class TemplateViewActions {
             generateMetadata: template.generateMetadata,
             code: template.id,
             name: template.name,
-            dataFormId: template.dataFormId.type === "value" ? template.dataFormId.id : undefined,
+            dataFormId:
+                template.dataFormId.type === "value" ? template.dataFormId.id : template.isDefault ? "ALL" : undefined,
             dataFormType: template.dataFormType.type === "value" ? template.dataFormType.id : undefined,
             description: template.description,
             spreadsheet: await getSpreadsheetFile(template.file).catch(() => undefined),
@@ -374,12 +375,17 @@ export class TemplateViewActions {
             stylesLogoRange: stylesBySection["logo"]?.source.ref,
         });
 
+        const mode1 = template.type === "custom" ? template.mode : "advanced";
+        const defaultMode = dataSources && dataSources.length > 1 ? "advanced" : "basic";
+        const mode = mode1 ?? defaultMode;
+        if (mode === "advanced") return advancedView;
+
         switch (dataFormType) {
             case "dataSets":
             case "programs": {
                 const dataSource = dataSources?.[0];
                 const dataSourceHasTypeRow = dataSource && "type" in dataSource && dataSource.type === "row";
-                if (!dataSourceHasTypeRow || dataSources?.length !== 1) return advancedView;
+                if (!dataSourceHasTypeRow) return advancedView;
 
                 const view: Partial<TemplateView> = {
                     mode: "basic",
@@ -449,10 +455,12 @@ export class TemplateViewActions {
             | "description"
             | "file"
             | "created"
-            | "lastUpdated";
+            | "lastUpdated"
+            | "mode";
 
         const base: Pick<CustomTemplate, BaseField> = {
             type: "custom",
+            mode: view.mode,
             isDefault: view.isDefault,
             generateMetadata: view.generateMetadata,
             id: view.code,

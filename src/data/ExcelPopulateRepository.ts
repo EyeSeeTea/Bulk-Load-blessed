@@ -23,22 +23,22 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const workbook = await this.parseFile(options);
         const forcedCleanId = options.type === "file-base64" ? options.templateId : null;
         const cell = workbook.sheet(0).cell("A1");
-        const versionPrefix = "Version: ";
+        const versionPrefix = /Version[:_]/;
 
         // We need to read and store the template ID in the spreadsheet. Keep old/new way for compatibility:
         //  - Old way: sheets[0].cell("A1").value("Version: ID")
         //  - New way: workbook.definedName("Version: ID")
         let cleanId: string;
         if (forcedCleanId) {
-            workbook.definedName(versionPrefix + forcedCleanId, cell);
+            workbook.definedName(`Version: ${forcedCleanId}`, cell);
             cleanId = forcedCleanId;
         } else {
-            const idFromDefinedName = workbook.definedName().find(name => name.startsWith(versionPrefix));
+            const idFromDefinedName = workbook.definedName().find(name => name.match(versionPrefix));
             const idFromCell = cell.value();
             const id = idFromDefinedName || idFromCell;
 
             if (!id || typeof id !== "string") throw new Error("Invalid id");
-            cleanId = id.replace(/^.*?:/, "").trim();
+            cleanId = id.replace(/^.*?[:_]/, "").trim();
         }
 
         this.workbooks[cleanId] = workbook;

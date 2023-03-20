@@ -15,10 +15,13 @@ export class AnalyzeTemplateUseCase implements UseCase {
     public async execute(file: File) {
         const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
         const template = await this.templateRepository.getTemplate(templateId);
+        const template2 = { ...template, dataFormId: { type: "cell" as const, sheet: 0, ref: "B1" } };
 
-        const dataFormId = await this.excelRepository.readCell(templateId, template.dataFormId, {
+        const dataFormId1 = await this.excelRepository.readCell(templateId, template.dataFormId, {
             formula: true,
         });
+        const dataFormId2 = await this.excelRepository.readCell(templateId, template.dataFormId);
+        const dataFormId = dataFormId1 || dataFormId2;
 
         if (!dataFormId || typeof dataFormId !== "string") {
             throw new Error(i18n.t("Cannot read data form id"));

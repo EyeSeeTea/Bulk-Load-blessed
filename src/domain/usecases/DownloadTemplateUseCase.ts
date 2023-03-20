@@ -15,6 +15,7 @@ import { TemplateType } from "../entities/Template";
 import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
+import { ModulesRepositories } from "../repositories/ModulesRepositories";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 
 export interface DownloadTemplateProps {
@@ -42,7 +43,8 @@ export class DownloadTemplateUseCase implements UseCase {
     constructor(
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
-        private excelRepository: ExcelRepository
+        private excelRepository: ExcelRepository,
+        private modulesRepositories: ModulesRepositories
     ) {}
 
     public async execute(api: D2Api, options: DownloadTemplateProps): Promise<void> {
@@ -139,8 +141,8 @@ export class DownloadTemplateUseCase implements UseCase {
               })
             : undefined;
 
-        const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository);
-        await builder.templateCustomization(template, { populate, dataPackage, orgUnits });
+        const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository, this.modulesRepositories);
+        await builder.templateCustomization(template, { type, id, populate, dataPackage, orgUnits });
 
         if (theme) await builder.applyTheme(template, theme);
 

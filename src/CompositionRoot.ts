@@ -38,8 +38,9 @@ import { SaveCustomTemplateUseCase } from "./domain/usecases/SaveCustomTemplateU
 import { SaveThemeUseCase } from "./domain/usecases/SaveThemeUseCase";
 import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
-import { D2Api } from "./types/d2-api";
+import { D2Api, D2ApiDefault } from "./types/d2-api";
 import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
+import { NRCModuleMetadataD2Repository } from "./data/templates/nrc/NRCModuleMetadataD2Repository";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -48,6 +49,7 @@ export interface CompositionRootOptions {
 }
 
 export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+    const api = mockApi ?? new D2ApiDefault({ baseUrl: dhisInstance.url });
     const instance: InstanceRepository = new InstanceDhisRepository(dhisInstance, mockApi);
     const config: ConfigRepository = new ConfigWebRepository(appConfig);
     const storage: StorageRepository =
@@ -58,6 +60,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const excelReader: ExcelRepository = new ExcelPopulateRepository();
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
     const usersRepository = new D2UsersRepository(dhisInstance);
+    const modulesRepository = { NRCModule: new NRCModuleMetadataD2Repository(api) };
 
     return {
         orgUnits: getExecute({
@@ -70,7 +73,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
         }),
         templates: getExecute({
             analyze: new AnalyzeTemplateUseCase(instance, templateManager, excelReader),
-            download: new DownloadTemplateUseCase(instance, templateManager, excelReader),
+            download: new DownloadTemplateUseCase(instance, templateManager, excelReader, modulesRepository),
             import: new ImportTemplateUseCase(instance, templateManager, excelReader),
             list: new ListDataFormsUseCase(instance),
             getDataFormsForGeneration: new GetDataFormsForGenerationUseCase(instance),

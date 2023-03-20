@@ -191,12 +191,14 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                 </div>
 
                 <Group title={i18n.t("Data Source Configuration")}>
-                    <div>
-                        <FormControlLabel
-                            control={<Switch checked={generateMetadata} onChange={toggleGenerateMetadata} />}
-                            label={i18n.t("Fixed Metadata / Dynamic Metadata (TODO)")}
-                        />
-                    </div>
+                    {false && (
+                        <div>
+                            <FormControlLabel
+                                control={<Switch checked={generateMetadata} onChange={toggleGenerateMetadata} />}
+                                label={i18n.t("Fixed Metadata / Dynamic Metadata (TODO)")}
+                            />
+                        </div>
+                    )}
 
                     {isAdvancedMode ? (
                         <FileField data={data} field="dataSources" mimeType="application/json" />

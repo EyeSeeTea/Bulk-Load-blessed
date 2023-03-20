@@ -125,7 +125,8 @@ export const TemplateSelector = ({
     useEffect(() => {
         const { type, id } = state;
         if (type && id) {
-            compositionRoot.orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
+            const [dataSetIdValue = "", _templateIdValue] = id.split("-");
+            compositionRoot.orgUnits.getRootsByForm(type, dataSetIdValue).then(setOrgUnitTreeFilter);
         }
     }, [state, compositionRoot]);
 
