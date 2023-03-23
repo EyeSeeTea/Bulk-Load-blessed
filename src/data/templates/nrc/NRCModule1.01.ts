@@ -1,6 +1,6 @@
 import _ from "lodash";
 import "lodash.product";
-import { CategoryCombo, NRCModuleMetadata } from "../../../domain/entities/templates/NRCModuleMetadata";
+import { NRCModuleMetadata } from "../../../domain/entities/templates/NRCModuleMetadata";
 import { Id, Ref } from "../../../domain/entities/ReferenceObject";
 import {
     CustomTemplateWithUrl,
@@ -11,7 +11,6 @@ import {
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import { ModulesRepositories } from "../../../domain/repositories/ModulesRepositories";
-import { Workbook } from "../../../webapp/logic/Workbook";
 
 export class NRCModule101 implements CustomTemplateWithUrl {
     public readonly type = "custom";
@@ -140,17 +139,18 @@ class DownloadCustomization {
             .flatMap(({ metadataType, items }) => {
                 return items.map(item => ({ metadataType, item }));
             })
-            .sortBy(obj => obj.item.name.toLowerCase())
-            .map(({ metadataType, item }) => {
-                return _.compact([
+            .sortBy(({ metadataType, item }) => [metadataType, "-", item.name].join(""))
+            .flatMap(({ metadataType, item }, idx) => {
+                const row = initialRow + idx;
+                const cells = [
                     { column: "A", value: item.id },
                     { column: "B", value: metadataType },
                     { column: "C", value: item.name, id: item.id },
-                ]);
-            })
-            .flatMap((objs, idx) => {
-                return objs.map(obj => {
-                    return this.cell({ sheet: sheets.metadata, row: initialRow + idx, ...obj });
+                    { column: "D", value: `=B${row}&"-"&C${row}` },
+                ];
+
+                return cells.map(obj => {
+                    return this.cell({ sheet: sheets.metadata, row: row, ...obj });
                 });
             })
             .value();
@@ -296,9 +296,4 @@ function getCocKey(categoryOptionCombo: { categoryOptions: Ref[] }): string {
         .map(co => co.id)
         .sortBy()
         .join(".");
-}
-
-function addColumn(column: string, offset: number): string {
-    const index = Workbook.getColumnIndex(column) + offset;
-    return Workbook.getExcelAlpha(index);
 }

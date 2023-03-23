@@ -8,7 +8,7 @@ export class NRCModule implements CustomTemplateWithUrl {
     public readonly url = "templates/NRCModule.xlsx";
     public readonly dataFormId = { type: "value" as const, id: "XXXX" };
     public readonly dataFormType = { type: "value" as const, id: "dataSets" as const };
-    
+
     public readonly fixedPeriod = {
         type: "cell" as const,
         sheet: "Data Entry",
@@ -24,9 +24,7 @@ export class NRCModule implements CustomTemplateWithUrl {
             categoryOption: { sheet: "Data Entry", type: "column", ref: "D" },
             attribute: { sheet: "Data Entry", type: "column", ref: "G" },
             range: { sheet: "Data Entry", rowStart: 4, columnStart: "F", columnEnd: "G" },
-        }
-
-
+        },
     ];
 
     public readonly styleSources: StyleSource[] = [];
