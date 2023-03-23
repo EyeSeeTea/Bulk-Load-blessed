@@ -26,7 +26,6 @@ export class TemplateWebRepository implements TemplateRepository {
             const customTemplate = customTemplatesById[template.id];
             if (!customTemplate) return template;
             const { downloadCustomization, importCustomization } = customTemplate;
-            console.log({ template, customTemplate });
 
             return customTemplate && customTemplate.downloadCustomization
                 ? {

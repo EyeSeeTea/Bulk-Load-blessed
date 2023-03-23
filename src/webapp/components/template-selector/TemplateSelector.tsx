@@ -267,6 +267,7 @@ export const TemplateSelector = ({
 
     const isCustomDataSet = state.templateType === "custom" && state.type === "dataSets";
     const isMultipleSelection = !isCustomDataSet;
+    const showPopulate = !(state.templateType === "custom" && !settings.showPopulateInCustomForms);
 
     return (
         <React.Fragment>
@@ -294,7 +295,7 @@ export const TemplateSelector = ({
                 )}
             </div>
 
-            {state.type === "dataSets" && state.templateType === "custom" && (
+            {state.type === "dataSets" && state.templateType === "custom" && showPopulate && (
                 <DatePicker
                     className={classes.fullWidth}
                     label={i18n.t("Period")}
@@ -307,7 +308,7 @@ export const TemplateSelector = ({
                 />
             )}
 
-            {state.type === "dataSets" && state.templateType !== "custom" && (
+            {state.type === "dataSets" && state.templateType !== "custom" && showPopulate && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <DatePicker
@@ -336,7 +337,7 @@ export const TemplateSelector = ({
                 </div>
             )}
 
-            {settings.orgUnitSelection !== "import" && (
+            {settings.orgUnitSelection !== "import" && showPopulate && (
                 <React.Fragment>
                     <h3>{i18n.t("Organisation units")}</h3>
 
@@ -395,7 +396,7 @@ export const TemplateSelector = ({
                 </div>
             )}
 
-            {isDataSet && (
+            {isDataSet && state.templateType !== "custom" && (
                 <FormControlLabel
                     className={classes.checkbox}
                     control={
