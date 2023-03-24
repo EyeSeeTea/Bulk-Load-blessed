@@ -1,7 +1,7 @@
 import _ from "lodash";
 import "lodash.product";
 import { NRCModuleMetadata } from "../../../domain/entities/templates/NRCModuleMetadata";
-import { Id, Ref } from "../../../domain/entities/ReferenceObject";
+import { Id, NamedRef, Ref } from "../../../domain/entities/ReferenceObject";
 import {
     CustomTemplateWithUrl,
     DataSource,
@@ -11,6 +11,7 @@ import {
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import { ModulesRepositories } from "../../../domain/repositories/ModulesRepositories";
+import { NRCModuleMetadataRepository } from "../../../domain/repositories/templates/NRCModuleMetadataRepository";
 
 export class NRCModule101 implements CustomTemplateWithUrl {
     public readonly type = "custom";
@@ -44,17 +45,15 @@ export class NRCModule101 implements CustomTemplateWithUrl {
         modulesRepositories: ModulesRepositories,
         options: DownloadCustomizationOptions
     ): Promise<void> {
-        return new DownloadCustomization(
-            this.id,
-            excelRepository,
-            instanceRepository,
-            modulesRepositories,
-            options
-        ).execute();
+        return new DownloadCustomization(this.id, excelRepository, modulesRepositories.NRCModule, options).execute();
     }
 }
 
 class DownloadCustomization {
+    initialValidationRow = 3;
+    initialMetadataRow = 4;
+    initialDataEntryRow = 4;
+
     sheets = {
         dataEntry: "Data Entry",
         validation: "Validation",
@@ -64,8 +63,7 @@ class DownloadCustomization {
     constructor(
         private id: Id,
         private excelRepository: ExcelRepository,
-        private _instanceRepository: InstanceRepository,
-        private modulesRepository: ModulesRepositories,
+        private moduleRepository: NRCModuleMetadataRepository,
         private options: DownloadCustomizationOptions
     ) {}
 
@@ -73,7 +71,7 @@ class DownloadCustomization {
         await this.createSheet(this.sheets.validation);
         await this.createSheet(this.sheets.metadata);
 
-        const metadata = await this.modulesRepository.NRCModule.get({ dataSetId: this.options.id });
+        const metadata = await this.moduleRepository.get({ dataSetId: this.options.id });
         const workbookData = this.getSheetData(metadata);
         await this.fillWorkbook(workbookData);
     }
@@ -82,78 +80,77 @@ class DownloadCustomization {
         await this.excelRepository.getOrCreateSheet(this.id, name);
     }
 
-    private getValidationCells(items: Ref[], options: { column: string; useRef: boolean }) {
-        const initialValidationRow = 3;
-
-        return items.map((item, idx) => {
-            return this.cell({
-                sheet: this.sheets.validation,
-                column: options.column,
-                row: initialValidationRow + idx,
-                value: options.useRef ? referenceToId(item.id) : item.id,
-            });
-        });
-    }
-
-    private getSheetData(metadata: NRCModuleMetadata): WorkbookData {
-        const { sheets } = this;
-
+    private getValidationCells(metadata: NRCModuleMetadata) {
         const { categories } = metadata.categoryCombo;
         const projectCategoryOption = categories.project.categoryOption;
 
-        const categoryOptions = _([projectCategoryOption])
-            .concat(categories.phasesOfEmergency.categoryOptions)
-            .concat(categories.targetActual.categoryOptions)
-            .value();
+        const getCells = (items: Ref[], options: { column: string; useRef?: boolean }) => {
+            const { useRef = true } = options;
 
-        const validationCells = _.flatten([
-            this.getValidationCells(metadata.organisationUnits, { column: "A", useRef: true }),
-            this.getValidationCells(categories.phasesOfEmergency.categoryOptions, { column: "B", useRef: true }),
-            this.getValidationCells(categories.targetActual.categoryOptions, { column: "C", useRef: true }),
-            this.getValidationCells(metadata.dataElements, { column: "D", useRef: true }),
-            this.getValidationCells([metadata.dataSet], { column: "J", useRef: true }),
-            this.getValidationCells([projectCategoryOption], { column: "H", useRef: true }),
-            this.getValidationCells(metadata.periods, { column: "I", useRef: false }),
+            return items.map((item, idx) => {
+                return cell({
+                    sheet: this.sheets.validation,
+                    column: options.column,
+                    row: this.initialValidationRow + idx,
+                    value: useRef ? referenceToId(item.id) : item.id,
+                });
+            });
+        };
+
+        return _.flatten([
+            getCells(metadata.organisationUnits, { column: "A" }),
+            getCells(categories.phasesOfEmergency.categoryOptions, { column: "B" }),
+            getCells(categories.targetActual.categoryOptions, { column: "C" }),
+            getCells(metadata.dataElements, { column: "D" }),
+            getCells([metadata.dataSet], { column: "J" }),
+            getCells([projectCategoryOption], { column: "H" }),
+            getCells(metadata.periods, { column: "I", useRef: false }),
         ]);
+    }
 
-        const initialRow = 4;
-
-        const categoryOptionCombos = _(metadata.dataElements)
-            .flatMap(dataElement => dataElement.categoryCombo.categoryOptionCombos)
-            .concat(metadata.categoryCombo.categoryOptionCombos.map(coc => ({ id: coc.id, name: coc.name })))
-            .uniqBy(coc => coc.id)
-            .value();
-
-        const metadataObj: Array<{
-            metadataType: string;
-            items: Array<{ id: string; name: string }>;
-        }> = [
-            { metadataType: "dataSets", items: [metadata.dataSet] },
-            { metadataType: "categoryOptions", items: categoryOptions },
-            { metadataType: "organisationUnits", items: metadata.organisationUnits },
-            { metadataType: "dataElements", items: metadata.dataElements },
-            { metadataType: "categoryOptionCombos", items: categoryOptionCombos },
+    private getSheetData(metadata: NRCModuleMetadata): WorkbookData {
+        const validationCells = this.getValidationCells(metadata);
+        const metadataCells = this.getMetadataCells(metadata);
+        const aocCells = this.getAttributeOptionComboCells(metadata);
+        const cocCells = this.getCategoryOptionComboCells(metadata);
+        const miscCells = [
+            cell({ sheet: this.sheets.dataEntry, column: "F", row: 1, value: referenceToId(metadata.dataSet.id) }),
         ];
 
-        const metadataCells = _(metadataObj)
-            .flatMap(({ metadataType, items }) => {
-                return items.map(item => ({ metadataType, item }));
-            })
-            .sortBy(({ metadataType, item }) => [metadataType, "-", item.name].join(""))
-            .flatMap(({ metadataType, item }, idx) => {
-                const row = initialRow + idx;
-                const cells = [
-                    { column: "A", value: item.id },
-                    { column: "B", value: metadataType },
-                    { column: "C", value: item.name, id: item.id },
-                    { column: "D", value: `=B${row}&"-"&C${row}` },
-                ];
+        return {
+            cells: _.concat(miscCells, validationCells, metadataCells, aocCells, cocCells),
+        };
+    }
 
-                return cells.map(obj => {
-                    return this.cell({ sheet: sheets.metadata, row: row, ...obj });
-                });
+    private getCategoryOptionComboCells(metadata: NRCModuleMetadata) {
+        return _(metadata.dataElements)
+            .flatMap(dataElement => {
+                return dataElement.categoryCombo.categoryOptionCombos.map(coc => [dataElement, coc] as const);
+            })
+            .flatMap(([dataElement, coc], pairIdx) => {
+                const row = this.initialDataEntryRow + pairIdx;
+
+                return [
+                    cell({
+                        sheet: this.sheets.dataEntry,
+                        column: "S",
+                        row: row,
+                        value: dataElement.id,
+                    }),
+                    cell({
+                        sheet: this.sheets.dataEntry,
+                        column: "T",
+                        row: row,
+                        value: referenceToId(coc.id),
+                    }),
+                ];
             })
             .value();
+    }
+
+    private getAttributeOptionComboCells(metadata: NRCModuleMetadata) {
+        const { categories } = metadata.categoryCombo;
+        const projectCategoryOption = categories.project.categoryOption;
 
         const categoryOptionsProduct = _.product(
             [categories.project.categoryOption],
@@ -163,8 +160,8 @@ class DownloadCustomization {
 
         const cocsByKey = _.keyBy(metadata.categoryCombo.categoryOptionCombos, getCocKey);
 
-        const projectCategoryOptionCell = this.cell({
-            sheet: sheets.dataEntry,
+        const projectCategoryOptionCell = cell({
+            sheet: this.sheets.dataEntry,
             column: "B",
             row: 1,
             value: referenceToId(projectCategoryOption.id),
@@ -187,10 +184,10 @@ class DownloadCustomization {
                     ([obj, column]) => {
                         if (!obj || !column) return null;
 
-                        return this.cell({
-                            sheet: sheets.dataEntry,
+                        return cell({
+                            sheet: this.sheets.dataEntry,
                             column: column,
-                            row: 4 + idx,
+                            row: this.initialDataEntryRow + idx,
                             value: obj.id,
                         });
                     }
@@ -200,51 +197,48 @@ class DownloadCustomization {
             .concat([projectCategoryOptionCell])
             .value();
 
-        const cocCells = _(metadata.dataElements)
-            .flatMap(dataElement => {
-                return dataElement.categoryCombo.categoryOptionCombos.map(coc => [dataElement, coc] as const);
-            })
-            .flatMap(([dataElement, coc], pairIdx) => {
-                const row = 4 + pairIdx;
-
-                return [
-                    this.cell({
-                        sheet: sheets.dataEntry,
-                        column: "S",
-                        row: row,
-                        value: dataElement.id,
-                    }),
-                    this.cell({
-                        sheet: sheets.dataEntry,
-                        column: "T",
-                        row: row,
-                        value: referenceToId(coc.id),
-                    }),
-                ];
-            })
-            .value();
-
-        const miscCells = [
-            this.cell({
-                sheet: sheets.dataEntry,
-                column: "F",
-                row: 1,
-                value: referenceToId(metadata.dataSet.id),
-            }),
-        ];
-
-        return {
-            cells: _.concat(miscCells, validationCells, metadataCells, aocCells, cocCells),
-        };
+        return aocCells;
     }
 
-    private cell(options: { sheet: string; column: string; row: number; value: string; id?: Id }): Cell {
-        return {
-            sheet: options.sheet,
-            ref: `${options.column}${options.row}`,
-            value: options.value,
-            id: options.id,
-        };
+    private getMetadataCells(metadata: NRCModuleMetadata) {
+        const { categories } = metadata.categoryCombo;
+        const projectCategoryOption = categories.project.categoryOption;
+
+        const categoryOptions = _([projectCategoryOption])
+            .concat(categories.phasesOfEmergency.categoryOptions)
+            .concat(categories.targetActual.categoryOptions)
+            .value();
+
+        const categoryOptionCombos = _(metadata.dataElements)
+            .flatMap(dataElement => dataElement.categoryCombo.categoryOptionCombos)
+            .concat(metadata.categoryCombo.categoryOptionCombos)
+            .uniqBy(coc => coc.id)
+            .value();
+
+        const metadataObj: Array<{ metadataType: string; items: NamedRef[] }> = [
+            { metadataType: "dataSets", items: [metadata.dataSet] },
+            { metadataType: "categoryOptions", items: categoryOptions },
+            { metadataType: "organisationUnits", items: metadata.organisationUnits },
+            { metadataType: "dataElements", items: metadata.dataElements },
+            { metadataType: "categoryOptionCombos", items: categoryOptionCombos },
+        ];
+
+        return _(metadataObj)
+            .flatMap(({ metadataType, items }) => items.map(item => ({ metadataType, item })))
+            .sortBy(({ metadataType, item }) => [metadataType, "-", item.name].join(""))
+            .flatMap(({ metadataType, item }, idx) => {
+                const row = this.initialMetadataRow + idx;
+
+                const cells = [
+                    { column: "A", value: item.id },
+                    { column: "B", value: metadataType },
+                    { column: "C", value: item.name, id: item.id },
+                    { column: "D", value: `=B${row}&"-"&C${row}` },
+                ];
+
+                return cells.map(obj => cell({ sheet: this.sheets.metadata, row: row, ...obj }));
+            })
+            .value();
     }
 
     private async fillWorkbook(sheetData: WorkbookData) {
@@ -259,6 +253,8 @@ class DownloadCustomization {
                 cell.value
             );
         }
+
+        // Defined names must be set after cell values, as writeCell looks for existing names.
 
         for (const cell of sheetData.cells) {
             if (!cell.id) continue;
@@ -296,4 +292,13 @@ function getCocKey(categoryOptionCombo: { categoryOptions: Ref[] }): string {
         .map(co => co.id)
         .sortBy()
         .join(".");
+}
+
+function cell(options: { sheet: string; column: string; row: number; value: string; id?: Id }): Cell {
+    return {
+        sheet: options.sheet,
+        ref: `${options.column}${options.row}`,
+        value: options.value,
+        id: options.id,
+    };
 }

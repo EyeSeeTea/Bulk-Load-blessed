@@ -1,93 +1,76 @@
 import _ from "lodash";
-import { D2Api } from "@eyeseetea/d2-api/2.33";
-import { Id } from "../../../domain/entities/ReferenceObject";
+import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.33";
+import { Id, NamedRef, Ref } from "../../../domain/entities/ReferenceObject";
 import { DataElement, NRCModuleMetadata } from "../../../domain/entities/templates/NRCModuleMetadata";
 import { NRCModuleMetadataRepository } from "../../../domain/repositories/templates/NRCModuleMetadataRepository";
 
 export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepository {
+    categoryComboCodes = {
+        phaseOfEmergency: "GL_CORECOMP_CATCOMBO",
+        actualTargets: "GL_Actual_Targets",
+        all: "GL_CATBOMBO_ProjectCCTarAct",
+    };
+
     constructor(private api: D2Api) {}
 
     async get(options: { dataSetId: Id }): Promise<NRCModuleMetadata> {
-        const { dataSets } = await this.api.metadata
-            .get({
-                dataSets: {
-                    fields: {
-                        id: true,
-                        name: true,
-                        code: true,
-                        categoryCombo: { id: true, categories: { id: true, code: true } },
-                        dataSetElements: {
-                            dataElement: { id: true, name: true, categoryCombo: { id: true } },
-                            categoryCombo: { id: true },
-                        },
-                        organisationUnits: { id: true, name: true },
-                        dataInputPeriods: { period: { id: true } },
-                    },
-                    filter: { id: { eq: options.dataSetId } },
-                },
-            })
-            .getData();
+        const dataSet = await this.getDataSet(options);
+        const projectCategoryOption = await this.getProjectCategoryOption(dataSet);
+        const categoryOptions = await this.getCategoryOptions(projectCategoryOption);
+        const categoryOptionCombos = await this.getCategoryOptionCombos(projectCategoryOption);
 
-        const dataSet = dataSets[0];
-        if (!dataSet) throw new Error(`Data set not found: ${options.dataSetId}`);
-        if (!dataSet.code) throw new Error(`Data set has no code`);
-        const categoryOptionPrefix = dataSet.code.replace(/Data Set$/, "").trim();
-
-        const res2 = await this.api.metadata
-            .get({
-                categoryOptions: {
-                    fields: { id: true, name: true },
-                    filter: { code: { $like: categoryOptionPrefix } },
-                },
-            })
-            .getData();
-
-        const projectCategoryCombo = res2.categoryOptions[0];
-        if (!projectCategoryCombo)
-            throw new Error(`Project category combo not found: code:$like:${categoryOptionPrefix}}`);
-
-        const categoryCodes = ["GL_CORECOMP_CATCOMBO", "GL_Actual_Targets"];
-
-        const { categories } = await this.api.metadata
-            .get({
+        return {
+            dataSet: dataSet,
+            dataElements: await this.getDataElementsWithDisaggregation(dataSet),
+            organisationUnits: this.getOrganisationUnits(projectCategoryOption, dataSet),
+            periods: this.getPeriods(dataSet),
+            categoryCombo: {
                 categories: {
-                    fields: { id: true, code: true, categoryOptions: { id: true, name: true } },
-                    filter: { code: { in: categoryCodes } },
+                    project: { categoryOption: projectCategoryOption },
+                    phasesOfEmergency: { categoryOptions: categoryOptions.phasesOfEmergency },
+                    targetActual: { categoryOptions: categoryOptions.targetActual },
                 },
-            })
-            .getData();
-
-        const categoriesByCode = _.keyBy(categories, category => category.code);
-
-        const categoryOptions = {
-            project: [projectCategoryCombo],
-            phasesOfEmergency: categoriesByCode["GL_CORECOMP_CATCOMBO"]?.categoryOptions || [],
-            targetActual: categoriesByCode["GL_Actual_Targets"]?.categoryOptions || [],
+                categoryOptionCombos: categoryOptionCombos,
+            },
         };
+    }
 
+    private getOrganisationUnits(projectCategoryOption: D2CategoryOption, dataSet: D2DataSet): NamedRef[] {
+        return _(projectCategoryOption.organisationUnits).isEmpty()
+            ? dataSet.organisationUnits
+            : _.intersectionBy(dataSet.organisationUnits, projectCategoryOption.organisationUnits, ou => ou.id);
+    }
+
+    private getPeriods(dataSet: D2DataSet) {
+        return _(dataSet.dataInputPeriods)
+            .map(dip => ({ id: dip.period.id, name: dip.period.id }))
+            .sortBy(period => period.id)
+            .value();
+    }
+
+    private async getCategoryOptionCombos(projectCategoryOption: D2CategoryOption): Promise<D2Coc[]> {
         const { categoryOptionCombos } = await this.api.metadata
             .get({
                 categoryOptionCombos: {
                     fields: { id: true, name: true, categoryOptions: { id: true } },
                     filter: {
-                        "categoryOptions.id": { eq: projectCategoryCombo.id },
-                        "categoryCombo.code": { eq: "GL_CATBOMBO_ProjectCCTarAct" },
+                        "categoryOptions.id": { eq: projectCategoryOption.id },
+                        "categoryCombo.code": { eq: this.categoryComboCodes.all },
                     },
                 },
             })
             .getData();
 
+        return categoryOptionCombos;
+    }
+
+    private async getDataElementsWithDisaggregation(dataSet: D2DataSet) {
         const dataElements = dataSet.dataSetElements.map(dse => dse.dataElement);
         const categoryComboByDataElement = _.keyBy(dataElements, dataElement => dataElement.id);
-        const categoryCombosFromDataElements = _(dataSet.dataSetElements)
-            .map(dse => {
-                return dse.categoryCombo || categoryComboByDataElement[dse.dataElement.id]?.categoryCombo;
-            })
+        const categoryComboIds = _(dataSet.dataSetElements)
+            .map(dse => dse.categoryCombo || categoryComboByDataElement[dse.dataElement.id]?.categoryCombo)
             .compact()
-            .value();
-
-        const categoryComboIds = _(categoryCombosFromDataElements)
-            .map(o => o.id)
+            .map(categoryCombo => categoryCombo.id)
             .uniq()
             .value();
 
@@ -103,7 +86,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         const categoryCombosById = _.keyBy(categoryCombos, cc => cc.id);
         const dataElementsById = _.keyBy(dataElements, cc => cc.id);
 
-        const dataElementsWithDisaggregation = _(dataSet.dataSetElements)
+        return _(dataSet.dataSetElements)
             .map((dse): DataElement | undefined => {
                 const dataElement = dataElementsById[dse.dataElement.id];
                 const categoryComboRef =
@@ -115,20 +98,95 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
             })
             .compact()
             .value();
+    }
+
+    private async getCategoryOptions(projectCategoryOption: D2CategoryOption) {
+        const { categoryComboCodes } = this;
+
+        const { categories } = await this.api.metadata
+            .get({
+                categories: {
+                    fields: { id: true, code: true, categoryOptions: { id: true, name: true } },
+                    filter: {
+                        code: {
+                            in: [categoryComboCodes.phaseOfEmergency, categoryComboCodes.actualTargets],
+                        },
+                    },
+                },
+            })
+            .getData();
+
+        const categoriesByCode = _.keyBy(categories, category => category.code);
 
         return {
-            dataSet: dataSet,
-            dataElements: dataElementsWithDisaggregation,
-            organisationUnits: dataSet.organisationUnits,
-            periods: dataSet.dataInputPeriods.map(dip => ({ id: dip.period.id, name: dip.period.id })),
-            categoryCombo: {
-                categories: {
-                    project: { categoryOption: projectCategoryCombo },
-                    phasesOfEmergency: { categoryOptions: categoryOptions.phasesOfEmergency },
-                    targetActual: { categoryOptions: categoryOptions.targetActual },
-                },
-                categoryOptionCombos: categoryOptionCombos,
-            },
+            project: [projectCategoryOption],
+            phasesOfEmergency: categoriesByCode[categoryComboCodes.phaseOfEmergency]?.categoryOptions || [],
+            targetActual: categoriesByCode[categoryComboCodes.actualTargets]?.categoryOptions || [],
         };
     }
+
+    private async getProjectCategoryOption(dataSet: D2DataSet) {
+        const categoryOptionPrefix = dataSet.code.replace(/Data Set$/, "").trim();
+
+        const res = await this.api.metadata
+            .get({
+                categoryOptions: {
+                    fields: { id: true, name: true, organisationUnits: { id: true } },
+                    filter: { code: { $like: categoryOptionPrefix } },
+                },
+            })
+            .getData();
+
+        const projectCategoryOption = res.categoryOptions[0];
+
+        if (!projectCategoryOption) {
+            throw new Error(`Project category combo not found: code:$like:${categoryOptionPrefix}`);
+        } else {
+            return projectCategoryOption;
+        }
+    }
+
+    private async getDataSet(options: { dataSetId: Id }): Promise<D2DataSet> {
+        const { dataSets } = await this.api.metadata
+            .get({
+                dataSets: {
+                    fields: dataSetFields,
+                    filter: { id: { eq: options.dataSetId } },
+                },
+            })
+            .getData();
+
+        const dataSet = dataSets[0];
+
+        if (!dataSet) {
+            throw new Error(`Data set not found: ${options.dataSetId}`);
+        } else if (!dataSet.code) {
+            throw new Error(`Data set has no code`);
+        } else {
+            return dataSet;
+        }
+    }
+}
+
+const dataSetFields = {
+    id: true,
+    name: true,
+    code: true,
+    categoryCombo: { id: true, categories: { id: true, code: true } },
+    dataSetElements: {
+        dataElement: { id: true, name: true, categoryCombo: { id: true } },
+        categoryCombo: { id: true },
+    },
+    organisationUnits: { id: true, name: true },
+    dataInputPeriods: { period: { id: true } },
+} as const;
+
+type D2DataSet = MetadataPick<{ dataSets: { fields: typeof dataSetFields } }>["dataSets"][number];
+
+interface D2CategoryOption extends NamedRef {
+    organisationUnits: Ref[];
+}
+
+interface D2Coc extends NamedRef {
+    categoryOptions: Ref[];
 }
