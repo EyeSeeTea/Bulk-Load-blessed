@@ -225,7 +225,7 @@ class DownloadCustomization {
 
         return _(metadataObj)
             .flatMap(({ metadataType, items }) => items.map(item => ({ metadataType, item })))
-            .sortBy(({ metadataType, item }) => [metadataType, "-", item.name].join(""))
+            .sortBy(({ metadataType, item }) => [metadataType, "-", item.name.toLowerCase()].join(""))
             .flatMap(({ metadataType, item }, idx) => {
                 const row = this.initialMetadataRow + idx;
 
