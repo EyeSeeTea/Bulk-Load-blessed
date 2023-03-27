@@ -53,6 +53,7 @@ class DownloadCustomization {
     initialValidationRow = 3;
     initialMetadataRow = 4;
     initialDataEntryRow = 4;
+    password = "1234";
 
     sheets = {
         dataEntry: "Data Entry",
@@ -242,8 +243,10 @@ class DownloadCustomization {
     }
 
     private async fillWorkbook(sheetData: WorkbookData) {
+        const { excelRepository } = this;
+
         for (const cell of sheetData.cells) {
-            await this.excelRepository.writeCell(
+            await excelRepository.writeCell(
                 this.id,
                 {
                     type: "cell" as const,
@@ -259,12 +262,15 @@ class DownloadCustomization {
         for (const cell of sheetData.cells) {
             if (!cell.id) continue;
 
-            await this.excelRepository.defineName(this.id, nameForId(cell.id), {
+            await excelRepository.defineName(this.id, nameForId(cell.id), {
                 type: "cell" as const,
                 sheet: cell.sheet,
                 ref: cell.ref,
             });
         }
+
+        excelRepository.protectSheet(this.id, this.sheets.validation, this.password);
+        excelRepository.protectSheet(this.id, this.sheets.metadata, this.password);
     }
 }
 
