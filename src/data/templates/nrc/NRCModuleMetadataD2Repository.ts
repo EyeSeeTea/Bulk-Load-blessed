@@ -126,13 +126,13 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
     }
 
     private async getProjectCategoryOption(dataSet: D2DataSet) {
-        const categoryOptionPrefix = dataSet.code.replace(/Data Set$/, "").trim();
+        const categoryOptionCode = dataSet.code.replace(/Data Set$/, "").trim();
 
         const res = await this.api.metadata
             .get({
                 categoryOptions: {
                     fields: { id: true, name: true, organisationUnits: { id: true } },
-                    filter: { code: { $like: categoryOptionPrefix } },
+                    filter: { code: { eq: categoryOptionCode } },
                 },
             })
             .getData();
@@ -140,7 +140,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         const projectCategoryOption = res.categoryOptions[0];
 
         if (!projectCategoryOption) {
-            throw new Error(`Project category combo not found: code:$like:${categoryOptionPrefix}`);
+            throw new Error(`Project category option not found (code: ${categoryOptionCode})`);
         } else {
             return projectCategoryOption;
         }
@@ -161,7 +161,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         if (!dataSet) {
             throw new Error(`Data set not found: ${options.dataSetId}`);
         } else if (!dataSet.code) {
-            throw new Error(`Data set has no code`);
+            throw new Error(`Data set has no code, it's required to get the project category option`);
         } else {
             return dataSet;
         }
