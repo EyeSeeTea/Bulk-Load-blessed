@@ -86,6 +86,13 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         const categoryCombosById = _.keyBy(categoryCombos, cc => cc.id);
         const dataElementsById = _.keyBy(dataElements, cc => cc.id);
 
+        const greyedFields = new Set(
+            _(dataSet.sections)
+                .flatMap(section => section.greyedFields)
+                .map(gf => [gf.dataElement.id, gf.categoryOptionCombo.id].join("."))
+                .value()
+        );
+
         return _(dataSet.dataSetElements)
             .map((dse): DataElement | undefined => {
                 const dataElement = dataElementsById[dse.dataElement.id];
@@ -94,7 +101,12 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
                 if (!dataElement || !categoryComboRef) return undefined;
                 const categoryCombo = categoryCombosById[categoryComboRef.id];
                 if (!categoryCombo) return undefined;
-                return { ...dataElement, categoryCombo };
+                const categoryOptionCombos = _.reject(categoryCombo.categoryOptionCombos, coc => {
+                    const key = [dataElement.id, coc.id].join(".");
+                    return greyedFields.has(key);
+                });
+                const categoryCombo2 = { ...categoryCombo, categoryOptionCombos };
+                return { ...dataElement, categoryCombo: categoryCombo2 };
             })
             .compact()
             .value();
@@ -179,6 +191,7 @@ const dataSetFields = {
     },
     organisationUnits: { id: true, name: true },
     dataInputPeriods: { period: { id: true } },
+    sections: { greyedFields: { dataElement: { id: true }, categoryOptionCombo: { id: true } } },
 } as const;
 
 type D2DataSet = MetadataPick<{ dataSets: { fields: typeof dataSetFields } }>["dataSets"][number];
