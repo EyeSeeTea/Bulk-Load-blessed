@@ -2,13 +2,17 @@ import { Maybe } from "../../types/utils";
 import _ from "lodash";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
-import { DataFormType } from "./DataForm";
+import { DataForm, DataFormType } from "./DataForm";
 import { DataPackage } from "./DataPackage";
 import { Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 import { UserTimestamp } from "./User";
 import { Sheet as SheetE } from "./Sheet";
 import { ModulesRepositories } from "../repositories/ModulesRepositories";
+
+export interface DataFormTemplate extends DataForm {
+    templateId: string;
+}
 
 export type TemplateType = "generated" | "custom";
 export type DataSourceType = "row" | "column" | "cell";

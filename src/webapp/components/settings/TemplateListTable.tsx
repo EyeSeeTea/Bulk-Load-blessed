@@ -28,6 +28,7 @@ import { DataForm, DataFormType, dataFormTypes, getTranslations } from "../../..
 import { fromBase64, xlsxMimeType } from "../../../utils/files";
 import { useDataForms } from "../../hooks/useDataForms";
 import { Select, SelectProps } from "../select/Select";
+import { getGeneratedTemplateId } from "../../logic/sheetBuilder";
 
 interface WarningDialog {
     title?: string;
@@ -140,6 +141,8 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                 compositionRoot.templates.download(api, {
                     type: row.dataFormType,
                     id: row.dataFormId,
+                    templateId: getGeneratedTemplateId(row.dataFormType),
+                    templateType: "generated",
                     language: "en",
                     settings,
                     populate: false,

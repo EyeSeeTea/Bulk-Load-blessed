@@ -8,7 +8,7 @@ import i18n from "../../locales";
 import { D2Api } from "../../types/d2-api";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
-import { getGeneratedTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
+import { SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id, Ref } from "../entities/ReferenceObject";
 import { TemplateType } from "../entities/Template";
@@ -34,8 +34,8 @@ export interface DownloadTemplateProps {
     downloadRelationships: boolean;
     filterTEIEnrollmentDate?: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
-    templateId?: string;
-    templateType?: TemplateType;
+    templateId: string;
+    templateType: TemplateType;
     splitDataEntryTabsBySection: boolean;
 }
 
@@ -50,7 +50,7 @@ export class DownloadTemplateUseCase implements UseCase {
     public async execute(api: D2Api, options: DownloadTemplateProps): Promise<void> {
         const {
             type,
-            id: id0,
+            id,
             theme: themeId,
             orgUnits = [],
             startDate,
@@ -64,17 +64,10 @@ export class DownloadTemplateUseCase implements UseCase {
             downloadRelationships,
             filterTEIEnrollmentDate,
             relationshipsOuFilter,
-            templateId: customTemplateId0,
-            templateType,
+            templateId,
             splitDataEntryTabsBySection,
         } = options;
         i18n.setDefaultNamespace("bulk-load");
-        const customTemplateId =
-            (customTemplateId0?.includes("-") ? customTemplateId0?.split("-", 2)[1] : customTemplateId0) || ""; // TODO: better
-        const templateId =
-            templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
-
-        const id = id0.split("-", 2)[0] || ""; // TODO: better
         const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
         const element = await getElement(api, type, id);

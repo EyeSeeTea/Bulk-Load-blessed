@@ -1,11 +1,11 @@
+import { Id } from "@eyeseetea/d2-api";
 import { DatePicker, OrgUnitsSelector } from "@eyeseetea/d2-ui-components";
 import { Checkbox, FormControlLabel, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { RelationshipOrgUnitFilter } from "../../../data/Dhis2RelationshipTypes";
-import { DataForm } from "../../../domain/entities/DataForm";
-import { CustomTemplate, TemplateType } from "../../../domain/entities/Template";
+import { CustomTemplate, DataFormTemplate, TemplateType } from "../../../domain/entities/Template";
 import { Theme } from "../../../domain/entities/Theme";
 import { DownloadTemplateProps } from "../../../domain/usecases/DownloadTemplateUseCase";
 import i18n from "../../../locales";
@@ -15,7 +15,7 @@ import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
 import { Select, SelectOption } from "../select/Select";
 
-type DataSource = Record<string, DataForm[]>;
+type DataSource = Record<string, DataFormTemplate[]>;
 
 type PickerUnit = "year" | "month" | "date";
 interface PickerFormat {
@@ -25,8 +25,8 @@ interface PickerFormat {
 }
 
 export interface TemplateSelectorState extends DownloadTemplateProps {
-    templateId?: string;
-    templateType?: TemplateType;
+    templateId: string;
+    templateType: TemplateType;
 }
 
 export interface DataModelProps {
@@ -38,7 +38,7 @@ export interface TemplateSelectorProps {
     settings: Settings;
     themes: Theme[];
     onChange(state: TemplateSelectorState | null): void;
-    onChangeModel(state: DataModelProps[]): void;
+    onChangeModel?(state: DataModelProps[]): void;
     customTemplates: CustomTemplate[];
 }
 
@@ -62,17 +62,19 @@ export const TemplateSelector = ({
     const [userHasReadAccess, setUserHasReadAccess] = useState<boolean>(false);
     const [filterOrgUnits, setFilterOrgUnits] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<string>("");
-    const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id">>({
-        startDate: moment().add("-1", "year").startOf("year"),
-        endDate: moment().add("-1", "year").endOf("year"),
-        relationshipsOuFilter: "CAPTURE",
-        populate: false,
-        downloadRelationships: true,
-        filterTEIEnrollmentDate: false,
-        language: "en",
-        settings,
-        splitDataEntryTabsBySection: false,
-    });
+    const [state, setState] = useState<PartialBy<TemplateSelectorState, "type" | "id" | "templateId" | "templateType">>(
+        {
+            startDate: moment().add("-1", "year").startOf("year"),
+            endDate: moment().add("-1", "year").endOf("year"),
+            relationshipsOuFilter: "CAPTURE",
+            populate: false,
+            downloadRelationships: true,
+            filterTEIEnrollmentDate: false,
+            language: "en",
+            settings,
+            splitDataEntryTabsBySection: false,
+        }
+    );
 
     const selectedId = state.id;
     const isDataSet = React.useMemo(() => {
@@ -112,21 +114,21 @@ export const TemplateSelector = ({
                 const dataSourceModel = dataSource[model ?? ""];
 
                 if (model && dataSourceModel) {
-                    setTemplates(modelToSelectOption(dataSourceModel));
+                    const options = dataFormsToSelectOptions(dataSourceModel);
+                    setTemplates(options);
                     setSelectedModel(model);
                 }
             });
     }, [models, compositionRoot, customTemplates, settings]);
 
     useEffect(() => {
-        onChangeModel(templates);
+        onChangeModel?.(templates);
     }, [onChangeModel, templates]);
 
     useEffect(() => {
         const { type, id } = state;
         if (type && id) {
-            const [dataSetIdValue = "", _templateIdValue] = id.split("-");
-            compositionRoot.orgUnits.getRootsByForm(type, dataSetIdValue).then(setOrgUnitTreeFilter);
+            compositionRoot.orgUnits.getRootsByForm(type, id).then(setOrgUnitTreeFilter);
         }
     }, [state, compositionRoot]);
 
@@ -139,10 +141,10 @@ export const TemplateSelector = ({
     }, [compositionRoot]);
 
     useEffect(() => {
-        const { type, id, ...rest } = state;
-        if (type && id) {
+        const { type, id, templateId, templateType, ...rest } = state;
+        if (type && id && templateId && templateType) {
             const orgUnits = filterOrgUnits ? cleanOrgUnitPaths(selectedOrgUnits) : [];
-            onChange({ type, id, orgUnits, ...rest });
+            onChange({ type, id, orgUnits, templateId, templateType, ...rest });
         } else {
             onChange(null);
         }
@@ -156,21 +158,23 @@ export const TemplateSelector = ({
 
     const onModelChange = ({ value }: SelectOption) => {
         if (!dataSource) return;
-        const options = modelToSelectOption(dataSource[value] ?? []);
+        const options = dataFormsToSelectOptions(dataSource[value] ?? []);
 
         setSelectedModel(value);
         clearPopulateDates();
         setTemplates(options);
-        onChangeModel(templates);
+        onChangeModel?.(templates);
     };
 
     const onTemplateChange = ({ value }: SelectOption) => {
+        const [dataFormId, templateId] = value.split("-");
+
         if (dataSource) {
             const {
                 periodType,
                 type,
                 readAccess = false,
-            } = dataSource[selectedModel]?.find(({ id }) => id === value) ?? {};
+            } = dataSource[selectedModel]?.find(({ id }) => id === dataFormId) ?? {};
             setUserHasReadAccess(readAccess);
 
             if (periodType === "Yearly") {
@@ -185,19 +189,17 @@ export const TemplateSelector = ({
                 setDatePickerFormat(undefined);
             }
 
-            const [_dataSetIdValue = "", templateIdValue] = value.split("-");
-            const customTemplate = customTemplates.find(t => t.id === (value.includes("-") ? templateIdValue : value));
-            const templateId = customTemplate?.isDefault ? value : customTemplate?.id || value;
-            const dataFormId =
-                customTemplate?.dataFormId.type === "value"
-                    ? customTemplate.isDefault
-                        ? value
-                        : customTemplate.dataFormId.id
-                    : value;
-            //const dataFormId = customTemplate?.dataFormId.type === "value" ? customTemplate.dataFormId.id : value
+            const customTemplate = customTemplates.find(t => t.id === templateId);
             const templateType: TemplateType = customTemplate ? "custom" : "generated";
 
-            setState(state => ({ ...state, id: dataFormId, type, templateId, templateType, populate: false }));
+            setState(state => ({
+                ...state,
+                id: dataFormId,
+                type: type,
+                templateId,
+                templateType,
+                populate: false,
+            }));
             setFilterOrgUnits(false);
             clearPopulateDates();
             setSelectedOrgUnits([]);
@@ -268,6 +270,7 @@ export const TemplateSelector = ({
     const isCustomDataSet = state.templateType === "custom" && state.type === "dataSets";
     const isMultipleSelection = !isCustomDataSet;
     const showPopulate = !(state.templateType === "custom" && !settings.showPopulateInCustomForms);
+    const selected = state.id && state.templateId ? getOptionValue({ id: state.id, templateId: state.templateId }) : "";
 
     return (
         <React.Fragment>
@@ -279,7 +282,7 @@ export const TemplateSelector = ({
                         placeholder={i18n.t("Select template to export...")}
                         onChange={onTemplateChange}
                         options={templates}
-                        value={state.templateId || ""}
+                        value={selected}
                     />
                 </div>
 
@@ -564,6 +567,17 @@ function modelToSelectOption<T extends { id: string; name: string }>(array: T[])
             label: name,
         })) ?? []
     );
+}
+
+function dataFormsToSelectOptions(forms: DataFormTemplate[]) {
+    return forms.map(form => ({
+        value: getOptionValue(form),
+        label: form.name,
+    }));
+}
+
+function getOptionValue<T extends { id: Id; templateId: Id }>(form: T) {
+    return [form.id, form.templateId].join("-");
 }
 
 function getPopulateDateLabel(state: Partial<TemplateSelectorState>, picker: "start" | "end") {

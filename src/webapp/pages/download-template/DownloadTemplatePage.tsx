@@ -2,11 +2,7 @@ import { useLoading, useSnackbar } from "@eyeseetea/d2-ui-components";
 import { Button, makeStyles } from "@material-ui/core";
 import React, { useState } from "react";
 import i18n from "../../../locales";
-import {
-    DataModelProps,
-    TemplateSelector,
-    TemplateSelectorState,
-} from "../../components/template-selector/TemplateSelector";
+import { TemplateSelector, TemplateSelectorState } from "../../components/template-selector/TemplateSelector";
 import { useAppContext } from "../../contexts/app-context";
 import { RouteComponentProps } from "../Router";
 
@@ -17,10 +13,9 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
     const { api, compositionRoot } = useAppContext();
 
     const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
-    const [availableModels, setAvailableModels] = useState<DataModelProps[]>([]);
 
     const handleTemplateDownloadClick = async () => {
-        if (!template || availableModels.filter(availableModel => template?.id === availableModel.value).length === 0) {
+        if (!template) {
             snackbar.info(i18n.t("You need to select at least one element to export"));
             return;
         }
@@ -74,7 +69,6 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
     return (
         <React.Fragment>
             <TemplateSelector
-                onChangeModel={setAvailableModels}
                 settings={settings}
                 themes={themes}
                 onChange={setTemplate}
