@@ -86,6 +86,13 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         const categoryCombosById = _.keyBy(categoryCombos, cc => cc.id);
         const dataElementsById = _.keyBy(dataElements, cc => cc.id);
 
+        const greyedFields = new Set(
+            _(dataSet.sections)
+                .flatMap(section => section.greyedFields)
+                .map(gf => [gf.dataElement.id, gf.categoryOptionCombo.id].join("."))
+                .value()
+        );
+
         return _(dataSet.dataSetElements)
             .map((dse): DataElement | undefined => {
                 const dataElement = dataElementsById[dse.dataElement.id];
@@ -94,7 +101,12 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
                 if (!dataElement || !categoryComboRef) return undefined;
                 const categoryCombo = categoryCombosById[categoryComboRef.id];
                 if (!categoryCombo) return undefined;
-                return { ...dataElement, categoryCombo };
+                const categoryOptionCombos = _.reject(categoryCombo.categoryOptionCombos, coc => {
+                    const key = [dataElement.id, coc.id].join(".");
+                    return greyedFields.has(key);
+                });
+                const categoryCombo2 = { ...categoryCombo, categoryOptionCombos };
+                return { ...dataElement, categoryCombo: categoryCombo2 };
             })
             .compact()
             .value();
@@ -126,13 +138,13 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
     }
 
     private async getProjectCategoryOption(dataSet: D2DataSet) {
-        const categoryOptionPrefix = dataSet.code.replace(/Data Set$/, "").trim();
+        const categoryOptionCode = dataSet.code.replace(/Data Set$/, "").trim();
 
         const res = await this.api.metadata
             .get({
                 categoryOptions: {
                     fields: { id: true, name: true, organisationUnits: { id: true } },
-                    filter: { code: { $like: categoryOptionPrefix } },
+                    filter: { code: { eq: categoryOptionCode } },
                 },
             })
             .getData();
@@ -140,7 +152,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         const projectCategoryOption = res.categoryOptions[0];
 
         if (!projectCategoryOption) {
-            throw new Error(`Project category combo not found: code:$like:${categoryOptionPrefix}`);
+            throw new Error(`Project category option not found (code: ${categoryOptionCode})`);
         } else {
             return projectCategoryOption;
         }
@@ -161,7 +173,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         if (!dataSet) {
             throw new Error(`Data set not found: ${options.dataSetId}`);
         } else if (!dataSet.code) {
-            throw new Error(`Data set has no code`);
+            throw new Error(`Data set has no code, it's required to get the project category option`);
         } else {
             return dataSet;
         }
@@ -179,6 +191,7 @@ const dataSetFields = {
     },
     organisationUnits: { id: true, name: true },
     dataInputPeriods: { period: { id: true } },
+    sections: { greyedFields: { dataElement: { id: true }, categoryOptionCombo: { id: true } } },
 } as const;
 
 type D2DataSet = MetadataPick<{ dataSets: { fields: typeof dataSetFields } }>["dataSets"][number];
