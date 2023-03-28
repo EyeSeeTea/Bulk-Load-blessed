@@ -507,10 +507,11 @@ export default class Settings {
     private hasPermissions(permission: PermissionValue): boolean {
         if (permission.type === "all") return true;
 
+        const isUserAdmin = this.currentUser.authorities.has("ALL");
         const hasGroupAccess = this.findCurrentUser(permission.groups);
         const hasUserAccess = this.findCurrentUser(permission.users);
         const hasUnknownAccess = this.findCurrentUser(permission.unknown);
-        return hasGroupAccess || hasUserAccess || hasUnknownAccess;
+        return isUserAdmin || hasGroupAccess || hasUserAccess || hasUnknownAccess;
     }
 
     private findCurrentUser(collection: NamedRef[]): boolean {
