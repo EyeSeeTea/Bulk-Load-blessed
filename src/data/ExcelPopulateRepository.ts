@@ -27,10 +27,10 @@ export class ExcelPopulateRepository extends ExcelRepository {
 
         // We need to read and store the template ID in the spreadsheet. Keep old/new way for compatibility:
         //  - Old way: sheets[0].cell("A1").value("Version: ID")
-        //  - New way: workbook.definedName("Version: ID")
+        //  - New way: workbook.definedName("Version_ID")
         let cleanId: string;
         if (forcedCleanId) {
-            workbook.definedName(`Version: ${forcedCleanId}`, cell);
+            workbook.definedName(`Version_${forcedCleanId}`, cell);
             cleanId = forcedCleanId;
         } else {
             const idFromDefinedName = workbook.definedName().find(name => name.match(versionPrefix));
