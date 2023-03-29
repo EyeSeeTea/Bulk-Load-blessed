@@ -450,6 +450,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const categoryComboIds = _(dataSet.categoryCombo)
             .concat(dataSet.dataSetElements.map(dse => dse.categoryCombo))
+            .compact()
             .map(categoryCombo => categoryCombo.id)
             .uniq()
             .value();

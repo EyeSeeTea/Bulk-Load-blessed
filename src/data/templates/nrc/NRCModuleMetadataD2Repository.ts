@@ -109,6 +109,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
                 return { ...dataElement, categoryCombo: categoryCombo2 };
             })
             .compact()
+            .sortBy(dataElement => dataElement.name)
             .value();
     }
 

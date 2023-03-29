@@ -12,6 +12,7 @@ import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
 import { InstanceRepository } from "../../../domain/repositories/InstanceRepository";
 import { ModulesRepositories } from "../../../domain/repositories/ModulesRepositories";
 import { NRCModuleMetadataRepository } from "../../../domain/repositories/templates/NRCModuleMetadataRepository";
+import { Workbook } from "../../../webapp/logic/Workbook";
 
 export class NRCModule101 implements CustomTemplateWithUrl {
     public readonly type = "custom";
@@ -123,28 +124,31 @@ class DownloadCustomization {
         };
     }
 
-    private getCategoryOptionComboCells(metadata: NRCModuleMetadata) {
-        return _(metadata.dataElements)
-            .flatMap(dataElement => {
-                return dataElement.categoryCombo.categoryOptionCombos.map(coc => [dataElement, coc] as const);
-            })
-            .flatMap(([dataElement, coc], pairIdx) => {
-                const row = this.initialDataEntryRow + pairIdx;
+    private getCategoryOptionComboCells(metadata: NRCModuleMetadata): Cell[] {
+        const initialColumnIndex = Workbook.getColumnIndex("S");
 
-                return [
-                    cell({
+        return _(metadata.dataElements)
+            .sortBy(dataElement => dataElement.id.toLowerCase())
+            .flatMap((dataElement, dataElementIdx) => {
+                const column = Workbook.getExcelAlpha(initialColumnIndex + dataElementIdx);
+
+                const dataElementCell = cell({
+                    sheet: this.sheets.dataEntry,
+                    column: column,
+                    row: this.initialDataEntryRow - 1,
+                    value: dataElement.id,
+                });
+
+                const cocCells = dataElement.categoryCombo.categoryOptionCombos.map((coc, cocIdx) => {
+                    return cell({
                         sheet: this.sheets.dataEntry,
-                        column: "S",
-                        row: row,
-                        value: dataElement.id,
-                    }),
-                    cell({
-                        sheet: this.sheets.dataEntry,
-                        column: "T",
-                        row: row,
+                        column: column,
+                        row: this.initialDataEntryRow + cocIdx,
                         value: referenceToId(coc.id),
-                    }),
-                ];
+                    });
+                });
+
+                return [dataElementCell, ...cocCells];
             })
             .value();
     }
