@@ -6,6 +6,7 @@ import {
     CustomTemplateWithUrl,
     DataSource,
     DownloadCustomizationOptions,
+    RangeRef,
     StyleSource,
 } from "../../../domain/entities/Template";
 import { ExcelRepository } from "../../../domain/repositories/ExcelRepository";
@@ -32,9 +33,9 @@ export class NRCModule101 implements CustomTemplateWithUrl {
             orgUnit: { sheet: "Data Entry", type: "column", ref: "A" },
             period: this.fixedPeriod,
             dataElement: { sheet: "Data Entry", type: "column", ref: "C" },
-            categoryOption: { sheet: "Data Entry", type: "column", ref: "I" },
-            attribute: { sheet: "Data Entry", type: "column", ref: "J" },
-            range: { sheet: "Data Entry", rowStart: 4, columnStart: "F", columnEnd: "G" },
+            categoryOption: { sheet: "Data Entry", type: "column", ref: "H" },
+            attribute: { sheet: "Data Entry", type: "column", ref: "G" },
+            range: { sheet: "Data Entry", rowStart: 4, columnStart: "F", columnEnd: "F" },
         },
     ];
 
@@ -75,7 +76,7 @@ class DownloadCustomization {
 
         const metadata = await this.moduleRepository.get({ dataSetId: this.options.id });
         const workbookData = this.getSheetData(metadata);
-        await this.fillWorkbook(workbookData);
+        await this.fillWorkbook(metadata, workbookData);
     }
 
     private async createSheet(name: string) {
@@ -104,9 +105,9 @@ class DownloadCustomization {
             getCells(categories.phasesOfEmergency.categoryOptions, { column: "B" }),
             getCells(categories.targetActual.categoryOptions, { column: "C" }),
             getCells(metadata.dataElements, { column: "D" }),
-            getCells([metadata.dataSet], { column: "J" }),
-            getCells([projectCategoryOption], { column: "H" }),
-            getCells(metadata.periods, { column: "I", useRef: false }),
+            getCells([metadata.dataSet], { column: "G" }),
+            getCells([projectCategoryOption], { column: "E" }),
+            getCells(metadata.periods, { column: "F", useRef: false }),
         ]);
     }
 
@@ -125,7 +126,7 @@ class DownloadCustomization {
     }
 
     private getCategoryOptionComboCells(metadata: NRCModuleMetadata): Cell[] {
-        const initialColumnIndex = Workbook.getColumnIndex("S");
+        const initialColumnIndex = Workbook.getColumnIndex("M");
 
         return _(metadata.dataElements)
             .sortBy(dataElement => dataElement.id.toLowerCase())
@@ -133,17 +134,17 @@ class DownloadCustomization {
                 const column = Workbook.getExcelAlpha(initialColumnIndex + dataElementIdx);
 
                 const dataElementCell = cell({
-                    sheet: this.sheets.dataEntry,
+                    sheet: this.sheets.validation,
                     column: column,
-                    row: this.initialDataEntryRow - 1,
+                    row: this.initialValidationRow,
                     value: dataElement.id,
                 });
 
                 const cocCells = dataElement.categoryCombo.categoryOptionCombos.map((coc, cocIdx) => {
                     return cell({
-                        sheet: this.sheets.dataEntry,
+                        sheet: this.sheets.validation,
                         column: column,
-                        row: this.initialDataEntryRow + cocIdx,
+                        row: this.initialValidationRow + 1 + cocIdx,
                         value: referenceToId(coc.id),
                     });
                 });
@@ -185,14 +186,17 @@ class DownloadCustomization {
             })
             .compact()
             .flatMap((obj, idx) => {
-                return _.zip([obj.categoryOptionCombo, ...obj.categoryOptions], ["J", "K", "L", "M"]).map(
+                const row = this.initialValidationRow + idx;
+                const sum = { id: "=" + [`I${row}`, `J${row}`, `K${row}`].join(" & ") };
+
+                return _.zip([obj.categoryOptionCombo, ...obj.categoryOptions, sum], ["H", "I", "J", "K", "L"]).map(
                     ([obj, column]) => {
                         if (!obj || !column) return null;
 
                         return cell({
-                            sheet: this.sheets.dataEntry,
+                            sheet: this.sheets.validation,
                             column: column,
-                            row: this.initialDataEntryRow + idx,
+                            row: row,
                             value: obj.id,
                         });
                     }
@@ -246,8 +250,47 @@ class DownloadCustomization {
             .value();
     }
 
-    private async fillWorkbook(sheetData: WorkbookData) {
+    private async setDropdown(columns: { data: string; validation: string }, objects: unknown[]) {
+        const row = this.initialValidationRow;
+        const range: RangeRef = {
+            type: "range",
+            sheet: this.sheets.dataEntry,
+            ref: `${columns.data}4:${columns.data}1000`,
+        };
+        const value = `Validation!$${columns.validation}$${row}:$${columns.validation}$${row + objects.length - 1}`;
+
+        /*
+        await excelRepository.defineName(this.id, nameForId(cell.id), {
+            type: "cell" as const,
+            sheet: cell.sheet,
+            ref: cell.ref,
+        });
+        */
+
+        await this.excelRepository.setDataValidation(this.id, range, value);
+    }
+
+    private async setDropdownCell(cellRef: string, columns: { validation: string }, objects: unknown[]) {
+        const row = this.initialValidationRow;
+
+        await this.excelRepository.setDataValidation(
+            this.id,
+            { type: "cell", sheet: this.sheets.dataEntry, ref: cellRef },
+            `Validation!$${columns.validation}$${row}:$${columns.validation}$${row + objects.length - 1}`
+        );
+    }
+
+    private async fillWorkbook(_metadata: NRCModuleMetadata, sheetData: WorkbookData) {
         const { excelRepository } = this;
+        /*
+        const { categories } = metadata.categoryCombo;
+
+        await this.setDropdown({ data: "A", validation: "A" }, metadata.organisationUnits);
+        await this.setDropdown({ data: "B", validation: "B" }, categories.phasesOfEmergency.categoryOptions);
+        await this.setDropdown({ data: "C", validation: "D" }, metadata.dataElements);
+        await this.setDropdown({ data: "E", validation: "C" }, categories.targetActual.categoryOptions);
+        await this.setDropdownCell("D1", { validation: "F" }, metadata.periods);
+        */
 
         for (const cell of sheetData.cells) {
             await excelRepository.writeCell(

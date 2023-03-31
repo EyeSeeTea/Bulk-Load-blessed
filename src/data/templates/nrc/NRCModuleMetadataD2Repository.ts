@@ -130,10 +130,13 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
             .getData();
 
         const categoriesByCode = _.keyBy(categories, category => category.code);
+        const categoryPhaseOfEmergency = categoriesByCode[categoryComboCodes.phaseOfEmergency];
 
         return {
             project: [projectCategoryOption],
-            phasesOfEmergency: categoriesByCode[categoryComboCodes.phaseOfEmergency]?.categoryOptions || [],
+            phasesOfEmergency: _(categoryPhaseOfEmergency?.categoryOptions || [])
+                .reject(categoryOption => categoryOption.name.includes("DEPRECATED"))
+                .value(),
             targetActual: categoriesByCode[categoryComboCodes.actualTargets]?.categoryOptions || [],
         };
     }
