@@ -357,10 +357,19 @@ export class InstanceDhisRepository implements InstanceRepository {
     ): Promise<SynchronizationResult> {
         const dataValues = await this.validateAggregateImportPackage(this.buildAggregatedPayload(dataPackage));
 
+        const dataSetIds = _(dataPackage.dataEntries)
+            .map(entry => entry.dataForm)
+            .uniq()
+            .value();
+        const dataSetIdFirst = dataSetIds[0];
+        const dataSetId = dataSetIdFirst && dataSetIds.length === 1 ? dataSetIdFirst : undefined;
+
         const title =
             importStrategy === "DELETE" ? i18n.t("Data values - Delete") : i18n.t("Data values - Create/update");
 
-        const { response } = await this.api.dataValues.postSetAsync({ importStrategy }, { dataValues }).getData();
+        const { response } = await this.api.dataValues
+            .postSetAsync({ importStrategy }, { dataSet: dataSetId, dataValues })
+            .getData();
 
         const importSummary = await this.api.system.waitFor(response.jobType, response.id).getData();
 
