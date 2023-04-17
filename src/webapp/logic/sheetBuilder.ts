@@ -60,7 +60,6 @@ export class SheetBuilder {
     private programStageSheets: any;
     private relationshipsSheets: any;
     private legendSheet: any;
-    private dataSetSheet: any;
     private validationSheet: any;
     private metadataSheet: any;
 
@@ -76,6 +75,8 @@ export class SheetBuilder {
         const { element, rawMetadata } = builder;
         const useDataSetSections =
             builder.splitDataEntryTabsBySection && (element.formType === "SECTION" || !_(element.sections).isEmpty());
+
+        const dataEntrySheetsInfo: Array<{ sheet: any; options: { includedDataElementIds?: Set<string> } }> = [];
 
         if (isTrackerProgram(element)) {
             const { elementMetadata: metadata } = builder;
@@ -110,11 +111,11 @@ export class SheetBuilder {
                     const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
                     const dataEntrySheet = this.workbook.addWorksheet(tabName);
                     const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
-                    this.fillDataEntrySheet(dataEntrySheet, { includedDataElementIds });
+                    dataEntrySheetsInfo.push({ sheet: dataEntrySheet, options: { includedDataElementIds } });
                 });
             } else {
                 const dataEntrySheet = this.workbook.addWorksheet(dataEntryTabName);
-                this.fillDataEntrySheet(dataEntrySheet, {});
+                dataEntrySheetsInfo.push({ sheet: dataEntrySheet, options: {} });
             }
         }
 
@@ -130,6 +131,10 @@ export class SheetBuilder {
             this.fillInstancesSheet();
             this.fillProgramStageSheets();
             this.fillRelationshipSheets();
+        } else {
+            dataEntrySheetsInfo.forEach(({ sheet, options }) => {
+                this.fillDataEntrySheet(sheet, options);
+            });
         }
 
         return this.workbook;
