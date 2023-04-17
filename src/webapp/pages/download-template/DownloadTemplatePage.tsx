@@ -17,10 +17,10 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
     const { api, compositionRoot } = useAppContext();
 
     const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
-    const [availableModels, setAvailableModels] = useState<DataModelProps[]>([]);
+    const [_availableModels, setAvailableModels] = useState<DataModelProps[]>([]);
 
     const handleTemplateDownloadClick = async () => {
-        if (!template || availableModels.filter(availableModel => template?.id === availableModel.value).length === 0) {
+        if (!template) {
             snackbar.info(i18n.t("You need to select at least one element to export"));
             return;
         }
