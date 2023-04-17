@@ -74,7 +74,7 @@ export const TemplateSelector = ({
         splitDataEntryTabsBySection: false,
     });
 
-    const selectedId = state.id;
+    const selectedId = state.templateId || state.id;
     const isDataSet = React.useMemo(() => {
         const dataSetIds = dataSource?.dataSets?.map(ds => ds.id);
         return selectedId && dataSetIds && dataSetIds.includes(selectedId);
