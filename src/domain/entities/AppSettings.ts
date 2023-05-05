@@ -39,6 +39,7 @@ export interface AppSettings {
     programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
     dataFormTemplate: DataFormTemplate;
     templatePermissions: TemplatePermissions;
+    useCodesForDataElements: boolean;
 }
 
 export type TemplatePermissions = Record<TemplateId, TemplatePermission>;

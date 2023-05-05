@@ -1010,7 +1010,7 @@ export class SheetBuilder {
     }
 
     private translate(item: any) {
-        const { elementMetadata, language } = this.builder;
+        const { elementMetadata, language, settings } = this.builder;
         const translations = item?.translations?.filter(({ locale }: any) => locale === language) ?? [];
 
         const { value: formName } = translations.find(({ property }: any) => property === "FORM_NAME") ?? {};
@@ -1031,6 +1031,13 @@ export class SheetBuilder {
             });
 
             return { name: options.join(", "), description };
+        } else if (
+            settings.useCodesForDataElements &&
+            item &&
+            item.code &&
+            ["dataElements", "options", "categoryOptions"].includes(item.type)
+        ) {
+            return { name: item.code || name, description };
         } else {
             return { name, description };
         }

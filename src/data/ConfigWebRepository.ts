@@ -41,6 +41,7 @@ export class ConfigWebRepository implements ConfigRepository {
             programStagePopulateEventsForEveryTei: {},
             dataFormTemplate: { relationships: {} },
             templatePermissions: {},
+            useCodesForDataElements: false,
             ...defaultSettings,
         };
     }

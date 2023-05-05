@@ -80,6 +80,13 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
         [settings, onChange]
     );
 
+    const setUseCodesForDataElements = useCallback(
+        (ev: ChangeEvent<HTMLInputElement>) => {
+            onChange(settings.update({ useCodesForDataElements: ev.target.checked }));
+        },
+        [settings, onChange]
+    );
+
     const modelsInfo = useMemo(() => {
         return settings.getModelsInfo();
     }, [settings]);
@@ -302,6 +309,17 @@ export default function SettingsFields(props: SettingsFieldsProps & CustomTempla
                         )}
                     />
                 </ListItem>
+
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            className={classes.checkbox}
+                            checked={settings.useCodesForDataElements}
+                            onChange={setUseCodesForDataElements}
+                        />
+                    }
+                    label={i18n.t("Use codes for data elements and options")}
+                />
             </div>
 
             <div className={classes.content}>
