@@ -42,7 +42,6 @@ const publicFields = [
     "programStagePopulateEventsForEveryTei",
     "dataFormTemplate",
     "templatePermissions",
-    "useCodesForDataElements",
 ] as const;
 
 const allFields = [...privateFields, ...publicFields];
@@ -80,7 +79,6 @@ export default class Settings {
     public programStageFilter: ProgramStageFilter;
     public programStagePopulateEventsForEveryTei: ProgramStagePopulateEventsForEveryTei;
     public dataFormTemplate: DataFormTemplate;
-    public useCodesForDataElements: boolean;
 
     static constantCode = "BULK_LOAD_SETTINGS";
 
@@ -98,7 +96,6 @@ export default class Settings {
         this.programStageFilter = options.programStageFilter;
         this.programStagePopulateEventsForEveryTei = options.programStagePopulateEventsForEveryTei;
         this.dataFormTemplate = options.dataFormTemplate;
-        this.useCodesForDataElements = options.useCodesForDataElements;
     }
 
     static async build(api: D2Api, compositionRoot: CompositionRoot): Promise<Settings> {
@@ -186,7 +183,6 @@ export default class Settings {
                 data.programStagePopulateEventsForEveryTei ?? defaultSettings.programStagePopulateEventsForEveryTei,
             dataFormTemplate: data.dataFormTemplate ?? defaultSettings.dataFormTemplate,
             templatePermissions: buildTemplatesPermission(data.templatePermissions),
-            useCodesForDataElements: data.useCodesForDataElements ?? false,
         });
     }
 
@@ -208,7 +204,6 @@ export default class Settings {
             programStageFilter,
             programStagePopulateEventsForEveryTei,
             dataFormTemplate,
-            useCodesForDataElements,
         } = this;
         const validation = this.validate();
         if (!validation.status) return validation;
@@ -255,7 +250,6 @@ export default class Settings {
             programStagePopulateEventsForEveryTei,
             dataFormTemplate,
             templatePermissions: buildTemplatePermissions(),
-            useCodesForDataElements,
         };
 
         try {
