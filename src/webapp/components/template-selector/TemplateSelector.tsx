@@ -72,6 +72,7 @@ export const TemplateSelector = ({
         language: "en",
         settings,
         splitDataEntryTabsBySection: false,
+        useCodesForMetadata: false,
     });
 
     const selectedId = state.templateId || state.id;
@@ -232,6 +233,10 @@ export const TemplateSelector = ({
     const onPopulateChange = (_event: React.ChangeEvent, populate: boolean) => {
         setState(state => ({ ...state, populate }));
     };
+
+    const setUseCodesMetadata = React.useCallback((ev: React.ChangeEvent<HTMLInputElement>) => {
+        setState(state => ({ ...state, useCodesForMetadata: ev.target.checked }));
+    }, []);
 
     const onDownloadRelationshipsChange = (_event: React.ChangeEvent, downloadRelationships: boolean) => {
         setState(state => ({ ...state, downloadRelationships }));
@@ -522,6 +527,16 @@ export const TemplateSelector = ({
                             label={i18n.t("Include relationships")}
                         />
                     </div>
+                </div>
+            )}
+
+            {state.type && (
+                <div>
+                    <FormControlLabel
+                        className={classes.checkbox}
+                        control={<Checkbox checked={state.useCodesForMetadata} onChange={setUseCodesMetadata} />}
+                        label={i18n.t("Use metadata codes (organisation units, data elements and options)")}
+                    />
                 </div>
             )}
         </React.Fragment>
