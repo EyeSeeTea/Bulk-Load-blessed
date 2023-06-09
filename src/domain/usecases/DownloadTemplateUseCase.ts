@@ -129,7 +129,6 @@ export class DownloadTemplateUseCase implements UseCase {
                   startDate: populateStartDate,
                   endDate: populateEndDate,
                   filterTEIEnrollmentDate,
-                  translateCodes: template.type !== "custom",
                   relationshipsOuFilter,
               })
             : undefined;
