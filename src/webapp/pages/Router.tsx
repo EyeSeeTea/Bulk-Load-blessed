@@ -114,8 +114,8 @@ export const Router: React.FC = React.memo(() => {
                 icon: "info",
                 path: "/about",
                 section: "about",
-                auth: (settings: Settings) => true,
-                component: (props: RouteComponentProps) => <AboutPage />,
+                auth: (_settings: Settings) => true,
+                component: (_props: RouteComponentProps) => <AboutPage />,
             },
         ],
         []
