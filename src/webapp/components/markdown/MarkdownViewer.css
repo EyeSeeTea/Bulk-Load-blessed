@@ -1,0 +1,68 @@
+.markdown-viewer {
+    color: white;
+    padding: 5px 20px 0 20px;
+}
+
+.markdown-viewer h1 {
+    font-size: 32px;
+    line-height: 47px;
+    font-weight: 300;
+    margin: 0px 0px 30px 0px;
+}
+
+.markdown-viewer p {
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 28px;
+    text-align: justify;
+}
+
+.markdown-viewer img {
+    max-width: 100%;
+    border-radius: 1em;
+    -webkit-user-drag: none;
+}
+
+.markdown-viewer video {
+    max-width: 100%;
+    -webkit-user-drag: none;
+}
+
+.markdown-viewer a {
+    color: white;
+}
+
+.markdown-viewer details > summary {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    outline: none;
+    list-style: none;
+    list-style-type: none;
+    font-size: 33px;
+    font-weight: 100;
+    text-align: left;
+    user-select: none;
+}
+
+.markdown-viewer details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.markdown-viewer details > summary::before {
+    content: ">";
+    margin-right: 20px;
+    top: 3px;
+    position: relative;
+}
+
+.markdown-viewer details > summary::after {
+    content: "keyboard_arrow_down";
+    font-size: 35px;
+    margin-left: 10px;
+    font-family: "Material Icons";
+}
+
+.markdown-viewer details[open] > summary::after {
+    transform: rotate(180deg);
+}
