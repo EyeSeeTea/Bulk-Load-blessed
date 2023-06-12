@@ -24,7 +24,7 @@ export const AboutPage: React.FC = React.memo(() => {
     return (
         <>
             <Typography className="about-page-title" variant="h5" align="center">
-                About Bulk Load App
+                {i18n.t("About Bulk Load App")}
             </Typography>
             <div className="about-page">
                 <div className="about-content">
