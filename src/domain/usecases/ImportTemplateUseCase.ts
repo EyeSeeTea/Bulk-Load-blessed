@@ -8,7 +8,7 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
-import { SynchronizationResult } from "../entities/SynchronizationResult";
+import { ErrorMessage, SynchronizationResult } from "../entities/SynchronizationResult";
 import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -38,6 +38,20 @@ export interface ImportTemplateUseCaseParams {
     organisationUnitStrategy?: OrganisationUnitImportStrategy;
     settings: Settings;
 }
+
+type CustomErrorMatch = {
+    regex: RegExp;
+    getErrorMessage: (value: string) => string;
+};
+
+const customErrorMatches: CustomErrorMatch[] = [
+    {
+        regex: /Organisation unit: `(\w+)` not in hierarchy of current user: `(\w+)`/,
+        getErrorMessage: (name: string) => {
+            return `The user cannot write in OU ${name}`;
+        },
+    },
+];
 
 export class ImportTemplateUseCase implements UseCase {
     constructor(
@@ -109,7 +123,27 @@ export class ImportTemplateUseCase implements UseCase {
 
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
-        return Either.success(_.compact([deleteResult, ...importResult]));
+        const importResultHasErrors = importResult.flatMap(result => result.errors);
+        if (template.type === "custom" && (importResultHasErrors.length > 0 || deleteResult)) {
+            const orgUnitName = removeCharacters(
+                await this.excelRepository.readCell(templateId, template.fixedOrgUnit, {
+                    formula: false,
+                })
+            );
+
+            const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnitName);
+
+            const deleteResultWithErrorsDetails = deleteResult
+                ? {
+                      ...deleteResult,
+                      errors: this.generateErrorDetails(deleteResult.errors || [], customErrorMatches, orgUnitName),
+                  }
+                : undefined;
+
+            return Either.success(_.compact([deleteResultWithErrorsDetails, ...importResultWithErrorsDetails]));
+        } else {
+            return Either.success(_.compact([deleteResult, ...importResult]));
+        }
     }
 
     private async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
@@ -249,6 +283,29 @@ export class ImportTemplateUseCase implements UseCase {
             periods,
             orgUnits,
             translateCodes: false,
+        });
+    }
+
+    private getImportResultsWithDetailsErrors(
+        importResult: SynchronizationResult[],
+        orgUnitName: string
+    ): SynchronizationResult[] {
+        const importResultWithErrorsDetails = importResult.map(result => {
+            return {
+                ...result,
+                errors: this.generateErrorDetails(result.errors || [], customErrorMatches, orgUnitName),
+            };
+        });
+        return importResultWithErrorsDetails;
+    }
+
+    private generateErrorDetails(errors: ErrorMessage[], allowedMessages: CustomErrorMatch[], orgUnitName: string) {
+        return errors.map(error => {
+            const matches = allowedMessages.find(regex => error.message.match(regex.regex));
+            return {
+                ...error,
+                details: matches ? matches.getErrorMessage(orgUnitName) : "",
+            };
         });
     }
 }

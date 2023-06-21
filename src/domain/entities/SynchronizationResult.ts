@@ -12,6 +12,7 @@ export interface SynchronizationStats {
 export interface ErrorMessage {
     id: string;
     message: string;
+    details?: string;
 }
 
 export interface SynchronizationResult {
