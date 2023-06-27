@@ -14,6 +14,9 @@ import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
+import { FileRepository } from "../repositories/FileRepository";
+import { FileResource } from "../entities/FileResource";
+import { extractImagesFromZip, getExcelOrThrow, isExcelFile } from "../../utils/files";
 
 export type ImportTemplateError =
     | {
@@ -43,7 +46,8 @@ export class ImportTemplateUseCase implements UseCase {
     constructor(
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
-        private excelRepository: ExcelRepository
+        private excelRepository: ExcelRepository,
+        private fileRepository: FileRepository
     ) {}
 
     public async execute({
@@ -54,11 +58,13 @@ export class ImportTemplateUseCase implements UseCase {
         organisationUnitStrategy = "ERROR",
         settings,
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, SynchronizationResult[]>> {
+        const excelFile = await getExcelOrThrow(file);
+
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
 
-        const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
+        const templateId = await this.excelRepository.loadTemplate({ type: "file", file: excelFile });
         const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = removeCharacters(
@@ -80,13 +86,22 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
+        const filesToUpload = isExcelFile(file.name)
+            ? []
+            : await extractImagesFromZip(file, {
+                  filesToExtract: this.getImageDataValuesOnly(dataPackage.dataEntries, dataForm),
+              });
+
+        const uploadedFiles = await this.fileRepository.uploadAll(filesToUpload);
+
         const { dataValues, invalidDataValues, existingDataValues, instanceDataValues } = await this.readDataValues(
             dataPackage,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,
             settings,
-            duplicateStrategy
+            duplicateStrategy,
+            uploadedFiles
         );
 
         if (organisationUnitStrategy === "ERROR" && invalidDataValues.dataEntries.length > 0) {
@@ -137,7 +152,8 @@ export class ImportTemplateUseCase implements UseCase {
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[],
         settings: Settings,
-        duplicateStrategy: DuplicateImportStrategy
+        duplicateStrategy: DuplicateImportStrategy,
+        files: FileResource[]
     ) {
         const { duplicateEnabled, duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
@@ -183,7 +199,7 @@ export class ImportTemplateUseCase implements UseCase {
         return {
             dataValues: {
                 type: dataForm.type,
-                dataEntries: excelFile,
+                dataEntries: files.length === 0 ? excelFile : this.addImagesToDataEntries(files, excelFile, dataForm),
                 trackedEntityInstances,
             },
             invalidDataValues: {
@@ -202,6 +218,43 @@ export class ImportTemplateUseCase implements UseCase {
                 trackedEntityInstances: [],
             },
         };
+    }
+
+    private addImagesToDataEntries(files: FileResource[], dataEntries: DataPackageData[], dataForm: DataForm) {
+        const imageDataElementsIds = this.getImageDataElementIds(dataForm);
+        return dataEntries.map(dataEntry => {
+            return {
+                ...dataEntry,
+                dataValues: dataEntry.dataValues.map(dataValue => {
+                    if (!imageDataElementsIds.includes(dataValue.dataElement)) {
+                        return dataValue;
+                    }
+                    const fileInfo = files.find(
+                        file => file.name.toLowerCase() === String(dataValue.value).toLowerCase()
+                    );
+                    return {
+                        ...dataValue,
+                        value: fileInfo?.id || "",
+                    };
+                }),
+            };
+        });
+    }
+
+    private getImageDataValuesOnly(dataEntries: DataPackageData[], dataForm: DataForm) {
+        const imageDataElementsIds = this.getImageDataElementIds(dataForm);
+        const fileNameInDataValues = _(dataEntries)
+            .flatMap(de => de.dataValues)
+            .filter(dv => imageDataElementsIds.includes(dv.dataElement))
+            .map(dv => String(dv.value))
+            .compact()
+            .value();
+
+        return fileNameInDataValues;
+    }
+
+    private getImageDataElementIds(dataForm: DataForm) {
+        return dataForm.dataElements.filter(de => de.valueType === "IMAGE").map(de => de.id);
     }
 
     private parseExcelFile(dataPackage: DataPackage, useBuilderOrgUnits: boolean, selectedOrgUnits: string[]) {

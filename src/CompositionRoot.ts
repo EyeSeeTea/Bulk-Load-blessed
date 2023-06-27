@@ -41,6 +41,7 @@ import { SearchUsersUseCase } from "./domain/usecases/SearchUsersUseCase";
 import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api } from "./types/d2-api";
 import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
+import { FileD2Repository } from "./data/FileD2Repository";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -59,6 +60,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const excelReader: ExcelRepository = new ExcelPopulateRepository();
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
     const usersRepository = new D2UsersRepository(dhisInstance);
+    const fileRepository = new FileD2Repository(dhisInstance);
 
     return {
         orgUnits: getExecute({
@@ -72,7 +74,7 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
         templates: getExecute({
             analyze: new AnalyzeTemplateUseCase(instance, templateManager, excelReader),
             download: new DownloadTemplateUseCase(instance, templateManager, excelReader),
-            import: new ImportTemplateUseCase(instance, templateManager, excelReader),
+            import: new ImportTemplateUseCase(instance, templateManager, excelReader, fileRepository),
             list: new ListDataFormsUseCase(instance),
             getDataFormsForGeneration: new GetDataFormsForGenerationUseCase(instance),
             get: new GetDataFormsUseCase(instance),
