@@ -16,7 +16,8 @@ import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 import { FileRepository } from "../repositories/FileRepository";
 import { FileResource } from "../entities/FileResource";
-import { extractImagesFromZip, getExcelOrThrow, isExcelFile } from "../../utils/files";
+import { isExcelFile } from "../../utils/files";
+import { ImportSourceRepository } from "../repositories/ImportSourceRepository";
 
 export type ImportTemplateError =
     | {
@@ -47,7 +48,8 @@ export class ImportTemplateUseCase implements UseCase {
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository,
-        private fileRepository: FileRepository
+        private fileRepository: FileRepository,
+        private importSourceRepository: ImportSourceRepository
     ) {}
 
     public async execute({
@@ -58,13 +60,13 @@ export class ImportTemplateUseCase implements UseCase {
         organisationUnitStrategy = "ERROR",
         settings,
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, SynchronizationResult[]>> {
-        const excelFile = await getExcelOrThrow(file);
+        const { spreadSheet, images } = await this.importSourceRepository.import(file);
 
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
 
-        const templateId = await this.excelRepository.loadTemplate({ type: "file", file: excelFile });
+        const templateId = await this.excelRepository.loadTemplate({ type: "file", file: spreadSheet });
         const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = removeCharacters(
@@ -88,9 +90,7 @@ export class ImportTemplateUseCase implements UseCase {
 
         const filesToUpload = isExcelFile(file.name)
             ? []
-            : await extractImagesFromZip(file, {
-                  filesToExtract: this.getImageDataValuesOnly(dataPackage.dataEntries, dataForm),
-              });
+            : this.validateImagesExistInZip(dataPackage.dataEntries, dataForm, images);
 
         const uploadedFiles = await this.fileRepository.uploadAll(filesToUpload);
 
@@ -239,6 +239,18 @@ export class ImportTemplateUseCase implements UseCase {
                 }),
             };
         });
+    }
+
+    private validateImagesExistInZip(dataEntries: DataPackageData[], dataForm: DataForm, images: FileResource[]) {
+        const imagesInExcel = this.getImageDataValuesOnly(dataEntries, dataForm);
+        const imagesNames = images.map(image => image.name);
+        const fileNotInZip = _.differenceBy(imagesInExcel, imagesNames);
+        if (fileNotInZip.length > 0) {
+            console.error(_.differenceBy(imagesInExcel, imagesNames));
+            const message = `Cannot found files: ${fileNotInZip.join(", ")} in zip.`;
+            throw new Error(message);
+        }
+        return images;
     }
 
     private getImageDataValuesOnly(dataEntries: DataPackageData[], dataForm: DataForm) {

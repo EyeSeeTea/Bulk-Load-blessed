@@ -5,3 +5,5 @@ export type FileResource = {
     name: string;
     data: Blob;
 };
+
+export type ImportSource = { spreadSheet: Blob; images: FileResource[] };

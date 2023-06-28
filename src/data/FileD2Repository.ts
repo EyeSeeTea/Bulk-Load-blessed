@@ -1,5 +1,4 @@
 import { D2Api } from "@eyeseetea/d2-api/2.33";
-import _ from "lodash";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { FileResource } from "../domain/entities/FileResource";
 import { FileRepository } from "../domain/repositories/FileRepository";
@@ -24,33 +23,29 @@ export class FileD2Repository implements FileRepository {
     async uploadAll(files: FileResource[]): Promise<FileResource[]> {
         if (files.length === 0) return files;
 
-        const filesWithIds = await promiseMap(_.chunk(files, 10), async chunkFiles => {
-            const fileUploaded = await promiseMap(chunkFiles, async file => {
-                const formData = new FormData();
-                formData.append("file", file.data, file.name);
-                formData.append("domain", "DATA_VALUE");
+        const filesWithIds = await promiseMap(files, async file => {
+            const formData = new FormData();
+            formData.append("file", file.data, file.name);
+            formData.append("domain", "DATA_VALUE");
 
-                const response = await this.api
-                    .request<FileResponse>({
-                        url: "/fileResources",
-                        method: "post",
-                        requestBodyType: "raw",
-                        data: formData,
-                    })
-                    .response();
+            const response = await this.api
+                .request<FileResponse>({
+                    url: "/fileResources",
+                    method: "post",
+                    requestBodyType: "raw",
+                    data: formData,
+                })
+                .response();
 
-                const fileResourceId = response.data.response?.fileResource;
+            const fileResourceId = response.data.response?.fileResource;
 
-                if (!fileResourceId?.id) {
-                    throw Error("Unable to save file");
-                }
+            if (!fileResourceId?.id) {
+                throw Error("Unable to save file");
+            }
 
-                return { ...file, id: fileResourceId.id };
-            });
-
-            return fileUploaded;
+            return { ...file, id: fileResourceId.id };
         });
 
-        return _.flatten(filesWithIds);
+        return filesWithIds;
     }
 }

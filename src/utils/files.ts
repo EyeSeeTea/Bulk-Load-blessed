@@ -3,9 +3,6 @@ import _ from "lodash";
 import { FileResource } from "../domain/entities/FileResource";
 
 type ExtensionName = string;
-type ExtractFileOptions = {
-    filesToExtract: string[];
-};
 
 const ALLOWED_IMAGES = ["png", "jpg", "jpeg", "svg"];
 const XLSX_EXTENSION = "xlsx";
@@ -69,28 +66,11 @@ export async function extractExcelFromZip(file: File) {
     return await zipContent.file(excelFileName)?.async("blob");
 }
 
-export async function extractImagesFromZip(file: File, options: ExtractFileOptions): Promise<FileResource[]> {
-    const { filesToExtract } = options;
+export async function extractImagesFromZip(file: File): Promise<FileResource[]> {
     const zip = new JSZip();
     const zipContent = await zip.loadAsync(file);
 
     const fileNames = _(zipContent.files).keys().value();
-
-    const fileNamesImages = _(fileNames)
-        .map(fileName => {
-            const extensionFile = _(fileName).split(".").last()?.toLowerCase() || "";
-            const name = _(fileName).split("/").last() || "";
-            return ALLOWED_IMAGES.includes(extensionFile) ? name : undefined;
-        })
-        .compact()
-        .value();
-
-    const fileNotInZip = _.differenceBy(filesToExtract, fileNamesImages);
-    if (fileNotInZip.length > 0) {
-        console.error(_.differenceBy(filesToExtract, fileNamesImages));
-        const message = `Cannot found files: ${fileNotInZip.join(", ")} in zip.`;
-        throw new Error(message);
-    }
 
     const allowedFiles = _(fileNames)
         .map(fileName => {
@@ -99,7 +79,6 @@ export async function extractImagesFromZip(file: File, options: ExtractFileOptio
             return ALLOWED_IMAGES.includes(extensionFile) ? name : undefined;
         })
         .compact()
-        .filter(fileName => filesToExtract.includes(fileName))
         .value();
 
     const promises = _(allowedFiles)
