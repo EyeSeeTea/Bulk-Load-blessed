@@ -377,7 +377,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const { status, description, conflicts, importCount } = importSummary;
         const { imported, deleted, updated, ignored } = importCount;
-        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
+        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value, details: "" })) ?? [];
 
         return {
             title,

@@ -8,6 +8,7 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
+import { OrgUnit } from "../entities/OrgUnit";
 import { ErrorMessage, SynchronizationResult } from "../entities/SynchronizationResult";
 import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
@@ -124,19 +125,15 @@ export class ImportTemplateUseCase implements UseCase {
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
         const importResultHasErrors = importResult.flatMap(result => result.errors);
-        if (template.type === "custom" && (importResultHasErrors.length > 0 || deleteResult)) {
-            const orgUnitName = removeCharacters(
-                await this.excelRepository.readCell(templateId, template.fixedOrgUnit, {
-                    formula: false,
-                })
-            );
+        if (importResultHasErrors.length > 0 || deleteResult) {
+            const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataFormId);
 
-            const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnitName);
+            const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnits);
 
             const deleteResultWithErrorsDetails = deleteResult
                 ? {
                       ...deleteResult,
-                      errors: this.generateErrorDetails(deleteResult.errors || [], customErrorMatches, orgUnitName),
+                      errors: this.generateErrorDetails(deleteResult.errors || [], customErrorMatches, orgUnits),
                   }
                 : undefined;
 
@@ -288,23 +285,24 @@ export class ImportTemplateUseCase implements UseCase {
 
     private getImportResultsWithDetailsErrors(
         importResult: SynchronizationResult[],
-        orgUnitName: string
+        orgUnits: OrgUnit[]
     ): SynchronizationResult[] {
-        const importResultWithErrorsDetails = importResult.map(result => {
+        const importResultsWithErrorsDetails = importResult.map(result => {
             return {
                 ...result,
-                errors: this.generateErrorDetails(result.errors || [], customErrorMatches, orgUnitName),
+                errors: this.generateErrorDetails(result.errors || [], customErrorMatches, orgUnits),
             };
         });
-        return importResultWithErrorsDetails;
+        return importResultsWithErrorsDetails;
     }
 
-    private generateErrorDetails(errors: ErrorMessage[], allowedMessages: CustomErrorMatch[], orgUnitName: string) {
+    private generateErrorDetails(errors: ErrorMessage[], allowedMessages: CustomErrorMatch[], orgUnits: OrgUnit[]) {
         return errors.map(error => {
+            const orgUnit = orgUnits.find(ou => ou.id === error.id);
             const matches = allowedMessages.find(regex => error.message.match(regex.regex));
             return {
                 ...error,
-                details: matches ? matches.getErrorMessage(orgUnitName) : "",
+                details: matches && orgUnit ? matches.getErrorMessage(orgUnit.name) : "",
             };
         });
     }

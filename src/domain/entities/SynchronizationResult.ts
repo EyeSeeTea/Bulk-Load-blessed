@@ -12,7 +12,7 @@ export interface SynchronizationStats {
 export interface ErrorMessage {
     id: string;
     message: string;
-    details?: string;
+    details: string | undefined;
 }
 
 export interface SynchronizationResult {
