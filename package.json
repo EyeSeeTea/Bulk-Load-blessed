@@ -29,6 +29,7 @@
         "excel4node": "1.7.2",
         "file-saver": "2.0.5",
         "jquery": "3.6.0",
+        "jszip": "3.10.1",
         "lodash": "4.17.21",
         "lodash.product": "18.9.19",
         "md5": "2.3.0",
