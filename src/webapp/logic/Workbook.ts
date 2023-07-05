@@ -16,22 +16,22 @@ import { fromBase64 } from "../../utils/files";
    Upstream Backlog: https://github.com/dtjohnson/xlsx-populate/blob/master/backlog.md
 */
 
+const defaultSheetName = "__default";
+
 export class Workbook {
-    private constructor(
-        private xworkbook: XlsxPopulate.Workbook,
-        private options: { sheetsToRemove: XlsxPopulate.Sheet[] }
-    ) {}
+    private constructor(public xworkbook: XlsxPopulate.Workbook) {}
 
     static async empty() {
-        const workbook = await XlsxPopulate.fromBlankAsync();
-        // Initial default sheet ("Sheet 1") should be removed on write.
-        return new Workbook(workbook, { sheetsToRemove: workbook.sheets() });
+        const xworkbook = await XlsxPopulate.fromBlankAsync();
+        // Set a default name to the initial sheet so it can be reused on the first addWorksheet call
+        xworkbook.sheet(0).name(defaultSheetName);
+        return new Workbook(xworkbook);
     }
 
     static async fromBase64(base64: string) {
         const file = await fromBase64(base64);
         const workbook = await XlsxPopulate.fromDataAsync(file);
-        return new Workbook(workbook, { sheetsToRemove: [] });
+        return new Workbook(workbook);
     }
 
     static getExcelAlpha(n: number): string {
@@ -56,11 +56,17 @@ export class Workbook {
     }
 
     private getPopulateSheet(name: string): XlsxPopulate.Sheet {
-        return this.xworkbook.sheet(name) || this.xworkbook.addSheet(name);
+        const defaultSheet = this.xworkbook.sheet(defaultSheetName);
+
+        if (defaultSheet) {
+            defaultSheet.name(name);
+            return defaultSheet;
+        } else {
+            return this.xworkbook.sheet(name) || this.xworkbook.addSheet(name);
+        }
     }
 
     writeToBuffer(): Promise<Blob> {
-        this.options.sheetsToRemove.forEach(sheet => this.xworkbook.deleteSheet(sheet));
         return this.xworkbook.outputAsync({ type: "blob" });
     }
 
@@ -78,7 +84,7 @@ export class Workbook {
 }
 
 export class Sheet {
-    constructor(public workbook: Workbook, private xsheet: XlsxPopulate.Sheet) {}
+    constructor(public workbook: Workbook, public xsheet: XlsxPopulate.Sheet) {}
 
     get name() {
         return this.xsheet.name();
