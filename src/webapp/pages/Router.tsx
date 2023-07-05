@@ -14,6 +14,7 @@ import ImportTemplatePage from "./import-template/ImportTemplatePage";
 import SettingsPage from "./settings/SettingsPage";
 import ThemesPage from "./themes/ThemesPage";
 import BlankTemplatePage from "./blank-template/BlankTemplatePage";
+import { AboutPage } from "./about/AboutPage";
 import { CustomTemplate } from "../../domain/entities/Template";
 
 export interface RouteComponentProps {
@@ -106,6 +107,15 @@ export const Router: React.FC = React.memo(() => {
                 section: "settings",
                 auth: (settings: Settings) => settings.areSettingsVisibleForCurrentUser(),
                 component: (props: RouteComponentProps) => <SettingsPage {...props} />,
+            },
+            {
+                key: "about",
+                name: i18n.t("About"),
+                icon: "info",
+                path: "/about",
+                section: "about",
+                auth: (_settings: Settings) => true,
+                component: (_props: RouteComponentProps) => <AboutPage />,
             },
         ],
         []

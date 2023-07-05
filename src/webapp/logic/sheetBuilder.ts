@@ -50,6 +50,7 @@ export interface SheetBuilderParams {
     settings: Settings;
     downloadRelationships: boolean;
     splitDataEntryTabsBySection: boolean;
+    useCodesForMetadata: boolean;
 }
 
 export class SheetBuilder {
@@ -1053,6 +1054,12 @@ export class SheetBuilder {
             });
 
             return { name: options.join(", "), description };
+        } else if (
+            this.builder.useCodesForMetadata &&
+            item?.code &&
+            ["organisationUnits", "dataElements", "options", "categoryOptions"].includes(item?.type)
+        ) {
+            return { name: item.code, description };
         } else {
             return { name, description };
         }

@@ -148,6 +148,7 @@ export default function TemplateListTable(props: TemplateListTableProps) {
                     populate: false,
                     downloadRelationships: false,
                     splitDataEntryTabsBySection: false,
+                    useCodesForMetadata: false,
                 });
             } else {
                 snackbar.error(i18n.t("Cannot download spreadsheet for template"));

@@ -41,6 +41,8 @@ import { WriteSettingsUseCase } from "./domain/usecases/WriteSettingsUseCase";
 import { D2Api, D2ApiDefault } from "./types/d2-api";
 import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
 import { NRCModuleMetadataD2Repository } from "./data/templates/nrc/NRCModuleMetadataD2Repository";
+import { FileD2Repository } from "./data/FileD2Repository";
+import { ImportSourceZipRepository } from "./data/ImportSourceZipRepository";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -61,6 +63,8 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
     const usersRepository = new D2UsersRepository(dhisInstance);
     const modulesRepository = { NRCModule: new NRCModuleMetadataD2Repository(api) };
+    const fileRepository = new FileD2Repository(dhisInstance);
+    const importSourceRepository = new ImportSourceZipRepository();
 
     return {
         orgUnits: getExecute({
@@ -74,7 +78,13 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
         templates: getExecute({
             analyze: new AnalyzeTemplateUseCase(instance, templateManager, excelReader),
             download: new DownloadTemplateUseCase(instance, templateManager, excelReader, modulesRepository),
-            import: new ImportTemplateUseCase(instance, templateManager, excelReader),
+            import: new ImportTemplateUseCase(
+                instance,
+                templateManager,
+                excelReader,
+                fileRepository,
+                importSourceRepository
+            ),
             list: new ListDataFormsUseCase(instance),
             getDataFormsForGeneration: new GetDataFormsForGenerationUseCase(instance),
             get: new GetDataFormsUseCase(instance),

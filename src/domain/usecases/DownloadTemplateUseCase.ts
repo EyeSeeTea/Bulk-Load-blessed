@@ -37,6 +37,7 @@ export interface DownloadTemplateProps {
     templateId: string;
     templateType: TemplateType;
     splitDataEntryTabsBySection: boolean;
+    useCodesForMetadata: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -66,7 +67,9 @@ export class DownloadTemplateUseCase implements UseCase {
             relationshipsOuFilter,
             templateId,
             splitDataEntryTabsBySection,
+            useCodesForMetadata,
         } = options;
+
         i18n.setDefaultNamespace("bulk-load");
         const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
@@ -97,6 +100,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 settings,
                 downloadRelationships,
                 splitDataEntryTabsBySection,
+                useCodesForMetadata,
             });
 
             const workbook = await sheetBuilder.generate();
@@ -129,7 +133,6 @@ export class DownloadTemplateUseCase implements UseCase {
                   startDate: populateStartDate,
                   endDate: populateEndDate,
                   filterTEIEnrollmentDate,
-                  translateCodes: template.type !== "custom",
                   relationshipsOuFilter,
               })
             : undefined;
@@ -238,14 +241,23 @@ async function getElementMetadata({
 
     const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
         api
-            .get<{ organisationUnits: { id: string; displayName: string; translations: unknown }[] }>("/metadata", {
-                fields: "id,displayName,translations",
-                filter: `id:in:[${orgUnits}]`,
-            })
+            .get<{ organisationUnits: { id: string; displayName: string; code?: string; translations: unknown }[] }>(
+                "/metadata",
+                {
+                    fields: "id,displayName,code,translations",
+                    filter: `id:in:[${orgUnits}]`,
+                }
+            )
             .getData()
     );
 
-    const organisationUnits = _.flatMap(responses, ({ organisationUnits }) => organisationUnits);
+    const organisationUnits = _.flatMap(responses, ({ organisationUnits }) =>
+        organisationUnits.map(orgUnit => ({
+            type: "organisationUnits",
+            ...orgUnit,
+        }))
+    );
+
     const metadata =
         element.type === "trackerPrograms" && downloadRelationships
             ? await getRelationshipMetadata(element, api, {
