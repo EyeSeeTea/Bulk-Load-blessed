@@ -4005,10 +4005,10 @@
     rxjs-compat "6.6.3"
     throttle-debounce "2.1.0"
 
-"@eyeseetea/xlsx-populate@4.1.0-beta.3":
-  version "4.1.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/xlsx-populate/-/xlsx-populate-4.1.0-beta.3.tgz#3085baf7d0d9defbb19f798ec39199cb69e64470"
-  integrity sha512-EUdwQGxIwtTq3De00UCs7BRttaoSc7sQ8YU3gMfxLzobFGRDiFrGBJDU+JVrSPJwFQg4Bw5Ju6lUseDwlz2EoQ==
+"@eyeseetea/xlsx-populate@4.2.1-beta.1":
+  version "4.2.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/xlsx-populate/-/xlsx-populate-4.2.1-beta.1.tgz#fcfbd685ca99dd9d6fce44de37fdae180cf5e9a1"
+  integrity sha512-MRKb/xL13znWEEVkkaYIXdehYOJB7C3ieVd8qHQOFgnXV28AsOM0GcZ5kvo5TTnQu3e5Wsb+ogYLcbVUHWPWHA==
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"
