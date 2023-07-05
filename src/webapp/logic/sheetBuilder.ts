@@ -138,8 +138,8 @@ export class SheetBuilder {
 
         // Add template version
         workbook.definedNameCollection.addDefinedName({
-            name: `Version: ${this.getVersion()}`,
-            refFormula: "",
+            name: `Version_${this.getVersion()}`, // Restrict to [a-zA-Z0-9_] characters
+            refFormula: "Metadata!A1", // Excel needs a formula, reference an always existing cell
         });
 
         return workbook;
