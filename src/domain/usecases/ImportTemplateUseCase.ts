@@ -18,6 +18,7 @@ import { FileRepository } from "../repositories/FileRepository";
 import { FileResource } from "../entities/FileResource";
 import { isExcelFile } from "../../utils/files";
 import { ImportSourceRepository } from "../repositories/ImportSourceRepository";
+import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 
 export type ImportTemplateError =
     | {
@@ -200,7 +201,8 @@ export class ImportTemplateUseCase implements UseCase {
             dataValues: {
                 type: dataForm.type,
                 dataEntries: files.length === 0 ? excelFile : this.addImagesToDataEntries(files, excelFile, dataForm),
-                trackedEntityInstances,
+                trackedEntityInstances:
+                    files.length === 0 ? trackedEntityInstances : this.addImagesToTeis(files, trackedEntityInstances),
             },
             invalidDataValues: {
                 type: dataForm.type,
@@ -235,6 +237,25 @@ export class ImportTemplateUseCase implements UseCase {
                     return {
                         ...dataValue,
                         value: fileInfo?.id || "",
+                    };
+                }),
+            };
+        });
+    }
+
+    private addImagesToTeis(files: FileResource[], trackedEntityInstances: TrackedEntityInstance[]) {
+        return trackedEntityInstances.map(tei => {
+            return {
+                ...tei,
+                attributeValues: tei.attributeValues.map(attribute => {
+                    const imageAttribute = files.find(file => file.name === attribute.value);
+                    if (attribute.attribute.valueType !== "IMAGE" || !imageAttribute) {
+                        return attribute;
+                    }
+
+                    return {
+                        ...attribute,
+                        value: imageAttribute.id,
                     };
                 }),
             };

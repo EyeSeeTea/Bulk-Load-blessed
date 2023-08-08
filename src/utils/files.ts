@@ -76,14 +76,14 @@ export async function extractImagesFromZip(file: File): Promise<FileResource[]> 
         .map(fileName => {
             const extensionFile = _(fileName).split(".").last()?.toLowerCase() || "";
             const name = _(fileName).split("/").last() || "";
-            return ALLOWED_IMAGES.includes(extensionFile) ? name : undefined;
+            return ALLOWED_IMAGES.includes(extensionFile) ? { name, fullPath: fileName } : undefined;
         })
         .compact()
         .value();
 
     const promises = _(allowedFiles)
-        .map(fileName => {
-            return zipContent.file(fileName)?.async("blob");
+        .map(allowedFile => {
+            return zipContent.file(allowedFile.fullPath)?.async("blob");
         })
         .value();
 
@@ -92,7 +92,7 @@ export async function extractImagesFromZip(file: File): Promise<FileResource[]> 
     return _(filesContents)
         .map((fileContent, index) => {
             if (!fileContent) return undefined;
-            const name = allowedFiles[index] || "";
+            const name = allowedFiles[index]?.name || "";
             return {
                 id: "",
                 data: fileContent.slice(0, fileContent.size, MIME_TYPES_BY_EXTENSION[getExtensionFile(name) as string]),
