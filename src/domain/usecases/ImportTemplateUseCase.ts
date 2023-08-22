@@ -16,7 +16,6 @@ import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 import { FileRepository } from "../repositories/FileRepository";
 import { FileResource } from "../entities/FileResource";
-import { isExcelFile } from "../../utils/files";
 import { ImportSourceRepository } from "../repositories/ImportSourceRepository";
 import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 
@@ -89,9 +88,8 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
-        const filesToUpload = isExcelFile(file.name)
-            ? []
-            : this.validateImagesExistInZip(dataPackage.dataEntries, dataForm, images);
+        const filesToUpload =
+            images.length === 0 ? [] : this.validateImagesExistInZip(dataPackage.dataEntries, dataForm, images);
 
         const uploadedFiles = await this.fileRepository.uploadAll(filesToUpload);
 
