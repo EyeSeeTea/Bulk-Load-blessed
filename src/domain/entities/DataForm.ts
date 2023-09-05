@@ -32,10 +32,14 @@ export interface DataForm {
         attribute: { code: string };
         value: string;
     }[]; // Only used for versioning, is really being used by any client?
-    teiAttributes?: NamedRef[];
+    teiAttributes?: TrackedEntityAttributeType[];
     trackedEntityType?: TrackedEntityType;
     readAccess: boolean;
     writeAccess: boolean;
+}
+
+export interface TrackedEntityAttributeType extends NamedRef {
+    valueType: DataElementType | undefined;
 }
 
 export interface TrackedEntityType {
