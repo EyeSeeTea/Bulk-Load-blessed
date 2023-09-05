@@ -8,6 +8,7 @@ import {
 import { generateUid } from "d2/uid";
 import _ from "lodash";
 import { Moment } from "moment";
+import { DataElementType } from "../domain/entities/DataForm";
 import { DataPackageData } from "../domain/entities/DataPackage";
 import { Event, EventDataValue } from "../domain/entities/DhisDataPackage";
 import { Geometry } from "../domain/entities/Geometry";
@@ -494,6 +495,7 @@ function buildTei(
         return {
             attribute: {
                 id: attrApi.attribute,
+                valueType: attrApi.valueType as DataElementType,
                 ...(optionSet ? { optionSet } : {}),
             },
             value: attrApi.value,

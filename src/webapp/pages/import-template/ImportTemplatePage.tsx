@@ -272,9 +272,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             <h3>{i18n.t("Bulk data import")}</h3>
 
             <Dropzone
-                accept={
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
-                }
+                accept={[
+                    "application/zip",
+                    "application/x-zip-compressed",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.ms-excel.sheet.macroEnabled.12",
+                ]}
                 onDrop={onDrop}
                 multiple={false}
             >
