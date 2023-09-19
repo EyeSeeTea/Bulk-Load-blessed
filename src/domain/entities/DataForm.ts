@@ -4,7 +4,7 @@ import { Id, NamedRef } from "./ReferenceObject";
 
 export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
 export type DataFormType = typeof dataFormTypes[number];
-export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
+export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly" | "Quarterly";
 
 export function getTranslations() {
     return {
