@@ -45,11 +45,18 @@ type CustomErrorMatch = {
     getErrorMessage: (value: string) => string;
 };
 
+const ORG_UNIT_GLOBAL_LEVEL = 1;
+type ActionPermissionType = "read" | "write";
+
+function getDefaultOrgUnitMessage(name: string, action: ActionPermissionType) {
+    return `The user cannot ${action.toUpperCase()} in OU ${name}`;
+}
+
 const customErrorMatches: CustomErrorMatch[] = [
     {
         regex: /Organisation unit: `(\w+)` not in hierarchy of current user: `(\w+)`/,
         getErrorMessage: (name: string) => {
-            return `The user cannot write in OU ${name}`;
+            return getDefaultOrgUnitMessage(name, "write");
         },
     },
 ];
@@ -95,6 +102,10 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
+        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataFormId);
+
+        this.validateOrgUnitAccess(dataPackage, orgUnits, selectedOrgUnits, settings);
+
         const { dataValues, invalidDataValues, existingDataValues, instanceDataValues } = await this.readDataValues(
             dataPackage,
             dataForm,
@@ -126,8 +137,6 @@ export class ImportTemplateUseCase implements UseCase {
 
         const importResultHasErrors = importResult.flatMap(result => result.errors);
         if (importResultHasErrors.length > 0 || deleteResult) {
-            const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataFormId);
-
             const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnits);
 
             const deleteResultWithErrorsDetails = deleteResult
@@ -141,6 +150,49 @@ export class ImportTemplateUseCase implements UseCase {
         } else {
             return Either.success(_.compact([deleteResult, ...importResult]));
         }
+    }
+
+    private validateOrgUnitAccess(
+        dataPackage: DataPackage,
+        orgUnits: OrgUnit[],
+        selectedOrgUnits: string[],
+        settings: Settings
+    ): void {
+        const orgUnitsIdsToCheck = [...dataPackage.dataEntries.map(de => de.orgUnit), ...selectedOrgUnits];
+        const orgUnitsToCheck = _(orgUnitsIdsToCheck)
+            .map(orgUnitId => {
+                const orgUnitDetails = orgUnits.find(ou => ou.id === orgUnitId);
+                if (!orgUnitDetails) return undefined;
+                return {
+                    ...orgUnitDetails,
+                };
+            })
+            .compact()
+            .value();
+
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "read");
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "write");
+    }
+
+    private hasOrgUnitAccessOrThrow(orgUnitsToCheck: OrgUnit[], settings: Settings, permission: ActionPermissionType) {
+        const orgUnitFieldName = permission === "read" ? "orgUnitsView" : "orgUnits";
+        if (settings.currentUser[orgUnitFieldName].some(ou => ou.level === ORG_UNIT_GLOBAL_LEVEL)) return;
+
+        orgUnitsToCheck.forEach(orgUnit => {
+            const hasPermission = settings.currentUser[orgUnitFieldName].some(userOrgUnit => {
+                const diffLevel = orgUnit.level - userOrgUnit.level;
+                if (diffLevel === 0) {
+                    return orgUnit.path === userOrgUnit.path;
+                } else {
+                    const orgUnitPath = _(orgUnit.path).split("/").dropRight(diffLevel).value().join("/");
+                    return orgUnitPath === userOrgUnit.path;
+                }
+            });
+            if (!hasPermission) {
+                const errorMessage = getDefaultOrgUnitMessage(orgUnit.name, permission);
+                throw Error(errorMessage);
+            }
+        });
     }
 
     private async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
