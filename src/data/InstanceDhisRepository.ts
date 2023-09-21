@@ -132,6 +132,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
+                    valueType: trackedEntityAttribute.valueType,
                 })),
                 trackedEntityType: getTrackedEntityTypeFromApi(trackedEntityType),
             })
@@ -639,7 +640,7 @@ const programFields = {
         programStageDataElements: { dataElement: dataElementFields },
         repeatable: true,
     },
-    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
+    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true, valueType: true } },
     access: true,
     programType: true,
     trackedEntityType: { id: true, featureType: true },
