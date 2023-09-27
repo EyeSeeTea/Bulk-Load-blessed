@@ -332,8 +332,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 </React.Fragment>
                             ) : (
                                 <React.Fragment>
-                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
-                                    {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                                    {importState.dataForm.periodType === "Monthly"
+                                        ? moment(String(group.period)).format("DD/MM/YYYY")
+                                        : group.period}
+                                    : {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
                                     {i18n.t("data values")} {group.id && `(${group.id})`}
                                 </React.Fragment>
                             )}
