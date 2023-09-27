@@ -974,7 +974,9 @@ export class SheetBuilder {
                             columnId,
                             `_${dataElement.id}`,
                             groupId,
-                            this.validations.get(validation)
+                            dataElement.valueType === "ORGANISATION_UNIT"
+                                ? this.validations.get("organisationUnits")
+                                : this.validations.get(validation)
                         );
                         dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
 
