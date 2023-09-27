@@ -19,6 +19,10 @@ export function buildAllPossiblePeriods(periodType, startDate, endDate) {
             unit = "weeks";
             format = "YYYY[W]W";
             break;
+        case "Quarterly":
+            unit = "quarters";
+            format = "YYYY[Q]Q";
+            break;
         default:
             throw new Error("Unsupported period type");
     }
