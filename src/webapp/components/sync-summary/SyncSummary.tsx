@@ -94,13 +94,15 @@ const buildMessageTable = (messages: ErrorMessage[]) => {
                 <TableRow>
                     <TableCell>{i18n.t("Identifier")}</TableCell>
                     <TableCell>{i18n.t("Message")}</TableCell>
+                    <TableCell>{i18n.t("Details")}</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
-                {messages.map(({ id, message }, i) => (
+                {messages.map(({ id, message, details }, i) => (
                     <TableRow key={`row-${i}`}>
                         <TableCell>{id}</TableCell>
                         <TableCell>{message}</TableCell>
+                        <TableCell>{details}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>

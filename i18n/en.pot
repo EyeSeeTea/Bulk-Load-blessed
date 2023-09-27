@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-06-12T23:33:13.726Z\n"
-"PO-Revision-Date: 2023-06-12T23:33:13.726Z\n"
+"POT-Creation-Date: 2023-06-29T07:07:25.389Z\n"
+"PO-Revision-Date: 2023-06-29T07:07:25.389Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -636,6 +636,9 @@ msgid "Identifier"
 msgstr ""
 
 msgid "Message"
+msgstr ""
+
+msgid "Details"
 msgstr ""
 
 msgid "Synchronization Results"

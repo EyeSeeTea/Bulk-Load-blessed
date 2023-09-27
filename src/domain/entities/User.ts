@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { getCurrentTimestamp } from "../../utils/time";
+import { OrgUnit } from "./OrgUnit";
 import { Ref } from "./ReferenceObject";
 
 export interface User {
@@ -8,6 +9,8 @@ export interface User {
     name: string;
     authorities: Set<string>;
     userGroups: Ref[];
+    orgUnits: OrgUnit[];
+    orgUnitsView: OrgUnit[];
 }
 
 export interface UserTimestamp {
