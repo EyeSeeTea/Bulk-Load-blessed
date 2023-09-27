@@ -164,13 +164,14 @@ export async function updateTrackedEntityInstances(
 }
 
 async function runSequentialPromisesOnSuccess(
-    fns: Array<() => Promise<SynchronizationResult | undefined>>
+    fns: Array<() => Promise<SynchronizationResult[] | undefined>>
 ): Promise<SynchronizationResult[]> {
     const output: SynchronizationResult[] = [];
     for (const fn of fns) {
         const res = await fn();
-        if (res) output.push(res);
-        if (res && res.status !== "SUCCESS") break;
+        if (res) output.push(...res);
+        const status = res?.find(r => r.status !== "SUCCESS")?.status;
+        if (status && status !== "SUCCESS") break;
     }
     return output;
 }
@@ -224,33 +225,36 @@ async function uploadTeis(options: {
     teis: TrackedEntityInstance[];
     existingTeis: TrackedEntityInstance[];
     title: string;
-}): Promise<SynchronizationResult | undefined> {
+}): Promise<SynchronizationResult[]> {
     const { api, program, metadata, teis, existingTeis, title } = options;
 
-    if (_.isEmpty(teis)) return undefined;
+    if (_.isEmpty(teis)) return [];
 
     const apiTeis = teis.map(tei => getApiTeiToUpload(program, metadata, tei, existingTeis));
     const model = i18n.t("Tracked Entity Instance");
 
-    return postImport(
-        async () => {
-            const { response } = await api.trackedEntityInstances
-                .postAsync({ strategy: "CREATE_AND_UPDATE", async: true }, { trackedEntityInstances: apiTeis })
-                .getData();
+    const teisResult = await promiseMap(_.chunk(apiTeis, 200), teisToSave => {
+        return postImport(
+            async () => {
+                const { response } = await api.trackedEntityInstances
+                    .postAsync({ strategy: "CREATE_AND_UPDATE", async: true }, { trackedEntityInstances: teisToSave })
+                    .getData();
 
-            const result = await api.system.waitFor(response.jobType, response.id).getData();
+                const result = await api.system.waitFor(response.jobType, response.id).getData();
 
-            return {
-                status: result?.status === "SUCCESS" ? "OK" : "ERROR",
-                response: result ?? undefined,
-            };
-        },
-        {
-            title: `${model} - ${title}`,
-            model: model,
-            splitStatsList: false,
-        }
-    );
+                return {
+                    status: result?.status === "SUCCESS" ? "OK" : "ERROR",
+                    response: result ?? undefined,
+                };
+            },
+            {
+                title: `${model} - ${title}`,
+                model: model,
+                splitStatsList: false,
+            }
+        );
+    });
+    return teisResult;
 }
 
 interface Metadata {

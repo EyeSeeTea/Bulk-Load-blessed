@@ -138,6 +138,12 @@ export class SheetBuilder {
             });
         }
 
+        // Add template version
+        this.workbook.definedNameCollection.addDefinedName({
+            name: `Version_${this.getVersion()}`, // Restrict to [a-zA-Z0-9_] characters
+            refFormula: "Metadata!A1", // Excel needs a formula, reference an always existing cell
+        });
+
         return this.workbook;
     }
 
