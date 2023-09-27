@@ -209,7 +209,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             }
             case "programs": {
                 const result = await this.importEventsData(dataPackage);
-                return [result];
+                return result;
             }
             case "trackerPrograms": {
                 return this.importTrackerProgramData(dataPackage);
@@ -416,7 +416,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         );
     }
 
-    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult> {
+    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
         const events = this.buildEventsPayload(dataPackage);
         return postEvents(this.api, events);
     }
