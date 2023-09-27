@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2023-06-12T23:33:13.726Z\n"
+"POT-Creation-Date: 2023-06-29T07:07:25.389Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -683,6 +683,9 @@ msgid "Identifier"
 msgstr ""
 
 msgid "Message"
+msgstr ""
+
+msgid "Details"
 msgstr ""
 
 msgid "Synchronization Results"
