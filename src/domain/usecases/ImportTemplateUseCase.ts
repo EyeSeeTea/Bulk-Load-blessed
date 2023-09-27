@@ -8,7 +8,8 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
-import { SynchronizationResult } from "../entities/SynchronizationResult";
+import { OrgUnit } from "../entities/OrgUnit";
+import { ErrorMessage, SynchronizationResult } from "../entities/SynchronizationResult";
 import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
@@ -42,6 +43,27 @@ export interface ImportTemplateUseCaseParams {
     organisationUnitStrategy?: OrganisationUnitImportStrategy;
     settings: Settings;
 }
+
+type CustomErrorMatch = {
+    regex: RegExp;
+    getErrorMessage: (value: string) => string;
+};
+
+const ORG_UNIT_GLOBAL_LEVEL = 1;
+type ActionPermissionType = "read" | "write";
+
+function getDefaultOrgUnitMessage(name: string, action: ActionPermissionType) {
+    return `The user cannot ${action.toUpperCase()} in OU ${name}`;
+}
+
+const customErrorMatches: CustomErrorMatch[] = [
+    {
+        regex: /Organisation unit: `(\w+)` not in hierarchy of current user: `(\w+)`/,
+        getErrorMessage: (name: string) => {
+            return getDefaultOrgUnitMessage(name, "write");
+        },
+    },
+];
 
 export class ImportTemplateUseCase implements UseCase {
     constructor(
@@ -88,6 +110,9 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
+        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataFormId);
+        this.validateOrgUnitAccess(dataPackage, orgUnits, selectedOrgUnits, settings);
+
         const filesToUpload =
             images.length === 0 ? [] : this.validateImagesExistInZip(dataPackage.dataEntries, dataForm, images);
 
@@ -123,7 +148,64 @@ export class ImportTemplateUseCase implements UseCase {
 
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
-        return Either.success(_.compact([deleteResult, ...importResult]));
+        const importResultHasErrors = importResult.flatMap(result => result.errors);
+        if (importResultHasErrors.length > 0 || deleteResult) {
+            const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnits);
+
+            const deleteResultWithErrorsDetails = deleteResult
+                ? {
+                      ...deleteResult,
+                      errors: this.generateErrorDetails(deleteResult.errors || [], customErrorMatches, orgUnits),
+                  }
+                : undefined;
+
+            return Either.success(_.compact([deleteResultWithErrorsDetails, ...importResultWithErrorsDetails]));
+        } else {
+            return Either.success(_.compact([deleteResult, ...importResult]));
+        }
+    }
+
+    private validateOrgUnitAccess(
+        dataPackage: DataPackage,
+        orgUnits: OrgUnit[],
+        selectedOrgUnits: string[],
+        settings: Settings
+    ): void {
+        const orgUnitsIdsToCheck = [...dataPackage.dataEntries.map(de => de.orgUnit), ...selectedOrgUnits];
+        const orgUnitsToCheck = _(orgUnitsIdsToCheck)
+            .map(orgUnitId => {
+                const orgUnitDetails = orgUnits.find(ou => ou.id === orgUnitId);
+                if (!orgUnitDetails) return undefined;
+                return {
+                    ...orgUnitDetails,
+                };
+            })
+            .compact()
+            .value();
+
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "read");
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "write");
+    }
+
+    private hasOrgUnitAccessOrThrow(orgUnitsToCheck: OrgUnit[], settings: Settings, permission: ActionPermissionType) {
+        const orgUnitFieldName = permission === "read" ? "orgUnitsView" : "orgUnits";
+        if (settings.currentUser[orgUnitFieldName].some(ou => ou.level === ORG_UNIT_GLOBAL_LEVEL)) return;
+
+        orgUnitsToCheck.forEach(orgUnit => {
+            const hasPermission = settings.currentUser[orgUnitFieldName].some(userOrgUnit => {
+                const diffLevel = orgUnit.level - userOrgUnit.level;
+                if (diffLevel === 0) {
+                    return orgUnit.path === userOrgUnit.path;
+                } else {
+                    const orgUnitPath = _(orgUnit.path).split("/").dropRight(diffLevel).value().join("/");
+                    return orgUnitPath === userOrgUnit.path;
+                }
+            });
+            if (!hasPermission) {
+                const errorMessage = getDefaultOrgUnitMessage(orgUnit.name, permission);
+                throw Error(errorMessage);
+            }
+        });
     }
 
     private async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
@@ -333,6 +415,30 @@ export class ImportTemplateUseCase implements UseCase {
             periods,
             orgUnits,
             translateCodes: false,
+        });
+    }
+
+    private getImportResultsWithDetailsErrors(
+        importResult: SynchronizationResult[],
+        orgUnits: OrgUnit[]
+    ): SynchronizationResult[] {
+        const importResultsWithErrorsDetails = importResult.map(result => {
+            return {
+                ...result,
+                errors: this.generateErrorDetails(result.errors || [], customErrorMatches, orgUnits),
+            };
+        });
+        return importResultsWithErrorsDetails;
+    }
+
+    private generateErrorDetails(errors: ErrorMessage[], allowedMessages: CustomErrorMatch[], orgUnits: OrgUnit[]) {
+        return errors.map(error => {
+            const orgUnit = orgUnits.find(ou => ou.id === error.id);
+            const matches = allowedMessages.find(regex => error.message.match(regex.regex));
+            return {
+                ...error,
+                details: matches && orgUnit ? matches.getErrorMessage(orgUnit.name) : "",
+            };
         });
     }
 }

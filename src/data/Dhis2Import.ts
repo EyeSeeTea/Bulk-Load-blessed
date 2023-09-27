@@ -69,7 +69,8 @@ export function processImportResponse(options: {
                 conflicts?.map(({ object, value }) => ({
                     id: reference,
                     message: _([description, object, value]).compact().join(" "),
-                })) ?? (description ? [{ id: reference, message: description }] : [])
+                    details: "",
+                })) ?? (description ? [{ id: reference, message: description, details: "" }] : [])
         ) ?? [];
 
     const fields = ["imported", "updated", "ignored", "deleted", "total"] as const;
