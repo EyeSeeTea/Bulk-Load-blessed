@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2023-05-05T09:48:29.255Z\n"
+"POT-Creation-Date: 2023-06-29T07:07:25.389Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -720,6 +720,9 @@ msgstr "Identificador"
 msgid "Message"
 msgstr "Mensagem"
 
+msgid "Details"
+msgstr ""
+
 msgid "Synchronization Results"
 msgstr "Resultados da Sincronização"
 
@@ -981,6 +984,56 @@ msgstr "Temas"
 
 msgid "Settings"
 msgstr "Configurações"
+
+msgid "About"
+msgstr ""
+
+msgid "About Bulk Load App"
+msgstr ""
+
+msgid "Distributed under GNU GLPv3"
+msgstr ""
+
+msgid ""
+"Bulk Load is the import/export solution to connect DHIS2 and Excel. It "
+"allows to automatically create excel templates from any datasets and quickly "
+"upload data through them and to easily download data from DHIS2 as excel "
+"files."
+msgstr ""
+
+msgid ""
+"This application has been funded by the WHO Global Malaria Programme, "
+"Samaritan’s Purse, Medecins Sans Frontières (MSF), the the Norwegian Refugee "
+"Council (NRC) and the Clinton Health Access Initiative (CHAI) to support "
+"countries in strengthening the collection and use of health data by using "
+"DHIS2. The application has been developed by [EyeSeeTea SL](http://eyeseetea."
+"com). Source code, documentation and release notes can be found at the "
+"[EyeSeetea GitHub Project Page](https://eyeseetea.github.io/Bulk-Load-"
+"blessed/)."
+msgstr ""
+
+msgid ""
+"If you wish to contribute to the development of Bulk Load with new features, "
+"please contact [EyeSeeTea](mailto:hello@eyeseetea.com)."
+msgstr ""
+
+msgid "World Health Organization"
+msgstr ""
+
+msgid "Samaritan's Purse"
+msgstr ""
+
+msgid "EyeSeeTea"
+msgstr ""
+
+msgid "Médicos Sin Fronteras"
+msgstr ""
+
+msgid "Norwegian Refugee Council"
+msgstr ""
+
+msgid "Clinton Health Access Initiative"
+msgstr ""
 
 msgid "User with no permissions"
 msgstr "Utilizador sem permissões"

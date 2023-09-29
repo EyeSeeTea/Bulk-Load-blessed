@@ -1,7 +1,7 @@
 {
     "name": "bulk-load",
     "description": "Bulk importing made easy",
-    "version": "3.20.2",
+    "version": "3.22.0",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
     "homepage": ".",
@@ -16,7 +16,7 @@
         "@dhis2/ui-core": "6.24.0",
         "@dhis2/ui-widgets": "6.24.0",
         "@eyeseetea/d2-api": "1.11.0",
-        "@eyeseetea/d2-ui-components": "2.6.10",
+        "@eyeseetea/d2-ui-components": "2.7.0",
         "@eyeseetea/xlsx-populate": "4.1.0",
         "@material-ui/core": "4.12.3",
         "@material-ui/icons": "4.11.2",
@@ -29,6 +29,7 @@
         "excel4node": "1.7.2",
         "file-saver": "2.0.5",
         "jquery": "3.6.0",
+        "jszip": "3.10.1",
         "lodash": "4.17.21",
         "lodash.product": "18.9.19",
         "md5": "2.3.0",
@@ -41,8 +42,11 @@
         "react-dom": "17.0.2",
         "react-dropzone": "11.5.1",
         "react-json-view": "1.21.3",
+        "react-markdown": "^8.0.7",
         "react-router-dom": "6.2.1",
         "react-scripts": "4.0.3",
+        "rehype-raw": "^6.1.1",
+        "rehype-sanitize": "^5.0.1",
         "styled-jsx": "4.0.1"
     },
     "scripts": {

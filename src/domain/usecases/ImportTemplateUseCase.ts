@@ -8,12 +8,17 @@ import { DuplicateExclusion, DuplicateToleranceUnit } from "../entities/AppSetti
 import { DataForm } from "../entities/DataForm";
 import { DataPackage, DataPackageData, DataPackageDataValue } from "../entities/DataPackage";
 import { Either } from "../entities/Either";
-import { SynchronizationResult } from "../entities/SynchronizationResult";
+import { OrgUnit } from "../entities/OrgUnit";
+import { ErrorMessage, SynchronizationResult } from "../entities/SynchronizationResult";
 import { Template } from "../entities/Template";
 import { ExcelReader } from "../helpers/ExcelReader";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { TemplateRepository } from "../repositories/TemplateRepository";
+import { FileRepository } from "../repositories/FileRepository";
+import { FileResource } from "../entities/FileResource";
+import { ImportSourceRepository } from "../repositories/ImportSourceRepository";
+import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
 
 export type ImportTemplateError =
     | {
@@ -39,11 +44,34 @@ export interface ImportTemplateUseCaseParams {
     settings: Settings;
 }
 
+type CustomErrorMatch = {
+    regex: RegExp;
+    getErrorMessage: (value: string) => string;
+};
+
+const ORG_UNIT_GLOBAL_LEVEL = 1;
+type ActionPermissionType = "read" | "write";
+
+function getDefaultOrgUnitMessage(name: string, action: ActionPermissionType) {
+    return `The user cannot ${action.toUpperCase()} in OU ${name}`;
+}
+
+const customErrorMatches: CustomErrorMatch[] = [
+    {
+        regex: /Organisation unit: `(\w+)` not in hierarchy of current user: `(\w+)`/,
+        getErrorMessage: (name: string) => {
+            return getDefaultOrgUnitMessage(name, "write");
+        },
+    },
+];
+
 export class ImportTemplateUseCase implements UseCase {
     constructor(
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
-        private excelRepository: ExcelRepository
+        private excelRepository: ExcelRepository,
+        private fileRepository: FileRepository,
+        private importSourceRepository: ImportSourceRepository
     ) {}
 
     public async execute({
@@ -54,11 +82,13 @@ export class ImportTemplateUseCase implements UseCase {
         organisationUnitStrategy = "ERROR",
         settings,
     }: ImportTemplateUseCaseParams): Promise<Either<ImportTemplateError, SynchronizationResult[]>> {
+        const { spreadSheet, images } = await this.importSourceRepository.import(file);
+
         if (useBuilderOrgUnits && selectedOrgUnits.length !== 1) {
             return Either.error({ type: "INVALID_OVERRIDE_ORG_UNIT" });
         }
 
-        const templateId = await this.excelRepository.loadTemplate({ type: "file", file });
+        const templateId = await this.excelRepository.loadTemplate({ type: "file", file: spreadSheet });
         const template = await this.templateRepository.getTemplate(templateId);
 
         const dataFormId = removeCharacters(
@@ -80,13 +110,22 @@ export class ImportTemplateUseCase implements UseCase {
             return Either.error({ type: "MALFORMED_TEMPLATE" });
         }
 
+        const orgUnits = await this.instanceRepository.getDataFormOrgUnits(dataForm.type, dataFormId);
+        this.validateOrgUnitAccess(dataPackage, orgUnits, selectedOrgUnits, settings);
+
+        const filesToUpload =
+            images.length === 0 ? [] : this.validateImagesExistInZip(dataPackage.dataEntries, dataForm, images);
+
+        const uploadedFiles = await this.fileRepository.uploadAll(filesToUpload);
+
         const { dataValues, invalidDataValues, existingDataValues, instanceDataValues } = await this.readDataValues(
             dataPackage,
             dataForm,
             useBuilderOrgUnits,
             selectedOrgUnits,
             settings,
-            duplicateStrategy
+            duplicateStrategy,
+            uploadedFiles
         );
 
         if (organisationUnitStrategy === "ERROR" && invalidDataValues.dataEntries.length > 0) {
@@ -109,7 +148,64 @@ export class ImportTemplateUseCase implements UseCase {
 
         const importResult = await this.instanceRepository.importDataPackage(dataValues);
 
-        return Either.success(_.compact([deleteResult, ...importResult]));
+        const importResultHasErrors = importResult.flatMap(result => result.errors);
+        if (importResultHasErrors.length > 0 || deleteResult) {
+            const importResultWithErrorsDetails = this.getImportResultsWithDetailsErrors(importResult, orgUnits);
+
+            const deleteResultWithErrorsDetails = deleteResult
+                ? {
+                      ...deleteResult,
+                      errors: this.generateErrorDetails(deleteResult.errors || [], customErrorMatches, orgUnits),
+                  }
+                : undefined;
+
+            return Either.success(_.compact([deleteResultWithErrorsDetails, ...importResultWithErrorsDetails]));
+        } else {
+            return Either.success(_.compact([deleteResult, ...importResult]));
+        }
+    }
+
+    private validateOrgUnitAccess(
+        dataPackage: DataPackage,
+        orgUnits: OrgUnit[],
+        selectedOrgUnits: string[],
+        settings: Settings
+    ): void {
+        const orgUnitsIdsToCheck = [...dataPackage.dataEntries.map(de => de.orgUnit), ...selectedOrgUnits];
+        const orgUnitsToCheck = _(orgUnitsIdsToCheck)
+            .map(orgUnitId => {
+                const orgUnitDetails = orgUnits.find(ou => ou.id === orgUnitId);
+                if (!orgUnitDetails) return undefined;
+                return {
+                    ...orgUnitDetails,
+                };
+            })
+            .compact()
+            .value();
+
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "read");
+        this.hasOrgUnitAccessOrThrow(orgUnitsToCheck, settings, "write");
+    }
+
+    private hasOrgUnitAccessOrThrow(orgUnitsToCheck: OrgUnit[], settings: Settings, permission: ActionPermissionType) {
+        const orgUnitFieldName = permission === "read" ? "orgUnitsView" : "orgUnits";
+        if (settings.currentUser[orgUnitFieldName].some(ou => ou.level === ORG_UNIT_GLOBAL_LEVEL)) return;
+
+        orgUnitsToCheck.forEach(orgUnit => {
+            const hasPermission = settings.currentUser[orgUnitFieldName].some(userOrgUnit => {
+                const diffLevel = orgUnit.level - userOrgUnit.level;
+                if (diffLevel === 0) {
+                    return orgUnit.path === userOrgUnit.path;
+                } else {
+                    const orgUnitPath = _(orgUnit.path).split("/").dropRight(diffLevel).value().join("/");
+                    return orgUnitPath === userOrgUnit.path;
+                }
+            });
+            if (!hasPermission) {
+                const errorMessage = getDefaultOrgUnitMessage(orgUnit.name, permission);
+                throw Error(errorMessage);
+            }
+        });
     }
 
     private async readTemplate(template: Template, dataForm: DataForm): Promise<DataPackage | undefined> {
@@ -137,7 +233,8 @@ export class ImportTemplateUseCase implements UseCase {
         useBuilderOrgUnits: boolean,
         selectedOrgUnits: string[],
         settings: Settings,
-        duplicateStrategy: DuplicateImportStrategy
+        duplicateStrategy: DuplicateImportStrategy,
+        files: FileResource[]
     ) {
         const { duplicateEnabled, duplicateExclusion, duplicateTolerance, duplicateToleranceUnit } = settings;
 
@@ -183,8 +280,9 @@ export class ImportTemplateUseCase implements UseCase {
         return {
             dataValues: {
                 type: dataForm.type,
-                dataEntries: excelFile,
-                trackedEntityInstances,
+                dataEntries: files.length === 0 ? excelFile : this.addImagesToDataEntries(files, excelFile, dataForm),
+                trackedEntityInstances:
+                    files.length === 0 ? trackedEntityInstances : this.addImagesToTeis(files, trackedEntityInstances),
             },
             invalidDataValues: {
                 type: dataForm.type,
@@ -202,6 +300,74 @@ export class ImportTemplateUseCase implements UseCase {
                 trackedEntityInstances: [],
             },
         };
+    }
+
+    private addImagesToDataEntries(files: FileResource[], dataEntries: DataPackageData[], dataForm: DataForm) {
+        const imageDataElementsIds = this.getImageDataElementIds(dataForm);
+        return dataEntries.map(dataEntry => {
+            return {
+                ...dataEntry,
+                dataValues: dataEntry.dataValues.map(dataValue => {
+                    if (!imageDataElementsIds.includes(dataValue.dataElement)) {
+                        return dataValue;
+                    }
+                    const fileInfo = files.find(
+                        file => file.name.toLowerCase() === String(dataValue.value).toLowerCase()
+                    );
+                    return {
+                        ...dataValue,
+                        value: fileInfo?.id || "",
+                    };
+                }),
+            };
+        });
+    }
+
+    private addImagesToTeis(files: FileResource[], trackedEntityInstances: TrackedEntityInstance[]) {
+        return trackedEntityInstances.map(tei => {
+            return {
+                ...tei,
+                attributeValues: tei.attributeValues.map(attribute => {
+                    const imageAttribute = files.find(file => file.name === attribute.value);
+                    if (attribute.attribute.valueType !== "IMAGE" || !imageAttribute) {
+                        return attribute;
+                    }
+
+                    return {
+                        ...attribute,
+                        value: imageAttribute.id,
+                    };
+                }),
+            };
+        });
+    }
+
+    private validateImagesExistInZip(dataEntries: DataPackageData[], dataForm: DataForm, images: FileResource[]) {
+        const imagesInExcel = this.getImageDataValuesOnly(dataEntries, dataForm);
+        const imagesNames = images.map(image => image.name);
+        const fileNotInZip = _.differenceBy(imagesInExcel, imagesNames);
+        if (fileNotInZip.length > 0) {
+            console.error(_.differenceBy(imagesInExcel, imagesNames));
+            const message = `Cannot found files: ${fileNotInZip.join(", ")} in zip.`;
+            throw new Error(message);
+        }
+        return images;
+    }
+
+    private getImageDataValuesOnly(dataEntries: DataPackageData[], dataForm: DataForm) {
+        const imageDataElementsIds = this.getImageDataElementIds(dataForm);
+        const fileNameInDataValues = _(dataEntries)
+            .flatMap(de => de.dataValues)
+            .filter(dv => imageDataElementsIds.includes(dv.dataElement))
+            .map(dv => String(dv.value))
+            .compact()
+            .value();
+
+        return fileNameInDataValues;
+    }
+
+    private getImageDataElementIds(dataForm: DataForm) {
+        return dataForm.dataElements.filter(de => de.valueType === "IMAGE").map(de => de.id);
     }
 
     private parseExcelFile(dataPackage: DataPackage, useBuilderOrgUnits: boolean, selectedOrgUnits: string[]) {
@@ -249,6 +415,30 @@ export class ImportTemplateUseCase implements UseCase {
             periods,
             orgUnits,
             translateCodes: false,
+        });
+    }
+
+    private getImportResultsWithDetailsErrors(
+        importResult: SynchronizationResult[],
+        orgUnits: OrgUnit[]
+    ): SynchronizationResult[] {
+        const importResultsWithErrorsDetails = importResult.map(result => {
+            return {
+                ...result,
+                errors: this.generateErrorDetails(result.errors || [], customErrorMatches, orgUnits),
+            };
+        });
+        return importResultsWithErrorsDetails;
+    }
+
+    private generateErrorDetails(errors: ErrorMessage[], allowedMessages: CustomErrorMatch[], orgUnits: OrgUnit[]) {
+        return errors.map(error => {
+            const orgUnit = orgUnits.find(ou => ou.id === error.id);
+            const matches = allowedMessages.find(regex => error.message.match(regex.regex));
+            return {
+                ...error,
+                details: matches && orgUnit ? matches.getErrorMessage(orgUnit.name) : "",
+            };
         });
     }
 }
