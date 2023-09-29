@@ -13,6 +13,7 @@ import { PartialBy } from "../../../types/utils";
 import { cleanOrgUnitPaths } from "../../../utils/dhis";
 import { useAppContext } from "../../contexts/app-context";
 import Settings from "../../logic/settings";
+import { orgUnitListParams } from "../../utils/template";
 import { Select, SelectOption } from "../select/Select";
 
 type DataSource = Record<string, DataForm[]>;
@@ -367,6 +368,8 @@ export const TemplateSelector = ({
                                     withElevation={false}
                                     singleSelection={!isMultipleSelection}
                                     typeInput={isMultipleSelection ? undefined : "radio"}
+                                    listParams={orgUnitListParams}
+                                    showNameSetting
                                 />
                             </div>
                         ) : (

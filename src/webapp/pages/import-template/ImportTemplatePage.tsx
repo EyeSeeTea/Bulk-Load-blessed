@@ -20,6 +20,7 @@ import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemp
 import i18n from "../../../locales";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/app-context";
+import { orgUnitListParams } from "../../utils/template";
 import { RouteComponentProps } from "../Router";
 
 interface ImportState {
@@ -370,6 +371,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             filterByGroup: false,
                             selectAll: false,
                         }}
+                        showNameSetting
+                        listParams={orgUnitListParams}
                     />
                 ) : (
                     i18n.t("No capture org unit match element org units")
