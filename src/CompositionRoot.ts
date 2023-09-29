@@ -43,14 +43,16 @@ import { D2Api } from "./types/d2-api";
 import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUseCase";
 import { FileD2Repository } from "./data/FileD2Repository";
 import { ImportSourceZipRepository } from "./data/ImportSourceZipRepository";
+import { ImportSourceNodeRepository } from "./data/ImportSourceNodeRepository";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
     dhisInstance: DhisInstance;
     mockApi?: D2Api;
+    importSource?: "zip" | "node";
 }
 
-export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+export function getCompositionRoot({ appConfig, dhisInstance, mockApi, importSource = "zip" }: CompositionRootOptions) {
     const instance: InstanceRepository = new InstanceDhisRepository(dhisInstance, mockApi);
     const config: ConfigRepository = new ConfigWebRepository(appConfig);
     const storage: StorageRepository =
@@ -62,7 +64,8 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
     const usersRepository = new D2UsersRepository(dhisInstance);
     const fileRepository = new FileD2Repository(dhisInstance);
-    const importSourceRepository = new ImportSourceZipRepository();
+    const importSourceRepository =
+        importSource === "zip" ? new ImportSourceZipRepository() : new ImportSourceNodeRepository();
 
     return {
         orgUnits: getExecute({

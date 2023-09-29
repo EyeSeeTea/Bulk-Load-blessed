@@ -1,8 +1,7 @@
-import { D2Api } from "@eyeseetea/d2-api/2.33";
 import { DhisInstance } from "../domain/entities/DhisInstance";
 import { User } from "../domain/entities/User";
 import { SearchResults, UsersRepository } from "../domain/repositories/UsersRepository";
-import { D2ApiDefault } from "../types/d2-api";
+import { D2ApiDefault, D2OrganisationUnit, D2Api } from "../types/d2-api";
 
 export class D2UsersRepository implements UsersRepository {
     private api: D2Api;
@@ -20,6 +19,18 @@ export class D2UsersRepository implements UsersRepository {
                     userCredentials: { username: true },
                     userGroups: { id: true, name: true },
                     authorities: true,
+                    dataViewOrganisationUnits: {
+                        id: true,
+                        level: true,
+                        name: true,
+                        path: true,
+                    },
+                    organisationUnits: {
+                        id: true,
+                        level: true,
+                        name: true,
+                        path: true,
+                    },
                 },
             })
             .getData();
@@ -30,6 +41,17 @@ export class D2UsersRepository implements UsersRepository {
             username: apiUser.userCredentials.username,
             authorities: new Set(apiUser.authorities),
             userGroups: apiUser.userGroups,
+            orgUnitsView: apiUser.dataViewOrganisationUnits.map(this.buildOrgUnit),
+            orgUnits: apiUser.organisationUnits.map(this.buildOrgUnit),
+        };
+    }
+
+    private buildOrgUnit(d2OrgUnit: Pick<D2OrganisationUnit, "id" | "name" | "path" | "level">) {
+        return {
+            id: d2OrgUnit.id,
+            level: d2OrgUnit.level,
+            name: d2OrgUnit.name,
+            path: d2OrgUnit.path,
         };
     }
 

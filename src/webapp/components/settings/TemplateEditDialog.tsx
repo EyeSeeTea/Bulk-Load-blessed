@@ -25,7 +25,7 @@ import {
 } from "./templates/TemplateView";
 import { downloadFile } from "../../utils/download";
 import { useAppContext } from "../../contexts/app-context";
-import { xlsxMimeType } from "../../../utils/files";
+import { getExtensionFile, MIME_TYPES_BY_EXTENSION, xlsxMacroMimeType, xlsxMimeType } from "../../../utils/files";
 
 export interface CustomTemplateEditDialogProps {
     formMode: FormMode;
@@ -192,7 +192,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                 </Group>
 
                 <Group title={i18n.t("File")}>
-                    <FileField data={data} field="spreadsheet" mimeType={xlsxMimeType} />
+                    <FileField data={data} field="spreadsheet" mimeType={[xlsxMimeType, xlsxMacroMimeType]} />
                 </Group>
             </Div>
         </ConfirmationDialog>
@@ -208,7 +208,7 @@ const stylesFields = {
 const FileField: React.FC<{
     data: { template: ViewModel; setTemplate: SetTemplate };
     field: "spreadsheet" | "dataSources" | "styleSources";
-    mimeType: string;
+    mimeType: string | string[];
 }> = React.memo(props => {
     const { data, field, mimeType } = props;
     const { template, setTemplate } = data;
@@ -226,10 +226,13 @@ const FileField: React.FC<{
     const download = React.useCallback<NonNullable<ButtonProps["onClick"]>>(
         ev => {
             if (!file) return;
+            const extensionFile = getExtensionFile(file.name);
+            if (!extensionFile) return;
+            const fileMimeType = MIME_TYPES_BY_EXTENSION[extensionFile] || file.type;
             ev.stopPropagation();
-            downloadFile({ filename: file.name, data: file, mimeType });
+            downloadFile({ filename: file.name, data: file, mimeType: fileMimeType });
         },
-        [file, mimeType]
+        [file]
     );
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeType, multiple: false });
