@@ -138,6 +138,12 @@ export class SheetBuilder {
             });
         }
 
+        // Add template version
+        this.workbook.definedNameCollection.addDefinedName({
+            name: `Version_${this.getVersion()}`, // Restrict to [a-zA-Z0-9_] characters
+            refFormula: "Metadata!A1", // Excel needs a formula, reference an always existing cell
+        });
+
         return this.workbook;
     }
 
@@ -968,7 +974,9 @@ export class SheetBuilder {
                             columnId,
                             `_${dataElement.id}`,
                             groupId,
-                            this.validations.get(validation)
+                            dataElement.valueType === "ORGANISATION_UNIT"
+                                ? this.validations.get("organisationUnits")
+                                : this.validations.get(validation)
                         );
                         dataEntrySheet.column(columnId).setWidth(name.length / 2.5 + 10);
 

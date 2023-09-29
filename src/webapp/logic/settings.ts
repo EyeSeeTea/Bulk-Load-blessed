@@ -108,6 +108,18 @@ export default class Settings {
                     name: true,
                     userCredentials: { username: true },
                     userGroups: { id: true },
+                    dataViewOrganisationUnits: {
+                        id: true,
+                        level: true,
+                        name: true,
+                        path: true,
+                    },
+                    organisationUnits: {
+                        id: true,
+                        level: true,
+                        name: true,
+                        path: true,
+                    },
                 },
             })
             .getData();
@@ -117,6 +129,8 @@ export default class Settings {
             username: d2CurrentUser.userCredentials.username,
             authorities: new Set(authorities),
             userGroups: d2CurrentUser.userGroups,
+            orgUnits: d2CurrentUser.organisationUnits,
+            orgUnitsView: d2CurrentUser.dataViewOrganisationUnits,
         };
         const isUserAdmin = currentUser.authorities.has("ALL");
 

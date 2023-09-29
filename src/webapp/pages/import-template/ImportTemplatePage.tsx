@@ -20,6 +20,7 @@ import { ImportTemplateUseCaseParams } from "../../../domain/usecases/ImportTemp
 import i18n from "../../../locales";
 import SyncSummary from "../../components/sync-summary/SyncSummary";
 import { useAppContext } from "../../contexts/app-context";
+import { orgUnitListParams } from "../../utils/template";
 import { RouteComponentProps } from "../Router";
 
 interface ImportState {
@@ -272,9 +273,12 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
             <h3>{i18n.t("Bulk data import")}</h3>
 
             <Dropzone
-                accept={
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12"
-                }
+                accept={[
+                    "application/zip",
+                    "application/x-zip-compressed",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.ms-excel.sheet.macroEnabled.12",
+                ]}
                 onDrop={onDrop}
                 multiple={false}
             >
@@ -329,8 +333,10 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 </React.Fragment>
                             ) : (
                                 <React.Fragment>
-                                    {moment(String(group.period)).format("DD/MM/YYYY")}:{" "}
-                                    {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
+                                    {importState.dataForm.periodType === "Monthly"
+                                        ? moment(String(group.period)).format("DD/MM/YYYY")
+                                        : group.period}
+                                    : {group.id ? i18n.t("Update") : i18n.t("Create")} {group.count}{" "}
                                     {i18n.t("data values")} {group.id && `(${group.id})`}
                                 </React.Fragment>
                             )}
@@ -365,6 +371,8 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             filterByGroup: false,
                             selectAll: false,
                         }}
+                        showNameSetting
+                        listParams={orgUnitListParams}
                     />
                 ) : (
                     i18n.t("No capture org unit match element org units")

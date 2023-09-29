@@ -10,6 +10,6 @@
 
 ### :fire: Notes for the reviewer
 
-### :art: Screenshots
+### :video_camera: Screenshots/Screen capture
 
 ### :bookmark_tabs: Others
