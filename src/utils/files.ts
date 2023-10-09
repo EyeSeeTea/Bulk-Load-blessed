@@ -114,3 +114,8 @@ export async function getExcelOrThrow(file: File) {
 }
 
 export const xlsxMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+export const xlsxMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel.sheet.macroEnabled.12",
+];

@@ -43,11 +43,11 @@ export class NRCModule101 implements CustomTemplateWithUrl {
 
     public async downloadCustomization(
         excelRepository: ExcelRepository,
-        instanceRepository: InstanceRepository,
+        _instanceRepository: InstanceRepository,
         modulesRepositories: ModulesRepositories,
         options: DownloadCustomizationOptions
     ): Promise<void> {
-        return new DownloadCustomization(this.id, excelRepository, modulesRepositories.NRCModule, options).execute();
+        return new DownloadCustomization(this.id, excelRepository, modulesRepositories.nrc, options).execute();
     }
 }
 

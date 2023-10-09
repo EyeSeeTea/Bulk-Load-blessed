@@ -33,6 +33,7 @@ export class TemplateWebRepository implements TemplateRepository {
                       dataFormId: customTemplate.dataFormId,
                       ...(downloadCustomization ? { downloadCustomization } : {}),
                       ...(importCustomization ? { importCustomization } : {}),
+                      generateMetadata: customTemplate.generateMetadata ?? false,
                   }
                 : template;
         });

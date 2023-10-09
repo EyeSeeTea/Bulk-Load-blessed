@@ -432,6 +432,12 @@ export class ExcelPopulateRepository extends ExcelRepository {
         workbook.sheet(sheet).hidden(hidden);
     }
 
+    public async deleteSheet(id: string, sheet: string | number): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const xlsSheet = workbook.sheet(sheet);
+        workbook.deleteSheet(xlsSheet);
+    }
+
     public async protectSheet(id: string, sheet: string | number, password: string): Promise<void> {
         const workbook = await this.getWorkbook(id);
         workbook.sheet(sheet).protected(password, {

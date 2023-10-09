@@ -52,6 +52,7 @@ export abstract class ExcelRepository {
     public abstract mergeCells(id: string, range: Range): Promise<void>;
     public abstract hideCells(id: string, ref: ColumnRef | RowRef, hidden?: boolean): Promise<void>;
     public abstract hideSheet(id: string, sheet: string | number, hidden?: boolean): Promise<void>;
+    public abstract deleteSheet(id: string, sheet: string | number): Promise<void>;
     public abstract protectSheet(id: string, sheet: string | number, password: string): Promise<void>;
     public abstract setActiveCell(id: string, cell: CellRef): Promise<void>;
     public abstract setDataValidation(id: string, ref: CellRef | RangeRef, formula: string | null): Promise<void>;

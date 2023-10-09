@@ -107,6 +107,8 @@ export class DownloadTemplateUseCase implements UseCase {
             return workbook.writeToBuffer();
         }
 
+        let filename: string;
+
         if (template.type === "custom") {
             if (template.generateMetadata) {
                 const file = await getGenerateFile();
@@ -118,9 +120,12 @@ export class DownloadTemplateUseCase implements UseCase {
                     templateId: template.id,
                 });
             }
+            const extension = _.last(template.file.name.split(".")) || "xlsx";
+            filename = `${name}.${extension}`;
         } else {
             const file = await getGenerateFile();
             await this.excelRepository.loadTemplate({ type: "file", file });
+            filename = `${name}.xlsx`;
         }
 
         const enablePopulate = populate && !!populateStartDate && !!populateEndDate;
@@ -138,6 +143,7 @@ export class DownloadTemplateUseCase implements UseCase {
             : undefined;
 
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository, this.modulesRepositories);
+
         await builder.templateCustomization(template, { type, id, populate, dataPackage, orgUnits });
 
         if (theme) await builder.applyTheme(template, theme);
@@ -161,8 +167,6 @@ export class DownloadTemplateUseCase implements UseCase {
 
             await builder.populateTemplate(template, dataPackage, settings);
         }
-
-        const filename = `${name}.xlsx`;
 
         if (writeFile) {
             const buffer = await this.excelRepository.toBuffer(templateId);

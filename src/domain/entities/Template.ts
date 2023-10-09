@@ -63,6 +63,7 @@ interface BaseTemplate {
 export interface GeneratedTemplate extends BaseTemplate {
     type: "generated";
     rowOffset: number;
+    generateMetadata?: boolean;
 }
 
 export interface DownloadCustomizationOptions {

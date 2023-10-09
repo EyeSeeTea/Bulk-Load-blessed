@@ -43,6 +43,8 @@ import { GetFilteredThemesUseCase } from "./domain/usecases/GetFilteredThemesUse
 import { NRCModuleMetadataD2Repository } from "./data/templates/nrc/NRCModuleMetadataD2Repository";
 import { FileD2Repository } from "./data/FileD2Repository";
 import { ImportSourceZipRepository } from "./data/ImportSourceZipRepository";
+import { MSFModuleMetadataD2Repository } from "./data/templates/nrc/MSFModuleMetadataD2Repository";
+import { ModulesRepositories } from "./domain/repositories/ModulesRepositories";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
@@ -62,7 +64,10 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
     const excelReader: ExcelRepository = new ExcelPopulateRepository();
     const migrations: MigrationsRepository = new MigrationsAppRepository(storage, dhisInstance);
     const usersRepository = new D2UsersRepository(dhisInstance);
-    const modulesRepository = { NRCModule: new NRCModuleMetadataD2Repository(api) };
+    const modulesRepository: ModulesRepositories = {
+        nrc: new NRCModuleMetadataD2Repository(api),
+        msf: new MSFModuleMetadataD2Repository(api),
+    };
     const fileRepository = new FileD2Repository(dhisInstance);
     const importSourceRepository = new ImportSourceZipRepository();
 

@@ -1,5 +1,7 @@
+import { MSFModuleMetadataRepository } from "./templates/MSFModuleMetadataRepository";
 import { NRCModuleMetadataRepository } from "./templates/NRCModuleMetadataRepository";
 
 export interface ModulesRepositories {
-    NRCModule: NRCModuleMetadataRepository;
+    nrc: NRCModuleMetadataRepository;
+    msf: MSFModuleMetadataRepository;
 }

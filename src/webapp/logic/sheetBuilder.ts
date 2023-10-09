@@ -907,12 +907,10 @@ export class SheetBuilder {
                 }
 
                 if (description !== undefined) {
-                    dataEntrySheet
-                        .cell(rowDataElement, firstColumnId, rowDataElement, columnId - 1, true)
-                        .comment(description, {
-                            height: "100pt",
-                            width: "160pt",
-                        });
+                    dataEntrySheet.cell(rowDataElement, firstColumnId, rowDataElement, columnId - 1, true);
+                    /* TEMPORAL: When MSF template is clean (with no notes), uncomment this.
+                       Currently, Excel show the repair warning with adding comment/notes. */
+                    //.comment("description", { height: "100pt", width: "160pt" });
                 }
 
                 groupId++;
