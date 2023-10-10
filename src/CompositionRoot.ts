@@ -45,14 +45,16 @@ import { FileD2Repository } from "./data/FileD2Repository";
 import { ImportSourceZipRepository } from "./data/ImportSourceZipRepository";
 import { MSFModuleMetadataD2Repository } from "./data/templates/nrc/MSFModuleMetadataD2Repository";
 import { ModulesRepositories } from "./domain/repositories/ModulesRepositories";
+import { ImportSourceNodeRepository } from "./data/ImportSourceNodeRepository";
 
 export interface CompositionRootOptions {
     appConfig: JsonConfig;
     dhisInstance: DhisInstance;
     mockApi?: D2Api;
+    importSource?: "zip" | "node";
 }
 
-export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: CompositionRootOptions) {
+export function getCompositionRoot({ appConfig, dhisInstance, mockApi, importSource = "zip" }: CompositionRootOptions) {
     const api = mockApi ?? new D2ApiDefault({ baseUrl: dhisInstance.url });
     const instance: InstanceRepository = new InstanceDhisRepository(dhisInstance, mockApi);
     const config: ConfigRepository = new ConfigWebRepository(appConfig);
@@ -69,7 +71,8 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi }: Composi
         msf: new MSFModuleMetadataD2Repository(api),
     };
     const fileRepository = new FileD2Repository(dhisInstance);
-    const importSourceRepository = new ImportSourceZipRepository();
+    const importSourceRepository =
+        importSource === "zip" ? new ImportSourceZipRepository() : new ImportSourceNodeRepository();
 
     return {
         orgUnits: getExecute({

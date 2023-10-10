@@ -27,6 +27,7 @@ import { downloadFile } from "../../utils/download";
 import { useAppContext } from "../../contexts/app-context";
 import { isValueInUnionType } from "../../../types/utils";
 import { xlsxMimeTypes } from "../../../utils/files";
+import { getExtensionFile, MIME_TYPES_BY_EXTENSION } from "../../../utils/files";
 
 export interface CustomTemplateEditDialogProps {
     formMode: FormMode;
@@ -201,7 +202,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                     )}
 
                     {isAdvancedMode ? (
-                        <FileField data={data} field="dataSources" mimeTypes={["application/json"]} />
+                        <FileField data={data} field="dataSources" mimeType={["application/json"]} />
                     ) : (
                         actions
                             .getFieldsForDataFormType(template.dataFormType)
@@ -212,7 +213,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                 <Group title={i18n.t("Styles")}>
                     {isAdvancedMode ? (
                         <>
-                            <FileField data={data} field="styleSources" mimeTypes={["application/json"]} />
+                            <FileField data={data} field="styleSources" mimeType={["application/json"]} />
                         </>
                     ) : (
                         <>
@@ -224,7 +225,7 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                 </Group>
 
                 <Group title={i18n.t("File")}>
-                    <FileField data={data} field="spreadsheet" mimeTypes={xlsxMimeTypes} />
+                    <FileField data={data} field="spreadsheet" mimeType={xlsxMimeTypes} />
                 </Group>
             </Div>
         </ConfirmationDialog>
@@ -240,9 +241,9 @@ const stylesFields = {
 const FileField: React.FC<{
     data: { template: ViewModel; setTemplate: SetTemplate };
     field: "spreadsheet" | "dataSources" | "styleSources";
-    mimeTypes: string[];
+    mimeType: string | string[];
 }> = React.memo(props => {
-    const { data, field, mimeTypes } = props;
+    const { data, field, mimeType } = props;
     const { template, setTemplate } = data;
     const classes = useStyles();
     const file = template[field];
@@ -255,18 +256,19 @@ const FileField: React.FC<{
         [field, setTemplate]
     );
 
-    const mimeType = mimeTypes[0];
-
     const download = React.useCallback<NonNullable<ButtonProps["onClick"]>>(
         ev => {
             if (!file) return;
+            const extensionFile = getExtensionFile(file.name);
+            if (!extensionFile) return;
+            const fileMimeType = MIME_TYPES_BY_EXTENSION[extensionFile] || file.type;
             ev.stopPropagation();
-            if (mimeType) downloadFile({ filename: file.name, data: file, mimeType });
+            downloadFile({ filename: file.name, data: file, mimeType: fileMimeType });
         },
-        [file, mimeType]
+        [file]
     );
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeTypes, multiple: false });
+    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: mimeType, multiple: false });
 
     const mainProps = React.useMemo(() => ({ className: classes.dropzone }), [classes]);
 

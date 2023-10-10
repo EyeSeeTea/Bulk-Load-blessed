@@ -4,13 +4,20 @@ import { FileResource } from "../domain/entities/FileResource";
 
 type ExtensionName = string;
 
+export const xlsxMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+export const xlsxMacroMimeType = "application/vnd.ms-excel.sheet.macroEnabled.12";
+
 const ALLOWED_IMAGES = ["png", "jpg", "jpeg", "svg"];
-const XLSX_EXTENSION = "xlsx";
-const MIME_TYPES_BY_EXTENSION: Record<ExtensionName, string> = {
+export const XLSX_EXTENSION = "xlsx";
+const XLSX_EXTENSION_WITH_MACRO = "xlsm";
+export const MIME_TYPES_BY_EXTENSION: Record<ExtensionName, string> = {
     jpeg: "image/jpeg",
     jpg: "image/jpeg",
     png: "image/png",
     svg: "image/svg+xml",
+    json: "application/json",
+    XLSX_EXTENSION: xlsxMimeType,
+    XLSX_EXTENSION_WITH_MACRO: xlsxMacroMimeType,
 };
 
 export const toBase64 = (file: File): Promise<string> => {
@@ -43,10 +50,11 @@ export function getBlobFromBase64(contents: string): Blob {
 }
 
 export function isExcelFile(fileName: string): boolean {
-    return getExtensionFile(fileName) === XLSX_EXTENSION;
+    const extension = getExtensionFile(fileName);
+    return extension === XLSX_EXTENSION || extension === XLSX_EXTENSION_WITH_MACRO;
 }
 
-function getExtensionFile(fileName: string) {
+export function getExtensionFile(fileName: string) {
     return _(fileName).split(".").last()?.toLowerCase();
 }
 
@@ -59,8 +67,7 @@ export async function extractExcelFromZip(file: File) {
 
     const excelFileName =
         _(fileNames).find(fileName => {
-            const extensionFile = _(fileName).split(".").last()?.toLowerCase() || "";
-            return extensionFile === XLSX_EXTENSION;
+            return isExcelFile(fileName);
         }) || "";
 
     return await zipContent.file(excelFileName)?.async("blob");
@@ -76,14 +83,14 @@ export async function extractImagesFromZip(file: File): Promise<FileResource[]> 
         .map(fileName => {
             const extensionFile = _(fileName).split(".").last()?.toLowerCase() || "";
             const name = _(fileName).split("/").last() || "";
-            return ALLOWED_IMAGES.includes(extensionFile) ? name : undefined;
+            return ALLOWED_IMAGES.includes(extensionFile) ? { name, fullPath: fileName } : undefined;
         })
         .compact()
         .value();
 
     const promises = _(allowedFiles)
-        .map(fileName => {
-            return zipContent.file(fileName)?.async("blob");
+        .map(allowedFile => {
+            return zipContent.file(allowedFile.fullPath)?.async("blob");
         })
         .value();
 
@@ -92,7 +99,7 @@ export async function extractImagesFromZip(file: File): Promise<FileResource[]> 
     return _(filesContents)
         .map((fileContent, index) => {
             if (!fileContent) return undefined;
-            const name = allowedFiles[index] || "";
+            const name = allowedFiles[index]?.name || "";
             return {
                 id: "",
                 data: fileContent.slice(0, fileContent.size, MIME_TYPES_BY_EXTENSION[getExtensionFile(name) as string]),
@@ -113,9 +120,4 @@ export async function getExcelOrThrow(file: File) {
     }
 }
 
-export const xlsxMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
-export const xlsxMimeTypes = [
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel.sheet.macroEnabled.12",
-];
+export const xlsxMimeTypes = [xlsxMimeType, xlsxMacroMimeType];

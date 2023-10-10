@@ -4,7 +4,7 @@ import { Id, NamedRef } from "./ReferenceObject";
 
 export const dataFormTypes = ["dataSets", "programs", "trackerPrograms"] as const;
 export type DataFormType = typeof dataFormTypes[number];
-export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly";
+export type DataFormPeriod = "Daily" | "Monthly" | "Yearly" | "Weekly" | "Quarterly";
 
 export function getTranslations() {
     return {
@@ -32,10 +32,14 @@ export interface DataForm {
         attribute: { code: string };
         value: string;
     }[]; // Only used for versioning, is really being used by any client?
-    teiAttributes?: NamedRef[];
+    teiAttributes?: TrackedEntityAttributeType[];
     trackedEntityType?: TrackedEntityType;
     readAccess: boolean;
     writeAccess: boolean;
+}
+
+export interface TrackedEntityAttributeType extends NamedRef {
+    valueType: DataElementType | undefined;
 }
 
 export interface TrackedEntityType {

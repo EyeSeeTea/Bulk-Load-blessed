@@ -6,6 +6,7 @@ import { UseCase } from "../../CompositionRoot";
 import { getRelationshipMetadata, RelationshipOrgUnitFilter } from "../../data/Dhis2RelationshipTypes";
 import i18n from "../../locales";
 import { D2Api } from "../../types/d2-api";
+import { getExtensionFile, XLSX_EXTENSION } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
 import { SheetBuilder } from "../../webapp/logic/sheetBuilder";
@@ -107,8 +108,6 @@ export class DownloadTemplateUseCase implements UseCase {
             return workbook.writeToBuffer();
         }
 
-        let filename: string;
-
         if (template.type === "custom") {
             if (template.generateMetadata) {
                 const file = await getGenerateFile();
@@ -120,12 +119,9 @@ export class DownloadTemplateUseCase implements UseCase {
                     templateId: template.id,
                 });
             }
-            const extension = _.last(template.file.name.split(".")) || "xlsx";
-            filename = `${name}.${extension}`;
         } else {
             const file = await getGenerateFile();
             await this.excelRepository.loadTemplate({ type: "file", file });
-            filename = `${name}.xlsx`;
         }
 
         const enablePopulate = populate && !!populateStartDate && !!populateEndDate;
@@ -167,6 +163,9 @@ export class DownloadTemplateUseCase implements UseCase {
 
             await builder.populateTemplate(template, dataPackage, settings);
         }
+
+        const extension = template.type === "custom" ? getExtensionFile(template.file.name) : XLSX_EXTENSION;
+        const filename = `${name}.${extension}`;
 
         if (writeFile) {
             const buffer = await this.excelRepository.toBuffer(templateId);

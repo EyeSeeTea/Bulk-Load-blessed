@@ -132,6 +132,7 @@ export class InstanceDhisRepository implements InstanceRepository {
                 teiAttributes: programTrackedEntityAttributes.map(({ trackedEntityAttribute }) => ({
                     id: trackedEntityAttribute.id,
                     name: trackedEntityAttribute.name,
+                    valueType: trackedEntityAttribute.valueType,
                 })),
                 trackedEntityType: getTrackedEntityTypeFromApi(trackedEntityType),
             })
@@ -208,7 +209,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             }
             case "programs": {
                 const result = await this.importEventsData(dataPackage);
-                return [result];
+                return result;
             }
             case "trackerPrograms": {
                 return this.importTrackerProgramData(dataPackage);
@@ -386,7 +387,7 @@ export class InstanceDhisRepository implements InstanceRepository {
 
         const { status, description, conflicts, importCount } = importSummary;
         const { imported, deleted, updated, ignored } = importCount;
-        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value })) ?? [];
+        const errors = conflicts?.map(({ object, value }) => ({ id: object, message: value, details: "" })) ?? [];
 
         return {
             title,
@@ -424,7 +425,7 @@ export class InstanceDhisRepository implements InstanceRepository {
         );
     }
 
-    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult> {
+    private async importEventsData(dataPackage: DataPackage): Promise<SynchronizationResult[]> {
         const events = this.buildEventsPayload(dataPackage);
         return postEvents(this.api, events);
     }
@@ -719,7 +720,7 @@ const programFields = {
         programStageDataElements: { dataElement: dataElementFields },
         repeatable: true,
     },
-    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true } },
+    programTrackedEntityAttributes: { trackedEntityAttribute: { id: true, name: true, valueType: true } },
     access: true,
     programType: true,
     trackedEntityType: { id: true, featureType: true },

@@ -374,7 +374,10 @@ export class ExcelReader {
 
             return {
                 row: this.excelRepository.buildRowNumber(cell.ref),
-                attribute: { id: attributeId },
+                attribute: {
+                    id: attributeId,
+                    valueType: dataForm.teiAttributes?.find(attribute => attribute.id === attributeId)?.valueType,
+                },
                 value: attributeValueVal !== undefined ? String(attributeValueVal) : "",
                 optionId: attributeValueFormula ? removeCharacters(attributeValueFormula) : undefined,
             };
