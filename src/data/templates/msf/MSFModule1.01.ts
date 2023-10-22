@@ -106,6 +106,7 @@ class DownloadCustomization {
         fontSize: 10,
         fillColor: DEFAULT_DE_CELL_BG_COLOR,
         horizontalAlignment: "center",
+        columnSize: 12,
     } as ThemeStyle;
 
     async execute() {
@@ -305,13 +306,31 @@ class DownloadCustomization {
                 // Headers from Category Options
                 const cellsHeaders = columnsGroups.flatMap((columnGroup, colGroupIndex) => {
                     const quantityMergeCells = productCategories.length / columnGroup.length;
-                    return columnGroup.map((cell, cellIndex) => {
+                    return columnGroup.flatMap((cell, cellIndex) => {
                         const nextLetter = cellIndex * quantityMergeCells;
                         const headerLetter = Workbook.getExcelAlpha(headerColumnIndex + nextLetter);
                         const rowNumber = initialSectionCellNumber + colGroupIndex;
 
                         const endMergeIndex = Workbook.getColumnIndex(headerLetter);
                         const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + (quantityMergeCells - 1));
+
+                        const emptyCellForSection =
+                            colGroupIndex > 0
+                                ? [
+                                      {
+                                          ...sectionNameCell,
+                                          ref: `${initialSectionletter}${rowNumber}`,
+                                          merge: sectionNameCell.merge
+                                              ? {
+                                                    ...sectionNameCell.merge,
+                                                    rowStart: rowNumber,
+                                                    rowEnd: rowNumber,
+                                                }
+                                              : undefined,
+                                          value: "",
+                                      },
+                                  ]
+                                : [];
 
                         const newCell: Cell = {
                             ...cell,
@@ -328,7 +347,17 @@ class DownloadCustomization {
                             },
                             includeInMapping: false,
                         };
-                        return newCell;
+
+                        const columnSpaceAtEnd = this.generateColumnSpaceAtEnd(
+                            cellIndex,
+                            columnGroup,
+                            endMergeIndex,
+                            quantityMergeCells,
+                            cell,
+                            rowNumber
+                        );
+
+                        return [...emptyCellForSection, newCell, ...columnSpaceAtEnd];
                     });
                 });
 
@@ -365,27 +394,73 @@ class DownloadCustomization {
                             metadata: undefined,
                         };
 
-                        const combinationsCells = productCategories.map((record, productIndex): Cell => {
+                        const combinationsCells = productCategories.flatMap((record, productIndex): Cell[] => {
                             const combColumnIndex = Workbook.getColumnIndex("L");
                             const combLetter = Workbook.getExcelAlpha(combColumnIndex + productIndex);
-                            return {
-                                sheet: this.sheets.entryForm,
-                                ref: `${combLetter}${initialSectionCellNumber + totalCategories + deIndex}`,
-                                value: "",
-                                style: this.combinationCellStyle,
-                                includeInMapping: true,
-                                metadata: {
-                                    dataElement: {
-                                        id: sectionDe.id,
-                                        name: sectionDe.name,
+
+                            const isLastCell = productIndex + 1 === productCategories.length;
+                            const lastCellColumn = Workbook.getExcelAlpha(combColumnIndex + productIndex + 1);
+                            const spaceEndCell = isLastCell
+                                ? [
+                                      {
+                                          sheet: this.sheets.entryForm,
+                                          ref: `${lastCellColumn}${
+                                              initialSectionCellNumber + totalCategories + deIndex
+                                          }`,
+                                          style: { ...this.headerCellStyle },
+                                          value: "",
+                                          includeInMapping: false,
+                                          merge: undefined,
+                                          metadata: undefined,
+                                      },
+                                  ]
+                                : [];
+
+                            return [
+                                {
+                                    sheet: this.sheets.entryForm,
+                                    ref: `${combLetter}${initialSectionCellNumber + totalCategories + deIndex}`,
+                                    value: "",
+                                    style: this.combinationCellStyle,
+                                    includeInMapping: true,
+                                    metadata: {
+                                        dataElement: {
+                                            id: sectionDe.id,
+                                            name: sectionDe.name,
+                                        },
+                                        categoryOptions: record.map(r => r.id),
                                     },
-                                    categoryOptions: record.map(r => r.id),
+                                    merge: undefined,
                                 },
-                                merge: undefined,
-                            };
+                                ...spaceEndCell,
+                            ];
                         });
 
-                        return [deIndeCell, deCell, ...combinationsCells];
+                        const isLastDe = deIndex + 1 === section.dataElements.length;
+                        const spaceColumnEnd = Workbook.getExcelAlpha(
+                            initialSectionRefCell + productCategories.length + 1 + 4
+                        );
+                        const spaceRow = rowNumber + 1;
+                        const endSpaceDeCell = isLastDe
+                            ? [
+                                  {
+                                      sheet: this.sheets.entryForm,
+                                      ref: `${initialSectionletter}${rowNumber + 1}`,
+                                      value: "",
+                                      style: this.headerCellStyle,
+                                      includeInMapping: false,
+                                      merge: {
+                                          rowStart: spaceRow,
+                                          rowEnd: spaceRow,
+                                          columnStart: initialSectionletter,
+                                          columnEnd: spaceColumnEnd,
+                                      },
+                                      metadata: undefined,
+                                  },
+                              ]
+                            : [];
+
+                        return [deIndeCell, deCell, ...combinationsCells, ...endSpaceDeCell];
                     })
                     .compact()
                     .flatMap()
@@ -398,6 +473,33 @@ class DownloadCustomization {
             .value();
 
         return cells;
+    }
+
+    private generateColumnSpaceAtEnd(
+        cellIndex: number,
+        columnGroup: Cell[],
+        endMergeIndex: number,
+        quantityMergeCells: number,
+        cell: Cell,
+        rowNumber: number
+    ) {
+        const isLastHeaderCell = cellIndex + 1 === columnGroup.length;
+        const endSpaceColumn = Workbook.getExcelAlpha(endMergeIndex + (quantityMergeCells - 1) + 1);
+
+        const lastCell = isLastHeaderCell
+            ? [
+                  {
+                      ...cell,
+                      ref: `${endSpaceColumn}${rowNumber}`,
+                      value: "",
+                      includeInMapping: false,
+                      style: { ...this.headerCellStyle, merged: false },
+                      merge: undefined,
+                      metadata: undefined,
+                  },
+              ]
+            : [];
+        return lastCell;
     }
 
     private createMappingCells(
