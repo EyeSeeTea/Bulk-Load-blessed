@@ -18,6 +18,7 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
 
     const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
     const [_availableModels, setAvailableModels] = useState<DataModelProps[]>([]);
+    const [orgUnitShortName, setOrgUnitShortName] = useState(false);
 
     const handleTemplateDownloadClick = async () => {
         if (!template) {
@@ -62,7 +63,7 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
         loading.show(true, i18n.t("Downloading template..."));
 
         try {
-            await compositionRoot.templates.download(api, templateToDownload);
+            await compositionRoot.templates.download(api, { ...templateToDownload, orgUnitShortName });
         } catch (error: any) {
             console.error(error);
             snackbar.error(error.message ?? i18n.t("Couldn't generate template"));
@@ -79,6 +80,7 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
                 themes={themes}
                 onChange={setTemplate}
                 customTemplates={customTemplates}
+                onUseShortNamesChange={setOrgUnitShortName}
             />
 
             <div className={classes.downloadTemplateRow}>
