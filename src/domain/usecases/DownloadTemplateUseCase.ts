@@ -38,6 +38,7 @@ export interface DownloadTemplateProps {
     templateType?: TemplateType;
     splitDataEntryTabsBySection: boolean;
     useCodesForMetadata: boolean;
+    orgUnitShortName?: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -69,9 +70,11 @@ export class DownloadTemplateUseCase implements UseCase {
             templateType,
             splitDataEntryTabsBySection,
             useCodesForMetadata,
+            orgUnitShortName,
         }: DownloadTemplateProps
     ): Promise<void> {
         i18n.setDefaultNamespace("bulk-load");
+        const useShortNameInOrgUnit = orgUnitShortName || false;
         const templateId =
             templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
         const template = await this.templateRepository.getTemplate(templateId);
@@ -98,6 +101,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 populateStartDate: populateStartDate?.toDate(),
                 populateEndDate: populateEndDate?.toDate(),
                 relationshipsOuFilter,
+                orgUnitShortName: useShortNameInOrgUnit,
             });
 
             // FIXME: Legacy code, sheet generator
@@ -112,6 +116,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 downloadRelationships,
                 splitDataEntryTabsBySection,
                 useCodesForMetadata,
+                orgUnitShortName: useShortNameInOrgUnit,
             });
             const workbook = await sheetBuilder.generate();
 
@@ -206,6 +211,7 @@ async function getElementMetadata({
     populateEndDate,
     downloadRelationships,
     relationshipsOuFilter,
+    orgUnitShortName,
 }: {
     element: any;
     api: D2Api;
@@ -216,6 +222,7 @@ async function getElementMetadata({
     populateEndDate?: Date;
     downloadRelationships: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
+    orgUnitShortName: boolean;
 }) {
     const elementMetadataMap = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
@@ -239,13 +246,19 @@ async function getElementMetadata({
 
     const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
         api
-            .get<{ organisationUnits: { id: string; displayName: string; code?: string; translations: unknown }[] }>(
-                "/metadata",
-                {
-                    fields: "id,displayName,code,translations",
-                    filter: `id:in:[${orgUnits}]`,
-                }
-            )
+            .get<{
+                organisationUnits: {
+                    id: string;
+                    displayShortName: string;
+                    displayName: string;
+                    code?: string;
+                    translations: unknown;
+                }[];
+            }>("/metadata", {
+                fields: "id,displayName,code,translations,displayShortName",
+                filter: `id:in:[${orgUnits}]`,
+                order: orgUnitShortName ? "displayShortName:asc" : "displayName:asc",
+            })
             .getData()
     );
 
