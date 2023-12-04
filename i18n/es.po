@@ -342,13 +342,11 @@ msgstr "Nueva plantilla personalizada"
 msgid "Apply to"
 msgstr ""
 
-#, fuzzy
 msgid "Show languages in download template"
-msgstr "Descargar plantilla"
+msgstr "Mostrar idiomas en descargar plantilla"
 
-#, fuzzy
 msgid "Show periods in download template"
-msgstr "Descargar plantilla"
+msgstr "Mostrar periodos en descargar plantilla"
 
 msgid "Advanced"
 msgstr ""
@@ -686,13 +684,11 @@ msgstr "TEI valores de datos del evento - Columna inicial"
 msgid "Data Source"
 msgstr "Fuente de datos"
 
-#, fuzzy
 msgid "Show Language"
-msgstr "Idioma"
+msgstr "Mostrar Idioma"
 
-#, fuzzy
 msgid "Show Period"
-msgstr "Periodo"
+msgstr "Mostrar Periodo"
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""

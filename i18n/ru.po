@@ -349,13 +349,11 @@ msgstr "Шаблон"
 msgid "Apply to"
 msgstr ""
 
-#, fuzzy
 msgid "Show languages in download template"
-msgstr "Скачать шаблон"
+msgstr ""
 
-#, fuzzy
 msgid "Show periods in download template"
-msgstr "Скачать шаблон"
+msgstr ""
 
 msgid "Advanced"
 msgstr ""
@@ -743,13 +741,11 @@ msgstr ""
 msgid "Data Source"
 msgstr "Набор данных"
 
-#, fuzzy
 msgid "Show Language"
-msgstr "Язык"
+msgstr ""
 
-#, fuzzy
 msgid "Show Period"
-msgstr "Период"
+msgstr ""
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""

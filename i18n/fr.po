@@ -328,13 +328,11 @@ msgstr "Modèle"
 msgid "Apply to"
 msgstr ""
 
-#, fuzzy
 msgid "Show languages in download template"
-msgstr "Télécharger modèle"
+msgstr ""
 
-#, fuzzy
 msgid "Show periods in download template"
-msgstr "Télécharger modèle"
+msgstr ""
 
 msgid "Advanced"
 msgstr ""
@@ -706,13 +704,11 @@ msgstr ""
 msgid "Data Source"
 msgstr "Base de données"
 
-#, fuzzy
 msgid "Show Language"
-msgstr "Langue"
+msgstr ""
 
-#, fuzzy
 msgid "Show Period"
-msgstr "Période"
+msgstr ""
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""
