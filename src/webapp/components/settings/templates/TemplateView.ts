@@ -49,6 +49,8 @@ interface BaseView {
 export interface AdvancedView extends BaseView {
     dataSources: Maybe<File>;
     styleSources: Maybe<File>;
+    showLanguage: boolean;
+    showPeriod: boolean;
 }
 
 export interface BasicView extends BaseView {
@@ -218,6 +220,8 @@ const viewDefs = {
     spreadsheet: definition(undefined),
     dataSources: definition(undefined),
     styleSources: definition(undefined),
+    showLanguage: definition(false),
+    showPeriod: definition(false),
 } as const;
 
 const viewEmpty = _.mapValues(viewDefs, def => def.default) as TemplateView;
@@ -299,6 +303,8 @@ export class TemplateViewActions {
             dataFormType: template.dataFormType.type === "value" ? template.dataFormType.id : undefined,
             description: template.description,
             spreadsheet: await getSpreadsheetFile(template.file).catch(() => undefined),
+            showLanguage: template.showLanguage || false,
+            showPeriod: template.showPeriod || false,
         };
 
         return { ...viewEmpty, ...base, ...this.get(template) };
@@ -556,6 +562,8 @@ export class TemplateViewActions {
                     ...base,
                     dataSources: await arrayFromFile<DataSource>(view.dataSources),
                     styleSources: await arrayFromFile<StyleSource>(view.styleSources),
+                    showLanguage: view.showLanguage,
+                    showPeriod: view.showPeriod,
                 };
         }
     }
@@ -690,6 +698,8 @@ export class TemplateViewActions {
 
             dataSources: i18n.t("Data Source"),
             styleSources: i18n.t("Styles"),
+            showLanguage: i18n.t("Show Language"),
+            showPeriod: i18n.t("Show Period"),
         });
     }
 }

@@ -1,20 +1,34 @@
 import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.33";
-import { Id } from "../../../domain/entities/ReferenceObject";
+import { i18nShortCode, Id } from "../../../domain/entities/ReferenceObject";
 import { CategoryOptionCombo, MSFModuleMetadata } from "../../../domain/entities/templates/MSFModuleMetadata";
 import { MSFModuleMetadataRepository } from "../../../domain/repositories/templates/MSFModuleMetadataRepository";
+import { Maybe } from "../../../types/utils";
 import { promiseMap } from "../../../utils/promises";
 
 export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepository {
     constructor(private api: D2Api) {}
 
-    async get(options: { dataSetId: Id; catOptionCombinationIds: Id[] }): Promise<MSFModuleMetadata> {
+    async get(options: {
+        dataSetId: Id;
+        catOptionCombinationIds: Id[];
+        language: Maybe<i18nShortCode>;
+    }): Promise<MSFModuleMetadata> {
         const d2DataSet = await this.getDataSet(options);
-        const cagegoryOptionCombos = await this.getAllCategoryOptionCombos(options.catOptionCombinationIds);
+        const categoryOptionCombos = await this.getAllCategoryOptionCombos(
+            options.catOptionCombinationIds,
+            options.language
+        );
 
         return {
             dataSet: {
                 id: d2DataSet.id,
-                name: d2DataSet.displayName,
+                description: this.getValueFromTranslation(
+                    d2DataSet.translations,
+                    options.language,
+                    d2DataSet.displayDescription,
+                    true
+                ),
+                name: this.getValueFromTranslation(d2DataSet.translations, options.language, d2DataSet.displayName),
                 dataSetElements: d2DataSet.dataSetElements.map(d2SetElement => {
                     const categoryCombo = d2SetElement.categoryCombo
                         ? d2SetElement.categoryCombo
@@ -22,19 +36,35 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                     return {
                         dataElement: {
                             id: d2SetElement.dataElement.id,
-                            name: d2SetElement.dataElement.displayName,
+                            name: this.getValueFromTranslation(
+                                d2SetElement.dataElement.translations,
+                                options.language,
+                                d2SetElement.dataElement.displayName
+                            ),
                         },
                         categoryCombo: {
                             id: categoryCombo.id,
-                            name: categoryCombo.displayName,
+                            name: this.getValueFromTranslation(
+                                d2SetElement.dataElement.translations,
+                                options.language,
+                                categoryCombo.displayName
+                            ),
                             categories: categoryCombo.categories.map(d2Category => {
                                 return {
                                     id: d2Category.id,
-                                    name: d2Category.displayName,
+                                    name: this.getValueFromTranslation(
+                                        d2Category.translations,
+                                        options.language,
+                                        d2Category.displayName
+                                    ),
                                     categoryOptions: d2Category.categoryOptions.map(d2CatOption => {
                                         return {
                                             id: d2CatOption.id,
-                                            name: d2CatOption.displayName,
+                                            name: this.getValueFromTranslation(
+                                                d2CatOption.translations,
+                                                options.language,
+                                                d2CatOption.displayName
+                                            ),
                                         };
                                     }),
                                 };
@@ -45,17 +75,25 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                 sections: d2DataSet.sections.map(d2Section => {
                     return {
                         id: d2Section.id,
-                        name: d2Section.displayName,
+                        name: this.getValueFromTranslation(
+                            d2Section.translations,
+                            options.language,
+                            d2Section.displayName
+                        ),
                         dataElements: d2Section.dataElements.map(d2SectionDe => {
                             return {
                                 id: d2SectionDe.id,
-                                name: d2SectionDe.displayName,
+                                name: this.getValueFromTranslation(
+                                    d2SectionDe.translations,
+                                    options.language,
+                                    d2SectionDe.displayName
+                                ),
                             };
                         }),
                     };
                 }),
             },
-            categoryOptionCombos: cagegoryOptionCombos,
+            categoryOptionCombos: categoryOptionCombos,
         };
     }
 
@@ -78,9 +116,12 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
         }
     }
 
-    private async getAllCategoryOptionCombos(ids: Id[]): Promise<CategoryOptionCombo[]> {
+    private async getAllCategoryOptionCombos(
+        ids: Id[],
+        language: Maybe<i18nShortCode>
+    ): Promise<CategoryOptionCombo[]> {
         const result = await promiseMap(_.chunk(ids, 100), catOptionCombosIds => {
-            return this.getPaginatedCategoryOptionCombos(catOptionCombosIds, 1, []);
+            return this.getPaginatedCategoryOptionCombos(catOptionCombosIds, 1, [], language);
         });
         return result.flat();
     }
@@ -88,17 +129,22 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
     private async getPaginatedCategoryOptionCombos(
         ids: Id[],
         page: number,
-        acum: CategoryOptionCombo[]
+        acum: CategoryOptionCombo[],
+        language: Maybe<i18nShortCode>
     ): Promise<CategoryOptionCombo[]> {
         const d2Response = await this.getCategoryOptionCombos(ids, page);
         const catOptionCombos = d2Response.objects.map(d2CatOptionCombo => {
             return {
                 id: d2CatOptionCombo.id,
-                name: d2CatOptionCombo.name,
+                name: this.getValueFromTranslation(
+                    d2CatOptionCombo.translations,
+                    language,
+                    d2CatOptionCombo.displayName
+                ),
                 categoryOptions: d2CatOptionCombo.categoryOptions.map(d2CatOption => {
                     return {
                         id: d2CatOption.id,
-                        name: d2CatOption.name,
+                        name: this.getValueFromTranslation(d2CatOption.translations, language, d2CatOption.displayName),
                     };
                 }),
             };
@@ -107,7 +153,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
         if (d2Response.pager.page >= d2Response.pager.pageCount) {
             return newRecords;
         } else {
-            return this.getPaginatedCategoryOptionCombos(ids, d2Response.pager.page + 1, newRecords);
+            return this.getPaginatedCategoryOptionCombos(ids, d2Response.pager.page + 1, newRecords, language);
         }
     }
 
@@ -116,16 +162,12 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
             .get({
                 fields: {
                     id: true,
-                    name: true,
-                    categoryOptions: {
-                        id: true,
-                        name: true,
-                    },
+                    displayName: true,
+                    translations: translationFields,
+                    categoryOptions: { id: true, displayName: true, translations: translationFields },
                 },
                 filter: {
-                    id: {
-                        in: ids,
-                    },
+                    id: { in: ids },
                 },
                 page,
                 pageSize: 100,
@@ -134,37 +176,73 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
 
         return response;
     }
+
+    private getValueFromTranslation(
+        translations: D2Translation[],
+        locale: Maybe<i18nShortCode>,
+        defaultValue: string,
+        isDescription = false
+    ): string {
+        if (!locale) return defaultValue;
+        const localeTranslations = translations.filter(t => t.locale === locale);
+        if (isDescription) {
+            const descriptionLocale = localeTranslations.find(translation => translation.property === "DESCRIPTION");
+            return descriptionLocale?.value || defaultValue;
+        } else {
+            const formNameLocale = localeTranslations.find(translation => translation.property === "FORM_NAME");
+            const nameLocale = localeTranslations.find(translation => translation.property === "NAME");
+            return formNameLocale?.value || nameLocale?.value || defaultValue;
+        }
+    }
 }
+
+const translationFields = {
+    property: true,
+    locale: true,
+    value: true,
+};
 
 const categoryComboFields = {
     id: true,
     displayName: true,
+    translations: translationFields,
     categories: {
         id: true,
         displayName: true,
-        categoryOptions: { id: true, displayName: true },
+        translations: translationFields,
+        categoryOptions: { id: true, translations: translationFields, displayName: true },
     },
 };
 
 const dataSetFields = {
     id: true,
+    displayDescription: true,
     displayName: true,
+    translations: translationFields,
     dataSetElements: {
         dataElement: {
             id: true,
             displayName: true,
             categoryCombo: categoryComboFields,
+            translations: translationFields,
         },
         categoryCombo: categoryComboFields,
     },
     sections: {
         id: true,
         displayName: true,
+        translations: translationFields,
         dataElements: {
             id: true,
             displayName: true,
+            translations: translationFields,
         },
     },
 } as const;
 
 type D2DataSet = MetadataPick<{ dataSets: { fields: typeof dataSetFields } }>["dataSets"][number];
+type D2Translation = {
+    property: string;
+    locale: string;
+    value: string;
+};

@@ -75,6 +75,8 @@ export const TemplateSelector = ({
             settings,
             splitDataEntryTabsBySection: false,
             useCodesForMetadata: false,
+            showPeriod: false,
+            showLanguage: false,
         }
     );
 
@@ -201,6 +203,8 @@ export const TemplateSelector = ({
                 templateId,
                 templateType,
                 populate: false,
+                showLanguage: customTemplate?.showLanguage || false,
+                showPeriod: customTemplate?.showPeriod || false,
             }));
             setFilterOrgUnits(false);
             clearPopulateDates();
@@ -317,7 +321,7 @@ export const TemplateSelector = ({
                 />
             )}
 
-            {state.type === "dataSets" && state.templateType !== "custom" && showPopulate && (
+            {state.type === "dataSets" && (showPopulate || state.showPeriod) && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <DatePicker
@@ -394,7 +398,7 @@ export const TemplateSelector = ({
 
             {state.templateType !== "custom" && <h3>{i18n.t("Advanced template properties")}</h3>}
 
-            {availableLanguages.length > 0 && state.templateType !== "custom" && (
+            {availableLanguages.length > 0 && (state.templateType !== "custom" || state.showLanguage) && (
                 <div className={classes.row}>
                     <div className={classes.select}>
                         <Select

@@ -39,6 +39,8 @@ export interface DownloadTemplateProps {
     templateType: TemplateType;
     splitDataEntryTabsBySection: boolean;
     useCodesForMetadata: boolean;
+    showLanguage: boolean;
+    showPeriod: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -69,6 +71,7 @@ export class DownloadTemplateUseCase implements UseCase {
             templateId,
             splitDataEntryTabsBySection,
             useCodesForMetadata,
+            showLanguage,
         } = options;
 
         i18n.setDefaultNamespace("bulk-load");
@@ -140,7 +143,14 @@ export class DownloadTemplateUseCase implements UseCase {
 
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository, this.modulesRepositories);
 
-        await builder.templateCustomization(template, { type, id, populate, dataPackage, orgUnits });
+        await builder.templateCustomization(template, {
+            type,
+            id,
+            populate,
+            dataPackage,
+            orgUnits,
+            language: showLanguage ? language : undefined,
+        });
 
         if (theme) await builder.applyTheme(template, theme);
 

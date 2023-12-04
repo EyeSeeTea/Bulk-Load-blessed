@@ -1,14 +1,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2023-10-10T10:43:22.846Z\n"
+"POT-Creation-Date: 2023-12-04T19:09:59.711Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "Data values - Create/update"
 msgstr "Значения данных - создание/обновление"
@@ -348,6 +348,14 @@ msgstr "Шаблон"
 
 msgid "Apply to"
 msgstr ""
+
+#, fuzzy
+msgid "Show languages in download template"
+msgstr "Скачать шаблон"
+
+#, fuzzy
+msgid "Show periods in download template"
+msgstr "Скачать шаблон"
 
 msgid "Advanced"
 msgstr ""
@@ -734,6 +742,14 @@ msgstr ""
 #, fuzzy
 msgid "Data Source"
 msgstr "Набор данных"
+
+#, fuzzy
+msgid "Show Language"
+msgstr "Язык"
+
+#, fuzzy
+msgid "Show Period"
+msgstr "Период"
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""

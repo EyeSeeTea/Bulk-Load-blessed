@@ -4,7 +4,7 @@ import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { DataForm, DataFormType } from "./DataForm";
 import { DataPackage } from "./DataPackage";
-import { Id } from "./ReferenceObject";
+import { i18nShortCode, Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
 import { UserTimestamp } from "./User";
 import { Sheet as SheetE } from "./Sheet";
@@ -72,6 +72,7 @@ export interface DownloadCustomizationOptions {
     populate: boolean;
     dataPackage?: DataPackage;
     orgUnits: string[];
+    language?: i18nShortCode;
 }
 
 export interface ImportCustomizationOptions {
@@ -85,6 +86,8 @@ export interface CustomTemplateWithUrl extends BaseTemplate {
     description: string;
     fixedOrgUnit?: CellRef;
     fixedPeriod?: CellRef;
+    showLanguage?: boolean;
+    showPeriod?: boolean;
     downloadCustomization?: (
         excelRepository: ExcelRepository,
         instanceRepository: InstanceRepository,

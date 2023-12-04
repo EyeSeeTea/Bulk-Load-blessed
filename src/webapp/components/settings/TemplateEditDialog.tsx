@@ -1,6 +1,7 @@
 import {
     Button,
     ButtonProps,
+    Checkbox,
     FormControlLabel,
     Grid,
     GridSize,
@@ -152,6 +153,14 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
 
     const applyTo = useApplyTo(customTemplates, template, setTemplate);
 
+    const onLanguageChange = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setTemplate(update("showLanguage", checked));
+    };
+
+    const onPeriodChange = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setTemplate(update("showPeriod", checked));
+    };
+
     return (
         <ConfirmationDialog
             isOpen={true}
@@ -172,6 +181,20 @@ const EditDialog: React.FC<CustomTemplateEditDialogProps2> = React.memo(props =>
                     value={applyTo.current?.value}
                     onChange={applyTo.set}
                 />
+
+                <div>
+                    <FormControlLabel
+                        control={<Checkbox checked={template.showLanguage} onChange={onLanguageChange} />}
+                        label={i18n.t("Show languages in download template")}
+                    />
+                </div>
+
+                <div>
+                    <FormControlLabel
+                        control={<Checkbox checked={template.showPeriod} onChange={onPeriodChange} />}
+                        label={i18n.t("Show periods in download template")}
+                    />
+                </div>
 
                 {applyTo.current.value === "select" && (
                     <Select

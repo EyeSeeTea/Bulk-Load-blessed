@@ -112,6 +112,7 @@ class DownloadCustomization {
     async execute() {
         const dataEntryCells = await this.getDataEntryCombinationsCells();
         const metadata = await this.moduleRepository.get({
+            language: this.options.language,
             dataSetId: this.options.id,
             catOptionCombinationIds: _(dataEntryCells)
                 .map(cell => this.getIdFromCellFormula(cell.value))
@@ -120,13 +121,31 @@ class DownloadCustomization {
         });
         const cells = this.createSectionCells(metadata);
 
+        await this.fillHeaderSection(metadata);
         await this.fillEntryForm(cells);
         await this.fillMapping(metadata, cells, dataEntryCells);
         await this.setPeriodDataValidation();
         await this.setMappingAsDone();
     }
 
-    private async fillMapping(metadata: MSFModuleMetadata, cells: Cell[], dataEntryCells: CellWithCombinationId[]) {
+    private async fillHeaderSection(metadata: MSFModuleMetadata): Promise<void> {
+        await this.excelRepository.writeCell(
+            this.templateId,
+            { type: "cell", sheet: this.sheets.entryForm, ref: "J7" },
+            metadata.dataSet.name
+        );
+        await this.excelRepository.writeCell(
+            this.templateId,
+            { type: "cell", sheet: this.sheets.entryForm, ref: "J9" },
+            metadata.dataSet.description
+        );
+    }
+
+    private async fillMapping(
+        metadata: MSFModuleMetadata,
+        cells: Cell[],
+        dataEntryCells: CellWithCombinationId[]
+    ): Promise<void> {
         const combinationCells = cells.filter(cell => cell.includeInMapping);
         const mappingCells = this.createMappingCells(metadata, combinationCells, dataEntryCells);
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2023-10-10T10:43:22.846Z\n"
+"POT-Creation-Date: 2023-12-04T19:09:59.711Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -342,6 +342,14 @@ msgstr "Nueva plantilla personalizada"
 msgid "Apply to"
 msgstr ""
 
+#, fuzzy
+msgid "Show languages in download template"
+msgstr "Descargar plantilla"
+
+#, fuzzy
+msgid "Show periods in download template"
+msgstr "Descargar plantilla"
+
 msgid "Advanced"
 msgstr ""
 
@@ -677,6 +685,14 @@ msgstr "TEI valores de datos del evento - Columna inicial"
 
 msgid "Data Source"
 msgstr "Fuente de datos"
+
+#, fuzzy
+msgid "Show Language"
+msgstr "Idioma"
+
+#, fuzzy
+msgid "Show Period"
+msgstr "Periodo"
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""

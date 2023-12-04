@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2023-10-10T10:43:22.846Z\n"
+"POT-Creation-Date: 2023-12-04T19:09:59.711Z\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -348,6 +348,14 @@ msgstr "Modelo"
 
 msgid "Apply to"
 msgstr ""
+
+#, fuzzy
+msgid "Show languages in download template"
+msgstr "Descarregar a planilha"
+
+#, fuzzy
+msgid "Show periods in download template"
+msgstr "Descarregar a planilha"
 
 msgid "Advanced"
 msgstr ""
@@ -732,6 +740,14 @@ msgstr ""
 #, fuzzy
 msgid "Data Source"
 msgstr "Data Set"
+
+#, fuzzy
+msgid "Show Language"
+msgstr "Língua"
+
+#, fuzzy
+msgid "Show Period"
+msgstr "Período"
 
 msgid "Value for field '{{field}}' is invalid - {{value}}"
 msgstr ""
