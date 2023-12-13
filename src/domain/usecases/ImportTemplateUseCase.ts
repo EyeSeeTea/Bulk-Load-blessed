@@ -19,6 +19,7 @@ import { FileRepository } from "../repositories/FileRepository";
 import { FileResource } from "../entities/FileResource";
 import { ImportSourceRepository } from "../repositories/ImportSourceRepository";
 import { TrackedEntityInstance } from "../entities/TrackedEntityInstance";
+import { Maybe } from "../../types/utils";
 
 export type ImportTemplateError =
     | {
@@ -518,12 +519,23 @@ export const compareDataPackages = (
     return true;
 };
 
+function getBooleanValue(item: DataPackageDataValue): Maybe<boolean> {
+    switch (true) {
+        case String(item.optionId) === "true" || item.optionId === "true":
+            return true;
+        case String(item.optionId) === "false" || item.optionId === "false":
+            return false;
+        default:
+            return undefined;
+    }
+}
+
 const formatDhis2Value = (item: DataPackageDataValue, dataForm: DataForm): DataPackageDataValue | undefined => {
     const dataElement = dataForm.dataElements.find(({ id }) => item.dataElement === id);
-    const booleanValue = String(item.optionId) === "true" || item.optionId === "true";
+    const booleanValue = getBooleanValue(item);
 
     if (dataElement?.valueType === "BOOLEAN") {
-        return { ...item, value: booleanValue };
+        return { ...item, value: booleanValue ?? "" };
     }
 
     if (dataElement?.valueType === "TRUE_ONLY") {
