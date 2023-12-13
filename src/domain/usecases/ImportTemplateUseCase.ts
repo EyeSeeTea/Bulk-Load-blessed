@@ -519,11 +519,20 @@ export const compareDataPackages = (
     return true;
 };
 
+const trueValues = ["y", "yes", "true", "1"];
+const falseValues = ["n", "no", "false", "0"];
+
 function getBooleanValue(item: DataPackageDataValue): Maybe<boolean> {
+    const strValue = String(item.value).toLowerCase();
+
     switch (true) {
         case String(item.optionId) === "true" || item.optionId === "true":
             return true;
         case String(item.optionId) === "false" || item.optionId === "false":
+            return false;
+        case trueValues.includes(strValue):
+            return true;
+        case falseValues.includes(strValue):
             return false;
         default:
             return undefined;
