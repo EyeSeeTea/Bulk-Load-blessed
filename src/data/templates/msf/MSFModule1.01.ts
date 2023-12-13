@@ -11,6 +11,7 @@ import {
     CategoryCombo,
     CategoryOption,
     DataElement,
+    DataSetSection,
     MSFModuleMetadata,
 } from "../../../domain/entities/templates/MSFModuleMetadata";
 import { ThemeStyle } from "../../../domain/entities/Theme";
@@ -267,231 +268,280 @@ class DownloadCustomization {
         const initialSectionRowNumber = 17;
 
         const totalRowsPerSection = _(metadata.dataSet.sections)
-            .map(section => {
-                const firstDe = _(section.dataElements).first();
-                if (!firstDe) return undefined;
-                const dataElement = deByKeys[firstDe.id];
-                if (!dataElement) return undefined;
-                return section.dataElements.length + dataElement.categoryCombo.categories.length;
+            .flatMap(section => {
+                const deByCategoryCombos = this.groupDataElementsByCategoryCombo(section, deByKeys);
+                return deByCategoryCombos.map(categoryCombo => {
+                    const firstDe = _(categoryCombo.dataElements).first();
+                    if (!firstDe) return undefined;
+                    const dataElement = deByKeys[firstDe.id];
+                    if (!dataElement) return undefined;
+                    return categoryCombo.dataElements.length + dataElement.categoryCombo.categories.length;
+                });
             })
             .compact()
             .value();
 
+        let sectionComboIndex = 0;
+
         const cells = _(metadata.dataSet.sections)
-            .map((section, sectionIndex) => {
-                const firstDe = _(section.dataElements).first();
-                if (!firstDe) return undefined;
+            .flatMap(section => {
+                const deByCategoryCombos = this.groupDataElementsByCategoryCombo(section, deByKeys);
 
-                const dataElement = deByKeys[firstDe.id];
+                return deByCategoryCombos.map(categoryCombo => {
+                    const firstDe = _(categoryCombo.dataElements).first();
+                    if (!firstDe) return undefined;
 
-                if (!dataElement) return undefined;
-                const totalCategories = dataElement.categoryCombo.categories.length;
+                    const dataElement = deByKeys[firstDe.id];
 
-                const sumTotalRowsPerSection = _(totalRowsPerSection).slice(0, sectionIndex).sum();
+                    if (!dataElement) return undefined;
+                    const totalCategories = dataElement.categoryCombo.categories.length;
 
-                const currentSpaces = (spaceBetweenSections + spaceAtEndOfSection) * sectionIndex;
+                    const sumTotalRowsPerSection = _(totalRowsPerSection).slice(0, sectionComboIndex).sum();
 
-                const initialSectionCellNumber =
-                    sectionIndex === 0
-                        ? initialSectionRowNumber
-                        : initialSectionRowNumber + sumTotalRowsPerSection + currentSpaces;
+                    const currentSpaces = (spaceBetweenSections + spaceAtEndOfSection) * sectionComboIndex;
 
-                const sectionColumnEndLetter = Workbook.getExcelAlpha(initialSectionRefCell + 4);
+                    const initialSectionCellNumber =
+                        sectionComboIndex === 0
+                            ? initialSectionRowNumber
+                            : initialSectionRowNumber + sumTotalRowsPerSection + currentSpaces;
 
-                const sectionNameCell: Cell = {
-                    ref: `${initialSectionletter}${initialSectionCellNumber}`,
-                    sheet: this.sheets.entryForm,
-                    value: section.name,
-                    style: this.sectionCellStyle,
-                    includeInMapping: false,
-                    merge: {
-                        rowStart: initialSectionCellNumber,
-                        rowEnd: initialSectionCellNumber,
-                        columnStart: initialSectionletter,
-                        columnEnd: sectionColumnEndLetter,
-                    },
-                    metadata: undefined,
-                };
+                    const sectionColumnEndLetter = Workbook.getExcelAlpha(initialSectionRefCell + 4);
 
-                const headerColumnIndex = Workbook.getColumnIndex("L");
+                    const sectionNameCell: Cell = {
+                        ref: `${initialSectionletter}${initialSectionCellNumber}`,
+                        sheet: this.sheets.entryForm,
+                        value: section.name,
+                        style: this.sectionCellStyle,
+                        includeInMapping: false,
+                        merge: {
+                            rowStart: initialSectionCellNumber,
+                            rowEnd: initialSectionCellNumber,
+                            columnStart: initialSectionletter,
+                            columnEnd: sectionColumnEndLetter,
+                        },
+                        metadata: undefined,
+                    };
 
-                const allCategoryOptions = dataElement.categoryCombo.categories.map(
-                    category => category.categoryOptions
-                );
-                const productCategories = _.product(...allCategoryOptions);
-                const columnsGroups = this.generateColumnsCombinations(dataElement);
-                const fontColors = this.generateColors(totalCategories);
+                    const headerColumnIndex = Workbook.getColumnIndex("L");
 
-                // Headers from Category Options
-                const cellsHeaders = columnsGroups.flatMap((columnGroup, colGroupIndex) => {
-                    const quantityMergeCells = productCategories.length / columnGroup.length;
-                    return columnGroup.flatMap((cell, cellIndex) => {
-                        const nextLetter = cellIndex * quantityMergeCells;
-                        const headerLetter = Workbook.getExcelAlpha(headerColumnIndex + nextLetter);
-                        const rowNumber = initialSectionCellNumber + colGroupIndex;
+                    const allCategoryOptions = dataElement.categoryCombo.categories.map(
+                        category => category.categoryOptions
+                    );
+                    const productCategories = _.product(...allCategoryOptions);
+                    const columnsGroups = this.generateColumnsCombinations(dataElement);
+                    const fontColors = this.generateColors(totalCategories);
 
-                        const endMergeIndex = Workbook.getColumnIndex(headerLetter);
-                        const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + (quantityMergeCells - 1));
+                    // Headers from Category Options
+                    const cellsHeaders = columnsGroups.flatMap((columnGroup, colGroupIndex) => {
+                        const quantityMergeCells = productCategories.length / columnGroup.length;
+                        return columnGroup.flatMap((cell, cellIndex) => {
+                            const nextLetter = cellIndex * quantityMergeCells;
+                            const headerLetter = Workbook.getExcelAlpha(headerColumnIndex + nextLetter);
+                            const rowNumber = initialSectionCellNumber + colGroupIndex;
 
-                        const emptyCellForSection =
-                            colGroupIndex > 0
-                                ? [
-                                      {
-                                          ...sectionNameCell,
-                                          ref: `${initialSectionletter}${rowNumber}`,
-                                          merge: sectionNameCell.merge
-                                              ? {
-                                                    ...sectionNameCell.merge,
-                                                    rowStart: rowNumber,
-                                                    rowEnd: rowNumber,
-                                                }
-                                              : undefined,
-                                          value: "",
-                                      },
-                                  ]
-                                : [];
+                            const endMergeIndex = Workbook.getColumnIndex(headerLetter);
+                            const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + (quantityMergeCells - 1));
 
-                        const newCell: Cell = {
-                            ...cell,
-                            ref: `${headerLetter}${rowNumber}`,
-                            style: {
-                                ...this.headerCellStyle,
-                                fontColor: fontColors[colGroupIndex] || DEFAULT_COLUMN_COLOR,
-                            },
-                            merge: {
-                                rowStart: rowNumber,
-                                rowEnd: rowNumber,
-                                columnStart: headerLetter,
-                                columnEnd: endMergeLetter,
-                            },
-                            includeInMapping: false,
-                        };
+                            const emptyCellForSection =
+                                colGroupIndex > 0
+                                    ? [
+                                          {
+                                              ...sectionNameCell,
+                                              ref: `${initialSectionletter}${rowNumber}`,
+                                              merge: sectionNameCell.merge
+                                                  ? {
+                                                        ...sectionNameCell.merge,
+                                                        rowStart: rowNumber,
+                                                        rowEnd: rowNumber,
+                                                    }
+                                                  : undefined,
+                                              value: "",
+                                          },
+                                      ]
+                                    : [];
 
-                        const columnSpaceAtEnd = this.generateColumnSpaceAtEnd(
-                            cellIndex,
-                            columnGroup,
-                            endMergeIndex,
-                            quantityMergeCells,
-                            cell,
-                            rowNumber
-                        );
+                            const newCell: Cell = {
+                                ...cell,
+                                ref: `${headerLetter}${rowNumber}`,
+                                style: {
+                                    ...this.headerCellStyle,
+                                    fontColor: fontColors[colGroupIndex] || DEFAULT_COLUMN_COLOR,
+                                },
+                                merge: {
+                                    rowStart: rowNumber,
+                                    rowEnd: rowNumber,
+                                    columnStart: headerLetter,
+                                    columnEnd: endMergeLetter,
+                                },
+                                includeInMapping: false,
+                            };
 
-                        return [...emptyCellForSection, newCell, ...columnSpaceAtEnd];
+                            const columnSpaceAtEnd = this.generateColumnSpaceAtEnd(
+                                cellIndex,
+                                columnGroup,
+                                endMergeIndex,
+                                quantityMergeCells,
+                                cell,
+                                rowNumber
+                            );
+
+                            return [...emptyCellForSection, newCell, ...columnSpaceAtEnd];
+                        });
                     });
-                });
 
-                const cellsDe = _(section.dataElements)
-                    .map((sectionDe, deIndex) => {
-                        const currentDe = deByKeys[sectionDe.id];
-                        if (!currentDe) return undefined;
-                        const rowNumber = initialSectionCellNumber + totalCategories + deIndex;
-                        const endMergeIndex = Workbook.getColumnIndex(initialSectionletter);
-                        const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + 3);
+                    const cellsDe = _(categoryCombo.dataElements)
+                        .map((sectionDe, deIndex) => {
+                            const currentDe = deByKeys[sectionDe.id];
+                            if (!currentDe) return undefined;
+                            const rowNumber = initialSectionCellNumber + totalCategories + deIndex;
+                            const endMergeIndex = Workbook.getColumnIndex(initialSectionletter);
+                            const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + 3);
 
-                        const deIndeCell: Cell = {
-                            sheet: this.sheets.entryForm,
-                            ref: `F${rowNumber}`,
-                            value: String(sectionIndex + 1),
-                            includeInMapping: false,
-                            style: undefined,
-                            merge: undefined,
-                            metadata: undefined,
-                        };
+                            const deIndeCell: Cell = {
+                                sheet: this.sheets.entryForm,
+                                ref: `F${rowNumber}`,
+                                value: String(sectionComboIndex + 1),
+                                includeInMapping: false,
+                                style: undefined,
+                                merge: undefined,
+                                metadata: undefined,
+                            };
 
-                        const deCell: Cell = {
-                            sheet: this.sheets.entryForm,
-                            ref: `${initialSectionletter}${rowNumber}`,
-                            value: sectionDe.name,
-                            style: this.dataElementCellStyle,
-                            includeInMapping: false,
-                            merge: {
-                                rowStart: rowNumber,
-                                rowEnd: rowNumber,
-                                columnStart: initialSectionletter,
-                                columnEnd: endMergeLetter,
-                            },
-                            metadata: undefined,
-                        };
+                            const deCell: Cell = {
+                                sheet: this.sheets.entryForm,
+                                ref: `${initialSectionletter}${rowNumber}`,
+                                value: sectionDe.name,
+                                style: this.dataElementCellStyle,
+                                includeInMapping: false,
+                                merge: {
+                                    rowStart: rowNumber,
+                                    rowEnd: rowNumber,
+                                    columnStart: initialSectionletter,
+                                    columnEnd: endMergeLetter,
+                                },
+                                metadata: undefined,
+                            };
 
-                        const combinationsCells = productCategories.flatMap((record, productIndex): Cell[] => {
-                            const combColumnIndex = Workbook.getColumnIndex("L");
-                            const combLetter = Workbook.getExcelAlpha(combColumnIndex + productIndex);
+                            const combinationsCells = productCategories.flatMap((record, productIndex): Cell[] => {
+                                const combColumnIndex = Workbook.getColumnIndex("L");
+                                const combLetter = Workbook.getExcelAlpha(combColumnIndex + productIndex);
 
-                            const isLastCell = productIndex + 1 === productCategories.length;
-                            const lastCellColumn = Workbook.getExcelAlpha(combColumnIndex + productIndex + 1);
-                            const spaceEndCell = isLastCell
+                                const isLastCell = productIndex + 1 === productCategories.length;
+                                const lastCellColumn = Workbook.getExcelAlpha(combColumnIndex + productIndex + 1);
+                                const spaceEndCell = isLastCell
+                                    ? [
+                                          {
+                                              sheet: this.sheets.entryForm,
+                                              ref: `${lastCellColumn}${
+                                                  initialSectionCellNumber + totalCategories + deIndex
+                                              }`,
+                                              style: { ...this.headerCellStyle },
+                                              value: "",
+                                              includeInMapping: false,
+                                              merge: undefined,
+                                              metadata: undefined,
+                                          },
+                                      ]
+                                    : [];
+
+                                return [
+                                    {
+                                        sheet: this.sheets.entryForm,
+                                        ref: `${combLetter}${initialSectionCellNumber + totalCategories + deIndex}`,
+                                        value: "",
+                                        style: this.combinationCellStyle,
+                                        includeInMapping: true,
+                                        metadata: {
+                                            dataElement: {
+                                                id: sectionDe.id,
+                                                name: sectionDe.name,
+                                            },
+                                            categoryOptions: record.map(r => r.id),
+                                        },
+                                        merge: undefined,
+                                    },
+                                    ...spaceEndCell,
+                                ];
+                            });
+
+                            const isLastDe = deIndex + 1 === categoryCombo.dataElements.length;
+                            const spaceColumnEnd = Workbook.getExcelAlpha(
+                                initialSectionRefCell + productCategories.length + 1 + 4
+                            );
+                            const spaceRow = rowNumber + 1;
+                            const endSpaceDeCell = isLastDe
                                 ? [
                                       {
                                           sheet: this.sheets.entryForm,
-                                          ref: `${lastCellColumn}${
-                                              initialSectionCellNumber + totalCategories + deIndex
-                                          }`,
-                                          style: { ...this.headerCellStyle },
+                                          ref: `${initialSectionletter}${rowNumber + 1}`,
                                           value: "",
+                                          style: this.headerCellStyle,
                                           includeInMapping: false,
-                                          merge: undefined,
+                                          merge: {
+                                              rowStart: spaceRow,
+                                              rowEnd: spaceRow,
+                                              columnStart: initialSectionletter,
+                                              columnEnd: spaceColumnEnd,
+                                          },
                                           metadata: undefined,
                                       },
                                   ]
                                 : [];
 
-                            return [
-                                {
-                                    sheet: this.sheets.entryForm,
-                                    ref: `${combLetter}${initialSectionCellNumber + totalCategories + deIndex}`,
-                                    value: "",
-                                    style: this.combinationCellStyle,
-                                    includeInMapping: true,
-                                    metadata: {
-                                        dataElement: {
-                                            id: sectionDe.id,
-                                            name: sectionDe.name,
-                                        },
-                                        categoryOptions: record.map(r => r.id),
-                                    },
-                                    merge: undefined,
-                                },
-                                ...spaceEndCell,
-                            ];
-                        });
+                            return [deIndeCell, deCell, ...combinationsCells, ...endSpaceDeCell];
+                        })
+                        .compact()
+                        .flatMap()
+                        .value();
 
-                        const isLastDe = deIndex + 1 === section.dataElements.length;
-                        const spaceColumnEnd = Workbook.getExcelAlpha(
-                            initialSectionRefCell + productCategories.length + 1 + 4
-                        );
-                        const spaceRow = rowNumber + 1;
-                        const endSpaceDeCell = isLastDe
-                            ? [
-                                  {
-                                      sheet: this.sheets.entryForm,
-                                      ref: `${initialSectionletter}${rowNumber + 1}`,
-                                      value: "",
-                                      style: this.headerCellStyle,
-                                      includeInMapping: false,
-                                      merge: {
-                                          rowStart: spaceRow,
-                                          rowEnd: spaceRow,
-                                          columnStart: initialSectionletter,
-                                          columnEnd: spaceColumnEnd,
-                                      },
-                                      metadata: undefined,
-                                  },
-                              ]
-                            : [];
-
-                        return [deIndeCell, deCell, ...combinationsCells, ...endSpaceDeCell];
-                    })
-                    .compact()
-                    .flatMap()
-                    .value();
-
-                return [sectionNameCell, ...cellsHeaders, ...cellsDe];
+                    sectionComboIndex += 1;
+                    return [sectionNameCell, ...cellsHeaders, ...cellsDe];
+                });
             })
             .compact()
             .flatMap()
             .value();
 
         return cells;
+    }
+
+    private groupDataElementsByCategoryCombo(
+        section: DataSetSection,
+        deByKeys: Record<Id, { dataElement: DataElement; categoryCombo: CategoryCombo }>
+    ) {
+        const dataElementsIdsInSection = _(section.dataElements).map(dataElement => dataElement.id);
+
+        const dataElementsWithCategoryCombo = dataElementsIdsInSection
+            .map(dataElementId => {
+                const dataElement = deByKeys[dataElementId];
+                if (!dataElement) throw Error(`Cannot find dataElement with id ${dataElementId}`);
+                return { id: dataElement.categoryCombo.id, dataElement };
+            })
+            .groupBy("id")
+            .value();
+
+        const transformedArray = _.map(dataElementsWithCategoryCombo, (group, categoryComboId) => {
+            return {
+                categoryComboId,
+                dataElements: group.map(item => item.dataElement.dataElement),
+            };
+        });
+
+        // transformedArray[0]?.dataElements[0]?.id
+
+        // const dataElementsGroupByCategoryCombo = _(dataElementsWithCategoryCombo)
+        //     .groupBy("id")
+        //     .map((dataElements, categoryComboId) => ({
+        //         categoryComboId,
+        //         dataElements: _.map(dataElements, "dataElement.id"),
+        //     }))
+        //     .value();
+
+        // if (section.name === "Quality of Care") {
+        //     console.log("dataElementsGroupByCategoryCombo", transformedArray);
+        // }
+
+        return transformedArray;
     }
 
     private generateColumnSpaceAtEnd(
@@ -528,7 +578,10 @@ class DownloadCustomization {
     ): Cell[] {
         const cells = _(combinationCells)
             .flatMap((cell, index) => {
-                if (!cell.metadata) return undefined;
+                if (!cell.metadata) {
+                    console.warn(cell);
+                    return undefined;
+                }
                 const rowNumber = index + 1;
 
                 const combinationCell: Cell = {
@@ -546,14 +599,28 @@ class DownloadCustomization {
                     return _.isEqual(_.sortBy(ids), _.sortBy(cell.metadata?.categoryOptions));
                 });
 
-                if (!categoryOptionCombo) return undefined;
+                if (!categoryOptionCombo) {
+                    console.warn("categoryOptionCombo", cell);
+                    return undefined;
+                }
 
-                const dataEntryCell = dataEntryCells.find(
-                    dec =>
+                const dataEntryCell = dataEntryCells.find(dec => {
+                    // if (cell.ref === "L188") {
+                    //     debugger;
+                    // }
+                    const condition =
                         this.getIdFromCellFormula(dec.value) === categoryOptionCombo.id &&
-                        dec.dataElementId === cell.metadata?.dataElement.id
-                );
-                if (!dataEntryCell) return undefined;
+                        dec.dataElementId === cell.metadata?.dataElement.id;
+                    // if (condition && cell.ref === "L188") {
+                    //     debugger;
+                    // }
+                    return condition;
+                });
+
+                if (!dataEntryCell) {
+                    console.warn("dataEntryCell", cell);
+                    return undefined;
+                }
 
                 const dataEntryCocCell: Cell = {
                     sheet: this.sheets.mapping,

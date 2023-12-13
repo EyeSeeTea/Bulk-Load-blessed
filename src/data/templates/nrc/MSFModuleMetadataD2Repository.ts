@@ -39,7 +39,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                             name: this.getValueFromTranslation(
                                 d2SetElement.dataElement.translations,
                                 options.language,
-                                d2SetElement.dataElement.displayName
+                                d2SetElement.dataElement.displayFormName
                             ),
                         },
                         categoryCombo: {
@@ -86,7 +86,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                                 name: this.getValueFromTranslation(
                                     d2SectionDe.translations,
                                     options.language,
-                                    d2SectionDe.displayName
+                                    d2SectionDe.displayFormName
                                 ),
                             };
                         }),
@@ -222,7 +222,7 @@ const dataSetFields = {
     dataSetElements: {
         dataElement: {
             id: true,
-            displayName: true,
+            displayFormName: true,
             categoryCombo: categoryComboFields,
             translations: translationFields,
         },
@@ -234,7 +234,7 @@ const dataSetFields = {
         translations: translationFields,
         dataElements: {
             id: true,
-            displayName: true,
+            displayFormName: true,
             translations: translationFields,
         },
     },
