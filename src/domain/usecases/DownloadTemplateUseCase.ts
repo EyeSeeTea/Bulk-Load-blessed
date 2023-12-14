@@ -9,7 +9,7 @@ import { D2Api } from "../../types/d2-api";
 import { getExtensionFile, XLSX_EXTENSION } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
-import { SheetBuilder } from "../../webapp/logic/sheetBuilder";
+import { getGeneratedTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
 import { DataFormType } from "../entities/DataForm";
 import { Id, Ref } from "../entities/ReferenceObject";
 import { TemplateType } from "../entities/Template";
@@ -41,6 +41,7 @@ export interface DownloadTemplateProps {
     useCodesForMetadata: boolean;
     showLanguage: boolean;
     showPeriod: boolean;
+    orgUnitShortName?: boolean;
 }
 
 export class DownloadTemplateUseCase implements UseCase {
@@ -68,13 +69,17 @@ export class DownloadTemplateUseCase implements UseCase {
             downloadRelationships,
             filterTEIEnrollmentDate,
             relationshipsOuFilter,
-            templateId,
+            templateId: customTemplateId,
+            templateType,
             splitDataEntryTabsBySection,
             useCodesForMetadata,
             showLanguage,
+            orgUnitShortName,
         } = options;
-
         i18n.setDefaultNamespace("bulk-load");
+        const useShortNameInOrgUnit = orgUnitShortName || false;
+        const templateId =
+            templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
         const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
         const element = await getElement(api, type, id);
@@ -91,6 +96,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 populateStartDate: populateStartDate?.toDate(),
                 populateEndDate: populateEndDate?.toDate(),
                 relationshipsOuFilter,
+                orgUnitShortName: useShortNameInOrgUnit,
             });
 
             // FIXME: Legacy code, sheet generator
@@ -105,6 +111,7 @@ export class DownloadTemplateUseCase implements UseCase {
                 downloadRelationships,
                 splitDataEntryTabsBySection,
                 useCodesForMetadata,
+                orgUnitShortName: useShortNameInOrgUnit,
             });
 
             const workbook = await sheetBuilder.generate();
@@ -221,6 +228,7 @@ async function getElementMetadata({
     populateEndDate,
     downloadRelationships,
     relationshipsOuFilter,
+    orgUnitShortName,
 }: {
     element: any;
     api: D2Api;
@@ -231,6 +239,7 @@ async function getElementMetadata({
     populateEndDate?: Date;
     downloadRelationships: boolean;
     relationshipsOuFilter?: RelationshipOrgUnitFilter;
+    orgUnitShortName: boolean;
 }) {
     const elementMetadataMap = new Map();
     const endpoint = element.type === "dataSets" ? "dataSets" : "programs";
@@ -254,13 +263,19 @@ async function getElementMetadata({
 
     const responses = await promiseMap(_.chunk(_.uniq(requestOrgUnits), 400), orgUnits =>
         api
-            .get<{ organisationUnits: { id: string; displayName: string; code?: string; translations: unknown }[] }>(
-                "/metadata",
-                {
-                    fields: "id,displayName,code,translations",
-                    filter: `id:in:[${orgUnits}]`,
-                }
-            )
+            .get<{
+                organisationUnits: {
+                    id: string;
+                    displayShortName: string;
+                    displayName: string;
+                    code?: string;
+                    translations: unknown;
+                }[];
+            }>("/metadata", {
+                fields: "id,displayName,code,translations,displayShortName",
+                filter: `id:in:[${orgUnits}]`,
+                order: orgUnitShortName ? "displayShortName:asc" : "displayName:asc",
+            })
             .getData()
     );
 

@@ -41,6 +41,7 @@ export interface TemplateSelectorProps {
     onChange(state: TemplateSelectorState | null): void;
     onChangeModel?(state: DataModelProps[]): void;
     customTemplates: CustomTemplate[];
+    onUseShortNamesChange(value: boolean): void;
 }
 
 export const TemplateSelector = ({
@@ -49,6 +50,7 @@ export const TemplateSelector = ({
     onChange,
     onChangeModel,
     customTemplates,
+    onUseShortNamesChange,
 }: TemplateSelectorProps) => {
     const classes = useStyles();
     const { api, compositionRoot } = useAppContext();
@@ -386,6 +388,7 @@ export const TemplateSelector = ({
                                     typeInput={isMultipleSelection ? undefined : "radio"}
                                     listParams={orgUnitListParams}
                                     showNameSetting
+                                    onUseShortNamesChange={onUseShortNamesChange}
                                 />
                             </div>
                         ) : (

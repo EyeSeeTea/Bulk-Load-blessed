@@ -51,6 +51,7 @@ export interface SheetBuilderParams {
     downloadRelationships: boolean;
     splitDataEntryTabsBySection: boolean;
     useCodesForMetadata: boolean;
+    orgUnitShortName: boolean;
 }
 
 export class SheetBuilder {
@@ -124,7 +125,7 @@ export class SheetBuilder {
         const metadataSheet = workbook.addWorksheet("Metadata", protectedSheet);
 
         this.fillValidationSheet(validationSheet);
-        this.fillMetadataSheet(metadataSheet);
+        this.fillMetadataSheet(metadataSheet, this.builder.orgUnitShortName || false);
         this.fillLegendSheet(legendSheet);
 
         if (isTrackerProgram(element)) {
@@ -631,7 +632,7 @@ export class SheetBuilder {
         validationSheet.cell(1, 1, 1, columnId, true).formula(`_${element.id}`).style(baseStyle);
     }
 
-    private fillMetadataSheet(metadataSheet: Sheet) {
+    private fillMetadataSheet(metadataSheet: Sheet, orgUnitShortName: boolean) {
         const { workbook } = metadataSheet;
         const { elementMetadata: metadata, organisationUnits } = this.builder;
 
@@ -706,7 +707,7 @@ export class SheetBuilder {
         });
 
         organisationUnits.forEach(orgUnit => {
-            const { name } = this.translate(orgUnit);
+            const { name } = this.translate(orgUnit, orgUnitShortName);
             metadataSheet.cell(rowId, 1).string(orgUnit.id !== undefined ? orgUnit.id : "");
             metadataSheet.cell(rowId, 2).string("organisationUnit");
             metadataSheet.cell(rowId, 3).string(name ?? "");
@@ -1032,7 +1033,7 @@ export class SheetBuilder {
             .value();
     }
 
-    private translate(item: any) {
+    private translate(item: any, selectedName?: boolean) {
         const { elementMetadata, language } = this.builder;
         const translations = item?.translations?.filter(({ locale }: any) => locale === language) ?? [];
 
@@ -1061,7 +1062,7 @@ export class SheetBuilder {
         ) {
             return { name: item.code, description };
         } else {
-            return { name, description };
+            return { name: selectedName ? item.displayShortName : name, description };
         }
     }
 
