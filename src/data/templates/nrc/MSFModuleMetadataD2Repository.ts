@@ -75,6 +75,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                 sections: d2DataSet.sections.map(d2Section => {
                     return {
                         id: d2Section.id,
+                        greyedFields: d2Section.greyedFields,
                         name: this.getValueFromTranslation(
                             d2Section.translations,
                             options.language,
@@ -232,6 +233,11 @@ const dataSetFields = {
         id: true,
         displayName: true,
         translations: translationFields,
+        greyedFields: {
+            id: true,
+            categoryOptionCombo: true,
+            dataElement: true,
+        },
         dataElements: {
             id: true,
             displayFormName: true,

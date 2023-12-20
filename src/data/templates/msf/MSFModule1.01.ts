@@ -25,6 +25,7 @@ import { Workbook } from "../../../webapp/logic/Workbook";
 const DEFAULT_COLUMN_COLOR = "#000000";
 const DEFAULT_SECTION_BG_COLOR = "#f2f2f2";
 const DEFAULT_DE_CELL_BG_COLOR = "#ffffff";
+const DEFAULT_GREYED_CELL_BG_COLOR = "#cccccc";
 
 export class MSFModule101 implements CustomTemplateWithUrl {
     public readonly type = "custom";
@@ -73,12 +74,7 @@ class DownloadCustomization {
 
     password = "Wiscentd2019!";
 
-    sheets = {
-        mapping: "mapping",
-        entryForm: "Entry form",
-        dataEntry: "Data Entry",
-        validation: "Validation",
-    };
+    sheets = { mapping: "mapping", entryForm: "Entry form", dataEntry: "Data Entry", validation: "Validation" };
 
     sectionCellStyle = {
         bold: true,
@@ -88,11 +84,9 @@ class DownloadCustomization {
         fillColor: DEFAULT_SECTION_BG_COLOR,
     } as ThemeStyle;
 
-    dataElementCellStyle = {
-        border: true,
-        fillColor: DEFAULT_DE_CELL_BG_COLOR,
-        merged: true,
-    };
+    dataElementCellStyle = { border: true, fillColor: DEFAULT_DE_CELL_BG_COLOR, merged: true };
+
+    greyedFieldCellStyle = { fillColor: DEFAULT_GREYED_CELL_BG_COLOR };
 
     headerCellStyle = {
         bold: true,
@@ -149,13 +143,23 @@ class DownloadCustomization {
     ): Promise<void> {
         const combinationCells = cells.filter(cell => cell.includeInMapping);
         const mappingCells = this.createMappingCells(metadata, combinationCells, dataEntryCells);
-
         for (const cell of mappingCells) {
             await this.excelRepository.writeCell(
                 this.templateId,
                 { type: "cell", sheet: cell.sheet, ref: cell.ref },
                 cell.value
             );
+            if (cell.style) {
+                await this.excelRepository.styleCell(
+                    this.templateId,
+                    {
+                        type: "cell",
+                        sheet: this.sheets.entryForm,
+                        ref: cell.value,
+                    },
+                    cell.style
+                );
+            }
         }
     }
 
@@ -526,21 +530,6 @@ class DownloadCustomization {
                 dataElements: group.map(item => item.dataElement.dataElement),
             };
         });
-
-        // transformedArray[0]?.dataElements[0]?.id
-
-        // const dataElementsGroupByCategoryCombo = _(dataElementsWithCategoryCombo)
-        //     .groupBy("id")
-        //     .map((dataElements, categoryComboId) => ({
-        //         categoryComboId,
-        //         dataElements: _.map(dataElements, "dataElement.id"),
-        //     }))
-        //     .value();
-
-        // if (section.name === "Quality of Care") {
-        //     console.log("dataElementsGroupByCategoryCombo", transformedArray);
-        // }
-
         return transformedArray;
     }
 
@@ -576,12 +565,15 @@ class DownloadCustomization {
         combinationCells: Cell[],
         dataEntryCells: CellWithCombinationId[]
     ): Cell[] {
+        const greyedFields = _(metadata.dataSet.sections)
+            .flatMap(section => {
+                return section.greyedFields;
+            })
+            .value();
+
         const cells = _(combinationCells)
             .flatMap((cell, index) => {
-                if (!cell.metadata) {
-                    console.warn(cell);
-                    return undefined;
-                }
+                if (!cell.metadata) return undefined;
                 const rowNumber = index + 1;
 
                 const combinationCell: Cell = {
@@ -599,28 +591,21 @@ class DownloadCustomization {
                     return _.isEqual(_.sortBy(ids), _.sortBy(cell.metadata?.categoryOptions));
                 });
 
-                if (!categoryOptionCombo) {
-                    console.warn("categoryOptionCombo", cell);
-                    return undefined;
-                }
+                if (!categoryOptionCombo) return undefined;
 
                 const dataEntryCell = dataEntryCells.find(dec => {
-                    // if (cell.ref === "L188") {
-                    //     debugger;
-                    // }
                     const condition =
                         this.getIdFromCellFormula(dec.value) === categoryOptionCombo.id &&
                         dec.dataElementId === cell.metadata?.dataElement.id;
-                    // if (condition && cell.ref === "L188") {
-                    //     debugger;
-                    // }
                     return condition;
                 });
 
-                if (!dataEntryCell) {
-                    console.warn("dataEntryCell", cell);
-                    return undefined;
-                }
+                if (!dataEntryCell) return undefined;
+                const greyedField = greyedFields.find(
+                    greyedField =>
+                        greyedField.dataElement.id === dataEntryCell.dataElementId &&
+                        greyedField.categoryOptionCombo.id === dataEntryCell.value.replace("_", "")
+                );
 
                 const dataEntryCocCell: Cell = {
                     sheet: this.sheets.mapping,
@@ -642,11 +627,30 @@ class DownloadCustomization {
                     metadata: undefined,
                 };
 
+                const blockCell: Cell = {
+                    sheet: this.sheets.mapping,
+                    includeInMapping: false,
+                    value: greyedField ? cell.ref : "",
+                    ref: `G${rowNumber}`,
+                    style: undefined,
+                    merge: undefined,
+                    metadata: undefined,
+                };
+
+                const combinationCellWithStyle =
+                    blockCell.value === combinationCell.value
+                        ? {
+                              ...combinationCell,
+                              style: this.greyedFieldCellStyle,
+                          }
+                        : combinationCell;
+
                 return [
-                    combinationCell,
+                    combinationCellWithStyle,
                     dataEntryCocCell,
                     dataElementCell,
                     { ...dataElementCell, ref: `F${rowNumber}` },
+                    blockCell,
                 ];
             })
             .compact()

@@ -11,6 +11,11 @@ export interface DataSet extends NamedRef {
     sections: DataSetSection[];
 }
 
+export interface GreyedFields extends Ref {
+    categoryOptionCombo: Ref;
+    dataElement: Ref;
+}
+
 export interface DataElement extends NamedRef {}
 
 export interface CategoryCombo extends NamedRef {
@@ -25,6 +30,7 @@ export interface CategoryOption extends NamedRef {}
 
 export interface DataSetSection extends NamedRef {
     dataElements: Pick<DataElement, "id" | "name">[];
+    greyedFields: GreyedFields[];
 }
 
 export interface CategoryOptionCombo extends Ref {
