@@ -10,6 +10,7 @@ import {
 import {
     CategoryCombo,
     CategoryOption,
+    CategoryOptionCombo,
     DataElement,
     DataSetSection,
     MSFModuleMetadata,
@@ -20,6 +21,7 @@ import { InstanceRepository } from "../../../domain/repositories/InstanceReposit
 import { ModulesRepositories } from "../../../domain/repositories/ModulesRepositories";
 import { MSFModuleMetadataRepository } from "../../../domain/repositories/templates/MSFModuleMetadataRepository";
 import { Maybe } from "../../../types/utils";
+import { getOptionsKey } from "../../../webapp/logic/sheetBuilder";
 import { Workbook } from "../../../webapp/logic/Workbook";
 
 const DEFAULT_COLUMN_COLOR = "#000000";
@@ -114,13 +116,84 @@ class DownloadCustomization {
                 .compact()
                 .value(),
         });
-        const cells = this.createSectionCells(metadata);
+        const dataElementsWithCombinations = this.getDataElementsWithCombinations(metadata);
+
+        const cells = this.createSectionCells(metadata, dataElementsWithCombinations);
 
         await this.fillHeaderSection(metadata);
         await this.fillEntryForm(cells);
         await this.fillMapping(metadata, cells, dataEntryCells);
         await this.setPeriodDataValidation();
         await this.setMappingAsDone();
+    }
+
+    private getDataElementsWithCombinations(metadata: MSFModuleMetadata) {
+        const allCategories = metadata.dataSet.dataSetElements.flatMap(dse => {
+            return dse.categoryCombo.categories.map(category => {
+                return category;
+            });
+        });
+
+        const allCategoryCombos = metadata.dataSet.dataSetElements.map(dse => {
+            return dse.categoryCombo;
+        });
+
+        const getCocsByCategoryComboId = this.getCocsByCategoryCombo(
+            metadata.categoryOptionCombos,
+            allCategories,
+            allCategoryCombos
+        ) as Record<Id, CategoryOptionCombo[]>;
+
+        const allDataElements = metadata.dataSet.dataSetElements.map(dse => dse.dataElement);
+
+        const categoryComboIdByDataElementId = _(metadata.dataSet.dataSetElements)
+            .map(dse => {
+                return [dse.dataElement.id, dse.categoryCombo.id];
+            })
+            .fromPairs()
+            .value();
+
+        const getDeGroupedWithCombo = _(allDataElements)
+            .groupBy(dataElement => categoryComboIdByDataElementId[dataElement.id])
+            .toPairs()
+            .flatMap(([categoryComboId, dataElements]) => {
+                return dataElements.map(dataElement => ({
+                    dataElement,
+                    categoryOptionCombos: getCocsByCategoryComboId[categoryComboId] || [],
+                }));
+            })
+            .value();
+
+        return getDeGroupedWithCombo;
+    }
+
+    private getCocsByCategoryCombo(categoryOptionCombos: any, categories: any, categoryCombos: any) {
+        const unsortedCocsByCatComboId = _.groupBy(categoryOptionCombos, (coc: any) => coc.categoryCombo.id);
+        const categoryById: any = _.keyBy(categories, (category: any) => category.id);
+        const cocsByKey = _.groupBy(categoryOptionCombos, (coc: any) => getOptionsKey(coc.categoryOptions));
+
+        const cocsByCategoryPairs = categoryCombos.map((categoryCombo: any) => {
+            const unsortedCocsForCategoryCombo = unsortedCocsByCatComboId[categoryCombo.id] || [];
+            const categoryOptionsList = categoryCombo.categories.map(
+                (category: any) => categoryById[category.id]?.categoryOptions || []
+            );
+
+            const categoryOptionsProduct = _.product(...categoryOptionsList);
+            const cocsForCategoryCombo = _(categoryOptionsProduct)
+                .map(getOptionsKey)
+                .map(optionsKey =>
+                    _(cocsByKey[optionsKey] || [])
+                        .intersectionBy(unsortedCocsForCategoryCombo, "id")
+                        .first()
+                )
+                .compact()
+                .value();
+            if (cocsForCategoryCombo.length !== categoryOptionsProduct.length)
+                console.warn(`Fewer COCs than expected for CC: ${categoryCombo.id}`);
+            return [categoryCombo.id, cocsForCategoryCombo];
+        });
+
+        return _.fromPairs(cocsByCategoryPairs);
     }
 
     private async fillHeaderSection(metadata: MSFModuleMetadata): Promise<void> {
@@ -262,7 +335,10 @@ class DownloadCustomization {
         return value.replace("_", "");
     }
 
-    private createSectionCells(metadata: MSFModuleMetadata): Cell[] {
+    private createSectionCells(
+        metadata: MSFModuleMetadata,
+        dataElementsByCombination: { dataElement: DataElement; categoryOptionCombos: CategoryOptionCombo[] }[]
+    ): Cell[] {
         const initialSectionRefCell = Workbook.getColumnIndex("G");
         const initialSectionletter = Workbook.getExcelAlpha(initialSectionRefCell);
 
@@ -395,8 +471,13 @@ class DownloadCustomization {
 
                     const cellsDe = _(categoryCombo.dataElements)
                         .map((sectionDe, deIndex) => {
+                            const deWithCombination = dataElementsByCombination.find(
+                                de => de.dataElement.id === sectionDe.id
+                            );
                             const currentDe = deByKeys[sectionDe.id];
-                            if (!currentDe) return undefined;
+                            if (!currentDe || !deWithCombination) {
+                                throw Error(`Data element not found ${sectionDe.id}`);
+                            }
                             const rowNumber = initialSectionCellNumber + totalCategories + deIndex;
                             const endMergeIndex = Workbook.getColumnIndex(initialSectionletter);
                             const endMergeLetter = Workbook.getExcelAlpha(endMergeIndex + 3);
@@ -456,11 +537,10 @@ class DownloadCustomization {
                                         style: this.combinationCellStyle,
                                         includeInMapping: true,
                                         metadata: {
-                                            dataElement: {
-                                                id: sectionDe.id,
-                                                name: sectionDe.name,
-                                            },
+                                            dataElement: { id: sectionDe.id, name: sectionDe.name },
                                             categoryOptions: record.map(r => r.id),
+                                            categoryCombinationId:
+                                                deWithCombination.categoryOptionCombos[productIndex]?.id,
                                         },
                                         merge: undefined,
                                     },
@@ -586,21 +666,18 @@ class DownloadCustomization {
                     metadata: undefined,
                 };
 
-                const categoryOptionCombo = metadata.categoryOptionCombos.find(coc => {
-                    const ids = coc.categoryOptions.map(categoryOption => categoryOption.id);
-                    return _.isEqual(_.sortBy(ids), _.sortBy(cell.metadata?.categoryOptions));
-                });
-
-                if (!categoryOptionCombo) return undefined;
+                const combinationId = cell.metadata.categoryCombinationId;
+                if (!combinationId) return undefined;
 
                 const dataEntryCell = dataEntryCells.find(dec => {
                     const condition =
-                        this.getIdFromCellFormula(dec.value) === categoryOptionCombo.id &&
+                        this.getIdFromCellFormula(dec.value) === combinationId &&
                         dec.dataElementId === cell.metadata?.dataElement.id;
                     return condition;
                 });
 
                 if (!dataEntryCell) return undefined;
+
                 const greyedField = greyedFields.find(
                     greyedField =>
                         greyedField.dataElement.id === dataEntryCell.dataElementId &&
@@ -743,6 +820,7 @@ export interface Cell extends BaseCell {
     metadata: Maybe<{
         dataElement: DataElement;
         categoryOptions: Id[];
+        categoryCombinationId?: Id;
     }>;
 }
 

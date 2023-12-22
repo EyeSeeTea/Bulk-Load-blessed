@@ -137,6 +137,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
         const catOptionCombos = d2Response.objects.map(d2CatOptionCombo => {
             return {
                 id: d2CatOptionCombo.id,
+                categoryCombo: { id: d2CatOptionCombo.categoryCombo.id },
                 name: this.getValueFromTranslation(
                     d2CatOptionCombo.translations,
                     language,
@@ -165,6 +166,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                     id: true,
                     displayName: true,
                     translations: translationFields,
+                    categoryCombo: { id: true },
                     categoryOptions: { id: true, displayName: true, translations: translationFields },
                 },
                 filter: {

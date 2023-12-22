@@ -1244,7 +1244,7 @@ function getDataElementsForDefaultDataSet(dataSet: any, metadata: any, cocsByCat
 }
 
 /* Return a unique key for a set of categoryOptions */
-function getOptionsKey(categoryOptions: any) {
+export function getOptionsKey(categoryOptions: any) {
     return _.sortBy(categoryOptions.map((co: any) => co.id)).join("-");
 }
 
