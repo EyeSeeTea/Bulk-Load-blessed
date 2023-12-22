@@ -8,6 +8,7 @@ import {
     StyleSource,
 } from "../../../domain/entities/Template";
 import {
+    Category,
     CategoryCombo,
     CategoryOption,
     CategoryOptionCombo,
@@ -167,15 +168,19 @@ class DownloadCustomization {
         return getDeGroupedWithCombo;
     }
 
-    private getCocsByCategoryCombo(categoryOptionCombos: any, categories: any, categoryCombos: any) {
-        const unsortedCocsByCatComboId = _.groupBy(categoryOptionCombos, (coc: any) => coc.categoryCombo.id);
-        const categoryById: any = _.keyBy(categories, (category: any) => category.id);
-        const cocsByKey = _.groupBy(categoryOptionCombos, (coc: any) => getOptionsKey(coc.categoryOptions));
+    private getCocsByCategoryCombo(
+        categoryOptionCombos: CategoryOptionCombo[],
+        categories: Category[],
+        categoryCombos: CategoryCombo[]
+    ) {
+        const unsortedCocsByCatComboId = _.groupBy(categoryOptionCombos, coc => coc.categoryCombo.id);
+        const categoryById = _.keyBy(categories, category => category.id);
+        const cocsByKey = _.groupBy(categoryOptionCombos, coc => getOptionsKey(coc.categoryOptions));
 
-        const cocsByCategoryPairs = categoryCombos.map((categoryCombo: any) => {
+        const cocsByCategoryPairs = categoryCombos.map(categoryCombo => {
             const unsortedCocsForCategoryCombo = unsortedCocsByCatComboId[categoryCombo.id] || [];
             const categoryOptionsList = categoryCombo.categories.map(
-                (category: any) => categoryById[category.id]?.categoryOptions || []
+                category => categoryById[category.id]?.categoryOptions || []
             );
 
             const categoryOptionsProduct = _.product(...categoryOptionsList);

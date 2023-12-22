@@ -34,5 +34,6 @@ export interface DataSetSection extends NamedRef {
 }
 
 export interface CategoryOptionCombo extends Ref {
+    categoryCombo: Ref;
     categoryOptions: CategoryOption[];
 }
