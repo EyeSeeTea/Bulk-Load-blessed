@@ -17,7 +17,7 @@ export default function DownloadTemplatePage({ settings, themes, customTemplates
     const { api, compositionRoot } = useAppContext();
 
     const [template, setTemplate] = useState<TemplateSelectorState | null>(null);
-    const [_availableModels, setAvailableModels] = useState<DataModelProps[]>([]);
+    const [_availableModels, _] = useState<DataModelProps[]>([]);
     const [orgUnitShortName, setOrgUnitShortName] = useState(false);
 
     const handleTemplateDownloadClick = async () => {

@@ -41,7 +41,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
 
     const [orgUnitTreeRootIds, setOrgUnitTreeRootIds] = useState<string[]>([]);
     const [selectedOrgUnits, setSelectedOrgUnits] = useState<string[]>([]);
-    const [overwriteOrgUnits, setOverwriteOrgUnits] = useState<boolean>(false);
+    const [overwriteOrgUnits, setOverwriteOrgUnits] = useState<boolean>(() => {
+        return settings.orgUnitSelection === "import";
+    });
     const [orgUnitTreeFilter, setOrgUnitTreeFilter] = useState<string[]>([]);
     const [importState, setImportState] = useState<ImportState>();
     const [messages, setMessages] = useState<string[]>([]);
@@ -283,7 +285,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 multiple={false}
             >
                 {({ getRootProps, getInputProps, isDragActive, isDragAccept }) => (
-                    <section>
+                    <section className={classes.dropzoneSection}>
                         <div
                             {...getRootProps({
                                 className: isDragActive
@@ -345,10 +347,9 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                 </div>
             )}
 
-            {settings.orgUnitSelection !== "generation" && (
+            {settings.orgUnitSelection !== "import" && (
                 <div>
                     <FormControlLabel
-                        style={{ marginTop: "1em" }}
                         control={<Checkbox checked={overwriteOrgUnits} onChange={onOverwriteOrgUnitsChange} />}
                         label={i18n.t("Override import Organisation Unit")}
                     />
@@ -457,4 +458,5 @@ const useStyles = makeStyles({
             #f4231f 50px
         )`,
     },
+    dropzoneSection: { marginBottom: "1em" },
 });
