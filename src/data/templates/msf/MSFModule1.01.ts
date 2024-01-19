@@ -24,6 +24,8 @@ import { MSFModuleMetadataRepository } from "../../../domain/repositories/templa
 import { Maybe } from "../../../types/utils";
 import { getOptionsKey } from "../../../webapp/logic/sheetBuilder";
 import { Workbook } from "../../../webapp/logic/Workbook";
+import i18n from "../../../locales";
+import { CellDataValidation, getValidationFromValueType } from "../../../domain/entities/CellDataValidation";
 
 const DEFAULT_COLUMN_COLOR = "#000000";
 const DEFAULT_SECTION_BG_COLOR = "#f2f2f2";
@@ -204,6 +206,21 @@ class DownloadCustomization {
     private async fillHeaderSection(metadata: MSFModuleMetadata): Promise<void> {
         await this.excelRepository.writeCell(
             this.templateId,
+            { type: "cell", sheet: this.sheets.entryForm, ref: "H7" },
+            i18n.t("Service")
+        );
+        await this.excelRepository.writeCell(
+            this.templateId,
+            { type: "cell", sheet: this.sheets.entryForm, ref: "H9" },
+            i18n.t("DataSet")
+        );
+        await this.excelRepository.writeCell(
+            this.templateId,
+            { type: "cell", sheet: this.sheets.entryForm, ref: "H11" },
+            i18n.t("Period")
+        );
+        await this.excelRepository.writeCell(
+            this.templateId,
             { type: "cell", sheet: this.sheets.entryForm, ref: "J7" },
             metadata.dataSet.name
         );
@@ -268,6 +285,13 @@ class DownloadCustomization {
                         type: cell.merge ? "range" : "cell",
                     },
                     cell.style
+                );
+            }
+            if (cell.dataValidation) {
+                await this.excelRepository.setCellValidation(
+                    this.templateId,
+                    { type: "cell", ref: cell.ref, sheet: this.sheets.entryForm },
+                    cell.dataValidation
                 );
             }
         }
@@ -534,19 +558,31 @@ class DownloadCustomization {
                                       ]
                                     : [];
 
+                                const combinationCellRef = `${combLetter}${
+                                    initialSectionCellNumber + totalCategories + deIndex
+                                }`;
+
                                 return [
                                     {
                                         sheet: this.sheets.entryForm,
-                                        ref: `${combLetter}${initialSectionCellNumber + totalCategories + deIndex}`,
+                                        ref: combinationCellRef,
                                         value: "",
                                         style: this.combinationCellStyle,
                                         includeInMapping: true,
                                         metadata: {
-                                            dataElement: { id: sectionDe.id, name: sectionDe.name },
+                                            dataElement: { ...sectionDe },
                                             categoryOptions: record.map(r => r.id),
                                             categoryCombinationId:
                                                 deWithCombination.categoryOptionCombos[productIndex]?.id,
                                         },
+                                        dataValidation: getValidationFromValueType(
+                                            sectionDe.valueType,
+                                            combinationCellRef,
+                                            {
+                                                booleanFormula: `=${this.sheets.validation}!$D$${3}:$D${4}`,
+                                                trueOnlyFormula: `=${this.sheets.validation}!$D$${3}`,
+                                            }
+                                        ),
                                         merge: undefined,
                                     },
                                     ...spaceEndCell,
@@ -822,11 +858,8 @@ export interface Cell extends BaseCell {
     style: Maybe<ThemeStyle>;
     includeInMapping: boolean;
     merge: Maybe<MergeCell>;
-    metadata: Maybe<{
-        dataElement: DataElement;
-        categoryOptions: Id[];
-        categoryCombinationId?: Id;
-    }>;
+    metadata: Maybe<{ dataElement: DataElement; categoryOptions: Id[]; categoryCombinationId?: Id }>;
+    dataValidation?: CellDataValidation | null;
 }
 
 type MergeCell = {

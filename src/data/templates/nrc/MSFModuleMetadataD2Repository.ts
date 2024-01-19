@@ -41,6 +41,7 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
                                 options.language,
                                 d2SetElement.dataElement.displayFormName
                             ),
+                            valueType: d2SetElement.dataElement.valueType,
                         },
                         categoryCombo: {
                             id: categoryCombo.id,
@@ -225,6 +226,7 @@ const dataSetFields = {
     dataSetElements: {
         dataElement: {
             id: true,
+            valueType: true,
             displayFormName: true,
             categoryCombo: categoryComboFields,
             translations: translationFields,

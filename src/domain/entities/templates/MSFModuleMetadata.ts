@@ -16,7 +16,9 @@ export interface GreyedFields extends Ref {
     dataElement: Ref;
 }
 
-export interface DataElement extends NamedRef {}
+export interface DataElement extends NamedRef {
+    valueType: string;
+}
 
 export interface CategoryCombo extends NamedRef {
     categories: Category[];

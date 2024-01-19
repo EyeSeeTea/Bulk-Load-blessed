@@ -7,6 +7,7 @@ import XLSX, {
 } from "@eyeseetea/xlsx-populate";
 import _ from "lodash";
 import moment from "moment";
+import { CellDataValidation } from "../domain/entities/CellDataValidation";
 import { Sheet } from "../domain/entities/Sheet";
 import { CellRef, ColumnRef, Range, RangeRef, RowRef, SheetRef, ValueRef } from "../domain/entities/Template";
 import { ThemeStyle } from "../domain/entities/Theme";
@@ -456,6 +457,13 @@ export class ExcelPopulateRepository extends ExcelRepository {
         const item = ref.type === "range" ? sheet.range(ref.ref) : sheet.cell(ref.ref);
         // @ts-ignore Not properly typed (https://app.clickup.com/t/e14mnv)
         item.dataValidation(formula);
+    }
+
+    public async setCellValidation(id: string, ref: CellRef, options: CellDataValidation): Promise<void> {
+        const workbook = await this.getWorkbook(id);
+        const sheet = workbook.sheet(ref.sheet);
+        const item = sheet.cell(ref.ref);
+        item.dataValidation(options);
     }
 }
 
