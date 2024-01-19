@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2023-12-04T19:09:59.711Z\n"
+"POT-Creation-Date: 2024-01-19T18:27:08.201Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,6 +33,16 @@ msgstr "Valores de los datos - Borrar"
 
 msgid "Failed to import data values"
 msgstr ""
+
+msgid "Service"
+msgstr ""
+
+#, fuzzy
+msgid "DataSet"
+msgstr "Data Set"
+
+msgid "Period"
+msgstr "Periodo"
 
 msgid ""
 "It is not possible to create products. The maximum number of products has "
@@ -740,9 +750,6 @@ msgstr "Seleccione plantilla para exportar..."
 
 msgid "Data Model"
 msgstr "Modelo de Datos"
-
-msgid "Period"
-msgstr "Periodo"
 
 msgid "Start period"
 msgstr "Periodo inicial"

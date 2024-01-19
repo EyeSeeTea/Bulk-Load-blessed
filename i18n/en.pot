@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2023-12-04T19:09:59.711Z\n"
-"PO-Revision-Date: 2023-12-04T19:09:59.711Z\n"
+"POT-Creation-Date: 2024-01-19T18:27:08.201Z\n"
+"PO-Revision-Date: 2024-01-19T18:27:08.201Z\n"
 
 msgid "Data values - Create/update"
 msgstr ""
@@ -30,6 +30,15 @@ msgid "Data values - Delete"
 msgstr ""
 
 msgid "Failed to import data values"
+msgstr ""
+
+msgid "Service"
+msgstr ""
+
+msgid "DataSet"
+msgstr ""
+
+msgid "Period"
 msgstr ""
 
 msgid ""
@@ -708,9 +717,6 @@ msgid "Select template to export..."
 msgstr ""
 
 msgid "Data Model"
-msgstr ""
-
-msgid "Period"
 msgstr ""
 
 msgid "Start period"
