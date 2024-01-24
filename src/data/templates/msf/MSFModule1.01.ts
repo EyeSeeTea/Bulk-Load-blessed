@@ -227,7 +227,7 @@ class DownloadCustomization {
         await this.excelRepository.writeCell(
             this.templateId,
             { type: "cell", sheet: this.sheets.entryForm, ref: "J9" },
-            metadata.dataSet.description
+            metadata.dataSet.name
         );
     }
 

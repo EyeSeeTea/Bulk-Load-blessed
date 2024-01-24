@@ -22,12 +22,6 @@ export class MSFModuleMetadataD2Repository implements MSFModuleMetadataRepositor
         return {
             dataSet: {
                 id: d2DataSet.id,
-                description: this.getValueFromTranslation(
-                    d2DataSet.translations,
-                    options.language,
-                    d2DataSet.displayDescription,
-                    true
-                ),
                 name: this.getValueFromTranslation(d2DataSet.translations, options.language, d2DataSet.displayName),
                 dataSetElements: d2DataSet.dataSetElements.map(d2SetElement => {
                     const categoryCombo = d2SetElement.categoryCombo

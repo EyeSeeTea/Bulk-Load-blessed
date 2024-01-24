@@ -6,7 +6,6 @@ export interface MSFModuleMetadata {
 }
 
 export interface DataSet extends NamedRef {
-    description: string;
     dataSetElements: { dataElement: DataElement; categoryCombo: CategoryCombo }[];
     sections: DataSetSection[];
 }
