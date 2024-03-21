@@ -173,7 +173,7 @@ export class ExcelReader {
         const cell = await this.excelRepository.findRelativeCell(template.id, dataSource.ref);
         const value = cell ? await this.readCellValue(template, cell) : undefined;
         const optionId = await this.excelRepository.readCell(template.id, cell, { formula: true });
-        if (!isDefined(value)) return [];
+        if (!isDefined(value) || value === "") return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
         if (!orgUnit) return [];

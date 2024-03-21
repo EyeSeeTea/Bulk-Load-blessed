@@ -19,6 +19,7 @@ import { InstanceRepository } from "../repositories/InstanceRepository";
 import { ModulesRepositories } from "../repositories/ModulesRepositories";
 import { TemplateRepository } from "../repositories/TemplateRepository";
 import { UsersRepository } from "../repositories/UsersRepository";
+import { buildAllPossiblePeriods } from "../../webapp/utils/periods";
 
 export interface DownloadTemplateProps {
     type: DataFormType;
@@ -165,24 +166,27 @@ export class DownloadTemplateUseCase implements UseCase {
 
         if (theme) await builder.applyTheme(template, theme);
 
-        if (enablePopulate && dataPackage) {
+        if (enablePopulate) {
             if (template.type === "custom" && template.fixedOrgUnit) {
                 await this.excelRepository.writeCell(
                     template.id,
                     template.fixedOrgUnit,
-                    dataPackage.dataEntries[0]?.orgUnit ?? ""
+                    dataPackage?.dataEntries[0]?.orgUnit ?? this.getFirstValueOrEmpty(orgUnits)
                 );
             }
 
             if (template.type === "custom" && template.fixedPeriod) {
+                const periods = buildAllPossiblePeriods(element.periodType, populateStartDate, populateEndDate);
                 await this.excelRepository.writeCell(
                     template.id,
                     template.fixedPeriod,
-                    dataPackage.dataEntries[0]?.period ?? ""
+                    dataPackage?.dataEntries[0]?.period ?? this.getFirstValueOrEmpty(periods)
                 );
             }
 
-            await builder.populateTemplate(template, dataPackage, settings);
+            if (dataPackage) {
+                await builder.populateTemplate(template, dataPackage, settings);
+            }
         }
 
         const extension = template.type === "custom" ? getExtensionFile(template.file.name) : XLSX_EXTENSION;
@@ -195,6 +199,10 @@ export class DownloadTemplateUseCase implements UseCase {
             const data = await this.excelRepository.toBlob(templateId);
             saveAs(data, filename);
         }
+    }
+
+    private getFirstValueOrEmpty(model: string[]): string {
+        return _(model).first() || "";
     }
 }
 
