@@ -18,6 +18,7 @@ import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
 import { ModulesRepositories } from "../repositories/ModulesRepositories";
 import { TemplateRepository } from "../repositories/TemplateRepository";
+import { UsersRepository } from "../repositories/UsersRepository";
 
 export interface DownloadTemplateProps {
     type: DataFormType;
@@ -49,7 +50,8 @@ export class DownloadTemplateUseCase implements UseCase {
         private instanceRepository: InstanceRepository,
         private templateRepository: TemplateRepository,
         private excelRepository: ExcelRepository,
-        private modulesRepositories: ModulesRepositories
+        private modulesRepositories: ModulesRepositories,
+        private usersRepository: UsersRepository
     ) {}
 
     public async execute(api: D2Api, options: DownloadTemplateProps): Promise<void> {
@@ -80,6 +82,7 @@ export class DownloadTemplateUseCase implements UseCase {
         const useShortNameInOrgUnit = orgUnitShortName || false;
         const templateId =
             templateType === "custom" && customTemplateId ? customTemplateId : getGeneratedTemplateId(type);
+        const currentUser = await this.usersRepository.getCurrentUser();
         const template = await this.templateRepository.getTemplate(templateId);
         const theme = themeId ? await this.templateRepository.getTheme(themeId) : undefined;
         const element = await getElement(api, type, id);
@@ -151,6 +154,7 @@ export class DownloadTemplateUseCase implements UseCase {
         const builder = new ExcelBuilder(this.excelRepository, this.instanceRepository, this.modulesRepositories);
 
         await builder.templateCustomization(template, {
+            currentUser,
             type,
             id,
             populate,

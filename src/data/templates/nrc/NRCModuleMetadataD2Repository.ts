@@ -3,6 +3,7 @@ import { D2Api, MetadataPick } from "@eyeseetea/d2-api/2.33";
 import { Id, NamedRef, Ref } from "../../../domain/entities/ReferenceObject";
 import { DataElement, NRCModuleMetadata } from "../../../domain/entities/templates/NRCModuleMetadata";
 import { NRCModuleMetadataRepository } from "../../../domain/repositories/templates/NRCModuleMetadataRepository";
+import { User } from "../../../domain/entities/User";
 
 export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepository {
     categoryComboCodes = {
@@ -13,7 +14,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
 
     constructor(private api: D2Api) {}
 
-    async get(options: { dataSetId: Id }): Promise<NRCModuleMetadata> {
+    async get(options: { currentUser: User; dataSetId: Id }): Promise<NRCModuleMetadata> {
         const dataSet = await this.getDataSet(options);
         const projectCategoryOption = await this.getProjectCategoryOption(dataSet);
         const categoryOptions = await this.getCategoryOptions(projectCategoryOption);
@@ -22,7 +23,7 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         return {
             dataSet: dataSet,
             dataElements: await this.getDataElementsWithDisaggregation(dataSet),
-            organisationUnits: this.getOrganisationUnits(projectCategoryOption, dataSet),
+            organisationUnits: this.getOrganisationUnits(options.currentUser, projectCategoryOption, dataSet),
             periods: this.getPeriods(dataSet),
             categoryCombo: {
                 categories: {
@@ -35,10 +36,29 @@ export class NRCModuleMetadataD2Repository implements NRCModuleMetadataRepositor
         };
     }
 
-    private getOrganisationUnits(projectCategoryOption: D2CategoryOption, dataSet: D2DataSet): NamedRef[] {
-        return _(projectCategoryOption.organisationUnits).isEmpty()
-            ? dataSet.organisationUnits
-            : _.intersectionBy(dataSet.organisationUnits, projectCategoryOption.organisationUnits, ou => ou.id);
+    private getOrganisationUnits(
+        currentUser: User,
+        projectCategoryOption: D2CategoryOption,
+        dataSet: D2DataSet
+    ): NamedRef[] {
+        const projectOrgUnits = projectCategoryOption.organisationUnits;
+
+        function isOrgUnitAvailableForCurrentUserAndProject(dataSetOrgUnit: { path: string }) {
+            const canUserAccessDataSetOrgUnit = currentUser.orgUnits.some(userOrgUnit =>
+                dataSetOrgUnit.path.includes(userOrgUnit.id)
+            );
+
+            const isProjectAssignedToDataSetOrgUnit =
+                projectOrgUnits.length === 0 ||
+                projectOrgUnits.some(projectOrgUnit => dataSetOrgUnit.path.includes(projectOrgUnit.id));
+
+            return canUserAccessDataSetOrgUnit && isProjectAssignedToDataSetOrgUnit;
+        }
+
+        return _(dataSet.organisationUnits)
+            .filter(isOrgUnitAvailableForCurrentUserAndProject)
+            .sortBy(orgUnit => orgUnit.name)
+            .value();
     }
 
     private getPeriods(dataSet: D2DataSet) {
@@ -193,7 +213,7 @@ const dataSetFields = {
         dataElement: { id: true, name: true, categoryCombo: { id: true } },
         categoryCombo: { id: true },
     },
-    organisationUnits: { id: true, name: true },
+    organisationUnits: { id: true, name: true, path: true },
     dataInputPeriods: { period: { id: true } },
     sections: { greyedFields: { dataElement: { id: true }, categoryOptionCombo: { id: true } } },
 } as const;

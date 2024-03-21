@@ -74,7 +74,10 @@ class DownloadCustomization {
         await this.createSheet(this.sheets.validation);
         await this.createSheet(this.sheets.metadata);
 
-        const metadata = await this.moduleRepository.get({ dataSetId: this.options.id });
+        const metadata = await this.moduleRepository.get({
+            currentUser: this.options.currentUser,
+            dataSetId: this.options.id,
+        });
         const workbookData = this.getSheetData(metadata);
         await this.fillWorkbook(metadata, workbookData);
     }

@@ -85,7 +85,13 @@ export function getCompositionRoot({ appConfig, dhisInstance, mockApi, importSou
         }),
         templates: getExecute({
             analyze: new AnalyzeTemplateUseCase(instance, templateManager, excelReader),
-            download: new DownloadTemplateUseCase(instance, templateManager, excelReader, modulesRepository),
+            download: new DownloadTemplateUseCase(
+                instance,
+                templateManager,
+                excelReader,
+                modulesRepository,
+                usersRepository
+            ),
             import: new ImportTemplateUseCase(
                 instance,
                 templateManager,

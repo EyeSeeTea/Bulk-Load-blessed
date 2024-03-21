@@ -6,7 +6,7 @@ import { DataForm, DataFormType } from "./DataForm";
 import { DataPackage } from "./DataPackage";
 import { i18nShortCode, Id } from "./ReferenceObject";
 import { ImageSections, ThemeableSections } from "./Theme";
-import { UserTimestamp } from "./User";
+import { User, UserTimestamp } from "./User";
 import { Sheet as SheetE } from "./Sheet";
 import { ModulesRepositories } from "../repositories/ModulesRepositories";
 
@@ -73,6 +73,7 @@ export interface DownloadCustomizationOptions {
     dataPackage?: DataPackage;
     orgUnits: string[];
     language?: i18nShortCode;
+    currentUser: User;
 }
 
 export interface ImportCustomizationOptions {
