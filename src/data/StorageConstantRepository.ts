@@ -71,9 +71,16 @@ export class StorageConstantRepository extends StorageRepository {
     public async saveObject<T extends object>(key: string, value: T): Promise<void> {
         const { id = generateUid(), name = `${defaultName} - ${key}` } = await this.getConstant(key);
 
-        const response = await this.api.models.constants
-            .put({ id, name, code: key, description: JSON.stringify(value, null, 4), value: 1 })
-            .getData();
+        const payload = {
+            id: id,
+            shortName: name.slice(0, 50),
+            name: name,
+            code: key,
+            description: JSON.stringify(value, null, 4),
+            value: 1,
+        };
+
+        const response = await this.api.models.constants.put(payload).getData();
 
         if (response.status !== "OK") {
             throw new Error(JSON.stringify(response.message, null, 2));
