@@ -82,11 +82,14 @@ export const TemplateSelector = ({
         }
     );
 
-    const selectedId = state.templateId || state.id;
+    const dataSets = dataSource?.dataSets;
+    const { templateId, id } = state;
+
     const isDataSet = React.useMemo(() => {
-        const dataSetIds = dataSource?.dataSets?.map(ds => ds.id);
-        return selectedId && dataSetIds && dataSetIds.includes(selectedId);
-    }, [selectedId, dataSource]);
+        if (!dataSets) return false;
+        const dataSetIds = dataSets.map(ds => ds.id);
+        return (templateId && dataSetIds.includes(templateId)) || (id && dataSetIds.includes(id));
+    }, [dataSets, templateId, id]);
 
     const models = useMemo(() => {
         return _.compact([
