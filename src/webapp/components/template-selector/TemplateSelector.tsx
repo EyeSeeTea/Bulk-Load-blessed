@@ -457,18 +457,20 @@ export const TemplateSelector = ({
 
             {state.populate && !isCustomDataSet && (
                 <>
-                    <div>
-                        <FormControlLabel
-                            className={classes.checkbox}
-                            control={
-                                <Checkbox
-                                    checked={state.filterTEIEnrollmentDate}
-                                    onChange={onFilterTEIEnrollmentDateChange}
-                                />
-                            }
-                            label={i18n.t("Also filter TEI and relationships by their enrollment date")}
-                        />
-                    </div>
+                    {!isDataSet && (
+                        <div>
+                            <FormControlLabel
+                                className={classes.checkbox}
+                                control={
+                                    <Checkbox
+                                        checked={state.filterTEIEnrollmentDate}
+                                        onChange={onFilterTEIEnrollmentDateChange}
+                                    />
+                                }
+                                label={i18n.t("Also filter TEI and relationships by their enrollment date")}
+                            />
+                        </div>
+                    )}
 
                     <div className={classes.row}>
                         <div className={classes.select}>
@@ -490,6 +492,7 @@ export const TemplateSelector = ({
                                 InputLabelProps={{ style: { color: "#494949" } }}
                             />
                         </div>
+
                         <div className={classes.select}>
                             <DatePicker
                                 className={classes.fullWidth}
