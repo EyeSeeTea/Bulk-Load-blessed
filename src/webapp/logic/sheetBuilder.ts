@@ -109,7 +109,7 @@ export class SheetBuilder {
                 const sections = _.orderBy(rawMetadata.sections as Section[], section => section.sortOrder);
 
                 sections.forEach(section => {
-                    const tabName = `${dataEntryTabName} - ${this.translate(section).name}`;
+                    const tabName = getValidSheetName(`${dataEntryTabName} - ${this.translate(section).name}`);
                     const dataEntrySheet = workbook.addWorksheet(tabName);
                     const includedDataElementIds = new Set(section.dataElements.map(de => de.id));
                     dataEntrySheetsInfo.push({ sheet: dataEntrySheet, options: { includedDataElementIds } });
