@@ -274,7 +274,7 @@ export class InstanceDhisRepository implements InstanceRepository {
     }
 
     public async getBuilderMetadata(teis: TrackedEntityInstance[]): Promise<BuilderMetadata> {
-        const orgUnitIds = teis.map(tei => tei.orgUnit.id);
+        const orgUnitIds = _.uniq(teis.map(tei => tei.orgUnit.id));
         const orgUnitIdsList = _.chunk(orgUnitIds, 250);
 
         const orgUnits: NamedRef[] = _.flatten(
