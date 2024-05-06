@@ -1,9 +1,17 @@
+
+![logo_bulkload_eyeseetea_dhis2_suite_apps](https://github.com/EyeSeeTea/Bulk-Load-blessed/assets/108925044/c207c818-824d-44ff-ba9f-af31b1e94a1e)
+
 # DHIS2 Bulk Load
 
-The Bulk Load application generates templates (an Excel sheet) and imports multiple data values for DHIS2 v2.30 instances. Some notes:
+Bulk Load is a DHIS2 Web Application part of [EyeSeeTea's DHIS2 Suite](https://eyeseetea.com/dhis2-apps/) designed to ease the integration of data from excel
+into DHIS2 and generate templates for datasets and programs.
 
--   Settings are only visible for superusers (`ALL` authority) or users that belong to the settings groups.
--   The generation box is only visible for users that belong to the configurable `Template Generation` groups (initial value: `HMIS Officers`).
+### About & Sponsorships
+
+Bulk Load App development is sustainable thanks to the partners for which we build customized DHIS2 solutions. It has been funded by This application has been funded by the WHO Global Malaria Programme, Samaritan’s Purse, Medecins Sans Frontières (MSF), the the Norwegian Refugee Council (NRC) and the Clinton Health Access Initiative (CHAI) to support countries in strengthening the collection and use of health data by using DHIS2. Also, the WHO Integrated Data Platform (WIDP), where several WHO departments and units share a dedicated hosting and maintenance provided by EyeSeeTea, back some specific new features. The Long Term Agreement EyeSeeTea holds with WHO for this maintenance includes maintenance of this application, ensuring that it will always work at least with the last version of WIDP. We are passionate about both DHIS2 and open source, so giving back to the community through dedicated open-source development is and will always be part of EyeSeeTea’s commitment.
+
+You can also [support our work through a one-time contribution or becoming a regular github sponsor](https://github.com/sponsors/EyeSeeTea)
+
 
 ## Setup
 
