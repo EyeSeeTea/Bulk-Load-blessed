@@ -10,7 +10,7 @@ into DHIS2 and generate templates for datasets and programs.
 
 You can find a detailed user and developer guide [at the wiki](https://github.com/EyeSeeTea/Bulk-Load-blessed/wiki) and also our [road map](https://github.com/orgs/EyeSeeTea/projects/45) You can download User Extended from the [DHIS2 App Hub](https://apps.dhis2.org/app/ce68be24-22ce-4cfd-98f7-71f4a0155a0f)
 
-For more links, see the [User-Extended App website](https://eyeseetea.github.io/user-extended-app-blessed/)
+For more links, see the [Bulk Load App website](https://eyeseetea.github.io/Bulk-Load-blessed/index.html)
 
 ## Feedback
 
@@ -18,7 +18,7 @@ We’d like to hear your thoughts on the app in general, improvements, new featu
 
 ### About & Sponsorships
 
-Bulk Load App development is sustainable thanks to the partners for which we build customized DHIS2 solutions. It has been funded by This application has been funded by the WHO Global Malaria Programme, Samaritan’s Purse, Medecins Sans Frontières (MSF), the the Norwegian Refugee Council (NRC) and the Clinton Health Access Initiative (CHAI) to support countries in strengthening the collection and use of health data by using DHIS2. Also, the WHO Integrated Data Platform (WIDP), where several WHO departments and units share a dedicated hosting and maintenance provided by EyeSeeTea, back some specific new features. The Long Term Agreement EyeSeeTea holds with WHO for this maintenance includes maintenance of this application, ensuring that it will always work at least with the last version of WIDP. We are passionate about both DHIS2 and open source, so giving back to the community through dedicated open-source development is and will always be part of EyeSeeTea’s commitment.
+Bulk Load App development is sustainable thanks to the partners for which we build customized DHIS2 solutions. It has been funded by This application has been funded by the WHO Global Malaria Programme, Samaritan’s Purse, Medecins Sans Frontières (MSF), the Norwegian Refugee Council (NRC) and the Clinton Health Access Initiative (CHAI) to support countries in strengthening the collection and use of health data by using DHIS2. Also, the WHO Integrated Data Platform (WIDP), where several WHO departments and units share a dedicated hosting and maintenance provided by EyeSeeTea, back some specific new features. The Long Term Agreement EyeSeeTea holds with WHO for this maintenance includes maintenance of this application, ensuring that it will always work at least with the last version of WIDP. We are passionate about both DHIS2 and open source, so giving back to the community through dedicated open-source development is and will always be part of EyeSeeTea’s commitment.
 
 You can also [support our work through a one-time contribution or becoming a regular github sponsor](https://github.com/sponsors/EyeSeeTea)
 
