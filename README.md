@@ -22,6 +22,11 @@ Bulk Load App development is sustainable thanks to the partners for which we bui
 
 You can also [support our work through a one-time contribution or becoming a regular github sponsor](https://github.com/sponsors/EyeSeeTea)
 
+<p align="center">
+  <a href="https://eyeseetea.github.io/user-extended-app-blessed/"> <img src="https://github.com/EyeSeeTea/Bulk-Load-blessed/assets/108925044/9aecf851-ceb2-4070-8a43-da3fae9bbe19"> </a>
+</p>
+
+
 
 ## Setup
 
