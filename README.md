@@ -6,6 +6,16 @@
 Bulk Load is a DHIS2 Web Application part of [EyeSeeTea's DHIS2 Suite](https://eyeseetea.com/dhis2-apps/) designed to ease the integration of data from excel
 into DHIS2 and generate templates for datasets and programs.
 
+## Documentation
+
+You can find a detailed user and developer guide [at the wiki](https://github.com/EyeSeeTea/Bulk-Load-blessed/wiki) and also our [road map](https://github.com/orgs/EyeSeeTea/projects/45) You can download User Extended from the [DHIS2 App Hub](https://apps.dhis2.org/app/ce68be24-22ce-4cfd-98f7-71f4a0155a0f)
+
+For more links, see the [User-Extended App website](https://eyeseetea.github.io/user-extended-app-blessed/)
+
+## Feedback
+
+We’d like to hear your thoughts on the app in general, improvements, new features or any of the technologies being used. Just drop as a line at community@eyeseetea.com and let us know! If you prefer, you can also [create a new issue](https://github.com/EyeSeeTea/Bulk-Load-blessed/issues) on our GitHub repository. Note that you will have to register and be logged in to GitHub to create a new issue.
+
 ### About & Sponsorships
 
 Bulk Load App development is sustainable thanks to the partners for which we build customized DHIS2 solutions. It has been funded by This application has been funded by the WHO Global Malaria Programme, Samaritan’s Purse, Medecins Sans Frontières (MSF), the the Norwegian Refugee Council (NRC) and the Clinton Health Access Initiative (CHAI) to support countries in strengthening the collection and use of health data by using DHIS2. Also, the WHO Integrated Data Platform (WIDP), where several WHO departments and units share a dedicated hosting and maintenance provided by EyeSeeTea, back some specific new features. The Long Term Agreement EyeSeeTea holds with WHO for this maintenance includes maintenance of this application, ensuring that it will always work at least with the last version of WIDP. We are passionate about both DHIS2 and open source, so giving back to the community through dedicated open-source development is and will always be part of EyeSeeTea’s commitment.
