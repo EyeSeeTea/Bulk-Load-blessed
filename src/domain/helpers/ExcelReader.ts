@@ -132,6 +132,12 @@ export class ExcelReader {
             if (!dataFormId) return undefined;
 
             const category = await this.readCellValue(template, dataSource.categoryOption, cell);
+            /*const category2 = await this.excelRepository.readCell(template.id, dataSource.categoryOption, cell, {
+                formula: true,
+            });
+            console.log({ category, category2 });
+            */
+
             const attribute = await this.readCellValue(template, dataSource.attribute, cell);
             const eventId = await this.readCellValue(template, dataSource.eventId, cell);
 
@@ -170,6 +176,7 @@ export class ExcelReader {
         if (!isDefined(value) || value === "") return [];
 
         const orgUnit = await this.readCellValue(template, dataSource.orgUnit);
+        if (!orgUnit) return [];
 
         const period = await this.readCellValue(template, dataSource.period);
         if (!period) return [];
