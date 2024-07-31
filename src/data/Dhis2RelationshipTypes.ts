@@ -219,7 +219,7 @@ const getConstraint = memoizeAsync(
                 if ("program" in constraint) {
                     const program = programsById[constraint.program.id];
                     return getConstraintForTypeProgram(api, filters, program);
-                } else {
+                } else if ("programStage" in constraint) {
                     const data = programsDataByProgramStageId[constraint.programStage.id];
                     return getConstraintForTypeProgram(api, filters, data?.program, data?.programStage);
                 }
