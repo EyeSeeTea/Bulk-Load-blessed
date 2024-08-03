@@ -1029,7 +1029,7 @@ export class SheetBuilder {
         const { element } = this.builder;
 
         return _(element.programStages)
-            .filter(({ access }) => access?.read && access?.data?.read && access?.data?.write)
+            .filter(({ access }) => access?.read && access?.data?.read)
             .value();
     }
 
