@@ -86,7 +86,9 @@ export class SheetBuilder {
             instancesSheet = workbook.addWorksheet(teiSheetName);
 
             // ProgramStage sheets
-            const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+            const programStages = this.getProgramStagesWithReadPermission().map(programStageT =>
+                metadata.get(programStageT.id)
+            );
 
             withSheetNames(programStages).forEach((programStage: any) => {
                 const sheet = workbook.addWorksheet(programStage.sheetName);
@@ -190,7 +192,9 @@ export class SheetBuilder {
     private fillProgramStageSheets(programStageSheets: Record<Id, Sheet>) {
         const { elementMetadata: metadata, element: program, settings } = this.builder;
 
-        const programStages = this.getProgramStages().map(programStageT => metadata.get(programStageT.id));
+        const programStages = this.getProgramStagesWithReadPermission().map(programStageT =>
+            metadata.get(programStageT.id)
+        );
         const sheets = withSheetNames(programStages);
 
         _.forEach(programStageSheets, (sheet, programStageId) => {
@@ -917,7 +921,7 @@ export class SheetBuilder {
                 groupId++;
             });
         } else {
-            _.forEach(this.getProgramStages(), programStageT => {
+            _.forEach(this.getProgramStagesWithReadPermission(), programStageT => {
                 const programStage = metadata.get(programStageT.id);
 
                 this.createColumn(
@@ -1024,8 +1028,7 @@ export class SheetBuilder {
         };
     }
 
-    // Return only program stages for which the current user has permissions to export/import data.
-    private getProgramStages() {
+    private getProgramStagesWithReadPermission() {
         const { element } = this.builder;
 
         return _(element.programStages)
