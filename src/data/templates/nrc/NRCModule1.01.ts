@@ -126,16 +126,16 @@ class DownloadCustomization {
     }
 
     private getSheetData(metadata: NRCModuleMetadata): WorkbookData {
-        const validationCells = this.getValidationCells(metadata);
-        const metadataCells = this.getMetadataCells(metadata);
-        const aocCells = this.getAttributeOptionComboCells(metadata);
-        const cocCells = this.getCategoryOptionComboCells(metadata);
-        const dataSetCells = this.getDataSetCells(metadata);
-        const clearedOutCells = this.getClearedOutCellsByCategories(metadata);
+        const cellGroups = [
+            this.getValidationCells(metadata),
+            this.getMetadataCells(metadata),
+            this.getAttributeOptionComboCells(metadata),
+            this.getCategoryOptionComboCells(metadata),
+            this.getDataSetCells(metadata),
+            this.getClearedOutCellsByCategories(metadata),
+        ];
 
-        return {
-            cells: _.concat(dataSetCells, validationCells, metadataCells, aocCells, cocCells, clearedOutCells),
-        };
+        return { cells: _.flatten(cellGroups) };
     }
 
     private getDataSetCells(metadata: NRCModuleMetadata) {
@@ -356,8 +356,19 @@ class DownloadCustomization {
             });
         }
 
+        this.hideIdCells(excelRepository);
+
         excelRepository.protectSheet(this.id, this.sheets.validation, this.password);
         excelRepository.protectSheet(this.id, this.sheets.metadata, this.password);
+    }
+
+    private hideIdCells(excelRepository: ExcelRepository) {
+        const idColumns = ["G", "H", "I", "J"];
+        const sheet = this.sheets.dataEntry;
+
+        idColumns.forEach(idColumn => {
+            excelRepository.hideCells(this.id, { sheet: sheet, type: "column", ref: idColumn }, true);
+        });
     }
 }
 
