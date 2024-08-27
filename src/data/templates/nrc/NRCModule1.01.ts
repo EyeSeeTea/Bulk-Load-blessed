@@ -299,14 +299,6 @@ class DownloadCustomization {
         };
         const value = `Validation!$${columns.validation}$${row}:$${columns.validation}$${row + objects.length - 1}`;
 
-        /*
-        await excelRepository.defineName(this.id, nameForId(cell.id), {
-            type: "cell" as const,
-            sheet: cell.sheet,
-            ref: cell.ref,
-        });
-        */
-
         await this.excelRepository.setDataValidation(this.id, range, value);
     }
 
@@ -322,15 +314,6 @@ class DownloadCustomization {
 
     private async fillWorkbook(_metadata: NRCModuleMetadata, sheetData: WorkbookData) {
         const { excelRepository } = this;
-        /*
-        const { categories } = metadata.categoryCombo;
-
-        await this.setDropdown({ data: "A", validation: "A" }, metadata.organisationUnits);
-        await this.setDropdown({ data: "B", validation: "B" }, categories.phasesOfEmergency.categoryOptions);
-        await this.setDropdown({ data: "C", validation: "D" }, metadata.dataElements);
-        await this.setDropdown({ data: "E", validation: "C" }, categories.targetActual.categoryOptions);
-        await this.setDropdownCell("D1", { validation: "F" }, metadata.periods);
-        */
 
         for (const cell of sheetData.cells) {
             await excelRepository.writeCell(
