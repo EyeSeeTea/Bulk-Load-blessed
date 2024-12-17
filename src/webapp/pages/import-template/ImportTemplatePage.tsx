@@ -135,7 +135,7 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                             const dataSetConfig = {
                                 title: i18n.t("Existing data values"),
                                 message: i18n.t(
-                                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. All those data values can either be completely deleted or will be kept and only the ones with different values will be updated. What do you want to do?",
+                                    "There are {{totalExisting}} data values in the database for this organisation unit and periods. Would you like to import only the new data values, import new values and update existing ones, or completely delete existing values before importing the data?",
                                     { totalExisting }
                                 ),
                                 save: i18n.t("Delete and Import"),
@@ -144,13 +144,13 @@ export default function ImportTemplatePage({ settings }: RouteComponentProps) {
                                 updateText: i18n.t("Import and Update"),
                                 saveButtonPrimary: false,
                                 saveTooltipText: i18n.t(
-                                    "Delete all existing values and import the ones in the spreadsheet"
+                                    "All data values in the spreadsheet will be imported to the system, but any data that was existing for such organisation unit and periods in the system will be deleted first, so none will be kept before doing the import."
                                 ),
                                 infoTooltipText: i18n.t(
-                                    "Import only new data values. Without updating or deleting current ones"
+                                    "Import only new data values, without updating nor deleting any existing one. Only values in the spreadsheet that do not currently exist in the system will be imported"
                                 ),
                                 updateTooltipText: i18n.t(
-                                    "Import and update data values without deleting the remaining existing data"
+                                    "Import new data values and also update existing ones. All data values in the spreadsheet will be imported to the system, but other data values present in the system that are not provided in the spreadsheet will be kept."
                                 ),
                             };
 
