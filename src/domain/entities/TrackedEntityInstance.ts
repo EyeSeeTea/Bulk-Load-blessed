@@ -3,6 +3,7 @@ import { DataElementType } from "./DataForm";
 import { Geometry } from "./Geometry";
 import { Id, Ref } from "./ReferenceObject";
 import { Relationship } from "./Relationship";
+import { D2TrackerAttribute } from "./TrackedEntity";
 
 export interface TrackedEntityInstance {
     program: Ref;
@@ -17,8 +18,12 @@ export interface TrackedEntityInstance {
 
 export interface Enrollment {
     id?: Id;
-    enrollmentDate: string;
-    incidentDate: string;
+    program?: Id;
+    orgUnit?: Id;
+    enrollment?: string;
+    enrolledAt: string;
+    occurredAt: string;
+    attributes?: D2TrackerAttribute[];
 }
 
 export interface AttributeValue {
