@@ -70,11 +70,11 @@ export function processImportResponse(options: {
             rawResponse: importResult,
         };
     }
-
+    const trackerStats = bundleReport.stats || importResult.stats;
     const totalStats: SynchronizationStats = {
         type: "TOTAL",
-        imported: bundleReport.stats.created,
-        ...bundleReport.stats,
+        imported: trackerStats.created,
+        ...trackerStats,
     };
 
     const eventStatsList = _(bundleReport.typeReportMap)
