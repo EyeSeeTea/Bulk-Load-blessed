@@ -16,7 +16,7 @@ import { Feedback } from "@eyeseetea/feedback-component";
 import "./App.css";
 import { muiTheme } from "./themes/dhis2.theme";
 import {Maybe} from "../../../types/utils";
-import {AppConfig} from "../../../AppConfig";
+import {AppConfig} from "./AppConfig";
 
 export interface AppProps {
     api: D2Api;
