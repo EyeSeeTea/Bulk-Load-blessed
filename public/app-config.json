@@ -4,18 +4,18 @@
         "showShareButton": true
     },
     "feedback": {
-       "repositories": {
-           "clickUp": {
-               "apiUrl": "https://dev.eyeseetea.com/clickup",
-               "listId": "170646821",
-               "title": "[User feedback] {title}",
-               "body": "## dhis2\n\nUsername: {username}\n\n{body}",
-               "status": "Misc"
-           },
-           "dhis2": {
-               "sendToDhis2UserGroups": []
-           }
-       },
+        "repositories": {
+            "clickUp": {
+                "apiUrl": "https://dev.eyeseetea.com/clickup",
+                "listId": "170646821",
+                "title": "[User feedback] {title}",
+                "body": "## dhis2\n\nUsername: {username}\n\n{body}",
+                "status": "Misc"
+            },
+            "dhis2": {
+                "sendToDhis2UserGroups": []
+            }
+        },
         "layoutOptions": {
             "showContact": false,
             "descriptionTemplate": "## Summary\n\n## Steps to reproduce\n\n## Actual results\n\n## Expected results\n\n"
