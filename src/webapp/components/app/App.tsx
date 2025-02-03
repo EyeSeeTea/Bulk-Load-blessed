@@ -15,8 +15,8 @@ import Share from "../share/Share";
 import { Feedback } from "@eyeseetea/feedback-component";
 import "./App.css";
 import { muiTheme } from "./themes/dhis2.theme";
-import {Maybe} from "../../../types/utils";
-import {AppConfig} from "./AppConfig";
+import { Maybe } from "../../../types/utils";
+import { AppConfig } from "./AppConfig";
 
 export interface AppProps {
     api: D2Api;
@@ -75,7 +75,9 @@ export const App: React.FC<AppProps> = React.memo(({ api, d2 }) => {
                                 <Router />
                             </div>
                             <Share visible={showShareButton} />
-                            {appConfig && appConfig.feedback && <Feedback options={appConfig.feedback} username={username} />}
+                            {appConfig && appConfig.feedback && (
+                                <Feedback options={appConfig.feedback} username={username} />
+                            )}
                         </SnackbarProvider>
                     </LoadingProvider>
                 </MuiThemeProvider>
