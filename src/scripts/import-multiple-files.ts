@@ -21,11 +21,11 @@ function main() {
                 long: "dhis2-url",
                 description: "DHIS2 base URL. Example: http://USERNAME:PASSWORD@localhost:8080",
             }),
-            folderPath: option({
+            templatePath: option({
                 type: string,
                 short: "fp",
-                long: "folder-path",
-                description: "folder path with excel files to import data",
+                long: "template-path",
+                description: "template path with excel files to import data",
             }),
             resultsPath: option({
                 type: string,
@@ -37,14 +37,14 @@ function main() {
         handler: async args => {
             const api: D2Api = getD2APiFromInstance({ type: "local", url: args.url });
 
-            const excelFile = await readFile(args.folderPath);
+            const excelFile = await readFile(args.templatePath);
             const compositionRoot = getCompositionRoot({
                 appConfig: appConfig as unknown as JsonConfig,
                 dhisInstance: { type: "local", url: args.url },
                 importSource: "node",
             });
             const settings = await Settings.build(api, compositionRoot);
-            console.debug(`Importing file ${args.folderPath}`);
+            console.debug(`Importing file ${args.templatePath}`);
             const results = await compositionRoot.templates.import({
                 // @ts-ignore
                 file: Buffer.from(excelFile),
@@ -54,7 +54,7 @@ function main() {
                 selectedOrgUnits: [],
                 useBuilderOrgUnits: false,
             });
-            const resultPath = resolve(args.resultsPath, `${basename(args.folderPath)}.json`);
+            const resultPath = resolve(args.resultsPath, `${basename(args.templatePath)}.json`);
             results.match({
                 success: async syncResults => {
                     const resultDetails = JSON.stringify(syncResults, null, 2);
