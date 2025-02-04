@@ -459,7 +459,7 @@ export class InstanceDhisRepository implements InstanceRepository {
             };
         });
 
-        return postEvents(this.api, eventsToSave);
+        return postEvents(this.api, eventsToSave, { existingTeis: [], teis: [] });
     }
 
     private async getEventProgramStage(programId: Id): Promise<Ref | undefined> {

@@ -166,7 +166,7 @@ export async function updateTrackedEntityInstances(
     return runSequentialPromisesOnSuccess([
         () => uploadTeis({ ...options, teis: preTeis, title: i18n.t("Create/update") }),
         () => uploadTeis({ ...options, teis: postTeis, title: i18n.t("Relationships") }),
-        () => postEvents(api, apiEvents),
+        () => postEvents(api, apiEvents, { existingTeis, teis: preTeis.concat(postTeis) }),
     ]);
 }
 
@@ -589,7 +589,7 @@ function getValue(
     dataValue: { optionId?: string; value: EventDataValue["value"] },
     optionById: Record<Id, { id: Id; code: string } | undefined>
 ): string {
-    if (dataValue.optionId && dataValue.optionId !== "true" && dataValue.optionId !== "false") {
+    if (dataValue.optionId) {
         return optionById[dataValue.optionId]?.code || dataValue.optionId;
     } else {
         return dataValue.value.toString();
