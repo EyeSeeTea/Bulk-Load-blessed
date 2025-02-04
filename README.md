@@ -73,3 +73,25 @@ $ yarn localize
 ### App context
 
 The file `src/webapp/contexts/app-context.ts` holds some general context so typical infrastructure objects (`api`, `d2`, ...) are readily available. Add your own global objects if necessary.
+
+### Import multiple files in a folder
+
+You can use the script `import-multiple-files.ts` along this bash script to import multiple templates in a folder:
+
+```bash
+#!/bin/bash
+
+xlsx_folder="/path/to/folder/with/templates"
+
+for file in "$xlsx_folder"/*.xlsx; do
+    if [ -f "$file" ]; then
+
+        filepath=$(realpath "$file")
+        echo "Importing file: $filepath"
+        npx ts-node src/scripts/import-multiple-files.ts \
+            --dhis2-url="http://admin:district@localhost:8080" \
+            --template-path="$filepath" \
+            --results-path="/path/to/folder/for/json_results"
+    fi
+done
+```
