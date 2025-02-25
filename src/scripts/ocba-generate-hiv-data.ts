@@ -161,7 +161,10 @@ class HIVDataGenerator {
                 const newDate = nextConsultationDate.getDate() + random(`next-${index}`, -offset, +offset);
                 nextConsultationDate.setDate(newDate);
 
+                const ageAtConsultation = Math.max(1, new Date(consultationDate).getFullYear() - tei.birthYear);
+
                 const advancedHiv =
+                    ageAtConsultation < 5 ||
                     config.advancedHivWhoStages.includes(tei.currentWhoStage) ||
                     random(`advancedHiv-${index}`, 0, 100) < config.percentageOfAdvancedHiv;
 
@@ -179,7 +182,7 @@ class HIVDataGenerator {
                     advancedHiv: advancedHiv,
                     viralLoad: viralLoad,
                     arvLine: tei.arvLine,
-                    ageAtConsultation: Math.max(1, new Date(consultationDate).getFullYear() - tei.birthYear),
+                    ageAtConsultation: ageAtConsultation,
                     arv1StartDate: tei.arvLine === 1 ? tei.enrollmentDate : undefined,
                     arv2StartDate: tei.arvLine === 2 ? tei.enrollmentDate : undefined,
                     arv3StartDate: tei.arvLine === 3 ? tei.enrollmentDate : undefined,
