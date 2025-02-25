@@ -23,11 +23,16 @@ $ yarn install
 
 ### Basic Usage
 
+Using bundled xlsx (hiv-bl-template.xlsx):
+
 ```sh
-$ npx ts-node src/scripts/ocba-generate-hiv-data.ts --output "hiv-data-INDEX.xlsx" --template src/scripts/hiv-bl-template.xlsx
+$ npx ts-node src/scripts/ocba-generate-hiv-data.ts --template src/scripts/hiv-bl-template.xlsx --output "hiv-data-INDEX.xlsx"
 ```
 
-Literal `INDEX` will be replaced in the output path for the current file index.
+Notes:
+
+-   Use your own xlsx template (bulk-load -> Download Template -> Select program "HIV" + select orgUnit (example: "MALAKAL HIV - PoC - Linelist") + [Download template])
+-   Literal `INDEX` will be replaced in the output path for the current file index.
 
 ### Command Line Arguments
 

@@ -9,7 +9,7 @@ const config = {
     yearsInPast: 8,
     chunkSize: 100,
     teisPerMonth: 50,
-    maxConsultationsDefault: 50,
+    maxConsultationsDefault: 8 * 12,
     closurePercentageDefault: 5,
     orgUnits: ["MALAKAL HIV - PoC - Linelist"],
     addresses: [
@@ -28,7 +28,7 @@ const config = {
     advancedHivWhoStages: [3, 4],
     percentageOfAdvancedHiv: 20,
     percentageOfViralLoadPresence: 80,
-    viralLoad: { min: 100, max: 10000 },
+    viralLoad: { min: 100, max: 100_000 },
 };
 
 const app = command({
@@ -129,7 +129,7 @@ class HIVDataGenerator {
 
         return dates.map((enrollmentDate, rowIndex): TrackedEntity => {
             const teiId = getUid(`tei-${rowIndex}`);
-            const age = random(`age-${rowIndex}`, config.ages.min, config.ages.min);
+            const age = random(`age-${rowIndex}`, config.ages.min, config.ages.max);
 
             return {
                 id: teiId,
@@ -147,6 +147,8 @@ class HIVDataGenerator {
     }
 
     private buildConsultations(teis: TrackedEntity[]): Consultation[] {
+        const now = new Date();
+
         return teis.flatMap(tei => {
             let consultationDate = new Date(tei.enrollmentDate);
 
