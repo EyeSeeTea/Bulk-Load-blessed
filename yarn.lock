@@ -4714,10 +4714,10 @@
     rxjs-compat "6.6.7"
     throttle-debounce "4.0.1"
 
-"@eyeseetea/xlsx-populate@4.3.0-beta.1":
-  version "4.3.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@eyeseetea/xlsx-populate/-/xlsx-populate-4.3.0-beta.1.tgz#0687ca3ee20d5dd44c1ccb269add252215dcfcbf"
-  integrity sha512-G4fKNbxmyVGdmjzWcyMzi3GIYLHaNrDw5S6g07G2YZV/s6n3Ma10OOar372gD8aCo8OlFxbE8qK2yq7Kmz5phw==
+"@eyeseetea/xlsx-populate@4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@eyeseetea/xlsx-populate/-/xlsx-populate-4.3.1.tgz#abe91d9313d4d8f99c7af5213753b763cad7a504"
+  integrity sha512-JivVociksARWbvCVCRNmW+VKrIetxNzDvt8oGU19ni0g/bfRa0SuPqETqjrbjNo0k7mdoBXpyKVV1esGXPx6mA==
   dependencies:
     cfb "^1.1.3"
     jszip "^3.2.2"
@@ -9016,7 +9016,7 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-csstype@^2.2.0, csstype@^2.5.2, csstype@^2.6.7:
+csstype@^2.5.2, csstype@^2.6.7:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.10.tgz#e63af50e66d7c266edb6b32909cfd0aabe03928b"
   integrity sha512-D34BqZU4cIlMCY93rZHbrq9pjTAQJ3U8S8rfBqjwHxkGPThWFjzZDQpgMJY0QViLxth6ZKYiwFBo14RdN44U/w==
