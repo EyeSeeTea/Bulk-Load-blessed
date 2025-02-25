@@ -1,267 +1,256 @@
-import _ from "lodash";
 import XlsxPopulate from "@eyeseetea/xlsx-populate";
-import { command, number, string, option, run } from "cmd-ts";
+import { command, number, string, option, run, optional } from "cmd-ts";
 import { fromFileAsync } from "@eyeseetea/xlsx-populate";
+import _ from "lodash";
+
 import { getUid } from "../data/dhis2-uid";
 
-type HIVDataGeneratorOptions = {
-    templateFile: string;
-    maxTeis: number;
-    maxConsultations: number;
-    closurePercentage: number;
-    output: string;
+const config = {
+    chunkSize: 100,
+    maxConsultationsDefault: 50,
+    closurePercentageDefault: 5,
+    orgUnits: ["MALAKAL HIV - PoC - Linelist"],
+    addresses: [
+        "SOUTH SUDAN / MALAKAL / CANAL",
+        "SOUTH SUDAN / MALAKAL / POAM",
+        "SOUTH SUDAN / MALAKAL / GELACHEL",
+        "SOUTH SUDAN / MALAKAL / ULANG",
+        "SOUTH SUDAN / MALAKAL / MUDERIA",
+        "SOUTH SUDAN / MALAKAL / KOLIET",
+        "SOUTH SUDAN / MALAKAL / KHORWAI",
+    ],
 };
 
-type Tei = {
-    id: string;
-    enrollmentDate: string;
-    age: number;
-    currentWhoStage: number;
-    arvLine: number;
-};
-
-type Consultation = {
-    id: string;
-    teiId: string;
-    consultationDate: string;
-};
+const app = command({
+    name: "hiv-data-generator",
+    args: {
+        templateFile: option({ type: string, long: "template" }),
+        maxTeis: option({ type: optional(number), long: "max-tracked-entities" }),
+        maxConsultations: option({
+            type: number,
+            long: "max-consultations",
+            defaultValue: () => config.maxConsultationsDefault,
+        }),
+        closurePercentage: option({
+            type: number,
+            long: "closure-percentage",
+            defaultValue: () => config.closurePercentageDefault,
+        }),
+        output: option({ type: string, long: "output" }),
+    },
+    handler: async args => {
+        const generator = await HIVDataGenerator.build(args);
+        await generator.generateAndSaveSpreadsheet({ output: args.output });
+    },
+});
 
 class HIVDataGenerator {
-    private workbook: XlsxPopulate.Workbook | null = null;
-    private tables: Record<string, XlsxPopulate.Sheet> = {};
+    sheets = {
+        trackedEntities: "TEI Instances",
+        consultationEvents: "(1) HIV Consultation",
+        closureEvents: "(2) Closure",
+    };
 
-    constructor(
-        private options: { templateFile: string; maxTeis: number; maxConsultations: number; closurePercentage: number }
-    ) {}
+    constructor(private workbook: XlsxPopulate.Workbook, private options: Omit<HIVDataGeneratorOptions, "output">) {}
+
+    public async generateAndSaveSpreadsheet(options: Pick<HIVDataGeneratorOptions, "output">): Promise<void> {
+        const { chunkSize } = config;
+        const teis = this.buildTeis();
+        const sheetsCount = Math.ceil(teis.length / chunkSize);
+        const indexedGroups = _.chunk(teis, chunkSize).map((teisGroup, index) => ({ index, teisGroup }));
+        this.log(`trackedEntities: ${teis.length} (${sheetsCount} files in chunks of ${chunkSize})`);
+
+        for (const item of indexedGroups) {
+            const { index, teisGroup } = item;
+
+            this.generateTrackedEntitiesSheet(teisGroup);
+
+            const consultations = this.buildConsultations(teisGroup);
+            this.generateConsultationsSheet(consultations);
+
+            const closures = this.buildClosures(teisGroup, consultations);
+            this.generateClosureSheet(closures);
+
+            const indexWithPadding = (index + 1).toString().padStart(3, "0");
+            const outputFileName = options.output.replace("INDEX", indexWithPadding);
+            await this.workbook?.toFileAsync(outputFileName);
+
+            this.log(`Written: ${outputFileName}`);
+        }
+    }
 
     private log(message: string): void {
-        console.log(message);
+        console.info(message);
     }
 
-    private error(message: string): void {
-        console.error(message);
-    }
-
-    async loadTemplate(): Promise<void> {
-        this.log("Loading template file");
-        this.workbook = await fromFileAsync(this.options.templateFile);
-        this.tables = {
-            "TEI Instances": this.workbook.sheet("TEI Instances"),
-            "(1) HIV Consultation": this.workbook.sheet("(1) HIV Consultation"),
-            "(2) Closure": this.workbook.sheet("(2) Closure"),
-        };
-    }
-
-    generateFirstSheet(): Tei[] {
-        this.log("Generating first sheet");
-        const sheet = this.tables["TEI Instances"];
+    private getSheet(sheetName: string): XlsxPopulate.Sheet {
+        const sheet = this.workbook.sheet(sheetName);
         if (!sheet) throw new Error("TEI Instances sheet not found");
+        return sheet;
+    }
 
-        const allowedValues = {
-            "Org Unit *": ["MALAKAL HIV - PoC - Linelist"],
-            Address: [
-                "SOUTH SUDAN / MALAKAL / CANAL",
-                "SOUTH SUDAN / MALAKAL / POAM",
-                "SOUTH SUDAN / MALAKAL / GELACHEL",
-                "SOUTH SUDAN / MALAKAL / ULANG",
-                "SOUTH SUDAN / MALAKAL / MUDERIA",
-                "SOUTH SUDAN / MALAKAL / KOLIET",
-                "SOUTH SUDAN / MALAKAL / KHORWAI",
-            ],
-            "Sex *": ["Female", "Male"],
-        };
+    private generateTrackedEntitiesSheet(trackedEntities: TrackedEntity[]) {
+        const sheet = this.getSheet(this.sheets.trackedEntities);
+        const rowIndexStart = 6;
 
-        let rowIndexStart = 6;
-
-        const teis: Tei[] = [];
-
-        function generateCode(row: number): string {
-            // =TEXT(20+INT((ROW()-1)/10),"00")&"-HIV-MALAKAL-"&TEXT(MOD(ROW()-1,10)+1,"00")
-            const prefix = (20 + Math.floor((row - 1) / 10)).toString().padStart(2, "0");
-            const suffix = (1 + ((row - 1) % 10)).toString().padStart(2, "0");
-            return `${prefix}-HIV-MALAKAL-${suffix}`;
-        }
-
-        function generateDatesPerMonth(startDate: Date, numPerMonth: number): Date[] {
-            const dates: Date[] = [];
-            const currentDate = new Date();
-
-            let current = new Date(startDate);
-
-            while (current <= currentDate) {
-                const year = current.getFullYear();
-                const month = current.getMonth();
-
-                for (let i = 0; i < numPerMonth; i++) {
-                    const randomDay = random(i.toString(), 1, 28);
-                    dates.push(new Date(year, month, randomDay));
-                }
-
-                current.setMonth(current.getMonth() + 1);
-            }
-
-            return dates;
-        }
-
-        const year = new Date().getFullYear() - 8;
-        const dates = _.take(generateDatesPerMonth(new Date(year, 0, 1), 50), this.options.maxTeis);
-
-        _(dates).forEach((date, rowIndex) => {
+        trackedEntities.forEach((tei, rowIndex) => {
             const row = sheet.row(rowIndexStart + rowIndex);
-            const id = getUid(`tei-${rowIndex}`);
-            const enrollmentDate = date.toISOString().split("T")[0] || "";
-            const code = generateCode(rowIndex);
+
+            row.cell("A").value(tei.id);
+            row.cell("B").value(tei.orgUnitName);
+            row.cell("D").value(getIsoDate(tei.enrollmentDate));
+            row.cell("E").value(getIsoDate(tei.enrollmentDate));
+            row.cell("F").value(tei.code);
+            row.cell("G").value(tei.address);
+            row.cell("J").value(tei.sex);
+            row.cell("K").value(tei.birthYear);
+            row.cell("L").value(tei.age);
+        });
+    }
+
+    private buildTeis(): TrackedEntity[] {
+        const year = new Date().getFullYear() - 8;
+        const dates0 = generateDates({ startDate: new Date(year, 0, 1), perMonth: 50 });
+        const { maxTeis } = this.options;
+        const dates = maxTeis ? _.take(dates0, maxTeis) : dates0;
+
+        return dates.map((enrollmentDate, rowIndex): TrackedEntity => {
+            const teiId = getUid(`tei-${rowIndex}`);
             const age = random(`age-${rowIndex}`, 5, 80);
-            console.log({ rowIndex, age });
-            const birthYear = new Date().getFullYear() - age;
 
-            row.cell("A").value(id);
-            row.cell("B").value(sample(`orgUnit-${rowIndex}`, allowedValues["Org Unit *"]));
-            row.cell("D").value(enrollmentDate);
-            row.cell("E").value(enrollmentDate);
-            row.cell("F").value(code);
-            row.cell("G").value(sample(`address-${rowIndex}`, allowedValues.Address));
-            row.cell("J").value(sample(`sex-${rowIndex}`, allowedValues["Sex *"]));
-            row.cell("K").value(birthYear);
-            row.cell("L").value(age);
-
-            const tei: Tei = {
-                id: id,
+            return {
+                id: teiId,
                 enrollmentDate: enrollmentDate,
                 age: age,
-                currentWhoStage: random(`whoStage-${id}`, 1, 3),
-                arvLine: random(`arvLine-${id}`, 1, 3),
+                currentWhoStage: sample(`whoStage-${teiId}`, [1, 2, 3]),
+                arvLine: sample(`arvLine-${teiId}`, [1, 2, 3]),
+                orgUnitName: sample(`orgUnit-${rowIndex}`, config.orgUnits),
+                code: generateCode(rowIndex),
+                address: sample(`address-${rowIndex}`, config.addresses),
+                sex: sample(`sex-${rowIndex}`, ["Female", "Male"]),
+                birthYear: new Date().getFullYear() - age,
             };
-            teis.push(tei);
         });
-
-        return teis;
     }
 
-    generateSecondSheet(teis: Tei[]): Consultation[] {
-        this.log("Generating Second sheet");
-        const sheet = this.tables["(1) HIV Consultation"];
-        if (!sheet) throw new Error();
-
-        let rowIndexStart = 3;
-        let rowIndex = 0;
-
-        const allowedValues = {
-            "default *": ["default"],
-            "Type of visit *": [
-                "Visit – Starts ART",
-                "Visit – Continue ART",
-                "Visit – stop ART",
-                "Visit – restart ART",
-            ],
-            "Current WHO stage *": [1, 2, 3, 4],
-        };
-
-        const consultations: Consultation[] = [];
-
-        _(teis).forEach(tei => {
+    private buildConsultations(teis: TrackedEntity[]): Consultation[] {
+        return teis.flatMap(tei => {
             let consultationDate = new Date(tei.enrollmentDate);
 
-            _.range(0, this.options.maxConsultations).forEach(() => {
-                const row = sheet.row(rowIndexStart + rowIndex);
-                const eventId = getUid(`event-consultation-${tei.id}`);
+            return _.range(0, this.options.maxConsultations).map((index): Consultation => {
+                const eventId = getUid(`event-consultation-${tei.id}-${index}`);
+
                 const nextConsultationDate = new Date(consultationDate);
                 nextConsultationDate.setMonth(nextConsultationDate.getMonth() + 1);
-                nextConsultationDate.setDate(nextConsultationDate.getDate() + random(`next-${rowIndex}`, -5, 5));
-                const advancedHiv = random(`advancedHiv-${rowIndex}`, 0, 100) < 20;
-                const viralLoad =
-                    random(`hasViralLoad-${rowIndex}`, 0, 100) < 80
-                        ? undefined
-                        : random(`viralLoad-${rowIndex}`, 100, 10000);
+                nextConsultationDate.setDate(nextConsultationDate.getDate() + random(`next-${index}`, -5, 5));
 
-                row.cell("A").value(eventId);
-                row.cell("B").value(tei.id);
-                row.cell("C").value("default");
-                const consultationDateStr = consultationDate.toISOString().split("T")[0] || "";
-                const { arvLine, enrollmentDate } = tei;
+                const advancedHiv = [3, 4].includes(tei.currentWhoStage) || random(`advancedHiv-${index}`, 0, 100) < 20;
+                const viralLoad =
+                    random(`hasViralLoad-${index}`, 0, 100) < 80 ? undefined : random(`viralLoad-${index}`, 100, 10000);
+                const { enrollmentDate } = tei;
 
                 const consultation: Consultation = {
                     id: eventId,
-                    teiId: tei.id,
-                    consultationDate: consultationDateStr,
+                    tei: tei,
+                    consultationDate: consultationDate,
+                    nextConsultationDate: nextConsultationDate,
+                    typeOfVisit: "Visit – Starts ART",
+                    advancedHiv: advancedHiv,
+                    viralLoad: viralLoad,
+                    arvLine: tei.arvLine,
+                    ageAtConsultation: new Date(consultationDate).getFullYear() - tei.birthYear,
+                    arv1StartDate: tei.arvLine === 1 ? enrollmentDate : undefined,
+                    arv2StartDate: tei.arvLine === 2 ? enrollmentDate : undefined,
+                    arv3StartDate: tei.arvLine === 3 ? enrollmentDate : undefined,
+                    pvlDate: viralLoad ? consultationDate : undefined,
                 };
 
-                row.cell("D").value(consultationDateStr);
-                row.cell("E").value(nextConsultationDate.toISOString().split("T")[0]);
-                row.cell("F").value(tei.age);
-                row.cell("G").value("Visit – Starts ART");
-                row.cell("H").value(tei.currentWhoStage);
-                row.cell("P").value(tei.arvLine);
-                row.cell("Q").value(tei.enrollmentDate);
-                row.cell("AC").value(advancedHiv ? "Yes" : "No");
-                row.cell("AM").value(viralLoad);
-
-                row.cell("AW").value(consultationDateStr); // Consultation date (YYYY-MM-DD)
-                row.cell("AX").value(arvLine === 1 ? enrollmentDate : ""); // ARV1 start date (YYYY-MM-DD)
-                row.cell("AY").value(arvLine === 2 ? enrollmentDate : ""); // ARV2 start date (YYYY-MM-DD)
-                row.cell("AZ").value(arvLine === 3 ? enrollmentDate : ""); // ARV3 start date (YYYY-MM-DD)
-                row.cell("BA").value(viralLoad ? consultationDateStr : ""); // pVL date (YYYY-MM-DD)
-
                 consultationDate = nextConsultationDate;
-                consultations.push(consultation);
-                rowIndex++;
+                return consultation;
             });
         });
-
-        return consultations;
     }
 
-    generateThirdSheet(teis: Tei[], consultations: Consultation[]) {
-        this.log("Generating third sheet");
-        const sheet = this.tables["(2) Closure"];
-        if (!sheet) throw new Error();
+    private generateConsultationsSheet(consultations: Consultation[]) {
+        const sheet = this.getSheet(this.sheets.consultationEvents);
+        const rowIndexStart = 3;
+        this.log(`Consultations: ${consultations.length}`);
 
+        _(consultations).forEach((consultation, rowIndex) => {
+            const { tei, consultationDate } = consultation;
+            const row = sheet.row(rowIndexStart + rowIndex);
+            const enrollmentDateS = getIsoDate(tei.enrollmentDate);
+
+            row.cell("A").value(consultation.id);
+            row.cell("B").value(tei.id);
+            row.cell("C").value("default");
+            row.cell("D").value(getIsoDate(consultationDate));
+            row.cell("E").value(getIsoDate(consultation.nextConsultationDate));
+            row.cell("F").value(consultation.ageAtConsultation);
+            row.cell("G").value("Visit – Starts ART");
+            row.cell("H").value(tei.currentWhoStage);
+            row.cell("P").value(tei.arvLine);
+            row.cell("Q").value(enrollmentDateS);
+            row.cell("AC").value(consultation.advancedHiv ? "Yes" : "No");
+            row.cell("AM").value(consultation.viralLoad);
+
+            row.cell("AW").value(getIsoDate(consultationDate));
+            row.cell("AX").value(getIsoDate(consultation.arv1StartDate));
+            row.cell("AY").value(getIsoDate(consultation.arv2StartDate));
+            row.cell("AZ").value(getIsoDate(consultation.arv3StartDate));
+            row.cell("BA").value(getIsoDate(consultation.pvlDate));
+        });
+    }
+
+    private buildClosures(teis: TrackedEntity[], consultations: Consultation[]): Closure[] {
         const allowedValues = {
-            reasonOfClosure: { lost: "Lost to follow-up", dead: "Dead" },
+            reasonOfClosure: ["Lost to follow-up", "Dead"],
         };
 
-        let rowIndexStart = 3;
-        let rowIndex = 0;
+        const closureCount = Math.max(1, (teis.length * this.options.closurePercentage) / 100);
+        const teisInClosure = _.take(teis, closureCount);
 
-        const n = Math.max(1, (teis.length * this.options.closurePercentage) / 100);
-        const teisInClosure = _.take(teis, n);
+        return teisInClosure.map((tei): Closure => {
+            const lastConsultation = _.last(consultations.filter(c => c.tei.id === tei.id));
+            if (!lastConsultation) throw new Error(`No consultation found for TEI ${tei.id}`);
 
-        _(teisInClosure).forEach(tei => {
+            return {
+                id: getUid(`event-closure-${tei.id}`),
+                tei: tei,
+                lastConsultation: lastConsultation,
+                reason: sample(`reasonOfClosure-${tei.id}`, allowedValues.reasonOfClosure),
+            };
+        });
+    }
+
+    private generateClosureSheet(closures: Closure[]) {
+        const sheet = this.getSheet(this.sheets.closureEvents);
+        const rowIndexStart = 3;
+
+        _(closures).forEach((closure, rowIndex) => {
+            const { tei } = closure;
             const row = sheet.row(rowIndexStart + rowIndex);
             const eventId = getUid(`event-closure-${tei.id}`);
-            const lastConsultation = _(consultations)
-                .filter(c => c.teiId === tei.id)
-                .last();
-            const closureDate = lastConsultation?.consultationDate;
+            const closureStrDate = getIsoDate(closure.lastConsultation.consultationDate);
 
             row.cell("A").value(eventId);
             row.cell("B").value(tei.id);
             row.cell("C").value("default");
-            row.cell("D").value(closureDate);
+            row.cell("D").value(closureStrDate);
             row.cell("E").value(tei.age);
-            row.cell("F").value(sample(`reasonOfClosure-${rowIndex}`, Object.values(allowedValues.reasonOfClosure)));
-            row.cell("G").value(closureDate);
-
-            rowIndex++;
+            row.cell("F").value(closure.reason);
+            row.cell("G").value(closureStrDate);
         });
     }
 
-    async generateAndSaveData(options: HIVDataGeneratorOptions): Promise<void> {
-        try {
-            await this.loadTemplate();
-            const teis = this.generateFirstSheet();
-            const consultations = this.generateSecondSheet(teis);
-            this.generateThirdSheet(teis, consultations);
-
-            const outputFileName = options.output;
-            await this.workbook?.toFileAsync(outputFileName);
-            this.log(`Data successfully generated and saved to ${outputFileName}`);
-        } catch (error) {
-            this.error(`Error generating data: ${error}`);
-        }
+    static async build(options: HIVDataGeneratorOptions): Promise<HIVDataGenerator> {
+        const workbook = await fromFileAsync(options.templateFile);
+        return new HIVDataGenerator(workbook, options);
     }
 }
 
+// Random number generator from key
+// random("event-1-status", ["active", "disabled"]) // #> "active" OR "disabled"
 function random(key: string, min: number, max: number): number {
     // FNV-1a hash to generate a 32-bit seed from the key
     let hash = 2166136261;
@@ -279,30 +268,93 @@ function random(key: string, min: number, max: number): number {
     // Normalize to [0, 1)
     const normalized = hash / 4294967296;
 
-    // Scale to desired range [min, max]
     return min + Math.floor(normalized * (max - min + 1));
 }
 
 function sample<T>(key: string, xs: T[]): T {
     const index = random(key, 0, xs.length - 1);
     const value = xs[index];
-    if (!value) throw new Error("");
+    if (!value) throw new Error(`Cannot sample from empty list`);
     return value;
 }
 
-const app = command({
-    name: "hiv-data-generator",
-    args: {
-        templateFile: option({ type: string, long: "template" }),
-        maxTeis: option({ type: number, long: "max-tracked-entities" }),
-        maxConsultations: option({ type: number, long: "max-consultations", defaultValue: () => 50 }),
-        closurePercentage: option({ type: number, long: "closure-percentage", defaultValue: () => 0.05 }),
-        output: option({ type: string, long: "output" }),
-    },
-    handler: async args => {
-        const generator = new HIVDataGenerator(args);
-        await generator.generateAndSaveData(args);
-    },
-});
+function generateCode(index: number): string {
+    // =TEXT(20+INT((ROW()-1)/10),"00")&"-HIV-MALAKAL-"&TEXT(MOD(ROW()-1,10)+1,"00")
+    const prefix = (20 + Math.floor((index - 1) / 10)).toString().padStart(2, "0");
+    const suffix = (1 + ((index - 1) % 10)).toString().padStart(2, "0");
+    return `${prefix}-HIV-MALAKAL-${suffix}`;
+}
+
+function generateDates(options: { startDate: Date; perMonth: number }): Date[] {
+    const { startDate, perMonth: numPerMonth } = options;
+    const dates: Date[] = [];
+    const currentDate = new Date();
+    const current = new Date(startDate);
+
+    while (current <= currentDate) {
+        const year = current.getFullYear();
+        const month = current.getMonth();
+
+        for (let i = 0; i < numPerMonth; i++) {
+            const randomDay = random(i.toString(), 1, 28);
+            dates.push(new Date(year, month, randomDay));
+        }
+
+        current.setMonth(current.getMonth() + 1);
+    }
+
+    return dates;
+}
+
+function getIsoDate(date: Date | undefined): string | undefined {
+    if (!date) return;
+    const dateStr = date.toISOString().split("T")[0];
+    if (!dateStr) throw new Error(`Invalid date: ${date}`);
+    return dateStr;
+}
+
+type HIVDataGeneratorOptions = {
+    templateFile: string;
+    maxTeis?: number;
+    maxConsultations: number;
+    closurePercentage: number;
+    output: string;
+};
+
+type TrackedEntity = {
+    id: string;
+    enrollmentDate: Date;
+    age: number;
+    currentWhoStage: number;
+    arvLine: number;
+    orgUnitName: string;
+    code: string;
+    address: string;
+    sex: string;
+    birthYear: number;
+};
+
+type Consultation = {
+    id: string;
+    tei: TrackedEntity;
+    consultationDate: Date;
+    ageAtConsultation: number;
+    nextConsultationDate: Date;
+    typeOfVisit: string;
+    advancedHiv: boolean;
+    viralLoad: number | undefined;
+    arvLine: number;
+    arv1StartDate: Date | undefined;
+    arv2StartDate: Date | undefined;
+    arv3StartDate: Date | undefined;
+    pvlDate: Date | undefined;
+};
+
+type Closure = {
+    id: string;
+    tei: TrackedEntity;
+    lastConsultation: Consultation;
+    reason: string;
+};
 
 run(app, process.argv.slice(2));
