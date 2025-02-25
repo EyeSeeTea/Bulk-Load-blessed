@@ -6,7 +6,9 @@ import _ from "lodash";
 import { getUid } from "../data/dhis2-uid";
 
 const config = {
+    yearsInPast: 8,
     chunkSize: 100,
+    teisPerMonth: 50,
     maxConsultationsDefault: 50,
     closurePercentageDefault: 5,
     orgUnits: ["MALAKAL HIV - PoC - Linelist"],
@@ -19,6 +21,14 @@ const config = {
         "SOUTH SUDAN / MALAKAL / KOLIET",
         "SOUTH SUDAN / MALAKAL / KHORWAI",
     ],
+    reasonOfClosure: ["Lost to follow-up", "Dead"],
+    typeOfVisit: "starts_art",
+    ages: { min: 5, max: 80 },
+    nextConsultationsDaysOffset: 5,
+    advancedHivWhoStages: [3, 4],
+    percentageOfAdvancedHiv: 20,
+    percentageOfViralLoadPresence: 80,
+    viralLoad: { min: 100, max: 10000 },
 };
 
 const app = command({
@@ -40,7 +50,7 @@ const app = command({
     },
     handler: async args => {
         const generator = await HIVDataGenerator.build(args);
-        await generator.generateAndSaveSpreadsheet({ output: args.output });
+        await generator.execute({ output: args.output });
     },
 });
 
@@ -53,7 +63,7 @@ class HIVDataGenerator {
 
     constructor(private workbook: XlsxPopulate.Workbook, private options: Omit<HIVDataGeneratorOptions, "output">) {}
 
-    public async generateAndSaveSpreadsheet(options: Pick<HIVDataGeneratorOptions, "output">): Promise<void> {
+    public async execute(options: Pick<HIVDataGeneratorOptions, "output">): Promise<void> {
         const { chunkSize } = config;
         const teis = this.buildTeis();
         const sheetsCount = Math.ceil(teis.length / chunkSize);
@@ -109,14 +119,17 @@ class HIVDataGenerator {
     }
 
     private buildTeis(): TrackedEntity[] {
-        const year = new Date().getFullYear() - 8;
-        const dates0 = generateDates({ startDate: new Date(year, 0, 1), perMonth: 50 });
         const { maxTeis } = this.options;
-        const dates = maxTeis ? _.take(dates0, maxTeis) : dates0;
+        const year = new Date().getFullYear() - config.yearsInPast;
+        const allDates = generateDates({
+            startDate: new Date(year, 0, 1),
+            perMonth: config.teisPerMonth,
+        });
+        const dates = maxTeis ? _.take(allDates, maxTeis) : allDates;
 
         return dates.map((enrollmentDate, rowIndex): TrackedEntity => {
             const teiId = getUid(`tei-${rowIndex}`);
-            const age = random(`age-${rowIndex}`, 5, 80);
+            const age = random(`age-${rowIndex}`, config.ages.min, config.ages.min);
 
             return {
                 id: teiId,
@@ -142,26 +155,32 @@ class HIVDataGenerator {
 
                 const nextConsultationDate = new Date(consultationDate);
                 nextConsultationDate.setMonth(nextConsultationDate.getMonth() + 1);
-                nextConsultationDate.setDate(nextConsultationDate.getDate() + random(`next-${index}`, -5, 5));
+                const offset = config.nextConsultationsDaysOffset;
+                const newDate = nextConsultationDate.getDate() + random(`next-${index}`, -offset, +offset);
+                nextConsultationDate.setDate(newDate);
 
-                const advancedHiv = [3, 4].includes(tei.currentWhoStage) || random(`advancedHiv-${index}`, 0, 100) < 20;
+                const advancedHiv =
+                    config.advancedHivWhoStages.includes(tei.currentWhoStage) ||
+                    random(`advancedHiv-${index}`, 0, 100) < config.percentageOfAdvancedHiv;
+
                 const viralLoad =
-                    random(`hasViralLoad-${index}`, 0, 100) < 80 ? undefined : random(`viralLoad-${index}`, 100, 10000);
-                const { enrollmentDate } = tei;
+                    random(`hasViralLoad-${index}`, 0, 100) < config.percentageOfViralLoadPresence
+                        ? undefined
+                        : random(`viralLoad-${index}`, config.viralLoad.min, config.viralLoad.max);
 
                 const consultation: Consultation = {
                     id: eventId,
                     tei: tei,
                     consultationDate: consultationDate,
                     nextConsultationDate: nextConsultationDate,
-                    typeOfVisit: "Visit – Starts ART",
+                    typeOfVisit: config.typeOfVisit,
                     advancedHiv: advancedHiv,
                     viralLoad: viralLoad,
                     arvLine: tei.arvLine,
-                    ageAtConsultation: new Date(consultationDate).getFullYear() - tei.birthYear,
-                    arv1StartDate: tei.arvLine === 1 ? enrollmentDate : undefined,
-                    arv2StartDate: tei.arvLine === 2 ? enrollmentDate : undefined,
-                    arv3StartDate: tei.arvLine === 3 ? enrollmentDate : undefined,
+                    ageAtConsultation: Math.max(1, new Date(consultationDate).getFullYear() - tei.birthYear),
+                    arv1StartDate: tei.arvLine === 1 ? tei.enrollmentDate : undefined,
+                    arv2StartDate: tei.arvLine === 2 ? tei.enrollmentDate : undefined,
+                    arv3StartDate: tei.arvLine === 3 ? tei.enrollmentDate : undefined,
                     pvlDate: viralLoad ? consultationDate : undefined,
                 };
 
@@ -187,7 +206,7 @@ class HIVDataGenerator {
             row.cell("D").value(getIsoDate(consultationDate));
             row.cell("E").value(getIsoDate(consultation.nextConsultationDate));
             row.cell("F").value(consultation.ageAtConsultation);
-            row.cell("G").value("Visit – Starts ART");
+            row.cell("G").value(config.typeOfVisit);
             row.cell("H").value(tei.currentWhoStage);
             row.cell("P").value(tei.arvLine);
             row.cell("Q").value(enrollmentDateS);
@@ -203,10 +222,6 @@ class HIVDataGenerator {
     }
 
     private buildClosures(teis: TrackedEntity[], consultations: Consultation[]): Closure[] {
-        const allowedValues = {
-            reasonOfClosure: ["Lost to follow-up", "Dead"],
-        };
-
         const closureCount = Math.max(1, (teis.length * this.options.closurePercentage) / 100);
         const teisInClosure = _.take(teis, closureCount);
 
@@ -218,7 +233,7 @@ class HIVDataGenerator {
                 id: getUid(`event-closure-${tei.id}`),
                 tei: tei,
                 lastConsultation: lastConsultation,
-                reason: sample(`reasonOfClosure-${tei.id}`, allowedValues.reasonOfClosure),
+                reason: sample(`reasonOfClosure-${tei.id}`, config.reasonOfClosure),
             };
         });
     }
@@ -230,10 +245,9 @@ class HIVDataGenerator {
         _(closures).forEach((closure, rowIndex) => {
             const { tei } = closure;
             const row = sheet.row(rowIndexStart + rowIndex);
-            const eventId = getUid(`event-closure-${tei.id}`);
             const closureStrDate = getIsoDate(closure.lastConsultation.consultationDate);
 
-            row.cell("A").value(eventId);
+            row.cell("A").value(closure.id);
             row.cell("B").value(tei.id);
             row.cell("C").value("default");
             row.cell("D").value(closureStrDate);
@@ -249,8 +263,8 @@ class HIVDataGenerator {
     }
 }
 
-// Random number generator from key
-// random("event-1-status", ["active", "disabled"]) // #> "active" OR "disabled"
+// random("event-1-status", 1, 10)
+//   // Generates a pseudo-random number between 1 and 10 (inclusive) using event-1-status as seed key
 function random(key: string, min: number, max: number): number {
     // FNV-1a hash to generate a 32-bit seed from the key
     let hash = 2166136261;
@@ -279,7 +293,7 @@ function sample<T>(key: string, xs: T[]): T {
 }
 
 function generateCode(index: number): string {
-    // =TEXT(20+INT((ROW()-1)/10),"00")&"-HIV-MALAKAL-"&TEXT(MOD(ROW()-1,10)+1,"00")
+    // Frm Excel formula: =TEXT(20+INT((ROW()-1)/10),"00")&"-HIV-MALAKAL-"&TEXT(MOD(ROW()-1,10)+1,"00")
     const prefix = (20 + Math.floor((index - 1) / 10)).toString().padStart(2, "0");
     const suffix = (1 + ((index - 1) % 10)).toString().padStart(2, "0");
     return `${prefix}-HIV-MALAKAL-${suffix}`;

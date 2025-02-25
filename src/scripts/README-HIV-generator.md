@@ -27,6 +27,8 @@ $ yarn install
 $ npx ts-node src/scripts/ocba-generate-hiv-data.ts --output "hiv-data-INDEX.xlsx" --template src/scripts/hiv-bl-template.xlsx
 ```
 
+Literal `INDEX` will be replaced in the output path for the current file index.
+
 ### Command Line Arguments
 
 -   `--template`: Path to the HIV Bulk Load template Excel file (required)
@@ -55,8 +57,10 @@ The script generates an Excel file ready to be imported in Bulk Load. It contain
 Import all generate xlsx files (a JSON report file will be generated for each imported file)
 
 ```sh
-npx ts-node src/scripts/import-multiple-files.ts \
-  --dhis2-url 'http://USER:PASSWORD@172.16.1.1:8093' \
-  --results-path ./ \
-  hiv-data-*xlsx
+for file in hiv-data-*xlsx; do
+    npx ts-node src/scripts/import-multiple-files.ts \
+    --dhis2-url 'http://USER:PASSWORD@172.16.1.1:8093' \
+    --results-path ./ \
+    "$file"
+done
 ```
