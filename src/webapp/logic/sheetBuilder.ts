@@ -341,10 +341,12 @@ export class SheetBuilder {
                     }
 
                     if (description !== undefined) {
-                        sheet.cell(itemRow, columnId).comment(description, {
-                            height: "100pt",
-                            width: "160pt",
-                        });
+                        // TODO: adding description as a comment is generating an error in excel
+                        // More details here: https://github.com/EyeSeeTea/Bulk-Load/pull/348
+                        // sheet.cell(itemRow, columnId).comment(description, {
+                        //     height: "100pt",
+                        //     width: "160pt",
+                        // });
                     }
 
                     columnId++;
