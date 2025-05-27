@@ -5,7 +5,7 @@ import { DataFormType } from "../../domain/entities/DataForm";
 import { NamedRef, Ref } from "../../domain/entities/ReferenceObject";
 import { getDataSources, Template } from "../../domain/entities/Template";
 import { Theme } from "../../domain/entities/Theme";
-import i18n from "../../locales";
+import i18n from "../../utils/i18n";
 import { defaultColorScale } from "../utils/colors";
 import { buildAllPossiblePeriods } from "../utils/periods";
 import Settings from "./settings";
@@ -340,7 +340,7 @@ export class SheetBuilder {
                         sheet.cell(itemRow, columnId).link(dataElement.url).formula(`=_${dataElement.id}`);
                     }
 
-                    if (description !== undefined) {
+                    if (description) {
                         sheet.cell(itemRow, columnId).comment(description, {
                             height: "100pt",
                             width: "160pt",

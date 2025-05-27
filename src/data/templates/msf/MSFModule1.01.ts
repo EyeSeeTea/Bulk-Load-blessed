@@ -24,7 +24,7 @@ import { MSFModuleMetadataRepository } from "../../../domain/repositories/templa
 import { Maybe } from "../../../types/utils";
 import { getOptionsKey } from "../../../webapp/logic/sheetBuilder";
 import { Workbook } from "../../../webapp/logic/Workbook";
-import i18n from "../../../locales";
+import i18n from "../../../utils/i18n";
 import { CellDataValidation, getValidationFromValueType } from "../../../domain/entities/CellDataValidation";
 
 const DEFAULT_COLUMN_COLOR = "#000000";
@@ -331,7 +331,7 @@ class DownloadCustomization {
             rowEnd: 5,
         });
 
-        const result = [];
+        const result: CellWithCombinationId[] = [];
 
         for (const cell of cellsCatOptComb) {
             const value = await this.excelRepository.readCell(this.templateId, cell);
