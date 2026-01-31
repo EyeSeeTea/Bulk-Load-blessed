@@ -98,7 +98,7 @@
         "cypress": "9.2.1",
         "cypress-xpath": "1.6.2",
         "d2-manifest": "1.0.0",
-        "eslint": "8.7.0",
+        "eslint": "9.26.0",
         "eslint-config-prettier": "8.3.0",
         "eslint-config-react": "1.1.7",
         "eslint-config-react-app": "7.0.0",
