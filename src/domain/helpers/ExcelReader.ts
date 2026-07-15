@@ -5,6 +5,7 @@ import moment from "moment";
 import { isDefined } from "../../utils";
 import { promiseMap } from "../../utils/promises";
 import { removeCharacters } from "../../utils/string";
+import { readCellResolvingDefinedNames } from "./readCell";
 import { DataForm, dataFormTypeMap, DataFormFeatureType } from "../entities/DataForm";
 import { buildGeometry, getGeometryFromString } from "../entities/Geometry";
 import { Relationship } from "../entities/Relationship";
@@ -113,6 +114,7 @@ export class ExcelReader {
                     dataValues: _.flatMap(items, ({ dataValues }) => dataValues),
                     coordinate: items[0]?.coordinate,
                     geometry: items[0]?.geometry,
+                    sheet: items[0]?.sheet,
                 };
             })
             .compact()
@@ -136,7 +138,7 @@ export class ExcelReader {
         const values = await promiseMap(cells, async cell => {
             const value = cell ? await this.readCellValue(template, cell) : undefined;
             const optionId = await this.excelRepository.readCell(template.id, cell, { formula: true });
-            if (!isDefined(value)) return undefined;
+            if (!isDefined(value) || value === "") return undefined;
 
             const orgUnit = await this.readCellValue(template, dataSource.orgUnit, cell);
 
@@ -165,6 +167,7 @@ export class ExcelReader {
 
             return {
                 group: this.excelRepository.buildRowNumber(cell.ref),
+                sheet: String(dataSource.range.sheet),
                 dataForm: this.formatValue(dataFormId),
                 id: eventId ? this.formatValue(eventId) : undefined,
                 orgUnit: this.formatValue(orgUnit),
@@ -182,8 +185,8 @@ export class ExcelReader {
                         category: category ? this.formatValue(category) : undefined,
                         value: this.formatValue(value),
                         optionId: optionId ? removeCharacters(optionId) : undefined,
-
                         contentType: contentType,
+                        column: this.parseColumn(cell.ref),
                     },
                 ],
             };
@@ -232,9 +235,14 @@ export class ExcelReader {
             this.excelRepository.getContentType(template.id, cell),
         ]);
 
+        const sheet = String(dataSource.ref.sheet);
+        const row = cell ? this.excelRepository.buildRowNumber(cell.ref) : undefined;
+        const column = cell ? this.parseColumn(cell.ref) : undefined;
+
         return [
             {
                 group: undefined, // TODO: Add a way for custom templates to group by event
+                sheet: sheet,
                 dataForm: String(dataFormId),
                 id: eventId ? String(eventId) : undefined,
                 orgUnit: String(orgUnit),
@@ -251,6 +259,8 @@ export class ExcelReader {
                         value: this.formatValue(value),
                         optionId: optionId ? removeCharacters(optionId) : undefined,
                         contentType: contentType,
+                        column: column,
+                        row: row,
                     },
                 ],
             },
@@ -309,6 +319,7 @@ export class ExcelReader {
             ]);
             return {
                 row: this.excelRepository.buildRowNumber(cell.ref),
+                column: this.parseColumn(cell.ref),
                 value: value,
                 optionId: optionId,
                 contentType: contentType,
@@ -340,10 +351,11 @@ export class ExcelReader {
                 // If column id does not exist on program, exclude values => Attributes
                 if (!dataForm.dataElements.find(({ id }) => id === dataElementId)) return null;
 
-                const { value, optionId, contentType } = item;
+                const { value, optionId, contentType, column } = item;
 
                 const data: TemplateDataPackageData = {
                     group: rowIdx,
+                    sheet: String(dataSource.dataValues.sheet),
                     dataForm: String(programId),
                     id: eventId ? String(eventId) : undefined,
                     orgUnit: tei.orgUnit.id,
@@ -360,6 +372,7 @@ export class ExcelReader {
                             value: this.formatValue(value),
                             optionId: optionId ? removeCharacters(optionId) : undefined,
                             contentType: contentType,
+                            column,
                         },
                     ],
                 };
@@ -435,6 +448,7 @@ export class ExcelReader {
 
             return {
                 row: this.excelRepository.buildRowNumber(cell.ref),
+                column: this.parseColumn(cell.ref),
                 attribute: {
                     id: attributeId,
                     valueType: dataForm.teiAttributes?.find(attribute => attribute.id === attributeId)?.valueType,
@@ -474,6 +488,8 @@ export class ExcelReader {
                 id: String(teiId),
                 orgUnit: { id: orgUnitId },
                 disabled: false,
+                row: rowIdx,
+                sheet: String(dataSource.attributes.sheet),
                 attributeValues,
                 enrollment: {
                     enrolledAt: this.formatValue(enrollmentDate),
@@ -515,18 +531,12 @@ export class ExcelReader {
 
         const cell = await this.excelRepository.findRelativeCell(template.id, ref, relative);
         if (cell) {
-            const value = await this.excelRepository.readCell(template.id, cell);
-            const formula = await this.excelRepository.readCell(template.id, cell, {
-                formula: true,
-            });
-
-            const definedNames = await this.excelRepository.listDefinedNames(template.id);
-            if (typeof formula === "string" && definedNames.includes(formula.replace(/^=/, ""))) {
-                return removeCharacters(formula);
-            }
-
-            return value;
+            return readCellResolvingDefinedNames(this.excelRepository, template.id, cell);
         }
+    }
+
+    private parseColumn(ref: string): string | undefined {
+        return /^[A-Z]+/.exec(ref)?.[0];
     }
 
     private formatValue(value: ExcelValue | undefined): string {

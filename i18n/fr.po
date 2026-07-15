@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load App\n"
-"POT-Creation-Date: 2025-11-12T16:45:33.366Z\n"
+"POT-Creation-Date: 2026-06-30T17:31:02.698Z\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,7 +41,23 @@ msgstr ""
 msgid "Data values - Create/update"
 msgstr ""
 
+#, fuzzy
+msgid "No data values to import"
+msgstr "valeurs de données"
+
 msgid "Failed to import data values"
+msgstr ""
+
+msgid ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgid_plural ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Chunk (unknown outcome)"
 msgstr ""
 
 msgid "Service"
@@ -86,6 +102,29 @@ msgstr "Programme"
 #, fuzzy
 msgid "Tracker Program"
 msgstr "Programme"
+
+msgid "cell {{ref}}"
+msgstr ""
+
+msgid "cells {{refs}}"
+msgstr ""
+
+msgid "row {{ref}}"
+msgstr ""
+
+msgid "rows {{refs}}"
+msgstr ""
+
+msgid "and {{count}} more"
+msgid_plural "and {{count}} more"
+msgstr[0] "et {{count}} de plus"
+msgstr[1] "et {{count}} de plus"
+
+msgid "sheet {{sheet}}, {{lines}}"
+msgstr ""
+
+msgid "Found in {{locations}} of the Excel file"
+msgstr ""
 
 msgid "Cannot read data form id"
 msgstr ""
@@ -205,9 +244,8 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#, fuzzy
-msgid "Delete and import"
-msgstr "Importation de données en masse"
+msgid "Delete and Import"
+msgstr "SUPPRIMER ET IMPORTER"
 
 #, fuzzy
 msgid "Import despite duplicates"
@@ -252,6 +290,21 @@ msgstr ""
 
 msgid "All"
 msgstr "Tout"
+
+msgid "Import successful"
+msgstr ""
+
+msgid "Import with warnings"
+msgstr ""
+
+msgid "Import with errors"
+msgstr ""
+
+msgid "Network error"
+msgstr ""
+
+msgid "Import pending"
+msgstr ""
 
 msgid ""
 "There has been an error. You can either retry or contact your administrator "
@@ -659,6 +712,12 @@ msgstr[1] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Voulez-vous vraiment supprimer les thèmes sélectionnés"
 
+msgid "Cannot determine file extension for template"
+msgstr ""
+
+msgid "Unsupported file extension for template"
+msgstr ""
+
 msgid "Cannot download spreadsheet for template"
 msgstr ""
 
@@ -1012,6 +1071,10 @@ msgstr ""
 
 msgid "Synchronization Results"
 msgstr ""
+
+msgid "Selected template has unsupported period type: {{periodType}}"
+msgstr ""
+"Modèle sélectionné avec un type de période non supporté: {{periodType}}"
 
 msgid "Select organisation unit to populate data"
 msgstr ""
@@ -1406,26 +1469,34 @@ msgstr ""
 "valeurs de données seront supprimées et seules celles de la feuille de "
 "calcul seront enregistrées. Êtes-vous sur de vouloir continuer?"
 
-msgid "Delete and Import"
-msgstr ""
-
 msgid ""
 "All data values in the spreadsheet will be imported to the system, but any "
 "data that was existing for such organisation unit and periods in the system "
 "will be deleted first, so none will be kept before doing the import."
 msgstr ""
+"Toutes les données de la feuille de calcul seront importées dans le "
+"système,mais les données existantes pour ces unités d'organisation et ces "
+"périodes seront d'abord supprimées; aucune donnée existante ne sera donc "
+"conservée avant l'importation."
 
 msgid ""
 "Import only new data values, without updating nor deleting any existing one. "
 "Only values in the spreadsheet that do not currently exist in the system "
 "will be imported"
 msgstr ""
+"Importer uniquement les nouvelles valeurs, sans mettre à jour ni supprimer "
+"les données existantes.Seules les valeurs de la feuille de calcul qui "
+"n'existent pas encore dans le système seront importées."
 
 msgid ""
 "Import new data values and also update existing ones. All data values in the "
 "spreadsheet will be imported to the system, but other data values present in "
 "the system that are not provided in the spreadsheet will be kept."
 msgstr ""
+"Importer les nouvelles valeurs et mettre à jour les valeurs "
+"existantes.Toutes les données de la feuille de calcul seront importées,mais "
+"les autres valeurs présentes dans le système et absentes de la feuille de "
+"calcul seront conservées."
 
 msgid "Warning: Your upload may result in the generation of duplicates"
 msgstr ""

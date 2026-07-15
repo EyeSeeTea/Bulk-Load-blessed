@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2025-11-12T16:45:33.366Z\n"
+"POT-Creation-Date: 2026-06-30T17:31:02.698Z\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,7 +42,24 @@ msgstr "Значения данных - Удалить"
 msgid "Data values - Create/update"
 msgstr "Значения данных - создание/обновление"
 
+#, fuzzy
+msgid "No data values to import"
+msgstr "значения данных"
+
 msgid "Failed to import data values"
+msgstr ""
+
+msgid ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgid_plural ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+msgid "Chunk (unknown outcome)"
 msgstr ""
 
 msgid "Service"
@@ -95,6 +112,31 @@ msgstr "Программа"
 #, fuzzy
 msgid "Tracker Program"
 msgstr "Программа"
+
+msgid "cell {{ref}}"
+msgstr ""
+
+msgid "cells {{refs}}"
+msgstr ""
+
+msgid "row {{ref}}"
+msgstr ""
+
+msgid "rows {{refs}}"
+msgstr ""
+
+msgid "and {{count}} more"
+msgid_plural "and {{count}} more"
+msgstr[0] "и ещё {{count}}"
+msgstr[1] "и ещё {{count}}"
+msgstr[2] "и ещё {{count}}"
+msgstr[3] "и ещё {{count}}"
+
+msgid "sheet {{sheet}}, {{lines}}"
+msgstr ""
+
+msgid "Found in {{locations}} of the Excel file"
+msgstr ""
 
 msgid "Cannot read data form id"
 msgstr "Невозможно прочитать данные формы id"
@@ -214,9 +256,8 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#, fuzzy
-msgid "Delete and import"
-msgstr "Массовый импорт данных"
+msgid "Delete and Import"
+msgstr ""
 
 #, fuzzy
 msgid "Import despite duplicates"
@@ -261,6 +302,21 @@ msgstr ""
 
 msgid "All"
 msgstr "Все"
+
+msgid "Import successful"
+msgstr ""
+
+msgid "Import with warnings"
+msgstr ""
+
+msgid "Import with errors"
+msgstr ""
+
+msgid "Network error"
+msgstr ""
+
+msgid "Import pending"
+msgstr ""
 
 msgid ""
 "There has been an error. You can either retry or contact your administrator "
@@ -683,6 +739,12 @@ msgstr[3] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Вы уверены, что хотите удалить выбранные темы"
 
+msgid "Cannot determine file extension for template"
+msgstr ""
+
+msgid "Unsupported file extension for template"
+msgstr ""
+
 msgid "Cannot download spreadsheet for template"
 msgstr ""
 
@@ -1050,6 +1112,9 @@ msgstr "Ответ JSON"
 
 msgid "Synchronization Results"
 msgstr "Результаты синхронизации"
+
+msgid "Selected template has unsupported period type: {{periodType}}"
+msgstr "Выбранный шаблон имеет неподдерживаемый тип периода: {{periodType}}"
 
 msgid "Select organisation unit to populate data"
 msgstr "Выберите организационную единицу для заполнения данных"
@@ -1444,9 +1509,6 @@ msgstr ""
 "организационной единицы и периодов. Если вы продолжите, все эти значения "
 "данных будут удалены, и будут сохранены только те, которые находятся в "
 "электронной таблице. Вы уверены?"
-
-msgid "Delete and Import"
-msgstr ""
 
 msgid ""
 "All data values in the spreadsheet will be imported to the system, but any "

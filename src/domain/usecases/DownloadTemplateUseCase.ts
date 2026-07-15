@@ -1,5 +1,5 @@
 import { saveAs } from "file-saver";
-import fs from "fs";
+import * as fs from "fs";
 import _ from "lodash";
 import { Moment } from "moment";
 import { UseCase } from "../../CompositionRoot";
@@ -9,9 +9,15 @@ import { getExtensionFile, XLSX_EXTENSION } from "../../utils/files";
 import { promiseMap } from "../../utils/promises";
 import Settings from "../../webapp/logic/settings";
 import { getGeneratedTemplateId, SheetBuilder } from "../../webapp/logic/sheetBuilder";
-import { DataFormType, dataFormTypeMap } from "../entities/DataForm";
+import { DataForm, DataFormType, dataFormTypeMap } from "../entities/DataForm";
 import { Id, Ref } from "../entities/ReferenceObject";
-import { templateFromDataPackage, TemplateType } from "../entities/Template";
+import {
+    getDataFormRef,
+    hasMultiTextDataElementDelimiter,
+    Template,
+    templateFromDataPackage,
+    TemplateType,
+} from "../entities/Template";
 import { ExcelBuilder } from "../helpers/ExcelBuilder";
 import { ExcelRepository } from "../repositories/ExcelRepository";
 import { InstanceRepository } from "../repositories/InstanceRepository";
@@ -21,6 +27,7 @@ import { UsersRepository } from "../repositories/UsersRepository";
 import { buildAllPossiblePeriods } from "../../webapp/utils/periods";
 import { applyFilter } from "../entities/TemplateFilter";
 import { DataElementDisaggregationsMappingRepository } from "../repositories/DataElementDisaggregationsMappingRepository";
+import { getCaptureOrgUnitIdsForDataForm } from "./utils/orgUnits";
 
 export interface DownloadTemplateProps {
     type: DataFormType;
@@ -95,12 +102,17 @@ export class DownloadTemplateUseCase implements UseCase {
         const element = await getElement(api, type, id);
         const name = element.displayName ?? element.name;
 
+        const orgUnitIds =
+            _.isEmpty(orgUnits) && settings.orgUnitSelection === "import"
+                ? getCaptureOrgUnitIdsForDataForm(element.organisationUnits, currentUser.orgUnits)
+                : orgUnits;
+
         async function getGenerateFile(maxTeiRows?: number) {
             const result = await getElementMetadata({
                 api,
                 element,
                 downloadRelationships,
-                orgUnitIds: orgUnits,
+                orgUnitIds,
                 startDate: startDate?.toDate(),
                 endDate: endDate?.toDate(),
                 populateStartDate: populateStartDate?.toDate(),
@@ -196,26 +208,27 @@ export class DownloadTemplateUseCase implements UseCase {
 
         if (theme) await builder.applyTheme(template, theme);
 
+        if (template.type === "custom" && template.fixedOrgUnit) {
+            await this.excelRepository.writeCell(
+                template.id,
+                template.fixedOrgUnit,
+                dataPackage?.dataEntries[0]?.orgUnit ?? this.getFirstValueOrEmpty(orgUnits)
+            );
+        }
+
+        if (template.type === "custom" && template.fixedPeriod) {
+            const periods = buildAllPossiblePeriods(element.periodType, populateStartDate, populateEndDate);
+            await this.excelRepository.writeCell(
+                template.id,
+                template.fixedPeriod,
+                dataPackage?.dataEntries[0]?.period ?? this.getFirstValueOrEmpty(periods)
+            );
+        }
+
         if (enablePopulate) {
-            if (template.type === "custom" && template.fixedOrgUnit) {
-                await this.excelRepository.writeCell(
-                    template.id,
-                    template.fixedOrgUnit,
-                    dataPackage?.dataEntries[0]?.orgUnit ?? this.getFirstValueOrEmpty(orgUnits)
-                );
-            }
-
-            if (template.type === "custom" && template.fixedPeriod) {
-                const periods = buildAllPossiblePeriods(element.periodType, populateStartDate, populateEndDate);
-                await this.excelRepository.writeCell(
-                    template.id,
-                    template.fixedPeriod,
-                    dataPackage?.dataEntries[0]?.period ?? this.getFirstValueOrEmpty(periods)
-                );
-            }
-
             if (dataPackage) {
-                await builder.populateTemplate(template, dataPackage, settings);
+                const dataForm = await this.getDataForm(template);
+                await builder.populateTemplate(template, dataPackage, settings, dataForm);
             }
         }
 
@@ -229,6 +242,20 @@ export class DownloadTemplateUseCase implements UseCase {
             const data = await this.excelRepository.toBlob(templateId);
             saveAs(data, filename);
         }
+    }
+
+    private async getDataForm(template: Template): Promise<DataForm | undefined> {
+        if (template.type !== "custom") return undefined;
+
+        const hasMultiText = template.dataSources?.some(
+            ds => hasMultiTextDataElementDelimiter(ds) && ds.multiTextDataElementDelimiter
+        );
+        if (!hasMultiText) return undefined;
+
+        const dataFormRef = getDataFormRef(template);
+        if (!dataFormRef.id) return undefined;
+
+        return (await this.instanceRepository.getDataForms({ ids: [dataFormRef.id] }))[0];
     }
 
     private getFirstValueOrEmpty(model: string[]): string {

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Bulk Load\n"
-"POT-Creation-Date: 2025-11-12T16:45:33.366Z\n"
+"POT-Creation-Date: 2026-06-30T17:31:02.698Z\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,7 +41,23 @@ msgstr "Valores de los datos - Borrar"
 msgid "Data values - Create/update"
 msgstr "Valores de los datos - Crear/actualizar"
 
+#, fuzzy
+msgid "No data values to import"
+msgstr "valores de datos"
+
 msgid "Failed to import data values"
+msgstr ""
+
+msgid ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgid_plural ""
+"{{count}} chunk(s) returned no summary — import result unknown for those "
+"records."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Chunk (unknown outcome)"
 msgstr ""
 
 msgid "Service"
@@ -92,6 +108,29 @@ msgstr "Programa de eventos"
 
 msgid "Tracker Program"
 msgstr "Programa de tracker"
+
+msgid "cell {{ref}}"
+msgstr ""
+
+msgid "cells {{refs}}"
+msgstr ""
+
+msgid "row {{ref}}"
+msgstr ""
+
+msgid "rows {{refs}}"
+msgstr ""
+
+msgid "and {{count}} more"
+msgid_plural "and {{count}} more"
+msgstr[0] "y {{count}} más"
+msgstr[1] "y {{count}} más"
+
+msgid "sheet {{sheet}}, {{lines}}"
+msgstr ""
+
+msgid "Found in {{locations}} of the Excel file"
+msgstr ""
 
 msgid "Cannot read data form id"
 msgstr "No se pueden leer los datos del formulario id"
@@ -211,9 +250,8 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#, fuzzy
-msgid "Delete and import"
-msgstr "Importación de datos"
+msgid "Delete and Import"
+msgstr "Borrar e Importar"
 
 #, fuzzy
 msgid "Import despite duplicates"
@@ -258,6 +296,21 @@ msgstr ""
 
 msgid "All"
 msgstr "Todos"
+
+msgid "Import successful"
+msgstr "Importación exitosa"
+
+msgid "Import with warnings"
+msgstr ""
+
+msgid "Import with errors"
+msgstr "Importación con errores"
+
+msgid "Network error"
+msgstr ""
+
+msgid "Import pending"
+msgstr "Importación pendiente"
 
 msgid ""
 "There has been an error. You can either retry or contact your administrator "
@@ -667,6 +720,12 @@ msgstr[1] ""
 msgid "Are you sure you want to remove the selected templates"
 msgstr "Esta seguro que quiere borrar las plantillas seleccionadas"
 
+msgid "Cannot determine file extension for template"
+msgstr ""
+
+msgid "Unsupported file extension for template"
+msgstr ""
+
 msgid "Cannot download spreadsheet for template"
 msgstr ""
 
@@ -993,6 +1052,11 @@ msgstr "Respuesta JSON"
 
 msgid "Synchronization Results"
 msgstr "Resultados de la sincronización"
+
+msgid "Selected template has unsupported period type: {{periodType}}"
+msgstr ""
+"La plantilla seleccionada tiene el tipo de período no soportado: "
+"{{periodType}}"
 
 msgid "Select organisation unit to populate data"
 msgstr "Seleccione la unidad de organización para rellenar los datos"
@@ -1384,26 +1448,34 @@ msgstr ""
 "remplazarán por aquellos presentes en el archivo. ¿Está seguro que desea "
 "continuar?"
 
-msgid "Delete and Import"
-msgstr ""
-
 msgid ""
 "All data values in the spreadsheet will be imported to the system, but any "
 "data that was existing for such organisation unit and periods in the system "
 "will be deleted first, so none will be kept before doing the import."
 msgstr ""
+"Todos los valores de la hoja de cálculo se importarán al sistema, pero "
+"cualquier dato existente para dicha unidad organizativa y periodos se "
+"eliminará primero, por lo que no se conservará nada antes de realizar la "
+"importación."
 
 msgid ""
 "Import only new data values, without updating nor deleting any existing one. "
 "Only values in the spreadsheet that do not currently exist in the system "
 "will be imported"
 msgstr ""
+"Importar solo valores de datos nuevos, sin actualizar ni eliminar los "
+"existentes. Solo se importarán los valores de la hoja de cálculo que no "
+"existan actualmente en el sistema."
 
 msgid ""
 "Import new data values and also update existing ones. All data values in the "
 "spreadsheet will be imported to the system, but other data values present in "
 "the system that are not provided in the spreadsheet will be kept."
 msgstr ""
+"Importar nuevos valores de datos y actualizar los existentes. Todos los "
+"valores de la hoja de cálculo se importarán al sistema, pero se mantendrán "
+"los demás valores presentes en el sistema que no figuren en la hoja de "
+"cálculo."
 
 msgid "Warning: Your upload may result in the generation of duplicates"
 msgstr "Alerta: Su importación puede generar duplicados"
@@ -1469,7 +1541,3 @@ msgstr ""
 
 msgid "Settings saved"
 msgstr "Configuración guardada"
-
-#, fuzzy
-#~ msgid "Pending"
-#~ msgstr "Encabezamientos"
