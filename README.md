@@ -29,6 +29,9 @@ You can also [support our work through a one-time contribution or becoming a reg
 </p>
 
 
+-   Settings are only visible for superusers (`ALL` authority) or users that belong to the settings groups.
+-   The generation box is only visible for users that belong to the configurable `Template Generation` groups (initial value: `HMIS Officers`).
+-   Imported files are stored as documents (and can be downloaded later from the history) only for users with the `ALL` or `F_DOCUMENT_PRIVATE_ADD` authority. Users without them see a warning in the import page: their data is imported as usual and the import is still recorded in the history, but without the file.
 
 ## Setup
 
@@ -96,3 +99,35 @@ npx ts-node src/scripts/import-multiple-files.ts \
     --results-path="/path/to/folder/for/json_results" \
     file1.xlsx file2.xlsx
 ```
+
+### Regenerate template metadata (from DHIS2)
+
+You can use the script `regenerate-metadata.ts` to refresh **only** the Metadata
+sheet of an existing template from fresh DHIS2 metadata, leaving every other sheet
+(custom form, dropdowns, VBA) untouched:
+
+```bash
+yarn regenerate-metadata \
+    --dhis2-url="https://play.dhis2.org" \
+    --auth="user:pass" \
+    --input=template.xlsm \
+    --output=template.regenerated.xlsm \
+    --form-id=U6z7eJniNfL \
+    --form-type=trackerPrograms \
+    --include-codes
+```
+
+| Flag | Required | Description |
+| ---- | -------- | ----------- |
+| `--dhis2-url` / `-u` | yes | DHIS2 base URL (auth can be embedded here or via `--auth`). |
+| `--auth` / `-a` | — | `"username:password"` (special characters are handled). |
+| `--input` / `-i` | yes | Path to the input template (`.xlsm`/`.xlsx`). |
+| `--output` / `-o` | yes | Path where the regenerated template is written. |
+| `--form-id` | yes | DHIS2 program/dataSet id whose metadata is used. |
+| `--form-type` | — | `trackerPrograms` \| `programs` \| `dataSets` (default `trackerPrograms`). |
+| `--language` | — | Metadata name language (default `en`). |
+| `--include-codes` | — | Write the Code column in the Metadata sheet (default off). |
+| `--use-codes` | — | Use item codes instead of names for org units, data elements, options… (default off). |
+| `--org-unit-short-name` | — | Use each org unit's short name instead of its regular name (default off). |
+
+The same operation is available in the app, under Settings → Maintenance → Regenerate template metadata.
